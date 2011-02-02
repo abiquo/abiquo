@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    resizeEffect="{myResize}"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Metadata>
+		[Event(name="VirtualImageFormClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.vo.user.Role;
+        	import net.undf.abicloud.business.managers.ConfigurationManager;
+        	import flash.net.navigateToURL;
+            import com.adobe.serialization.json.JSON;
+
+            import mx.binding.utils.ChangeWatcher;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+            import mx.utils.StringUtil;
+
+            import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
+            import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.utils.AbicloudUtils;
+            import net.undf.abicloud.view.general.*;
+            import net.undf.abicloud.view.virtualimage.components.icon.IconForm;
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.virtualimage.Category;
+            import net.undf.abicloud.vo.virtualimage.DiskFormatType;
+            import net.undf.abicloud.vo.virtualimage.Icon;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceDTO;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceUploadDTO;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
+            import net.undf.abicloud.vo.virtualimage.VirtualImage;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualImage")]
+            private var rb2:ResourceBundle;
+
+            [Bindable]
+            private var virtualImageManager:VirtualImageManager;
+
+            private var iconForm:IconForm;
+
+            [Bindable]
+            private var formIsValid:Boolean = false;
+
+            [Bindable]
+            private var virtualImageFileSelected:Boolean = false;
+            
+            [Bindable]
+            private var _virtualImageFileName:String;
+            
+            [Bindable]
+            private var creatingVirtualImage:Boolean = false;
+
+            //The VirtualImage being created or edited
+            [Bindable]
+            private var _virtualImage:VirtualImage;
+
+            private var _uploadProgressTimer:Timer;
+
+            private var ovfPackageInstanceDTO:OVFPackageInstanceDTO;
+            private var ovfPackageInstanceUploadDTO:OVFPackageInstanceUploadDTO;
+
+            private var applianceManager:RemoteService;
+            
+            [Bindable]
+            private var categoriesList:ArrayCollection;
+
+            private function onCreationComplete():void
+            {
+                //Caching VirtualImageManager
+                virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
+
+                //Creating auxiliary form
+                this.iconForm = new IconForm();
+                this.iconForm.addEventListener("IconFormClose", closeIconForm);
+
+                //Listening for updates in model
+                ChangeWatcher.watch(virtualImageManager, "icons", onIconsUpdated);
+                ChangeWatcher.watch(virtualImageManager, "diskFormatTypes", onDiskFormatTypesUpdated);
+
+                //Adding support for external calls from Javascript
+                ExternalInterface.addCallback("virtualImageFileSelected", onVirtualImageFileSelected);
+                ExternalInterface.addCallback("virtualImageCreated", onVirtualImageCreated);
+
+                //Creating timer to periodically check upload progress
+                this._uploadProgressTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_applibrary_virtualimageUploadProgressUpdateInterval.value * 1000,
+                                                      0);
+                this._uploadProgressTimer.addEventListener(TimerEvent.TIMER, checkVirtualImageUploadProgress);
+
+                requestDiskFormatTypes();
+            }
+
+            private function requestDiskFormatTypes():void
+            {
+                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_DISK_FORMAT_TYPES);
+                dispatchEvent(event)
+            }
+
+            private function onDiskFormatTypesUpdated(event:Event):void
+            {
+                if (_virtualImage)
+                {
+                    diskFormatTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.diskFormatTypes.toArray(),
+                                                                                              "id",
+                                                                                              _virtualImage.diskFormatType);
+                }
+
+                validateForm();
+            }
+
+            private function requestIcons():void
+            {
+                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_ICONS);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(event)
+            }
+
+            private function onIconsUpdated(event:Event):void
+            {
+                if (_virtualImage)
+                {
+                    iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
+                                                                                    "id",
+                                                                                    _virtualImage.icon);
+                }
+                validateForm();
+            }
+
+
+            /**
+             * Initializes this component to create a new Repository
+             **/
+            public function init(virtualImage:VirtualImage = null, applianceManager:RemoteService = null):void
+            {
+                //Initializing component
+                formIsValid = false;
+                virtualImageFileSelected = false;
+                creatingVirtualImage = false;
+                virtualImageFormVS.selectedIndex = 0;
+                               
+                //we use the list of categories but removing the first one
+                //Show all categories
+                categoriesList = ObjectUtil.copy(virtualImageManager.categories) as ArrayCollection;
+                if(Category(categoriesList.getItemAt(0)).name == ResourceManager.getInstance().getString('VirtualImage','LABEL_ALL_CATEGORIES')){
+	                categoriesList.removeItemAt(0);             	
+                }                
+                
+                requestIcons();
+
+                this._virtualImage = virtualImage;
+                this.applianceManager = applianceManager;
+
+                if (this._virtualImage)
+                {
+                    //Editing an existing Virtual Image
+                    titleText = ResourceManager.getInstance().getString("VirtualImage",
+                                                                        "POPUP_TITLE_VIRTUALIMAGE_EDIT");
+
+                    //Setting fields
+                    nameInput.text = virtualImage.name;
+                    descriptionInput.text = virtualImage.description;
+                    diskFormatTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.diskFormatTypes.toArray(),
+                                                                                              "id",
+                                                                                              _virtualImage.diskFormatType);
+                    pathInput.text = virtualImage.path;
+                    categoryInput.selectedIndex = AbicloudUtils.getValuePositionInArray(categoriesList.toArray(),
+                                                                                        "id",
+                                                                                        _virtualImage.category);
+                    cpuInput.value = this._virtualImage.cpuRequired;
+                    ramUnitsSelector.selectedIndex = 0;
+                    ramInput.value = this._virtualImage.ramRequired / ramUnitsSelector.selectedItem.conversion;
+
+                    hdUnitsSelector.selectedIndex = 0;
+                    hdInput.value = this._virtualImage.hdRequired / hdUnitsSelector.selectedItem.conversion;
+                    iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
+                                                                                    "id",
+                                                                                    _virtualImage.icon);
+                    publicImageInput.selected = this._virtualImage.shared == 1;
+                }
+                else
+                {
+                    //Creating a new Virtual Image
+                    titleText = ResourceManager.getInstance().getString("VirtualImage",
+                                                                        "POPUP_TITLE_VIRTUALIMAGE_ADD");
+
+                    //Cleaning fields
+                    nameInput.text = "";
+                    descriptionInput.text = "";
+                    diskFormatTypeInput.selectedIndex = -1;
+                    categoryInput.selectedIndex = -1;
+                    cpuInput.value = cpuInput.minimum;
+                    ramInput.value = 0;
+                    ramUnitsSelector.selectedIndex = 0;
+                    hdInput.value = 0;
+                    hdUnitsSelector.selectedIndex = 0;
+                    iconInput.text = "";
+                    iconsList.selectedIndex = -1;
+
+                    ovfPackageInstanceDTO = null;
+                    ovfPackageInstanceUploadDTO = null;
+                }
+
+                validateForm();
+                nameInput.setFocus();
+            }
+
+            /**
+             * When user clicks Accept button, we save the new Virtual Image
+             **/
+            private function onAccept():void
+            {
+                var virtualImageEvent:VirtualImageEvent;
+                var updatedValues:VirtualImage;
+
+                if (this._virtualImage)
+                {
+                    //Editing the Virtual Image
+                    updatedValues = ObjectUtil.copy(this._virtualImage) as VirtualImage;
+
+                    updatedValues.name = nameInput.text;
+                    updatedValues.description = descriptionInput.text;
+                    updatedValues.diskFormatType = diskFormatTypeInput.selectedItem as DiskFormatType;
+                    updatedValues.category = categoryInput.selectedItem as Category;
+                    updatedValues.cpuRequired = cpuInput.value;
+                    updatedValues.ramRequired = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+                    updatedValues.hdRequired = hdInput.value * hdUnitsSelector.selectedItem.conversion;
+                    if (iconsList.selectedIndex > -1)
+                        updatedValues.icon = iconsList.selectedItem as Icon;
+
+                    if (publicImageInput.selected)
+                        updatedValues.shared = 1;
+                    else
+                        updatedValues.shared = 0;                    
+
+                    //Announcing that user wants to edit a Virtual Image
+                    virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
+                    virtualImageEvent.virtualImage = _virtualImage;
+                    virtualImageEvent.viUpdatedValues = updatedValues;
+                    dispatchEvent(virtualImageEvent);
+
+                    //Closing the form
+                    dispatchEvent(new Event("VirtualImageFormClose"));
+                }
+                else
+                {
+                    //Creating the new Virtual Image, using a OVFPackageInstanceDTO object, since we have to send it to ApplianceManager
+                    ovfPackageInstanceDTO = new OVFPackageInstanceDTO();
+                    
+                    ovfPackageInstanceUploadDTO = new OVFPackageInstanceUploadDTO(); 
+
+                    ovfPackageInstanceDTO.ovfUrl = StringUtil.substitute("http://{0}/{1}/{2}.ovf",
+                                                                         applianceManager.domainName,
+                                                                         nameInput.text,
+                                                                         nameInput.text);
+                    ovfPackageInstanceDTO.name = nameInput.text;
+                    ovfPackageInstanceDTO.description = descriptionInput.text;
+                    ovfPackageInstanceDTO.idEnterprise = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
+                    ovfPackageInstanceDTO.idUser = AbiCloudModel.getInstance().loginManager.user.id;
+                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).alias;
+                    ovfPackageInstanceDTO.categoryName = Category(categoryInput.selectedItem).name;
+                    if (iconsList.selectedIndex > -1)
+                        ovfPackageInstanceDTO.iconPath = Icon(iconsList.selectedItem).path;
+
+                    ovfPackageInstanceDTO.cpu = cpuInput.value;
+                    ovfPackageInstanceDTO.ram = (ramInput.value * ramUnitsSelector.selectedItem.conversion) * AbiCloudModel.MB_TO_BYTES;
+                    ovfPackageInstanceDTO.ramSizeUnit = "BYTE";
+                    ovfPackageInstanceDTO.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion;
+                    ovfPackageInstanceDTO.hdSizeUnit = "BYTE";
+
+					ovfPackageInstanceDTO.diskFilePath = _virtualImageFileName;
+
+                    this.creatingVirtualImage = true;
+                    virtualImageFormVS.selectedIndex = 2;
+                    if (uploadProgressBar)
+                        uploadProgressBar.indeterminate = true;
+
+
+                    //Notifying Javascript to send information to server
+                    var applianceManagerAddress:String = StringUtil.substitute("{0}{1}:{2}/am/erepos/{3}/ovfs",
+                                                                               applianceManager.protocol,
+                                                                               applianceManager.domainName,
+                                                                               applianceManager.port,
+                                                                               ovfPackageInstanceDTO.idEnterprise);
+
+					ovfPackageInstanceUploadDTO.ovfPackageInstanceDto = ovfPackageInstanceDTO;
+                    
+                    ExternalInterface.call("submitVirtualImageForm", JSON.encode(ovfPackageInstanceUploadDTO),
+                                           applianceManagerAddress);
+
+                        //Starting timer to periodically check upload progress
+                        //this._uploadProgressTimer.start(); <= DISABLED FOR NOW...
+                }
+            }
+
+            /**
+             * Cancels Virtual Image creation
+             **/
+            private function onCancel():void
+            {
+                if (virtualImageFormVS.selectedIndex == 1)
+                    ExternalInterface.call("hideVirtualImageForm");
+
+                //Closing the form
+                dispatchEvent(new Event("VirtualImageFormClose"));
+            }
+
+
+            private function addIcon():void
+            {
+                PopUpManager.addPopUp(this.iconForm, this, true);
+                PopUpManager.centerPopUp(this.iconForm);
+
+                this.iconForm.init();
+            }
+
+            private function editIcon():void
+            {
+                PopUpManager.addPopUp(this.iconForm, this, true);
+                PopUpManager.centerPopUp(this.iconForm);
+
+                this.iconForm.init(iconsList.selectedItem as Icon);
+            }
+
+            private function closeIconForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this.iconForm);
+            }
+
+            private function askIconDeletion():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_ICON_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_ICON_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        deleteIcon);
+            }
+
+            private function deleteIcon(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_ICON);
+                    virtualImageEvent.icon = iconsList.selectedItem as Icon;
+                    dispatchEvent(virtualImageEvent);
+                }
+            }
+
+
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (nameInput.text.length > 0 && descriptionInput.text.length > 0 && categoryInput.selectedIndex > -1 && diskFormatTypeInput.selectedIndex > -1)
+                    formIsValid = true;
+
+                else
+                    formIsValid = false;
+            }
+
+            private function onClickDownloadButton():void
+            {
+            	var downloadEnable:Boolean;
+            	var enterpriseId:int = int(_virtualImage.path.substr(0,_virtualImage.path.indexOf("/")));
+            	var fileURL:String = StringUtil.substitute("{0}{1}:{2}/am/files/{3}",
+                                                           applianceManager.protocol,
+                                                           applianceManager.domainName,
+                                                           applianceManager.port,
+                                                           _virtualImage.path);
+            	//if the virtualImage is shared, everyone can download it
+            	if(_virtualImage.shared == 1){
+            		downloadEnable = true;
+        		//else if the user is a sysadmin, he can download the image
+            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
+            		downloadEnable = true;
+        		//else if the user enterprise id == virtualImage enterprise id
+            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            		downloadEnable = true;
+            	}                
+                
+                //If the user is allowed, he can downnload the file
+                if(downloadEnable){
+	                ExternalInterface.call("downloadVirtualImageFile", fileURL);
+                }
+            }
+
+            /**
+             * To go first step in VirtualImage creation
+             */
+            private function onClickPreviousButton():void
+            {
+                ExternalInterface.call("hideVirtualImageForm");
+                virtualImageFormVS.selectedIndex = 0;
+            }
+
+            /**
+             * To go to second step in VirtualImage creation
+             */
+            private function onClickNextButton():void
+            {
+                //The second step to create a VirtualImage, is to select the image file from user file system.
+                //Since we cannot do this with Flex, because size limitations, we make a call to Javascript
+                virtualImageFormVS.selectedIndex = 1;
+                ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
+            }
+
+
+            /**
+             * Function called from Javascript when user has selected a file for the VirtualImage
+             */
+            private function onVirtualImageFileSelected(virtualImageFileName:String):void
+            {
+                virtualImageFileSelected = true;
+                _virtualImageFileName = virtualImageFileName;
+            }
+
+            private function onVirtualImageCreated():void
+            {
+                creatingVirtualImage = false;
+
+                //Stoping timer
+                if (this._uploadProgressTimer.running)
+                    this._uploadProgressTimer.stop();
+
+                //Notifying user
+                AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
+                                                                                       "ALERT_TITLE_LABEL"),
+                                               ResourceManager.getInstance().getString("VirtualImage",
+                                                                                       "ALERT_VIRTUAL_IMAGE_CREATED_HEADER"),
+                                               ResourceManager.getInstance().getString("VirtualImage",
+                                                                                       "ALERT_VIRTUAL_IMAGE_CREATED_TEXT"),
+                                               Alert.OK);
+
+                //Announce that a Virtual Image has been created
+                dispatchEvent(new Event("VirtualImageCreated"));
+
+                //Closing the form
+                dispatchEvent(new Event("VirtualImageFormClose"));
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                virtualImageFormVS.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                virtualImageFormVS.visible = true;
+            }
+
+            private function checkVirtualImageUploadProgress(timerEvent:TimerEvent = null):void
+            {
+                var ovfURLList:ArrayCollection = new ArrayCollection();
+                ovfURLList.addItem(ovfPackageInstanceDTO.ovfUrl);
+
+                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.CHECK_VIRTUAL_IMAGE_UPLOAD_PROGRESS);
+                event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.ovfPackageURLList = ovfURLList;
+                event.callback = setVirtualImageUploadProgress;
+                dispatchEvent(event);
+            }
+
+            /**
+             * Handler called when the upload progress of a VirtualImage has been checked
+             */
+            private function setVirtualImageUploadProgress(ovfPackageStatus:OVFPackageInstanceStatus):void
+            {
+                //Updating the progress bar
+                if (ovfPackageStatus.progress > 0)
+                {
+                    uploadProgressBar.indeterminate = false;
+                    uploadProgressBar.setProgress(ovfPackageStatus.progress,
+                                                  100);
+                }
+            }
+            
+            /**
+             * Open a link to display more info about upload limitations
+             */
+            private function openMoreInfo():void{
+            	navigateToURL(new URLRequest(AbiCloudModel.getInstance().configurationManager.config.client_virtual_moreInfoAboutUploadLimitations.value),"_blank");
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Resize id="myResize"
+        duration="800"
+        heightTo="{virtualImageFormVS.selectedChild.explicitHeight}"
+        widthTo="{virtualImageFormVS.selectedChild.explicitWidth}"
+        tweenStart="onResizeEffectStart()"
+        tweenUpdate="onResizeEffectUpdate()"
+        tweenEnd="onResizeEffectEnd()"/>
+
+    <mx:ViewStack id="virtualImageFormVS"
+        width="100%" height="100%"
+        paddingTop="3"
+        resizeToContent="true">
+
+        <!-- STEP 1: INTRODUCE VIRTUAL IMAGE INFORMATION -->
+
+
+
+        <mx:Form id="virtualImageFormContainer"
+            paddingTop="3">
+            <mx:Label 
+                fontWeight="bold"
+                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP1')"
+                includeInLayout="{this._virtualImage == null}"
+                visible="{this._virtualImage == null}"/>
+
+            <mx:FormItem 
+                label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+                required="true">
+                <mx:TextInput id="nameInput"
+                    height="20"
+                    maxChars="155"
+                    change="validateForm()"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_DESCRIPTION')"
+                required="true">
+                <mx:TextArea id="descriptionInput"
+                    height="20"
+                    maxChars="255"
+                    change="validateForm()"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_TYPE')"
+                required="true">
+                <mx:ComboBox id="diskFormatTypeInput"
+                    height="18"
+                    labelField="description"
+                    enabled="{this._virtualImage == null}"
+                    dataProvider="{virtualImageManager.diskFormatTypes}"
+                    change="validateForm()"
+                    prompt="@Resource(bundle='VirtualImage', key='COMBOBOX_CHOOSE_PROMPT')"/>
+            </mx:FormItem>
+
+
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_FILE_NAME')"
+                direction="horizontal"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:TextInput id="pathInput"
+                    width="300" height="20"
+                    editable="false"/>
+
+                <mx:Button id="downloadButton"
+                    height="18"
+                    label="@Resource(bundle='VirtualImage', key='LABEL_DOWNLOAD')"
+                    click="onClickDownloadButton()"/>
+
+            </mx:FormItem>
+
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_CATEGORY')"
+                required="true">
+                <mx:ComboBox id="categoryInput"
+                    height="18"
+                    labelField="name"
+                    dataProvider="{categoriesList}"
+                    change="validateForm()"
+                    prompt="@Resource(bundle='VirtualImage', key='COMBOBOX_CHOOSE_PROMPT')"/>
+            </mx:FormItem>
+
+            <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
+                <mx:NumericStepper id="cpuInput"
+                    width="100" height="20"
+                    minimum="1" maximum="32" stepSize="1"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+                direction="horizontal">
+                <mx:NumericStepper id="ramInput"
+                    width="100" height="20"
+                    minimum="0"
+                    maximum="{ramUnitsSelector.selectedItem.maximum}"
+                    stepSize="{ramUnitsSelector.selectedItem.stepSize}"/>
+
+                <mx:ComboBox id="ramUnitsSelector"
+                    width="80" height="18"
+                    labelField="label"
+                    dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+                    selectedIndex="0"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_HD')"
+                direction="horizontal">
+                <mx:NumericStepper id="hdInput"
+                    width="100" height="20"
+                    minimum="0" maximum="{hdUnitsSelector.selectedItem.maximum}"
+                    stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
+
+                <mx:ComboBox id="hdUnitsSelector"
+                    width="80" height="18"
+                    labelField="label"
+                    dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+                    selectedIndex="3"/>
+            </mx:FormItem>
+
+            <mx:FormItem label="@Resource(bundle='VirtualImage', key='LABEL_ICON')">
+
+                <mx:TextInput id="iconInput"
+                    height="18"
+                    text="{Icon(iconsList.selectedItem).name}"
+                    editable="false"/>
+
+                <mx:HorizontalList id="iconsList"
+                    width="100%" height="85"
+                    dataProvider="{virtualImageManager.icons}"
+                    change="validateForm()"
+                    itemRenderer="net.undf.abicloud.view.virtualimage.components.icon.IconListItemRenderer"/>
+
+                <mx:HBox 
+                    width="100%"
+                    horizontalGap="3"
+                    verticalAlign="middle">
+                    <mx:Button id="addIconButton"
+                        styleName="AddButton"
+                        toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                        click="addIcon()"/>
+
+                    <mx:Button id="deleteIconButton"
+                        enabled="{iconsList.selectedIndex > -1}"
+                        styleName="RemoveButton"
+                        toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                        click="askIconDeletion()"/>
+
+                    <mx:Spacer 
+                        width="100%" height="6"/>
+
+                    <mx:Button id="editIconButton"
+                        enabled="{iconsList.selectedIndex > -1}"
+                        styleName="ConfigurationButton"
+                        toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                        click="editIcon()"/>
+                </mx:HBox>
+
+                <mx:Spacer width="5"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:CheckBox id="publicImageInput"/>
+            </mx:FormItem>
+        </mx:Form>
+
+        <!-- STEP 2: SELECT VIRTUAL IMAGE FILE TO UPLOAD -->
+        <mx:VBox>
+        	<mx:HBox
+        		verticalAlign="middle">
+	            <mx:Label 
+	                fontWeight="bold"
+	                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP2')"/>
+        		<mx:Label
+        			buttonMode="true"
+        			textDecoration="underline" 
+	                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP2_MORE_INFO')"
+	                click="openMoreInfo()"/>
+        	</mx:HBox>
+            <mx:Canvas 
+                width="300" height="155">
+                <!-- Where the HTML Form will be placed -->
+            </mx:Canvas>
+        </mx:VBox>
+
+        <!-- STEP 3: CREATING VIRTUAL IMAGE -->
+        <mx:VBox 
+            horizontalAlign="center"
+            paddingBottom="10">
+            <mx:TextArea 
+                width="100%"
+                backgroundAlpha="0"
+                fontSize="12"
+                minHeight="75"
+                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_WAIT_MESSAGE')"
+                editable="false"/>
+
+            <mx:Label 
+                fontWeight="bold"
+                text="{uploadProgressBar.indeterminate ? ResourceManager.getInstance().getString('VirtualImage', 'LABEL_PREPARING_FILE_TO_UPLOAD') :
+															   ResourceManager.getInstance().getString('VirtualImage', 'LABEL_UPLOADING')}"/>
+
+            <mx:ProgressBar id="uploadProgressBar"
+                width="100%" height="12"
+                barColor="#FE9608"
+                borderColor="#666666"
+                fontSize="10"
+                indeterminateMoveInterval="30"
+                minimum="0" maximum="100" indeterminate="true" label="%3%%"
+                labelPlacement="center"
+                toolTip="@Resource(bundle='VirtualImage', key='LABEL_UPLOADING')"/>
+        </mx:VBox>
+    </mx:ViewStack>
+
+
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center"
+        paddingBottom="10">
+
+        <mx:Button id="previousStepButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_BACK')"
+            includeInLayout="{this._virtualImage == null}"
+            enabled="{virtualImageFormVS.selectedIndex == 1  &amp;&amp; !this.creatingVirtualImage}"
+            visible="{this._virtualImage == null}"
+            click="onClickPreviousButton()"/>
+
+        <mx:Button id="nextStepButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_NEXT')"
+            includeInLayout="{this._virtualImage == null}"
+            enabled="{virtualImageFormVS.selectedIndex == 0 &amp;&amp; this.formIsValid}"
+            visible="{this._virtualImage == null}"
+            click="onClickNextButton()"/>
+
+        <mx:Button id="acceptButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+            enabled="{(this._virtualImage == null) ? this.formIsValid &amp;&amp; this.virtualImageFileSelected &amp;&amp; virtualImageFormVS.selectedIndex == 1 &amp;&amp; !this.creatingVirtualImage 
+			       											: formIsValid}"
+            click="onAccept()"/>
+
+        <mx:Button id="cancelButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+            styleName="AlternativeButton"
+            enabled="{(this._virtualImage == null) ? !this.creatingVirtualImage : true}"
+            click="onCancel()"/>
+
+    </mx:HBox>
+
+</AbiCloudPopUp>

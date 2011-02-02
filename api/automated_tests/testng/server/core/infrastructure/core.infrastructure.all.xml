@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+
+<suite name="Suite: core.infrastructure all" verbose="2" parallel="false">
+  <suite-files>
+    <suite-file path="automated_tests/testng/server/core/infrastructure/core.infrastructure.dataaccess.xml"></suite-file>
+    <suite-file path="automated_tests/testng/server/core/infrastructure/core.infrastructure.model.xml"></suite-file>
+  </suite-files>
+</suite>
+

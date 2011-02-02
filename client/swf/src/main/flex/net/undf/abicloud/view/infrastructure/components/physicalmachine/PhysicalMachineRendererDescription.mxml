@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="35%"
+    paddingTop="6"
+    verticalGap="0"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+            import mx.controls.NumericStepper;
+            import mx.controls.ComboBox;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+            import mx.utils.ObjectUtil;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.business.managers.InfrastructureManager;
+            import mx.collections.ArrayCollection;
+            import mx.controls.NumericStepper;
+            import mx.controls.ComboBox;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+
+            [Bindable]
+            private var _editMode:Boolean;
+
+            public function set editMode(value:Boolean):void
+            {
+                this._editMode = value;
+
+                if (this._editMode)
+                {
+                    //Set the values that can be edited
+                    descriptionInput.text = this._physicalMachine.description;
+                }
+            }
+
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+                this._physicalMachine = value;
+                this._physicalMachineEdited = ObjectUtil.copy(value) as PhysicalMachine;
+            }
+
+            private var _physicalMachineEdited:PhysicalMachine;
+
+            /**
+             * Returns a copy (not original) of _physicalMachine, with the changes that can be made in this component
+             */
+            public function get physicalMachineEdited():PhysicalMachine
+            {
+                this._physicalMachineEdited.description = descriptionInput.text;
+
+                return this._physicalMachineEdited;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Label 
+		styleName="PhysicalMachinesRendererDescriptionLabel1"
+		paddingTop="4"
+        text="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_DESCRIPTION')"/>
+
+    <mx:TextArea 
+        width="100%"
+        backgroundAlpha="0"
+        text="{this._physicalMachine.description}"
+        includeInLayout="{! _editMode}"
+        visible="{! _editMode}"
+        editable="false"
+        selectable="false"
+        />
+
+    <mx:TextArea id="descriptionInput"
+        width="100%" height="95%"
+        maxChars="99" includeInLayout="{_editMode}"
+        visible="{_editMode}"/>
+</mx:VBox>

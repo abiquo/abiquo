@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+<mx:Script>
+	<![CDATA[
+		import mx.resources.ResourceManager;
+		import net.undf.abicloud.vo.virtualhardware.ExceedLimit;
+
+		[Bindable]
+        private var _exceededLimit:ExceedLimit;
+        
+        [Bindable]
+        private var _color:uint;
+        
+        [Bindable]
+        private var _exceededColor:uint = 0xFF0000;
+        
+        public function get exceededLimit():ExceedLimit{
+        	return this._exceededLimit;
+        }
+        
+        public function set exceededLimit(exceededLimit:ExceedLimit):void{
+        	this._exceededLimit = exceededLimit;
+        }
+        
+        public function get color():uint{
+        	return this._color;
+        }
+        
+        public function set color(color:uint):void{
+        	this._color = color;
+        }
+	]]>
+</mx:Script>
+	<mx:HBox>
+	 	<!--info for used ressources-->
+        <mx:Box>
+            <mx:Label fontWeight="bold" text="{_exceededLimit.cause}"/>
+        </mx:Box>
+     </mx:HBox>
+	 <mx:HBox>
+	 	<!--info for used ressources-->
+        <mx:Box width="100">
+            <mx:Label fontWeight="bold" text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'LABEL_USED')}"/>
+        </mx:Box>
+     </mx:HBox>
+     <mx:HBox paddingBottom="5">
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'LABEL_CPU')+': '+_exceededLimit.usedCPU}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.usedRAM}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.usedHD}"/>
+        </mx:Box>
+        <mx:Box width="130"	            	
+        	includeInLayout="{_exceededLimit.includeStorage}"
+        	visible="{_exceededLimit.includeStorage}">
+            <mx:Label
+            	 text="{ResourceManager.getInstance().getString('Main','LABEL_STORAGE')+': '+_exceededLimit.usedStorage}"/>
+        </mx:Box>
+        <mx:Box width="100"	            	
+        	includeInLayout="{_exceededLimit.includeVLAN}"
+        	visible="{_exceededLimit.includeVLAN}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Networking',
+	                                                                         'LABEL_VLAN')+': '+_exceededLimit.usedVLAN}"/>
+        </mx:Box>
+        <mx:Box width="100"	            	
+        	includeInLayout="{_exceededLimit.includeIP}"
+        	visible="{_exceededLimit.includeIP}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_IP')+': '+_exceededLimit.usedIP}"/>
+        </mx:Box>
+    </mx:HBox>
+    <!--info for required ressources-->
+    <mx:HBox>
+        <mx:Box width="100" >
+            <mx:Label fontWeight="bold" text="REQUIRED"/>
+        </mx:Box>
+     </mx:HBox>
+     <mx:HBox paddingBottom="5">
+        <mx:Box width="100">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusCPU) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusCPU) ? _exceededColor:_color}"
+            	id="requiredCPU" text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'LABEL_CPU')+': '+_exceededLimit.requiredCPU}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusRAM) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusRAM) ? _exceededColor:_color}"
+            	id="requiredRAM" text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.requiredRAM}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusHD) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusHD) ? _exceededColor:_color}"
+            	id="requiredHD" text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.requiredHD}"/>
+        </mx:Box>
+         <mx:Box width="130"
+         	includeInLayout="{_exceededLimit.includeStorage}"
+        	visible="{_exceededLimit.includeStorage}">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusStorage) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusStorage) ? _exceededColor:_color}"
+            	text="{ResourceManager.getInstance().getString('Main','LABEL_STORAGE')+': '+_exceededLimit.requiredStorage}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeVLAN}"
+        	visible="{_exceededLimit.includeVLAN}">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusVLAN) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusVLAN) ? _exceededColor:_color}"
+            	text="{ResourceManager.getInstance().getString('Networking',
+	                                                                         'LABEL_VLAN')+': '+_exceededLimit.requiredVLAN}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeIP}"
+        	visible="{_exceededLimit.includeIP}">
+            <mx:Label 
+            	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusIP) ? 'bold':'normal'}"
+            	color="{_exceededLimit.limitExceeded(_exceededLimit.statusIP) ? _exceededColor:_color}"
+            	text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_IP')+': '+_exceededLimit.requiredIP}"/>
+        </mx:Box>
+    </mx:HBox>
+    <!--info for Soft ressources-->
+    <mx:HBox>
+        <mx:Box width="100" >
+            <mx:Label fontWeight="bold" text="SOFT"/>
+        </mx:Box>
+     </mx:HBox>
+     <mx:HBox paddingBottom="5">
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'LABEL_CPU')+': '+_exceededLimit.softCPU}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.softRAM}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.softHD}"/>
+        </mx:Box>
+         <mx:Box width="130"
+         	includeInLayout="{_exceededLimit.includeStorage}"
+        	visible="{_exceededLimit.includeStorage}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Main','LABEL_STORAGE')+': '+_exceededLimit.softStorage}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeVLAN}"
+        	visible="{_exceededLimit.includeVLAN}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Networking',
+	                                                                         'LABEL_VLAN')+': '+_exceededLimit.softVLAN}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeIP}"
+        	visible="{_exceededLimit.includeIP}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_IP')+': '+_exceededLimit.softIP}"/>
+        </mx:Box>
+    </mx:HBox>
+    <!--info for hard ressources-->
+    <mx:HBox>
+        <mx:Box width="100" >
+            <mx:Label fontWeight="bold" text="HARD"/>
+        </mx:Box>
+     </mx:HBox>
+     <mx:HBox paddingBottom="5">
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'LABEL_CPU')+': '+_exceededLimit.hardCPU}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.hardRAM}"/>
+        </mx:Box>
+        <mx:Box width="100">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.hardHD}"/>
+        </mx:Box>
+         <mx:Box width="130"
+         	includeInLayout="{_exceededLimit.includeStorage}"
+        	visible="{_exceededLimit.includeStorage}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Main','LABEL_STORAGE')+': '+_exceededLimit.hardStorage}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeVLAN}"
+        	visible="{_exceededLimit.includeVLAN}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Networking',
+	                                                                         'LABEL_VLAN')+': '+_exceededLimit.hardVLAN}"/>
+        </mx:Box>
+        <mx:Box width="100"
+        	includeInLayout="{_exceededLimit.includeIP}"
+        	visible="{_exceededLimit.includeIP}">
+            <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
+	                                                                         'TEXTINPUT_LABEL_IP')+': '+_exceededLimit.hardIP}"/>
+        </mx:Box>
+    </mx:HBox>
+</mx:VBox>

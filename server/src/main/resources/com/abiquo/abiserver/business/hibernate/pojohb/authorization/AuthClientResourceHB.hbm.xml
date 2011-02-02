@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthClientResourceHB" table="auth_clientresource">
+    <id name="id" type="java.lang.Integer">
+      <column name="id"/>
+      <generator class="identity"/>
+    </id>
+    <property name="name" type="string">
+      <column length="50" name="name"/>
+    </property>
+    <property name="description" type="string">
+      <column length="100" name="description"/>
+    </property>
+    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthGroupHB" fetch="select" name="authGroupHB">
+      <column name="idGroup" not-null="true"/>
+    </many-to-one>
+    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" fetch="select" name="roleHB">
+      <column name="idRole" not-null="true"/>
+    </many-to-one>
+  </class>
+</hibernate-mapping>

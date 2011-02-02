@@ -1,0 +1,30 @@
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+          <directory>target/themes/defaultRed</directory>
+          <outputDirectory>themes/defaultRed</outputDirectory>
+          <includes>
+            <include>*.swf</include>
+          </includes>
+          </fileSet>
+        <fileSet>
+          <directory>src</directory>
+          <outputDirectory>themes/defaultRed</outputDirectory>
+          <includes>
+            <include>theme.lst</include>
+          </includes>
+          </fileSet>
+		<fileSet>
+			<directory>src/assets/application/login</directory>
+			<outputDirectory>themes/abicloudDefault</outputDirectory>
+			<includes>
+				<include>logo.png</include>
+			</includes>
+		</fileSet>
+
+        </fileSets>
+</assembly>

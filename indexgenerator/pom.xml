@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <!--                                      -->
+    <!--       POM RELATIONSHIPS              -->
+    <!--                                      -->
+
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.abiquo.abicloud</groupId>
+    <artifactId>indexgenerator</artifactId>
+    <name>OVF Index Generator</name>
+    <version>0.1</version>
+
+    <parent>
+        <groupId>com.abiquo.abicloud</groupId>
+        <artifactId>platform</artifactId>
+        <version>1.7.5-SNAPSHOT</version>
+    </parent>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.abiquo.indexgenerator.OVFIndexGenerator</mainClass>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/dist/dist.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.abiquo.abicloud</groupId>
+            <artifactId>ovfmanager</artifactId>
+            <version>${pom.version}</version>					
+        </dependency>
+    </dependencies>
+
+</project>

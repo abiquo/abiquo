@@ -1,0 +1,15 @@
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>target/themes/fonts</directory>
+            <outputDirectory>themes/fonts</outputDirectory>
+            <includes>
+                <include>*.swf</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Metadata>
+		[Event(name="fullScreenButtonClicked", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import mx.core.ScrollPolicy;
+            import mx.binding.utils.BindingUtils;
+            import mx.controls.Button;
+            import mx.containers.Canvas;
+            import mx.controls.Label;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Header visible in all GeneralPanels
+                var header:Canvas = new Canvas();
+                header.percentWidth = 100;
+                header.height = 18;
+                header.styleName = "GeneralPanelHeaderSkin";
+                header.horizontalScrollPolicy = ScrollPolicy.OFF;
+
+                //Title
+
+                var label:Label = new Label();
+                label.height = 14;
+                label.styleName = "GeneralPanelTextStyle";
+                BindingUtils.bindProperty(label, "text", this, "title");
+                header.addChild(label);
+
+                //Fullscreen button
+                if (this._hasFullScreenButton)
+                {
+                    var fullscreenbutton:Button = new Button();
+                    fullscreenbutton.styleName = "FullScreenButton";
+                    fullscreenbutton.setStyle("right", 0);
+                    fullscreenbutton.addEventListener(MouseEvent.CLICK, onClickFullScreenButton);
+                    header.addChild(fullscreenbutton);
+                }
+
+                addChildAt(header, 0);
+            }
+
+
+            private var _title:String = "PANEL";
+
+            [Bindable(event="titleChange")]
+            public function get title():String
+            {
+                return this._title;
+            }
+
+            public function set title(value:String):void
+            {
+                this._title = value;
+                dispatchEvent(new Event("titleChange"));
+            }
+
+            private var _hasFullScreenButton:Boolean = false;
+
+            public function set hasFullScreenButton(value:Boolean):void
+            {
+                this._hasFullScreenButton = value;
+            }
+
+
+            ////////////////////////////////////////
+
+            private function onClickFullScreenButton(mouseEvent:MouseEvent):void
+            {
+                dispatchEvent(new Event("fullScreenButtonClicked"));
+            }
+        ]]>
+    </mx:Script>
+
+</mx:VBox>

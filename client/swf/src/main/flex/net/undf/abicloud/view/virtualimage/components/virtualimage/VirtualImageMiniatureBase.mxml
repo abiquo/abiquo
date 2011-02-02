@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="85" height="115"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    styleName="VirtualImageMiniature" verticalScrollPolicy="off"
+    horizontalScrollPolicy="off" toolTip="{this._infoToolTip}"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    mouseDown="onMouseDown()"
+    mouseUp="onMouseUp()"
+    rollOver="onRollOver()"
+    rollOut="onRollOut()"
+    xmlns:virtualimage="net.undf.abicloud.view.virtualimage.components.virtualimage.*">
+
+    <!-- Miniature that represents a Virtual Image
+         Also used as source for Drag & Drop Functionality -->
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+            import mx.controls.Image;
+            import mx.core.DragSource;
+            import mx.effects.Zoom;
+            import mx.events.CloseEvent;
+            import mx.managers.DragManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
+            import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.virtualimage.VirtualImage;
+
+
+            private static const DEFAULT_WIDTH:int = 85;
+
+            private static const DEFAULT_HEIGHT:int = 115;
+
+            //The virtual image
+            [Bindable]
+            private var _virtualImage:VirtualImage;
+
+            [Bindable]
+            private var _sizeMultiplier:Number;
+
+            //Indicates if the Virtual Images displayed can be editable
+            private var _editable:Boolean = false;
+
+            private var _glowEffect:Glow;
+
+            private var _zoomEffect:Zoom;
+
+            //Indicates if its selected
+            //When selected and this is a Master virtual image, its bundled images are highlighted
+            //When selected and this is a Slave virtual image, means that its master image has been selected
+            private var _masterSlaveSelected:Boolean = false;
+
+            [Bindable]
+            private var _infoToolTip:String = "";
+            
+            [Bindable]
+            public var hasSlaveImage:Boolean;
+
+            private function onCreationComplete():void
+            {
+                //Changing the style of this component, depending on the multiplier
+                this.width = DEFAULT_WIDTH * this._sizeMultiplier;
+                this.height = DEFAULT_HEIGHT * this._sizeMultiplier;
+                imageCanvas.height = DEFAULT_WIDTH * this._sizeMultiplier;
+
+                //Making fontSize bigger, if multiplier > 1
+                if (this._sizeMultiplier > 1)
+                    nameLabel.setStyle("fontSize", 11);
+
+                //Registering events
+
+                //Creating Glow effects
+                this._glowEffect = new Glow();
+                this._glowEffect.duration = 700;
+                this._glowEffect.alphaFrom = 0;
+                this._glowEffect.alphaTo = 0.8;
+                this._glowEffect.blurXFrom = 0;
+                this._glowEffect.blurXTo = 20;
+                this._glowEffect.blurYFrom = 0;
+                this._glowEffect.blurYTo = 20;
+                if (this._virtualImage.master == null)
+                    this._glowEffect.color = 0xf7d344;
+                else
+                    this._glowEffect.color = 0x5f9de9;
+
+                this._zoomEffect = new Zoom();
+                this._zoomEffect.duration = 700;
+                this._zoomEffect.originX = 0;
+                this._zoomEffect.originY = 0;
+                this._zoomEffect.zoomHeightFrom = 1;
+                this._zoomEffect.zoomHeightTo = 1.2;
+                this._zoomEffect.zoomWidthFrom = 1;
+                this._zoomEffect.zoomWidthTo = 1.2;
+
+            }
+
+            public function set virtualImage(vI:VirtualImage):void
+            {
+                this._virtualImage = vI;
+                buildInfoToolTip();
+            }
+
+            public function get virtualImage():VirtualImage
+            {
+                return this._virtualImage;
+            }
+
+            /**
+             * Changes the size of this component by a multiplier
+             **/
+            public function set sizeMultiplier(multiplier:Number):void
+            {
+                this._sizeMultiplier = multiplier;
+            }
+
+            public function set editable(value:Boolean):void
+            {
+                this._editable = value;
+            }
+
+            private function onRollOver():void
+            {
+                if (this._editable && !DragManager.isDragging)
+                {
+                    buttonsContainer.visible = true;
+                }
+            }
+
+            private function onRollOut():void
+            {
+                if (this._editable)
+                {
+                    buttonsContainer.visible = false;
+                }
+            }
+
+            private function onClickEdit():void
+            {
+                var event:VirtualImageAccordionEvent = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_EDITION_REQUESTED,
+                                                                                      true);
+                event.virtualImage = this._virtualImage;
+                dispatchEvent(event);
+            }
+
+            private function onClickDownload():void
+            {
+                var event:VirtualImageAccordionEvent = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_DOWNLOAD_REQUESTED,
+                                                                                      true);
+                event.virtualImage = _virtualImage;
+                dispatchEvent(event);
+            }
+
+            private function onClickErase():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_VIRTUALIMAGE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_VIRTUALIMAGE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        eraseVirtualImage);
+            }
+
+            private function eraseVirtualImage(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //Announcing that user wants to delete a Virtual Image
+                    var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_VIRTUAL_IMAGE);
+                    event.virtualImage = this._virtualImage;
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Announces that this Master VirtualImageMiniature has been selected or unselected
+             */
+            private function onClickMasterImage():void
+            {
+                var event:VirtualImageAccordionEvent;
+                if (this._masterSlaveSelected)
+                {
+                    //Is selected. Goes to unselected
+                    this._masterSlaveSelected = false;
+
+                    this._glowEffect.play([ masterImage ], true);
+                    this._zoomEffect.play([ masterImage ], true);
+
+                    event = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MASTER_UNSELECTED,
+                                                           true);
+                }
+                else
+                {
+                    //Is unselected. Goes to selected
+                    this._masterSlaveSelected = true;
+
+                    this._glowEffect.play([ masterImage ]);
+                    this._zoomEffect.play([ masterImage ]);
+
+                    event = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MASTER_SELECTED,
+                                                           true);
+                }
+
+                event.virtualImage = this._virtualImage;
+                dispatchEvent(event);
+            }
+
+            public function masterHasBeenSelectedOrUnselected(masterVirtualImage:VirtualImage):void
+            {
+                if (this._virtualImage.master && this._virtualImage.master.id == masterVirtualImage.id)
+                {
+                    //I'm a slave of the Master VirtualImage that has been selected or unselected
+                    if (this._masterSlaveSelected)
+                    {
+                        //Is selected. Marking as unselected
+                        this._masterSlaveSelected = false;
+                        this._glowEffect.play([ slaveImage ], true);
+                        this._zoomEffect.play([ slaveImage ], true);
+                    }
+                    else
+                    {
+                        //Is unselected. Marking as selected
+                        this._masterSlaveSelected = true;
+                        this._glowEffect.play([ slaveImage ]);
+                        this._zoomEffect.play([ slaveImage ]);
+                    }
+                }
+            }
+
+            private function buildInfoToolTip():void
+            {
+                if (this._virtualImage)
+                {
+                    this._infoToolTip = ResourceManager.getInstance().getString("Common",
+                                                                                "TEXTINPUT_LABEL_NAME") + ": " + this._virtualImage.name + "\n";
+
+                    this._infoToolTip += ResourceManager.getInstance().getString("VirtualImage",
+                                                                                 "LABEL_TYPE") + ": " + this._virtualImage.diskFormatType.description + "\n";
+
+                    this._infoToolTip += "CPU: " + this._virtualImage.cpuRequired + "\n";
+                    this._infoToolTip += "RAM: " + this._virtualImage.ramRequired + " MB\n";
+                    this._infoToolTip += "HD: " + Number(this._virtualImage.hdRequired / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + " GB";
+                }
+                else
+                    this._infoToolTip = "";
+            }
+
+            //////////////////////////////////////////
+            // DRAG & DROP FUNCTIONALITY
+
+            /**
+             * Handler for MouseEvent.Mouse_DOWN, to register if user wants to
+             * start a drag operation
+             */
+            private function onMouseDown():void
+            {
+                if (!DragManager.isDragging)
+                    addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+            }
+
+            /**
+             * Handler for MouseEvent.MOUSE_UP
+             */
+            private function onMouseUp():void
+            {
+                //We do not need this listener anymore
+                removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+            }
+
+            /**
+             * Handler for MouseEvent.MOUSE_MOVE, to start a drag operation
+             */
+            private function onMouseMove(event:MouseEvent):void
+            {
+                //We do not need this listener anymore
+                removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+
+                //Creating the Drag Source
+                var dragSource:DragSource = new DragSource();
+                dragSource.addData(this._virtualImage, "VirtualImage");
+
+                //Creating the Drag Proxy, to display the Virtual Image's image while dragging
+                var dragProxy:Image = new Image();
+                dragProxy.source = virtualImageIcon.source;
+                dragProxy.width = virtualImageIcon.width + 10;
+                dragProxy.height = virtualImageIcon.height + 10;
+
+                //Starting the drag operation
+                dispatchEvent(new Event("virtualImageMiniatureDraggedStart", true));
+                DragManager.doDrag(this, dragSource, event, dragProxy);
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Glow id="glowMasterEffect"
+        color="0x00FF00"
+        duration="1000"
+        alphaFrom="1.0"
+        alphaTo="0.3"
+        blurXFrom="0.0"
+        blurXTo="50.0"
+        blurYFrom="0.0"
+        blurYTo="50.0"/>
+
+    <mx:Canvas id="imageCanvas"
+        width="100%"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+        <utils:ImageDefault id="virtualImageIcon"
+            left="0" right="0" top="0" bottom="0"
+            horizontalAlign="center"
+            verticalAlign="middle"
+            source="{this._virtualImage.icon.path}"
+            defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
+
+        <mx:HBox id="buttonsContainer"
+            right="5" top="5"
+            horizontalGap="3"
+            visible="false">
+
+            <mx:Button id="downloadButton"
+                styleName="VirtualImageButtonDownload"
+                toolTip="@Resource(bundle='Common', key='BUTTON_DOWNLOAD_TOOLTIP')"
+                click="onClickDownload()"/>
+
+            <virtualimage:SecurableEditVirtualImageButton id="editButton"
+                styleName="VirtualImageButtonEdit"
+                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT')"
+                click="onClickEdit()"
+                virtualImage="{this._virtualImage}"/>
+
+            <virtualimage:SecurableDeleteVirtualImageButton id="eraseButton"
+                styleName="VirtualImageButtonErase"
+                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                click="onClickErase()"
+                virtualImage="{this._virtualImage}"/>
+        </mx:HBox>
+
+        <utils:SmoothImage id="masterImage"
+            left="0" top="0"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseMasterImage', masterImage)"
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_MASTER_EXPLANATION')"
+            useHandCursor="true"
+            visible="{hasSlaveImage}"
+            buttonMode="true"
+            click="onClickMasterImage()"/>
+			<!--visible="{this._virtualImage.master == null}"-->
+
+        <utils:SmoothImage id="slaveImage"
+            left="0" top="0"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseSlaveImage', slaveImage)"
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_SLAVE_EXPLANATION')"
+            visible="false"
+            />
+            <!--visible="{this._virtualImage.master != null}"-->
+
+        <utils:SmoothImage id="publicImage"
+            left="5" bottom="5"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBasePublicImage', publicImage)"            
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
+            visible="{this._virtualImage.shared == 1}"/>
+    </mx:Canvas>
+
+    <mx:HRule 
+        width="100%" height="1"
+        styleName="VirtualImageMiniatureBaseVRule"
+        />
+
+    <mx:Canvas 
+        width="100%" height="100%"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+        <mx:Label id="nameLabel"
+            width="100%"
+            styleName="VirtualImageMiniatureBaseNameLabel"
+            text="{this._virtualImage.name}" truncateToFit="true"
+            toolTip="{ResourceManager.getInstance().getString('VirtualImage', 'LABEL_IMAGE_NAME') + ': ' + this._virtualImage.name}"/>
+    </mx:Canvas>
+
+    <mx:HRule 
+        width="100%" height="1"
+        styleName="VirtualImageMiniatureBaseVRule"
+        />
+
+    <mx:Canvas id="typeCanvas"
+        width="100%" height="100%"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+        <mx:Label 
+            width="100%"
+            fontSize="10"
+            paddingLeft="5"
+            verticalCenter="0"
+            text="{_virtualImage.diskFormatType.description}"
+            truncateToFit="true"
+            toolTip="{ResourceManager.getInstance().getString('VirtualImage', 'LABEL_IMAGE_TYPE') + ': ' + this._virtualImage.diskFormatType.description}"/>
+    </mx:Canvas>
+
+    <mx:Canvas id="moreInfoCanvas"
+        width="100%" height="100%"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off"
+        includeInLayout="false"
+        visible="false">
+
+        <mx:HBox 
+            width="100%" height="100%"
+            horizontalGap="3"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalAlign="middle"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+            <mx:Label id="cpuLabel"
+                width="50%"
+                fontSize="10"
+                paddingLeft="5"
+                text="{'# CPU ' + this._virtualImage.cpuRequired.toString()}"
+                truncateToFit="true"
+                toolTip="{ResourceManager.getInstance().getString('VirtualImage', 'LABEL_IMAGE_SIZE') + ': ' + Number(this._virtualImage.hdRequired / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + ' GB'}"/>
+
+            <mx:VRule 
+                width="1" height="100%"
+                styleName="VirtualImageMiniatureBaseVRule"
+                />
+
+            <mx:Label id="ramLabel"
+                width="50%"
+                styleName="VirtualImageMiniatureBaseRAMLabel"
+                text="{this._virtualImage.ramRequired.toString() + ' MB'}"
+                truncateToFit="true"
+                toolTip="{'RAM: ' + this._virtualImage.ramRequired.toString() + ' MB'}"/>
+
+        </mx:HBox>
+    </mx:Canvas>
+
+</mx:VBox>

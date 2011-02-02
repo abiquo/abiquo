@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<EventMap 
+    xmlns="http://mate.asfusion.com/"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.business.Services;
+            import net.undf.abicloud.controller.FaultHandler;
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.utils.ScreenBlocker;
+
+            [Bindable]
+            private var services:Services = new Services();
+        ]]>
+    </mx:Script>
+
+
+
+    <!-- InfrastructureEvent.GET_NETMASKS_BY_NETWORK_CLASS _______________________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_NETMASKS_BY_NETWORK_CLASS}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="resolveMaskForNetworkClass"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.networkClass]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetNetmasksByNetworkClass"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.GET_NETWORKS_BY_CLASS_AND_NETMASK _______________________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_NETWORKS_BY_CLASS_AND_NETMASK}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="resolvePossibleNetworks"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.networkClass, event.netmask]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetNetworksByClassAndMask"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- NetworkingEvent.CREATE_VLAN _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.CREATE_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="createVLAN"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.network.networkId, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleCreateVLAN"
+                    arguments="{[resultObject, event.network]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.EDIT_VLAN _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.EDIT_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="editVLAN"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleEditVLAN"
+                    arguments="{[resultObject, event.network, event.vlanNetwork, event.networkName, event.networkConfiguration, event.defaultNetwork]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.DELETE_VLAN _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.DELETE_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="deleteVLAN"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleDeleteVLAN"
+                    arguments="{[resultObject, event.network, event.vlanNetwork]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_PRIVATE_IPs_BY_ENTERPRISE _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_PRIVATE_IPs_BY_ENTERPRISE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getNetworkPoolInfoByEnterprise"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id, event.listRequest]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateIPs"
+                    arguments="{[resultObject, event.callback]}"/>
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_PRIVATE_IPs_BY_VDC _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_PRIVATE_IPs_BY_VDC}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getNetworkPoolInfoByVDC"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.listRequest]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateIPs"
+                    arguments="{[resultObject, event.callback]}"/>
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_PRIVATE_IPs_BY_VLAN ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_PRIVATE_IPs_BY_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getNetworkPoolInfoByVLAN"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateIPs"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE _______________ -->
+    <EventHandlers type="{NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getNICsByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetNICsByVirtualMachine"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getAvailableVirtualMachineNICsByVLAN"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateIPs"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="reorderNICintoVM"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.newOrder, event.ipPoolManagementId]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleOrderedVirtualMachineNICsByVLAN"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="requestNICforVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id, event.ipPoolManagement.idManagement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleAssignNICToVirtualMachine"
+                    arguments="{[resultObject, event.virtualMachine]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="releaseNICfromVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ipPoolManagement.idManagement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleRemoveNICFromVirtualMachine"
+                    arguments="{[resultObject, event.virtualMachine]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_VIRTUAL_MACHINE_GATEWAY _______________ -->
+    <EventHandlers type="{NetworkingEvent.GET_VIRTUAL_MACHINE_GATEWAY}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getGatewayUsedByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetVirtualMachineGateway"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_AVAILABLE_GATEWAYS_FOR_VIRTUAL_MACHINE _______________ -->
+    <EventHandlers type="{NetworkingEvent.GET_AVAILABLE_GATEWAYS_FOR_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getGatewayListByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetAvailableGatewaysForVirtualMachine"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE _______________ -->
+    <EventHandlers type="{NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="requestGatewayForVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id, event.gateway]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleAssignGatewayVirtualMachine"
+                    arguments="{[resultObject, event.virtualMachine, event.gateway]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- NetworkingEvent.GET_ENTERPRISES_WITH_NETWORKS_IN_DATACENTER _______________ -->
+    <EventHandlers type="{NetworkingEvent.GET_ENTERPRISES_WITH_NETWORKS_IN_DATACENTER}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <!-- The Private Networks of an Enterprise is contained in its Virtual Datacenters -->
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getEnterprisesWithNetworkInDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.datacenter.id, event.listRequest]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetEnterprisesWithNetworksInDatacenter"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- VirtualApplianceEvent.GET_PRIVATE_NETWORKS_BY_ENTERPRISE _________________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_PRIVATE_NETWORKS_BY_ENTERPRISE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <!-- The Private Networks of an Enterprise is contained in its Virtual Datacenters -->
+        <RemoteObjectInvoker instance="{services.virtualApplianceService}"
+            method="getVirtualDataCentersByEnterprise"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateNetworksByEnterprise"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+</EventMap>

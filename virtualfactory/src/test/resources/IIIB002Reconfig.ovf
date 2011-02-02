@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ns1:Envelope xmlns:ns1="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ns2="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:ns3="http://schemas.dmtf.org/wbem/wscim/1/common" xmlns:ns4="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">
+<ns1:References>
+<ns1:File ns1:href="[192.168.1.45:/opt/vm_repository/]http___192_168_1_45_5050_rs/ubuntu_img/ubuntu.img" ns1:id="debianSystem"/>
+</ns1:References>
+<ns1:Section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns1:NetworkSection_Type">
+<ns1:Network ns1:name="vaaa_network">
+<ns1:Description>Appliance Network identifier</ns1:Description>
+</ns1:Network>
+</ns1:Section>
+<ns1:Section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="ns1:DiskSection_Type">
+<ns1:Disk ns1:capacity="4294967296" ns1:diskId="disk_70" ns1:fileRef="debianSystem" ns1:format="http://kvm" ns1:populatedSize="4294967296"/>
+</ns1:Section>
+<ns1:VirtualSystemCollection ns1:id="10">
+<ns1:VirtualSystem ns1:id="aac71b8b-2cf5-45cd-b9f0-59262aeaa046">
+<ns1:Name>debianSystem</ns1:Name>
+<ns1:Section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ns1:transport="transport" xsi:type="ns1:VirtualHardwareSection_Type">
+<ns1:System>
+<ns2:AutomaticRecoveryAction xsi:nil="true"/>
+<ns2:AutomaticShutdownAction xsi:nil="true"/>
+<ns2:AutomaticStartupAction xsi:nil="true"/>
+<ns2:AutomaticStartupActionDelay xsi:nil="true"/>
+<ns2:AutomaticStartupActionSequenceNumber xsi:nil="true"/>
+<ns2:Caption xsi:nil="true"/>
+<ns2:ChangeableType xsi:nil="true"/>
+<ns2:ConfigurationDataRoot xsi:nil="true"/>
+<ns2:ConfigurationFile xsi:nil="true"/>
+<ns2:ConfigurationID xsi:nil="true"/>
+<ns2:ConfigurationName xsi:nil="true"/>
+<ns2:CreationTime xsi:nil="true"/>
+<ns2:Description xsi:nil="true"/>
+<ns2:ElementName>Hypervisor</ns2:ElementName>
+<ns2:Generation xsi:nil="true"/>
+<ns2:InstanceID>aac71b8b-2cf5-45cd-b9f0-59262aeaa046</ns2:InstanceID>
+<ns2:LogDataRoot xsi:nil="true"/>
+<ns2:RecoveryFile xsi:nil="true"/>
+<ns2:SnapshotDataRoot xsi:nil="true"/>
+<ns2:SuspendDataRoot xsi:nil="true"/>
+<ns2:SwapFileDataRoot xsi:nil="true"/>
+<ns2:VirtualSystemIdentifier>http://192.168.1.151:8889/</ns2:VirtualSystemIdentifier>
+<ns2:VirtualSystemType>KVM</ns2:VirtualSystemType>
+</ns1:System>
+<ns1:Item>
+<ns4:Address xsi:nil="true"/>
+<ns4:AddressOnParent xsi:nil="true"/>
+<ns4:AllocationUnits xsi:nil="true"/>
+<ns4:AutomaticAllocation xsi:nil="true"/>
+<ns4:AutomaticDeallocation xsi:nil="true"/>
+<ns4:Caption xsi:nil="true"/>
+<ns4:ChangeableType xsi:nil="true"/>
+<ns4:ConfigurationName xsi:nil="true"/>
+<ns4:ConsumerVisibility xsi:nil="true"/>
+<ns4:Description xsi:nil="true"/>
+<ns4:ElementName>CPU</ns4:ElementName>
+<ns4:Generation xsi:nil="true"/>
+<ns4:InstanceID>1</ns4:InstanceID>
+<ns4:Limit xsi:nil="true"/>
+<ns4:MappingBehavior xsi:nil="true"/>
+<ns4:OtherResourceType xsi:nil="true"/>
+<ns4:Parent xsi:nil="true"/>
+<ns4:PoolID xsi:nil="true"/>
+<ns4:Reservation xsi:nil="true"/>
+<ns4:ResourceSubType xsi:nil="true"/>
+<ns4:ResourceType>3</ns4:ResourceType>
+<ns4:VirtualQuantity>1</ns4:VirtualQuantity>
+<ns4:Weight xsi:nil="true"/>
+</ns1:Item>
+<ns1:Item>
+<ns4:Address xsi:nil="true"/>
+<ns4:AddressOnParent xsi:nil="true"/>
+<ns4:AllocationUnits xsi:nil="true"/>
+<ns4:AutomaticAllocation xsi:nil="true"/>
+<ns4:AutomaticDeallocation xsi:nil="true"/>
+<ns4:Caption xsi:nil="true"/>
+<ns4:ChangeableType xsi:nil="true"/>
+<ns4:ConfigurationName xsi:nil="true"/>
+<ns4:ConsumerVisibility xsi:nil="true"/>
+<ns4:Description xsi:nil="true"/>
+<ns4:ElementName>RAM</ns4:ElementName>
+<ns4:Generation xsi:nil="true"/>
+<ns4:InstanceID>2</ns4:InstanceID>
+<ns4:Limit xsi:nil="true"/>
+<ns4:MappingBehavior xsi:nil="true"/>
+<ns4:OtherResourceType xsi:nil="true"/>
+<ns4:Parent xsi:nil="true"/>
+<ns4:PoolID xsi:nil="true"/>
+<ns4:Reservation xsi:nil="true"/>
+<ns4:ResourceSubType xsi:nil="true"/>
+<ns4:ResourceType>4</ns4:ResourceType>
+<ns4:VirtualQuantity>256</ns4:VirtualQuantity>
+<ns4:Weight xsi:nil="true"/>
+</ns1:Item>
+<ns1:Item>
+<ns4:Address>52:54:00:28:f5:f4</ns4:Address>
+<ns4:AddressOnParent xsi:nil="true"/>
+<ns4:AllocationUnits xsi:nil="true"/>
+<ns4:AutomaticAllocation>true</ns4:AutomaticAllocation>
+<ns4:AutomaticDeallocation xsi:nil="true"/>
+<ns4:Caption xsi:nil="true"/>
+<ns4:ChangeableType xsi:nil="true"/>
+<ns4:ConfigurationName xsi:nil="true"/>
+<ns4:ConsumerVisibility xsi:nil="true"/>
+<ns4:Description xsi:nil="true"/>
+<ns4:ElementName>Ethernet adapter on ''vaaa_network''</ns4:ElementName>
+<ns4:Generation xsi:nil="true"/>
+<ns4:InstanceID>1</ns4:InstanceID>
+<ns4:Limit xsi:nil="true"/>
+<ns4:MappingBehavior xsi:nil="true"/>
+<ns4:OtherResourceType xsi:nil="true"/>
+<ns4:Parent xsi:nil="true"/>
+<ns4:PoolID xsi:nil="true"/>
+<ns4:Reservation xsi:nil="true"/>
+<ns4:ResourceSubType xsi:nil="true"/>
+<ns4:ResourceType>10</ns4:ResourceType>
+<ns4:VirtualQuantity xsi:nil="true"/>
+<ns4:Weight xsi:nil="true"/>
+</ns1:Item>
+<ns1:Item>
+<ns4:Address xsi:nil="true"/>
+<ns4:AddressOnParent xsi:nil="true"/>
+<ns4:AllocationUnits xsi:nil="true"/>
+<ns4:AutomaticAllocation xsi:nil="true"/>
+<ns4:AutomaticDeallocation xsi:nil="true"/>
+<ns4:Caption xsi:nil="true"/>
+<ns4:ChangeableType xsi:nil="true"/>
+<ns4:ConfigurationName xsi:nil="true"/>
+<ns4:ConsumerVisibility xsi:nil="true"/>
+<ns4:Description xsi:nil="true"/>
+<ns4:ElementName>Harddisk70''</ns4:ElementName>
+<ns4:Generation xsi:nil="true"/>
+<ns4:HostResource>ovf:/disk/disk_70</ns4:HostResource>
+<ns4:InstanceID>70</ns4:InstanceID>
+<ns4:Limit xsi:nil="true"/>
+<ns4:MappingBehavior xsi:nil="true"/>
+<ns4:OtherResourceType xsi:nil="true"/>
+<ns4:Parent xsi:nil="true"/>
+<ns4:PoolID xsi:nil="true"/>
+<ns4:Reservation xsi:nil="true"/>
+<ns4:ResourceSubType xsi:nil="true"/>
+<ns4:ResourceType>17</ns4:ResourceType>
+<ns4:VirtualQuantity xsi:nil="true"/>
+<ns4:Weight xsi:nil="true"/>
+</ns1:Item>
+</ns1:Section>
+<ns1:Section xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" remoteDesktopPort="3389" xsi:type="ns1:AnnotationSection_Type"/>
+</ns1:VirtualSystem>
+</ns1:VirtualSystemCollection>
+</ns1:Envelope>

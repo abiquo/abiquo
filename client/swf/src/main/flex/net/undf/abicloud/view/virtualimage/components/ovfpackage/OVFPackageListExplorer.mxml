@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.collections.Sort;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.events.MenuEvent;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.virtualimage.OVFPackageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.virtualimage.OVFPackage;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageList;
+
+            //The OVFPackageList to explore
+            [Bindable]
+            private var _ovfPackageList:OVFPackageList;
+
+            [Bindable]
+            private var ovfPackagesDP:Array = new Array();
+
+            public function set ovfPackageList(value:OVFPackageList):void
+            {
+                _ovfPackageList = value;
+                init();
+            }
+
+            //An Object with Categories as keys and OVFPackages as values
+            private var ovfPackageListCategories:Object;
+
+            private var sort:Sort = new Sort();
+
+            [Bindable]
+            private var ovfPackagesToDownload:ArrayCollection = new ArrayCollection();
+
+            private var downloadingOVFPackages:ArrayCollection = new ArrayCollection();
+
+            private var downloadingOVFPackagesTimer:Timer;
+            
+            public var selectedCategoryIndex:int;
+
+            //Data provider for "More Actions" Combo box
+            [Bindable]
+            public var orderByDP:Array = [ { label: ResourceManager.getInstance().getString("VirtualImage",
+                                                                                            "LABEL_ORDER_BY_DOWNLOADED"), data: 1 },
+                                           { label: ResourceManager.getInstance().getString("VirtualImage",
+                                                                                            "LABEL_ORDER_BY_NOT_DOWNLOADED"), data: 2 },
+                                           { label: ResourceManager.getInstance().getString("VirtualImage",
+                                                                                            "LABEL_ORDER_BY_DOWNLOADING"), data: 3 },
+                                           { label: ResourceManager.getInstance().getString("VirtualImage",
+                                                                                            "LABEL_ORDER_BY_DISK_FORMAT"), data: 4 },
+                                           { label: ResourceManager.getInstance().getString("VirtualImage",
+                                                                                            "LABEL_ORDER_BY_ERROR"), data: 5 } ];
+
+            /**
+             * When this component finishes its creation
+             */
+            private function onInitialize():void
+            {
+                //Initializing timer to check OVFPackages download progress
+                this.downloadingOVFPackagesTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_applibrary_ovfpackagesDownloadingProgressUpdateInterval.value * 1000,
+                                                             1);
+                this.downloadingOVFPackagesTimer.addEventListener(TimerEvent.TIMER_COMPLETE,
+                                                                  refreshOVFPackageStatus);
+
+                //Registering events from model
+                AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.addEventListener(OVFPackageEvent.OVF_PACKAGE_LIST_STATUS_RETRIEVED,
+                                                                                                   onOVFPackageListStatusRetrieved);
+
+                AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.addEventListener(OVFPackageEvent.OVF_PACKAGE_DOWNLOAD_STARTED,
+                                                                                                   onOVFPackageDownloadStarted);
+
+                AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.addEventListener(OVFPackageEvent.OVF_PACKAGE_STATUS_REFRESHED,
+                                                                                                   onOVFPackageStatusRefreshed);
+
+                AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.addEventListener(OVFPackageEvent.OVF_PACKAGE_DOWNLOAD_CANCELED,
+                                                                                                   onOVFPackageDownloadCanceled);
+
+
+                //Registering when a OVFPackage has been selected or unselected by the user to download
+                ovfPackages.addEventListener(OVFPackageEvent.OVFPACKAGE_SELECTED_TO_DOWNLOAD,
+                                             onOVFPackageSelectedToDownload);
+                ovfPackages.addEventListener(OVFPackageEvent.OVFPACKAGE_UNSELECTED_TO_DOWNLOAD,
+                                             onOVFPackageUnselectedToDownload);
+            }
+
+            /**
+             * Initializes this component to manage a RepositorySpace
+             */
+            private function init():void
+            {
+                //Clean view
+
+                if (downloadingOVFPackagesTimer.running)
+                    downloadingOVFPackagesTimer.stop();
+                
+                categoriesList.dataProvider = new ArrayCollection();
+                ovfPackagesDP = new Array();
+
+                ovfPackageListCategories = new Object();
+                ovfPackagesToDownload.removeAll();
+
+                if (_ovfPackageList)
+                {
+                    buildOVFPackageListCategories();
+                    getOVFPackageListStatus();
+                }
+            }
+
+            private function buildOVFPackageListCategories():void
+            {
+                var categoryNames:ArrayCollection = new ArrayCollection();
+                var length:int = _ovfPackageList.ovfpackages.length;
+                var ovfPackage:OVFPackage;
+                for (var i:int = 0; i < length; i++)
+                {
+                    ovfPackage = _ovfPackageList.ovfpackages.getItemAt(i) as OVFPackage;
+                    if (ovfPackageListCategories.propertyIsEnumerable(ovfPackage.category))
+                    {
+                        //We already have this category name in our Dictionary
+                        (ovfPackageListCategories[ovfPackage.category] as Array).push(ovfPackage);
+                    }
+                    else
+                    {
+                        //We still do not have this category name in our Dictionary
+                        categoryNames.addItem(ovfPackage.category);
+
+                        var newListForCategory:Array = new Array();
+                        newListForCategory.push(ovfPackage);
+                        ovfPackageListCategories[ovfPackage.category] = newListForCategory;
+                    }
+                }
+
+                //Set the list of categories
+                categoriesList.dataProvider = categoryNames;
+                if(selectedCategoryIndex != -1){
+                	categoriesList.selectedIndex = selectedCategoryIndex;
+                	showOVFPackagesByCategory(categoriesList.selectedItem as String);
+                }else{
+	                showAllOVFPackages();                	
+                }
+            }
+
+            /**
+             * Retrieves the status of this OVFPackageList for the current Repository
+             */
+            private function getOVFPackageListStatus():void
+            {
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.GET_OVF_PACKAGE_LIST_STATUS);
+                event.ovfPackageList = _ovfPackageList;
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                dispatchEvent(event);
+            }
+
+            private function onOVFPackageListStatusRetrieved(event:OVFPackageEvent):void
+            {
+                checkAreOVFPackagesDownloading();
+            }
+
+            private function checkAreOVFPackagesDownloading():void
+            {
+                var length:int = _ovfPackageList.ovfpackages.length;
+                var i:int;
+                downloadingOVFPackages.removeAll();
+                var ovfPackage:OVFPackage;
+                for (i = 0; i < length; i++)
+                {
+                    ovfPackage = _ovfPackageList.ovfpackages.getItemAt(i) as OVFPackage;
+                    if (ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING)
+                        //This OVFPackage is in a downloading status
+                        downloadingOVFPackages.addItem(ovfPackage);
+                }
+
+                //If we have OVFPackages in a downloading status, we refresh them
+                if (downloadingOVFPackages.length > 0)
+                    refreshOVFPackageStatus();
+            }
+
+            /**
+             * Refreshes the OVFPackages that are currently downloading
+             */
+            private function refreshOVFPackageStatus(timerEvent:TimerEvent = null):void
+            {
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.REFRESH_OVF_PACKAGE_STATUS);
+                event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.ovfPackageURLList = getOVFPackageURLs(downloadingOVFPackages);
+                dispatchEvent(event);
+            }
+
+            /**
+             * Generates an array of int's with the ids of an Array of OVFPackages
+             */
+            private function getOVFPackageURLs(ovfPackageArray:ArrayCollection):ArrayCollection
+            {
+                var length:int = ovfPackageArray.length;
+                var ovfPackageURLs:ArrayCollection = new ArrayCollection();
+                for (var i:int = 0; i < length; i++)
+                {
+                    ovfPackageURLs.addItem(OVFPackage(ovfPackageArray.getItemAt(i)).url);
+                }
+
+                return ovfPackageURLs;
+            }
+
+            /**
+             * When user selects a Category from the categoriesList
+             * we request the OVFPackages that only belong to that category
+             */
+            private function onClickCategoriesList():void
+            {
+            	selectedCategoryIndex = categoriesList.selectedIndex;
+                if (categoriesList.selectedIndex > -1)
+                {
+                    showOVFPackagesByCategory(categoriesList.selectedItem as String);
+                }
+                else
+                {
+                    showAllOVFPackages();
+                }
+            }
+
+            private function showAllOVFPackages():void
+            {
+                ovfPackagesDP = _ovfPackageList.ovfpackages.toArray();
+            }
+
+            private function showOVFPackagesByCategory(categoryName:String):void
+            {
+                if (ovfPackageListCategories.hasOwnProperty(categoryName))
+                {
+                    ovfPackagesDP = ovfPackageListCategories[categoryName];
+                }
+                else
+                {
+                    showAllOVFPackages();
+                }
+            }
+
+            /**
+             * Requests the OVFPacakge list for all categories
+             */
+            private function onClickAllCategoriesLabel():void
+            {
+            	categoriesList.selectedIndex = -1;
+                showAllOVFPackages();
+            }
+
+            /**
+             * Launches a Refresh petition for this RepositorySpace
+             */
+            private function onClickRefreshButton():void
+            {
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.REFRESH_OVF_PACKAGE_LIST);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.ovfPackageList = _ovfPackageList;
+                dispatchEvent(event);
+            }
+
+
+            /**
+             * Aks user for the selected packages download confirmation
+             */
+            private function askDownloadConfirmation():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DOWNLOAD_PACKAGES_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DOWNLOAD_PACKAGES_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        downloadSelectedOVFPackages);
+            }
+
+            /**
+             * Request to download the selected OVFPackages, if user confirmed so
+             */
+            private function downloadSelectedOVFPackages(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.START_DOWNLOAD_OVF_PACKAGE);
+                    event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                    event.ovfPackageURLList = getOVFPackageURLs(ovfPackagesToDownload);
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Handler for when an OVFPackage is selected by the user to download
+             */
+            private function onOVFPackageSelectedToDownload(event:OVFPackageEvent):void
+            {
+                event.ovfPackage.selectedToDownload = true;
+
+                //Adding the OVFPackage to OVFPackages to download list
+                if (!ovfPackagesToDownload.contains(event.ovfPackage))
+                    ovfPackagesToDownload.addItem(event.ovfPackage);
+            }
+
+            /**
+             * Handler for when an OVFPackage is unselected by the user to download
+             */
+            private function onOVFPackageUnselectedToDownload(event:OVFPackageEvent):void
+            {
+                event.ovfPackage.selectedToDownload = false;
+
+                //Removing the OVFPackage from OVFPackages to download list
+                var index:int = ovfPackagesToDownload.getItemIndex(event.ovfPackage);
+                if (index > -1)
+                {
+                    ovfPackagesToDownload.removeItemAt(index);
+                }
+            }
+
+            /**
+             * Handler for when one or more OVFPackages started to download
+             */
+            private function onOVFPackageDownloadStarted(event:OVFPackageEvent):void
+            {
+                //Cleaning the list of OVFPackages that were selected by the user to download
+                ovfPackagesToDownload.removeAll();
+
+                //Getting again the OVFPackageList status for this repository
+                getOVFPackageListStatus();
+            }
+
+            /**
+             * Handler for when the download progress from one or more OVFPackages has been checked
+             */
+            private function onOVFPackageStatusRefreshed(event:OVFPackageEvent):void
+            {
+                //We remove those OVFPackages that have finished its download, from the downloading OVFPackages list
+                var length:int = downloadingOVFPackages.length;
+                var i:int;
+                for (i = length - 1; i >= 0; i--)
+                {
+                    if (OVFPackage(downloadingOVFPackages.getItemAt(i)).ovfPackageStatus.status != OVFPackageInstanceStatus.DOWNLOADING)
+                    {
+                        downloadingOVFPackages.removeItemAt(i);
+                            //_requestVirtualImages = true;
+                    }
+                }
+
+                //If we still have packages downloading, we run the timer again
+                if (downloadingOVFPackages.length > 0)
+                    downloadingOVFPackagesTimer.start();
+            }
+
+
+            /**
+             * Handler called when the download of one or more OVFPackages has been successfully cancelled
+             */
+            private function onOVFPackageDownloadCanceled(event:OVFPackageEvent):void
+            {
+                //Remove the OVFPackage that has been cancelled
+                var index:int = downloadingOVFPackages.getItemIndex(event.ovfPackage);
+                if (index > -1)
+                {
+                    downloadingOVFPackages.removeItemAt(index);
+                }
+            }
+
+            /**
+             * Orders the OVFPackages list depending on the choice selected by the user
+             */
+            private function onClickOrderBy(menuEvent:MenuEvent):void
+            {
+                switch (menuEvent.item.data)
+                {
+                    case 1:
+                        //Order by downloaded OVFPackages
+                        sort.compareFunction = orderByDownloaded;
+                        break;
+
+                    case 2:
+                        //Order by not downloaded OVFPackages
+                        sort.compareFunction = orderByNotDownloaded;
+                        break;
+
+                    case 3:
+                        //Order by downloading OVFPackages
+                        sort.compareFunction = orderByDownloading;
+                        break;
+
+                    case 4:
+                        //Order by diskFormat
+                        sort.compareFunction = orderByDiskFormat;
+                        break;
+
+                    case 5:
+                        //Order by error
+                        sort.compareFunction = orderByError;
+                        break;
+                }
+
+                sort.sort(ovfPackagesDP);
+                if (ovfPackages != null)
+                {
+                    ovfPackages.dataProvider = ovfPackagesDP;
+                }
+            }
+
+            private function onOpenOrderBy(event:Event):void
+            {
+                orderByButton.addEventListener(MenuEvent.ITEM_CLICK, onClickOrderBy);
+            }
+
+            private function onCloseOrderBy(event:Event):void
+            {
+                orderByButton.removeEventListener(MenuEvent.ITEM_CLICK, onClickOrderBy);
+            }
+
+            /**
+             * Sort function to order OVFPackages putting those that are already downloaded first
+             */
+            private function orderByDownloaded(a:Object, b:Object, fields:Array = null):int
+            {
+                var ovfPackageA:OVFPackage = a as OVFPackage;
+                var ovfPackageB:OVFPackage = b as OVFPackage;
+
+                if (ovfPackageA.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD)
+                    return -1;
+                else if (ovfPackageB.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            /**
+             * Sort function to order OVFPackages putting those that are still not downloaded first
+             */
+            private function orderByNotDownloaded(a:Object, b:Object, fields:Array = null):int
+            {
+                var ovfPackageA:OVFPackage = a as OVFPackage;
+                var ovfPackageB:OVFPackage = b as OVFPackage;
+
+                if (ovfPackageA.ovfPackageStatus.status == OVFPackageInstanceStatus.NOT_DOWNLOAD)
+                    return -1;
+                else if (ovfPackageB.ovfPackageStatus.status == OVFPackageInstanceStatus.NOT_DOWNLOAD)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            /**
+             * Sort function to order OVFPackages putting those that are downloading first
+             */
+            private function orderByDownloading(a:Object, b:Object, fields:Array = null):int
+            {
+                var ovfPackageA:OVFPackage = a as OVFPackage;
+                var ovfPackageB:OVFPackage = b as OVFPackage;
+
+                if (ovfPackageA.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING)
+                    return -1;
+                else if (ovfPackageB.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            /**
+             * Sort function to order OVFPackages by their diskFormat
+             */
+            private function orderByDiskFormat(a:Object, b:Object, fields:Array = null):int
+            {
+                var ovfPackageA:OVFPackage = a as OVFPackage;
+                var ovfPackageB:OVFPackage = b as OVFPackage;
+                var compareValue:int = ovfPackageA.diskFormat.localeCompare(ovfPackageB.diskFormat);
+
+                if (compareValue < 0)
+                    return -1;
+                else if (compareValue > 0)
+                    return 1;
+                else
+                    return 0;
+            }
+
+            /**
+             * Sort function to order OVFPackages by error state
+             */
+            private function orderByError(a:Object, b:Object, fields:Array = null):int
+            {
+                var ovfPackageA:OVFPackage = a as OVFPackage;
+                var ovfPackageB:OVFPackage = b as OVFPackage;
+
+                if (ovfPackageA.ovfPackageStatus.status == OVFPackageInstanceStatus.ERROR)
+                    return -1;
+                else if (ovfPackageB.ovfPackageStatus.status == OVFPackageInstanceStatus.ERROR)
+                    return 1;
+                else
+                    return 0;
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- RepositorySpace's categories list -->
+
+    <general:GeneralSubPanel 
+        width="200" height="100%"
+        title="@Resource(bundle='VirtualImage', key='LABEL_CATEGORIES')">
+
+        <mx:HBox 
+            width="100%" height="23"
+            horizontalGap="2"
+            paddingLeft="5"
+            paddingRight="10"
+            verticalAlign="middle"
+            styleName="GeneralDataPanelTopFullSkin"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            click="onClickAllCategoriesLabel()">
+            <mx:Label id="allEnterprisesLabel"
+                verticalCenter="0"
+                maxWidth="160"
+                text="@Resource(bundle='VirtualImage', key='LABEL_ALL_CATEGORIES')"/>
+        </mx:HBox>
+
+        <mx:List id="categoriesList"
+            width="100%" height="100%"
+            borderStyle="none"
+            styleName="ListFull"
+            click="onClickCategoriesList()"/>
+
+        <general:GeneralSubPanelToolBox/>
+    </general:GeneralSubPanel>
+
+    <general:GeneralSubPanel 
+        width="100%" height="100%"
+        verticalGap="-1"
+        title="@Resource(bundle='VirtualImage', key='LABEL_PACKAGES_LIST')">
+
+        <mx:HBox 
+            width="100%" height="32"
+            horizontalGap="0"
+            paddingLeft="6"
+            paddingRight="6"
+            verticalAlign="middle"
+            styleName="GeneralDataPanelTopFullSkin">
+
+            <mx:PopUpMenuButton id="orderByButton"
+                height="18"
+                color="#333333"
+                styleName="MoreActionsButton" dataProvider="{orderByDP}"
+                label="@Resource(bundle='VirtualImage', key='LABEL_ORDER_BY')"
+                labelField="label"
+                open="onOpenOrderBy(event)"
+                close="onCloseOrderBy(event)"/>
+        </mx:HBox>
+
+        <mx:List id="ovfPackages"
+            width="100%" height="100%"
+            paddingLeft="0"
+            dataProvider="{ovfPackagesDP}"
+            itemRenderer="net.undf.abicloud.view.virtualimage.components.ovfpackage.OVFPackageMiniature"/>
+
+        <general:GeneralPanelToolBox 
+            width="100%" height="32"
+            styleName="GeneralDataPanelBottomSkin">
+            <mx:Button id="downloadButton"
+                styleName="DownloadButton"
+                toolTip="@Resource(bundle='VirtualImage', key='LABEL_TO_DOWNLOAD')"
+                enabled="{this.ovfPackagesToDownload.length > 0}"
+                click="askDownloadConfirmation()"/>
+
+            <mx:Button id="refreshButton"
+                styleName="RefreshButtonBig" enabled="{_ovfPackageList != null}"
+                toolTip="@Resource(bundle='VirtualImage', key='TOOLTIP_REFRESH_BUTTON')"
+                click="onClickRefreshButton()"/>
+        </general:GeneralPanelToolBox>
+    </general:GeneralSubPanel>
+</mx:HBox>

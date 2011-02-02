@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    xmlns="net.undf.abicloud.utils.flowbox.*"
+    paddingBottom="0"
+    paddingTop="5"
+    verticalGap="0"
+    creationPolicy="all" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <!-- NodeVirtualImageContainer will display only NodeVirtualImage components, and only those
+         whose VirtualImage belongs to the category _virtualImageCategory
+    -->
+
+    <mx:Script>
+        <![CDATA[
+            import mx.events.ChildExistenceChangedEvent;
+            import mx.events.FlexEvent;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.NodeType;
+            import net.undf.abicloud.vo.virtualimage.Category;
+
+
+            private var _nodeTypeView:NodeTypeView;
+
+            public function set nodeTypeView(value:NodeTypeView):void
+            {
+                //The NodeTypeView is the parent for this NodeVirtualImageContainer
+                this._nodeTypeView = value;
+
+                //Registering all events that NodeTypeView can dispatch
+                this._nodeTypeView.addEventListener(NodeRendererEvent.NODERENDERER_ADDED,
+                                                    onNodeRendererAdded);
+                this._nodeTypeView.addEventListener(NodeRendererEvent.NODERENDERER_ERASED,
+                                                    onNodeRendererErased);
+                this._nodeTypeView.addEventListener("cleanNodes", onCleanNodes);
+                this._nodeTypeView.addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE,
+                                                    onNodeViewChildRemove);
+                this._nodeTypeView.addEventListener("deleteAllNodeVirtualImageContainer",
+                                                    onDeleteAllVirtualImageContainer);
+
+            }
+
+            /**
+             * This handler captures when any Node Container (of any type) has been removed from the
+             * NodeTypeView where this NodeVirtualImageContainer is.
+             * This NodeVirtualImageContainer must check if has to change its styleName, depending on which
+             * child position has in the NodeTypeView
+             */
+            private function onNodeViewChildRemove(childExistenceChangedEvent:ChildExistenceChangedEvent):void
+            {
+                //If this NodeVirtualImageContainer is currently being displayed, and the Node Container that has 
+                //been removed is not itself
+                if (this._nodeTypeView.contains(this) && childExistenceChangedEvent.relatedObject != this)
+                {
+                    var childRemovedIndex:int = this._nodeTypeView.getChildIndex(childExistenceChangedEvent.relatedObject);
+                    var meIndex:int = this._nodeTypeView.getChildIndex(this);
+
+                    if (childRemovedIndex < meIndex)
+                        //Since this NodeVirtualImageContainer has moved one position, we have to reverse its styleName
+                        styleName = (meIndex % 2 == 0) ? "NodeTypeViewOdd" : "NodeTypeViewEven";
+                }
+
+            }
+
+            /**
+             * The event deleteAllNodeVirtualImageContainer is dispatched by the NodeTypeView when
+             * all NodeVirtualImageContainer must be erased.
+             * Usually, this happens when there are new VirtualImage Categories available, and the Virtual Image category
+             * assigned to this NodeVirtualImageContainer is no longer valid
+             */
+            private function onDeleteAllVirtualImageContainer(event:Event):void
+            {
+                //This NodeVirtualImageContainer will stop to listen events from its NodeTypeView
+                //This will also means that now ActionScript's garbage collector can remove this component
+                this._nodeTypeView.removeEventListener(NodeRendererEvent.NODERENDERER_ADDED,
+                                                       onNodeRendererAdded);
+                this._nodeTypeView.removeEventListener(NodeRendererEvent.NODERENDERER_ERASED,
+                                                       onNodeRendererErased);
+                this._nodeTypeView.removeEventListener("cleanNodes", onCleanNodes);
+                this._nodeTypeView.removeEventListener(ChildExistenceChangedEvent.CHILD_REMOVE,
+                                                       onNodeViewChildRemove);
+                this._nodeTypeView.removeEventListener("deleteAllNodeVirtualImageContainer",
+                                                       onDeleteAllVirtualImageContainer);
+
+                if (nodeContainer)
+                    nodeContainer.removeAllChildren();
+
+                if (this._nodeTypeView.contains(this))
+                    this._nodeTypeView.removeChild(this);
+            }
+
+            [Bindable]
+            private var _virtualImageCategory:Category;
+
+            /**
+             * Sets the VirtualImage Category for this NodeVirtualImageContainer
+             * This NodeVirtualImageContainer will only draw NodeVirtualImage that belongs to this category
+             */
+            public function set virtualImageCategory(value:Category):void
+            {
+                this._virtualImageCategory = value;
+            }
+
+            /**
+             * Adds a NewNodeRenderer to this container
+             */
+            private function onNodeRendererAdded(nodeRendererEvent:NodeRendererEvent):void
+            {
+                //We only add the NodeRenderer if it is representing a NodeVirtualImage
+                if (nodeRendererEvent.nodeRenderer.node.nodeType.id == NodeType.VIRTUALIMAGE && NodeVirtualImage(nodeRendererEvent.nodeRenderer.node).virtualImage.category.id == this._virtualImageCategory.id)
+                {
+                    //If this NodeVirtualImageContainer still is not displayed inside its NodeTypeView, we must set its styleName
+                    //depending on the child position that it will have
+                    if (!this._nodeTypeView.contains(this))
+                    {
+                        styleName = (this._nodeTypeView.numChildren % 2 == 0) ? "NodeTypeViewEven" : "NodeTypeViewOdd";
+                        this._nodeTypeView.addChild(this);
+                    }
+
+                    nodeContainer.width = width;
+                    nodeContainer.addChild(nodeRendererEvent.nodeRenderer);
+                }
+            }
+
+            /**
+             * Removes a NodeRenderer from this NodeVirtualImageContainer, only if it has it
+             */
+            private function onNodeRendererErased(nodeRendererEvent:NodeRendererEvent):void
+            {
+                if (contains(nodeRendererEvent.nodeRenderer))
+                {
+                    nodeContainer.removeChild(nodeRendererEvent.nodeRenderer);
+                    if (nodeContainer.numChildren == 0 && this._nodeTypeView.contains(this))
+                        this._nodeTypeView.removeChild(this);
+                }
+            }
+
+            /**
+             * Removes all NodeRenderers that this NodeVirtualImageContainer may have
+             * Since all NodeRenderers are removed, this NodeVirtualImageContainer will also remove itself
+             * from its NodeTypeView
+             */
+            private function onCleanNodes(event:Event):void
+            {
+                if (nodeContainer)
+                    nodeContainer.removeAllChildren();
+                if (this._nodeTypeView.contains(this))
+                    this._nodeTypeView.removeChild(this);
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Label
+    	styleName="NodeVirtualImageContainerLabel1" 
+        text="{this._virtualImageCategory.name}"/>
+
+    <mx:Tile id="nodeContainer"
+        backgroundAlpha="0"
+        direction="horizontal"/>
+</mx:VBox>

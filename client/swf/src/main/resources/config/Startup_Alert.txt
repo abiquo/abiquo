@@ -1,0 +1,10 @@
+<!-- ***************************************************************************************************
+     Write here the text you want to appear automatically 
+	 when you successfully log in the application
+	 Remember to set to 1 the SHOW_START_UP_ALERT 
+	 variable in client-config.xml
+	 
+	 Basic HTML tags, like <b>, <i>, <a> and so on, are accepted
+	 
+	 *************************************************************************************************** -->
+This is the <b>Start Up</b> Alert!

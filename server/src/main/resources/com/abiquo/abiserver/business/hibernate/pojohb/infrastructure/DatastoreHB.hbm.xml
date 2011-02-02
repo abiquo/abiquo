@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+	<class catalog="kinton"
+		name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB"
+		table="datastore">
+		<id name="idDatastore" type="java.lang.Integer">
+			<column name="idDatastore" />
+			<generator class="identity" />
+		</id>
+		<property name="name" type="string">
+			<column length="255" name="name" not-null="true" />
+		</property>
+		<property name="directory" type="string">
+			<column length="255" name="directory" />
+		</property>
+		<property name="rootPath" type="string">
+			<column length="36" name="rootPath" not-null="true" />
+		</property>
+		<property name="shared" type="boolean">
+			<column name="shared" />
+		</property>
+		<property name="enabled" type="boolean">
+			<column name="enabled" />
+		</property>
+		<property name="size" type="java.lang.Long">
+			<column name="size" not-null="true" />
+		</property>
+		<property name="usedSize" type="java.lang.Long">
+			<column name="usedSize" not-null="true" />
+		</property>
+		<set name="pmList" table="datastore_assignment" lazy="false" cascade="all">
+			<key>
+				<column name="idDatastore" not-null="true" />
+			</key>
+			<many-to-many column="idPhysicalMachine"  class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
+		</set>
+	</class>
+</hibernate-mapping>

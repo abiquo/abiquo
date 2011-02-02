@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<general:GeneralSubPanel 
+    horizontalAlign="center"
+    paddingTop="10"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    title="{ResourceManager.getInstance().getString('Networking', 'LABEL_VIRTUAL_MACHINE_NETWORK_CONF').toUpperCase()}">
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.core.UIComponent;
+        	import mx.managers.DragManager;
+        	import mx.controls.Image;
+        	import mx.core.DragSource;
+        	import mx.events.DragEvent;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+            import net.undf.abicloud.vo.networking.IPAddress;
+            import net.undf.abicloud.vo.networking.IPPoolManagement;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+            //The VirtualMachine to manage its Network
+            [Bindable]
+            protected var _virtualMachine:VirtualMachine;
+
+            //The VirtualDatacenter where the VirtualMachine is
+            [Bindable]
+            protected var _virtualDatacenter:VirtualDataCenter;
+
+            //Flag indicating if changes can be made to the VirtualMachine network configuration
+            [Bindable]
+            private var _isEditionAllowed:Boolean;
+
+            //List of IPPoolManagement containing the NICs that the VirtualMachine currently has
+            [Bindable]
+            protected var virtualMachineNICs:ArrayCollection;
+
+            //Component to select a new NIC for the VirtualMachine
+            private var availableNICSelector:AvailableNICSelector;
+
+            private var virtualMachineGateway:IPAddress;
+
+            [Bindable]
+            private var availableGateways:ArrayCollection = new ArrayCollection();
+            
+            //To order dragged object
+            public var newIndex:int;
+            
+            public var itemMoved:Object;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                availableNICSelector = new AvailableNICSelector();
+                availableNICSelector.addEventListener("AvailableNICSelectorClose",
+                                                      closeAvailableNICSelector);
+            }
+
+            private function onCreationComplete():void
+            {
+                //Listening for updated from Model
+                AbiCloudModel.getInstance().networkingManager.addEventListener(NetworkingEvent.VIRTUAL_MACHINE_NICs_CHANGED,
+                                                                               onVirtualMachineNICsChanged);
+                AbiCloudModel.getInstance().networkingManager.addEventListener(NetworkingEvent.VIRTUAL_MACHINE_GATEWAY_CHANGED,
+                                                                               onVirtualMachineGatewayChanged);
+            }
+
+            /**
+             * Initializes this component to manage the Network of a Virtual Machine
+             */
+            public function init(node:NodeVirtualImage, isEditionAllowed:Boolean,
+                                 virtualDatacenter:VirtualDataCenter):void
+            {
+                _virtualMachine = node.virtualMachine;
+                _virtualDatacenter = virtualDatacenter;
+                _isEditionAllowed = isEditionAllowed;
+
+                if (_virtualMachine)
+                {
+                    getVirtualMachineNICs();
+                    getVirtualMachineGateway();
+                }
+            }
+
+            protected function getVirtualMachineNICs():void
+            {
+                if (_virtualMachine)
+                {
+                    var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
+                    event.virtualMachine = _virtualMachine;
+                    event.callback = setVirtualMachineNICs;
+                    dispatchEvent(event);
+                }
+            }
+
+            public function setVirtualMachineNICs(list:ArrayCollection):void
+            {
+                virtualMachineNICs = list;
+            }
+
+            private function onVirtualMachineNICsChanged(event:NetworkingEvent):void
+            {
+                getVirtualMachineNICs();
+                getVirtualMachineGateway();
+            }
+
+            private function addNIC():void
+            {
+                PopUpManager.addPopUp(availableNICSelector, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(availableNICSelector);
+
+                availableNICSelector.init(_virtualDatacenter, _virtualMachine);
+            }
+
+            private function closeAvailableNICSelector(event:Event = null):void
+            {
+                PopUpManager.removePopUp(availableNICSelector);
+            }
+
+            private function askRemoveNIC():void
+            {
+                if (virtualMachineNICs.length == 1)
+                {
+                    //The Virtual Machine needs, at least, 1 NIC
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNASSIGN_NIC_FROM_VM_HEADER"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNASSIGN_NIC_FROM_VM_ERROR"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNASSIGN_NIC_FROM_VM_HEADER"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNASSIGN_NIC_FROM_VM_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            removeNIC);
+                }
+            }
+
+            protected function removeNIC(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE);
+                    event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
+                    event.virtualMachine = _virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+            private function nicOrderLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                return (virtualMachineNICs.getItemIndex(item) + 1).toString();
+            }
+
+            ////////////////////////
+            //GATEWAY
+            protected function getVirtualMachineGateway():void
+            {
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_VIRTUAL_MACHINE_GATEWAY);
+                event.virtualMachine = _virtualMachine;
+                event.callback = setVirtualMachineGateway;
+                dispatchEvent(event);
+            }
+
+            protected function setVirtualMachineGateway(gateway:IPAddress):void
+            {
+                virtualMachineGateway = gateway;
+
+                getAvailableGateways();
+            }
+
+            protected function getAvailableGateways():void
+            {
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_GATEWAYS_FOR_VIRTUAL_MACHINE);
+                event.virtualMachine = _virtualMachine;
+                event.callback = setAvailableGateways;
+                dispatchEvent(event);
+            }
+
+            protected function setAvailableGateways(list:ArrayCollection):void
+            {
+                availableGateways = list;
+                virtualMachineGatewayInput.dataProvider = availableGateways;
+                virtualMachineGatewayInput.selectedIndex = -1;
+
+                if (virtualMachineGateway)
+                {
+                    var length:int = availableGateways.length;
+                    for (var i:int = 0; i < length; i++)
+                    {
+                        if (IPAddress(availableGateways.getItemAt(i)).ip == virtualMachineGateway.ip)
+                        {
+                            virtualMachineGatewayInput.selectedIndex = i;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            protected function assignGatewayToVirtualMachine():void
+            {
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualMachine = _virtualMachine;
+                event.gateway = virtualMachineGatewayInput.selectedIndex > -1 ? virtualMachineGatewayInput.selectedItem as IPAddress : null;
+                dispatchEvent(event);
+            }
+
+            protected function unassignGatewayFromVirtualMachine():void
+            {
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualMachine = _virtualMachine;
+                event.gateway = null;
+                dispatchEvent(event);
+            }
+
+            private function onVirtualMachineGatewayChanged(event:NetworkingEvent):void
+            {
+                virtualMachineGateway = event.gateway;
+                if (virtualMachineGateway == null)
+                {
+                    virtualMachineGatewayInput.selectedIndex = -1;
+                }
+            }
+            
+            private function onDragComplete():void{
+            	for(var i:int = 0  ; i < virtualMachineNICs.length ; i++){
+            		if(itemMoved == virtualMachineNICs[i]){
+            			newIndex = i;
+            		}            		
+            	}
+            	
+            	reorderNicIntoVM(newIndex,IPPoolManagement(itemMoved).idManagement);
+
+            	
+            	//
+            		
+            }
+            
+            protected function reorderNicIntoVM(newIndex:int ,ipPoolManagement:int ):void{
+            	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE);
+                event.newOrder = newIndex;
+                event.ipPoolManagementId = ipPoolManagement;
+                dispatchEvent(event);
+            }
+            
+            private function onDragStart(event:DragEvent):void{
+            	
+            }
+            
+            private function onDragStop(event:DragEvent):void{
+            	
+            }
+            
+             private function onMouseDownUsersDataGrid():void
+            {
+                if (virtualMachineNICsDataGrid.selectedIndex > -1)
+                    itemMoved = virtualMachineNICsDataGrid.selectedItem;
+            }
+            
+          
+            
+           
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+
+        <mx:FormItem 
+            width="500" height="300"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalGap="-1"
+            label="@Resource(bundle='Networking', key='LABEL_NETWORK_INTERFACES')"
+            direction="vertical">
+
+            <mx:DataGrid id="virtualMachineNICsDataGrid"
+                width="100%" height="100%"
+                dataProvider="{virtualMachineNICs}"
+                dropEnabled="true"
+                dragMoveEnabled="true"
+            	allowMultipleSelection="false"
+                dragEnabled="true"
+                sortableColumns="false"
+                dragComplete="onDragComplete()"
+                dragStart="onDragStart(event)"
+                dragDrop="onDragStop(event)"
+                mouseDown="onMouseDownUsersDataGrid()">
+
+                <mx:columns>
+                    <mx:DataGridColumn 
+                        width="50"
+                        labelFunction="nicOrderLabelFunction"
+                        headerText="# NIC"/>
+                    <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
+                        dataField="ip"/>
+                    <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
+                        dataField="mac"/>
+                    <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_VLAN')"
+                        dataField="vlanNetworkName"/>
+                </mx:columns>
+            </mx:DataGrid>
+
+            <!-- Tool Box -->
+            <general:GeneralPanelToolBox 
+                width="100%" height="32"
+                styleName="GeneralDataPanelBottomSkin">
+
+                <mx:Button id="addNICButton"
+                    enabled="{_isEditionAllowed}" styleName="AddButton"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                    click="addNIC()"/>
+
+                <mx:Button id="removeNICButton"
+                    enabled="{virtualMachineNICsDataGrid.selectedIndex > -1 &amp;&amp; _isEditionAllowed}"
+                    styleName="RemoveButton"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                    click="askRemoveNIC()"/>
+            </general:GeneralPanelToolBox>
+
+
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Networking', key='LABEL_DEFAULT_GATEWAY')"
+            direction="horizontal">
+
+            <mx:ComboBox id="virtualMachineGatewayInput"
+                height="18"
+                enabled="{_isEditionAllowed}" labelField="ip"
+                change="assignGatewayToVirtualMachine()"
+                prompt="@Resource(bundle='Networking', key='PROMPT_CHOOSE')"/>
+
+            <mx:Button 
+                styleName="DeleteButton"
+                toolTip="@Resource(bundle='Networking', key='LABEL_REMOVE_GATEWAY_FROM_VM')"
+                click="unassignGatewayFromVirtualMachine()"
+                visible="{virtualMachineGatewayInput.selectedIndex > -1 &amp;&amp; _isEditionAllowed}"/>
+        </mx:FormItem>
+    </mx:Form>
+
+
+</general:GeneralSubPanel>

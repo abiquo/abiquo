@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<Envelope ovf:version="1.0" xml:lang="en-US" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovfstr="http://schema.dmtf.org/ovf/strings/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.dmtf.org/ovf/envelope/1 ../ovf-envelope.xsd">
+	<!--Reference of all external             files-->
+	<References>
+		<File ovf:href="lamp.vmdk" ovf:id="lamp" ovf:size="180114671"/>
+	</References>
+	<!--Meta Data description-->
+	<!--Disk Section-->
+	<DiskSection>
+		<Info>List of the virtual disks used in the package</Info>
+		<Disk ovf:capacity="4294967296" ovf:diskId="lamp" ovf:format="http://www.vmware.com/specifications/vmdk.html#compressed" ovf:populatedSize="1924967692"/>
+	</DiskSection>
+	<!--Network Section-->
+	<NetworkSection>
+		<Info>Logical networks used in the package</Info>
+		<Network ovf:name="VM Network">
+			<Description>The network that the LAMP Service will be available on</Description>
+		</Network>
+	</NetworkSection>
+	<VirtualSystem ovf:id="MyLampService">
+		<Info>Single-VM Virtual appliance with LAMP stack</Info>
+		<!-- Overall information about the product-->
+		<ProductSection ovf:class="org.linuxdistx">
+			<Info>Product information for the service</Info>
+			<Product>My Lamp Service</Product>
+			<Version>1.0</Version>
+			<FullVersion>1.0.0</FullVersion>
+			<AppUrl>'http://{org.linux.ip}:{org.apache.httpd.httpdPort}/'</AppUrl>
+		</ProductSection>
+		<!--Linux component configuration parameters-->
+		<ProductSection ovf:class="org.linuxdistx">
+			<Info>Product customization for the installed Linux system</Info>
+			<Product>Linux Distribution X</Product>
+			<Version>2.6.3</Version>
+			<Property ovf:key="hostname" ovf:type="string">
+				<Description>Specifies the hostname for the appliance</Description>
+			</Property>
+			<Property ovf:key="ip" ovf:type="string">
+				<Description>Specifies the IP address for the appliance</Description>
+			</Property>
+			<Property ovf:key="subnet" ovf:type="string">
+				<Description>Specifies the subnet to use on the deployed network</Description>
+			</Property>
+			<Property ovf:key="gateway" ovf:type="string">
+				<Description>Specifies the gateway on the deployed network</Description>
+			</Property>
+			<Property ovf:key="dns" ovf:type="string">
+				<Description>A comma separated list of DNS servers on the deployed network</Description>
+			</Property>
+			<Property ovf:key="netCoreRmemMaxMB" ovf:type="string">
+				<Description>Specify TCP read max buffer size in mega bytes. Default is 16.</Description>
+			</Property>
+		</ProductSection>
+		<!--Apache  component configuration parameters-->
+		<ProductSection ovf:class="org.apache.httpd">
+			<Info>Product customization for the installed Apache Web Server</Info>
+			<Product>Apache Distribution Y</Product>
+			<Version>2.6.6</Version>
+		</ProductSection>
+		<!--Apache  component configuration parameters-->
+		<ProductSection ovf:class="org.apache.httpd">
+			<Info>Product customization for the installed Apache Web Server</Info>
+			<Product>Apache Distribution Y</Product>
+			<Version>2.6.6</Version>
+			<Property ovf:key="httpPort" ovf:type="int" ovf:userConfigurable="true" ovf:value="80">
+				<Description>Port number for HTTP requests.</Description>
+			</Property>
+			<Property ovf:key="httpsPort" ovf:type="int" ovf:userConfigurable="true" ovf:value="443">
+				<Description>Port number for HTTPS requests.</Description>
+			</Property>
+			<Property ovf:key="startThreads" ovf:type="int" ovf:userConfigurable="true" ovf:value="50">
+				<Description>Number of threads created on startup.</Description>
+			</Property>
+			<Property ovf:key="minSpareThreads" ovf:type="int" ovf:userConfigurable="true" ovf:value="15">
+				<Description>Minimum number of idle threads to handle request spikes.</Description>
+			</Property>
+			<Property ovf:key="maxSpareThreads" ovf:type="string" ovf:userConfigurable="true" ovf:value="30">
+				<Description>Maximum number of idle threads.</Description>
+			</Property>
+			<Property ovf:key="maxClients" ovf:type="string" ovf:userConfigurable="true" ovf:value="256">
+				<Description>Limit the number of simultaneous requests that will be served.</Description>
+			</Property>
+		</ProductSection>
+		<!--MySQL  component configuration parameters-->
+		<ProductSection ovf:class="org.mysql.db">
+			<Info>Product customization for  the installed MySql Database Server</Info>
+			<Product>MySQL Distribution Z</Product>
+			<Version>5.0</Version>
+			<Property ovf:key="queryCacheSizeMB" ovf:type="int" ovf:userConfigurable="true" ovf:value="32">
+				<Description>Buffer to cache repeated queries for faster access</Description>
+			</Property>
+			<Property ovf:key="maxConnections" ovf:type="int" ovf:userConfigurable="true" ovf:value="500">
+				<Description>The number of concurrent connections that can be served.</Description>
+			</Property>
+			<Property ovf:key="waitTimeout" ovf:type="int" ovf:userConfigurable="true" ovf:value="100">
+				<Description>Number of seconds to wait before timing out a connection .</Description>
+			</Property>
+			<Property ovf:key="waitTimeout" ovf:type="int" ovf:userConfigurable="true" ovf:value="100">
+				<Description>Number of seconds to wait before timing out a connection .</Description>
+			</Property>
+		</ProductSection>
+		<!--PHP component configuration parameters-->
+		<ProductSection ovf:class="net.php">
+			<Info>Product customization for the installed PHP  component</Info>
+			<Product>PHP Distribution U</Product>
+			<Version>5.0</Version>
+			<Property ovf:key="sessionTimeout" ovf:type="int" ovf:userConfigurable="true" ovf:value="5">
+				<Description>How many minutes a session has to be idle before it is timed out.</Description>
+			</Property>
+			<Property ovf:key="concurrentSessions" ovf:type="int" ovf:userConfigurable="true" ovf:value="500">
+				<Description>The number of concurrent sessions that can be served.</Description>
+			</Property>
+			<Property ovf:key="memoryLimit" ovf:type="int" ovf:userConfigurable="true" ovf:value="32">
+				<Description>How much memory in megabytes a script can consume before being killed.</Description>
+			</Property>
+		</ProductSection>
+		<OperatingSystemSection ovf:id="103">
+			<Info>Guest Operating System</Info>
+			<Description>Linux 2.6.x</Description>
+		</OperatingSystemSection>
+		<VirtualHardwareSection>
+			<Info>Virtual Hardware Requirements: 256Mb, 1 CPU, 1 disk, 1 nic</Info>
+			<System>
+				<vssd:ElementName>vmware</vssd:ElementName>
+				<vssd:InstanceID>1</vssd:InstanceID>
+				<vssd:VirtualSystemType>vmx-4</vssd:VirtualSystemType>
+			</System>
+			<Item>
+				<rasd:Caption>1 virtual CPU</rasd:Caption>
+				<rasd:Description>Number of virtual CPUs</rasd:Description>
+				<rasd:ElementName>some virt cpu</rasd:ElementName>
+				<rasd:InstanceID>1</rasd:InstanceID>
+				<rasd:ResourceType>3</rasd:ResourceType>
+				<rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+			</Item>
+			<Item>
+				<rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+				<rasd:Caption>256 MB of memory</rasd:Caption>
+				<rasd:Description>Memory Size</rasd:Description>
+				<rasd:ElementName>some mem size</rasd:ElementName>
+				<rasd:InstanceID>2</rasd:InstanceID>
+				<rasd:ResourceType>4</rasd:ResourceType>
+				<rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+			</Item>
+			<Item>
+				<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+				<rasd:Caption>Ethernet adapter on 'VM Network'</rasd:Caption>
+				<rasd:Connection>VM Network</rasd:Connection>
+				<rasd:ElementName>VM network</rasd:ElementName>
+				<rasd:InstanceID>3</rasd:InstanceID>
+				<rasd:ResourceType>10</rasd:ResourceType>
+			</Item>
+			<Item>
+				<rasd:Caption>SCSI Controller 0 - LSI Logic</rasd:Caption>
+				<rasd:ElementName>LSILOGIC</rasd:ElementName>
+				<rasd:InstanceID>4</rasd:InstanceID>
+				<rasd:ResourceSubType>LsiLogic</rasd:ResourceSubType>
+				<rasd:ResourceType>6</rasd:ResourceType>
+			</Item>
+			<Item>
+				<rasd:Caption>Harddisk 1</rasd:Caption>
+				<rasd:ElementName>Hard disk </rasd:ElementName>
+				<rasd:HostResource>ovf://disk/lamp</rasd:HostResource>
+				<rasd:InstanceID>5</rasd:InstanceID>
+				<rasd:Parent>4</rasd:Parent>
+				<rasd:ResourceType>17</rasd:ResourceType>
+			</Item>
+		</VirtualHardwareSection>
+	</VirtualSystem>
+</Envelope>

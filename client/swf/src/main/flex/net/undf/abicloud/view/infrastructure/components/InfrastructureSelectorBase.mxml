@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:customtree="net.undf.abicloud.utils.customtree.*"
+    xmlns:componentsPM="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <!-- addButton's data provider -->
+    <mx:XMLList id="addButtonDataProvider">
+        <node id="addPhysicalMachine"
+            label="@Resource(bundle='Infrastructure', key='LABEL_PHYSICALMACHINE')"/>
+        <node id="addRack"
+            label="@Resource(bundle='Infrastructure', key='LABEL_RACK')"/>
+    </mx:XMLList>
+
+    <mx:Metadata>
+		[Event(name="addRack", type="flash.events.Event")]
+		[Event(name="addPhysicalMachine", type="flash.events.Event")]
+		[Event(name="editRack", type="flash.events.Event")]
+		[Event(name="editPhysicalMachine", type="flash.events.Event")]
+		
+		[Event(name="infrastructureElementSelected", type="flash.events.Event")]
+		
+		[Event(name="refreshDatacenterResources", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.binding.utils.BindingUtils;
+        	import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+            import net.undf.abicloud.vo.infrastructure.Rack;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import mx.events.CloseEvent;
+            import mx.controls.Alert;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import mx.resources.ResourceBundle;
+            import mx.events.MenuEvent;
+            import net.undf.abicloud.vo.infrastructure.InfrastructureElement;
+            import mx.collections.ArrayCollection;
+
+
+            //ArrayCollection containing the racks that will be shown in the infrastructure tree
+            [Bindable]
+            private var _racks:ArrayCollection;
+            
+            //Associated to the filter text
+			[Bindable]
+			public var searchFilter:String;
+
+            public function get racks():ArrayCollection
+            {
+                return this._racks;
+            }
+
+            public function set racks(value:ArrayCollection):void
+            {
+                this._racks = value;
+            }
+
+            //Selected InfrastructureElement by the User in the Infrastructure Tree
+            [Bindable]
+            private var _selectedInfrastructureElement:InfrastructureElement;
+
+            [Bindable(event="selectedInfrastructureElementChange")]
+            public function get selectedInfrastructureElement():InfrastructureElement
+            {
+                return this._selectedInfrastructureElement;
+            }
+
+            public function set selectedInfrastructureElement(value:InfrastructureElement):void
+            {
+                this._selectedInfrastructureElement = value;
+                dispatchEvent(new Event("selectedInfrastructureElementChange"));
+            }
+
+            //Data descriptor for the Infrastructure Tree
+            [Bindable]
+            private var _infrastructureDataDescriptor:InfrastructureDataDescriptor;
+
+            private function onCreationComplete():void
+            {
+                //Initializing variables that required only to initalize once
+                _infrastructureDataDescriptor = new InfrastructureDataDescriptor();
+                
+                BindingUtils.bindProperty(this,"racks",AbiCloudModel.getInstance().infrastructureManager,"racks");
+                
+                infrastructureTree.addEventListener("selectedItemUpdated",onClickInfrastructureTree)
+                
+                
+            }
+
+            /**
+             * To clean this component
+             */
+            public function init():void
+            {
+                this._racks = null;
+                this._selectedInfrastructureElement = null;
+                infrastructureTree.cleanState();
+                unassignedPMList.closeList();
+            }
+
+            /**
+             * When user clicks to add a new infrastructure element
+             **/
+            protected function onClickAddInfrastructureElement(event:MenuEvent):void
+            {
+                addButton.dataProvider = addButtonDataProvider; //To avoid an annoying graphic problem...
+
+                if (event.item.@id == "addRack")
+                {
+                    //Announcing user wants to create a new Rack
+                    dispatchEvent(new Event("addRack"));
+                }
+                else if (event.item.@id == "addPhysicalMachine")
+                {
+                    //Announcing user wants to create a new PhysicalMachine
+                    dispatchEvent(new Event("addPhysicalMachine"));
+                }
+            }
+
+            /**
+             * When user clicks to delete a infrastructure element, we ask him/her for confirmation
+             **/
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("Infrastructure")]
+            private var rb2:ResourceBundle;
+
+            private function askInfrastructureElementDeletion():void
+            {
+                if (this._selectedInfrastructureElement is Rack)
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_DELETE_RACK_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_DELETE_RACK_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            deleteInfrastructureElement);
+
+                else if (this._selectedInfrastructureElement is PhysicalMachine)
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_DELETE_PHYSICALMACHINE_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_DELETE_PHYSICALMACHINE_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            deleteInfrastructureElement);
+            }
+
+            /**
+             * Calls for infrastructure element deletion, if user has confirmed it
+             **/
+            private function deleteInfrastructureElement(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES && this._selectedInfrastructureElement != null)
+                {
+                    var event:InfrastructureEvent;
+
+                    if (this._selectedInfrastructureElement is Rack)
+                    {
+                        //Announcing that user wants to delete a Rack
+                        event = new InfrastructureEvent(InfrastructureEvent.DELETE_RACK);
+                        event.infrastructureElement = this._selectedInfrastructureElement
+                    }
+
+                    else if (this._selectedInfrastructureElement is PhysicalMachine)
+                    {
+                        //Announcing that user wants to delete a Physical Machine
+                        event = new InfrastructureEvent(InfrastructureEvent.DELETE_PHYSICALMACHINE);
+                        event.infrastructureElement = this._selectedInfrastructureElement;
+                    }
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * When user clicks to edit a infrastructure element
+             **/
+            private function onClickEditInfrastructureElement():void
+            {
+                if (this._selectedInfrastructureElement is Rack)
+                {
+                    //Adding a Pop Up to edit the selected Rack
+                    dispatchEvent(new Event("editRack"));
+                }
+                else if (this._selectedInfrastructureElement is PhysicalMachine)
+                {
+                    //Adding a Pop Up to edit the selected Physical Machine
+                    dispatchEvent(new Event("editPhysicalMachine"));
+                }
+            }
+
+            /**
+             * When  user selects a infrastructure element from the tree
+             * we retrieve the corresponding virtual machines
+             **/
+            private function onClickInfrastructureTree(event:Event = null):void
+            {
+                if (infrastructureTree.selectedIndex > -1){
+                    //Saving the selected Infrastructure Element
+                    selectedInfrastructureElement = infrastructureTree.selectedItem as InfrastructureElement;
+                }else{
+                    selectedInfrastructureElement = null;
+                }
+
+                //Announcing that a InfrastructureElement has been selected
+                dispatchEvent(new Event("infrastructureElementSelected"));
+            }
+
+            private function onClickRefreshDatacenterResourcesButton():void
+            {
+                dispatchEvent(new Event("refreshDatacenterResources"));
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:VBox 
+        width="100%"
+        top="0" bottom="31"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalGap="0">
+
+        <!-- Display Racks, and for each rack its Physical Machines -->
+        <customtree:CustomTree id="infrastructureTree"
+            width="100%" height="100%"
+            borderStyle="none"
+            styleName="ListFull" labelField="name"
+            saveState="true"
+            searchFilter="{searchFilter}"
+            selectedElement="{selectedInfrastructureElement}"
+            customTreeDataDescriptor="{this._infrastructureDataDescriptor}"
+            customTreeDataProvider="{this._racks}"
+            customTreeNodeRenderer="net.undf.abicloud.view.infrastructure.components.InfrastructureNodeRenderer"
+            click="onClickInfrastructureTree()"/>
+             <!--customTreeDataProvider="{this._racks}"
+             	 customTreeDataProvider="{AbiCloudModel.getInstance().infrastructureManager.racks}"-->
+
+        <!--As we don't use it right now, we don't show the component-->
+        <componentsPM:PhysicalMachineList id="unassignedPMList"
+            width="100%"
+            visible="false"
+            includeInLayout="false"/>
+    </mx:VBox>
+
+
+    <!-- Tool Bar -->
+    <general:GeneralSubPanelToolBox bottom="0">
+        <mx:PopUpMenuButton id="addButton"
+            width="40" height="22"
+            styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
+            label="" labelField="@label"
+            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+            itemClick="onClickAddInfrastructureElement(event)"
+            closeDuration="0"/>
+
+        <mx:Button id="deleteButton"
+            enabled="{this._selectedInfrastructureElement != null}"
+            styleName="RemoveButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+            click="askInfrastructureElementDeletion()"/>
+
+        <mx:Spacer width="100%"/>
+
+        <mx:Button id="refreshDatacenterResourcesButton"
+            styleName="RefreshButtonBig"
+            toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REFRESH_DATACENTER_RESOURCES')"
+            click="onClickRefreshDatacenterResourcesButton()"/>
+
+        <mx:Button id="editButton"
+            enabled="{this._selectedInfrastructureElement != null}"
+            styleName="ConfigurationButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+            click="onClickEditInfrastructureElement()"/>
+    </general:GeneralSubPanelToolBox>
+
+</mx:Canvas>

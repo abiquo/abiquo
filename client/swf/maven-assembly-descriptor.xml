@@ -1,0 +1,22 @@
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>target</directory>
+                <outputDirectory>/</outputDirectory>
+                <includes>
+                    <include>*.html</include>
+                    <include>*.swf</include>
+                    <include>*.js</include>
+                    <include>assets/**</include>
+                    <include>config/**</include>
+                    <include>properJavaRDP/**</include>
+                    <include>tightvnc/**</include>
+                    <include>javascriptsupport/**</include>
+                </includes>
+            </fileSet>
+    </fileSets>
+</assembly>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    resizeEffect="{myResize}"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_NODE_FORM')">
+
+
+    <mx:Script>
+        <![CDATA[
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.view.networking.virtualmachine.NetworkManagement;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.virtualappliance.Node;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+            //The NodeVirtualImage to be configured
+            [Bindable]
+            private var _node:NodeVirtualImage;
+
+            //Flag indicating if any kind of edition is allowed for this Node
+            //This attribute must be propagated to any component inside of NodeManagementBase, that allows any
+            //kind of modification related to the Node
+            protected var _isEditionAllowed:Boolean = false;
+
+            //The VirtualDataCenter where the VirtualAppliance to which the Node belongs, is
+            private var _virtualDataCenter:VirtualDataCenter;
+
+            //The VirtualAppliance to which this Node belong
+            private var _virtualAppliance:VirtualAppliance;
+
+            //Component to manage the Network of a VirtualMachine
+            private var vmNetworkManagement:NetworkManagement;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Creating components
+                vmNetworkManagement = new NetworkManagement();
+                toggledContainer.addContent(vmNetworkManagement, ResourceManager.getInstance().getString("Networking",
+                                                                                                         "LABEL_NETWORK"));
+            }
+
+            /**
+             * Initializes this component to manage a Node
+             */
+            public function init(virtualDataCenter:VirtualDataCenter, virtualAppliance:VirtualAppliance,
+                                 node:NodeVirtualImage):void
+            {
+                toggledContainer.selectedIndex = 0;
+                this._virtualDataCenter = virtualDataCenter;
+                this._virtualAppliance = virtualAppliance;
+                this._node = node;
+
+                //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_DEPLOYED or POWERED_OFF
+                var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
+                if (nodeVirtualImage.virtualMachine && nodeVirtualImage.virtualMachine.state.id == State.NOT_DEPLOYED)
+                {
+                    this._isEditionAllowed = true
+                }
+                else
+                {
+                    this._isEditionAllowed = false;
+                }
+
+                //Initializing the NodeNetworkManagement component
+                vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter);
+            }
+
+            public function get node():Node
+            {
+                return this._node;
+            }
+
+            public function get virtualDataCenter():VirtualDataCenter
+            {
+                return this._virtualDataCenter;
+            }
+
+            private function onClickButtonClose():void
+            {
+                dispatchEvent(new Event("NodeFormClose"));
+            }
+
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                toggledContainer.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                toggledContainer.visible = true;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Resize id="myResize"
+        duration="800"
+        heightTo="{toggledContainer.viewStack.selectedChild.explicitHeight}"
+        widthTo="{toggledContainer.viewStack.selectedChild.explicitWidth}"
+        tweenStart="onResizeEffectStart()"
+        tweenUpdate="onResizeEffectUpdate()"
+        tweenEnd="onResizeEffectEnd()"/>
+
+    <GeneralToggledContainer id="toggledContainer"
+        width="100%" height="100%"/>
+
+    <mx:Button id="closeButton"
+        height="18"
+        label="@Resource(bundle='Common', key='BUTTON_CLOSE')"
+        styleName="AlternativeButton"
+        click="onClickButtonClose()"/>
+
+    <mx:Spacer height="5"/>
+</AbiCloudPopUp>

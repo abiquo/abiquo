@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xs:schema
+    targetNamespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:class="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:import namespace="http://schemas.dmtf.org/wbem/wscim/1/common"
+        schemaLocation="cim-common.xsd"/>
+    <xs:element name="Caption" nillable="true" type="cim:cimString"/>
+    <xs:element name="Description" nillable="true" type="cim:cimString"/>
+    <xs:element name="InstanceId" nillable="true" type="cim:cimString"/>
+    <xs:element name="VirtualSystemIdentifier" nillable="true" type="cim:cimString"/>
+    <xs:element name="VirtualSystemType" nillable="true" type="cim:cimString"/>
+    <xs:complexType name="CIM_VirtualSystemSettingData_Type">
+        <xs:sequence>
+             <xs:element ref="class:Caption" minOccurs="0" maxOccurs="unbounded"/>
+             <xs:element ref="class:Description" minOccurs="0" maxOccurs="unbounded"/>
+             <xs:element ref="class:InstanceId" minOccurs="0"/>
+             <xs:element ref="class:VirtualSystemIdentifier" minOccurs="0"/>
+             <xs:element ref="class:VirtualSystemType" minOccurs="0"/>
+             <xs:any namespace="##other" processContents="lax" minOccurs="0"
+                 maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute namespace="##any"/>
+    </xs:complexType>
+    <xs:element name="CIM_VirtualSystemSettingData"
+        type="class:CIM_VirtualSystemSettingData_Type"/>
+</xs:schema>

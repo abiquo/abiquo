@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_VIRTUALAPPLIANCE_BUNDLE_FORM')">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.binding.utils.ChangeWatcher;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.vo.virtualappliance.Node;
+            import mx.collections.Sort;
+            import mx.events.MenuEvent;
+            import mx.resources.ResourceManager;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.resources.ResourceBundle;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import mx.collections.ArrayCollection;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb2:ResourceBundle;
+
+            //The VirtualAppliance from which bundles will be created
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+
+            //The data provider for the nodesToBundleList
+            [Bindable]
+            private var _nodeListDP:ArrayCollection = new ArrayCollection();
+
+            [Bindable]
+            private var _numNodesToBundle:int = 0;
+
+            private var _virtualApplianceNodesWatcher:ChangeWatcher;
+
+            /**
+             * When this component initializes for the first time
+             */
+            private function onInitialize():void
+            {
+                //Registering events from the NodeListItems
+                addEventListener(NodeListItemEvent.NODE_LIST_ITEM_SELECTED_TO_BUNDLE,
+                                 onNodeListItemSelectedToBundle);
+                addEventListener(NodeListItemEvent.NODE_LIST_ITEM_UNSELECTED_TO_BUNDLE,
+                                 onNodeListItemUnselectedToBundle);
+            }
+
+            /**
+             * Handler called when a NodeListItem is selected to bundle
+             */
+            private function onNodeListItemSelectedToBundle(event:NodeListItemEvent):void
+            {
+                this._numNodesToBundle++;
+
+                if (this._numNodesToBundle == this._nodeListDP.length)
+                    bundleAllCheckbox.selected = true;
+            }
+
+            /**
+             * Handler called when a NodeListItem is unselected to bundle (so it was selected before)
+             */
+            private function onNodeListItemUnselectedToBundle(event:NodeListItemEvent):void
+            {
+                this._numNodesToBundle--;
+
+                bundleAllCheckbox.selected = false;
+            }
+
+            /**
+             * Initializes this component with a VirtualAppliance
+             * Creates the DataProvider using the Virtual Appliance nodes, to be used
+             * by user to select which nodes wants to bundle
+             */
+            public function init(virtualAppliance:VirtualAppliance):void
+            {
+                this._virtualAppliance = virtualAppliance;
+
+                bundleAllCheckbox.selected = false;
+                
+                this._numNodesToBundle = 0;
+
+                this._nodeListDP.removeAll();
+                if (this._virtualAppliance.nodes)
+                {
+                    var nodeListItem:NodeListItem;
+                    var length:int = this._virtualAppliance.nodes.length;
+                    var i:int;
+                    for (i = 0; i < length; i++)
+                    {
+                        nodeListItem = new NodeListItem(this._virtualAppliance.nodes.getItemAt(i) as Node);
+
+                        this._nodeListDP.addItem(nodeListItem);
+                    }
+                }
+
+                this._virtualApplianceNodesWatcher = ChangeWatcher.watch(this._virtualAppliance,
+                                                                         "nodes",
+                                                                         onVirtualApplianceNodesChange);
+            }
+
+            /**
+             * Updates our NodeListItem with the updated nodes list from the VirtualAppliance
+             */
+            private function onVirtualApplianceNodesChange(event:Event = null):void
+            {
+                var nodeListItem:NodeListItem;
+                var newNodeListDP:ArrayCollection = new ArrayCollection();
+                var length:int = this._virtualAppliance.nodes.length;
+                var i:int;
+                this._numNodesToBundle = 0;
+                for (i = 0; i < length; i++)
+                {
+                    nodeListItem = new NodeListItem(this._virtualAppliance.nodes.getItemAt(i) as Node);
+                    nodeListItem.selectedToBundle = isNodeListItemSelectedToBundle(nodeListItem);
+                    if (nodeListItem.selectedToBundle)
+                        this._numNodesToBundle++;
+
+                    newNodeListDP.addItem(nodeListItem);
+                }
+
+                this._nodeListDP = newNodeListDP;
+            }
+
+            private function isNodeListItemSelectedToBundle(nodeListItem:NodeListItem):Boolean
+            {
+                var length:int = this._nodeListDP.length;
+                var i:int;
+                for (i = 0; i < length; i++)
+                {
+                    if (NodeListItem(this._nodeListDP.getItemAt(i)).node.id == nodeListItem.node.id)
+                        return NodeListItem(this._nodeListDP.getItemAt(i)).selectedToBundle;
+                }
+
+                //NodeListItem not found
+                return false;
+            }
+
+            /**
+             * Marks or unmarks all VirtualAppliances nodes to bw bundled
+             */
+            private function markUnmarkAllNodesToBundle():void
+            {
+                var length:int = this._nodeListDP.length;
+                var i:int;
+                this._numNodesToBundle = 0;
+
+                if (bundleAllCheckbox.selected)
+                {
+                    //Selecting all nodes to be bundled (if bundleable)
+                    for (i = 0; i < length; i++)
+                    {
+                        if (NodeListItem(this._nodeListDP.getItemAt(i)).canBundle)
+                        {
+                            NodeListItem(this._nodeListDP.getItemAt(i)).selectedToBundle = true;
+                            this._numNodesToBundle++;
+                        }
+                    }
+                }
+                else
+                {
+                    //Unselecting all nodes to bundle
+                    for (i = 0; i < length; i++)
+                    {
+                        NodeListItem(this._nodeListDP.getItemAt(i)).selectedToBundle = false;
+                    }
+
+                }
+            }
+
+
+            private function askBundleConfirmation():void
+            {
+               	/* ABICLOUDPREMIUM-652 -> Not used anymore */
+               /*  if (updateVirtualApplianceWithBundlesCheckbox.selected)
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CREATE_BUNDLE_AND_UPDATE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CREATE_BUNDLE_AND_UPDATE_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            askBundleConfirmationResponse);
+                }
+                else
+                { */
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_CREATE_BUNDLE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_CREATE_BUNDLE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        askBundleConfirmationResponse);
+
+            }
+
+            private function askBundleConfirmationResponse(event:CloseEvent):void
+            {
+                if (event.detail == Alert.YES)
+                {
+                    if (this._virtualAppliance.state.id == State.IN_PROGRESS)
+                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_UNABLE_CREATE_BUNDLE_VA_PROGRESS_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_UNABLE_CREATE_BUNDLE_VA_PROGRESS_TEXT"),
+                                                Alert.OK,
+                                                null);
+                    else
+                        createBundle();
+
+                }
+            }
+
+            /**
+             * Announces that user wants to create the bundle from the selected Nodes
+             */
+            private function createBundle():void
+            {
+                if (this._virtualApplianceNodesWatcher && this._virtualApplianceNodesWatcher.isWatching())
+                    this._virtualApplianceNodesWatcher.unwatch();
+
+                var virtualApplianceEvent:VirtualApplianceEvent;
+
+                var nodesToBundle:ArrayCollection = new ArrayCollection();
+                var length:int = this._nodeListDP.length;
+                var i:int;
+                for (i = 0; i < length; i++)
+                {
+                    if (NodeListItem(this._nodeListDP.getItemAt(i)).selectedToBundle)
+                        nodesToBundle.addItem(NodeListItem(this._nodeListDP.getItemAt(i)).node);
+                }
+
+                /* ABICLOUDPREMIUM-652 -> Not used anymore */
+                /* if (updateVirtualApplianceWithBundlesCheckbox.selected)
+                {
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CREATE_VIRTUAL_APPLIANCE_BUNDLE_AND_UPDATE);
+                }
+                else
+                { */
+                
+                virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CREATE_VIRTUAL_APPLIANCE_BUNDLE);
+                
+
+                virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
+                virtualApplianceEvent.nodes = nodesToBundle;
+                dispatchEvent(virtualApplianceEvent);
+
+                //Closing this component
+                close();
+            }
+
+            /**
+             * Announces that user wants to close this component
+             */
+            private function close():void
+            {
+                if (this._virtualApplianceNodesWatcher && this._virtualApplianceNodesWatcher.isWatching())
+                    this._virtualApplianceNodesWatcher.unwatch();
+
+                dispatchEvent(new Event("VirtualApplianceBundleFormClose"));
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%"
+        horizontalGap="0"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0">
+        <mx:Spacer width="100%"/>
+
+        <mx:CheckBox id="bundleAllCheckbox"
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_BUNDLE_ALL')"
+            change="markUnmarkAllNodesToBundle()"/>
+    </mx:HBox>
+
+    <mx:List id="nodeList"
+        width="350" height="400"
+        selectable="false" dataProvider="{this._nodeListDP}"
+        itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualappliance.bundle.NodeListRenderer"/>
+
+   	<!--ABICLOUDPREMIUM-652 -> Not used anymore-->
+   <!-- <mx:CheckBox id="updateVirtualApplianceWithBundlesCheckbox"
+        width="100%"
+        label="@Resource(bundle='VirtualAppliance', key='LABEL_UPDATE_VIRTUAL_APPLIANCE_WITH_BUNDLES')"/>-->
+
+    <!-- Close and Bundle button -->
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center"
+        paddingBottom="10"
+        paddingTop="15">
+
+        <mx:Button id="bundleButton"
+            height="18"
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_BUNDLE')"
+            enabled="{this._numNodesToBundle > 0}"
+            click="askBundleConfirmation()"/>
+
+        <mx:Button id="closeButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CLOSE')"
+            styleName="AlternativeButton"
+            click="close()"/>
+
+    </mx:HBox>
+</AbiCloudPopUp>

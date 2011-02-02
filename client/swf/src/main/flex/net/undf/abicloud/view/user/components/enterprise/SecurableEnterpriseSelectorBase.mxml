@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="net.undf.abicloud.security.ISecurableComponent"
+    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Metadata>
+		[Event(name="selectedEnterpriseChange", type="flash.events.Event")]
+	</mx:Metadata>
+
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.binding.utils.BindingUtils;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.events.MenuEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.IResourceManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.business.managers.LoginManager;
+            import net.undf.abicloud.events.UserEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.security.SecurableResource;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.result.ListRequest;
+            import net.undf.abicloud.vo.user.Enterprise;
+            import net.undf.abicloud.vo.user.User;
+
+
+
+            ////////////////////////////////////////////////////
+            // SECURIZATION
+
+            //Securable Resources of this Securable Component
+            private var _securableResource:SecurableResource;
+
+            public function defineSecurableResources():void
+            {
+                _securableResource = new SecurableResource("CRUD_ENTERPRISE", "USER");
+            }
+
+            public function checkSecurableResources():void
+            {
+                if (!_securableResource || !_securableResource.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
+                {
+                    makeUnavailable();
+                }
+                else
+                {
+                    //User is authorized to perform CRUD operations over an Enterprise. Nothing to do...
+                }
+            }
+
+            public function makeUnavailable():void
+            {
+                //If user is not authorized, we hide buttons for creating, updating or deleting an enterprise
+                enterpriseToolBar.removeChild(addEnterpriseButton);
+                addEnterpriseButton = null;
+//                enterpriseToolBar.removeChild(editEnterpriseButton);
+//                editEnterpriseButton = null;
+                enterpriseToolBar.removeChild(deleteEnterpriseButton);
+                deleteEnterpriseButton = null;
+            }
+
+            ////////////////////////////////////////////////////
+
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("User")]
+            private var rb2:ResourceBundle;
+
+            [Bindable]
+            //Data provider for the enterprises edit button
+            protected var editEnterpriseButtonDP:Array = [ { id: 'editEnterprise', label: ResourceManager.getInstance().getString('Common',
+                                                                                                                                  'BUTTON_EDIT') } ];
+
+            private function onCreationComplete():void
+            {
+                //Secure this component
+                defineSecurableResources();
+                checkSecurableResources();
+
+
+                //Listening for changes in model related to enterprises
+                BindingUtils.bindSetter(enterprisesUpdated, AbiCloudModel.getInstance().userManager,
+                                        "enterprises");
+                AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.ENTERPRISE_DELETED,
+                                                                         onEnterpriseDeleted);
+            }
+
+            public function init():void
+            {
+                enterprisesList.selectedIndex = -1;
+                selectedEnterprise = null;
+                this._enterprisesCurrentPage = 0;
+                enterprisesFilter.text = "";
+                enterprisesPaginatorSlider.value = 1;
+
+                //Requesting the list of enterprises
+                requestEnterprises();
+            }
+
+            //Enterprises list that will be shown
+            [Bindable]
+            private var _enterprises:ArrayCollection;
+
+            //The currently selected Enterprise
+            [Bindable]
+            private var _selectedEnterprise:Enterprise;
+
+            [Bindable(event="selectedEnterpriseChange")]
+            public function get selectedEnterprise():Enterprise
+            {
+                return this._selectedEnterprise;
+            }
+
+            public function set selectedEnterprise(value:Enterprise):void
+            {
+                this._selectedEnterprise = value;
+                dispatchEvent(new Event("selectedEnterpriseChange"));
+            }
+
+            /**
+             * Request the list of users, building the appropriate options
+             **/
+            private function requestEnterprises():void
+            {
+                var listRequest:ListRequest = new ListRequest();
+                listRequest.offset = this._enterprisesCurrentPage * ENTERPRISES_RESULTS_PER_PAGE;
+                listRequest.numberOfNodes = ENTERPRISES_RESULTS_PER_PAGE;
+                listRequest.filterLike = enterprisesFilter.text;
+
+                var event:UserEvent = new UserEvent(UserEvent.GET_ENTERPRISES);
+                event.listRequest = listRequest;
+                dispatchEvent(event);
+            }
+
+            /**
+             * Handler to manage when new enterprises are available in the model
+             */
+            private function enterprisesUpdated(value:ArrayCollection):void
+            {
+                this._enterprises = value;
+            }
+
+            /**
+             * Handler called when an Enterprise has been deleted
+             */
+            private function onEnterpriseDeleted(userEvent:UserEvent):void
+            {
+                selectedEnterprise = null;
+            }
+
+            private function onClickAllEnterprisesLabel():void
+            {
+                enterprisesList.selectedIndex = -1;
+                selectedEnterprise = null;
+
+                //Cleaning filter
+                enterprisesFilter.text = "";
+
+                //Going to first page
+                this._enterprisesCurrentPage = 0;
+                enterprisesPaginatorSlider.value = 1;
+
+                //Requesting the list of enterprises filtered
+                requestEnterprises();
+            }
+
+            /**
+             * When user selects an enterprise in the Enterprises list
+             */
+            private function onClickEnterprisesList():void
+            {
+                if (enterprisesList.selectedIndex > -1)
+                    selectedEnterprise = enterprisesList.selectedItem as Enterprise;
+                else
+                    selectedEnterprise = null;
+            }
+
+
+            /////////////////////////////////////////////
+            //TOOL BOX
+
+            //not used anymore
+            private var _enterpriseEditForm:EnterpriseFormManagement;
+
+            /**
+             * When user wants to create a new Enterprise
+             */
+            private function onClickAddEnterprise():void
+            {
+                this._enterpriseEditForm = new EnterpriseFormManagement();
+                this._enterpriseEditForm.addEventListener("EnterpriseFormClose", closeEnterpriseForm);
+                
+                PopUpManager.addPopUp(this._enterpriseEditForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._enterpriseEditForm);
+
+                this._enterpriseEditForm.init(new Enterprise());
+                this._enterpriseEditForm.titleText = ResourceManager.getInstance().getString("User",
+                                                                                "POPUP_TITLE_ENTERPRISE_ADD");
+            }
+
+            /**
+             * Ask for user confirmation to delete an enterprise
+             */
+            private function askEnterpriseDeletion():void
+            {
+                if (_selectedEnterprise.id == AbiCloudModel.getInstance().loginManager.user.enterprise.id)
+                {
+                    //Unable to delete the own enterprise
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_OWN_ENTERPRISE_HEADER"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_OWN_ENTERPRISE_TEXT"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_ENTERPRISE_HEADER"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_ENTERPRISE_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            deleteEnterprise);
+                }
+            }
+
+            /**
+             * Deletes an enterprise if user has confirmed it
+             */
+            private function deleteEnterprise(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var userEvent:UserEvent = new UserEvent(UserEvent.DELETE_ENTERPRISE);
+                    userEvent.enterprise = this._selectedEnterprise;
+                    dispatchEvent(userEvent);
+                }
+            }
+
+            /**
+             * When user clicks on Enterprise edit button
+             */
+            public function onClickEditEnterpriseButton(event:MouseEvent):void
+            {
+
+                if (this._selectedEnterprise)
+                {
+                    //editEnterpriseButton.dataProvider = editEnterpriseButton.dataProvider; //To avoid an annoying graphic problem...
+
+                    //Edit an Enterprise
+                    editEnterprise();
+                    
+                    //Not used anymore
+                    /* if (event.item.id == "editEnterprise")
+                    {
+                        //Edit an Enterprise
+                        editEnterprise();
+                    } */
+                }
+            }
+
+            /**
+             * To edit an enterprise
+             */
+            private function editEnterprise():void
+            {
+                //not used anymore
+                /* PopUpManager.addPopUp(this._enterpriseForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._enterpriseForm);
+
+                this._enterpriseForm.init(this._selectedEnterprise); */
+                this._enterpriseEditForm = new EnterpriseFormManagement();
+                this._enterpriseEditForm.addEventListener("EnterpriseFormClose", closeEnterpriseForm);
+                
+                PopUpManager.addPopUp(this._enterpriseEditForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._enterpriseEditForm);
+
+                this._enterpriseEditForm.init(this._selectedEnterprise);
+                this._enterpriseEditForm.titleText = ResourceManager.getInstance().getString("User",
+                                                                                "POPUP_TITLE_ENTERPRISE_EDIT");
+            }
+
+            private function closeEnterpriseForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this._enterpriseEditForm);
+            }
+
+            /////////////////////////////////////////
+            //FILTERING & PAGINATION
+
+            //Needed variables for enterprise's pagination
+            private var _enterprisesCurrentPage:int;
+
+            private const ENTERPRISES_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberEnterprisesPerPage.value;
+
+            private var _isEnterprisesPaginatorMouseDown:Boolean = false;
+
+            private function onMouseDownEnterprisesPaginatorSlider():void
+            {
+                this._isEnterprisesPaginatorMouseDown = true;
+                Application.application.addEventListener(MouseEvent.MOUSE_UP, onMouseUpEnterprisesPaginatorSlider);
+            }
+
+            private function onMouseUpEnterprisesPaginatorSlider(mouseEvent:MouseEvent):void
+            {
+                this._isEnterprisesPaginatorMouseDown = false;
+                Application.application.removeEventListener(MouseEvent.MOUSE_UP,
+                                                            onMouseUpEnterprisesPaginatorSlider);
+                onChangeEnterprisesPaginator();
+            }
+
+            private function onChangeEnterprisesPaginator():void
+            {
+                if (!this._isEnterprisesPaginatorMouseDown && (this._enterprisesCurrentPage != enterprisesPaginatorSlider.value - 1))
+                {
+                    this._enterprisesCurrentPage = enterprisesPaginatorSlider.value - 1;
+                    requestEnterprises();
+                }
+            }
+
+            private function onKeyDownEnterprisesFilter(event:KeyboardEvent):void
+            {
+                //If user presses the Enter key, we launch the filter
+                if (event.keyCode == 13)
+                    onClickEnterprisesFilter();
+            }
+
+            /**
+             * Filters the users list, searching for a pattern in any field
+             **/
+            private function onClickEnterprisesFilter():void
+            {
+                //Going to first page
+                this._enterprisesCurrentPage = 0;
+                enterprisesPaginatorSlider.value = 1;
+
+                //Requesting the list of users filtered
+                requestEnterprises();
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%" height="32"
+        top="0"
+        horizontalGap="2"
+        paddingLeft="10"
+        paddingRight="10"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopSkin">
+
+        <mx:Image 
+        	id="securableEnterpriseSelectorBaseMagnifier"
+      	creationComplete="AbicloudUtils.getImageFromStyle('SecurableEnterpriseSelectorBaseMagnifier', securableEnterpriseSelectorBaseMagnifier)"
+            useHandCursor="true"
+            buttonMode="true"
+            mouseChildren="false"
+            click="onClickEnterprisesFilter()"/>
+
+        <mx:TextInput id="enterprisesFilter"
+            width="100%" height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            keyDown="onKeyDownEnterprisesFilter(event)"/>
+    </mx:HBox>
+
+    <mx:HBox 
+        width="100%" height="23"
+        top="32"
+        horizontalGap="2"
+        paddingLeft="5"
+        paddingRight="10"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopSkin"
+        buttonMode="true"
+        useHandCursor="true"
+        mouseChildren="false"
+        click="onClickAllEnterprisesLabel()">
+        <mx:Label id="allEnterprisesLabel"
+            verticalCenter="0"
+            maxWidth="160" text="@Resource(bundle='User', key='LABEL_ALL')"/>
+    </mx:HBox>
+
+
+    <!-- Enterprises list -->
+    <mx:List id="enterprisesList"
+        width="100%"
+        top="55" bottom="31"
+        borderStyle="none"
+        dataProvider="{this._enterprises}"
+        click="onClickEnterprisesList()"
+        itemRenderer="net.undf.abicloud.view.user.components.enterprise.EnterpriseListRenderer"/>
+
+    <!-- Enterprises Tool Bar -->
+    <general:GeneralPanelToolBox id="enterpriseToolBar"
+        width="100%" height="32"
+        bottom="0">
+
+        <mx:Button id="addEnterpriseButton"
+            styleName="AddButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+            click="onClickAddEnterprise()"/>
+
+        <mx:Button id="deleteEnterpriseButton"
+            enabled="{enterprisesList.selectedIndex > -1}"
+            styleName="RemoveButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+            click="askEnterpriseDeletion()"/>
+
+        <mx:Canvas 
+            width="100%" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:Label 
+                top="2"
+                horizontalCenter="0"
+                styleName="paginatorTextOnColor"
+                text="{enterprisesPaginatorSlider.value +
+					  ' / ' + 
+					  (int(Math.ceil(AbiCloudModel.getInstance().userManager.totalEnterprises / ENTERPRISES_RESULTS_PER_PAGE)) > 0 ?
+					  int(Math.ceil(AbiCloudModel.getInstance().userManager.totalEnterprises / ENTERPRISES_RESULTS_PER_PAGE)) : '1')}"/>
+
+            <mx:HSlider id="enterprisesPaginatorSlider"
+                width="75"
+                bottom="3"
+                horizontalCenter="0"
+                minimum="1" snapInterval="1"
+                maximum="{int(Math.ceil(AbiCloudModel.getInstance().userManager.totalEnterprises / ENTERPRISES_RESULTS_PER_PAGE))}"
+                liveDragging="true" showDataTip="false"
+                change="onChangeEnterprisesPaginator()"
+                mouseDown="onMouseDownEnterprisesPaginatorSlider()"/>
+        </mx:Canvas>
+
+        <!--As we group all edit functionalities, we only need one button-->
+        <!--<mx:PopUpMenuButton id="editEnterpriseButton"
+            width="40" height="22"
+            styleName="ConfigurationButtonPlus"
+            dataProvider="{editEnterpriseButtonDP}" label="" showRoot="false"
+            labelField="label" enabled="{this._selectedEnterprise != null}"
+            itemClick="onClickEditEnterpriseButton(event)"
+            closeDuration="0"/>-->
+        <mx:Button id="editEnterpriseButton"
+            styleName="ConfigurationButton"
+            label=""
+            enabled="{this._selectedEnterprise != null}"
+            click="onClickEditEnterpriseButton(event)"/>
+    </general:GeneralPanelToolBox>
+
+</mx:Canvas>

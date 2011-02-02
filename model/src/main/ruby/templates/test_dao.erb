@@ -1,0 +1,79 @@
+package <%= @package %>;
+
+import javax.persistence.EntityManager;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
+import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
+import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+
+public class <%= @class %>DAOTest extends DefaultDAOTestBase<<%= @class %>DAO, <%= @class %>>
+{
+
+    @BeforeMethod
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+        // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
+    }
+
+    @Override
+    protected <%= @class %>DAO createDao(EntityManager entityManager)
+    {
+        return new <%= @class%>DAO(entityManager);
+    }
+
+    @Override
+    protected PersistentInstanceTester<<%= @class %>> createEntityInstanceGenerator()
+    {
+        return new <%= @class%>Generator(getSeed());
+    }
+
+    @Override
+    protected EntityManagerFactoryForTesting getFactory()
+    {
+        return TestDataAccessManager.getFactory();
+    }
+
+    @Override
+    public <%= @class %>Generator eg()
+    {
+        return (<%= @class %>Generator) super.eg();
+    }
+
+    <% @unique_properties.each do |unique| %>
+    @Test
+    public void test_existsAnyWith<%= unique %>()
+    {
+        Assert.assertFalse(createDaoForRollbackTransaction().existsAnyWith<%= unique %>("INEXISTENT_PROPERTY"));
+
+        <%= @class %> entity = createUniqueEntity();
+        entity.set<%= unique %>("A property");
+        ds().persistAll(entity);
+
+        Assert.assertTrue(createDaoForRollbackTransaction().existsAnyWith<%= unique %>("A property"));
+    }
+
+    @Test
+    public void test_existsAnyOtherWith<%= unique %>()
+    {
+        <%= @class %> entity = createUniqueEntity();
+        entity.set<%= unique %>("A property");
+        <%= @class %> entity2 = createUniqueEntity();
+        entity2.set<%= unique%>("Property 2");
+        ds().persistAll(entity, entity2);
+
+        <%= @class %>DAO dao = createDaoForRollbackTransaction();
+        entity = dao.findById(entity.getId());
+        Assert.assertFalse(dao.existsAnyOtherWith<%= unique %>(entity, "INEXISTENT_PROPERTY"));
+        Assert.assertFalse(dao.existsAnyOtherWith<%= unique %>(entity, "A property"));
+        Assert.assertTrue(dao.existsAnyOtherWith<%= unique %>(entity, "Property 2"));
+    }
+    <% end %>
+}

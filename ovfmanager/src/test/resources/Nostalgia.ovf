@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope"
+	xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+	xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ovf:version="0.9">
+	<References>
+		<File ovf:href="Nostalgia-0.vmdk" ovf:id="file1" ovf:size="6680576" />
+	</References>
+	<Section xsi:type="ovf:NetworkSection_Type">
+		<Info>List of networks</Info>
+		<Network ovf:name="Network 1">
+			<Description>The "Network 1" network</Description>
+		</Network>
+	</Section>
+	<Section xsi:type="ovf:DiskSection_Type">
+		<Info>List of Virtual Disks</Info>
+		<Disk ovf:capacity="107374080" ovf:diskId="disk1" ovf:fileRef="file1"
+			ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse"
+			ovf:populatedSize="11141120" />
+	</Section>
+	<Content ovf:id="Nostalgia" xsi:type="ovf:VirtualSystem_Type">
+		<Info>A virtual machine</Info>
+		<Section ovf:required="false" xsi:type="ovf:AnnotationSection_Type">
+			<Info>An annotation</Info>
+			<Annotation>Nostalgia contains a great collection of ancient
+				DOS Games, ready to play!
+
+				Now you can begin to waste your time once again.</Annotation>
+		</Section>
+		<Section ovf:id="14" ovf:required="false"
+			xsi:type="ovf:OperatingSystemSection_Type">
+			<Info>Guest Operating System</Info>
+			<Description>MSDOS</Description>
+		</Section>
+		<Section xsi:type="ovf:VirtualHardwareSection_Type">
+			<Info>1 CPU, 64 memory</Info>
+			<System>
+				<vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+			</System>
+			<Item>
+				<rasd:Caption>1 virtual CPUs</rasd:Caption>
+				<rasd:Description>Number of virtual CPUs</rasd:Description>
+				<rasd:InstanceId>1</rasd:InstanceId>
+				<rasd:ResourceType>3</rasd:ResourceType>
+				<rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+			</Item>
+			<Item>
+				<rasd:Caption>64 MB of memory</rasd:Caption>
+				<rasd:Description>Memory Size</rasd:Description>
+				<rasd:InstanceId>2</rasd:InstanceId>
+				<rasd:ResourceType>4</rasd:ResourceType>
+				<rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+				<rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+			</Item>
+			<Item>
+				<rasd:Caption>SCSI Controller 0</rasd:Caption>
+				<rasd:InstanceId>10</rasd:InstanceId>
+				<rasd:ResourceType>6</rasd:ResourceType>
+				<rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+				<rasd:BusNumber>0</rasd:BusNumber>
+			</Item>
+			<Item ovf:required="false">
+				<rasd:Caption>CDROM 0</rasd:Caption>
+				<rasd:InstanceId>9</rasd:InstanceId>
+				<rasd:ResourceType>15</rasd:ResourceType>
+				<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+				<rasd:Parent>8</rasd:Parent>
+				<rasd:AddressOnParent>0</rasd:AddressOnParent>
+			</Item>
+			<Item>
+				<rasd:Caption>Harddisk 0</rasd:Caption>
+				<rasd:InstanceId>11</rasd:InstanceId>
+				<rasd:ResourceType>17</rasd:ResourceType>
+				<rasd:HostResource>/disk/disk1</rasd:HostResource>
+				<rasd:Parent>10</rasd:Parent>
+				<rasd:AddressOnParent>0</rasd:AddressOnParent>
+			</Item>
+			<Item>
+				<rasd:Caption>IDE Controller 1</rasd:Caption>
+				<rasd:InstanceId>8</rasd:InstanceId>
+				<rasd:ResourceType>5</rasd:ResourceType>
+				<rasd:BusNumber>1</rasd:BusNumber>
+			</Item>
+			<Item>
+				<rasd:Caption>Ethernet adapter on "Network 1"</rasd:Caption>
+				<rasd:InstanceId>7</rasd:InstanceId>
+				<rasd:ResourceType>10</rasd:ResourceType>
+				<rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+				<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+				<rasd:Connection>Network 1</rasd:Connection>
+				<rasd:AddressOnParent>1</rasd:AddressOnParent>
+			</Item>
+		</Section>
+	</Content>
+</ovf:Envelope>

@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Application 
+    width="100%" height="100%"
+    backgroundColor="#000000"
+    layout="absolute"
+    initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:model="net.undf.abicloud.model.*"
+    xmlns:controller="net.undf.abicloud.controller.*"
+    xmlns:controllerInfr="net.undf.abicloud.controller.infrastructure.*"
+    xmlns:controllerLogin="net.undf.abicloud.controller.login.*"
+    xmlns:controllerVirtualAppliance="net.undf.abicloud.controller.virtualappliance.*"
+    xmlns:controllerVirtualImage="net.undf.abicloud.controller.virtualimage.*"
+    xmlns:controllerUser="net.undf.abicloud.controller.user.*"
+    xmlns:controllerNetworking="net.undf.abicloud.controller.networking.*"
+    xmlns:controllerMetering="net.undf.abicloud.controller.metering.*"
+    xmlns:controllerConfiguration="net.undf.abicloud.controller.configuration.*"
+    xmlns:controllerSystemProperties="net.undf.abicloud.controller.systemProperties.*"
+    preloader="net.undf.abicloud.utils.CustomPreloader">
+    
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.ScreenBlocker;
+        	import net.undf.abicloud.events.SystemPropertiesEvent;
+        	import net.undf.abicloud.business.managers.ConfigurationManager;
+        	import net.undf.abicloud.controller.theme.ThemeDescriptor;
+        	import net.undf.abicloud.view.main.StateIcons;
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import net.undf.abicloud.view.main.components.RepeatedBackground;
+        	import net.undf.abicloud.events.ThemeEvent;
+        	import net.undf.abicloud.controller.ThemeHandler;
+        	import net.undf.abicloud.business.managers.LoginManager;
+        	import mx.messaging.ChannelSet;
+        	import com.adobe.crypto.MD5;
+        	import net.undf.abicloud.events.LoginEvent;
+        	import mx.utils.URLUtil;
+        	import mx.managers.IBrowserManager;
+        	import mx.managers.BrowserManager;
+            import mx.binding.utils.BindingUtils;
+            import mx.binding.utils.ChangeWatcher;
+            import mx.controls.Alert;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.login.Login;
+            import net.undf.abicloud.view.main.Main;
+            import net.undf.abicloud.events.LoginEvent;
+            import net.undf.abicloud.vo.authentication.Login
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            //The Login view
+            protected var loginView:net.undf.abicloud.view.login.Login;
+
+            //The Main view, visible once user has logged in
+            protected var mainView:Main;
+
+            private var _serverConnectionTesterSocket:Socket;
+
+            private var _serverConnectionTesterTimer:Timer; 
+
+			public var themeComplete:Boolean = false;
+			public var userLogged:Boolean = false;
+			
+			public var inited:Boolean = false;
+			
+            private function onInitialize():void
+            {
+				trace(net.undf.abicloud.view.main.components.RepeatedBackground);
+				
+//            	ThemeHandler.getInstance().addEventListener("onFontLoaded", onFontLoaded);
+            	
+//            	ThemeHandler.getInstance().changeSystemFont("arialComplete");
+				onFontLoaded(null);
+            }
+            
+            public function onFontLoaded(evt:Event):void{
+            	
+            	trace(" [AbiCloud] font loaded ");
+            	//when the font is loaded load the theme
+    	        ThemeHandler.getInstance().addEventListener(ThemeEvent.THEME_LOADED, onThemeBaseLoaded);
+    	        
+    	        var td:ThemeDescriptor = new ThemeDescriptor();
+    	        td.themeName = "base";
+    	        td.themePath = "themes/base";
+
+				ThemeHandler.getInstance().loadTheme( td );
+				            	
+                //Creating Socket and Timer to test server connection
+                this._serverConnectionTesterSocket = new Socket();
+                this._serverConnectionTesterSocket.addEventListener(Event.CONNECT,
+                                                                    onConnectServerConnectionTesterSocket);
+                this._serverConnectionTesterSocket.addEventListener(SecurityErrorEvent.SECURITY_ERROR,
+                                                                    onSecurityErrorTesterSocket);
+                this._serverConnectionTesterSocket.addEventListener(IOErrorEvent.IO_ERROR,
+                                                                    onErrorServerConnectionTesterSocket);
+
+                this._serverConnectionTesterTimer = new Timer(5000);
+                this._serverConnectionTesterTimer.addEventListener(TimerEvent.TIMER,
+                                                                   onServerConnectionTesterTimerComplete);
+            }
+            
+            private function onThemeBaseLoaded(evt:ThemeEvent):void{
+            	ThemeHandler.getInstance().removeEventListener(ThemeEvent.THEME_LOADED, onThemeBaseLoaded);
+            	
+            	if( ThemeHandler.getInstance().isThemeLoaded("base") ){
+            		cursorManager.removeBusyCursor();
+            		
+            		prepareToShowLogin();
+
+	                application.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+	
+	                //We need to know when the user has logged in or logged out from the application
+	                BindingUtils.bindSetter(trackUserLogged, AbiCloudModel.getInstance().loginManager,
+	                                        "userLogged");
+	                //Detect when the channel for services is defined
+               		BindingUtils.bindSetter(trackChannel, AbiCloudModel.getInstance().configurationManager,
+                                        "channelSet");
+
+					
+            		
+            	}
+            }
+
+			public function onThemeLoaded(evt:ThemeEvent):void{
+	                //Watching for when server is unreachable
+	                ChangeWatcher.watch(AbiCloudModel.getInstance().notificationManager, "isServerUnreachable", onServerIsUnreachable);
+
+					themeComplete = true;
+					ThemeHandler.getInstance().refreshImages();
+
+
+	        		StateIcons.refresh();
+	        		CommonAssets.refresh();
+	        		ThemeHandler.getInstance().refreshImages();
+
+					startMainView();
+            		Application.application.cursorManager.removeBusyCursor();
+            		ScreenBlocker.unblockScreen();
+            }
+            
+            public function startMainView():void{
+                appContainer.removeAllChildren();
+                appContainer.styleName = "ApplicationPostLoginBackground";
+                appContainer.addChild(mainView);
+            	
+                mainView.initMain();
+                loadStartUpAlert();
+            }
+            
+            //When the channel is defined, we check for the automaticLoggin
+            private function trackChannel(channel:ChannelSet):void{
+            	//when the channel is set
+            	//we call the autoLogin
+            	 
+            	if(channel){
+            		//We need to know when the user has logged in or logged out from the application
+                	BindingUtils.bindSetter(trackUserLogged, AbiCloudModel.getInstance().loginManager,
+                                        "userLogged"); 
+            		checkSingleSignOn();
+            	}
+            }
+
+            private function onCreationComplete():void
+            {
+                //Retrieving the App version from the html file
+                AbiCloudModel.getInstance().appVersion = ExternalInterface.call("getAppShowVersion");
+                
+                AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showLoginform);
+            }
+
+            /**
+             * Handler to define standard application behaivor when user uses the keyboard
+             **/
+            private function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.keyCode == 13)
+                {
+                    //When users presses the Enter key, it is like a click
+                    keyboardEvent.target.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+                }
+            }
+
+            /**
+             * Handler to catch when the user makes logout
+             **/
+            public function trackUserLogged(logged:Boolean):void
+            {
+            	if(logged != userLogged){
+            		userLogged = logged;
+            	}
+ 
+                if (logged){
+                	//GaB.Changed workflow to load first the systemproperties 
+//                	loadMainView();
+
+                // Load the System properties from server
+                	AbiCloudModel.getInstance().configurationManager.addEventListener("systemPropertiesLoaded", onSystemPropertiesLoaded);
+                	
+                	dispatchEvent(new SystemPropertiesEvent(SystemPropertiesEvent.GET_SYSTEM_PROPERTIES));
+                	
+                }else if( logged == false){
+//                	prepareToShowLogin();
+                }
+            }
+
+            public function onSystemPropertiesLoaded(evt:Event):void{
+            	loadMainView();
+            }
+
+            public function loadMainView():void{
+                if(!inited){
+                	inited=true;
+					loadMainTheme(AbiCloudModel.getInstance().configurationManager.config.defaultTheme);
+                }
+            }
+            
+            public function loadMainTheme(theme:String):void{
+            	ThemeHandler.getInstance().addEventListener(ThemeEvent.THEME_LOADED, onThemeLoaded);
+  				//load the theme
+    	        var td:ThemeDescriptor = new ThemeDescriptor();
+    	        td.themeName = theme;
+    	        td.themePath = "themes/" + theme;
+
+				ThemeHandler.getInstance().loadTheme(td);
+            }
+            
+            
+			private function prepareToShowLogin():void{
+                //Creating Login component
+                loginView = new net.undf.abicloud.view.login.Login();
+                
+                loginView.setStyle("verticalCenter", 0);
+                loginView.setStyle("horizontalCenter", 0);
+                appContainer.styleName = "ApplicationLoginBackground";
+
+                //Creating the Main component
+                mainView = new Main();
+
+                appContainer.removeAllChildren();
+                appContainer.styleName = "ApplicationLoginBackground";
+
+                appContainer.addChild(loginView);
+                loginView.init();
+            }
+            
+            private function checkSingleSignOn():void{ 
+       	
+				var urlString:String = ExternalInterface.call('window.location.href.toString');
+				var parameters:Array = urlString.split("?");
+				
+				//we save the current URL, for the logout process
+				AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
+				
+				
+				//the separator exists
+				if(parameters.length != 1){
+					var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
+		            var token:String = parameterList.auth;
+		            var language:String = parameterList.lang;         
+				}
+            	//we check if the selected language is passed in the URL
+            	if(language){          		
+            		AbiCloudModel.getInstance().configurationManager.config.selectedLanguage = loginView.returnLanguage(language);
+            	}
+            	//if the token exists, we try an automatic loggin
+            	if(token){
+            		singleSignOnlogin(token);
+            	}else{
+            		showLoginform();
+            	}
+            	
+            }
+            
+            private function showLoginform(event:Event = null):void{
+            	if(!appContainer.contains(loginView)){
+            		appContainer.addChild(loginView);
+                	loginView.init();
+                	if( AbiCloudModel.getInstance().configurationManager.config.selectedLanguage != -1){
+                		loginView.languageCombo.selectedIndex = AbiCloudModel.getInstance().configurationManager.config.selectedLanguage;
+                		loginView.onChangeLanguage();
+                	}
+            	}            	
+            }
+            
+            /**
+             * Starts singleSignOn login process
+             **/
+            private function singleSignOnlogin(token:String):void
+            {
+            	var loginInfo:net.undf.abicloud.vo.authentication.Login = new net.undf.abicloud.vo.authentication.Login();
+				loginInfo.authToken = token;
+				//loginInfo.authToken.writeUTFBytes(token);	            
+	            loginInfo.locale = ResourceManager.getInstance().localeChain[0];
+	
+	            var event:LoginEvent = new LoginEvent(LoginEvent.LOGIN);
+	            event.login = loginInfo;
+	            dispatchEvent(event); 
+            }
+
+            private function loadStartUpAlert():void
+            {
+                if (AbiCloudModel.getInstance().configurationManager.config.client_dashboard_showStartUpAlert.value == 1)
+                {
+                    //Loading the text file
+                    var loader:URLLoader = new URLLoader();
+                    loader.addEventListener(Event.COMPLETE, loadAlertFileCompleteHandler);
+                    loader.addEventListener(IOErrorEvent.IO_ERROR, loadAlertFileIOErrorHandler);
+                    loader.load(new URLRequest("config/Startup_Alert.txt"));
+                }
+            }
+
+            private function loadAlertFileCompleteHandler(event:Event):void
+            {
+                //Showing the text included in the file
+                AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
+                                                                                       "ALERT_TITLE_LABEL"),
+                                               ResourceManager.getInstance().getString("Common",
+                                                                                       "LABEL_WELCOME"),
+                                               URLLoader(event.currentTarget).data.toString(),
+                                               Alert.OK,
+                                               null);
+            }
+
+            private function loadAlertFileIOErrorHandler(ioErrorEvent:IOErrorEvent):void
+            {
+                //Startup_Alert.txt file not found. Well, it could be worse, couldn't it?
+            }
+
+            ///////////////////////////
+            //Server connection tester
+
+            /**
+             * Called when NotificationManager class announces that server
+             * reachability has changed
+             */
+            private function onServerIsUnreachable(event:Event):void
+            {
+                if (AbiCloudModel.getInstance().notificationManager.isServerUnreachable)
+                {
+                    //Starting timer to test server reachability
+                    this._serverConnectionTesterTimer.start();
+                }
+            }
+
+            /**
+             * Everytime delay's Timer has reached
+             */
+            private function onServerConnectionTesterTimerComplete(timerEvent:TimerEvent):void
+            {
+                //Testing server connection
+                testServerConnection();
+            }
+
+            /**
+             * Called when server connection has succeed
+             */
+            private function onConnectServerConnectionTesterSocket(event:Event):void
+            {
+                this._serverConnectionTesterTimer.stop();
+                this._serverConnectionTesterSocket.close();
+
+                AbiCloudModel.getInstance().notificationManager.isServerUnreachable = false;
+            }
+
+            private function onSecurityErrorTesterSocket(securityError:SecurityError):void
+            {
+                trace(securityError.toString());
+            }
+
+            /**
+             * Called when server connection failed
+             */
+            private function onErrorServerConnectionTesterSocket(ioErrorEvent:IOErrorEvent):void
+            {
+                trace(ioErrorEvent.toString());
+            }
+
+            /**
+             * Test server connection opening a simple socket socket
+             */
+            private function testServerConnection():void
+            {
+                this._serverConnectionTesterSocket.connect(AbiCloudModel.getInstance().configurationManager.config['SERVER_ADDRESS'],
+                                                           AbiCloudModel.getInstance().configurationManager.config.client_infra_defaultHypervisorPort.value);
+            }
+            
+			public function changeToArial_click(evt:MouseEvent):void{
+				ThemeHandler.getInstance().changeSystemFont("arialComplete");
+				
+			}
+
+			public function changeToJapanese_click(evt:MouseEvent):void{
+					ThemeHandler.getInstance().changeSystemFont("Japanese");
+			}
+            
+
+        ]]>
+    </mx:Script>
+
+    <!-- Event Maps that handle communications between model, view and controller -->
+    <controller:MainEventMap/>
+    <controllerInfr:InfrastructureEventMap/>
+    <controllerLogin:LoginEventMap/>
+    <controllerVirtualAppliance:VirtualApplianceEventMap/>
+    <controllerVirtualImage:VirtualImageEventMap/>
+    <controllerVirtualImage:OVFPackageEventMap/>
+    <controllerUser:UserEventMap/>
+    <controllerNetworking:NetworkingEventMap/>
+    <controllerMetering:MeteringEventMap/>
+    <controllerConfiguration:ConfigurationEventMap/>
+    <controllerSystemProperties:SystemPropertiesEventMap/>
+
+    <!-- Application's container, that contains all the views -->
+    <mx:Canvas id="appContainer"
+        width="100%" height="100%"/>
+        
+    <!-- temporary debug     
+    <mx:Button label="LATIN" id="changeToArial_btn" click="changeToArial_click(event)" top="30" left="0"/>
+	<mx:Button label="JAP" id="changeToJapanese_btn" click="changeToJapanese_click(event)" top="60" left="0"/>
+	<mx:Label styleName="miTestLabel" text="???"  top="90" left="0"/>
+	-->
+	
+</mx:Application>

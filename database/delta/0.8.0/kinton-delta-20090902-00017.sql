@@ -1,0 +1,1 @@
+update `kinton`.`physicalmachine` set `cpuRatio` = 2 where `idPhysicalMachine`= 1;

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="350" height="75"
+    backgroundAlpha="0"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.model.AbiCloudModel;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.Node;
+
+            //The node to be renderer (it is encapsulated inside an ObjectProxy
+            [Bindable]
+            protected var _nodeListItem:NodeListItem;
+
+            [Bindable]
+            private var _nodeIcon:String = "";
+
+            [Bindable]
+            private var _nodeName:String = "";
+
+            [Bindable]
+            private var _nodeSize:Number = 0;
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+
+                this._nodeIcon = "";
+                this._nodeName = "";
+                this._nodeSize = 0;
+                this._nodeListItem = null;
+
+                //Setting fields to display
+                if (data is NodeListItem)
+                {
+                    this._nodeListItem = data as NodeListItem;
+                    this._nodeName = this._nodeListItem.node.name;
+
+                    if (this._nodeListItem.node is NodeVirtualImage)
+                    {
+                        this._nodeIcon = (NodeVirtualImage(this._nodeListItem.node).virtualImage.icon) ? NodeVirtualImage(this._nodeListItem.node).virtualImage.icon.path : null;
+                        this._nodeSize = NodeVirtualImage(this._nodeListItem.node).virtualImage.hdRequired;
+                    }
+                }
+            }
+
+            private function onSelectedToBundleCheckboxChange():void
+            {
+                var nodeListItemEvent:NodeListItemEvent;
+                if (selectedToBundleCheckbox.selected)
+                {
+                    this._nodeListItem.selectedToBundle = true;
+                    nodeListItemEvent = new NodeListItemEvent(NodeListItemEvent.NODE_LIST_ITEM_SELECTED_TO_BUNDLE,
+                                                              true);
+                }
+                else
+                {
+                    this._nodeListItem.selectedToBundle = false;
+                    nodeListItemEvent = new NodeListItemEvent(NodeListItemEvent.NODE_LIST_ITEM_UNSELECTED_TO_BUNDLE,
+                                                              true);
+                }
+
+                dispatchEvent(nodeListItemEvent);
+
+            }
+        ]]>
+    </mx:Script>
+
+    <utils:ImageDefault id="nodeIcon"
+        width="65"
+        left="5" top="5" bottom="5"
+        source="{this._nodeIcon}"
+        scaleContent="true"
+        defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
+
+    <mx:Label id="nameLabel"
+        left="80" top="5"
+        fontSize="12"
+        fontWeight="bold"
+        maxWidth="200" text="{this._nodeName}" truncateToFit="true"
+        toolTip="{this._nodeName}"/>
+
+    <mx:Label id="sizeLabel"
+        left="80" top="22"
+        fontSize="12"
+        maxWidth="200"
+        text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_SIZE') + ': ' + (this._nodeSize / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + ' GB'}"
+        truncateToFit="true" toolTip="{this._nodeName}"/>
+
+    <mx:CheckBox id="selectedToBundleCheckbox"
+        right="5" top="5"
+        selected="{this._nodeListItem.selectedToBundle}"
+        enabled="{this._nodeListItem.canBundle}"
+        toolTip="{this._nodeListItem.canBundle ? '' : ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NODE_NOT_BUNDLEABLE')}"
+        change="onSelectedToBundleCheckboxChange()"/>
+
+    <mx:HRule 
+        width="100%"
+        bottom="0"/>
+</mx:Canvas>

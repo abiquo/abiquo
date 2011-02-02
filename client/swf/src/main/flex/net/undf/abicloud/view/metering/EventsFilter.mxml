@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Metadata>
+		[Event(name="filterChange", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.events.MeteringEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import mx.resources.ResourceManager;
+
+
+            private function onInitialize():void
+            {
+                //Requesting the list of Severity Types and Event Typs
+                var meteringEvent:MeteringEvent = new MeteringEvent(MeteringEvent.GET_EVENT_TYPES);
+                dispatchEvent(meteringEvent);
+
+                var meteringEvent2:MeteringEvent = new MeteringEvent(MeteringEvent.GET_SEVERITY_TYPES);
+                dispatchEvent(meteringEvent2);
+            }
+
+            /**
+             * An object that contains the filter params
+             */
+            private var _filter:Object = new Object();
+
+            [Bindable(event="filterChange")]
+            public function get filter():Object
+            {
+                return this._filter;
+            }
+
+            /**
+             * Sets the filter Object depending on the filled fields
+             */
+            private function getEventsFiltered():void
+            {
+                //Building the filter Object
+                this._filter = new Object();
+
+                if (datacenterInput.text.length > 0)
+                    filter["datacenter"] = datacenterInput.text;
+
+                if (rackInput.text.length > 0)
+                    filter["rack"] = rackInput.text;
+
+                if (physicalMachineInput.text.length > 0)
+                    filter["physicalmachine"] = physicalMachineInput.text;
+
+                if (storageSystemInput.text.length > 0)
+                    filter["storagesystem"] = storageSystemInput.text;
+
+                if (storagePoolInput.text.length > 0)
+                    filter["storagepool"] = storagePoolInput.text;
+
+                if (volumeInput.text.length > 0)
+                    filter["volume"] = volumeInput.text;
+
+                if (networkInput.text.length > 0)
+                    filter["network"] = networkInput.text;
+
+                if (subNetworkInput.text.length > 0)
+                    filter["subnet"] = subNetworkInput.text;
+
+                if (virtualDatacenterInput.text.length > 0)
+                    filter["virtualdatacenter"] = virtualDatacenterInput.text;
+
+                if (virtualApplianceInput.text.length > 0)
+                    filter["virtualapp"] = virtualApplianceInput.text;
+
+                if (virtualMachineInput.text.length > 0)
+                    filter["virtualmachine"] = virtualMachineInput.text;
+
+                if (enterpriseInput.text.length > 0)
+                    filter["enterprise"] = enterpriseInput.text;
+
+                if (userInput.text.length > 0)
+                    filter["user"] = userInput.text;
+				
+				/* if (traceInput.text.length > 0)
+					filter["trace"] = traceInput.text; */
+				
+                if (severityInput.selectedIndex > -1)
+                    filter["severity"] = severityInput.selectedItem.toString();
+
+                if (actionInput.selectedIndex > -1)
+                    filter["actionperformed"] = actionInput.selectedItem.toString();
+                ;
+
+                if (componentInput.text.length > 0)
+                    filter["component"] = componentInput.text;
+
+                if (dateFromInput.selectedDate)
+                    filter["datefrom"] = (dateFromInput.selectedDate.getTime() / 1000).toString();
+
+                if (dateToInput.selectedDate)
+                    filter["dateto"] = (dateToInput.selectedDate.getTime() / 1000).toString();
+
+                //Notifying that the filter object has been updated
+                dispatchEvent(new Event("filterChange"));
+            }
+
+            /**
+             * Clean all filter fields
+             */
+            private function cleanFilter():void
+            {
+                datacenterInput.text = "";
+                rackInput.text = "";
+                physicalMachineInput.text = "";
+
+                storageSystemInput.text = "";
+                storagePoolInput.text = "";
+                volumeInput.text = "";
+
+                networkInput.text = "";
+                subNetworkInput.text = "";
+
+                virtualDatacenterInput.text = "";
+                virtualApplianceInput.text = "";
+                virtualMachineInput.text = "";
+
+                enterpriseInput.text = "";
+                userInput.text = "";
+                
+                //traceInput.text = "";
+
+                severityInput.selectedIndex = -1;
+                actionInput.selectedIndex = -1;
+                componentInput.text = "";
+
+                dateFromInput.selectedDate = null;
+                dateToInput.selectedDate = null;
+                maxResultsInput.value = 100;
+
+                this._filter = new Object();
+                dispatchEvent(new Event("filterChange"));
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- Events Filter -->
+    <mx:Canvas 
+        width="100%" height="100%"
+        horizontalScrollPolicy="off" styleName="GeneralDataPanelTopSkin">
+
+
+        <mx:Form 
+            width="100%"
+            paddingLeft="5"
+            paddingRight="25"
+            paddingTop="10"
+            
+            horizontalScrollPolicy="off">
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_DATACENTER')">
+                <mx:TextInput id="datacenterInput"
+                    width="100%" height="20"
+                    maxChars="20"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_RACK')">
+                <mx:TextInput id="rackInput"
+                    width="100%" height="20"
+                    maxChars="20"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_PHYSICAL_MACHINE')">
+                <mx:TextInput id="physicalMachineInput"
+                    width="100%" height="20"
+                    maxChars="30"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_STORAGE_SYSTEM')">
+                <mx:TextInput id="storageSystemInput"
+                    width="100%" height="20"
+                    maxChars="256"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_STORAGE_POOL')">
+                <mx:TextInput id="storagePoolInput"
+                    width="100%" height="20"
+                    maxChars="256"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_VOLUME')">
+                <mx:TextInput id="volumeInput"
+                    width="100%" height="20"
+                    maxChars="256"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_NETWORK')">
+                <mx:TextInput id="networkInput"
+                    width="100%" height="20"
+                    maxChars="256"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_SUB_NETWORK')">
+                <mx:TextInput id="subNetworkInput"
+                    width="100%" height="20"
+                    maxChars="256"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_VIRTUAL_DATACENTER')">
+                <mx:TextInput id="virtualDatacenterInput"
+                    width="100%" height="20"
+                    maxChars="40"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_VIRTUAL_APPLIANCE')">
+                <mx:TextInput id="virtualApplianceInput"
+                    width="100%" height="20"
+                    maxChars="30"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_VIRTUAL_MACHINE')">
+                <mx:TextInput id="virtualMachineInput"
+                    width="100%" height="20"
+                    maxChars="100"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_ENTERPRISE')">
+                <mx:TextInput id="enterpriseInput"
+                    width="100%" height="20"
+                    maxChars="40"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_USER')">
+                <mx:TextInput id="userInput"
+                    width="100%" height="20"
+                    maxChars="20"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+            
+            <!--Disable the trace field due to performance problem during the search-->
+            <!--<mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_TRACE')">
+                <mx:TextInput id="traceInput"
+                    width="100%" height="20"
+                    maxChars="20"/>
+            </mx:FormItem>-->
+            
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                horizontalGap="1"
+                paddingLeft="0"
+                label="@Resource(bundle='Metering', key='LABEL_SEVERITY')"
+                direction="horizontal">
+                <mx:ComboBox id="severityInput"
+                    width="100%" height="18"
+                    dataProvider="{AbiCloudModel.getInstance().meteringManager.severityTypes}"
+                    prompt="@Resource(bundle='Metering', key='COMBOBOX_PROMPT_SEVERITY')"/>
+
+                <mx:Button 
+                    styleName="DeleteButton"
+                    click="severityInput.selectedIndex=-1"
+                    visible="{severityInput.selectedIndex > -1}"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                horizontalGap="1"
+                paddingLeft="0"
+                label="@Resource(bundle='Metering', key='LABEL_ACTION')"
+                direction="horizontal">
+                <mx:ComboBox id="actionInput"
+                    height="18"
+                    maxWidth="165"
+                    dataProvider="{AbiCloudModel.getInstance().meteringManager.eventTypes}"
+                    prompt="@Resource(bundle='Metering', key='COMBOBOX_PROMPT_ACTION')"/>
+
+                <mx:Button 
+                    styleName="DeleteButton"
+                    click="actionInput.selectedIndex=-1"
+                    visible="{actionInput.selectedIndex > -1}"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_COMPONENT')">
+                <mx:TextInput id="componentInput"
+                    width="100%" height="20"
+                    maxChars="255"/>
+            </mx:FormItem>
+
+            <mx:Spacer height="10"/>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_DATE')"
+                direction="vertical">
+
+                <mx:HBox width="100%">
+                    <mx:Label text="@Resource(bundle='Metering', key='LABEL_FROM')"/>
+
+                    <mx:DateField id="dateFromInput"
+                        width="100%" height="20"
+                        monthNames="{ResourceManager.getInstance().getString('Main', 'MONTHS_NAMES').split(',')}"
+                        dayNames="{ResourceManager.getInstance().getString('Main', 'DAY_NAMES').split(',')}"
+                        firstDayOfWeek="1" showToday="false"
+                        selectableRange="{dateToInput.selectedDate ? {rangeEnd : dateToInput.selectedDate} : {rangeEnd : new Date()}}"
+                        formatString="DD/MM/YYYY"/>
+
+                    <mx:Button 
+                        styleName="DeleteButton"
+                        click="dateFromInput.selectedDate=null"
+                        visible="{dateFromInput.selectedDate != null}"/>
+                </mx:HBox>
+
+                <mx:HBox width="100%">
+                    <mx:Label text="@Resource(bundle='Metering', key='LABEL_TO')"/>
+
+                    <mx:DateField id="dateToInput"
+                        width="100%" height="20"
+                        monthNames="{ResourceManager.getInstance().getString('Main', 'MONTHS_NAMES').split(',')}"
+                        dayNames="{ResourceManager.getInstance().getString('Main', 'DAY_NAMES').split(',')}"
+                        firstDayOfWeek="1" showToday="false"
+                        selectableRange="{dateFromInput.selectedDate ? {rangeStart : dateFromInput.selectedDate, rangeEnd : new Date()} : {rangeEnd : new Date()}}"
+                        formatString="DD/MM/YYYY"/>
+
+                    <mx:Button 
+                        styleName="DeleteButton"
+                        click="dateToInput.selectedDate=null"
+                        visible="{dateToInput.selectedDate != null}"/>
+                </mx:HBox>
+
+            </mx:FormItem>
+
+            <mx:FormItem 
+                width="100%"
+                label="@Resource(bundle='Metering', key='LABEL_MAX_RESULTS')">
+                <mx:NumericStepper id="maxResultsInput"
+                    height="20"
+                    minimum="1" maximum="500" stepSize="10" value="100"/>
+            </mx:FormItem>
+        </mx:Form>
+    </mx:Canvas>
+
+    <!-- Tool Bar -->
+    <mx:HBox 
+        width="100%" height="32"
+        bottom="0"
+        paddingLeft="6"
+        paddingRight="6"
+        verticalAlign="middle"
+        styleName="GeneralPanelBottomSkin">
+
+        <mx:Button id="filterButton"
+            styleName="AddButton"
+            toolTip="@Resource(bundle='Metering', key='LABEL_GET_RESULTS')"
+            click="getEventsFiltered()"/>
+
+        <mx:Button id="deleteButton"
+            styleName="RemoveButton"
+            toolTip="@Resource(bundle='Metering', key='LABEL_CLEAN')"
+            click="cleanFilter()"/>
+
+    </mx:HBox>
+</mx:VBox>

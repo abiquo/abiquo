@@ -1,0 +1,9 @@
+Rendering test:
+
+username $username
+password $password
+name $name
+lastname $lastname
+language $lang
+
+Hello World!

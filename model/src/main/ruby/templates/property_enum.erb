@@ -1,0 +1,16 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static boolean <%= @upcase %>_REQUIRED = true;
+private final static String <%= @upcase %>_COLUMN = "<%= @property %>";
+
+@Enumerated(value=javax.persistence.EnumType.STRING)
+@Column( name=<%= @upcase %>_COLUMN, nullable= !<%= @upcase %>_REQUIRED)
+private <%= @type %> <%= @property %>;
+
+@Required( value= <%= @upcase %>_REQUIRED )
+public <%= @type %> get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( <%= @type %> <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

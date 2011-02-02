@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<xs:schema targetNamespace="http://schemas.xmlsoap.org/ws/2004/09/transfer" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://schemas.xmlsoap.org/ws/2004/09/transfer" elementFormDefault="qualified" blockDefault="#all">
+	<xs:import namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing" schemaLocation="addressing.xsd"/>
+	<xs:complexType name="AnyXmlType">
+		<xs:sequence>
+			<xs:any namespace="##other" processContents="lax"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="AnyXmlOptionalType">
+		<xs:sequence>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CreateResponseType">
+		<xs:sequence>
+			<xs:element ref="tns:ResourceCreated"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ResourceCreated" type="wsa:EndpointReferenceType"/>
+	<xs:element name="AnyXmlOptional" type="tns:AnyXmlOptionalType"/>
+	<xs:element name="AnyXml" type="tns:AnyXmlType"/>
+</xs:schema>

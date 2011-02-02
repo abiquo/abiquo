@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.events.FlexEvent;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.view.general.GeneralToggledContainer;
+            import net.undf.abicloud.view.infrastructure.components.Infrastructure;
+            import net.undf.abicloud.view.networking.datacenter.NetworkManagement;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+
+            //This component will manage the infrastructure associated with this data center
+            [Bindable]
+            protected var _dataCenter:DataCenter;
+
+            //Where all Infrastructure subcomponents will be placed
+            protected var _generalToggledContainer:GeneralToggledContainer;
+
+            //Component to manage the physical infrastructure (Racks, Physical Machines...)
+            private var _infrastructure:Infrastructure;
+
+            //Component to manage the Network of this Datacenter
+            private var networkManagement:NetworkManagement;
+
+            /////////////////////////////////////
+            //IBodyComponentChildren implementation (in progress...)
+
+            public function cleanView():void
+            {
+                //We clean the view each time this component is shown
+                _generalToggledContainer.selectedIndex = 0;
+
+                this._infrastructure.cleanView();
+                networkManagement.init();
+            }
+
+
+            public function willShow():void
+            {
+                this._infrastructure.dataCenter = this._dataCenter;
+                this._infrastructure.willShow();
+            }
+
+            public function willHide():void
+            {
+                this._infrastructure.willHide();
+            }
+
+            /////////// END IBodyComponentChildren implementation ////////////////
+
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Creating the ToggledContainer component, to place
+                //infrastructure subcomponents
+                this._generalToggledContainer = new GeneralToggledContainer();
+                this._generalToggledContainer.setStyle("top", 25);
+                this._generalToggledContainer.setStyle("left", 0);
+                this._generalToggledContainer.percentWidth = 100;
+                this._generalToggledContainer.percentHeight = 100;
+                addChild(this._generalToggledContainer);
+
+                //Creating the Infrastructure component, to manage physical infrastructure
+                this._infrastructure = new Infrastructure();
+                this._generalToggledContainer.addContent(this._infrastructure, ResourceManager.getInstance().getString("Infrastructure",
+                                                                                                                       "LABEL_INFRASTRUCTURE"));
+
+                //Creating the NetworkManagement component
+                networkManagement = new NetworkManagement();
+                networkManagement.addEventListener(FlexEvent.SHOW, onShowNetworkManagement);
+                _generalToggledContainer.addContent(networkManagement, ResourceManager.getInstance().getString("Networking",
+                                                                                                               "LABEL_NETWORK"));
+            }
+
+            /**
+             * Sets the Data Center, to manage its infrastructure
+             **/
+            public function set dataCenter(value:DataCenter):void
+            {
+                this._dataCenter = value;
+            }
+
+            private function onShowNetworkManagement(flexEvent:FlexEvent):void
+            {
+                networkManagement.datacenter = _dataCenter;
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- Label showing the current Datacenters name -->
+    <mx:Label id="datacenterName"
+        left="0" top="0"
+        fontSize="14"
+        fontWeight="bold"
+        text="{this._dataCenter.name}"/>
+
+</mx:Canvas>

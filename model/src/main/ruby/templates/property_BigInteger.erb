@@ -1,0 +1,16 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static String <%= @upcase %>_COLUMN = "<%= @property %>";
+private final static int <%= @upcase %>_MIN = Integer.MIN_VALUE;
+private final static int <%= @upcase %>_MAX = Integer.MAX_VALUE;
+
+@Column( name=<%= @upcase %>_COLUMN, nullable= true)
+@Range(min=<%= @upcase %>_MIN, max=<%= @upcase %>_MAX)
+private BigInteger <%= @property %>;
+
+public BigInteger get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( BigInteger <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

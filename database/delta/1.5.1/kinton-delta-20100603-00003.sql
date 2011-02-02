@@ -1,0 +1,2 @@
+--  a fully qualified domain name (FQDN) is 255 octets - where any one label can be 63 octets long at most (RFC 2181)
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `name` VARCHAR(256)  NOT NULL; 

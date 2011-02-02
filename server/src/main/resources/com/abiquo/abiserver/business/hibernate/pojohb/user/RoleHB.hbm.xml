@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="kinton" lazy="false" name="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" table="role">
+    <id name="idRole" type="java.lang.Integer">
+      <column name="idRole"/>
+      <generator class="identity"/>
+    </id>
+    <property name="shortDescription" type="string">
+      <column length="20" name="shortDescription" not-null="true"/>
+    </property>
+    <property name="largeDescription" type="string">
+      <column length="100" name="largeDescription"/>
+    </property>
+    <property name="securityLevel" type="big_decimal">
+      <column name="securityLevel" not-null="true" precision="1"/>
+    </property>
+    
+    <property name="type" type="RoleType"/>
+  </class>
+  
+	<query name="GET_ROLE_BY_SHORT_DESC">
+	    from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB
+	    where shortDescription like :shortDescription
+  	</query>
+  
+  
+</hibernate-mapping>

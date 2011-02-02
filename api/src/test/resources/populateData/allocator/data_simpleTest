@@ -1,0 +1,45 @@
+# test
+test.name=simple test
+test.description=a very simple test
+
+# infrastructure
+dc1
+dc1.r1:2,1002,2,10,[3;4] #minVlan, maxVlna, vlanxvdcexpected, NRSQ, vlansIdAvoided
+dc1.r1.m1:XEN_3,20,100,4000
+
+# virtual infrastructure
+e1
+e2
+e1.vi1:dc1,1,1,2
+e1.vi2:dc1,1,1,2
+e1.vi3:dc1,1,1,2
+e1.vdc1:dc1,XEN_3
+vlan1:vdc1,r1
+e1.vdc1.va1
+e1.vdc1.va2
+e1.vdc1.va3
+e1.vdc1.va1.vm1:vi1,vnic1,vlan1
+e1.vdc1.va2.vm2:vi2,vnic1,vlan1
+e1.vdc1.va3.vm3:vi2,vnic1,vlan1
+
+# limit definition
+limit.e1#:cpu[100,200];ram[10,20]
+limit.dc1.e1 # allows datacenter dc1 for enterprise e1
+limit.vdc1:vlan[10,20] 
+
+# rule definition 
+
+rule.fit.default:PROGRESSIVE # XXXXXXXXX 
+rule.fit.dc1:PERFORMANCE 
+rule.exclusion.e1:e2
+#NOT IMPLEMENTED rule.reserved:e1:m1
+rule.load.m1:100,100
+rule.load.r1:100,100
+rule.load.dc1:100,100
+
+# actions and expected results
+     
+action.allocate.vm1=m1
+action.allocate.vm2=m1
+action.allocate.vm3=m1
+#action.deallocate.vm1

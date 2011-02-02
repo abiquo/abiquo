@@ -1,0 +1,1 @@
+update `kinton`.`resource_allocation_limit` set `ramSoft` = 0 , `cpuSoft` = 0 , `hdSoft` = 0 , `ramHard` = 0 , `cpuHard` = 0 , `hdHard` = 0  where `idRAL`= 1;

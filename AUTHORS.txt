@@ -1,0 +1,34 @@
+Please do not mail any of the authors listed here
+asking questions about this version of abiCloud
+community version.
+
+Original Authors (in alphabetical order)
+----------------
+Abiquo Holdings S.L. <contact_at_abiquo.com>
+Jaume Devesa	 <jdevesa_at_abiquo.com>
+Xavier Fernandez <xfernandez_at_abiquo.com>
+Oliver Fernandez <oliver.fernandez_at_undefined.es>
+Marc Morata		 <mmorata_at_abiquo.com>
+Pedro Navarro    <pnavarro_at_abiquo.com>
+Diego Parrilla   <dparrilla_at_abiquo.com>
+Albert Puig		 <apuig_at_abiquo.com>
+Enric Ruiz		 <eruiz_at_abiquo.com>
+
+The abiCloud Team (in alphabetical order)
+-------------------------------------
+Ignasi Barrera	 <ignasi.barrera_at_abiquo.com>
+David Calavera   <david.calavera_at_abiquo.com>
+Jaume Devesa	 <jdevesa_at_abiquo.com>
+Xavier Fernandez <xfernandez_at_abiquo.com>
+Oliver Fernandez <oliver.fernandez_at_undefined.es>
+Salvador Girones <salvador.girones_at_abiquo.com>
+Diego Mariño     <dmarino_at_abiquo.com>
+Marc Morata		 <mmorata_at_abiquo.com>
+Pedro Navarro    <pnavarro_at_abiquo.com>
+Diego Parrilla   <dparrilla_at_abiquo.com>
+Albert Puig		 <apuig_at_abiquo.com>
+Sergio Rubio	 <srubio_at_abiquo.com>
+Enric Ruiz		 <eruiz_at_abiquo.com>
+
+There are many others who have contributed ideas; we thank them,
+abiCloud is much better because of them.

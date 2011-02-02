@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    initialize="onInitialize()"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:virtualapplianceComponents="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*"
+    xmlns:virtualImageComponents="net.undf.abicloud.view.virtualimage.components.virtualimage.*"
+    xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageListManagement;
+        	import net.undf.abicloud.vo.virtualimage.Category;
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageList;
+            import mx.binding.utils.ChangeWatcher;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.effects.Move;
+            import mx.events.CloseEvent;
+            import mx.events.EffectEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.business.managers.CountdownManager;
+            import net.undf.abicloud.business.managers.FullScreenManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.*;
+            import net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineRenderer;
+            import net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineRendererBase;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeManagement;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeRenderer;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeRendererEvent;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.*;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.bundle.VirtualApplianceBundleForm;
+            import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageAccordion;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+            import net.undf.abicloud.vo.virtualappliance.Node;
+            import net.undf.abicloud.vo.virtualappliance.NodeType;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+
+            //Pop Up used to manage Virtual Appliance
+            private var _virtualApplianceSelector:VirtualApplianceSelector;
+
+            //Pop Up to create Virtual Appliance
+            private var _virtualApplianceForm:VirtualApplianceForm;
+
+            //Pop Up for Node's configuration
+            private var _nodeManagement:NodeManagement;
+
+            //From to create a bundle from a Virtual Appliance
+            private var _virtualApplianceBundleForm:VirtualApplianceBundleForm;
+
+            //Where the available VirtualImages will be displayed
+            //Deprecated
+            //protected var _virtualImageAccordion:VirtualImageAccordion;
+            
+            protected var _virtualImageList:VirtualImageListManagement;
+
+            //The VirtualAppliance that will be managed
+            [Bindable]
+            protected var _virtualAppliance:VirtualAppliance;
+
+            //The current Virtual DataCenter where we are
+            protected var _currentVirtualDataCenter:VirtualDataCenter;
+
+            //This component is currently displaying more info from this NodeRenderer
+            //This is also useful to highlight the NodeRenderer which we are showing more info of
+            private var _currentNodeRendererMoreInfo:NodeRenderer;
+
+            private var _moveEffect:Move;
+
+            //Flag indicating when this component is showing
+            protected var isShowing:Boolean;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Creating Pop Ups
+                _virtualApplianceSelector = new VirtualApplianceSelector();
+                _virtualApplianceSelector.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED,
+                                                           onVirtualApplianceSelected);
+                _virtualApplianceSelector.addEventListener("virtualApplianceSelectorClose",
+                                                           closeVirtualApplianceSelector);
+
+                this._virtualApplianceForm = new VirtualApplianceForm();
+                this._virtualApplianceForm.addEventListener("VirtualApplianceFormClose",
+                                                            closeVirtualApplianceForm);
+
+                this._nodeManagement = new NodeManagement();
+                this._nodeManagement.addEventListener("NodeFormClose", closeNodeForm);
+
+                this._virtualApplianceBundleForm = new VirtualApplianceBundleForm();
+                this._virtualApplianceBundleForm.addEventListener("VirtualApplianceBundleFormClose",
+                                                                  closeVirtualApplianceBundleForm);
+
+                //Creating the VirtualImagesAccordion, and adding it to VirtualResources container
+                //Deprecated
+                /* this._virtualImageAccordion = new VirtualImageAccordion();
+                this._virtualImageAccordion.percentWidth = 100;
+                this._virtualImageAccordion.percentHeight = 100;
+                this._virtualImageAccordion.setStyle("paddingTop", 10);
+                this._virtualImageAccordion.setStyle("backgroundAlpha", 0);
+                this._virtualImageAccordion.editable = false;
+                virtualResourcesToggledContainer.addContent(this._virtualImageAccordion,
+                                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                                    "LABEL_VIRTUAL_IMAGES")); */
+                                                                                                    
+                this._virtualImageList = new VirtualImageListManagement();
+                this._virtualImageList.percentWidth = 100;
+                this._virtualImageList.percentHeight = 100;
+                this._virtualImageList.labelVisible = false;
+                virtualResourcesToggledContainer.viewStack.setStyle("paddingLeft","0");
+                virtualResourcesToggledContainer.viewStack.setStyle("paddingRight","0");
+                
+                virtualResourcesToggledContainer.addContent(this._virtualImageList,
+                                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                                    "LABEL_VIRTUAL_IMAGES"));                                                                                    
+            	                                                                                                    
+                if (_currentVirtualDataCenter)
+                {
+                    //Deprecated
+                    //_virtualImageAccordion.hypervisorType = _currentVirtualDataCenter.hyperType;
+                }
+
+                //Creating other components
+                this._moveEffect = new Move();
+                this._moveEffect.duration = 300;
+            }
+
+            private function onInitialize():void
+            {
+                //We register events to know when a VirtualAppliance has been successfully edited, deleted or checked
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                     onVirtualApplianceEdited);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_DELETED,
+                                                                                     onVirtualApplianceDeleted);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CHECKED,
+                                                                                     onVirtualApplianceChecked);
+
+                //Registering NodeRendererEvents
+                addEventListener(NodeRendererEvent.NODERENDERER_SELECTED, onNodeRendererSelected);
+                addEventListener(NodeRendererEvent.NODERENDERER_ERASE, onNodeRendererErase);
+                addEventListener(NodeRendererEvent.NODERENDERER_CONFIGURATION_REQUESTED,
+                                 onNodeRendererConfigurationRequested);
+
+                //Listening for when a bundle form a Virtual Appliance bundle is successfully created
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_BUNDLE_CREATED,
+                                                                                     onVirtualApplianceBundleCreated);
+
+                //Listening for when a VirtualMachine has been edited
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
+                                                                                   onVirtualMachineEdited);
+
+       
+                //Listening updates from the VirtualImageManager                
+                ChangeWatcher.watch(AbiCloudModel.getInstance().virtualImageManager,
+                                    "categories", onCategoriesChange) 
+                ChangeWatcher.watch(AbiCloudModel.getInstance().virtualImageManager,
+                                    "repository", onRepositoryChange);
+            }
+
+            /////////////////////////////////////
+            //IBodyComponentChildren implementation (in progress...)
+
+            public function cleanView():void
+            {
+                virtualResourcesToggledContainer.selectedIndex = 0;
+
+                //Cleaning screen
+                //Deprecated
+                //_virtualImageAccordion.clean();
+                hideNodeInfoContainer();
+                virtualApplianceDrawTool.setDefaultView();
+            }
+
+
+            public function willShow():void
+            {
+                isShowing = true;
+                requestCategories();
+            }
+
+            public function willHide():void
+            {
+                isShowing = false;
+                virtualAppliance = null;
+            }
+
+            /////////// END IBodyComponentChildren implementation ////////////////
+
+            [Bindable(event="virtualApplianceChange")]
+            public function get virtualAppliance():VirtualAppliance
+            {
+                return this._virtualAppliance;
+            }
+
+            /**
+             * Sets the VirtualAppliance that will be managed
+             */
+            public function set virtualAppliance(virtualAppliance:VirtualAppliance):void
+            {
+                this._virtualAppliance = virtualAppliance;
+                stopBackgroundUpdates();
+
+                if (this._virtualAppliance)
+                {
+                    _currentVirtualDataCenter = virtualAppliance.virtualDataCenter;
+                    //Deprecated
+                    /* if (_virtualImageAccordion)
+                    {
+                        _virtualImageAccordion.hypervisorType = _currentVirtualDataCenter.hyperType;
+                    } */
+
+                    //Starting BackgroundUpdates. Time interval depends on the state of VirtualAppliance
+                    if (this._virtualAppliance.state.id == State.IN_PROGRESS)
+                        startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+                    else
+                        startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
+                }
+                else
+                {
+                    this._currentVirtualDataCenter = null;
+                    //Deprecated
+                    //_virtualImageAccordion.hypervisorType = null;
+                }
+
+
+                dispatchEvent(new Event("virtualApplianceChange"));
+            }
+
+            private function requestCategories():void
+            {
+                //Requesting the list of virtual image categories for the current User Enterprise
+                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
+                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(virtualImageEvent);
+            }
+
+            private function onCategoriesChange(event:Event):void
+            {
+                if (isShowing && !AbiCloudModel.getInstance().virtualImageManager.repository)
+                {
+                    virtualApplianceDrawTool.nodeTypeView.virtualImageCategories = AbiCloudModel.getInstance().virtualImageManager.categories;
+
+                    //Requesting the Repository for the Datacenter where the VirtualAppliance is
+                    var virtualApplianceDatacenter:DataCenter = new DataCenter();
+                    virtualApplianceDatacenter.id = _currentVirtualDataCenter.idDataCenter;
+
+                    var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_DATACENTER_REPOSITORY);
+                    virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    virtualImageEvent.datacenter = virtualApplianceDatacenter;
+                    dispatchEvent(virtualImageEvent);
+                    displayVirtualImage();
+                }
+            } 
+
+            private function onRepositoryChange(event:Event):void
+            {
+                if (isShowing && AbiCloudModel.getInstance().virtualImageManager.repository)
+                {
+                    //Show the Virtual Images for this Repository
+                    //Deprecated
+                    //_virtualImageAccordion.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                    //_virtualImageAccordion.categories = AbiCloudModel.getInstance().virtualImageManager.categories;
+                	displayVirtualImage();
+                }
+            }
+            
+            
+
+            /**
+             * When a Virtual Appliance has been edited, check if it is the one that we are managing
+             */
+            protected function onVirtualApplianceEdited(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //If the VirtualAppliance that has just been edited is the same that this component is drawing,
+                //we replace it to have the last version
+                if (isShowing && this._virtualAppliance && this._virtualAppliance.id == virtualApplianceEvent.virtualAppliance.id)
+                {
+                    virtualAppliance = virtualApplianceEvent.virtualAppliance;
+
+                    //Instead of closing the NodeInfoContainer, we try to update its content
+                    updateNodeInfoContainer();
+                }
+            }
+
+            /**
+             * When a Virtual Appliance has been  checked, check if it is the one that we are managing
+             */
+            private function onVirtualApplianceChecked(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //If the VirtualAppliance that has just been edited is the same that this component is drawing,
+                //we replace it to have the last version
+                if (isShowing && this._virtualAppliance && this._virtualAppliance.id == virtualApplianceEvent.virtualAppliance.id)
+                {
+                    virtualAppliance = virtualApplianceEvent.virtualAppliance;
+
+                    //Instead of closing the NodeInfoContainer, we try to update its content
+                    updateNodeInfoContainer();
+                }
+            }
+
+            /**
+             * Handler called when a VirtualAppliance is successfully deleted
+             */
+            private function onVirtualApplianceDeleted(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //If we are still showing the deleted VirtualAppliance, we remove it from screen
+                if (isShowing && this._virtualAppliance && this._virtualAppliance.id == virtualApplianceEvent.virtualAppliance.id)
+                {
+                    virtualAppliance = null;
+                    openVirtualApplianceSelector();
+                }
+            }
+
+            /**
+             * Updates the VirtualMachine being displayed by our virtualMachineRenderer component, when
+             * the VirtualMachine has been successfully edited
+             */
+            private function onVirtualMachineEdited(infrastructureEvent:InfrastructureEvent):void
+            {
+                if (isShowing && virtualMachineRenderer.virtualMachine && virtualMachineRenderer.virtualMachine.id == infrastructureEvent.infrastructureElement.id)
+                    virtualMachineRenderer.virtualMachine = infrastructureEvent.infrastructureElement as VirtualMachine;
+            }
+
+            private function onVirtualApplianceBundleCreated(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //Since when a bundle is created, new Virtual Images are created too, we refresh the list of Virtual Images
+                if (isShowing)
+                {
+                    //Deprecated
+                    //_virtualImageAccordion.categories = AbiCloudModel.getInstance().virtualImageManager.categories;
+                }
+            }
+
+            /**
+             * Flag that indicates if the VirtualAppliance that this component is managing, has
+             * unsaved changes
+             */
+            public function get isVirtualApplianceModified():Boolean
+            {
+                if (virtualApplianceDrawTool)
+                    return virtualApplianceDrawTool.isVirtualApplianceModified;
+                else
+                    return false;
+            }
+
+            /**
+             * Handler for when a VirtualAppliance has been selected in the VirtualApplianceSelector component
+             */
+            private function onVirtualApplianceSelected(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                closeVirtualApplianceSelector();
+                virtualAppliance = virtualApplianceEvent.virtualAppliance;
+                //virtualApplianceDrawTool.virtualAppliance = this._virtualAppliance;
+                hideNodeInfoContainer();
+            }
+
+            /**
+             * Checks if the current VirtualAppliance has unsaved changes, before creating
+             * a new VirtualAppliance
+             */
+            private function onVirtualApplianceDrawToolNew():void
+            {
+                if (isVirtualApplianceModified)
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.YES | Alert.NO | Alert.CANCEL,
+                                            onVirtualApplianceDrawToolNewHandler);
+                }
+                else
+                {
+                    //Opening the VirtualApplianceSelector
+                    openVirtualApplianceForm();
+                }
+            }
+
+
+            /**
+             * Retrieves user's response
+             */
+            private function onVirtualApplianceDrawToolNewHandler(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //Saving the current Virtual Appliance
+                    saveVirtualAppliance();
+
+                    //Opening the VirtualApplianceForm
+                    openVirtualApplianceForm();
+                }
+                else if (closeEvent.detail == Alert.NO)
+                {
+                    //Opening the VirtualApplianceForm
+                    openVirtualApplianceForm();
+                }
+                else
+                {
+                    //Do nothing
+                }
+            }
+
+            /**
+             * Opens the VirtualApplianceForm for VirtualAppliance creation
+             */
+            private function openVirtualApplianceForm():void
+            {
+                PopUpManager.addPopUp(this._virtualApplianceForm, this, true);
+                PopUpManager.centerPopUp(this._virtualApplianceForm);
+
+                this._virtualApplianceForm.init(null, this._currentVirtualDataCenter);
+
+                //Registering VirtualAppliance creation
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                     onVirtualApplianceCreated);
+            }
+
+            /**
+             * Closes VirtualApplianceForm Pop Up
+             */
+            private function closeVirtualApplianceForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this._virtualApplianceForm);
+
+                //We do not need this event anymore
+                AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                        onVirtualApplianceCreated);
+            }
+
+            private function onVirtualApplianceCreated(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //Setting this component to manage the VirtualAppliance created
+                virtualAppliance = virtualApplianceEvent.virtualAppliance;
+                //virtualApplianceDrawTool.virtualAppliance = this._virtualAppliance;
+                hideNodeInfoContainer();
+            }
+
+            /**
+             * Checks if the current VirtualAppliance has unsaved changes, before opening
+             * the VirtualApplianceSelector component
+             */
+            private function onVirtualApplianceDrawToolOpen(event:Event = null):void
+            {
+                if (isVirtualApplianceModified)
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.YES | Alert.NO | Alert.CANCEL,
+                                            onVirtualApplianceDrawToolOpenHandler);
+                }
+                else
+                {
+                    //Opening the VirtualApplianceSelector
+                    openVirtualApplianceSelector();
+                }
+
+            }
+
+            /**
+             * Retrieves user's response
+             */
+            private function onVirtualApplianceDrawToolOpenHandler(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //Saving the current Virtual Appliance
+                    saveVirtualAppliance();
+
+                    //Opening the VirtualApplianceSelector
+                    openVirtualApplianceSelector();
+                }
+                else if (closeEvent.detail == Alert.NO)
+                {
+                    //Opening the VirtualApplianceSelector
+                    openVirtualApplianceSelector();
+                }
+                else
+                {
+                    //Do nothing
+                }
+            }
+
+            /**
+             * Asks user to confirm a VirtualAppliance deletion
+             */
+            private function onVirtualApplianceDrawToolDelete():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        onVirtualApplianceDrawToolDeleteHandler);
+            }
+
+            /**
+             * Retrieves user's response when he is asked to confirm a Virtual Appliance deletion
+             */
+            private function onVirtualApplianceDrawToolDeleteHandler(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                    deleteVirtualAppliance();
+            }
+
+            /**
+             * Deletes the current VirtualAppliance
+             * If the VirtualAppliance is Running, we use a non blocking service to delete it
+             */
+            private function deleteVirtualAppliance():void
+            {
+                var virtualApplianceEvent:VirtualApplianceEvent;
+
+                if (this._virtualAppliance.state.id == State.RUNNING)
+                {
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE_NON_BLOCKING);
+                    virtualApplianceEvent.virtualAppliance = ObjectUtil.copy(this._virtualAppliance) as VirtualAppliance;
+                }
+                else
+                {
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE);
+                    virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
+                }
+
+                dispatchEvent(virtualApplianceEvent);
+            }
+
+            /**
+             * Opens the VirtualApplianceSelector component
+             */
+            private function openVirtualApplianceSelector():void
+            {
+                PopUpManager.addPopUp(this._virtualApplianceSelector, this, true);
+                PopUpManager.centerPopUp(this._virtualApplianceSelector);
+            }
+
+            /**
+             * Closes the VirtualApplianceSelector component
+             */
+            private function closeVirtualApplianceSelector(event:Event = null):void
+            {
+                //Closing the Pop Up
+                PopUpManager.removePopUp(_virtualApplianceSelector);
+            }
+
+            private function onVirtualApplianceDrawToolSave():void
+            {
+                saveVirtualAppliance();
+            }
+
+            /**
+             * Saves the current VirtualAppliance
+             * This function can be called from outside this component
+             */
+            public function saveVirtualAppliance():void
+            {
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
+                virtualApplianceEvent.virtualAppliance = virtualApplianceDrawTool.virtualApplianceCopy;
+                dispatchEvent(virtualApplianceEvent);
+            }
+
+            /**
+             * Powers on or off the current Virtual Appliance
+             */
+            private function onVirtualApplianceDrawToolPowerOnOff():void
+            {
+                switch (this._virtualAppliance.state.id)
+                {
+                    case State.RUNNING:
+                        //Asking for confirmation to power the virtual appliance off
+                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_TEXT"),
+                                                Alert.YES | Alert.NO,
+                                                powerOffVirtualAppliance);
+                        break;
+
+                    case State.PAUSED:
+                        //Asking for confirmation to power the virtual appliance off
+                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_TEXT"),
+                                                Alert.YES | Alert.NO,
+                                                powerOffVirtualAppliance);
+                        break;
+
+                    case State.APPLY_CHANGES_NEEDED:
+                        //Asking for confirmation to power the virtual appliance off
+                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_TEXT"),
+                                                Alert.YES | Alert.NO,
+                                                powerOffVirtualAppliance);
+                        break;
+
+                    case State.POWERED_OFF:
+                        //The Virtual Appliance is powered off We proceed to power it on
+                        powerOnVirtualAppliance();
+                        break;
+
+                    case State.NOT_DEPLOYED:
+                        //The Virtual Appliance is powered off We proceed to power it on
+                        powerOnVirtualAppliance();
+                        break;
+
+                    case State.FAILED:
+                        //The VirtualAppliance is in state Failed, and cannot be modified
+                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_TEXT"),
+                                                Alert.OK);
+                        break;
+
+                    default:
+                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_VIRTUALAPPLIANCE_UNREG_STATE_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                        "ALERT_VIRTUALAPPLIANCE_UNREG_STATE_TEXT"),
+                                                Alert.OK);
+                }
+
+            }
+
+            private function onVirtualApplianceApplyChanges():void
+            {
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.APPLY_CHANGES_VIRTUAL_APPLIANCE);
+                virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
+                dispatchEvent(virtualApplianceEvent);
+
+                startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+            	
+            	hideNodeInfoContainer();
+            }
+
+            private function powerOnVirtualAppliance():void
+            {
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.START_VIRTUALAPPLIANCE);
+
+                virtualApplianceEvent.virtualAppliance = _virtualAppliance;
+                dispatchEvent(virtualApplianceEvent);
+
+                startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+                hideNodeInfoContainer();
+            }
+
+            private function powerOffVirtualAppliance(closeEvent:CloseEvent = null):void
+            {
+                if (!closeEvent || closeEvent.detail == Alert.YES)
+                {
+                    //No confirmation required or user confirmed the power off
+                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.SHUTDOWN_VIRTUALAPPLIANCE);
+
+                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
+                    dispatchEvent(virtualApplianceEvent);
+
+                    startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+                    hideNodeInfoContainer();
+                }
+            }
+
+            /**
+             * Handler called when the VirtualAppliance modified flag has changed
+             */
+            private function onVirtualApplianceModifiedChange():void
+            {
+                //If the VirtualAppliance has been modified, we stop the background updated
+                if (virtualApplianceDrawTool.isVirtualApplianceModified && AbiCloudModel.getInstance().countdownManager.clockRunning)
+                    stopBackgroundUpdates();
+            }
+
+            /////////////////////////////////////////////
+            //VIRTUAL IMAGES AND OTHER NODE CONENT RELATED
+
+            /**
+             * When the list of categories has been updated
+             * Usually, when the user adds or delete a category
+             */
+            private function onCategoriesUpdated(event:Event):void
+            {
+                //Deprecated
+                //this._virtualImageAccordion.categories = AbiCloudModel.getInstance().virtualImageManager.categories;
+
+                //Provisional... NodeTypeView in VirtuaLApplianceDrawTool also needs the Categories
+                virtualApplianceDrawTool.nodeTypeView.virtualImageCategories = AbiCloudModel.getInstance().virtualImageManager.categories;
+            }
+
+            /**
+             * When a NodeRenderer has been selected, we show more info about it, if it exists
+             * If there is no more information related, we hidde the nodeInfoContainer
+             */
+            private function onNodeRendererSelected(nodeRendererEvent:NodeRendererEvent):void
+            {
+                //We say to old NodeRenderer that is no longer selected
+                if (this._currentNodeRendererMoreInfo)
+                    this._currentNodeRendererMoreInfo.isSelected = false;
+
+                //Saving the NodeRenderer which more info will be displayed
+                this._currentNodeRendererMoreInfo = nodeRendererEvent.nodeRenderer as NodeRenderer;
+
+                //Checking the Node type
+                switch (nodeRendererEvent.nodeRenderer.node.nodeType.id)
+                {
+                    case NodeType.VIRTUALIMAGE:
+                        showNodeVirtualImage(nodeRendererEvent.nodeRenderer.node as NodeVirtualImage);
+                        break;
+
+                    default:
+                        hideNodeInfoContainer();
+                }
+            }
+
+            /**
+             * When someone has anounced that any NodeRenderer has been selected, we hide the
+             * NodeInfoContainer
+             */
+            private function onNodeRendererAnySelected(nodeRendererEvent:NodeRendererEvent):void
+            {
+                hideNodeInfoContainer();
+            }
+
+            /**
+             * Handler for when a NodeRenderer is about to be erased
+             * If this component is displaying the information of the Node related to the
+             * NodeRenderer that is about to be erased, we hide the nodeMoreInfoContainer
+             */
+            private function onNodeRendererErase(nodeRendererEvent:NodeRendererEvent):void
+            {
+                if (nodeRendererEvent.nodeRenderer == this._currentNodeRendererMoreInfo)
+                    hideNodeInfoContainer();
+            }
+
+            /**
+             * Handler for when a NodeRenderer requests a configuration window
+             */
+            private function onNodeRendererConfigurationRequested(nodeRendererEvent:NodeRendererEvent):void
+            {
+                if (!isVirtualApplianceModified)
+                {
+                    //Showing a NodeForm Pop Up to show NodeRenderer configuration options
+                    PopUpManager.addPopUp(this._nodeManagement, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(this._nodeManagement);
+
+                    this._nodeManagement.init(this._currentVirtualDataCenter, this._virtualAppliance,
+                                              nodeRendererEvent.nodeRenderer.node as NodeVirtualImage);
+                }
+                else
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CONFIGURE_NODE_UNSAVED_VA_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CONFIGURE_NODE_UNSAVED_VA_TEXT"),
+                                            Alert.OK);
+                }
+            }
+
+            /**
+             * Closes a NodeForm when is Popped Up
+             */
+            private function closeNodeForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this._nodeManagement);
+                checkVirtualAppliance();
+            }
+
+            private function showVirtualApplianceBundleForm():void
+            {
+                PopUpManager.addPopUp(this._virtualApplianceBundleForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._virtualApplianceBundleForm);
+
+                this._virtualApplianceBundleForm.init(this._virtualAppliance);
+            }
+
+            /**
+             * Closes the VirtualApplianceBundleForm when is Popped Up
+             */
+            private function closeVirtualApplianceBundleForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this._virtualApplianceBundleForm);
+            }
+
+            /**
+             * Shows the VirtualMachine assigned to a NodeVirtualImage (if it exists)
+             */
+            private function showNodeVirtualImage(nodeVirtualImage:NodeVirtualImage):void
+            {
+                if (nodeVirtualImage.virtualMachine != null)
+                {
+                    virtualMachineRenderer.virtualMachine = nodeVirtualImage.virtualMachine;
+                    //use in case of custom name
+                    virtualMachineRenderer.nodeName = nodeVirtualImage.name;
+                    virtualMachineRenderer.init();
+                    showNodeInfoContainer();
+                }
+                else
+                    hideNodeInfoContainer();
+
+            }
+
+            /**
+             * Shows the nodeInfoContainer
+             */
+            private function showNodeInfoContainer():void
+            {
+                //Marking the currentNodeRendererInfo as selected
+                this._currentNodeRendererMoreInfo.isSelected = true;
+
+                if (!nodeInfoContainer.visible)
+                {
+                    nodeInfoContainer.visible = true;
+                    this._moveEffect.yFrom = container.height;
+                    this._moveEffect.yTo = container.height - nodeInfoContainer.height;
+                    this._moveEffect.play([ nodeInfoContainer ]);
+                }
+            }
+
+            /**
+             * Hides the nodeInfoContainer
+             */
+            private function hideNodeInfoContainer():void
+            {
+                //Marking the currentNodeRendererMoreInfo as unselected
+                if (this._currentNodeRendererMoreInfo)
+                    this._currentNodeRendererMoreInfo.isSelected = false;
+                this._currentNodeRendererMoreInfo = null;
+
+                if (nodeInfoContainer && nodeInfoContainer.visible)
+                {
+                    this._moveEffect.yFrom = nodeInfoContainer.y;
+                    this._moveEffect.yTo = nodeInfoContainer.y + nodeInfoContainer.height;
+                    this._moveEffect.addEventListener(EffectEvent.EFFECT_END, onEndMoveEffect);
+                    this._moveEffect.play([ nodeInfoContainer ]);
+                }
+            }
+
+            /**
+             * Updates the NodeInfoContainer content when the VirtualAppliance has changed
+             */
+            private function updateNodeInfoContainer():void
+            {
+                if (nodeInfoContainer.visible)
+                {
+                    //VirtualMachine Renderer
+                    if (virtualMachineRenderer.virtualMachine)
+                    {
+                        //Updating the VirtualMachine
+                        var length:int = this._virtualAppliance.nodes.length;
+                        var i:int;
+                        var node:Node;
+                        for (i = 0; i < length; i++)
+                        {
+                            node = this._virtualAppliance.nodes.getItemAt(i) as Node;
+                            if (node is NodeVirtualImage && NodeVirtualImage(node).virtualMachine && NodeVirtualImage(node).virtualMachine.id == virtualMachineRenderer.virtualMachine.id)
+                            {
+                                virtualMachineRenderer.virtualMachine = NodeVirtualImage(node).virtualMachine;
+                                virtualMachineRenderer.nodeName = NodeVirtualImage(node).name;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            private function onEndMoveEffect(effectEvent:EffectEvent):void
+            {
+                this._moveEffect.removeEventListener(EffectEvent.EFFECT_END, onEndMoveEffect);
+                nodeInfoContainer.visible = false;
+
+            }
+
+            private function onClickHideButton():void
+            {
+                hideNodeInfoContainer();
+            }
+
+            ////////////////////////////////////////////
+            //BACKGROUND UPDATES
+
+            /**
+             * Starts all backgrounds updates that this component may have
+             * Only this component control when the background updates can start
+             */
+            protected function startBackgroundUpdates(updateInterval:Number):void
+            {
+                //Registering new events
+                AbiCloudModel.getInstance().countdownManager.addEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                              checkVirtualAppliance);
+
+                //Starting timer
+                AbiCloudModel.getInstance().countdownManager.startAutoCountdown(updateInterval);
+            }
+
+            /**
+             * Stops all background automatic updates that this component may have
+             */
+            private function stopBackgroundUpdates():void
+            {
+                //Stopping timer
+                AbiCloudModel.getInstance().countdownManager.stopAutoCountdown();
+
+                //Unregistering all events for timer
+                AbiCloudModel.getInstance().countdownManager.removeEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                                 checkVirtualAppliance);
+            }
+
+            private function checkVirtualAppliance(event:Event = null):void
+            {
+                if (this._virtualAppliance)
+                {
+                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_APPLIANCE);
+                    virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
+                    dispatchEvent(virtualApplianceEvent);
+                }
+                else
+                    //If there is any VirtualAppliance, we stop the background updated
+                    stopBackgroundUpdates();
+            }
+
+            //////////////////////////////////////////
+            // FULL SCREEN FUNCTIONALITY
+            private function makeFullScreen():void
+            {
+                if (systemManager.stage.displayState == StageDisplayState.NORMAL)
+                    FullScreenManager.getInstance().makeFullScreen(container);
+            }
+            
+             /////////New way of displaying virtual images////////////////////
+            private function displayVirtualImage():void{
+            	if(AbiCloudModel.getInstance().virtualImageManager.repository && AbiCloudModel.getInstance().virtualImageManager.categories){
+	            	this._virtualImageList.virtualImageList.onInit(AbiCloudModel.getInstance().virtualImageManager.repository,
+	            							this._virtualImageList.categoriesCombo.selectedItem as Category,
+	            							false,
+	            							1.1,
+	            							this._virtualImageList.virtualImagesFilter.text,
+	            							this._currentVirtualDataCenter.hyperType);
+            	}
+            }
+            
+        ]]>
+    </mx:Script>
+
+    <!-- Label showing the current VirtualAppliance name -->
+    <mx:Label id="datacenterName"
+        left="0" top="0"
+        fontSize="14"
+        fontWeight="bold"
+        text="{this._virtualAppliance.name}"/>
+
+    <mx:HDividedBox 
+        left="0" right="0" top="25" bottom="0"
+        horizontalGap="10"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalAlign="middle"
+        verticalGap="0">
+
+        <!-- Virtual Resources -->
+        <general:GeneralSubPanel id="virtualResourcesPanel"
+            width="400" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off"
+            title="@Resource(bundle='VirtualAppliance', key='LABEL_VIRTUAL_MACHINE_IMAGES')">
+        	
+
+            <general:GeneralToggledContainer id="virtualResourcesToggledContainer"
+                width="100%" height="100%"/>
+    
+        </general:GeneralSubPanel>
+
+
+        <!-- Virtual Appliance Draw Tool -->
+
+        <general:GeneralSubPanel 
+            width="300" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off"
+            title="@Resource(bundle='VirtualAppliance', key='LABEL_VIRTUAL_MACHINES')">
+
+            <mx:Canvas id="container"
+                width="100%" height="100%"
+                verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+                <virtualapplianceComponents:VirtualApplianceDrawTool id="virtualApplianceDrawTool"
+                    width="100%" height="100%"
+                    virtualAppliance="{virtualAppliance}"
+                    virtualApplianceDrawToolNew="onVirtualApplianceDrawToolNew()"
+                    virtualApplianceDrawToolOpen="onVirtualApplianceDrawToolOpen()"
+                    virtualApplianceDrawToolDelete="onVirtualApplianceDrawToolDelete()"
+                    virtualApplianceDrawToolSave="onVirtualApplianceDrawToolSave()"
+                    virtualApplianceDrawToolPowerOnOff="onVirtualApplianceDrawToolPowerOnOff()"
+                    isVirtualApplianceModifiedChange="onVirtualApplianceModifiedChange()"
+                    virtualApplianceCreateBundle="showVirtualApplianceBundleForm()"
+                    virtualApplianceDrawToolApplyChanges="onVirtualApplianceApplyChanges()"/>
+
+                <!-- Node info -->
+                <mx:Canvas id="nodeInfoContainer"
+                    width="100%" height="160"
+                    bottom="0"
+                    visible="false">
+                    <mx:Button id="hideButton"
+                        width="49" height="10"
+                        top="0"
+                        horizontalCenter="0"
+                        styleName="UpDownButton"
+                        click="onClickHideButton()"/>
+
+                    <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
+                        width="100%"
+                        top="10" bottom="0"
+                        usedBy="{VirtualMachineRendererBase.USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT}"/>
+                </mx:Canvas>
+            </mx:Canvas>
+        </general:GeneralSubPanel>
+    </mx:HDividedBox>
+
+
+
+</mx:Canvas>

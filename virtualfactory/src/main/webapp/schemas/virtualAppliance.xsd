@@ -1,0 +1,796 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    attributeFormDefault="qualified" 
+    elementFormDefault="qualified">
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+    <xs:import namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+        schemaLocation="cim-vssd.xsd"/>
+    <xs:import namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+        schemaLocation="cim-rasd.xsd"/>
+
+    <!--- XML Schema 1.1 syntax: All defined types are extensible at the end 
+    
+    <xs:openContent mode="suffix">
+    <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:openContent>
+
+    -->
+
+    <xs:element name="Envelope" type="ovf:EnvelopeType">
+        <xs:annotation>
+            <xs:documentation>Root element of OVF Descriptor</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="EnvelopeType">
+        <xs:annotation>
+            <xs:documentation>Root OVF descriptor type</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="References" type="ovf:References_Type">
+                <xs:annotation>
+                    <xs:documentation>References to all external files</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="ovf:Section" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Package level meta-data</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="ovf:Content" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Content: A VirtualSystem or a VirtualSystemCollection</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="Strings" type="ovf:Strings_Type" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Localized string resource bundles</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="References_Type">
+        <xs:annotation>
+            <xs:documentation>Type for list of external resources</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="File" type="ovf:File_Type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="File_Type">
+        <xs:annotation>
+            <xs:documentation>Type for an external reference to a resource</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="id" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Reference key used in other parts of the package</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="href" type="xs:anyURI" use="required">
+            <xs:annotation>
+                <xs:documentation>Location of external resource</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="size" type="xs:integer" use="optional">
+            <xs:annotation>
+                <xs:documentation>Size in bytes of the files (if known)</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="compression" type="xs:string" default="" use="optional">
+            <xs:annotation>
+                <xs:documentation>Compression type (gzip, bzip2, or none if empty or not specified)</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="chunkSize" type="xs:long" use="optional">
+            <xs:annotation>
+                <xs:documentation>Chunk size (except for last chunk)</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:element name="Content" type="ovf:Entity_Type">
+        <xs:annotation>
+            <xs:documentation>Base element for content types. This is the head the subsitution group</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="Entity_Type" abstract="true">
+        <xs:annotation>
+            <xs:documentation>Base class for an entity</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Info" type="ovf:Msg_Type" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Info element describes the meaning of the Entity, this is typically shown if the
+                        Entity is not understood by an application</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="ovf:Section" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Entity body is list of Sections</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:element name="VirtualSystem" type="ovf:VirtualSystem_Type" substitutionGroup="ovf:Content">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Content since VirtualSystem is a derivation of Entity_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="VirtualSystem_Type">
+        <xs:annotation>
+            <xs:documentation>A Virtual Machine Entity</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Entity_Type">
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="VirtualSystemCollection" type="ovf:VirtualSystemCollection_Type" substitutionGroup="ovf:Content">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Content since VirtualSystem is a derivation of Entity_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="VirtualSystemCollection_Type">
+        <xs:annotation>
+            <xs:documentation>A Composite Entity</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Entity_Type">
+                <xs:sequence>
+                    <xs:element ref="ovf:Content" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- STRINGS -->
+
+    <xs:complexType name="Strings_Type">
+        <xs:annotation>
+            <xs:documentation>Type for string resource bundle</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="Msg" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Resource bundle element</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>String element value</xs:documentation>
+                            </xs:annotation>
+                            <xs:attribute name="msgid" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>String element identifier</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute ref="xml:lang">
+            <xs:annotation>
+                <xs:documentation>Locale for this string resource bundle</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="fileRef" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Reference to external resource bundle</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!--- SECTION -->
+
+    <xs:element name="Section" type="ovf:Section_Type">
+        <xs:annotation>
+            <xs:documentation>Base elements for OVF sections. This is the head of the substitution
+            group.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="Section_Type" abstract="true">
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation>Base type for Sections, subclassing this is the most common form of extensibility.
+                    Subtypes define more specific elements.</xs:documentation>
+            </xs:annotation>
+            <xs:element name="Info" type="ovf:Msg_Type">
+                <xs:annotation>
+                    <xs:documentation>Info element describes the meaning of the Section, this is typically shown if the
+                        Section is not understood by an application</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="required" type="xs:boolean" default="true" use="optional">
+            <xs:annotation>
+                <xs:documentation>Determines whether import should fail if the Section is not
+                understood</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="Msg_Type">
+        <xs:annotation>
+            <xs:documentation>Type for localizable string</xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Default string value</xs:documentation>
+                </xs:annotation>
+                <xs:attribute name="msgid" type="xs:string" default="" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Identifier for lookup in string resource bundle for alternate
+                        locale</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- CORE SECTIONS -->
+
+    <xs:element name="AnnotationSection" type="ovf:AnnotationSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since AnnotationSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="AnnotationSection_Type">
+        <xs:annotation>
+            <xs:documentation>User defined annotation on an entity</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Annotation" type="ovf:Msg_Type"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##other" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="ProductSection" type="ovf:ProductSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since ProductSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="ProductSection_Type">
+        <xs:annotation>
+            <xs:documentation>Product information for a virtual appliance</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Product" type="ovf:Msg_Type" minOccurs="0"/>
+                    <xs:element name="Vendor" type="ovf:Msg_Type" minOccurs="0"/>
+                    <xs:element name="Version" type="xs:string" minOccurs="0"/>
+                    <xs:element name="FullVersion" type="xs:string" minOccurs="0"/>
+                    <xs:element name="ProductUrl" type="xs:string" minOccurs="0"/>
+                    <xs:element name="VendorUrl" type="xs:string" minOccurs="0"/>
+                    <xs:element name="AppUrl" type="xs:string" minOccurs="0"/>
+                    <xs:element name="Icon" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="height" type="xs:integer" use="optional"/>
+                            <xs:attribute name="width" type="xs:integer" use="optional"/>
+                            <xs:attribute name="mimeType" type="xs:string" use="optional"/>
+                            <xs:attribute name="fileRef" type="xs:string" use="required"/>
+                            <xs:anyAttribute namespace="##other" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                        <xs:annotation>
+                            <xs:documentation>Properties for application-level customization</xs:documentation>
+                        </xs:annotation>
+                        <xs:element name="Category" type="ovf:Msg_Type">
+                            <xs:annotation>
+                                <xs:documentation>Property grouping delimiter</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="Property">
+                            <xs:annotation>
+                                <xs:documentation>Property element</xs:documentation>
+                            </xs:annotation>
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="Label" type="ovf:Msg_Type" minOccurs="0">
+                                        <xs:annotation>
+                                            <xs:documentation>Short description of property</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:element>
+                                    <xs:element name="Description" type="ovf:Msg_Type" minOccurs="0">
+                                        <xs:annotation>
+                                            <xs:documentation>Description of property</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:element>
+                                    <xs:element name="Value" type="ovf:PropertyConfigurationValue_Type" minOccurs="0">
+                                        <xs:annotation>
+                                            <xs:documentation>Alternative default property values for different
+                                                configuration</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:element>
+                                </xs:sequence>
+                                <xs:attribute name="key" type="xs:string" use="required">
+                                    <xs:annotation>
+                                        <xs:documentation>Property identifier</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute name="type" type="xs:string" use="required">
+                                    <xs:annotation>
+                                        <xs:documentation>Property type</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute name="qualifiers" type="xs:string" use="optional">
+                                    <xs:annotation>
+                                        <xs:documentation>A comma-separated set of type qualifiers</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute name="userConfigurable" type="xs:boolean" default="false" use="optional">
+                                    <xs:annotation>
+                                        <xs:documentation>Determines whether the property value is configurable during
+                                            installation</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute name="runtimeConfigurable" type="xs:boolean" default="false"
+                                    use="optional">
+                                    <xs:annotation>
+                                        <xs:documentation>Determines whether the property value is configurable at
+                                            runtime</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:attribute name="defaultValue" type="xs:string" use="optional" default="">
+                                    <xs:annotation>
+                                        <xs:documentation>Default value for property</xs:documentation>
+                                    </xs:annotation>
+                                </xs:attribute>
+                                <xs:anyAttribute namespace="##any" processContents="lax"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                </xs:sequence>
+                <xs:attribute name="class" type="xs:string" default="" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Property identifier prefix</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="instance" type="xs:string" default="" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Property identifier suffix</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="PropertyConfigurationValue_Type">
+        <xs:annotation>
+            <xs:documentation>Type for alternative default values for properties when DeploymentOptionSection is
+            used</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="value" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Alternative default property value</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="configuration" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Configuration from DeploymentOptionSection in which this value is
+                default</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:element name="NetworkSection" type="ovf:NetworkSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since NetworkSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="NetworkSection_Type">
+        <xs:annotation>
+            <xs:documentation>Descriptions of logical networks used within the package</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Network" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Description" type="ovf:Msg_Type" minOccurs="0"/>
+                            </xs:sequence>
+                            <xs:attribute name="name" type="xs:string" use="required"/>
+                            <xs:anyAttribute namespace="##any" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="DiskSection" type="ovf:DiskSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since DiskSection_Type is a derivation of Section_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="DiskSection_Type">
+        <xs:annotation>
+            <xs:documentation>Descriptions of virtual disks used within the package</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Disk" type="ovf:VirtualDiskDesc_Type" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="VirtualDiskDesc_Type">
+        <xs:annotation>
+            <xs:documentation>Type for virtual disk descriptor</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="diskId" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Identifier for virtual disk</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="fileRef" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Reference to virtual disk content. If not specified a blank virtual disk is created of
+                    size given by capacity attribute</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="capacity" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Virtual disk capacity, can be specified as either an xs:long size or as a reference to
+                    a property using ${property_name}. </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="capacityAllocationUnits" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Unit of allocation for ovf:capacity. If not specified default value is bytes. Value
+                    shall match a recognized value for the UNITS qualifier in DSP0004.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="format" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Format of virtual disk given as a URI that identifies the disk type</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="populatedSize" type="xs:long" use="optional">
+            <xs:annotation>
+                <xs:documentation>Estimated populated size of disk in bytes</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="parentRef" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Reference to potential parent disk</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:element name="OperatingSystemSection" type="ovf:OperatingSystemSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since OperatingSystemSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="OperatingSystemSection_Type">
+        <xs:annotation>
+            <xs:documentation>Specification of the operating system installed in the guest</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Description" type="ovf:Msg_Type" minOccurs="0"/>
+                </xs:sequence>
+                <xs:attribute name="id" type="xs:integer" use="required">
+                    <xs:annotation>
+                        <xs:documentation>Identifier defined by the CIM_OperatingSystem.OsType
+                        enumeration</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="version" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Version defined by the CIM_OperatingSystem.Version field</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="EulaSection" type="ovf:EulaSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since EulaSection_Type is a derivation of Section_Type
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="EulaSection_Type">
+        <xs:annotation>
+            <xs:documentation>End-User License Agreement</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="License" type="ovf:Msg_Type"/>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="VirtualHardwareSection" type="ovf:VirtualHardwareSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since VirtualHardwareSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="VirtualHardwareSection_Type">
+        <xs:annotation>
+            <xs:documentation>Specifies virtual hardware requirements for a virtual machine</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="System" type="ovf:VSSD_Type" minOccurs="0"/>
+                    <xs:element name="Item" type="ovf:RASD_Type" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:attribute name="transport" default="" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Comma-separated list of supported transports types for the OVF
+                        descriptor</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="ResourceAllocationSection" type="ovf:ResourceAllocationSection_Type"
+        substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since ResourceAllocationSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="ResourceAllocationSection_Type">
+        <xs:annotation>
+            <xs:documentation>Resource constraints on a VirtualSystemCollection</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Item" type="ovf:RASD_Type" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="InstallSection" type="ovf:InstallSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since InstallSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="InstallSection_Type">
+        <xs:annotation>
+            <xs:documentation>If present indicates that the virtual machine needs to be initially booted to install and
+                configure the software</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:attribute name="initialBoot" type="xs:boolean" default="true" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Initial boot required</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="initialBootStopDelay" type="xs:int" default="0" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Delay in seconds to wait for power off to complete after initial
+                        boot</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="StartupSection" type="ovf:StartupSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since StartupSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="StartupSection_Type">
+        <xs:annotation>
+            <xs:documentation>Specifies the order in which entities in a VirtualSystemCollection are powered on and shut
+                down</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Item" minOccurs="0" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="id" type="xs:string" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>Identifier of entity</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="order" type="xs:int" use="required">
+                                <xs:annotation>
+                                    <xs:documentation>Startup order. Entities are started up starting with lower-numbers
+                                        first, starting from 0. Items with same order identifier may be started up
+                                        concurrently or in any order. The order is reversed for
+                                    shutdown.</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="startDelay" type="xs:int" default="0" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>Delay in seconds to wait for power on to
+                                    complete</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="waitingForGuest" type="xs:boolean" default="false" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>Resumes power-on sequence if guest software reports
+                                    ok</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="stopDelay" type="xs:int" default="0" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>Delay in seconds to wait for power off to
+                                    complete</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="startAction" type="xs:string" default="powerOn" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>Start action to use, valid values are: 'powerOn', 'none'
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:attribute name="stopAction" type="xs:string" default="powerOff" use="optional">
+                                <xs:annotation>
+                                    <xs:documentation>Stop action to use, valid values are: ''powerOff' ,
+                                        'guestShutdown', 'none'</xs:documentation>
+                                </xs:annotation>
+                            </xs:attribute>
+                            <xs:anyAttribute namespace="##any" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="DeploymentOptionSection" type="ovf:DeploymentOptionSection_Type" substitutionGroup="ovf:Section">
+        <xs:annotation>
+            <xs:documentation>Element substitutable for Section since DeploymentOptionSection_Type is a derivation of
+                Section_Type </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+    <xs:complexType name="DeploymentOptionSection_Type">
+        <xs:annotation>
+            <xs:documentation>Enumeration of discrete deployment options</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="ovf:Section_Type">
+                <xs:sequence>
+                    <xs:element name="Configuration" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="Label" type="ovf:Msg_Type"/>
+                                <xs:element name="Description" type="ovf:Msg_Type"/>
+                            </xs:sequence>
+                            <xs:attribute name="id" type="xs:string" use="required"/>
+                            <xs:attribute name="default" type="xs:boolean" default="false" use="optional"/>
+                            <xs:anyAttribute namespace="##any" processContents="lax"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="VSSD_Type">
+        <xs:annotation>
+            <xs:documentation>Wrapper for CIM_VirtualSystemSettingData_Type</xs:documentation>
+        </xs:annotation>
+        <!-- XML Schema 1.1 Syntax: The type is extensible before the first element, 
+            between elements, and at the end. This is required to ensure forward
+            and backwards compatibility since  DSP230-based XML schemas are  
+            used.
+            
+            <xs:openContent mode="interleave">
+            <xs:any namespace="##any" processContents="lax"  minOccurs="0" maxOccurs="unbounded"/>
+            </xs:openContent>
+            
+        -->
+        <xs:complexContent>
+            <xs:extension base="vssd:CIM_VirtualSystemSettingData_Type">
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="RASD_Type">
+        <!-- XML Schema 1.1 Syntax: The type is extensible before the first element, 
+            between elements, and at the end. This is required to ensure forward
+            and backwards compatibility since  DSP230-based XML schemas are  
+            used.
+            
+            <xs:openContent mode="interleave">
+            <xs:any namespace="##any" processContents="lax"  minOccurs="0" maxOccurs="unbounded"/>
+            </xs:openContent>
+            
+        -->
+        <xs:complexContent>
+            <xs:annotation>
+                <xs:documentation>Wrapper for CIM_ResourceAllocationSettingData_Type</xs:documentation>
+            </xs:annotation>
+            <xs:extension base="rasd:CIM_ResourceAllocationSettingData_Type">
+                <xs:attribute name="required" type="xs:boolean" default="true" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Determines whether import should fail if entry is not
+                        understood</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="configuration" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>Configuration from DeploymentOptionSection this entry is valid
+                        for</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="bound" type="xs:string" use="optional">
+                    <xs:annotation>
+                        <xs:documentation>States that this entry is a range marker</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:anyAttribute namespace="##any" processContents="lax"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

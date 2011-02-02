@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Metadata>
+		[Event(name="isFormValidChange", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.utils.StringUtil;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.vo.networking.IPAddress;
+            import net.undf.abicloud.vo.networking.NetworkConfiguration;
+            import net.undf.abicloud.vo.networking.VlanNetwork;
+
+            private static const netmasksCIDR:Object = { "255.0.0.0": 8, "255.128.0.0": 9, "255.192.0.0": 10, "255.224.0.0": 11, "255.240.0.0": 12,
+                    "255.248.0.0": 13, "255.252.0.0": 14, "255.254.0.0": 15, "255.255.0.0": 16, "255.255.128.0": 17, "255.255.192.0": 18, "255.255.224.0": 19,
+                    "255.255.240.0": 20, "255.255.248.0": 21, "255.255.252.0": 22, "255.255.254.0": 23, "255.255.255.0": 24, "255.255.255.128": 25,
+                    "255.255.255.192": 26, "255.255.255.224": 27, "255.255.255.240": 28, "255.255.255.248": 29, "255.255.255.252": 30, "255.255.255.254": 31,
+                    "255.255.255.255": 32 };
+
+            [Bindable]
+            private var firstOctetDP:Array = [ { octet: "10", networkClass: "A" }, { octet: "172", networkClass: "B" }, { octet: "192", networkClass: "C" } ];
+
+            [Bindable]
+            private var secondOctetDP:ArrayCollection;
+
+            [Bindable]
+            private var thirdOctetDP:ArrayCollection;
+
+            [Bindable]
+            private var fourthOctetDP:ArrayCollection;
+
+            [Bindable]
+            private var netmaskDP:ArrayCollection;
+
+            [Bindable]
+            private var _isFormValid:Boolean;
+
+            public function get isFormValid():Boolean
+            {
+                return _isFormValid;
+            }
+
+
+            //Variables used when editing an existing Private Network
+            private var _networkName:String;
+
+            private var _networkConfiguration:NetworkConfiguration;
+
+            /**
+             * Initializes this component to create a Network (private)
+             */
+            public function init(defaultVLANName:String):void
+            {
+                //Create a new Private Network
+                //Default Private Network values are
+                //Network CLASS C
+                //Network address: 192.168.0.0
+                //Netmask: 255.255.255.0
+                //Gateway: 192.168.0.1
+                nameInput.text = defaultVLANName;
+                firstOctetInput.selectedIndex = 2;
+                primaryDNSInput.text = "";
+                secondaryDNSInput.text = "";
+                sufixDNSInput.text = "";
+                defaultNetworkInput.selected = false;
+                getAvailableNetmasks();
+            }
+
+
+            private function getAvailableNetmasks():void
+            {
+                var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NETMASKS_BY_NETWORK_CLASS);
+                networkingEvent.networkClass = firstOctetInput.selectedItem.networkClass.toString();
+                networkingEvent.callback = setNetmasks;
+                dispatchEvent(networkingEvent);
+            }
+
+            public function setNetmasks(netmasks:ArrayCollection):void
+            {
+                if (netmasks)
+                {
+                    netmaskDP = netmasks;
+                    netmaskInput.selectedIndex = 0;
+
+                    getAvailableNetworks();
+                }
+            }
+
+            private function getAvailableNetworks():void
+            {
+                var selectedNetmask:IPAddress = new IPAddress();
+                selectedNetmask.ip = netmaskInput.selectedItem.toString();
+
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NETWORKS_BY_CLASS_AND_NETMASK);
+                event.networkClass = firstOctetInput.selectedItem.networkClass.toString();
+                event.netmask = selectedNetmask;
+                event.callback = setAvailableNetworks;
+                dispatchEvent(event);
+            }
+
+            public function setAvailableNetworks(firstOctet:ArrayCollection, secondOctet:ArrayCollection,
+                                                 thirdOctet:ArrayCollection, fourthOctet:ArrayCollection):void
+            {
+                //firstOctetDP = firstOctet;
+                //firstOctetInput.selectedIndex = 0;
+                secondOctetDP = secondOctet;
+                secondOctetInput.selectedIndex = 0;
+                thirdOctetDP = thirdOctet;
+                thirdOctetInput.selectedIndex = 0;
+                fourthOctetDP = fourthOctet;
+                fourthOctetInput.selectedIndex = 0;
+
+                setDefaultGatewayForCurrentNetwork();
+
+                //We must validate form here
+                validateForm();
+            }
+
+            private function setDefaultGatewayForCurrentNetwork():void
+            {
+                var gateway:String = StringUtil.substitute("{0}.{1}.{2}.{3}",
+                                                           firstOctetInput.selectedItem.octet,
+                                                           secondOctetInput.selectedItem,
+                                                           thirdOctetInput.selectedItem,
+                                                           Number(fourthOctetInput.selectedItem) + 1);
+
+                gatewayInput.text = gateway;
+            }
+
+            private function validateForm():void
+            {
+                _isFormValid = nameInput.text.length > 0 && netmaskInput.selectedItem && firstOctetInput.selectedItem && secondOctetInput.selectedItem && thirdOctetInput.selectedItem && fourthOctetInput.selectedItem && gatewayInput.text.length > 0;
+                dispatchEvent(new Event("isFormValidChange"));
+            }
+
+            /**
+             * Returns the network name
+             */
+            public function get networkName():String
+            {
+                return nameInput.text;
+            }
+
+            /**
+             * Returns if this network is the VirtualDatacenter default one
+             */
+            public function get isDefaultNetwork():Boolean
+            {
+                return defaultNetworkInput.selected;
+            }
+
+            /**
+             * Returns the network configuration for the Network
+             */
+            public function get networkConfiguration():NetworkConfiguration
+            {
+                var networkConfig:NetworkConfiguration = new NetworkConfiguration();
+                networkConfig.gateway = gatewayInput.text;
+                networkConfig.networkAddress = StringUtil.substitute("{0}.{1}.{2}.{3}",
+                                                                     firstOctetInput.selectedItem.octet,
+                                                                     secondOctetInput.selectedItem,
+                                                                     thirdOctetInput.selectedItem,
+                                                                     fourthOctetInput.selectedItem);
+                networkConfig.netmask = netmaskInput.selectedItem as String;
+                networkConfig.mask = netmasksCIDR[netmaskInput.selectedItem.toString()];
+                networkConfig.primaryDNS = primaryDNSInput.text;
+                networkConfig.secondaryDNS = secondaryDNSInput.text;
+                networkConfig.sufixDNS = sufixDNSInput.text;
+
+                return networkConfig;
+            }
+
+            private function netmaskComboBoxLabelFunction(item:Object):String
+            {
+                return StringUtil.substitute("/{0}\t({1})", netmasksCIDR[item.toString()],
+                                             item.toString());
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:FormItem 
+        label="@Resource(bundle='Networking', key='LABEL_NAME')"
+        required="true">
+        <mx:TextInput id="nameInput"
+            height="20"
+            maxChars="39"
+            change="validateForm()"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        horizontalGap="0"
+        label="@Resource(bundle='Networking', key='LABEL_ADDRESS')"
+        direction="horizontal"
+        required="true">
+        <mx:ComboBox id="firstOctetInput"
+            width="65" height="18"
+            labelField="octet" dataProvider="{firstOctetDP}"
+            change="getAvailableNetmasks()"/>
+
+        <mx:Label 
+            fontSize="12"
+            fontWeight="bold"
+            textAlign="center"
+            text="."/>
+
+        <mx:ComboBox id="secondOctetInput"
+            width="65" height="18"
+            dataProvider="{secondOctetDP}"
+            change="setDefaultGatewayForCurrentNetwork()"/>
+
+        <mx:Label 
+            fontSize="12"
+            fontWeight="bold"
+            textAlign="center"
+            text="."/>
+
+        <mx:ComboBox id="thirdOctetInput"
+            width="65" height="18"
+            dataProvider="{thirdOctetDP}"
+            change="setDefaultGatewayForCurrentNetwork()"/>
+
+        <mx:Label 
+            fontSize="12"
+            fontWeight="bold"
+            textAlign="center"
+            text="."/>
+
+        <mx:ComboBox id="fourthOctetInput"
+            width="65" height="18"
+            dataProvider="{fourthOctetDP}"
+            change="setDefaultGatewayForCurrentNetwork()"/>
+
+        <mx:Label 
+            fontSize="12"
+            fontWeight="bold"
+            textAlign="center"
+            text="/"/>
+
+        <mx:ComboBox id="netmaskInput"
+            height="18"
+            dataProvider="{netmaskDP}"
+            labelFunction="netmaskComboBoxLabelFunction"
+            change="getAvailableNetworks()"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        label="@Resource(bundle='Networking', key='LABEL_GATEWAY')"
+        required="true">
+        <mx:TextInput id="gatewayInput"
+            height="20"
+            maxChars="39"
+            change="validateForm()"
+            restrict="0-9.:A-F"/>
+    </mx:FormItem>
+
+    <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">
+        <mx:TextInput id="primaryDNSInput"
+            height="20"
+            maxChars="39"
+            restrict="0-9.:A-F"/>
+    </mx:FormItem>
+
+    <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_SECONDARY_DNS')">
+        <mx:TextInput id="secondaryDNSInput"
+            height="20"
+            maxChars="39"
+            restrict="0-9.:A-F"/>
+    </mx:FormItem>
+
+    <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_DNS_SUFIX')">
+        <mx:TextInput id="sufixDNSInput"
+            height="20"
+            maxChars="39"/>
+    </mx:FormItem>
+
+    <mx:FormItem id="defaultNetworkFormItem"
+        label="@Resource(bundle='Networking', key='LABEL_VDC_DEFAULT_NETWORK')">
+        <mx:CheckBox id="defaultNetworkInput"/>
+    </mx:FormItem>
+</mx:Form>

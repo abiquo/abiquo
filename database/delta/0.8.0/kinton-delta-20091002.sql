@@ -1,0 +1,1 @@
+ALTER TABLE `networktype` MODIFY `uuid` VARCHAR(40);

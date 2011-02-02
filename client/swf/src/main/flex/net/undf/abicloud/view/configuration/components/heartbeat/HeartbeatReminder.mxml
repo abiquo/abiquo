@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    width="500" height="300"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='Configuration', key='LABEL_HEARTBEATING')">
+
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.events.ConfigurationEvent;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.model.AbiCloudModel;
+
+            private function close():void
+            {
+                dispatchEvent(new Event("HeartbeatReminderClose"));
+            }
+
+            private function onClickEnableNow():void
+            {
+                //Enabling Heartbeat
+                dispatchEvent(new Event("HeartbeatReminderGoToHeartbeating"));
+            }
+
+            private function onClickEnableLater():void
+            {
+                //Setting Heartbeat status to later
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_HEARTBEAT_STATUS_LATER);
+                dispatchEvent(configurationEvent);
+
+                close();
+            }
+
+            private function onClickEnableNo():void
+            {
+                //Setting Heartbeat status to no
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_HEARTBEAT_STATUS_NO);
+                dispatchEvent(configurationEvent);
+
+                close();
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Spacer height="5"/>
+
+    <mx:TextArea 
+        width="100%" height="100%"
+        backgroundAlpha="0"
+        fontSize="11"
+        fontWeight="bold"
+        leading="6"
+        selectable="true"
+        htmlText="@Resource(bundle='Configuration', key='LABEL_HEARTBEAT_REMINDER')"
+        editable="false"/>
+
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center">
+
+        <mx:Button 
+            height="18"
+            label="@Resource(bundle='Configuration', key='LABEL_ENABLE_NOW')"
+            click="onClickEnableNow()"/>
+
+        <mx:Button 
+            height="18"
+            label="@Resource(bundle='Configuration', key='LABEL_ENABLE_LATER')"
+            click="onClickEnableLater()"/>
+
+        <mx:Button 
+            height="18"
+            styleName="AlternativeButton"
+            label="@Resource(bundle='Configuration', key='LABEL_NOT_ENABLE')"
+            click="onClickEnableNo()"/>
+    </mx:HBox>
+
+    <mx:Spacer height="10"/>
+</AbiCloudPopUp>

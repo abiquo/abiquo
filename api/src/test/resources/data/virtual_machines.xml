@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1" version_c="1"/>
+    <datacenter idDataCenter="2" name="datacenter_2" situation="situation_datacenter_2" version_c="1"/>
+    <datacenter idDataCenter="3" name="datacenter_3" situation="situation_datacenter_3" version_c="1"/>
+    
+    <rack idRack="1" idDataCenter="1" name="rack_1" shortDescription="description_rack_1" largeDescription="large_description_rack_1" version_c="1"/>
+    <rack idRack="2" idDataCenter="2" name="rack_2" shortDescription="description_rack_2" largeDescription="large_description_rack_2" version_c="1"/>
+    <rack idRack="3" idDataCenter="2" name="rack_3" shortDescription="description_rack_3" largeDescription="large_description_rack_3" version_c="1"/>
+    <rack idRack="4" idDataCenter="2" name="rack_4" shortDescription="description_rack_4" largeDescription="large_description_rack_4" version_c="1"/>
+    
+    <physicalmachine idPhysicalMachine="1" idRack="1" idDataCenter="1" 
+        name="machine_1" description="description_1"
+        realRam = "24" realCpu = "24" realStorage = "24" 
+        ram="2" cpu="2" hd="2" cpuRatio="1"         
+        ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1"/>
+    <physicalmachine idPhysicalMachine="2" idRack="2" idDataCenter="2" 
+        name="machine_2" description="description_2"
+        realRam = "24" realCpu = "24" realStorage = "24"
+        ram="2" cpu="2" hd="2" cpuRatio="1" 
+        ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1"/>
+        
+    <hypervisor id="1" description="" type="KVM" idType="2" ip="192.168.1.1" ipService="192.168.1.1" port="4565" idPhysicalMachine="1" user="user" password="password" version_c="0"/>
+    <hypervisor id="2" description="" type="XEN_3" idType="3" ip="192.168.1.1" ipService="192.168.1.1" port="4565" idPhysicalMachine="2" user="user" password="password" version_c="0"/>
+    
+    <enterprise idEnterprise="1" 
+              name="entreprise_1" 
+              ramSoft="1"
+              cpuSoft="2"
+              hdSoft="3"
+              ramHard="4"
+              cpuHard="5"
+              hdHard="6"
+              repositorySoft="0"
+		      repositoryHard="0"
+			  vlanSoft="0"
+              vlanHard="0"
+              storageSoft="0"
+              storageHard="0"
+              publicIPSoft="0"
+              publicIPHard="0"
+              version_c="0"/>
+    
+    <role idRole="1" shortDescription="short_1" largeDescription="large_1" securityLevel="1.9" version_c="0" />
+    
+    <user idUser="1"      
+        idRole="1"   
+        idEnterprise="1"
+        user="user1"
+        name="user"     
+        surname="one"     
+        description="one" 
+        email="-"
+        locale="ES"    
+        password="bla"   
+        active="1"         
+        version_c="0"  />
+    
+    <virtualmachine idVM="1" name="vm" description="vmdesc" idHypervisor="1" idEnterprise="1" 
+        cpu="2" ram="1024" hd="2048" high_disponibility="0" vdrpPort="8080" vdrpIP="192.1.1.1" 
+        idType="0" idUser="1" version_c="1"/>    
+</dataset>

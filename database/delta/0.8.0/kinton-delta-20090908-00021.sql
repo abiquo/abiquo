@@ -1,0 +1,1 @@
+ALTER TABLE `dhcptype` MODIFY `addressDHCP` VARCHAR(22) NOT NULL;

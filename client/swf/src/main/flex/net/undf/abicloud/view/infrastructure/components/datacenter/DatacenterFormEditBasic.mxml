@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Form 
+    paddingBottom="5"
+    paddingTop="10"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+            [Bindable]
+            private var _datacenter:DataCenter;
+
+            public function set datacenter(value:DataCenter):void
+            {
+                this._datacenter = value;
+                saveButton.enabled = false;
+            }
+
+            private function onSave():void
+            {
+                //Updating datacenter with new values
+                var datacenter:DataCenter = ObjectUtil.copy(this._datacenter) as DataCenter;
+                datacenter.name = nameInput.text;
+                datacenter.situation = situationInput.text;
+
+                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_DATACENTER);
+                infrastructureEvent.dataCenter = datacenter;
+                dispatchEvent(infrastructureEvent);
+            }
+
+            /**
+             * Activates the Save Button if the form is valid
+             */
+            private function validateForm():void
+            {
+                if (nameInput.text.length > 0 && situationInput.text.length > 0)
+                    saveButton.enabled = true;
+
+                else
+                    saveButton.enabled = false;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:FormItem 
+        label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+        required="true">
+        <mx:TextInput id="nameInput"
+            height="20"
+            maxChars="19" text="{this._datacenter.name}"
+            change="validateForm()"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_SITUATION')"
+        required="true">
+        <mx:TextArea id="situationInput"
+            maxChars="100" text="{this._datacenter.situation}"
+            change="validateForm()"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        width="100%"
+        horizontalAlign="right"
+        direction="horizontal">
+        <mx:Button id="saveButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_SAVE')"
+            click="onSave()"/>
+    </mx:FormItem>
+</mx:Form>

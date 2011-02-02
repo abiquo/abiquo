@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+	<class catalog="kinton" lazy="false" table="workload_fit_policy_rule"
+		name="com.abiquo.abiserver.business.hibernate.pojohb.workload.FitPolicyRuleHB">
+
+		<id name="id" type="java.lang.Integer">
+			<column name="id" />
+			<generator class="identity" />
+		</id>
+
+		<property name="fitPolicy" type="FitPolicy" not-null="true">
+			<column name="fitPolicy" />
+		</property>
+
+		<many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
+			fetch="select" lazy="false" name="datacenter" not-null="false">
+			<column name="idDatacenter" />
+		</many-to-one>
+	</class>
+	
+	<query name="WORKLOAD.GLOBAL_FITPOLICY_RULE">
+	<![CDATA[
+		from com.abiquo.abiserver.business.hibernate.pojohb.workload.FitPolicyRuleHB
+		where datacenter is null
+	]]>
+	</query>
+	
+	<query name="WORKLOAD.DATACENTER_FITPOLICY_RULES">
+	<![CDATA[
+		from com.abiquo.abiserver.business.hibernate.pojohb.workload.FitPolicyRuleHB
+		where datacenter is not null
+	]]>
+	</query>
+	
+</hibernate-mapping>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_REMOTE_SERVICE')"
+    xmlns:datacenter="net.undf.abicloud.view.infrastructure.components.datacenter.*">
+
+    <mx:Metadata>
+		[Event(name="RemoteServiceFormClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.binding.utils.BindingUtils;
+            import mx.collections.ArrayCollection;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.service.RemoteServiceType;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("Infrastructure")]
+            private var rb2:ResourceBundle;
+
+            //The RemoteService that will be created or edited
+            [Bindable]
+            protected var _remoteService:RemoteService;
+
+            //The Datacenter where the RemoteService belongs
+            protected var _datacenter:DataCenter;
+
+            //The RemoteServiceType id being created or edited
+            [Bindable]
+            protected var _remoteServiceType:RemoteServiceType;
+
+            /**
+             * Initializes Form items to create or edit a RemoteService
+             **/
+            public function init(datacenter:DataCenter, remoteServiceType:RemoteServiceType = null,
+                                 remoteService:RemoteService = null):void
+            {
+                _datacenter = datacenter;
+                _remoteService = remoteService;
+                _remoteServiceType = remoteServiceType;
+                
+                //To enable/disable the check button
+                BindingUtils.bindSetter(setEnableCheckButton,typeInput,"selectedIndex");
+                
+                BindingUtils.bindSetter(uriChange,remoteServiceFormItem,"isUriValid");
+
+                if (this._remoteService)
+                {
+                    //Editing an existing RemoteService
+                    titleText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                        "POPUP_TITLE_REMOTE_SERVICE_EDIT");
+									
+                    //Setting fields
+                    remoteServiceFormItem.protocolInput.text = _remoteService.protocol;
+                    remoteServiceFormItem.domainNameInput.text = _remoteService.domainName;
+                    remoteServiceFormItem.portInput.text = _remoteService.port.toString();
+                    remoteServiceFormItem.serviceMappingInput.text = _remoteService.serviceMapping;
+                    remoteServiceFormItem.remoteServiceStatus = _remoteService.status;
+                    remoteServiceFormItem.remoteServiceType = _remoteServiceType;
+                    
+                    remoteServiceFormItem.ipValidator.validate();
+
+                    setRemoteServiceTypeInput();
+                }
+                else
+                {
+                    //Creating a new RemoteService
+                    titleText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                        "POPUP_TITLE_REMOTE_SERVICE_ADD");
+
+                    //Cleaning form
+                    if (_remoteServiceType)
+                    {
+                        remoteServiceFormItem.init(_remoteServiceType, "");
+                    }
+                    else
+                    {
+                        remoteServiceFormItem.init();
+                    }
+
+                    setRemoteServiceTypeInput();
+
+                }
+                validateForm();
+
+                remoteServiceFormItem.protocolInput.setFocus();
+            }
+            
+            private function setEnableCheckButton(index:int):void{
+            	if(index == -1){
+            		remoteServiceFormItem.checkButton.enabled = false;
+            	}else{
+            		remoteServiceFormItem.checkButton.enabled = true;
+            	}
+            	
+            }
+
+            protected function setRemoteServiceTypeInput():void
+            {
+                if (_remoteServiceType)
+                {
+                    var remoteServiceTypes:ArrayCollection = AbiCloudModel.getInstance().infrastructureManager.remoteServiceTypes;
+                    var length:int = remoteServiceTypes.length;
+                    var i:int;
+                    for (i = 0; i < length; i++)
+                    {
+                        if (_remoteServiceType.valueOf == RemoteServiceType(remoteServiceTypes.getItemAt(i)).valueOf)
+                        {
+                            typeInput.selectedIndex = i;
+                            return;
+                        }
+                    }
+                }
+
+                //Not found or not setted
+                typeInput.selectedIndex = -1;
+            }
+
+            /**
+             * Saves information and Notifys that user wants to create a new Data Center
+             */
+            private function onAccept():void
+            {
+                var infrastructureEvent:InfrastructureEvent;
+
+                if (this._remoteService)
+                {
+                    //Editing the RemoteService
+                    var remoteServiceToEdit:RemoteService = ObjectUtil.copy(_remoteService) as RemoteService;
+                    remoteServiceToEdit.protocol = remoteServiceFormItem.protocolInput.text;
+                    remoteServiceToEdit.domainName = remoteServiceFormItem.domainNameInput.text;
+                    remoteServiceToEdit.port = Number(remoteServiceFormItem.portInput.text);
+                    remoteServiceToEdit.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
+                    remoteServiceToEdit.name = remoteServiceFormItem.formedUri;
+                    remoteServiceToEdit.status = remoteServiceFormItem.remoteServiceStatus;
+
+                    infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_REMOTE_SERVICE);
+                    infrastructureEvent.dataCenter = _datacenter;
+                    infrastructureEvent.remoteService = remoteServiceToEdit;
+                }
+                else
+                {
+                    infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CREATE_REMOTE_SERVICE);
+                    infrastructureEvent.dataCenter = _datacenter;
+                    infrastructureEvent.remoteService = createNewRemoteService();
+                }
+
+                dispatchEvent(infrastructureEvent);
+                close();
+            }
+
+            protected function createNewRemoteService():RemoteService
+            {
+                var newRemoteService:RemoteService = new RemoteService();
+                if (newRemoteService)
+                {
+                    newRemoteService.remoteServiceType = typeInput.selectedItem as RemoteServiceType;
+                    newRemoteService.idDataCenter = _datacenter.id;
+                    newRemoteService.protocol = remoteServiceFormItem.protocolInput.text;
+                    newRemoteService.domainName = remoteServiceFormItem.domainNameInput.text;
+                    newRemoteService.port = Number(remoteServiceFormItem.portInput.text);
+                    newRemoteService.serviceMapping = remoteServiceFormItem.serviceMappingInput.text;
+                    newRemoteService.name = remoteServiceFormItem.formedUri;
+                }
+
+                return newRemoteService;
+            }
+
+            /**
+             * Cancels Data Center creation
+             **/
+            private function close():void
+            {
+                //Closing the form
+                dispatchEvent(new Event("RemoteServiceFormClose"));
+            }
+            
+            private function uriChange(value:Boolean):void{
+            	validateForm();
+            }
+
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (typeInput.selectedIndex > -1 && AbiCloudModel.getInstance().urlPattern.exec(remoteServiceFormItem.formedUri) && remoteServiceFormItem.isIpValid)
+                {
+                    acceptButton.enabled = true;
+                }
+                else
+                {
+                    acceptButton.enabled = false;
+                }
+            }
+
+            protected function onChangeTypeInput():void
+            {
+                if (typeInput.selectedIndex > -1)
+                {
+                    var remoteServiceType:RemoteServiceType = typeInput.selectedItem as RemoteServiceType;
+                    remoteServiceFormItem.init(remoteServiceType, "");
+                }
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='LABEL_TYPE')"
+            required="true">
+            <mx:ComboBox id="typeInput"
+                height="18"
+                labelField="name"
+                dataProvider="{AbiCloudModel.getInstance().infrastructureManager.remoteServiceTypes}"
+                selectedIndex="0" enabled="{_remoteService == null}"
+                change="validateForm();onChangeTypeInput()"
+                prompt="{ResourceManager.getInstance().getString('Infrastructure', 'COMBOBOX_PROMPT_REMOTE_SERVICE_TYPE')}"/>
+        </mx:FormItem>
+
+        <datacenter:RemoteServiceFormItem id="remoteServiceFormItem"
+            label="URI"
+            remoteServiceFormItemChange="validateForm()"/>
+
+        <mx:Spacer height="15"/>
+
+        <mx:FormItem 
+            width="100%"
+            horizontalAlign="center"
+            direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="close()"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</AbiCloudPopUp>

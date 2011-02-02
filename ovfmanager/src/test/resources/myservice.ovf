@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xsi:schemaLocation="http://schemas.dmtf.org/ovf/envelope/1 ../dsp8023.xsd">
+    
+    <!-- This example reference a local schema file, to validate against online schema use:
+    xsi:schemaLocation="http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.0.0.xsd"
+    -->
+    
+    <!-- References to all external files -->
+    <References>
+        <File ovf:id="de-DE-bundle" ovf:href="de-DE-bundle.xml" ovf:size="1340"/>
+        <File ovf:id="base" ovf:href="base.vmdk" ovf:size="180114671"/>
+        <File ovf:id="webdelta" ovf:href="webdelta.vmdk" ovf:size="123413"/>
+        <File ovf:id="dbdelta" ovf:href="dbdelta.vmdk" ovf:size="343243"/>
+        <File ovf:id="icon" ovf:href="icon.png" ovf:size="3638"/>
+    </References>
+    <!-- Describes meta-information about all virtual disks in the package.  
+         This example is encoded as a delta-disk hierarchy.
+     -->
+    <DiskSection>
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="base" ovf:fileRef="base" ovf:capacity="4294967296"
+            ovf:populatedSize="1924967692"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+        <Disk ovf:diskId="web" ovf:fileRef="webdelta" ovf:parentRef="base" 
+            ovf:capacity="4294967296"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+        <Disk ovf:diskId="db" ovf:fileRef="dbdelta" ovf:parentRef="base"
+            ovf:capacity="4294967296"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    </DiskSection>
+    <!-- Describes all networks used in the package -->
+    <NetworkSection>
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="VM Network">
+            <Description ovf:msgid="network.description">The network that the service
+                will be available on</Description>
+        </Network>
+    </NetworkSection>
+    <!-- Deployment options for the packages -->
+    <DeploymentOptionSection>
+        <Info>List of deployment options available in the package</Info>
+        <Configuration ovf:id="minimal">
+            <Label ovf:msgid="minimal.label">Minimal</Label>
+            <Description ovf:msgid="minimal.description">Deploy service with minimal
+                resource use</Description>
+        </Configuration>
+        <Configuration ovf:id="standard" ovf:default="true">
+            <Label ovf:msgid="standard.label">Standard</Label>
+            <Description ovf:msgid="standard.description">Deploy service with standard
+                resource use</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+    <!-- PetStore Virtual System Collection -->
+    <VirtualSystemCollection ovf:id="PetStore">
+        <Info>The packaging of the PetStoreService multi-tier application</Info>
+        <Name>PetStore Service</Name>
+        <!-- Overall information about the product -->
+        <ProductSection>
+            <Info>Describes product information for the service</Info>
+            <Product>Petstore Web Portal</Product>
+            <Vendor>Some Random Organization</Vendor>
+            <Version>4.5</Version>
+            <FullVersion>4.5-b4523</FullVersion>
+            <ProductUrl>http://www.vmware.com/go/ovf</ProductUrl>
+            <VendorUrl>http://www.vmware.com/</VendorUrl>
+            <Icon ovf:height="32" ovf:width="32" ovf:mimeType="image/jpeg"
+                ovf:fileRef="icon"/>
+            <Category ovf:msgid="category.email">Email properties</Category>
+            <Property ovf:key="adminEmail" ovf:type="string" ovf:userConfigurable="true">
+                <Label ovf:msgid="property.email.label">Admin email</Label>
+                <Description ovf:msgid="property.email.description">Email address of
+                    service administrator</Description>
+            </Property>
+            <Category ovf:msgid="category.network">Network properties</Category>
+            <Property ovf:key="appIp" ovf:type="string"
+                ovf:userConfigurable="true">
+                <Label ovf:msgid="property.appip.label">IP</Label>
+                <Description ovf:msgid="property.appip.description">IP address of the
+                    service</Description>
+            </Property>
+            <Property ovf:key="dbIp" ovf:type="string" ovf:userConfigurable="true">
+                <Label ovf:msgid="property.dpip.label">IP for DB</Label>
+                <Description ovf:msgid="property.dpip.description">Primary IP address of
+                    the database</Description>
+            </Property>
+            <Property ovf:key="db2Ip" ovf:type="string"
+                ovf:userConfigurable="true">
+                <Label ovf:msgid="property.dpip2.label">IP for DB2</Label>
+                <Description ovf:msgid="property.dpip2.description">A secondary IP
+                    address for the database</Description>
+            </Property>
+            <Category ovf:msgid="category.logging">Logging properties</Category>
+            <Property ovf:key="logLevel" ovf:type="string" ovf:value="normal"
+                ovf:userConfigurable="true">
+                <Label ovf:msgid="property.loglevel.label">Loglevel</Label>
+                <Description ovf:msgid="property.loglevel.description">Logging level for
+                    the service</Description>
+                <Value ovf:value="low" ovf:configuration="minimal"/>
+            </Property>
+        </ProductSection>
+        <AnnotationSection ovf:required="false">
+            <Info>A annotation on this service</Info>
+            <Annotation ovf:msgid="annotation.annotation">Contact customer support for
+                any urgent issues</Annotation>
+        </AnnotationSection>
+        <ResourceAllocationSection ovf:required="false">
+            <Info>Defines minimum reservations for CPU and memory</Info>
+            <Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:ElementName>512 MB reservation</rasd:ElementName>
+                <rasd:InstanceID>0</rasd:InstanceID>
+                <rasd:Reservation>512</rasd:Reservation>
+                <rasd:ResourceType>4</rasd:ResourceType>
+            </Item>
+            <Item ovf:configuration="minimal">
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:ElementName>384 MB reservation</rasd:ElementName>
+                <rasd:InstanceID>0</rasd:InstanceID>
+                <rasd:Reservation>384</rasd:Reservation>
+                <rasd:ResourceType>4</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AllocationUnits>MHz</rasd:AllocationUnits>
+                <rasd:ElementName>1000 MHz reservation</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:Reservation>500</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+            </Item>
+            <Item ovf:bound="min">
+                <rasd:AllocationUnits>MHz</rasd:AllocationUnits>
+                <rasd:ElementName>500 MHz reservation</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:Reservation>500</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+            </Item>
+            <Item ovf:bound="max">
+                <rasd:AllocationUnits>MHz</rasd:AllocationUnits>
+                <rasd:ElementName>1500 MHz reservation</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:Reservation>1500</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+            </Item>
+        </ResourceAllocationSection>
+        <StartupSection>
+            <Info>Specifies how the composite service is powered-on and off</Info>
+            <Item ovf:id="DBTier" ovf:order="1" ovf:startDelay="120"
+                ovf:startAction="powerOn" ovf:waitingForGuest="true" ovf:stopDelay="120"
+                ovf:stopAction="guestShutdown"/>
+            <Item ovf:id="WebTier" ovf:order="2" ovf:startDelay="120"
+                ovf:startAction="powerOn" ovf:waitingForGuest="true" ovf:stopDelay="120"
+                ovf:stopAction="guestShutdown"/>
+        </StartupSection>
+        <VirtualSystem ovf:id="WebTier">
+            <Info>The virtual machine containing the WebServer application</Info>
+            <Name>Petstore Web Server</Name>
+            <ProductSection>
+                <Info>Describes the product information</Info>
+                <Product>Apache Webserver</Product>
+                <Vendor>Apache Software Foundation</Vendor>
+                <Version>6.5</Version>
+                <FullVersion>6.5-b2432</FullVersion>
+            </ProductSection>
+            <OperatingSystemSection ovf:id="36">
+                <Info>Guest Operating System</Info>
+                <Description>Linux 2.4.x</Description>
+            </OperatingSystemSection>
+            <VirtualHardwareSection>
+                <Info>256 MB, 1 CPU, 1 disk, 1 nic virtual machine</Info>
+                <System>
+                    <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                    <vssd:InstanceID>0</vssd:InstanceID>
+                    <vssd:VirtualSystemType>vmx-4</vssd:VirtualSystemType>
+                </System>
+                <Item>
+                    <rasd:Description>Number of virtual CPUs</rasd:Description>
+                    <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+                    <rasd:InstanceID>1</rasd:InstanceID>
+                    <rasd:ResourceType>3</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                    <rasd:Description>Memory Size</rasd:Description>
+                    <rasd:ElementName>256 MB of memory</rasd:ElementName>
+                    <rasd:InstanceID>2</rasd:InstanceID>
+                    <rasd:ResourceType>4</rasd:ResourceType>
+                    <rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                    <rasd:Connection>VM Network</rasd:Connection>
+                    <rasd:ElementName>Ethernet adapter on "VM Network"</rasd:ElementName>
+                    <rasd:InstanceID>3</rasd:InstanceID>
+                    <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                    <rasd:ResourceType>10</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>1</rasd:AddressOnParent>
+                    <rasd:ElementName>SCSI Controller 0 - LSI Logic</rasd:ElementName>
+                    <rasd:InstanceID>1000</rasd:InstanceID>
+                    <rasd:ResourceSubType>LsiLogic</rasd:ResourceSubType>
+                    <rasd:ResourceType>6</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                    <rasd:ElementName>Harddisk 1</rasd:ElementName>
+                    <rasd:HostResource>ovf:/disk/web</rasd:HostResource>
+                    <rasd:InstanceID>22001</rasd:InstanceID>
+                    <rasd:Parent>1000</rasd:Parent>
+                    <rasd:ResourceType>17</rasd:ResourceType>
+                </Item>
+            </VirtualHardwareSection>
+        </VirtualSystem>
+        <!-- Database Tier -->
+        <VirtualSystemCollection ovf:id="DBTier">
+            <Info>Describes a clustered database instance</Info>
+            <Name>Database Tier</Name>
+            <ProductSection ovf:class="com.mydb.db">
+                <Info>Product Information</Info>
+                <Product>Somebody Clustered SQL Server</Product>
+                <Vendor>TBD</Vendor>
+                <Version>2.5</Version>
+                <FullVersion>2.5-b1234</FullVersion>
+                <Property ovf:key="vm1" ovf:value="${dbIp}" ovf:type="string"/>
+                <Property ovf:key="vm2" ovf:value="${db2Ip} " ovf:type="string"/>
+                <Property ovf:key="log" ovf:value="${logLevel}" ovf:type="string"/>
+            </ProductSection>
+            <StartupSection>
+                <Info>Specifies how the composite service is powered-on and off</Info>
+                <Item ovf:id="DB1" ovf:order="1" ovf:startDelay="120"
+                    ovf:startAction="powerOn" ovf:waitingForGuest="true"
+                    ovf:stopDelay="120" ovf:stopAction="guestShutdown"/>
+                <Item ovf:id="DB2" ovf:order="2" ovf:startDelay="120"
+                    ovf:startAction="powerOn" ovf:waitingForGuest="true"
+                    ovf:stopDelay="120" ovf:stopAction="guestShutdown"/>
+            </StartupSection>
+            <!-- DB VM 1 -->
+            <VirtualSystem ovf:id="DB1">
+                <Info>Describes a virtual machine with the database image installed</Info>
+                <Name>Database Instance I</Name>
+                <ProductSection ovf:class="com.mydb.db">
+                    <Info>Specifies the OVF properties available in the OVF environment</Info>
+                    <Property ovf:key="ip" ovf:value="${vm1}" ovf:type="string"/>
+                    <Property ovf:key="ip2" ovf:value="${vm2} " ovf:type="string"/>
+                    <Property ovf:key="primaryAtBoot" ovf:value="yes" ovf:type="string"/>
+                </ProductSection>
+                <VirtualHardwareSection>
+                    <Info>256 MB, 1 CPU, 1 disk, 1 nic virtual machine</Info>
+                    <System>
+                        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                        <vssd:InstanceID>0</vssd:InstanceID>
+                        <vssd:VirtualSystemType>vmx-4</vssd:VirtualSystemType>
+                    </System>
+                    <Item>
+                        <rasd:Description>Number of virtual CPUs</rasd:Description>
+                        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+                        <rasd:InstanceID>1</rasd:InstanceID>
+                        <rasd:ResourceType>3</rasd:ResourceType>
+                        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                    </Item>
+                    <Item>
+                        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                        <rasd:Description>Memory Size</rasd:Description>
+                        <rasd:ElementName>256 MB of memory</rasd:ElementName>
+                        <rasd:InstanceID>2</rasd:InstanceID>
+                        <rasd:ResourceType>4</rasd:ResourceType>
+                        <rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+                    </Item>
+                    <Item>
+                        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                        <rasd:Connection>VM Network</rasd:Connection>
+                        <rasd:ElementName>Ethernet adapter on "VM Network"</rasd:ElementName>
+                        <rasd:InstanceID>3</rasd:InstanceID>
+                        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                        <rasd:ResourceType>10</rasd:ResourceType>
+                    </Item>
+                    <Item>
+                        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+                        <rasd:ElementName>SCSI Controller 0 - LSI Logic</rasd:ElementName>
+                        <rasd:InstanceID>1000</rasd:InstanceID>
+                        <rasd:ResourceSubType>LsiLogic</rasd:ResourceSubType>
+                        <rasd:ResourceType>6</rasd:ResourceType>
+                    </Item>
+                    <Item>
+                        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                        <rasd:ElementName>Harddisk 1</rasd:ElementName>
+                        <rasd:HostResource>ovf:/disk/db</rasd:HostResource>
+                        <rasd:InstanceID>22001</rasd:InstanceID>
+                        <rasd:Parent>1000</rasd:Parent>
+                        <rasd:ResourceType>17</rasd:ResourceType>
+                    </Item>
+                </VirtualHardwareSection>
+                <OperatingSystemSection ovf:id="36">
+                    <Info>Guest Operating System</Info>
+                    <Description>Linux 2.4.x</Description>
+                </OperatingSystemSection>
+            </VirtualSystem>
+            <!-- DB VM 2 -->
+            <VirtualSystem ovf:id="DB2">
+                <Info>Describes a virtual machine with the database image installed</Info>
+                <Name>Database Instance II</Name>
+                <ProductSection ovf:class="com.mydb.db">
+                    <Info>Specifies the OVF properties available in the OVF environment</Info>
+                    <Property ovf:key="ip" ovf:value="${vm2}" ovf:type="string"/>
+                    <Property ovf:key="ip2" ovf:value="${vm1} " ovf:type="string"/>
+                    <Property ovf:key="primaryAtBoot" ovf:value="no" ovf:type="string"/>
+                </ProductSection>
+                <VirtualHardwareSection>
+                    <Info>256 MB, 1 CPU, 1 disk, 1 nic virtual machine</Info>
+                    <System>
+                        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                        <vssd:InstanceID>0</vssd:InstanceID>
+                        <vssd:VirtualSystemType>vmx-4</vssd:VirtualSystemType>
+                    </System>
+                    <Item>
+                        <rasd:Description>Number of virtual CPUs</rasd:Description>
+                        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+                        <rasd:InstanceID>1</rasd:InstanceID>
+                        <rasd:ResourceType>3</rasd:ResourceType>
+                        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                    </Item>
+                    <Item>
+                        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                        <rasd:Description>Memory Size</rasd:Description>
+                        <rasd:ElementName>256 MB of memory</rasd:ElementName>
+                        <rasd:InstanceID>2</rasd:InstanceID>
+                        <rasd:ResourceType>4</rasd:ResourceType>
+                        <rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+                    </Item>
+                    <Item>
+                        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                        <rasd:Connection>VM Network</rasd:Connection>
+                        <rasd:ElementName>Ethernet adapter on "VM Network"</rasd:ElementName>
+                        <rasd:InstanceID>3</rasd:InstanceID>
+                        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                        <rasd:ResourceType>10</rasd:ResourceType>
+                    </Item>
+                    <Item>
+                        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+                        <rasd:ElementName>SCSI Controller 0 - LSI Logic</rasd:ElementName>
+                        <rasd:InstanceID>1000</rasd:InstanceID>
+                        <rasd:ResourceSubType>LsiLogic</rasd:ResourceSubType>
+                        <rasd:ResourceType>6</rasd:ResourceType>
+                    </Item>
+                    <Item>
+                        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                        <rasd:ElementName>Harddisk 1</rasd:ElementName>
+                        <rasd:HostResource>ovf:/disk/db</rasd:HostResource>
+                        <rasd:InstanceID>22001</rasd:InstanceID>
+                        <rasd:Parent>1000</rasd:Parent>
+                        <rasd:ResourceType>17</rasd:ResourceType>
+                    </Item>
+                </VirtualHardwareSection>
+                <OperatingSystemSection ovf:id="36">
+                    <Info>Guest Operating System</Info>
+                    <Description>Linux 2.4.x</Description>
+                </OperatingSystemSection>
+            </VirtualSystem>
+        </VirtualSystemCollection>
+    </VirtualSystemCollection>
+    <!-- External I18N bundles -->
+    <Strings xml:lang="de-DE" ovf:fileRef="de-DE-bundle"/>
+    <!-- EmbeddedI18N bundles -->
+    <Strings xml:lang="da-DA">
+        <Msg ovf:msgid="network.description">Netværket servicen skal være tilgængelig på</Msg>
+        <Msg ovf:msgid="annotation.annotation">Kontakt kundeservice i tilfælde af
+            kritiske problemer</Msg>
+        <Msg ovf:msgid="property.email.description">Email adresse for administrator</Msg>
+        <Msg ovf:msgid="property.appip.description">IP adresse for service</Msg>
+        <Msg ovf:msgid="property.dpip">Primær IP adresse for database</Msg>
+        <Msg ovf:msgid="property.dpip2.description">Sekundær IP adresse for database</Msg>
+        <Msg ovf:msgid="property.loglevel.description">Logningsniveau for service</Msg>
+        <Msg ovf:msgid="minimal.label">Minimal</Msg>
+        <Msg ovf:msgid="minimal.description">Installer service med minimal brug af
+            resourcer</Msg>
+        <Msg ovf:msgid="standard.label">Normal</Msg>
+        <Msg ovf:msgid="standard.description">Installer service med normal brug af
+            resourcer</Msg>
+    </Strings>
+</Envelope>

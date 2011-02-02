@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.vo.infrastructure.State;
+            import mx.resources.ResourceManager;
+            import mx.resources.ResourceBundle;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+            import mx.utils.ObjectUtil;
+            import net.undf.abicloud.business.managers.VirtualApplianceManager;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import mx.collections.ArrayCollection;
+            import net.undf.abicloud.model.AbiCloudModel;
+
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb2:ResourceBundle;
+			
+			//Display the automatic open vapp after creation checkbox when apply
+			[Bindable]
+			public var automaticOpenCheckIsEnable:Boolean;
+			
+			//We need to know when the user cancel the creation
+			public var onCancelState:Boolean;
+			
+            //The VirtualAppliance that will be created or edited
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+
+            private var _defaultVirtualDataCenter:VirtualDataCenter;
+
+            //Flag to indicate when this component is listening for VirtualAppliance creation or edition
+            private var _listenerRegistered:Boolean;
+            
+            //created virtualAppliance to oepn it after creation depending on user choice
+            public var createdVirtualAppliance:VirtualAppliance;
+
+            /**
+             * Initializes Form items to create a VirtualAppliance, or
+             * edit an existing one
+             *
+             * @param virtualAppliance null, if we want to create a new Virtual Appliance, or with an existing virtual appliance if
+             * we want to edit it
+             * @param virtualDataCenter if not null, this VirtualDataCenter will be selected by default in the Virtual DataCenter
+             * combo box when we are creating a new Virtual Appliance. It has no effect when we are editing a Virtual Appliance.
+             **/
+            public function init(virtualAppliance:VirtualAppliance = null, defaultVirtualDataCenter:VirtualDataCenter = null):void
+            {
+                this._virtualAppliance = virtualAppliance;
+                this._defaultVirtualDataCenter = defaultVirtualDataCenter;
+
+                if (this._virtualAppliance == null)
+                {
+                    //Creating a new VirtualAppliance
+                    titleText = ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                        "POPUP_TITLE_VIRTUALAPPLIANCE_ADD");
+
+                    nameInput.text = "";
+   					automaticOpenCheckIsEnable = true;
+                    publicInput.selected = false;
+                    virtualDataCenterInput.enabled = true;
+                    acceptButton.enabled = false;
+
+                    if (this._defaultVirtualDataCenter)
+                    {
+                        //Setting this Virtual DataCenter as selected by default
+                        var length:int = virtualDataCenterInput.dataProvider.length;
+                        var i:int;
+                        for (i = 0; i < length; i++)
+                        {
+                            if (VirtualDataCenter(virtualDataCenterInput.dataProvider[i]).id == this._defaultVirtualDataCenter.id)
+                            {
+                                virtualDataCenterInput.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //There is not a Virtual DataCenter selected by default
+                        virtualDataCenterInput.selectedIndex = -1;
+                        virtualDataCenterInput.prompt = ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                                "COMBOBOX_PROMPT_VIRTUALDATACENTER")
+                    }
+                }
+                else
+                {
+                    //Editing an existing VirtualAppliance
+                    titleText = ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                        "POPUP_TITLE_VIRTUALAPPLIANCE_EDIT");
+
+                    nameInput.text = this._virtualAppliance.name;
+                    publicInput.selected = this._virtualAppliance.isPublic;
+                    virtualDataCenterInput.selectedIndex = -1;
+                    virtualDataCenterInput.prompt = this._virtualAppliance.virtualDataCenter.name;
+                    virtualDataCenterInput.enabled = false;
+
+                    acceptButton.enabled = true;
+                }
+
+                //check or not the automatic open virtualapp after creation depending on previous user choice
+                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenVirtualApp");
+
+                this._listenerRegistered = false;
+                nameInput.setFocus();
+            }
+
+            private function onAccept():void
+            {
+                var virtualApplianceEvent:VirtualApplianceEvent;
+
+                if (this._virtualAppliance == null)
+                {
+                    //Creating the new VirtualAppliance (we use the enterprise from the logged user)
+                    var newVirtualAppliance:VirtualAppliance = new VirtualAppliance();
+                    newVirtualAppliance.name = nameInput.text;
+                    newVirtualAppliance.virtualDataCenter = virtualDataCenterInput.selectedItem as VirtualDataCenter;
+                    newVirtualAppliance.isPublic = publicInput.selected;
+                    newVirtualAppliance.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+
+                    //Registering listener, if it is not, to know when the VirtualAppliance has been created
+                    if (!this._listenerRegistered)
+                    {
+                        //VirtualAppliance.VIRTUALAPPLIANCES_UPDATED is dispatched when a new VirtualAppliance has been successfully created
+                        AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                             virtualApplianceCallFinishedHandler);
+                        this._listenerRegistered = true;
+                    }
+
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CREATE_VIRTUALAPPLIANCE);
+                    virtualApplianceEvent.virtualAppliance = newVirtualAppliance;
+                }
+                else
+                {
+                    //Editing the VirtualAppliance, without modifying the original one until changes are saved in server
+                    var virtualApplianceCopy:VirtualAppliance = ObjectUtil.copy(this._virtualAppliance) as VirtualAppliance;
+
+                    //Updating fields
+                    virtualApplianceCopy.name = nameInput.text;
+                    virtualApplianceCopy.isPublic = publicInput.selected;
+                    if (virtualDataCenterInput.selectedIndex > -1)
+                        virtualApplianceCopy.virtualDataCenter = virtualDataCenterInput.selectedItem as VirtualDataCenter;
+
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
+                    virtualApplianceEvent.virtualAppliance = virtualApplianceCopy;
+
+                    //Registering listener, if it is not, to know when the VirtualAppliance has been edited
+                    if (!this._listenerRegistered)
+                    {
+                        //VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED is dispatched when a new VirtualAppliance has been successfully edited
+                        AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                             virtualApplianceCallFinishedHandler);
+                        this._listenerRegistered = true;
+                    }
+                }
+
+                dispatchEvent(virtualApplianceEvent);
+            }
+
+            private function virtualApplianceCallFinishedHandler(event:VirtualApplianceEvent):void
+            {
+                if(event.type == VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED){
+	                createdVirtualAppliance = event.virtualAppliance;
+                }else{
+                	createdVirtualAppliance = null;
+                }
+                //Closing form
+                onCancel(false);
+            }
+
+            private function onCancel(type:Boolean):void
+            {
+                onCancelState = type;
+                
+                //Unregistering apropiate event
+                if (this._listenerRegistered)
+                {
+                    if (this._virtualAppliance == null)
+                        AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                                virtualApplianceCallFinishedHandler);
+                    else
+                        AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                                virtualApplianceCallFinishedHandler);
+
+                }
+
+                dispatchEvent(new Event("VirtualApplianceFormClose"));
+            }
+
+            private function validateForm():void
+            {
+                if (this._virtualAppliance == null)
+                {
+                    if (nameInput.text.length > 0 && virtualDataCenterInput.selectedIndex > -1)
+                        acceptButton.enabled = true;
+                    else
+                        acceptButton.enabled = false;
+                }
+                else
+                {
+                    if (nameInput.text.length > 0)
+                        acceptButton.enabled = true;
+                    else
+                        acceptButton.enabled = false;
+                }
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+            
+            /**
+             * Manage the user choice
+             */
+            private function onAutomaticOpenCheckChange(event:Event):void{
+            	//we save the user choice about automatically open datacenetr after creation
+                AbiCloudModel.getInstance().configurationManager.modifyRegisteredSharedObject("automaticOpenVirtualApp",CheckBox(event.currentTarget).selected);   
+            }
+        ]]>
+    </mx:Script>
+
+
+    <mx:Form paddingTop="3">
+
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                height="20"
+                maxChars="29"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_VIRTUALDATACENTER')"
+            required="true">
+            <mx:ComboBox id="virtualDataCenterInput"
+                height="18"
+                labelField="name"
+                dataProvider="{AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters}"
+                change="validateForm()"
+                prompt="@Resource(bundle='VirtualAppliance', key='COMBOBOX_PROMPT_VIRTUALDATACENTER')"/>
+        </mx:FormItem>
+
+        <!-- This field is currently disabled. To enable it,
+             just delete visible="false"  -->      
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_PUBLIC')"
+            visible="false" includeInLayout="false">
+            <mx:CheckBox id="publicInput"/>
+        </mx:FormItem>
+        
+        <mx:FormItem
+        	visible="{automaticOpenCheckIsEnable}"
+        	includeInLayout="{automaticOpenCheckIsEnable}">
+	    	<mx:CheckBox id="automaticOpenCheck" 
+	    		label="@Resource(bundle='VirtualAppliance',key='LABEL_VIRTUAL_AUTOMATIC_OPEN')"
+	    		change="onAutomaticOpenCheckChange(event)"/>
+	    </mx:FormItem>
+
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="onCancel(true)"/>
+        </mx:FormItem>
+    </mx:Form>
+</AbiCloudPopUp>

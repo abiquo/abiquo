@@ -1,0 +1,196 @@
+<!-- saved from url=(0014)about:internet -->
+<html lang="en">
+
+<!-- 
+Smart developers always View Source. 
+
+This application was built using Adobe Flex, an open source framework
+for building rich Internet applications that get delivered via the
+Flash Player or to desktops via Adobe AIR. 
+
+Learn more about Flex at http://flex.org 
+// -->
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Cache-control" content="no-cache">
+<title>${title} - ${appShowVersion}</title>
+<script src="AC_OETags.js" language="javascript"></script>
+<script src="javascriptsupport/remoteaccess.js" language="javascript"></script>
+<script src="javascriptsupport/virtualimage.js" language="javascript"></script>
+<style>
+body { margin: 0px; overflow:hidden }
+</style>
+<script language="JavaScript" type="text/javascript">
+<!--
+// -----------------------------------------------------------------------------
+// Globals
+// Major version of Flash required
+var requiredMajorVersion = ${version_major};
+// Minor version of Flash required
+var requiredMinorVersion = ${version_minor};
+// Minor version of Flash required
+var requiredRevision = ${version_revision};
+// -----------------------------------------------------------------------------
+// -->
+</script>
+</head>
+
+<body scroll="no" onload="onBodyLoad()">
+<script language="JavaScript" type="text/javascript">
+<!--
+// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+var hasProductInstall = DetectFlashVer(6, 0, 65);
+
+// Version check based upon the values defined in globals
+var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+
+
+// Check to see if a player with Flash Product Install is available and the version does not meet the requirements for playback
+if ( hasProductInstall && !hasRequestedVersion ) {
+	// MMdoctitle is the stored document.title value used by the installation process to close the window that started the process
+	// This is necessary in order to close browser windows that are still utilizing the older version of the player after installation has completed
+	// DO NOT MODIFY THE FOLLOWING FOUR LINES
+	// Location visited after installation is complete if installation is required
+	var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+	var MMredirectURL = window.location;
+    document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+    var MMdoctitle = document.title;
+
+	AC_FL_RunContent(
+		"src", "playerProductInstall",
+		"FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
+		"width", "${width}",
+		"height", "${height}",
+		"align", "middle",
+		"id", "${application}",
+		"quality", "high",
+		"bgcolor", "${bgcolor}",
+		"name", "${application}",
+		"allowScriptAccess","sameDomain",
+		"type", "application/x-shockwave-flash",
+		"pluginspage", "http://www.adobe.com/go/getflashplayer"
+	);
+} else if (hasRequestedVersion) {
+	// if we've detected an acceptable version
+	// embed the Flash Content SWF when all tests are passed
+	AC_FL_RunContent(
+			"src", "${swf}",
+			"width", "${width}",
+			"height", "${height}",
+			"align", "middle",
+			"id", "${application}",
+			"quality", "high",
+			"bgcolor", "${bgcolor}",
+			"name", "${application}",
+			"allowScriptAccess","sameDomain",
+			"type", "application/x-shockwave-flash",
+			"pluginspage", "http://www.adobe.com/go/getflashplayer",
+			"allowFullScreen", "true"
+
+	);
+  } else {  // flash is too old or we can't detect the plugin
+    var alternateContent = 'Alternate HTML content should be placed here. '
+  	+ 'This content requires the Adobe Flash Player. '
+   	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+    document.write(alternateContent);  // insert non-flash content
+  }
+// -->
+</script>
+
+<script type="text/javascript">
+      			
+	var flexApplication;
+
+	function onBodyLoad()
+	{
+		//Setting the flexApplication variable that need virtualimage.js
+		flexApplication	= getFlexApplication("${application}");
+		
+		//Setting focus in our Flex application
+		flexApplication.focus()
+	}
+	
+	function getAppShowVersion()
+	{
+		return "${appShowVersion}";
+	}
+
+	function closeBrowser()
+	{
+		var current = window.open('', '_self', '');
+        current.close();
+	}
+	
+	//Helper function to get our Flex Application object in Javascript
+	function getFlexApplication(appName) 
+	{
+        if (navigator.appName.indexOf ("Microsoft") !=-1) 
+        {
+            return window[appName];
+        } 
+        else 
+        {
+            return document[appName];
+        }
+    }
+	
+
+	
+</script>
+
+<noscript>
+  	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+			id="${application}" width="${width}" height="${height}"
+			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+			<param name="movie" value="${swf}.swf" />
+			<param name="quality" value="high" />
+			<param name="bgcolor" value="${bgcolor}" />
+			<param name="allowScriptAccess" value="sameDomain" />
+			<param name="allowFullScreen" value="true" />
+			<embed src="${swf}.swf" quality="high" bgcolor="${bgcolor}"
+				width="${width}" height="${height}" name="${application}" align="middle"
+				play="true"
+				loop="false"
+				quality="high"
+				allowScriptAccess="sameDomain"
+				type="application/x-shockwave-flash"
+				pluginspage="http://www.adobe.com/go/getflashplayer"
+				allowFullScreen="true"
+				>
+			</embed>
+	</object>
+</noscript>
+
+<!-- Place to load support form for Virtual Images -->
+<div id="viFormDiv" style="text-align: center; z-index: 1; width: 300px; height: 150px; position: absolute; top: 50%; left: 50%; margin-left: -150px; margin-top: -80px; 
+						   display: none; background-color: #FFFFFF;
+						   BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid;">
+	<form id="viForm" name="viForm"
+		  style="width: 100%; "
+		  enctype="multipart/form-data" method="post"
+		  target="viFormIframe">
+		<input id="viDiskInfo" name="diskInfo" type="hidden">
+		<br />
+ 		<input id="viDiskFile" name="diskFile" type="file" onchange="onChangeDiskFile();">
+ 		<iframe id="viFormIframe" name="viFormIframe" style="display: none; position:absolute;" src="" onload="return onVirtualImageFormSubmitComplete();"></iframe>
+ 		<iframe id="viDownloadIframe" name="viDownloadIframe" style="display: none; position:absolute;" src=""></iframe>
+ 	</form>
+ 	
+	
+</div>
+
+<!-- Place to load Java applets for Remoting Access -->
+<div id="raDiv" style="display: none; text-align:left; z-index: 1; top: 20; bottom: 10; left: 20; right: 20; position: absolute; background-color: #FFFFFF;">
+
+	<button id="closeButton" type="button" onclick="unloadRemoteAccessJavaClient()"
+	   		style="top: 0; right: -2; z-index: 2; position: absolute;">X</button>
+	<iframe  id="raIframe"  frameborder="0" marginwidth="10"  marginheight="10"
+			 width="100%" height="100%"
+	         scrolling="no"  src=""
+	         style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid; 
+	         		z-index: 1; position: absolute;"></iframe> 
+</div>
+
+</body>
+</html>

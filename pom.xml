@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <!--                                      -->
+    <!--           POM RELATIONSHIPS          -->
+    <!--                                      -->
+
+    <!--      Maven coordinates        -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.abiquo.abicloud</groupId>
+    <artifactId>platform</artifactId>
+    <version>1.7.5-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <!-- Shared Properties -->
+    <properties>
+        <!-- Build properties -->
+        <jdk.version>1.6</jdk.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <tomcat.home>localhost</tomcat.home>
+        <tomcat.port>80</tomcat.port>
+        <tomcat.user>abiquo</tomcat.user>
+        <tomcat.password>abiquo</tomcat.password>
+
+        <!-- Dependences versions -->
+        <spring.version>3.0.5.RELEASE</spring.version>
+        <cxf.version>2.2.6</cxf.version>
+        <netty.version>3.2.0.BETA1</netty.version>
+        <wink.version>1.1-incubating</wink.version> <!-- TODO move to 1.1.2 -->
+        <hibernate.version>3.5.1-Final</hibernate.version>
+        <commonscodec.version>1.4</commonscodec.version>
+        <jackson.version>1.6.1</jackson.version>
+        <catalina.version>6.0.29</catalina.version>        
+    </properties>
+
+    <!-- Aggregations. Common modules -->
+    <modules>
+        <module>vsm</module>
+        <module>database</module>
+        <module>model</module>
+        <module>am</module>
+        <module>server</module>
+        <module>client</module>
+        <module>virtualfactory</module>
+        <module>api</module>
+        <module>commons-amqp</module>
+    </modules>
+
+    <!--                                      -->
+    <!--        PROJECT INFORMATION           -->
+    <!--                                      -->
+    <name>Abiquo Community Edition</name>
+    <url>http://abicloud.org</url>
+    <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>LGPL</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+
+    <!--           BUILD SETTINGS             -->
+    <!--                                      -->  
+    <build>
+        <!-- Running plugins from the PLATFORM POM -->
+        <plugins>
+            <plugin>
+                <inherited>false</inherited>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.5.0</version>
+                <configuration>
+                    <header>${basedir}/header.txt</header>
+                    <failIfMissing>true</failIfMissing>
+                    <aggregate>true</aggregate>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.c</include>
+                        <include>**/*.h</include>
+                    </includes>
+                    <excludes>
+                        <exclude>nomaven-libs/**/*.*</exclude>
+                        <exclude>installer/**/*.*</exclude>
+                        <exclude>deployer/**/*.*</exclude>
+                        <exclude>database/**/*.*</exclude>
+                        <exclude>client/**/*.*</exclude>
+                    </excludes>
+                    <keywords>
+                        <keyword>www.mozilla.org</keyword>
+                    </keywords>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>add-headers</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check-headers</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <wait>true</wait>
+                    <container>
+                        <containerId>tomcat6x</containerId>
+                        <type>remote</type>
+                    </container>
+                    <configuration>
+                        <type>runtime</type>
+                        <properties>
+                            <cargo.tomcat.manager.url>http://${tomcat.home}:${tomcat.port}/manager</cargo.tomcat.manager.url>
+                            <cargo.remote.username>${tomcat.user}</cargo.remote.username>
+                            <cargo.remote.password>${tomcat.password}</cargo.remote.password>
+                        </properties>
+                    </configuration>
+                </configuration>
+            </plugin>
+        </plugins>
+        <!-- Plugin inheritance configuration -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>tomcat-maven-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>maven-jetty-plugin</artifactId>
+                    <configuration>
+                        <scanIntervalSeconds>10</scanIntervalSeconds>
+                        <connectors>
+                            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                                <port>8888</port>
+                                <maxIdleTime>60000</maxIdleTime>
+                            </connector>
+                        </connectors>
+                        <stopKey>foo</stopKey>
+                        <stopPort>9999</stopPort>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>${jdk.version}</source>
+                        <target>${jdk.version}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>integration-tests</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <configuration>
+                                <skip>true</skip>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>**/*Test.java
+                                    </include>
+                                </includes>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.6</version>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <!--                                      -->
+    <!--   ENVIRONMENT SETTINGS               -->
+    <!--                                      -->
+
+    <!-- Community URLs -->
+    <issueManagement>
+        <system>JIRA</system>
+        <url>http://jira.abicloud.org/browse/ABICLOUD</url>
+    </issueManagement>
+    <ciManagement>
+        <system>Hudson</system>
+        <url>http://hudson.abicloud.org/</url>
+        <notifiers>
+            <notifier>
+                <type>mail</type>
+                <sendOnError>true</sendOnError>
+                <sendOnFailure>true</sendOnFailure>
+                <sendOnSuccess>false</sendOnSuccess>
+                <sendOnWarning>false</sendOnWarning>
+                <configuration>
+                    <address>developers@abiquo.com</address>
+                </configuration>
+            </notifier>
+        </notifiers>
+    </ciManagement>
+
+    <!-- Repositories -->
+    <repositories>
+        <repository>
+            <id>maven-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven 1</name>
+            <url>http://download.java.net/maven/1/</url>
+            <layout>legacy</layout>
+        </repository>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven 2</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+        <repository>
+            <id>maven2-repository.maven.org</id>
+            <name>Apache Central Repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jboss</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-snapshot</id>
+            <url>http://snapshots.jboss.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>apache-releases</id>
+            <url>https://repository.apache.org/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>apache-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jasig-m2</id>
+            <name>JASIG Maven2 Repository</name>
+            <url>http://developer.jasig.org/repo/content/repositories/m2</url>
+        </repository>
+        <repository>
+            <id>flex-mojos-repository</id>
+            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>wp5.e-taxonomy.eu</id>
+            <url>http://wp5.e-taxonomy.eu/cdmlib/mavenrepo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <!-- Plugin Repositories -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mc-release</id>
+            <name>Local Maven repository of releases</name>
+            <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>jboss-plugins</id>
+            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>jboss-snapshot-plugins</id>
+            <url>http://snapshots.jboss.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>codehaus-plugins-snapshots</id>
+            <url>http://snapshots.repository.codehaus.org/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>local</id>
+            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <!-- Distribution Management -->
+    <distributionManagement>
+        <repository>
+            <id>artifactory</id>
+            <url>http://artifactory.bcn.abiquo.com/libs-releases-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>artifactory</id>
+            <url>http://artifactory.bcn.abiquo.com/libs-snapshots-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <!-- And profiles -->
+    <profiles>
+        <!-- Profiles defined by OS -->
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <mysql.bin>C:/dev/MySQL/MySQL Server 5.1/bin</mysql.bin>
+                <env.family>win</env.family>
+            </properties>
+        </profile>
+        <profile>
+            <id>nix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <mysql.bin>/usr/bin</mysql.bin>
+                <env.family>nix</env.family>
+            </properties>
+        </profile>
+        <!-- Profiles defined by Environment -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <env>test</env>
+            </properties>
+        </profile>
+        <profile>
+            <id>hudson</id>
+            <properties>
+                <env>hudson</env>
+                <tomcat.home>localhost</tomcat.home>
+                <tomcat.port>8080</tomcat.port>
+                <tomcat.user>admin</tomcat.user>
+                <tomcat.password>admin</tomcat.password>
+                <mysql.bin>/usr/bin</mysql.bin>
+                <env.family>nix</env.family>
+            </properties>
+        </profile>
+        <!-- Profiles defined by target -->
+        <profile>
+            <id>libs</id>
+            <modules>
+                <module>tracer</module>
+                <module>ovfmanager</module>
+                <module>task-service</module>
+                <module>model</module>
+                <module>aimstub</module>
+                <module>commons-amqp</module>
+                <module>system-properties</module>
+            </modules>
+        </profile>
+    </profiles>
+
+</project>

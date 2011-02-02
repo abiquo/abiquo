@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    horizontalAlign="center"
+    paddingBottom="30"
+    paddingLeft="21"
+    paddingRight="20"
+    paddingTop="7"
+    verticalGap="6"
+    styleName="AbiCloudPopUp" verticalScrollPolicy="off"
+    horizontalScrollPolicy="off"
+    preinitialize="onPreInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <!-- *****************************
+         Base components for Pop Ups
+         All Pop Ups used in the application should extend this component,
+         so they can inherit all CSS attributes and common style for Pop Ups
+         ****************************** -->
+
+    <mx:Script>
+        <![CDATA[
+            import mx.core.Application;
+            import mx.controls.Label;
+            import mx.controls.Image;
+            import mx.containers.HBox;
+
+            private var _popUpIcon:Image;
+
+            private var _title:Label;
+
+            private var _titleText:String = "The title for this Pop Up has not been set!";
+
+            private var _iconSource:String = ""; //TODO: Set default icon source
+
+            /**
+             * When a Pop Up preinitializes, we add the common information that will be present
+             * in all Pop Ups: an Icon and a Title
+             **/
+            private final function onPreInitialize():void
+            {
+                //Creating Icon
+                _popUpIcon = new Image();
+                _popUpIcon.source = _iconSource;
+
+                //Creating Title
+                _title = new Label();
+                _title.text = _titleText;
+                _title.styleName = "AbiCloudPopUpTitle";
+
+                //Adding it to the view
+                var header:HBox = new HBox();
+                header.percentWidth = 100;
+                header.setStyle("horizontalAlign", "left");
+                header.addChild(_popUpIcon);
+                header.addChild(_title);
+
+                header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
+                header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
+                this.addChildAt(header, 0);
+
+                //Registering Keyboard events, for standard application behaivor
+                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+            }
+
+            /**
+             * Allows users to drag this AbiCloudPoUp around screen
+             */
+            private function headerMouseDown_handler(mouseEvent:MouseEvent):void
+            {
+                startDrag(false, Application.application.getRect(Application.application));
+            }
+
+            /**
+             * Stops the drag operation over this AbiCloudPopUp
+             */
+            private function headerMouseUp_hanlder(mouseEvent:MouseEvent):void
+            {
+                stopDrag();
+            }
+
+            public function set titleText(text:String):void
+            {
+                this._titleText = text;
+                if (this._title)
+                    this._title.text = this._titleText;
+            }
+
+            public function set iconSource(source:String):void
+            {
+                this._iconSource = source;
+            }
+
+            /**
+             * We replicate here the behaivor described in AbiCloud.mxml, since Events dispatched from a PopUp
+             * do not propagate outside
+             **/
+            protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.keyCode == 13)
+                {
+                    //When users presses the Enter key, it is like a click
+                    keyboardEvent.target.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+                }
+            }
+        ]]>
+    </mx:Script>
+
+</mx:VBox>

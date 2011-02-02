@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://abiquo.com/server/core/infrastructure/nodecollector"
+    xmlns:nc="http://abiquo.com/server/core/infrastructure/nodecollector"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0"
+    attributeFormDefault="qualified"
+    elementFormDefault="qualified">
+
+
+    <!--                                      -->
+    <!--  Definition of all the elements that -->
+    <!--  will be serializated in the         -->
+    <!--  responses                           -->
+    <!--                                      -->
+    <xs:element name="Host" type="nc:HostDto" />
+    <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
+    <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
+    <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
+    <xs:element name="ErrorResponse" type="nc:ErrorResponseDto" />
+
+    <!--                                      -->
+    <!-- Definition of the main complex types -->
+    <!-- defined as Data Transfer Objects     -->
+    <!--                                      --> 
+    <xs:complexType name="HostDto">
+        <xs:annotation>
+            <xs:documentation>
+                The object contains the current needed values of the physical machine capabilities to retrieve
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="nc:ComputerSystemType" >
+                <xs:sequence>
+                    <xs:element name="hypervisor" type="xs:string" nillable="false"/>
+                    <xs:element name="version" type="xs:string" nillable="false" />
+                    <xs:element name="status" type="nc:HostStatusEnumType" nillable="false" />
+                    <xs:element name="statusInfo" type="xs:string" nillable="true" />
+                    <xs:element name="initiatorIQN" type="xs:string" nillable="true" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="VirtualSystemDto">
+        <xs:complexContent>
+            <xs:extension base="nc:ComputerSystemType" >
+                <xs:sequence>
+                    <xs:element name="uuid" type="xs:string" nillable="false" />
+                    <xs:element name="vport" type="xs:long" nillable="false" />
+                    <xs:element name="status" type="nc:VirtualSystemStatusEnumType" nillable="false" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="VirtualSystemCollectionDto">
+        <xs:sequence>
+            <xs:element name="virtualSystems" type="nc:VirtualSystemDto" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="HypervisorEnumTypeDto">
+        <xs:annotation>
+            <xs:documentation>
+                Parametrizes the type of the Hypervisor
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="kvm" />
+            <xs:enumeration value="esxi" />
+            <xs:enumeration value="vbox" />
+            <xs:enumeration value="xen" />
+            <xs:enumeration value="hyperv" />
+            <xs:enumeration value="xenserver" />
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <xs:complexType name="ErrorResponseDto">
+        <xs:sequence>
+            <xs:element name="httpStatus" type="xs:int" />
+            <xs:element name="messageResponse" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <!--                                      -->
+    <!--  Complex helper types                -->
+    <!--                                      -->
+    <xs:complexType name="ComputerSystemType" abstract="true">
+        <xs:annotation>
+            <xs:documentation>
+                Class computer system POJO contains all the shared capabilities for physical and virtual systems
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" nillable="false" />
+            <xs:element name="cpu" type="xs:long" nillable="false" />
+            <xs:element name="ram" type="xs:long" nillable="false" />
+            <xs:element name="resources" type="nc:ResourceType" nillable="true" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ResourceType">
+        <xs:annotation>
+            <xs:documentation>
+                This class represents a resource allocated in a computer system, whatever is virtual or physical.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="elementName" type="xs:string" nillable="false" />
+            <xs:element name="address" type="xs:string" nillable="false" />
+            <xs:element name="resourceType" type="nc:ResourceEnumType" nillable="false" />
+            <xs:element name="resourceSubType" type="xs:anySimpleType" nillable="true" />
+            <xs:element name="units" type="xs:long" nillable="true" />
+            <xs:element name="availableUnits" type="xs:long" nillable="true" />
+            <xs:element name="connection" type="xs:string" nillable="true" />
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <!--                                      -->
+    <!--     Enumerations                     -->
+    <!--                                      -->
+    <xs:simpleType name="ResourceEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="8">
+                <xs:annotation>
+                	<xs:appinfo>
+                		<jaxb:typesafeEnumMember name="STORAGE_DISK" />
+                	</xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="10">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="NETWORK_INTERFACE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="34">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VSWITCH" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="VirtualDiskEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="http://unknown" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="UNKNOWN" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://raw" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="RAW" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://incompatible" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="INCOMPATIBLE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+                        <xs:enumeration value="http://stateful" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="STATEFUL" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VMDK_STREAM_OPTIMIZED" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VMDK_FLAT" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VMDK_MONOLITHIC_SPARSE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VHD_FLAT" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VHD_SPARSE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VDI_FLAT" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="VDI_SPARSE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="QCOW2_FLAT" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="QCOW2_SPARSE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="HostStatusEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="managed" />
+            <xs:enumeration value="not_managed" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="VirtualSystemStatusEnumType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="POWERED_OFF" />
+            <xs:enumeration value="RUNNING" />
+            <xs:enumeration value="PAUSED" />
+        </xs:restriction>
+    </xs:simpleType>
+
+
+</xs:schema>           

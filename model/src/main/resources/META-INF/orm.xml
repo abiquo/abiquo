@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<orm:entity-mappings 
+    version="2.0" 
+    xmlns:orm="http://java.sun.com/xml/ns/persistence/orm" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd ">
+
+    <!-- enterprise -->
+    <orm:entity class="com.abiquo.server.core.enterprise.Enterprise"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.Role"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.User"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.DatacenterLimits"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.Session"></orm:entity>
+    <!-- end: enterprise -->
+
+    <!-- physical infrastructure -->
+    <orm:entity class="com.abiquo.server.core.infrastructure.Datacenter"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.Rack"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.Machine"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.RemoteService"></orm:entity> 
+    <orm:entity class="com.abiquo.server.core.infrastructure.Datastore"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.Repository"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.management.Rasd"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.management.RasdManagement"></orm:entity>    
+    <!-- end: physical infrastructure -->    
+             
+    <!-- networking -->
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkConfiguration"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.VLANNetwork"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.Network"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.Dhcp"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.IpPoolManagement"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkAssignment"></orm:entity>
+    <!-- end: networking -->
+    
+    <!-- cloud infrastructure -->
+    <orm:entity class="com.abiquo.server.core.cloud.Hypervisor"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.VirtualMachine"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.VirtualDatacenter"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.VirtualImage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.VirtualImageConversion"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.Node"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.NodeVirtualImage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.VirtualAppliance"></orm:entity>
+    <!-- end: cloud infrastructure -->
+    
+    <!-- configuration -->
+    <orm:entity class="com.abiquo.server.core.config.License"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.config.SystemProperty"></orm:entity>
+    <!-- end: configuration -->
+    
+    <!-- storage -->
+    <orm:entity class="com.abiquo.server.core.infrastructure.storage.StoragePool"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.storage.VolumeManagement"></orm:entity>
+    <!-- end: storage -->
+    
+    <!-- workload -->
+    <orm:entity class="com.abiquo.server.core.scheduler.EnterpriseExclusionRule"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.scheduler.FitPolicyRule"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.scheduler.MachineLoadRule"></orm:entity>
+    <!-- end:workload -->
+    
+    <!-- statistics -->
+    <orm:entity class="com.abiquo.server.core.statistics.CloudUsage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.statistics.EnterpriseResources"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.statistics.VirtualAppResources"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.statistics.VirtualDatacenterResources"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.statistics.DatacenterResources"></orm:entity>
+    <!-- end : statistics -->   
+    
+    <!-- appliance manager -->
+    <orm:entity class="com.abiquo.server.core.appslibrary.AppsLibrary"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.Category"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.Icon"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
+    <!-- end : appliance manager -->
+    
+    <!-- tasks -->
+    <orm:entity class="com.abiquo.server.core.tasks.Task"/>
+
+</orm:entity-mappings>

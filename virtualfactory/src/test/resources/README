@@ -1,0 +1,105 @@
+OVF Conformance Tests for virtual appliances deployment
+
+I. Description of tests
+
+These tests are provided as an aid in achieving conformance to the Open Virtualization Format in the abicloud WS component. The tests may aid in determining whether an implementation is correctly interpreting the intent of the Open Virtualization Format. Moreover, this tests launches the basic operations called in the abicloud WS as it will be detailed in next sections.
+
+These tests are non-normative and do not constitute a full test of conformance to the OVF Standard.
+
+A. Known abicloud WS non-normative OVF implementation:
+
+- Section 7.1 File references of the OVF specification points out : " Relative-path references and the URL schemes "file", "http", and "https" shall be supported. Other URL schemes should not be used. If no URL scheme is specified, the value of the ovf:href attribute shall be interpreted as a path name of the referenced file that is relative to 
+the location of the OVF descriptor itself", however it was decided to used the notation [repositoryIP:mountedPoint]relativeFilePath. The secion I.B shows an example.
+
+- Section 9.1 Disk Section of the OVF scpecification describes that the ovf:format URI attribute specifies the disk format, however only the vmware disks format are clearyly standarised, therefore the next notation will be used for the non standarised disks format:
+
+KVM: http://kvm
+VBOX: http://vbox
+XEN: http://xen
+
+As stated, the standarised vmware disks formats will be used:
+
+http://www.vmware.com/specifications/vmdk.html#sparse
+http://www.vmware.com/specifications/vmdk.html#compressed
+http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized
+
+- Annotation section, the optional remoteDesktopPort attribute has been added.
+
+B. abicloud WS Conformance Level:
+
+The actual abicloud WS OVF conformance level is 3, since the File attribute of File References section as stated in section I.A does not follow the notation proposed in section 7.1 of the OVF standard.
+
+A. Tests Cases Grouping
+
+The tests are grouped depending on the conformance level intented to reach. As abicloud_WS conformance level is III, the majority of tests will be in this group.
+
+Each test case consists of 2 XML documents (or sets of documents):
+
+1. An OVF describing a VA to deploy
+2. A variation of the previous document
+
+Each XML document is named according to the section of this document in which it occurs. For example, the XML documents for the test in Part II, Section B, Test Case 8 are named:
+
+-IIIB008Create.xml
+-IIIB008Reconfig.xml
+ 
+B. How to use the tests
+
+In order to successfully launch the tests, the next non-normative parameters shall be configured:
+
+1. Virtual disk file. As stated in section I.B the virtual disk file shall follow the notation:
+
+[repositoryIP:mountedPoint]relativeFilePath
+
+For example: [192.168.1.45:/opt/vm_repository/]http___192_168_1_45_5050_rs/mw/AbiquoMW.vdi
+
+In the deploy phase, the repository importer will mount the repository located in the IP 192.168.1.45 and It will copy the file in the physical machine where the hypervisor is located.
+
+2. Disk Section, the format attribute must follow the notation stated in section I.B
+
+3. Remote desktop port attribute “remoteDesktopPort” with the port for the remote desktop service. 
+
+4. Hypervisor specific parameters: The virtualsystemIdentifier attribute describes the hypervisor management IP and the virtualSystemType attribute describes the hypervisors type. As the section 8.1 of the OVF specification states, the vmx-04 is used for VMware techonologie, xen-3 for xen technologie, however as the virtualbox and KVM are not included the next names are proposed:
+
+"KVM" for KVM hypervisor
+"vBox" for VirtualBox hypervisor
+
+C. General tests functionality
+
+The next parameters located in the root test index (tests_index.xml) element are used for the tests execution:
+
+- abicloud_WS_location, the address of the abicloud_WS component
+- request_timeout, the time out time is used in the call operation
+- sleep_time, the sleep time waiting between WS operations
+
+- The test case follows the next execution procedure:
+
+1. First of all, the virtual appliance defined by the *Create.ovf it will be deployed using the CREATE operation towards the abicloud WS defined in the abicloud_WS_location.
+2. The operations power on, pause, resume and power off will be launched.
+3. The reconfiguration, defined by *Reconfig.ovf operation will be launched.
+4. Finally, the test finishes undeploying the virtual appliance.
+
+II. Tests:
+
+A. Basic Tests
+
+1. Case: simple virtual appliance deploy with Virtual Box hypervisor.
+2. Case: simple virtual appliance deploy with KVM hypervisor.
+
+B. Networking Tests. The Virtual appliance deployed relies on an external DHCP service for the IP configuration.
+
+1. Case: simple virtual appliance deploy, with MAC assigned, and Virtual Box hypervisor
+2. Case: simple virtual appliance deploy, with MAC assigned, and KVM hypervisor.
+
+C. iScsi Storage tests.
+
+1. Case: virtual appliance deploy with an iscsi storage resource attached, the reconfiguration operation adds a second resource attached.
+2. Case: virtual appliance deploy with an iscsi storage resource attached, the reconfiguration operation removes the iscsi resource attached.
+6. Case: virtual appliance boots with an iscsi storage resource attached in KVM
+7. case: virtual appliance boots with an iscsi storage resource attached in XEN
+8. cse: virtual appliance boots with an iscsi storage resource attached in vBox
+
+
+
+
+

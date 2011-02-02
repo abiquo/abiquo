@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    horizontalGap="10"
+    paddingTop="10"
+    minWidth="700" minHeight="400"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.IResourceManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.service.RemoteServiceType;
+
+            [Bindable]
+            private var _datacenter:DataCenter;
+
+            //Form to create and modify Remote Services, for the current Datacenter
+            [Bindable]
+            private var _remoteServiceForm:RemoteServiceForm;
+
+            [Bindable]
+            private var _remoteServicesToShow:ArrayCollection;
+
+            public function set datacenter(value:DataCenter):void
+            {
+                this._datacenter = value;
+                showAllRemoteServices();
+            }
+
+            private function onCreationComplete():void
+            {
+                //Registering events for when a RemoteService is created, edited or deleted
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.REMOTE_SERVICE_CREATED,
+                                                                                   onRemoteServiceCreatedOrDeleted);
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.REMOTE_SERVICE_DELETED,
+                                                                                   onRemoteServiceCreatedOrDeleted);
+            }
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                this._remoteServiceForm = new RemoteServiceForm();
+                this._remoteServiceForm.addEventListener("RemoteServiceFormClose",
+                                                         onRemoteServiceFormClose);
+            }
+
+            private function onRemoteServiceCreatedOrDeleted(event:InfrastructureEvent):void
+            {
+                //Updating the RemoteService list that is being shown
+                filterRemoteServiceList();
+            }
+
+            /**
+             * Label function for RemoteServiceType column in RemoteServices Datagrid
+             */
+            private function remoteServiceTypeLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                return RemoteService(item).remoteServiceType.name;
+            }
+
+            /**
+             * Shows all RemoteServices of the current Datacenter
+             */
+            protected function showAllRemoteServices():void
+            {
+                remoteServiceTypesList.selectedIndex = -1;
+
+                if (this._datacenter)
+                    _remoteServicesToShow = this._datacenter.remoteServices;
+                else
+                    _remoteServicesToShow = null;
+            }
+
+            /**
+             * Filters the RemoteService list by the selected RemoteServiceType
+             */
+            private function filterRemoteServiceList():void
+            {
+                if (remoteServiceTypesList.selectedIndex > -1)
+                {
+                    var remoteServicesFiltered:ArrayCollection = new ArrayCollection();
+                    var length:int = this._datacenter.remoteServices.length;
+                    for (var i:int = 0; i < length; i++)
+                    {
+                        if (RemoteService(this._datacenter.remoteServices.getItemAt(i)).remoteServiceType.valueOf == remoteServiceTypesList.selectedItem.valueOf)
+                            remoteServicesFiltered.addItem(this._datacenter.remoteServices.getItemAt(i));
+                    }
+
+                    _remoteServicesToShow = remoteServicesFiltered;
+                }
+                else
+                    _remoteServicesToShow = this._datacenter.remoteServices;
+            }
+
+            private function onClickAddRemoteService():void
+            {
+                PopUpManager.addPopUp(_remoteServiceForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(_remoteServiceForm);
+
+                if (remoteServiceTypesList.selectedIndex > -1)
+                {
+                    _remoteServiceForm.init(_datacenter, remoteServiceTypesList.selectedItem as RemoteServiceType);
+                }
+                else
+                {
+                    _remoteServiceForm.init(_datacenter);
+                }
+
+            }
+
+            private function onClickDeleteRemoteService():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_DELETE_REMOTE_SERVICE_HEADER"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_DELETE_REMOTE_SERVICE_TEXT"),
+                                        Alert.YES | Alert.NO, deleteRemoteService);
+            }
+
+            private function deleteRemoteService(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.DELETE_REMOTE_SERVICE);
+                    event.dataCenter = _datacenter;
+                    event.remoteService = remoteServiceList.selectedItem as RemoteService;
+                    dispatchEvent(event);
+                }
+            }
+
+            private function onClickEditRemoteService():void
+            {
+                PopUpManager.addPopUp(_remoteServiceForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(_remoteServiceForm);
+
+                var remoteServiceToEdit:RemoteService = remoteServiceList.selectedItem as RemoteService;
+                _remoteServiceForm.init(_datacenter, remoteServiceToEdit.remoteServiceType,
+                                        remoteServiceToEdit);
+            }
+
+            private function onClickCheckRemoteService():void
+            {
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CHECK_REMOTE_SERVICE);
+                event.remoteService = remoteServiceList.selectedItem as RemoteService;
+                dispatchEvent(event);
+            }
+
+            private function onRemoteServiceFormClose(event:Event):void
+            {
+                PopUpManager.removePopUp(_remoteServiceForm);
+
+            }
+        ]]>
+    </mx:Script>
+
+    <general:GeneralSubPanel 
+        width="200" height="100%"
+        title="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_REMOTE_SERVICES').toUpperCase()}">
+        <mx:HBox 
+            width="100%" height="23"
+            horizontalGap="2"
+            paddingLeft="5"
+            paddingRight="10"
+            verticalAlign="middle"
+            styleName="GeneralDataPanelTopFullSkin"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            click="showAllRemoteServices()">
+            <mx:Label id="allRemoteServiceTypes"
+                verticalCenter="0"
+                maxWidth="160"
+                text="@Resource(bundle='Infrastructure', key='LABEL_ALL')"/>
+        </mx:HBox>
+
+        <mx:List id="remoteServiceTypesList"
+            width="100%" height="100%"
+            borderStyle="none"
+            dataProvider="{AbiCloudModel.getInstance().infrastructureManager.remoteServiceTypes}"
+            labelField="name"
+            click="filterRemoteServiceList()"/>
+
+        <general:GeneralSubPanelToolBox/>
+    </general:GeneralSubPanel>
+
+    <general:GeneralSubPanel 
+        width="100%" height="100%"
+        verticalGap="-1"
+        title="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_REMOTE_SERVICES_LIST').toUpperCase()}">
+
+        <mx:HBox 
+            width="100%" height="32"
+            horizontalGap="0"
+            paddingLeft="6"
+            paddingRight="6"
+            verticalAlign="middle"
+            styleName="GeneralDataPanelTopFullSkin">
+
+        </mx:HBox>
+
+        <mx:DataGrid id="remoteServiceList"
+            width="100%" height="100%"
+            dataProvider="{_remoteServicesToShow}">
+            <mx:columns>
+                <mx:DataGridColumn 
+                    width="200"
+                    headerText="{'IP / ' + ResourceManager.getInstance().getString('Infrastructure', 'LABEL_DOMAIN_NAME')}"
+                    dataField="domainName"/>
+
+                <mx:DataGridColumn 
+                    width="75"
+                    headerText="@Resource(bundle='Infrastructure', key='LABEL_PORT')"
+                    dataField="port"/>
+
+                <mx:DataGridColumn 
+                    labelFunction="remoteServiceTypeLabelFunction"
+                    headerText="@Resource(bundle='Infrastructure', key='LABEL_TYPE')"/>
+
+                <mx:DataGridColumn 
+                    width="24"
+                    dataField="state"
+                    sortable="false"
+                    resizable="false"
+                    headerText="">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <mx:Canvas 
+                                width="12" height="13">
+                                <mx:Script>
+                                    <![CDATA[
+                                    	import net.undf.abicloud.view.main.CommonAssets;
+                                        import net.undf.abicloud.vo.service.RemoteService;
+                                    ]]>
+                                </mx:Script>
+
+                                <utils:SmoothImage 
+                                    width="14" height="14"
+                                    horizontalCenter="0"
+                                    verticalCenter="0"
+                                    source="{data.status == RemoteService.STATUS_KO ? CommonAssets.genericKO :
+												   CommonAssets.genericOK}"/>
+                            </mx:Canvas>
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:DataGridColumn>
+            </mx:columns>
+        </mx:DataGrid>
+
+        <general:GeneralSubPanelToolBox>
+            <mx:Button id="addButton"
+                styleName="AddButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                click="onClickAddRemoteService()"/>
+
+            <mx:Button id="deleteButton"
+                enabled="{remoteServiceList.selectedIndex > -1}"
+                styleName="RemoveButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                click="onClickDeleteRemoteService()"/>
+
+            <mx:Spacer width="100%"/>
+
+            <mx:Button id="checkRemoteService"
+                styleName="RefreshButtonBig"
+                enabled="{remoteServiceList.selectedIndex > -1}"
+                toolTip="@Resource(bundle='Common', key='BUTTON_CHECK')"
+                click="onClickCheckRemoteService()"/>
+
+            <mx:Button id="editButton"
+                styleName="ConfigurationButton"
+                enabled="{remoteServiceList.selectedIndex > -1}"
+                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                click="onClickEditRemoteService()"/>
+        </general:GeneralSubPanelToolBox>
+    </general:GeneralSubPanel>
+</mx:HBox>

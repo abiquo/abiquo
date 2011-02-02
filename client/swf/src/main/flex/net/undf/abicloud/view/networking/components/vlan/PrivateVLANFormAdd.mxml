@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:privatenetwork="net.undf.abicloud.view.networking.components.privatenetwork.*"
+    titleText="@Resource(bundle='Networking', key='POPUP_TITLE_VLAN_ADD')"
+    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Button;
+            import mx.controls.TextInput;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.networking.Network;
+
+            //The PrivateNetwork where the VLAN will be added
+            private var _network:Network;
+
+            [Bindable]
+            private var _isFormValid:Boolean = false;
+
+            /**
+             * Initializes this component to create a new VLAN
+             */
+            public function init(network:Network):void
+            {
+                _network = network;
+
+                privateNetworkForm.init("");
+
+                privateNetworkForm.nameInput.setFocus();
+                validateForm();
+
+                AbiCloudModel.getInstance().networkingManager.addEventListener(NetworkingEvent.VLAN_CREATED,
+                                                                               onVLANCreated);
+            }
+
+            private function validateForm():void
+            {
+                _isFormValid = privateNetworkForm.isFormValid;
+            }
+
+            private function onVLANCreated(event:NetworkingEvent):void
+            {
+                closeForm();
+            }
+
+            private function onAccept():void
+            {
+                var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.CREATE_VLAN);
+                networkingEvent.network = _network;
+                networkingEvent.networkName = privateNetworkForm.networkName;
+                networkingEvent.networkConfiguration = privateNetworkForm.networkConfiguration;
+                networkingEvent.defaultNetwork = privateNetworkForm.isDefaultNetwork;
+
+                dispatchEvent(networkingEvent);
+            }
+
+            private function closeForm():void
+            {
+                AbiCloudModel.getInstance().networkingManager.removeEventListener(NetworkingEvent.VLAN_CREATED,
+                                                                                  onVLANCreated);
+                dispatchEvent(new Event("vlanFormAddClose"));
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <vlan:PrivateVLANFormItems id="privateNetworkForm"
+        isFormValidChange="validateForm()"/>
+
+    <!-- BUTTONS -->
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center"
+        paddingBottom="10">
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                enabled="{_isFormValid}"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="closeForm()"/>
+        </mx:FormItem>
+    </mx:HBox>
+</general:AbiCloudPopUp>

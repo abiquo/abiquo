@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:datacenter="net.undf.abicloud.view.infrastructure.components.datacenter.*"
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_DATACENTERADD')">
+
+    <mx:Metadata>
+		[Event(name="DatacenterFormAddClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.business.managers.InfrastructureManager;
+        	import mx.resources.ResourceManager;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import mx.binding.utils.BindingUtils;
+        	import mx.binding.utils.ChangeWatcher;
+        	import mx.controls.CheckBox;
+        	import mx.controls.ComboBox;
+            import mx.collections.ArrayCollection;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.service.RemoteServiceType;
+
+            /**
+             * Initialize this component to create a new Datacenter
+             */
+             
+            protected var validURIs:Boolean;
+
+            [Bindable]
+            private var virtualFactoryType:RemoteServiceType;
+
+            [Bindable]
+            private var virtualSystemMonitorType:RemoteServiceType;
+            
+            [Bindable]
+            public var createdDatacenter:DataCenter;
+
+            [Bindable]
+            private var applianceManagerType:RemoteServiceType;
+            
+            //Define Watcher for replicating the IP
+            public var vfWatcher:ChangeWatcher;
+            public var vsmWatcher:ChangeWatcher;
+            public var amWatcher:ChangeWatcher;
+            
+
+            public function init():void
+            {
+                nameInput.text = "";
+                situationInput.text = "";
+                
+                //Check if all remote services URIs are well formed
+                BindingUtils.bindSetter(uriChange,virtualFactoryInput,"isUriValid");
+                BindingUtils.bindSetter(uriChange,virtualSystemMonitorInput,"isUriValid");
+                BindingUtils.bindSetter(uriChange,applianceManagerInput,"isUriValid");
+
+                if (!virtualFactoryType)
+                    virtualFactoryType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_FACTORY);
+                if (!virtualSystemMonitorType)
+                    virtualSystemMonitorType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+                if (!applianceManagerType)
+                    applianceManagerType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.APPLIANCE_MANAGER);
+
+                virtualFactoryInput.init(virtualFactoryType, "");
+                virtualSystemMonitorInput.init(virtualSystemMonitorType, "");
+                applianceManagerInput.init(applianceManagerType, "");
+                
+                if(!AbiCloudModel.getInstance().infrastructureManager.hasEventListener(InfrastructureEvent.DATACENTER_CREATED)){
+                	AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.DATACENTER_CREATED,onClose);
+                }
+                                
+                //check or not the automatic open datacenter after creation depending on previous user choice
+                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenDatacenter");
+
+                validateForm();
+                nameInput.setFocus();
+            }
+            
+            protected function uriChange(value:Boolean):void{
+            	var tmp:Boolean = true
+            	if(!virtualFactoryInput.isUriValid){
+            		tmp = false;
+            	}
+            	if(!virtualSystemMonitorInput.isUriValid){
+            		tmp = false;
+            	}
+            	if(!applianceManagerInput.isUriValid){
+            		tmp = false;
+            	}
+            	
+            	validURIs = tmp;
+            	validateForm();
+            }
+            
+            /**
+             * Manage the user choice
+             */
+            private function onAutomaticOpenCheckChange(event:Event):void{
+            	//we save the user choice about automatically open datacenetr after creation
+                AbiCloudModel.getInstance().configurationManager.modifyRegisteredSharedObject("automaticOpenDatacenter",CheckBox(event.currentTarget).selected);   
+            }
+
+            /**
+             * Activates the Accept Button if the form is valid
+             */
+            protected function validateForm():void
+            {
+                if (nameInput.text.length > 0 && situationInput.text.length > 0 && validURIs)
+                    acceptButton.enabled = true;
+
+                else
+                    acceptButton.enabled = false;
+            }
+
+            protected function onAccept():void
+            {
+                var datacenter:DataCenter = new DataCenter();
+                datacenter.name = nameInput.text;
+                datacenter.situation = situationInput.text;
+                datacenter.remoteServices = createRemoteServices();
+
+                //Announcing user wants to create a new Datacenter
+                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CREATE_DATACENTER);
+                infrastructureEvent.dataCenter = datacenter;
+                dispatchEvent(infrastructureEvent);
+            }
+
+            protected function createRemoteServices():ArrayCollection
+            {
+                var remoteServices:ArrayCollection = new ArrayCollection();
+                var remoteService:RemoteService;
+
+                //VirtualFactory
+                remoteService = new RemoteService();
+                remoteService.remoteServiceType = virtualFactoryType;
+                remoteService.protocol = virtualFactoryInput.protocolInput.text;
+                remoteService.domainName = virtualFactoryInput.domainNameInput.text;
+                remoteService.port = Number(virtualFactoryInput.portInput.text);
+                remoteService.serviceMapping = virtualFactoryInput.serviceMappingInput.text;
+                remoteService.name = virtualFactoryInput.formedUri;
+                remoteServices.addItem(remoteService);
+
+                //VirtualSystemMonitor
+                remoteService = new RemoteService();
+                remoteService.remoteServiceType = virtualSystemMonitorType;
+                remoteService.protocol = virtualSystemMonitorInput.protocolInput.text;
+                remoteService.domainName = virtualSystemMonitorInput.domainNameInput.text;
+                remoteService.port = Number(virtualSystemMonitorInput.portInput.text);
+                remoteService.serviceMapping = virtualSystemMonitorInput.serviceMappingInput.text;
+                remoteService.name = virtualSystemMonitorInput.formedUri;
+                remoteServices.addItem(remoteService);
+
+                //ApplianceManager
+                remoteService = new RemoteService();
+                remoteService.remoteServiceType = applianceManagerType;
+                remoteService.protocol = applianceManagerInput.protocolInput.text;
+                remoteService.domainName = applianceManagerInput.domainNameInput.text;
+                remoteService.port = Number(applianceManagerInput.portInput.text);
+                remoteService.serviceMapping = applianceManagerInput.serviceMappingInput.text;
+                remoteService.name = applianceManagerInput.formedUri;
+                remoteServices.addItem(remoteService);
+
+                return remoteServices;
+            }
+
+            /**
+             * We call the close function when the datacenter has been created(event)
+             * or when the user cancel the creation and close the popup(event=null)
+             */
+            private function onClose(event:Event = null):void
+            {
+            	//the datacenter is created
+            	if(event){
+            		createdDatacenter = InfrastructureEvent(event).dataCenter;
+            		dispatchEvent(new Event("DatacenterAdded"))
+            	}else{            		
+		            dispatchEvent(new Event("DatacenterFormAddClose"));     	
+            	}
+            }
+
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+            
+            //Enable/disable watcher if the replicate IP checkbox is selected/unselected
+            protected function enableFieldBinding(event:Event):void{
+            	if(CheckBox(event.currentTarget).selected){
+            		vfWatcher = BindingUtils.bindSetter(updateFields,virtualFactoryInput.domainNameInput, "text");
+            		vsmWatcher = BindingUtils.bindSetter(updateFields, virtualSystemMonitorInput.domainNameInput,"text");
+            		amWatcher = BindingUtils.bindSetter(updateFields, applianceManagerInput.domainNameInput,"text");
+            	}else{
+            		vfWatcher.unwatch();
+            		vsmWatcher.unwatch();
+            		amWatcher.unwatch();
+            	}          
+            }
+            
+            //need to valid all IPs
+            protected function validateAllIPs():void{
+            	virtualFactoryInput.ipValidator.validate();
+            	virtualSystemMonitorInput.ipValidator.validate();
+            	applianceManagerInput.ipValidator.validate();
+            }
+            
+            //Update fields if the data bindings is activate
+            protected function updateFields(value:String):void{
+            	virtualFactoryInput.domainNameInput.text = value;
+            	virtualSystemMonitorInput.domainNameInput.text = value;
+            	applianceManagerInput.domainNameInput.text = value; 
+            	validateAllIPs();            	
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form id="generalForm"
+        paddingTop="3">
+
+        <mx:Label 
+        	styleName="DataCenterFormAddBaseLabel"
+            
+            text="@Resource(bundle='Infrastructure', key='LABEL_GENERAL')"/>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                width="100%" height="20"
+                maxChars="19"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_SITUATION')"
+            required="true">
+            <mx:TextArea id="situationInput"
+                width="100%"
+                maxChars="100"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="10"/>
+
+        <mx:HBox
+        	verticalAlign="middle">
+	        <mx:Label 
+	            styleName="DataCenterFormAddBaseLabel"
+	            text="@Resource(bundle='Infrastructure', key='LABEL_REMOTE_SERVICES')"/>
+	        <mx:CheckBox
+	        	label="@Resource(bundle='Infrastructure', key='LABEL_REPLICATE_IP')"
+	        	labelPlacement="right"
+	        	paddingLeft="130"
+	        	change="enableFieldBinding(event)"/>        	
+        </mx:HBox>
+
+        <datacenter:RemoteServiceFormItem id="virtualFactoryInput"
+            label="{virtualFactoryType.name}"/>
+
+        <datacenter:RemoteServiceFormItem id="virtualSystemMonitorInput"
+            label="{virtualSystemMonitorType.name}"/>
+
+        <datacenter:RemoteServiceFormItem id="applianceManagerInput"
+            label="{applianceManagerType.name}"/>
+    </mx:Form>
+    
+    <mx:HBox 
+    	verticalAlign="middle"
+    	paddingLeft="15">
+    	<mx:Image
+    		id="alertIcon"
+    		creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
+    	<mx:Label text="{ResourceManager.getInstance().getString('Infrastructure','LABEL_DATACENTER_CREATION_WARNING')+' '+AbiCloudModel.getInstance().loginManager.user.enterprise.name}"
+    		styleName="DataCenterCreationWarning"/>
+    </mx:HBox>
+   
+    <mx:HBox 
+    	verticalAlign="middle"
+    	width="100%"
+    	horizontalAlign="center">
+    	<mx:CheckBox id="automaticOpenCheck" 
+    		label="@Resource(bundle='Infrastructure',key='LABEL_DATACENTER_AUTOMATIC_OPEN')"
+    		change="onAutomaticOpenCheckChange(event)"/>
+    </mx:HBox>
+
+    <mx:Form>
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="onClose()"/>
+        </mx:FormItem>
+    </mx:Form>
+</AbiCloudPopUp>

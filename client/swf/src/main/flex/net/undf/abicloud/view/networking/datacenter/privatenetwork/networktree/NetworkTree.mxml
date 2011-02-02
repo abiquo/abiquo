@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="-1"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Metadata>
+		[Event(name="itemSelected", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.collections.ArrayCollection;
+            import mx.core.Application;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.result.ListRequest;
+            import net.undf.abicloud.vo.user.Enterprise;
+
+            private const ENTERPRISES_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberEnterprisesPerPage.value;
+
+
+            private var _datacenter:DataCenter;
+
+            public function set datacenter(value:DataCenter):void
+            {
+                _datacenter = value;
+            }
+
+            [Bindable]
+            private var networkTreeDP:ArrayCollection;
+
+            [Bindable]
+            private var totalNumEnterprises:int;
+
+            private var _selectedItem:Object = null;
+
+            public function get selectedItem():Object
+            {
+                if (_selectedItem is NetworkTreeItem)
+                    return NetworkTreeItem(_selectedItem).enterprise;
+                else
+                    return _selectedItem;
+            }
+
+            public function init():void
+            {
+                _selectedItem = null;
+                cleanFilter();
+            }
+
+            public function requestEnterprises():void
+            {
+                if (_datacenter)
+                {
+                    listRequest.filterLike = enterprisesFilter.text;
+                    listRequest.offset = (paginatorSlider.value - 1) * ENTERPRISES_RESULTS_PER_PAGE;
+
+                    var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_ENTERPRISES_WITH_NETWORKS_IN_DATACENTER);
+                    event.datacenter = _datacenter;
+                    event.listRequest = listRequest;
+                    event.callback = setEnterprises;
+                    dispatchEvent(event);
+                }
+            }
+
+            public function setEnterprises(list:ArrayCollection, totalNumEnterprises:int):void
+            {
+                networkTreeDP = buildNetworkTreeItems(list);
+                this.totalNumEnterprises = totalNumEnterprises;
+            }
+
+            private function buildNetworkTreeItems(enterpriseList:ArrayCollection):ArrayCollection
+            {
+                var length:int = enterpriseList.length;
+                var i:int = 0;
+                var networkTreeItems:ArrayCollection = new ArrayCollection();
+                for (i = 0; i < length; i++)
+                {
+                    networkTreeItems.addItem(new NetworkTreeItem(enterpriseList.getItemAt(i) as Enterprise,
+                                                                 requestPrivateNetworksByEnterprise));
+                }
+
+                return networkTreeItems;
+            }
+
+            private var networkTreeItemRequesting:NetworkTreeItem;
+
+            private function requestPrivateNetworksByEnterprise(networkTreeItem:NetworkTreeItem):void
+            {
+                networkTreeItemRequesting = networkTreeItem;
+                var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_ENTERPRISE);
+                networkingEvent.enterprise = networkTreeItemRequesting.enterprise;
+                networkingEvent.callback = setEnterprisePrivateNetworks;
+                dispatchEvent(networkingEvent);
+            }
+
+            private function setEnterprisePrivateNetworks(privateNetworks:ArrayCollection):void
+            {
+                //The Private Networks of an Enterprises are contained in its Virtual Datacenters
+                networkTreeItemRequesting.virtualDatacenters = privateNetworks;
+
+                //Update the Network Tree
+                networkTreeDP.itemUpdated(networkTreeItemRequesting);
+            }
+
+            private function onClickNetworkTree():void
+            {
+                _selectedItem = networkTree.selectedItem;
+                dispatchEvent(new Event("itemSelected"));
+            }
+
+            /////////////////////////////////////////
+            //FILTERING & PAGINATION
+            private var listRequest:ListRequest;
+
+            private function cleanFilter():void
+            {
+                listRequest = new ListRequest();
+                listRequest.numberOfNodes = ENTERPRISES_RESULTS_PER_PAGE;
+
+                paginatorSlider.value = 1;
+                enterprisesFilter.text = "";
+            }
+
+            private var _isEnterprisesPaginatorMouseDown:Boolean = false;
+
+            private function onMouseDownPaginatorSlider():void
+            {
+                this._isEnterprisesPaginatorMouseDown = true;
+                Application.application.addEventListener(MouseEvent.MOUSE_UP, onMouseUpPaginatorSlider);
+            }
+
+            private function onMouseUpPaginatorSlider(mouseEvent:MouseEvent):void
+            {
+                this._isEnterprisesPaginatorMouseDown = false;
+                Application.application.removeEventListener(MouseEvent.MOUSE_UP,
+                                                            onMouseUpPaginatorSlider);
+                onChangePaginatorSlider();
+            }
+
+            private function onChangePaginatorSlider():void
+            {
+                if (!this._isEnterprisesPaginatorMouseDown)
+                {
+                    requestEnterprises();
+                }
+            }
+
+            private function onKeyDownEnterprisesFilter(event:KeyboardEvent):void
+            {
+                //If user presses the Enter key, we launch the filter
+                if (event.keyCode == 13)
+                {
+                    paginatorSlider.value = 1;
+                    requestEnterprises();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%" height="32"
+        horizontalGap="2"
+        paddingLeft="10"
+        paddingRight="10"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopFullSkin">
+
+        <mx:Image id="networkTreeMagnifier" 
+        	creationComplete="AbicloudUtils.getImageFromStyle('NetworkTreeMagnifier', networkTreeMagnifier)"
+        	/>
+
+        <mx:TextInput id="enterprisesFilter"
+            width="100%" height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            keyDown="onKeyDownEnterprisesFilter(event)"/>
+    </mx:HBox>
+
+    <mx:Tree id="networkTree"
+        width="100%" height="100%"
+        paddingLeft="10"
+        styleName="NetworkTree"
+        dataDescriptor="{new NetworkTreeDataDescriptor()}"
+        dataProvider="{networkTreeDP}"
+        click="onClickNetworkTree()"
+        itemRenderer="net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree.NetworkTreeItemRenderer"
+        disclosureOpenIcon="{CommonAssets.openBranchArrow}"
+        disclosureClosedIcon="{CommonAssets.closeBranchArrow}"/>
+
+    <general:GeneralSubPanelToolBox 
+        width="100%" height="32"
+        bottom="0">
+
+        <mx:Canvas 
+            width="100%" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:Label 
+                top="2"
+                horizontalCenter="0"
+                text="{paginatorSlider.value + ' / ' + 
+				(int(Math.ceil(totalNumEnterprises / ENTERPRISES_RESULTS_PER_PAGE)) > 0 ?
+				int(Math.ceil(totalNumEnterprises / ENTERPRISES_RESULTS_PER_PAGE)) : '1')}"/>
+
+            <mx:HSlider id="paginatorSlider"
+                width="75"
+                bottom="3"
+                horizontalCenter="0"
+                minimum="1" snapInterval="1"
+                maximum="{int(Math.ceil(AbiCloudModel.getInstance().userManager.totalEnterprises / ENTERPRISES_RESULTS_PER_PAGE))}"
+                liveDragging="true" showDataTip="false"
+                change="onChangePaginatorSlider()"
+                mouseDown="onMouseDownPaginatorSlider()"/>
+        </mx:Canvas>
+    </general:GeneralSubPanelToolBox>
+</mx:VBox>

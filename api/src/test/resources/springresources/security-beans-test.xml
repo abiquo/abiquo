@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security" xmlns:beans="http://www.springframework.org/schema/beans"	
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd"
+>
+	<http>
+		<intercept-url pattern="/" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
+		<intercept-url pattern="/**/appslib/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
+		<intercept-url pattern="/admin/enterprises" access="ROLE_SYS_ADMIN" method="POST" />
+		<intercept-url pattern="/admin/enterprises" access="ROLE_SYS_ADMIN" method="DELETE" />
+		<intercept-url pattern="/admin/enterprises/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
+        <intercept-url pattern="/admin/roles/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
+        <intercept-url pattern="/admin/statistics/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
+		<intercept-url pattern="/admin/**" access="ROLE_SYS_ADMIN" />
+		<intercept-url pattern="/cloud/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
+		<intercept-url pattern="/config/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
+		<intercept-url pattern="/config/properties" access="ROLE_SYS_ADMIN" method="POST"/>
+		<intercept-url pattern="/config/properties" access="ROLE_SYS_ADMIN" method="PUT"/>
+		<intercept-url pattern="/config/properties/*" access="ROLE_SYS_ADMIN" method="PUT"/>
+		<intercept-url pattern="/config/properties/*" access="ROLE_SYS_ADMIN" method="DELETE"/>
+		<intercept-url pattern="/**" access="ROLE_NOBODY" />
+		<http-basic />
+		<anonymous granted-authority="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER"/>
+		<remember-me services-ref="tokenService" key="abiquo-auth-key" />
+	</http>
+
+	<authentication-provider>
+		<password-encoder hash="md5" />
+		<jdbc-user-service id="userDetailsService"
+			data-source-ref="dataSource"
+			role-prefix="ROLE_"
+			users-by-username-query="${security.auth.usersQuery}"
+			authorities-by-username-query="${security.auth.rolesQuery}" />
+	</authentication-provider>
+
+	<beans:bean id="tokenService" class="org.springframework.security.ui.rememberme.TokenBasedRememberMeServices">
+		<beans:property name="userDetailsService" ref="userDetailsService" />
+		<beans:property name="alwaysRemember" value="true" />
+		<beans:property name="key" value="abiquo-auth-key" />
+		<beans:property name="cookieName" value="${security.token.cookieName}" />
+		<beans:property name="tokenValiditySeconds" value="${security.token.timeout}" />
+	</beans:bean>
+
+	<beans:bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<beans:property name="location">
+			<beans:value>classpath:security/security.properties</beans:value>
+		</beans:property>
+	</beans:bean>
+</beans:beans>

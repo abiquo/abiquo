@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    paddingTop="10"
+    creationComplete="onCreationComplete()"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:components="net.undf.abicloud.view.infrastructure.components.*"
+    xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
+    xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.main.CommonAssets;
+            import mx.binding.utils.BindingUtils;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.effects.Resize;
+            import mx.events.EffectEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.business.managers.CountdownManager;
+            import net.undf.abicloud.business.managers.InfrastructureManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.infrastructure.components.physicalmachine.PhysicalMachineFormAdd;
+            import net.undf.abicloud.view.infrastructure.components.physicalmachine.PhysicalMachineFormEdit;
+            import net.undf.abicloud.view.infrastructure.components.rack.RackForm;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.infrastructure.InfrastructureElement;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+            import net.undf.abicloud.vo.infrastructure.Rack;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+
+            //Pop Ups
+            private var _rackForm:RackForm;
+
+            //protected var _physicalMachineForm:PhysicalMachineForm;
+
+            protected var physicalMachineFormAdd:PhysicalMachineFormAdd;
+
+            protected var physicalMachineFormEdit:PhysicalMachineFormEdit;
+
+            //Resize effect
+            private var _moreInfoResizeEffect:Resize;
+
+            //The Datacenter to manage its physical infrastructure
+            protected var _dataCenter:DataCenter;
+
+            /////////////////////////////////////
+            //IBodyComponentChildren implementation (in progress...)
+
+            public function cleanView():void
+            {
+                infrastructureSelector.init();
+                virtualMachineList.init();
+
+                hideMoreInfoContainer();
+            }
+
+
+            public function willShow():void
+            {
+                //Listening for updates in the Infrastructure
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureManager.INFRASTRUCTURE_UPDATED,
+                                                                                   onInfrastructureUpdated);
+                                                                                   
+                //Listening for udpates in racks list
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureManager.RACKS_UPDATED,
+                                                                                   checkInfrastructure);
+
+                //Listening for editions in any infrastructure element
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
+                                                                                   infrastructureElementEditedHandler);
+
+                //Retrieving the physical infrastructure
+                if (this._dataCenter)
+                {
+                    /****
+                    * 
+                    * Change the way of retrieving the infrastructure -> escalability
+                    * 
+                    * **/
+                    //We do not retrieve the infrastructure from the server, until this component is shown
+                    /* var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_INFRASTRUCTURE_BY_DATACENTER);
+                    event.dataCenter = this._dataCenter;
+                    dispatchEvent(event);  */
+                    getRacksByDatacenter();                  
+                }
+
+                //Starting background updates
+                startBackgroundUpdates();
+            }
+
+            public function willHide():void
+            {
+                //Unregistering events
+                AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureManager.INFRASTRUCTURE_UPDATED,
+                                                                                      onInfrastructureUpdated);
+                AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureManager.RACKS_UPDATED,
+                                                                                      checkInfrastructure);
+                AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
+                                                                                      infrastructureElementEditedHandler);
+
+                //Stopping background updates
+                stopBackgroundUpdates();
+
+                //Cleaning model
+                AbiCloudModel.getInstance().infrastructureManager.infrastructure = new ArrayCollection();
+            }
+
+            /////////// END IBodyComponentChildren implementation ////////////////
+
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                this._moreInfoResizeEffect = new Resize();
+                this._moreInfoResizeEffect.duration = 300;
+                this._moreInfoResizeEffect.heightFrom = 0;
+                this._moreInfoResizeEffect.heightTo = 160;
+
+                //Creating PopUp's
+                this._rackForm = new RackForm();
+                this._rackForm.addEventListener("RackFormClose", onRackFormClose);
+
+                physicalMachineFormAdd = new PhysicalMachineFormAdd();
+                physicalMachineFormAdd.addEventListener("PhysicalMachineFormAddClose",
+                                                        closePhysicalMachineFormAdd);
+
+                physicalMachineFormEdit = new PhysicalMachineFormEdit();
+                physicalMachineFormEdit.addEventListener("PhysicalMachineFormEditClose",
+                                                         closePhysicalMachineFormEdit);
+            }
+
+            /**
+             * When this component loads for the first time
+             */
+            private function onCreationComplete():void
+            {
+                //Listening for new Infrastructure available in model
+                BindingUtils.bindSetter(setInfrastructure, AbiCloudModel.getInstance().infrastructureManager,
+                                        "infrastructure");
+                                  
+
+                //Listening for updates in datacenter used resources information
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.USED_RESOURCES_BY_DATACENTER_UPDATED,
+                                                                                   onResourcesByDatacenterUpdated);
+            }
+
+            public function set dataCenter(value:DataCenter):void
+            {
+                this._dataCenter = value;
+            }
+            
+            
+            private function getRacksByDatacenter():void{
+            	var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RACKS_BY_DATACENTER);
+                event.dataCenter = this._dataCenter;
+                if(physicalServersFilter.text.length != 0){
+                	event.filters = physicalServersFilter.text;
+                }else{
+                	event.filters = null;
+                }
+                dispatchEvent(event);
+            }
+
+            //////////////////////////////////////////////////////
+            //INFRASTRUCTURE
+
+            /**
+             * Draws the infrastructure available in model
+             */
+            private function setInfrastructure(value:ArrayCollection, preserveState:Boolean = false):void
+            {
+                var element:InfrastructureElement;
+                var array:ArrayCollection = new ArrayCollection();
+                var unassignedPM:ArrayCollection = new ArrayCollection();
+                var length:int = value.length;
+                var i:int;
+                var infrastructureElementFound:Boolean = false;
+                for (i = 0; i < length; i++)
+                {
+                    element = value.getItemAt(i) as InfrastructureElement;
+                    if (element is Rack)
+                        array.addItem(element);
+                    //else if (element is PhysicalMachine && element.assignedTo == null)
+                      //  unassignedPM.addItem(element);
+
+                    //If preserveState, trying to recover the infrastructureElement that we had selected
+                    if (preserveState && !infrastructureElementFound && infrastructureSelector.selectedInfrastructureElement)
+                    {
+                        if (getQualifiedClassName(element) == getQualifiedClassName(infrastructureSelector.selectedInfrastructureElement) && element.id == infrastructureSelector.selectedInfrastructureElement.id)
+                        {
+                            infrastructureSelector.selectedInfrastructureElement = element;
+                            infrastructureElementFound = true;
+                        }
+                    }
+                }
+
+                //infrastructureSelector.racks = array;
+                //infrastructureSelector.unassignedPMList.physicalMachines = unassignedPM;
+
+                if (!preserveState || !infrastructureElementFound)
+                    //infrastructureSelector.selectedInfrastructureElement = null;
+
+                setVirtualMachines(preserveState);
+                
+                //We update the list of rack
+                //infrastructureSelector.racks = AbiCloudModel.getInstance().infrastructureManager.racks;
+                infrastructureSelector.infrastructureTree.customTreeDataProvider = AbiCloudModel.getInstance().infrastructureManager.racks;
+            }
+
+            /**
+             * Handler for when the Infrastructure that this component is drawing
+             * has been updated
+             */
+            private function onInfrastructureUpdated(event:Event):void
+            {
+                //We draw again the infrastructure, but preserving the state of this component
+                setInfrastructure(AbiCloudModel.getInstance().infrastructureManager.infrastructure,
+                                  true);
+            }
+
+            private function onResourcesByDatacenterUpdated(event:Event):void
+            {
+                //Asking for the whole infrastructure, so we can obtain the new information about the used resources
+                checkInfrastructure(null);
+            }
+
+            /**
+             * Handler for infrastructure element editions
+             */
+            private function infrastructureElementEditedHandler(infrastructureEvent:InfrastructureEvent):void
+            {
+                //Redrawing infrastructure to reflect edition
+                //TODO: Improve use of Bindings to not have to redraw the infrastructure (infrastructureTree is the culpable)
+                setInfrastructure(AbiCloudModel.getInstance().infrastructureManager.infrastructure,
+                                  true);
+            }
+
+            /**
+             * When an InfrastructureElement has been selected
+             */
+            private function infrastructureElementSelected():void
+            {
+                //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
+                if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
+                	
+                    showPhysicalMachine();
+                    
+                    //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+                    event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+                    event.callback = setVirtualMachine;
+                    /* if(physicalServersFilter.text.length != 0){
+	                	event.filters = physicalServersFilter.text;
+	                }else{
+	                	event.filters = null;
+	                } */
+                    dispatchEvent(event);
+                }else
+                    //Hiding more info container
+                    hideMoreInfoContainer();
+
+                //Setting the Virtual Machines that will be shown
+                setVirtualMachines(false);
+            }
+            
+            private function setVirtualMachine(value:ArrayCollection):void{
+            	virtualMachineList.virtualMachines = value;
+            }
+
+            /**
+             * Opens a component to create a new Rack
+             */
+            private function addRack():void
+            {
+                PopUpManager.addPopUp(this._rackForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._rackForm);
+                this._rackForm.init(_dataCenter);
+            }
+
+            /**
+             * Closes rackAdd Pop Up
+             **/
+            private function onRackFormClose(event:Event):void
+            {
+                PopUpManager.removePopUp(this._rackForm);
+            }
+
+            /**
+             * Opens a component to create a new Physical Machine
+             */
+            private function addPhysicalMachine():void
+            {
+                if (AbiCloudModel.getInstance().infrastructureManager.racks.length > 0)
+                {
+                    PopUpManager.addPopUp(physicalMachineFormAdd, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(physicalMachineFormAdd);
+                    if (infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is Rack)
+                        physicalMachineFormAdd.init(this._dataCenter, infrastructureSelector.selectedInfrastructureElement as Rack);
+                    else
+                        physicalMachineFormAdd.init(this._dataCenter);
+                }
+                else
+                {
+                 	//Any rack exists, we add one by default   
+                    addRack();
+                }
+
+            }
+
+            private function closePhysicalMachineFormAdd(event:Event = null):void
+            {
+                PopUpManager.removePopUp(physicalMachineFormAdd);
+            }
+
+
+            /**
+             * Opens a component to edit a Rack
+             */
+            private function editRack():void
+            {
+                PopUpManager.addPopUp(this._rackForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._rackForm);
+                this._rackForm.init(this._dataCenter, infrastructureSelector.selectedInfrastructureElement as Rack);
+            }
+
+            /**
+             * Opens a component to create a new Physical Machine
+             */
+            private function editPhysicalMachine():void
+            {
+                PopUpManager.addPopUp(physicalMachineFormEdit, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(physicalMachineFormEdit);
+                physicalMachineFormEdit.init(infrastructureSelector.selectedInfrastructureElement as PhysicalMachine);
+            }
+
+            private function closePhysicalMachineFormEdit(event:Event = null):void
+            {
+                PopUpManager.removePopUp(physicalMachineFormEdit);
+            }
+
+
+            /**
+             * Shows a PhysicalMachine using a PhysicalMachineRenderer component
+             */
+            private function showPhysicalMachine():void
+            {
+                physicalMachineRenderer.init();
+                showMoreInfoContainer(0);
+            }
+
+            /////////////////////////////////////////////////////////
+            //VIRTUAL MACHINES
+
+            /**
+             * Sets the Virtual Machines that will be displayed, depending on the selected Infrastructure Element
+             */
+            private function setVirtualMachines(preserveState:Boolean = false):void
+            {
+                var virtualMachines:ArrayCollection;
+                var currentlySelectedVirtualMachine:VirtualMachine = virtualMachineList.selectedVirtualMachine;
+
+                if (infrastructureSelector.selectedInfrastructureElement)
+                {
+                    if (infrastructureSelector.selectedInfrastructureElement is Rack)
+                        virtualMachines = new ArrayCollection(AbiCloudModel.getInstance().infrastructureManager.getVirtualMachinesByRack(infrastructureSelector.selectedInfrastructureElement as Rack));
+                    else
+                        virtualMachines = new ArrayCollection(AbiCloudModel.getInstance().infrastructureManager.getVirtualMachinesByPhysicalMachine(infrastructureSelector.selectedInfrastructureElement as PhysicalMachine));
+
+                    if (preserveState && currentlySelectedVirtualMachine)
+                    {
+                        //Trying to recover the selected Virtual Machine that we had before
+                        var length:int = virtualMachines.length;
+                        var i:int;
+                        var virtualMachineFound:Boolean = false;
+                        for (i = 0; i < length; i++)
+                        {
+                            if (VirtualMachine(virtualMachines.getItemAt(i)).id == currentlySelectedVirtualMachine.id)
+                            {
+                                currentlySelectedVirtualMachine = virtualMachines.getItemAt(i) as VirtualMachine;
+                                virtualMachineFound = true;
+                                break;
+                            }
+                        }
+
+                        if (!virtualMachineFound)
+                            //The Virtual Machine that we had selected no longer exists
+                            currentlySelectedVirtualMachine = null;
+                    }
+                    else
+                    {
+                        currentlySelectedVirtualMachine = null;
+                    }
+                }
+                else
+                {
+                    //When no infrastructure element is selected, the virtual machines array is empty
+                    virtualMachines = new ArrayCollection();
+                    currentlySelectedVirtualMachine = null;
+                }
+
+
+                //Setting the VirtualMachines in the VirtualMachineManagement component
+                virtualMachineList.virtualMachines = virtualMachines;
+                virtualMachineList.selectedVirtualMachine = currentlySelectedVirtualMachine;
+            }
+
+
+
+            /**
+             * Shows a Virtual Machine, using a VirtualMachineRenderer component
+             **/
+            private function showVirtualMachine():void
+            {
+                virtualMachineRenderer.init();
+                showMoreInfoContainer(1);
+            }
+
+            /**
+             * Performs a petition to refresh Datacenters used resources information
+             */
+            private function refreshDatacenterResources():void
+            {
+                var iE:InfrastructureEvent;
+                if(infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
+                	iE = new InfrastructureEvent(InfrastructureEvent.CHECK_VIRTUAL_INFRASTRUCTURE_STATE);
+                	iE.physicalMachine = PhysicalMachine(infrastructureSelector.selectedInfrastructureElement);                	
+                }else{
+                	iE = new InfrastructureEvent(InfrastructureEvent.UPDATE_USED_RESOURCES_BY_DATACENTER);
+                	iE.dataCenter = this._dataCenter;               	
+                }
+                dispatchEvent(iE);
+            }
+
+
+            /**
+             * Shows the MoreInfoContainer component
+             */
+            protected function showMoreInfoContainer(selectedIndex:int = 0):void
+            {
+                if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._moreInfoResizeEffect.play([ moreInfoContainer ]);
+                }
+
+                moreInfoVS.selectedIndex = selectedIndex;
+            }
+
+            /**
+             * Hides the MoreInfoContainer component
+             */
+            protected function hideMoreInfoContainer():void
+            {
+                if (moreInfoContainer.visible)
+                {
+                    this._moreInfoResizeEffect.addEventListener(EffectEvent.EFFECT_END,
+                                                                onHideMoreInfoContainerEnd);
+                    this._moreInfoResizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onHideMoreInfoContainerEnd(effectEvent:EffectEvent):void
+            {
+                this._moreInfoResizeEffect.removeEventListener(EffectEvent.EFFECT_END,
+                                                               onHideMoreInfoContainerEnd);
+                moreInfoContainer.visible = false;
+                moreInfoVS.selectedIndex = 0;
+            }
+
+            /**
+             * Creates a RDP Session against a Virtual Machine, using properJavaRDP applet
+             */
+            public function initRDPSession(virtualMachine:VirtualMachine):void
+            {
+                var appletURL:String = "properJavaRDP/properJavaRDP.html?vrdpIP=" + virtualMachine.vdrpIP + "&vrdpPort=" + virtualMachine.vdrpPort;
+                navigateToURL(new URLRequest(appletURL), "_blank");
+            }
+
+
+            //////////////////////////////
+            // BACKGROUND UPDATES
+
+            /**
+             * Starts all backgrounds updates that this component may have
+             */
+            public function startBackgroundUpdates():void
+            {
+                //Unregistering previous events that may be registered
+                AbiCloudModel.getInstance().countdownManager.removeEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                                 checkInfrastructure);
+
+                //Registering new events
+                AbiCloudModel.getInstance().countdownManager.addEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                              checkInfrastructure);
+
+                //Starting timer
+                AbiCloudModel.getInstance().countdownManager.startAutoCountdown(AbiCloudModel.getInstance().configurationManager.config.client_infra_InfrastructureUpdateInterval.value);
+            }
+
+            /**
+             * Stops all background automatic updates that this component may have
+             * The background updates can be stopped from outside, since this component can not always control
+             * when they are not longer necessary.
+             */
+            private function stopBackgroundUpdates():void
+            {
+                //Stopping timer
+                AbiCloudModel.getInstance().countdownManager.stopAutoCountdown();
+
+                //Unregistering all events for timer
+                AbiCloudModel.getInstance().countdownManager.removeEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                                 checkInfrastructure);
+            }
+
+            /**
+             * CountdownManager handler
+             */
+            public function checkInfrastructure(event:Event = null):void
+            {
+                getRacksByDatacenter();
+            }
+        ]]>
+    </mx:Script>
+
+
+    <!-- Physical Infrastructure selector -->
+    <general:GeneralSubPanel 
+        width="200" height="100%"
+        title="@Resource(bundle='Infrastructure', key='LABEL_PHYSICAL_INFRASTRUCTURE')">
+
+        <mx:HBox id="physicalServersHeader"
+	        width="100%" height="32"
+	        horizontalGap="0"
+	        paddingLeft="10"
+	        paddingRight="10"
+	        verticalAlign="middle"
+	        styleName="GeneralDataPanelTopFullSkin">
+
+	        <mx:Spacer width="100%"/>
+	        <mx:HBox 
+	            width="100%"
+	            horizontalAlign="right"
+	            horizontalGap="3"
+	            verticalAlign="middle">
+	            <mx:Image source="{CommonAssets.magnifier}"
+	            	click="getRacksByDatacenter()"/>
+	            <mx:TextInput id="physicalServersFilter"
+	                height="20"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+	                enter="getRacksByDatacenter()"/>
+	        </mx:HBox>
+	
+	    </mx:HBox>
+        <components:InfrastructureSelector id="infrastructureSelector"
+            width="100%" height="100%"
+            addRack="addRack()"
+            editRack="editRack()"
+            addPhysicalMachine="addPhysicalMachine()"
+            editPhysicalMachine="editPhysicalMachine()"
+            searchFilter="{physicalServersFilter.text}"
+            infrastructureElementSelected="infrastructureElementSelected()"
+            refreshDatacenterResources="refreshDatacenterResources()"/>
+    </general:GeneralSubPanel>
+
+    <!-- Virtual Machine list, and more info -->
+    <general:GeneralSubPanel 
+        width="100%" height="100%"
+        title="@Resource(bundle='Infrastructure', key='LABEL_VM_UPPERCASE')">
+
+        <virtualmachine:VirtualMachineList id="virtualMachineList"
+            width="100%" height="100%"
+            label="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_VM_UPPERCASE')}"
+            virtualMachineSelected="showVirtualMachine()"/>
+
+        <mx:VBox id="moreInfoContainer"
+            width="100%" height="0"
+            horizontalAlign="center"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalGap="0"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off"
+            visible="false">
+
+            <mx:Button id="hideMoreInfoButton"
+                width="49" height="10"
+                styleName="UpDownButton"
+                click="hideMoreInfoContainer()"/>
+
+            <mx:ViewStack id="moreInfoVS"
+                width="100%" height="100%"
+                creationPolicy="all">
+
+                <physicalmachine:PhysicalMachineRenderer id="physicalMachineRenderer"
+                    width="100%" height="100%"
+                    physicalMachine="{(infrastructureSelector.selectedInfrastructureElement &amp;&amp; infrastructureSelector.selectedInfrastructureElement is PhysicalMachine) ? infrastructureSelector.selectedInfrastructureElement as PhysicalMachine : null}"/>
+
+                <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
+                    width="100%" height="100%"
+                    virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
+            </mx:ViewStack>
+        </mx:VBox>
+    </general:GeneralSubPanel>
+</mx:HDividedBox>

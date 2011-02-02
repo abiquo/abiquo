@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:virtualappliance="net.undf.abicloud.view.virtualappliance.*"
+    xmlns:abicloudblind="net.undf.abicloud.view.general.abicloudblind.*"
+    implements="net.undf.abicloud.view.main.IBodyComponent">
+
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.State;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import net.undf.abicloud.view.main.IBodyComponentChildren;
+            import net.undf.abicloud.events.MainEvent;
+            import mx.events.CloseEvent;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.controls.Alert;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb:ResourceBundle;
+
+            private var _virtualApplianceManagement:VirtualApplianceManagement;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //VirtualApplianceManagement will be opened using an AbicloudBlind
+                this._virtualApplianceManagement = new VirtualApplianceManagement();
+                this._virtualApplianceManagement.percentWidth = 100;
+                this._virtualApplianceManagement.percentHeight = 100;
+            }
+
+            private function onInitialize():void
+            {
+                //Listening for VirtualAppliance selections
+                addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED,
+                                 onVirtualApplianceSelected);
+
+                //Listening for petitions when closing the AbiCloudBlind, catching them before the AbiCloudBlind
+                addEventListener("abiCloudBlindContainer_close", abiCloudBlindClosePetition_handler,
+                                 true);
+            }
+
+
+            /////////////////////////////////////
+            //IBodyComponent implementation (in progress...)
+
+            private var _isShowing:Boolean = false;
+
+            public function bodyComponentWillChange():void
+            {
+                this._isShowing = false;
+
+                //Check if we have unsaved changes
+                if (this._virtualApplianceManagement.isVirtualApplianceModified)
+                {
+                    //We ask user if wants to save changes before quiting
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Main",
+                                                                                    "ALERT_UNSAVED_CHANGES_HEADER"),
+                                            ResourceManager.getInstance().getString("Main",
+                                                                                    "ALERT_UNSAVED_CHANGES_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            onUserAskedToSaveChanges);
+                }
+                else
+                {
+                    makeIBodyComponentChange();
+                }
+            }
+
+
+            public function bodyComponentWillShow():void
+            {
+                this._isShowing = true;
+                virtualDataCenterManagement.willShow();
+            }
+
+            /////////// END IBodyComponent implementation ////////////////
+
+            private function onUserAskedToSaveChanges(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //Saving changes in VirtualApplianceManagement
+                    this._virtualApplianceManagement.saveVirtualAppliance();
+                }
+
+                makeIBodyComponentChange();
+            }
+
+            private function makeIBodyComponentChange():void
+            {
+                //Clean VirtualDatacenterManagement view
+                virtualDataCenterManagement.willHide();
+                virtualDataCenterManagement.cleanView();
+
+                if (abicloudBlind.isBlindOpened)
+                {
+                    abicloudBlind.closeBlind();
+
+                }
+                else
+                {
+                    //Announcing we are ready to be changed
+                    var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                    dispatchEvent(mainEvent);
+                }
+            }
+
+
+            /**
+             * VirtualAppliance selection handler
+             */
+            private function onVirtualApplianceSelected(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                virtualDataCenterManagement.willHide();
+
+                //Open VirtualApplianceManagement inside an AbiCloudBlind
+                this._virtualApplianceManagement.virtualAppliance = virtualApplianceEvent.virtualAppliance;
+                abicloudBlind.openBlind(this._virtualApplianceManagement, true);
+            }
+
+            /**
+             * Handler called when user wants to close VirtualApplianceManagement
+             */
+            private function abiCloudBlindClosePetition_handler(event:Event):void
+            {
+                //if the virtual appliance is modified, avoid
+                //the automatic AbiCloudBlind closing
+                if (this._virtualApplianceManagement.isVirtualApplianceModified && VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).subState.id != State.UNKNOWN)
+                {
+                    event.stopPropagation();
+
+                    //Asking if user wants to save changes to the VirtualAppliance, before exit from this component
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.YES | Alert.NO | Alert.CANCEL,
+                                            askUserSaveVirtualApplianceResponse);
+                }else if(VirtualAppliance(this._virtualApplianceManagement.virtualAppliance).subState.id == State.UNKNOWN && this._virtualApplianceManagement.isVirtualApplianceModified){
+                	
+                	event.stopPropagation();
+
+                    //Inform that changes will be discared because of the UNKNOWN status of the virtual applaince
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_UNKNOWN_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_UNSAVED_CHANGES_UNKNOWN_TEXT"),
+                                            Alert.OK,
+                                            askUserSaveVirtualApplianceResponse);
+                }
+            }
+
+            private function askUserSaveVirtualApplianceResponse(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //Saving the current Virtual Appliance
+                    this._virtualApplianceManagement.saveVirtualAppliance();
+
+                    //Closing VirtualApplianceManagement
+                    abicloudBlind.closeBlind();
+
+                }
+                else if (closeEvent.detail == Alert.NO)
+                {
+                    //Closing VirtualApplianceManagement
+                    abicloudBlind.closeBlind();
+                }
+                else if(closeEvent.detail == Alert.OK)
+                {
+                	//Closing VirtualApplianceManagement
+                    abicloudBlind.closeBlind();
+                }else
+                {
+                    //Do nothing. VirtualApplianceManagement will not be closed                	
+                }
+            }
+
+            /**
+             * Handler called when VirtualApplianceManagement is shown
+             * using an AbiCloudBlind component
+             */
+            private function onBlindOpened():void
+            {
+                //VirtualApplianceManagement is ready to be shown
+                this._virtualApplianceManagement.willShow();
+            }
+
+            /**
+             * Handler called when the blind that contains our VirtualApplianceManagement
+             * is closed
+             */
+            private function onBlindClosed():void
+            {
+                this._virtualApplianceManagement.willHide();
+                this._virtualApplianceManagement.cleanView();
+
+                if (this._isShowing)
+                    virtualDataCenterManagement.willShow();
+                else
+                {
+                    //Announcing we are ready to be changed
+                    var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                    dispatchEvent(mainEvent);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+
+    <virtualappliance:VirtualDataCenterManagement id="virtualDataCenterManagement"
+        width="100%" height="100%"/>
+
+    <!-- AbiCloudBlind, to open the VirtualAppliance Management -->
+    <abicloudblind:AbiCloudBlind id="abicloudBlind"
+        left="5" right="5" top="0" bottom="5"
+        blindOpened="onBlindOpened()"
+        blindClosed="onBlindClosed()"/>
+</mx:Canvas>

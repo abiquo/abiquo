@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    width="100%" height="23"
+    styleName="MainFooterSkin"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    horizontalScrollPolicy="off"
+
+    >
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	
+            import mx.resources.ResourceManager;
+            import mx.controls.Alert;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import flash.net.navigateToURL;
+            import mx.binding.utils.ChangeWatcher;
+            import mx.core.Application;
+            import mx.resources.ResourceBundle;
+            import mx.managers.PopUpManager;
+            import net.undf.abicloud.view.main.components.notification.NotificationList;
+            import mx.effects.Resize;
+            import mx.binding.utils.BindingUtils;
+            import net.undf.abicloud.model.AbiCloudModel;
+
+            private var _numUnreadNotifications:int = 0;
+
+            private var _notificationList:NotificationList;
+
+            [ResourceBundle("Main")]
+            private var rb:ResourceBundle;
+
+            private function onCreationComplete():void
+            {
+                this._notificationList = new NotificationList();
+                this._notificationList.addEventListener("closeNotificationList",
+                                                        closeNotificationList);
+
+                BindingUtils.bindSetter(numUnreadNotificationsChanged, AbiCloudModel.getInstance().notificationManager,
+                                        "numUnreadNotifications");
+                ChangeWatcher.watch(AbiCloudModel.getInstance().notificationManager,
+                                    "isServerUnreachable", onIsServerUnreachableChange);
+            }
+
+            private function numUnreadNotificationsChanged(value:int):void
+            {
+                if (this._numUnreadNotifications < value)
+                    //There is a new unread notification. Animating the alert icon
+                    alertGlowImage.play([ alertIcon ]);
+
+                this._numUnreadNotifications = value;
+            }
+
+            private function onIsServerUnreachableChange(event:Event):void
+            {
+                if (AbiCloudModel.getInstance().notificationManager.isServerUnreachable)
+                    noLineGlowImage.play([ noLineIcon ]);
+            }
+
+            private function onClickNotificationsLabel():void
+            {
+                PopUpManager.addPopUp(this._notificationList, Application.application.document as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._notificationList);
+            }
+
+            private function closeNotificationList(event:Event):void
+            {
+                PopUpManager.removePopUp(this._notificationList);
+            }
+
+            private function onClickAbiquoLink():void
+            {
+                var url:String = "http://www.abiquo.com";
+                navigateToURL(new URLRequest(url), "_blank");
+            }
+
+            private function onClickDocumentationLink():void
+            {
+                var url:String = "http://community.abiquo.com";
+                navigateToURL(new URLRequest(url), "_blank");
+            }
+
+            private function onClickSupportLink():void
+            {
+                //Loading the text file
+                var loader:URLLoader = new URLLoader();
+                loader.addEventListener(Event.COMPLETE, loadSupportFileCompleteHandler);
+                loader.addEventListener(IOErrorEvent.IO_ERROR, loadSupportFileErrorHandler);
+                loader.load(new URLRequest("config/Support_Alert.txt"));
+            }
+
+            private function loadSupportFileCompleteHandler(event:Event):void
+            {
+                //Showing the text included in the file
+                AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Main",
+                                                                                       "ALERT_SUPPORT_TITLE"),
+                                               ResourceManager.getInstance().getString("Main",
+                                                                                       "ALERT_SUPPORT_HEADER"),
+                                               URLLoader(event.currentTarget).data.toString(),
+                                               Alert.OK,
+                                               null);
+            }
+
+            private function loadSupportFileErrorHandler(ioErrorEvent:IOErrorEvent):void
+            {
+                //The Support_Alert.txt file is missing!!
+            }
+
+            private function onClickAboutLink():void
+            {
+                //Loading the text file
+                var loader:URLLoader = new URLLoader();
+                loader.addEventListener(Event.COMPLETE, loadAboutFileCompleteHandler);
+                loader.addEventListener(IOErrorEvent.IO_ERROR, loadAboutFileErrorHandler);
+                loader.load(new URLRequest("config/About_Alert.txt"));
+            }
+
+            private function loadAboutFileCompleteHandler(event:Event):void
+            {
+                //Showing the text included in the file
+                AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Main",
+                                                                                       "ALERT_ABOUT_TITLE"),
+                                               ResourceManager.getInstance().getString("Main",
+                                                                                       "ALERT_ABOUT_HEADER"),
+                                               URLLoader(event.currentTarget).data.toString(),
+                                               Alert.OK,
+                                               null);
+            }
+
+            private function loadAboutFileErrorHandler(ioErrorEvent:IOErrorEvent):void
+            {
+                //The Support_Alert.txt file is missing!!
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Glow id="alertGlowImage"
+        color="#FFBF00"
+        duration="1000"
+        alphaFrom="1.0"
+        alphaTo="0.3"
+        blurXFrom="0.0"
+        blurXTo="50.0"
+        blurYFrom="0.0"
+        blurYTo="50.0"/>
+
+    <mx:Glow id="noLineGlowImage"
+        color="#CCCCCC"
+        duration="1000"
+        alphaFrom="1.0"
+        alphaTo="0.3"
+        blurXFrom="0.0"
+        blurXTo="50.0"
+        blurYFrom="0.0"
+        blurYTo="50.0"/>
+
+    <!-- <mx:Label text="Todos los derechos reservados por Abiquo, S.L." styleName="footerText" height="18"/> -->
+
+    <mx:Label 
+        height="18"
+        styleName="footerText" text="{'v.' + AbiCloudModel.getInstance().appVersion}"/>
+
+    <!-- About link -->
+
+    <mx:VRule 
+        width="8" height="90%"
+        styleName="FooterVRule1"
+        />
+
+    <mx:Label id="aboutLink"
+        height="18"
+        styleName="footerText" text="@Resource(bundle='Main', key='LABEL_ABOUT')"
+        buttonMode="true"
+        useHandCursor="true"
+        mouseChildren="false"
+        rollOver="aboutLink.setStyle('textDecoration', 'underline')"
+        rollOut="aboutLink.setStyle('textDecoration', 'none')"
+        click="onClickAboutLink()"/>
+
+    <!-- DOCUMENTATION AND SUPPORT BUTTONS MOVED TO HEADER
+         <mx:VRule height="90%" width="8" strokeColor="#999999" strokeWidth="1"/>
+
+         <mx:Label id="documentationLink"
+         styleName="footerText" height="18"
+         buttonMode="true" useHandCursor="true" mouseChildren="false"
+         rollOver="documentationLink.setStyle('textDecoration', 'underline')" rollOut="documentationLink.setStyle('textDecoration', 'none')"
+         text="@Resource(bundle='Main', key='LABEL_DOCUMENTATION')"
+         click="onClickDocumentationLink()"/>
+
+         <mx:VRule height="90%" width="8" strokeColor="#999999" strokeWidth="1"/>
+
+         <mx:Label id="supportLink"
+         styleName="footerText" height="18"
+         buttonMode="true" useHandCursor="true" mouseChildren="false"
+         rollOver="supportLink.setStyle('textDecoration', 'underline')" rollOut="supportLink.setStyle('textDecoration', 'none')"
+         text="@Resource(bundle='Main', key='LABEL_SUPPORT')"
+         click="onClickSupportLink()"/> -->
+
+    <mx:Spacer width="100%"/>
+
+    <mx:HBox id="notificationsBox"
+        height="100%"
+        horizontalGap="0"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalAlign="middle">
+
+        <utils:SmoothImage id="alertIcon"
+            creationComplete="AbicloudUtils.getImageFromStyle('FooterAlertIcon', alertIcon)"
+            visible="{AbiCloudModel.getInstance().notificationManager.numUnreadNotifications > 0}"/>
+
+        <mx:Label id="notificationsLabel"
+            styleName="footerText"
+            text="{AbiCloudModel.getInstance().notificationManager.numUnreadNotifications + '  ' +
+						 ResourceManager.getInstance().getString('Main', 'LABEL_UNREAD_NOTIFICATIONS')}"
+            useHandCursor="true"
+            mouseChildren="false"
+            buttonMode="true"
+            rollOver="notificationsLabel.setStyle('textDecoration', 'underline')"
+            rollOut="notificationsLabel.setStyle('textDecoration', 'none')"
+            click="onClickNotificationsLabel()"/>
+    </mx:HBox>
+
+    <mx:HBox 
+        height="100%"
+        horizontalGap="0"
+        paddingLeft="6"
+        paddingTop="0"
+        verticalAlign="middle"
+        includeInLayout="{AbiCloudModel.getInstance().countdownManager.clockRunning}"
+        visible="{AbiCloudModel.getInstance().countdownManager.clockRunning}">
+
+        <mx:VRule 
+            height="90%"
+            styleName="FooterVRule1"
+            />
+
+        <mx:Spacer width="6"/>
+
+        <mx:SWFLoader 
+            width="16" height="15"
+            id="clockLoader"
+			creationComplete="AbicloudUtils.getImageFromStyle('FooterClock', clockLoader)"
+            />
+
+        <mx:Label id="countdownLabel"
+            width="18" height="16"
+            text="{AbiCloudModel.getInstance().countdownManager.currentSeconds.toFixed(0)}"
+            styleName="footerText"
+            toolTip="@Resource(bundle='Main', key='LABEL_NEXT_DATA_UPDATE')"/>
+    </mx:HBox>
+
+    <mx:HBox 
+        height="100%"
+        horizontalGap="6"
+        paddingLeft="6"
+        paddingTop="0"
+        verticalAlign="middle"
+        includeInLayout="{AbiCloudModel.getInstance().notificationManager.isServerUnreachable}"
+        visible="{AbiCloudModel.getInstance().notificationManager.isServerUnreachable}">
+
+        <mx:VRule 
+            height="90%"
+            styleName="FooterVRule1"
+            />
+
+        <utils:SmoothImage id="noLineIcon"
+            creationComplete="AbicloudUtils.getImageFromStyle('FooterNoLineIcon', noLineIcon)"
+            toolTip="@Resource(bundle='Main', key='LABEL_NO_SERVER_CONNECTION')"/>
+
+    </mx:HBox>
+
+
+
+
+</mx:HBox>

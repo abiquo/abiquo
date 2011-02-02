@@ -1,0 +1,1317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<EventMap 
+    xmlns="http://mate.asfusion.com/"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+
+
+    <mx:Script>
+        <![CDATA[
+            import com.asfusion.mate.utils.debug.Debugger;
+
+            import net.undf.abicloud.business.Services;
+            import net.undf.abicloud.controller.FaultHandler;
+            import net.undf.abicloud.controller.ResultHandler;
+            import net.undf.abicloud.events.*;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.utils.ScreenBlocker;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.result.DataResult;
+
+            [Bindable]
+            private var services:Services = new Services();
+        ]]>
+    </mx:Script>
+
+
+    <!-- ********************************************************************************************************************* -->
+    <!-- InfrastructureEvent.GET_DATACENTERS ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_DATACENTERS}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getDataCenters"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetDataCenters"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+     <!-- InfrastructureEvent.GET_DATACENTERS ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_ALLOWED_DATACENTERS}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getAllowedDataCenters"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetAllowedDataCenters"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.CREATE_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CREATE_DATACENTER}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="createDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreateDataCenter"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.EDIT_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.EDIT_DATACENTER}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="editDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditDataCenter"
+                    arguments="{[resultObject, event.dataCenter]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.DELETE_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.DELETE_DATACENTER}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="deleteDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleDeleteDataCenter"
+                    arguments="{[resultObject, event.dataCenter]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.GET_HYPERVISOR_TYPES_BY_DATACENTER _____________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_HYPERVISOR_TYPES_BY_DATACENTER}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getHypervisorsTypeByDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetHypervisorTypesByDatacenter"
+                    arguments="{[resultObject, event.dataCenter]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+        <!-- InfrastructureEvent.GET_HYPERVISOR_BY_PHYSICAL_MACHINE _____________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_HYPERVISOR_BY_PHYSICAL_MACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getHypervisorByPhysicalMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetHypervisorByPhysicalMachine"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+    <!-- InfrastructureEvent.GET_INFRASTRUCTURE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_INFRASTRUCTURE_BY_DATACENTER}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getInfrastructureByDataCenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetInfrastructureByDataCenter"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+	<!-- InfrastructureEvent.GET_RACKS_BY_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_RACKS_BY_DATACENTER}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getRacksByDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter.id, event.filters]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetRacksByDatacenter"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.CHECK_INFRASTRUCTURE_BY_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CHECK_INFRASTRUCTURE_BY_DATACENTER}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="checkInfrastructureByDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCheckInfrastructure"
+                    arguments="{[resultObject]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.UPDATE_USED_RESOURCES_BY_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.UPDATE_USED_RESOURCES_BY_DATACENTER}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="updateUsedResourcesByDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleUpdateUsedResourcesByDatacenter"
+                    arguments="{[resultObject, event.dataCenter]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+    <!-- InfrastructureEvent.UPDATE_USED_RESOURCES_BY_DATACENTER ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CHECK_VIRTUAL_INFRASTRUCTURE_STATE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="checkVirtualInfrastructureState"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCheckVirtualInfrastructureState"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- ********************************************************************************************************************* -->
+    <!-- InfrastructureEvent.CREATE_RACK ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.CREATE_RACK}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="createRack"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreateRack"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.DELETE_RACK ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.DELETE_RACK}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="deleteRack"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleDeleteRack"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.EDIT_RACK ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.EDIT_RACK}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="editRack"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditRack"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+
+    <!-- ********************************************************************************************************************* -->
+    <!-- InfrastructureEvent.CREATE_PHYSICALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.CREATE_PHYSICALMACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="createPhysicalMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachineCreation]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreatePhysicalMachine"
+                    arguments="{[resultObject, event.physicalMachineCreation.physicalMachine]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.DELETE_PHYSICALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.DELETE_PHYSICALMACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="deletePhysicalMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleDeletePhysicalMachine"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.EDIT_PHYSICALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.EDIT_PHYSICALMACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="editPhysicalMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachineCreation]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditPhysicalMachine"
+                    arguments="{[resultObject, event.physicalMachineCreation]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+    
+    <!-- InfrastructureEvent.GET_PHYSICALMACHINE_BY_RACK ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_PHYSICALMACHINE_BY_RACK}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getPhysicalMachinesByRack"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.rackId, event.filters]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetPhysicalMachineByRack"
+                    arguments="{[resultObject , event]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+    <!-- InfrastructureEvent.GET_AVAILABLE_PHYSICAL_MACHINE_BY_RACK ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_AVAILABLE_PHYSICAL_MACHINE_BY_RACK}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getAvailablePhysicalMachinesByRack"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.rackId, event.enterpriseId]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetAvailablePhysicalMachineByRack"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+
+    <!-- InfrastructureEvent.ADD_DATASTORE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.ADD_DATASTORE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.datastoreService}"
+            method="createDatastore"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.datastore, event.infrastructureElement.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleAddDatastore"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.EDIT_DATASTORE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.EDIT_DATASTORE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.datastoreService}"
+            method="editDatastore"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.datastore]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditDatastore"
+                    arguments="{[resultObject, event.infrastructureElement, event.datastore]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+    <!-- ********************************************************************************************************************* -->
+    <!-- InfrastructureEvent.CREATE_HYPERVISOR ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.CREATE_HYPERVISOR}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="createHypervisor"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreateHypervisor"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.EDIT_HYPERVISOR ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.EDIT_HYPERVISOR}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="editHypervisor"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditHypervisor"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.DELETE_HYPERVISOR ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.DELETE_HYPERVISOR}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="deleteHypervisor"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleDeleteHypervisor"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>
+
+    <!-- ********************************************************************************************************************* -->
+    <!-- InfrastructureEvent.CREATE_VIRTUALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.CREATE_VIRTUALMACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="createVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreateVirtualMachine"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+    
+	
+	<!-- InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getVirtualMachineByPhysicalMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetVirtualMachineByPhysicalMachine"
+                    arguments="{[resultObject , event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.EDIT_VIRTUALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.EDIT_VIRTUALMACHINE}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="editVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditVirtualMachine"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.START_VIRTUALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.START_VIRTUALMACHINE}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="startVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.PAUSE_VIRTUALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.PAUSE_VIRTUALMACHINE}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="pauseVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.REBOOT_VIRTUALMACHINE ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.REBOOT_VIRTUALMACHINE}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="rebootVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="shutdownVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.FORCE_REFRESH_VIRTUAL_MACHINE_STATE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.FORCE_REFRESH_VIRTUAL_MACHINE_STATE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="forceRefreshVirtualMachineState"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleForceRefreshVirtualMachineState"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- ********************************************************************************************************************* -->
+
+    <!-- InfrastructureEvent.GET_REMOTE_SERVICE_TYPES ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_REMOTE_SERVICE_TYPES}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="getRemoteServiceTypes"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetRemoteServiceTypes"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+
+    <!-- InfrastructureEvent.CREATE_REMOTE_SERVICE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CREATE_REMOTE_SERVICE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="addRemoteService"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCreateRemoteService"
+                    arguments="{[resultObject, event.dataCenter]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.EDIT_REMOTE_SERVICE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.EDIT_REMOTE_SERVICE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="updateRemoteService"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleEditRemoteService"
+                    arguments="{[resultObject, event.dataCenter, event.remoteService]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.DELETE_REMOTE_SERVICE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.DELETE_REMOTE_SERVICE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="deleteRemoteService"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleDeleteRemoteService"
+                    arguments="{[resultObject, event.dataCenter, event.remoteService]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.CHECK_REMOTE_SERVICE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CHECK_REMOTE_SERVICE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="checkRemoteService"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService.idRemoteService]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCheckRemoteService"
+                    arguments="{[resultObject, event.remoteService]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+
+    <!-- InfrastructureEvent.CHECK_REMOTE_SERVICE_BY_URI ___________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.CHECK_REMOTE_SERVICE_BY_URI}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="checkRemoteService"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService.protocol, event.remoteService.domainName, event.remoteService.port, event.remoteService.serviceMapping, event.remoteService.remoteServiceType.valueOf]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleCheckRemoteServiceByURI"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+</EventMap>

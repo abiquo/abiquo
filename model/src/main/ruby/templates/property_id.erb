@@ -1,0 +1,11 @@
+private final static String ID_COLUMN = "<%= @column_id %>";
+
+@Id
+@GeneratedValue
+@Column(name = ID_COLUMN, nullable = false)
+private Integer id;
+
+public Integer getId()
+{
+    return this.id;
+}

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<!--
+     ********************************************
+     Application's dashboard, with direct links and useful information
+     *********************************************
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="net.undf.abicloud.view.main.IBodyComponent"
+    xmlns:components="net.undf.abicloud.view.main.components.*">
+    <mx:Script>
+        <![CDATA[
+        	import mx.controls.Alert;
+            import net.undf.abicloud.events.MainEvent;
+            import net.undf.abicloud.security.SecurableResource;
+            import mx.resources.ResourceManager;
+            import mx.resources.ResourceBundle;
+            import net.undf.abicloud.view.main.components.HeaderButton;
+
+            [ResourceBundle("Main")]
+            private var rb:ResourceBundle;
+
+            /////////////////////////////////////
+            //IBodyComponent implementation (in progress...)
+
+            public function bodyComponentWillChange():void
+            {
+                //We are always ready to be changed
+                var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                dispatchEvent(mainEvent);
+            }
+
+            public function bodyComponentWillShow():void
+            {
+
+            }
+
+            /////////// END IBodyComponent implementation ////////////////
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center"
+        horizontalCenter="0"
+        horizontalGap="0"
+        paddingBottom="0"
+        paddingTop="0"
+        verticalAlign="middle"
+        verticalCenter="0">
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_INFRASTRUCTURE')"
+            headerButton="{new HeaderButton(1)}"
+            imageSource="{CommonAssets.dashboardMenuInfrastructure}"
+            securableResource="{new SecurableResource('INFRASTRUCTURE_BUTTON', 'MAIN')}"/>
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_VIRTUALAPPLIANCE')"
+            headerButton="{new HeaderButton(2)}"
+            imageSource="{CommonAssets.dashboardMenuVirtualApplications}"
+            securableResource="{new SecurableResource('VIRTUALAPP_BUTTON', 'MAIN')}"/>
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_VIRTUALIMAGE')"
+            headerButton="{new HeaderButton(3)}"
+            imageSource="{CommonAssets.dashboardMenuVirtualImages}"
+            securableResource="{new SecurableResource('VIRTUALIMAGE_BUTTON', 'MAIN')}"/>
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_USER')"
+            headerButton="{new HeaderButton(4)}"
+            imageSource="{CommonAssets.dashboardMenuUsers}"
+            securableResource="{new SecurableResource('USER_BUTTON', 'MAIN')}"/>
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_METERING')"
+            headerButton="{new HeaderButton(5)}"
+            imageSource="{CommonAssets.dashboardMenuMetering}"
+            securableResource="{new SecurableResource('METERING_BUTTON', 'MAIN')}"/>
+
+        <components:SecurableDashboardShortcurt 
+            label="@Resource(bundle='Main', key='HEADER_MENU_CONFIG')"
+            headerButton="{new HeaderButton(6)}"
+            imageSource="{CommonAssets.dashboardMenuConfiguration}"
+            securableResource="{new SecurableResource('CONFIG_BUTTON', 'MAIN')}"/>
+    </mx:HBox>
+
+    <!-- OLD VERSION...
+
+         <mx:VBox verticalGap="0" horizontalCenter="0" verticalCenter="0"
+         verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+         <mx:HBox width="100%" height="50%"
+         paddingBottom="0" paddingTop="0">
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(1)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_INFRASTRUCTURE')"
+         imageSource="assets/dashboard/infraestructura.j pg"
+         securableResource="{new SecurableResource('INFRASTRUCTURE_BUTTON', 'MAIN')}"/>
+
+         <mx:VRule height="100%"/>
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(2)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_VIRTUALAPPLIANCE')"
+         imageSource="assets/dashboard/aplicaciones_virtuales.j pg"
+         securableResource="{new SecurableResource('VIRTUALAPP_BUTTON', 'MAIN')}"/>
+
+         <mx:VRule height="100%"/>
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(3)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_VIRTUALIMAGE')"
+         imageSource="assets/dashboard/imagenes_virtuales.j pg"
+         securableResource="{new SecurableResource('VIRTUALIMAGE_BUTTON', 'MAIN')}"/>
+         </mx:HBox>
+
+         <mx:HRule width="100%"/>
+
+         <mx:HBox width="100%" height="50%"
+         paddingBottom="0" paddingTop="0">
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(4)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_USER')"
+         imageSource="assets/dashboard/usuario.j pg"
+         securableResource="{new SecurableResource('USER_BUTTON', 'MAIN')}"/>
+
+         <mx:VRule height="100%"/>
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(5)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_METERING')"
+         imageSource="assets/dashboard/metering.p ng"
+         securableResource="{new SecurableResource('METERING_BUTTON', 'MAIN')}"/>
+
+         <mx:VRule height="100%"/>
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(5)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_CHARTS')"
+         imageSource="assets/dashboard/estadisticas.j pg"
+         enterButtonEnabled="false"
+         securableResource="{new SecurableResource('CHARTS_BUTTON', 'MAIN')}"/>
+
+         <mx:VRule height="100%"/>
+
+         <components:SecurableDashboardShortcurt headerButton="{new HeaderButton(6)}"
+         label="@Resource(bundle='Main', key='HEADER_MENU_CONFIG')"
+         imageSource="assets/dashboard/configuracion.j pg"
+         enterButtonEnabled="false"
+         securableResource="{new SecurableResource('CONFIG_BUTTON', 'MAIN')}"/>
+         </mx:HBox>
+
+         </mx:VBox>
+
+    -->
+</mx:Canvas>

@@ -1,0 +1,18 @@
+<projectDescription>
+  <name>client-theme</name>
+  <comment/>
+  <projects/>
+  <buildSpec>
+    <buildCommand>
+      <name>org.maven.ide.eclipse.maven2Builder</name>
+    </buildCommand>
+    <buildCommand>
+      <name>com.adobe.flexbuilder.project.flexbuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.maven.ide.eclipse.maven2Nature</nature>
+    <nature>com.adobe.flexbuilder.project.flexnature</nature>
+    <nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+  </natures>
+</projectDescription>

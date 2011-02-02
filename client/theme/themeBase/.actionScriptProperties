@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actionScriptProperties mainApplicationPath="main.mxml" version="3">
+<compiler additionalCompilerArguments="-locale en_US" copyDependentFiles="false" enableModuleDebug="true" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="true" htmlPlayerVersion="10.0.0" htmlPlayerVersionCheck="true" outputFolderPath="bin-debug" sourceFolderPath="src" strict="true" useApolloConfig="false" verifyDigests="true" warn="true">
+<compilerSourcePath>
+<compilerSourcePathEntry kind="1" linkType="1" path="src"/>
+</compilerSourcePath>
+<libraryPath defaultLinkType="1">
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/flex/3.4.0.9271/flex-3.4.0.9271.swc" sourcepath="${PROJECT_FRAMEWORKS}/projects/flex/src" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/framework/3.4.0.9271/framework-3.4.0.9271.swc" sourcepath="${PROJECT_FRAMEWORKS}/projects/framework/src" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/rpc/3.4.0.9271/rpc-3.4.0.9271.swc" sourcepath="${PROJECT_FRAMEWORKS}/projects/rpc/src" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/utilities/3.4.0.9271/utilities-3.4.0.9271.swc" sourcepath="${PROJECT_FRAMEWORKS}/projects/utilities/src" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/degrafa/degrafa/3.1/degrafa-3.1.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/framework/3.4.0.9271/framework-3.4.0.9271-en_US.rb.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="C:/Users/GaB/.m2/repository/com/adobe/flex/framework/rpc/3.4.0.9271/rpc-3.4.0.9271-en_US.rb.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="4" path="">
+<excludedEntries>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_agent.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="1" linkType="1" path="${PROJECT_FRAMEWORKS}/locale/{locale}"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_flashflexkit.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/utilities.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/qtp.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/rpc.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/datavisualization.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_dmv.swc" useDefaultLinkType="false"/>
+<libraryPathEntry kind="3" linkType="4" path="${PROJECT_FRAMEWORKS}/libs/framework.swc" useDefaultLinkType="true">
+<crossDomainRsls>
+<crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swz"/>
+<crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swf"/>
+</crossDomainRsls>
+</libraryPathEntry>
+</excludedEntries>
+</libraryPathEntry>
+</libraryPath>
+<sourceAttachmentPath/>
+</compiler>
+<applications>
+<application path="main.mxml"/>
+</applications>
+<modules/>
+<buildCSSFiles>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/infrastructure.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/virtualimage.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/virtualdatacenter.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/logo.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/main.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/ConfigurationComponentsHeartBeat.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/japanese.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/base.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/networking.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/ConfigurationComponentsManagement.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/application.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/metering.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/virtualappliance.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/arialComplete.css"/>
+<buildCSSFileEntry destPath="bin-debug" sourcePath="src/user.css"/>
+</buildCSSFiles>
+</actionScriptProperties>

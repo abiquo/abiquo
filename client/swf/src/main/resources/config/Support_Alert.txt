@@ -1,0 +1,13 @@
+<html>
+<body>
+<ul>
+<li><b>Help:</b> Ask for support in our Q&A <u><a
+href="http://help.abicloud.org" target="_blank">site</a></u></li>
+<li><b>Issues:</b> Submit bugs, requests or improvements to our <u><a
+href="http://jira.abicloud.org" target="_blank">issue manager</a></u></li>
+<li><b>Chat:</b> Join us at <u><a href="http://webchat.freenode.net/?channels=#abiquo" target="_blank">#abiquo</a></u>(irc.freenode.net)</li>
+<li><b>Documentation:</b> Read the <u><a href="http://www.abicloud.org"
+target="_blank">documentation</a></u> and leave comments to improve it</b></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_RACKADD')">
+
+    <mx:Metadata>
+		[Event(name="RackFormClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.managers.PopUpManager;
+            import mx.utils.ObjectUtil;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.vo.infrastructure.Rack;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+            [ResourceBundle("Infrastructure")]
+            private var rb:ResourceBundle;
+
+			[Bindable]
+			protected var _rackFormBasicInfo:RackFormBasicInfo;
+			
+
+			
+			 //The Datacenter where the Rack is assigned
+            protected var _datacenter:DataCenter;
+
+            //The new rack that will be created or edited
+            protected var _rack:Rack;
+            
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //adding the rack basic info creation form
+                this._rackFormBasicInfo = new RackFormBasicInfo();
+                this._rackFormBasicInfo.percentHeight = 100;
+                this._rackFormBasicInfo.percentWidth = 100;
+                toggledContainer.addContent(this._rackFormBasicInfo, ResourceManager.getInstance().getString("User",
+                                                                                "LABEL_GENERAL_INFO"));
+                       
+               
+            }
+            
+           
+
+            /**
+             * Initializes this component, with the data center to which the new rack will be assigned
+             **/
+            public function init(dataCenter:DataCenter, rack:Rack = null):void
+            {
+                this._datacenter = dataCenter;
+                this._rack = rack;
+                 //Cleaning view
+                toggledContainer.selectedIndex = 0;
+                
+                this._rackFormBasicInfo.init(this._datacenter,this._rack); 
+
+                if (this._rack)
+                {
+                    //Editing an existing Rack
+                    titleText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                        "POPUP_TITLE_RACKEDIT");
+                }
+                else
+                {
+                    //Creating a new Rack
+                    titleText = ResourceManager.getInstance().getString("Infrastructure",
+                    													"POPUP_TITLE_RACKADD");
+                   
+                }
+
+            }
+
+
+            /**
+             * When user clicks Accept button, we save the new rack
+             **/
+            protected function onAccept():void
+            {
+                var event:InfrastructureEvent;
+                if (this._rack)
+                {
+                    //We do not modify the original Rack until changes
+                    //are saved in server
+                    var rackToModify:Rack = ObjectUtil.copy(this._rack) as Rack;
+                    rackToModify.name = this._rackFormBasicInfo.nameInput.text;
+                    rackToModify.shortDescription = this._rackFormBasicInfo.shortDescriptionInput.text;
+                    rackToModify.largeDescription = this._rackFormBasicInfo.largeDescriptionInput.text;
+
+                    event = new InfrastructureEvent(InfrastructureEvent.EDIT_RACK);
+                    event.infrastructureElement = rackToModify;
+                }
+                else
+                {
+                    //Creating the rack
+                    this._rack = new Rack();
+                    this._rack.dataCenter = this._datacenter;
+                    this._rack.name = this._rackFormBasicInfo.nameInput.text;
+                    this._rack.shortDescription = this._rackFormBasicInfo.shortDescriptionInput.text;
+                    this._rack.largeDescription = this._rackFormBasicInfo.largeDescriptionInput.text;
+
+                    event = new InfrastructureEvent(InfrastructureEvent.CREATE_RACK);
+                    event.infrastructureElement = this._rack;
+                }
+
+                //Announcing Rack creation or edition
+                dispatchEvent(event);
+
+                //Closing the form
+                dispatchEvent(new Event("RackFormClose"));
+            }
+
+            /**
+             * Cancels Rack creation
+             **/
+            private function onCancel():void
+            {
+                //Closing the form
+                dispatchEvent(new Event("RackFormClose"));
+            }
+
+           
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+            
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                toggledContainer.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                toggledContainer.visible = true;
+            }
+        ]]>
+    </mx:Script>
+    	
+	<mx:Resize id="myResize"
+        duration="800"
+        heightTo="{toggledContainer.viewStack.explicitHeight}"
+        widthTo="{toggledContainer.viewStack.explicitWidth}"
+        tweenStart="onResizeEffectStart()"
+        tweenUpdate="onResizeEffectUpdate()"
+        tweenEnd="onResizeEffectEnd()"/>
+
+    <GeneralToggledContainer id="toggledContainer"
+        width="100%" height="100%"
+        resizeEffect="{myResize}"/>
+       
+    <mx:HBox 
+    	width="100%" height="20"
+        horizontalAlign="center">
+        <mx:Button id="acceptButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+            click="onAccept()"
+            enabled="{this._rackFormBasicInfo.isValid }"/>
+
+         <mx:Button id="cancelButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+            styleName="AlternativeButton"
+            click="onCancel()"/>
+    </mx:HBox>
+    <mx:Spacer height="5"/>
+</AbiCloudPopUp>

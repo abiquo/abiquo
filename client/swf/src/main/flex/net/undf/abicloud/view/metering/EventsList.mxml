@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Metadata>
+		[Event(name="updateEventsList", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.utils.DateUtil;
+
+            import mx.collections.ArrayCollection;
+            import mx.core.Application;
+            import mx.managers.PopUpManager;
+
+            import net.undf.abicloud.business.managers.CountdownManager;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.metering.Meter;
+
+
+            //EventForm component to show the whole Event information
+            private var _eventForm:EventForm;
+
+            //The list of events being displayed
+            [Bindable]
+            private var _eventsList:ArrayCollection;
+
+            private var _autoUpdateTimer:Timer;
+
+            public function set eventsList(value:ArrayCollection):void
+            {
+                this._eventsList = value;
+            }
+
+            //A concrete event selected by the user
+            private var _eventSelected:Meter;
+
+            [Bindable(event="eventSelectedChange")]
+            public function get eventSelected():Meter
+            {
+                return this._eventSelected;
+            }
+
+            private function onInitialize():void
+            {
+                this._autoUpdateTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_metering_meteringUpdateInterval.value,
+                                                  0);
+                this._autoUpdateTimer.addEventListener(TimerEvent.TIMER, updateEventsList);
+
+                //Creating the EventForm
+                this._eventForm = new EventForm();
+                this._eventForm.addEventListener("EventFormClose", onEventFormClose);
+            }
+
+            public function startAutoupdateEventsList():void
+            {
+                AbiCloudModel.getInstance().countdownManager.addEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                              updateEventsList);
+                AbiCloudModel.getInstance().countdownManager.startAutoCountdown(AbiCloudModel.getInstance().configurationManager.config.client_metering_meteringUpdateInterval.value);
+            }
+
+            public function stopAutoupdateEventsList():void
+            {
+                AbiCloudModel.getInstance().countdownManager.stopAutoCountdown();
+                AbiCloudModel.getInstance().countdownManager.removeEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                                 updateEventsList);
+            }
+
+            private function updateEventsList(event:Event):void
+            {
+                dispatchEvent(new Event("updateEventsList"));
+            }
+
+            private function onAutoUpdateCheckBoxChange():void
+            {
+                if (autoUpdateCheckBox.selected)
+                    startAutoupdateEventsList();
+                else
+                    stopAutoupdateEventsList();
+            }
+
+            private function sourceColumnLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                var meter:Meter = item as Meter;
+                if (meter)
+                {
+                    //Building the source
+                    var path:String = meter.enterprise + ' / ' + meter.user + ' / ' + meter.datacenter + ' / ' + meter.rack + ' / ' + meter.physicalMachine + ' / ' + meter.storageSystem + ' / ' + meter.storagePool + ' / ' + meter.volume + ' / ' + meter.virtualDataCenter + ' / ' + meter.virtualApp + ' / ' + meter.virtualmachine + ' / ' + meter.network + ' / ' + meter.subnet + " ";
+
+                    //Replacing two consecutive slashes or null ocurrences
+                    var pattern:RegExp = / null /g;
+                    path = path.replace(pattern, "");
+                    pattern = /\/\//g;
+                    return path.replace(pattern, "");
+                }
+                else
+                    return "";
+            }
+
+            private function dateColumnLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                var meter:Meter = item as Meter;
+
+                return meter.timestamp.split(".")[0];
+            }
+
+            private function onDoubleClickEventsDataGrid():void
+            {
+                if (eventsDataGrid.selectedIndex > -1)
+                {
+                    PopUpManager.addPopUp(this._eventForm, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(this._eventForm);
+
+                    this._eventForm.init(eventsDataGrid.selectedItem as Meter);
+                }
+            }
+
+            private function onEventFormClose(event:Event):void
+            {
+                PopUpManager.removePopUp(this._eventForm);
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- More actions Bar -->
+    <mx:HBox 
+        width="100%" height="32"
+        top="0"
+        paddingLeft="6"
+        paddingRight="6"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopSkin">
+        <mx:CheckBox id="autoUpdateCheckBox"
+            label="@Resource(bundle='Metering', key='LABEL_UPDATE_AUTOMATICALLY')"
+            change="onAutoUpdateCheckBoxChange()"/>
+    </mx:HBox>
+
+    <!-- Data Grid -->
+    <mx:DataGrid id="eventsDataGrid"
+        width="100%"
+        top="31" bottom="31"
+        dataProvider="{this._eventsList}" doubleClickEnabled="true"
+        toolTip="@Resource(bundle='Metering', key='LABEL_DOUBLE_CLICK_SHOW_EVENT')"
+        doubleClick="onDoubleClickEventsDataGrid()">
+
+        <mx:columns>
+            <mx:DataGridColumn id="sourceColumn"
+                minWidth="250" labelFunction="sourceColumnLabelFunction"
+                headerText="@Resource(bundle='Metering', key='LABEL_SOURCE')"/>
+
+            <mx:DataGridColumn id="dateColumn"
+                width="150"
+                labelFunction="dateColumnLabelFunction"
+                headerText="@Resource(bundle='Metering', key='LABEL_DATE')"/>
+
+            <mx:DataGridColumn id="actionPerformedColumn"
+                headerText="@Resource(bundle='Metering', key='LABEL_ACTION_PERFORMED')"
+                dataField="actionperformed"/>
+
+            <mx:DataGridColumn id="performedByColumn"
+                width="100"
+                headerText="@Resource(bundle='Metering', key='LABEL_PERFORMED_BY')"
+                dataField="performedby"/>
+
+            <mx:DataGridColumn id="traceColumn"
+                headerText="@Resource(bundle='Metering', key='LABEL_TRACE')">
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:Canvas 
+                            width="100%" height="100%"
+                            verticalScrollPolicy="off"
+                            horizontalScrollPolicy="off">
+                            <mx:Script>
+                                <![CDATA[
+                                    import net.undf.abicloud.vo.metering.Meter;
+
+                                    [Bindable]
+                                    private var _meter:Meter;
+
+                                    override public function set data(value:Object):void
+                                    {
+                                        super.data = value;
+
+                                        if (value is Meter)
+                                        {
+                                            this._meter = value as Meter;
+                                        }
+                                    }
+                                ]]>
+                            </mx:Script>
+
+                            <mx:Label 
+                                width="100%"
+                                truncateToFit="true"
+                                text="{this._meter.stacktrace}"/>
+                        </mx:Canvas>
+                    </mx:Component>
+                </mx:itemRenderer>
+
+            </mx:DataGridColumn>
+
+            <mx:DataGridColumn id="severityColumn"
+                width="150"
+                headerText="@Resource(bundle='Metering', key='LABEL_SEVERITY')">
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:Canvas 
+                            width="100%" height="100%"
+                            verticalScrollPolicy="off"
+                            horizontalScrollPolicy="off">
+                            <mx:Script>
+                                <![CDATA[
+                                    import mx.controls.Alert;
+                                    import net.undf.abicloud.vo.metering.Meter;
+
+                                    [Bindable]
+                                    private var _meter:Meter;
+
+                                    override public function set data(value:Object):void
+                                    {
+                                        super.data = value;
+
+                                        if (value is Meter)
+                                        {
+                                            this._meter = value as Meter;
+                                            if (severityBar)
+                                            {
+                                                severityBar.setStyle("barColor",
+                                                                     Meter.SEVERITY_SCALE[this._meter.severity].color);
+                                                severityBar.setProgress(Meter.SEVERITY_SCALE[this._meter.severity].value,
+                                                                        6);
+                                            }
+                                        }
+
+                                    }
+                                ]]>
+                            </mx:Script>
+
+                            <mx:ProgressBar id="severityBar"
+                                height="12"
+                                left="5" right="5" top="5"
+                                minimum="0" maximum="6" indeterminate="false"
+                                styleName="MeteringSeverityBar"
+                                mode="manual" label="{this._meter.severity}"
+                                labelPlacement="center"/>
+                        </mx:Canvas>
+                    </mx:Component>
+                </mx:itemRenderer>
+            </mx:DataGridColumn>
+        </mx:columns>
+    </mx:DataGrid>
+
+    <!-- Tool Box -->
+    <mx:HBox 
+        width="100%" height="32"
+        bottom="0"
+        paddingLeft="6"
+        paddingRight="6"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelBottomSkin">
+
+    </mx:HBox>
+</mx:Canvas>

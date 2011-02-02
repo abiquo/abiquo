@@ -1,0 +1,20 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static boolean <%= @upcase %>_REQUIRED = false;
+private final static int <%= @upcase %>_LENGTH_MIN = 0;
+private final static int <%= @upcase %>_LENGTH_MAX = 255;
+private final static boolean <%= @upcase %>_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+private final static String <%= @upcase %>_COLUMN = "<%= @property %>";
+
+@Column( name=<%= @upcase %>_COLUMN, nullable = !<%= @upcase %>_REQUIRED, length=<%= @upcase %>_LENGTH_MAX )
+private String <%= @property %>;
+
+@Required( value=<%= @upcase %>_REQUIRED )
+@Length( min=<%= @upcase %>_LENGTH_MIN, max=<%= @upcase %>_LENGTH_MAX )
+@LeadingOrTrailingWhitespace(allowed=<%= @upcase %>_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)  
+public String get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( String <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

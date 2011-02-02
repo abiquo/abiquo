@@ -1,0 +1,17 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static boolean <%= @upcase %>_REQUIRED = true;
+private final static String <%= @upcase %>_ID_COLUMN = "id<%= @camelcase_first_upcase %>";
+
+@JoinColumn(name=<%= @upcase %>_ID_COLUMN)
+@ManyToOne(fetch=FetchType.LAZY)
+@ForeignKey(name = "FK_" + TABLE_NAME + "_<%= @property %>")
+private <%= @type %> <%= @property %>;
+
+@Required(value=<%= @upcase %>_REQUIRED)
+public <%= @type %> get<%= @camelcase_first_upcase %>() {
+  return this.<%= @property %>;
+}
+  
+public void set<%= @camelcase_first_upcase %>( <%= @type %> <%= @property %> ) {
+  	this.<%= @property %> = <%= @property %>;
+}

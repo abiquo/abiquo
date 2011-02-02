@@ -1,0 +1,238 @@
+A) Abiquo Community Edition License
+
+This licensing file applies to the Abiquo Community Edition software (the "Abiquo Community Eddition")
+
+Abiquo Community Edition is Copyright 2009-2010 Abiquo Holdings S.L. 
+
+This product is free software; you can redistribute it and/or modify it under  the terms of Lesser General Public License  v.3. This product is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A  PARTICULAR PURPOSE. See the Lesser General Public License  v.3 for more details.
+
+You should have received a copy of the Lesser General Public License  v.3 along with this product; if not, write to licensing@abiquo.com. You can also find the terms of the Lesser General Public License  v.3 here: http://www.gnu.org/licenses/lgpl.html
+
+The Initial Developer of the Original Code is Abiquo Holdings S.L. Diagonal 453 bis, 4, 08035 Barcelona, Spain (www.abiquo.com).  
+
+B) Third party libraries included in Abiquo Community Edition source code repository
+
+The programs contained in the folder /nomaven, which are third party software components parts used by the Abiquo Community Edition Software, and provided without modification under the following licenses: 
+
+# vmware-api-1.5.0.jar
+# flex-messaging-common-3.0.jar
+# flex-messaging-core-3.0.jar
+# flex-messaging-opt-3.0.jar
+# flex-messaging-proxy-3.0.jar 
+# flex-messaging-remoting-3.0.jar
+# libvirt-0.3.0.jar
+# vboxws-3.0.8.jar
+These components are distributed under the GNU Lesser Public License (www.gnu.org/licenses/lgpl.html)
+
+# Mate framework
+# wiseman-1.6.jar
+# wiseman-tools-1.0.jar
+These components are distributed under the Apache Software License 2.0 available at http://www.apache.org/licenses/LICENSE-2.0
+
+as3corelib (http://code.google.com/p/as3corelib/)
+This component is distributed under the new BSD license, available at http://www.opensource.org/licenses/bsd-license.php 
+
+You may also obtain a copy of the source code of these components by writing to ... @abiquo.com 
+
+
+C) Third party code in binary release
+
+In addition to the former components, the binary distribution of Abiquo Community Edition aincludes software provided by third parties under their own licensing terms. 
+
+In this distribution, they are: 
+
+abdera-core-0.4.0-incubating.jar             
+abdera-extensions-json-0.4.0-incubating.jar 
+abdera-extensions-main-0.4.0-incubating.jar  
+abdera-i18n-0.4.0-incubating.jar            
+abdera-parser-0.4.0-incubating.jar           
+activation-1.1.jar
+activeio-core-3.1.2.jar
+activemq-core-5.3.0
+activemq-protobuf-1.0
+antlr-2.7.6.jar              
+aopalliance-1.0.jar     
+apache-mime4j-0.5.jar
+axiom-api-1.2.5.jar            
+axiom-impl-1.2.5.jar 
+axis-1.4.jar
+bcel-5.2.jar
+camel-core-1.5.0.jar                         
+cglib-2.1_3.jar 
+cglib-nodep-2.1_3.jar        
+commons-dbcp-1.4.jar 
+commons-events-1.5.0.jar 
+commons-net-2.0.jar 
+commons-pool-1.5.4.jar 
+commons-beanutils-1.7.0.jar                  
+commons-beanutils-core-1.8.0.jar  
+commons-codec-1.4.jar 
+commons-collections-3.2.1.jar  
+commons-configuration-1.6.jar  
+commons-dbcp-1.2.2
+commons-digester-1.8.jar  
+commons-discovery-0.4.jar                  
+commons-events-1.5.0
+commons-httpclient-3.1.jar                      
+commons-lang-2.4.jar                             
+commons-logging-1.0.4.jar   
+commons-logging-1.1.1.jar                        
+commons-logging-api-1.1.jar                      
+commons-net-1.4.1.jar
+commons-net-2.0.jar                             
+commons-pool-1.3
+config-manager-1.5.0.jar 
+config-manager-premium-1.5.0.jar 
+cxf-api-2.2.6.jar 
+cxf-common-schemas-2.2.6.jar 
+cxf-common-utilities-2.2.6.jar 
+cxf-rt-bindings-xml-2.2.6.jar 
+cxf-rt-core-2.2.6.jar 
+cxf-rt-databinding-aegis-2.2.6.jar 
+cxf-rt-frontend-jaxrs-2.2.6.jar 
+cxf-rt-transports-http-2.2.6.jar 
+cxf-rt-transports-http-jetty-2.2.6.jar 
+ehcache-1.2.3.jar 
+ejb3-persistence-1.0.2.GA.jar 
+geronimo-activation_1.1_spec-1.0.2.jar           
+geronimo-annotation_1.0_spec-1.1.1.jar           
+geronimo-j2ee-management_1.0_spec-1.0.jar        
+geronimo-j2ee-management_1.1_spec-1.0.1
+geronimo-javamail_1.4_spec-1.6.jar               
+geronimo-jms_1.1_spec-1.1.1.jar                  
+geronimo-servlet_2.5_spec-1.2.jar                
+geronimo-stax-api_1.0_spec-1.0.1.jar  
+httpclient-4.0-beta2.jar              
+httpcore-4.0-beta3.jar                
+httpmime-4.0-beta2.jar
+jackson-core-asl-1.2.0.jar 
+jackson-core-asl-1.4.3.jar            
+jackson-jaxrs-1.2.0.jar 
+jackson-jaxrs-1.4.3.jar               
+jackson-mapper-asl-1.2.0.jar 
+jackson-mapper-asl-1.4.3.jar          
+jackson-xc-1.2.0.jar 
+jackson-xc-1.4.3.jar                  
+jakarta-regexp-1.4.jar    
+jaxb-api-2.0.jar 
+jaxb-api-2.1.jar                      
+jaxb-impl-2.1.9.jar 
+jaxb-impl-2.1.12.jar                  
+jettison-1.0.1.jar             
+jetty-6.1.21.jar                      
+jetty-util-6.1.21.jar                 
+logback-classic-0.9.11.jar            
+logback-core-0.9.11.jar  
+kahadb-5.3.0
+netty-3.2.0.BETA1
+neethi-2.0.4.jar
+oro-2.0.8.jar
+quartz-1.6.3.jar
+servlet-api-2.5.jar   
+spring-aop-3.0.1.RELEASE.jar 
+spring-asm-3.0.1.RELEASE.jar 
+spring-aspects-3.0.1.RELEASE.jar 
+spring-beans-3.0.1.RELEASE.jar 
+spring-context-3.0.0.RELEASE.jar 
+spring-context-3.0.1.RELEASE.jar 
+spring-context-support-3.0.1.RELEASE.jar 
+spring-core-3.0.1.RELEASE.jar 
+spring-dao-2.0.8.jar 
+spring-expression-3.0.0.RELEASE.jar 
+spring-expression-3.0.1.RELEASE.jar 
+spring-hibernate3-2.0.8.jar 
+spring-jdbc-3.0.1.RELEASE.jar 
+spring-jms-3.0.0.RELEASE.jar 
+spring-jpa-2.0.8.jar 
+spring-orm-3.0.1.RELEASE.jar 
+spring-test-3.0.1.RELEASE.jar 
+spring-tx-3.0.1.RELEASE.jar 
+spring-web-3.0.1.RELEASE.jar 
+stax2-api-3.0.1.jar
+stax-api-1.0.1.jar
+velocity-1.4.jar  
+velocity-dep-1.4.jar
+wiseman-1.6.jar
+wiseman-tools-1.0.jar
+woodstox-core-asl-4.0.4.jar
+wstx-asl-3.2.9.jar 
+xml-apis-1.0.b2.jar
+xmlbeans-2.4.0.jar
+XmlSchema-1.4.5.jar
+
+All files under Apache Software License 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+
+slf4j-api-1.5.6.jar    
+slf4j-jdk14-1.5.8.jar
+slf4j-simple-1.5.6.jar   
+All files under the MIT license, available at http://www.slf4j.org/license.html
+
+# dom4j-1.4.jar 
+Under a BSD style license  (available at http://www.dom4j.org/license.html) 
+  
+                        
+# C hash table   (http://www.cl.cam.ac.uk/~cwc22/hashtable/bsd-license.txt)
+# jaxen-1.1.1.jar
+# jwbem-0.0.1                   
+# OpenWSMAN (http://www.openwsman.org/project/openwsman/license)
+Under the new BSD license, also available at http://opensource.org/licenses/bsd-license.php
+
+
+# jsr311-api-1.0.jar
+# jsr173_api-1.0
+# jta-1.1.jar              
+# jaxrpc-api-1.1.jar             
+# saaj-api-1.3.jar  
+# saaj-impl-1.3.jar             
+
+All files under the CDDL (license available at http://opensource.org/licenses/cddl1.php)
+
+# wsdl4j-1.6.2.jar
+under the EPL (license available at http://opensource.org/licenses/eclipse-1.0.php)
+
+         
+# hibernate-c3p0-3.3.1.GA.jar
+# hibernate-3.2.5.ga.jar 
+# hibernate-annotations-3.4.0.GA.jar 
+# hibernate-commons-annotations-3.1.0.GA.jar 
+# hibernate-entitymanager-3.4.0.GA.jar           
+# hibernate-core-3.3.1.GA.jar
+# c3p0-0.9.1.jar    
+# javassist-3.4.GA.jar    
+# jna-3.0.9.jar  
+# jcifs-1.2.19.jar 
+# imageconverter-bpm-service-1.5.0.jar            
+
+All files under the LGPL 2.1 (available at www.gnu.org/licenses/lgpl.html)
+
+# dom4j-1.4.jar 
+Under a BSD style license  (available at http://www.dom4j.org/license.html) 
+
+# Curl
+Under the MIT license  (license available at http://curl.haxx.se/docs/copyright.html) 
+
+# OpenSSL
+under the OpenSSL license at http://www.openssl.org/source/license.html
+
+
+In addition, the distribution image includes 
+# tightvnc 
+# properJavaRDP 
+under the GPL license (available at www.gnu.org/licenses/gpl.html)
+
+# mysql-connector-java-5.1.6.jar     
+under the GPL2 with Floss exception license
+
+
+The license files for this third party software are available in the “legal” folder of this distribution. 
+
+D) Notices
+This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/)
+This product includes software written by Tim Hudson (tjh@cryptsoft.com)
+SSLeay License is Copyright (C) 1995-1998 Eric Young
+
+E) Access to source code: 
+You may obtain a copy of the source code of these components by writing to support@abiquo.com 
+
+If you have questions about the licensing terms for the Abiquo Community Edition Software, please contact us at: contact@abiquo.com
+

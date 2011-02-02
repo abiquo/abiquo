@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:virtualimageComponents="net.undf.abicloud.view.virtualimage.components.virtualimage.*"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:abicloudblind="net.undf.abicloud.view.general.abicloudblind.*"
+    implements="net.undf.abicloud.view.main.IBodyComponent"
+    xmlns:virtualimage="net.undf.abicloud.view.virtualimage.*">
+
+
+    <mx:Script>
+        <![CDATA[
+            import mx.resources.ResourceBundle;
+
+            import net.undf.abicloud.events.MainEvent;
+
+            [ResourceBundle("VirtualImage")]
+            private var rb:ResourceBundle;
+
+            private var ovfPackageListManagement:OVFPackageListManagement;
+
+            private var isShowing:Boolean = false;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                ovfPackageListManagement = new OVFPackageListManagement();
+            }
+
+            /////////////////////////////////////
+            //IBodyComponent implementation
+            public function bodyComponentWillChange():void
+            {
+                isShowing = false;
+
+                virtualImageManagement.willHide();
+
+                //Hide RepositorySpaceManagement, if opened
+                if (abicloudBlind.isBlindOpened)
+                {
+                    abicloudBlind.closeBlind();
+                }
+                else
+                {
+                    //We are ready to be changed
+                    var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                    dispatchEvent(mainEvent);
+                }
+            }
+
+            public function bodyComponentWillShow():void
+            {
+                isShowing = true;
+                virtualImageManagement.willShow();
+            }
+
+            /////////// END IBodyComponent implementation ////////////////
+
+            /**
+             * Shows the OVFPackageListManagement component to explore a remote repository
+             */
+            private function openOVFPackageListManagement():void
+            {
+                abicloudBlind.openBlind(ovfPackageListManagement, true);
+            }
+
+            private function onBlindOpened():void
+            {
+                ovfPackageListManagement.willShow();
+            }
+
+            /**
+             * Handler called when the blind that contains our InfrastructureManagement
+             * is closed
+             */
+            private function onBlindClosed():void
+            {
+                ovfPackageListManagement.willHide();
+
+                if (isShowing)
+                {
+                    virtualImageManagement.refreshVirtualImages();
+                }
+                else
+                {
+                    //We are ready to be changed
+                    var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                    dispatchEvent(mainEvent);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <virtualimage:VirtualImageManagement id="virtualImageManagement"
+        createVirtualImageFromOVFPackageList="openOVFPackageListManagement()"/>
+
+    <!-- AbiCloudBlind, to open the RepositorySpace Management -->
+    <abicloudblind:AbiCloudBlind id="abicloudBlind"
+        left="5" right="5" top="0" bottom="5"
+        blindOpened="onBlindOpened()"
+        blindClosed="onBlindClosed()"/>
+</mx:Canvas>

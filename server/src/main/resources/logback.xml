@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
+		</layout>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+  
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/server.log</file>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<fileNamePattern>${catalina.base}/logs/server-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>5</maxHistory>
+    	</rollingPolicy>
+	</appender>
+
+	<appender name="HEALTH" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/health.log</file>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+		</layout>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      		<fileNamePattern>${catalina.base}/logs/health-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>5</maxHistory>
+    	</rollingPolicy>
+	</appender>
+
+	<logger name="org.hibernate">
+		<level value="WARN" />
+	</logger>
+
+	<logger name="com.abiquo">
+		<level value="DEBUG" />
+	</logger>
+	
+	<logger name="com.abiquo.abiserver.healthcheck">
+        <appender-ref ref="HEALTH" />
+    </logger>
+    
+    <logger name="org.apache.wink">
+    	<level value="WARN"/>
+    </logger>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="FILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

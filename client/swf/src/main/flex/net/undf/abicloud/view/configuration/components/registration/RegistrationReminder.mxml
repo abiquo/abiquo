@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    width="500" height="300"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='Configuration', key='LABEL_REGISTRATION')">
+
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.events.ConfigurationEvent;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.model.AbiCloudModel;
+
+
+            private var _termsOfService:String = "";
+
+            /**
+             * Handler called when this component finishes its creation
+             */
+            private function onCreationComplete():void
+            {
+                //Reading the Terms of Service text file
+
+                var loader:URLLoader = new URLLoader();
+                loader.addEventListener(Event.COMPLETE, loadTermsOfServiceFileCompleteHandler);
+                loader.addEventListener(IOErrorEvent.IO_ERROR, loadTermsOfServiceFileIOErrorHandler);
+                loader.load(new URLRequest("config/TermsOfService.txt"));
+            }
+
+            private function loadTermsOfServiceFileCompleteHandler(event:Event):void
+            {
+                //Saving read text
+                this._termsOfService = URLLoader(event.currentTarget).data.toString();
+            }
+
+            private function loadTermsOfServiceFileIOErrorHandler(ioError:IOErrorEvent):void
+            {
+                this._termsOfService = "Unable to read TermsOfService.txt file";
+            }
+
+            private function onClickRegisterNow():void
+            {
+                //Announcing user wants to register
+                dispatchEvent(new Event("RegistrationReminderGoToRegistration"));
+            }
+
+            private function onClickRegisterLater():void
+            {
+                //Setting register status to later
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_REGISTRATION_STATUS_LATER);
+                dispatchEvent(configurationEvent);
+
+                //Closing form
+                dispatchEvent(new Event("RegistrationReminderClose"));
+            }
+
+            private function onClickRegisterNo():void
+            {
+                //Setting register status to no
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_REGISTRATION_STATUS_NO);
+                dispatchEvent(configurationEvent);
+
+                //Closing form
+                dispatchEvent(new Event("RegistrationReminderClose"));
+            }
+
+            private function onClickTermsOfService():void
+            {
+                //Showing AbiCloud terms of service
+                AbiCloudAlert.showConfirmation("", ResourceManager.getInstance().getString("Configuration",
+                                                                                           "LABEL_TERM_SERVICE"),
+                                               this._termsOfService,
+                                               Alert.OK,
+                                               null);
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Spacer height="5"/>
+
+    <mx:TextArea 
+        width="100%" height="100%"
+        backgroundAlpha="0"
+        fontSize="11"
+        fontWeight="bold"
+        leading="6"
+        selectable="true"
+        htmlText="{ResourceManager.getInstance().getString('Configuration', 'LABEL_REGISTRATION_REMINDER_TEXT_BEGINNING') + ' ' + 
+				 		AbiCloudModel.getInstance().appVersion + 
+				 		ResourceManager.getInstance().getString('Configuration', 'LABEL_REGISTRATION_REMINDER_TEXT_ENDING')}"
+        editable="false"/>
+
+    <mx:HBox width="100%">
+        <mx:CheckBox id="termServiceCheck"/>
+
+        <mx:Label text="@Resource(bundle='Configuration', key='LABEL_READ_TERM_SERVICE')"/>
+
+        <mx:Label id="termServiceLabel"
+            fontWeight="bold"
+            text="@Resource(bundle='Configuration', key='LABEL_TERM_SERVICE')"
+            rollOver="termServiceLabel.setStyle('textDecoration', 'underline')"
+            rollOut="termServiceLabel.setStyle('textDecoration', 'none')"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            click="onClickTermsOfService()"/>
+    </mx:HBox>
+
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center">
+
+        <mx:Button 
+            height="18"
+            label="@Resource(bundle='Configuration', key='LABEL_REGISTER_NOW')"
+            enabled="{termServiceCheck.selected}"
+            click="onClickRegisterNow()"/>
+
+        <mx:Button 
+            height="18"
+            label="@Resource(bundle='Configuration', key='LABEL_REMIND_LATER')"
+            click="onClickRegisterLater()"/>
+
+        <mx:Button 
+            height="18"
+            styleName="AlternativeButton"
+            label="@Resource(bundle='Configuration', key='LABEL_NOT_REGISTER')"
+            click="onClickRegisterNo()"/>
+    </mx:HBox>
+
+    <mx:Spacer height="10"/>
+</AbiCloudPopUp>

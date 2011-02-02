@@ -1,0 +1,54 @@
+#test
+test.name=simple test
+test.description=a very simple test
+
+#creating a physical infrastructure
+# -datacenters
+dc1
+
+# -racks
+dc1.r1
+
+# -Machines
+dc1.r1.m1:XEN_3,3,6,200 	#machine with XEN
+dc1.r1.m2:KVM,3,6,200 		#machine with KVM
+#dc1.r2.m3:XEN_3
+#dc3.r4.m4:XEN_3
+#dc2.r3.m5:XEN_3
+#dc1.r1.m6:XEN_3,1,5,200
+#dc2.r3.m7:XEN_3
+
+#creating virtual infrastructure
+# -enterprise
+e1
+
+# -virtual image
+e1.vi1:dc1,1,1,1
+e1.vi2:dc1,1,1,1
+e1.vi3:dc1,1,1,1
+e1.vi4:dc1,1,1,1
+
+# -virtual datacenter
+e1.vdc1:dc1,XEN_3 	#VDC1 in XEN
+e1.vdc2:dc1,KVM		#VDC2 in KVM
+
+# -virtual appliances
+e1.vdc1.va1
+e1.vdc1.va2
+
+# -virtual machine
+e1.vdc1.va1.vm1:vi1
+e1.vdc2.va2.vm2:vi2
+e1.vdc1.va1.vm3:vi3
+e1.vdc2.va2.vm4:vi4
+
+#Rules
+# -Minimal set of rules
+rule.fit.default:PROGRESSIVE # This one is mandatory
+
+action.allocate.vm1=m1 #XEN
+action.allocate.vm2=m2 #KVM
+action.allocate.vm3=m1 #XEN
+action.allocate.vm4=m2 #KVM
+
+

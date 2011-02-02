@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:metering="net.undf.abicloud.view.metering.*"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    implements="net.undf.abicloud.view.main.IBodyComponent">
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.events.MeteringEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.events.MainEvent;
+
+            /////////////////////////////////////
+            //IBodyComponent implementation (in progress...)
+
+            public function bodyComponentWillChange():void
+            {
+                //Stoping autoupdates
+                if (eventsList.autoUpdateCheckBox.selected)
+                    eventsList.stopAutoupdateEventsList();
+
+                //We are ready to be changed
+                var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                dispatchEvent(mainEvent);
+            }
+
+
+            public function bodyComponentWillShow():void
+            {
+                onFilterChange();
+
+                if (eventsList && eventsList.autoUpdateCheckBox.selected)
+                    eventsList.startAutoupdateEventsList();
+            }
+
+            /////////// END IBodyComponent implementation ////////////////
+
+
+            /**
+             * When the filter changes, we retrieve the filtered list of events
+             */
+            private function onFilterChange():void
+            {
+                var meteringEvent:MeteringEvent = new MeteringEvent(MeteringEvent.GET_EVENTS_FILTERED);
+                if (eventsFilter)
+                {
+                    meteringEvent.filter = eventsFilter.filter;
+                    meteringEvent.maxResults = eventsFilter.maxResultsInput.value;
+                }
+                else
+                {
+                    //The lastest list of events, not filtered
+                    meteringEvent.filter = new Object();
+                    meteringEvent.maxResults = 100;
+                }
+                dispatchEvent(meteringEvent);
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- EVENTS FILTERING -->
+    <general:GeneralPanel 
+        width="320" height="100%"
+        title="@Resource(bundle='Metering', key='LABEL_FILTER_UPPERCASE')">
+        <metering:EventsFilter id="eventsFilter"
+            width="100%" height="100%"
+            filterChange="onFilterChange()"/>
+    </general:GeneralPanel>
+
+
+    <!-- EVENTS LISTING -->
+    <general:GeneralPanel 
+        width="100%" height="100%"
+        title="@Resource(bundle='Metering', key='LABEL_EVENTS_UPPERCASE')">
+
+        <metering:EventsList id="eventsList"
+            width="100%" height="100%"
+            eventsList="{AbiCloudModel.getInstance().meteringManager.eventsFiltered}"
+            updateEventsList="onFilterChange()"/>
+
+    </general:GeneralPanel>
+
+</mx:HDividedBox>

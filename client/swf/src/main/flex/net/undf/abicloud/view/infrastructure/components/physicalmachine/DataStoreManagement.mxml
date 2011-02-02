@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    verticalGap="-1"
+    minWidth="400" minHeight="100"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.controls.HorizontalList;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.IResourceManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.Datastore;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+
+            //The Hypevisor assigned to the Physical Machine
+            private var _hypervisor:HyperVisor;
+
+            private var datastoreForm:DatastoreForm;
+            
+            [Bindable]
+            private var _editableButton:Boolean;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                datastoreForm = new DatastoreForm();
+                datastoreForm.addEventListener("datastoreFormCreate", createDatastore);
+                datastoreForm.addEventListener("datastoreFormEdit", editDatastore);
+                datastoreForm.addEventListener("datastoreFormClose", closeForm);
+            }
+
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+                _physicalMachine = value;
+            }
+
+            public function set hypervisor(value:HyperVisor):void
+            {
+                _hypervisor = value;
+            }
+            
+             public function set editableButton(value:Boolean):void
+            {
+                _editableButton = value;
+            }
+
+            public function get editableButton():Boolean
+            {
+            	return _editableButton;
+            }
+
+            private function sharedColumnLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                if (Datastore(item).shared)
+                    return ResourceManager.getInstance().getString('Infrastructure',
+                                                                   'LABEL_YES');
+                else
+                    return ResourceManager.getInstance().getString('Infrastructure',
+                                                                   'LABEL_NO');
+            }
+
+            private function enabledColumnLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                if (Datastore(item).enabled)
+                    return ResourceManager.getInstance().getString('Infrastructure',
+                                                                   'LABEL_YES');
+                else
+                    return ResourceManager.getInstance().getString('Infrastructure',
+                                                                   'LABEL_NO');
+            }
+
+            private function sizeLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                var sizeGB:Number = Datastore(item).size / AbiCloudModel.GB_TO_BYTES;
+                if (sizeGB > 0)
+                {
+                    return sizeGB.toFixed(2) + " GB";
+                }
+                else
+                {
+                    var sizeMB:Number = Datastore(item).size / AbiCloudModel.MB_TO_BYTES;
+                    return sizeMB.toFixed(2) + " MB";
+                }
+            }
+
+            private function usedSizeLabelFunction(item:Object, column:DataGridColumn):String
+            {
+                var usedSizeGB:Number = Datastore(item).usedSize / AbiCloudModel.GB_TO_BYTES;
+                if (usedSizeGB > 0)
+                {
+                    return usedSizeGB.toFixed(2) + " GB";
+                }
+                else
+                {
+                    var usedSizeMB:Number = Datastore(item).usedSize / AbiCloudModel.MB_TO_BYTES;
+                    return usedSizeMB.toFixed(2) + " MB";
+                }
+            }
+
+            private function openFormToCreate():void
+            {
+                PopUpManager.addPopUp(datastoreForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(datastoreForm);
+
+                datastoreForm.init();
+            }
+
+            private function openFormToEdit():void
+            {
+                PopUpManager.addPopUp(datastoreForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(datastoreForm);
+
+                datastoreForm.init(datagrid.selectedItem as Datastore, _physicalMachine,
+                                   _hypervisor);
+            }
+
+            private function closeForm(event:Event = null):void
+            {
+                PopUpManager.removePopUp(datastoreForm);
+            }
+
+            private function askDatastoreDeletion():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_DELETE_DATASTORE_HEADER"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_DELETE_DATASTORE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        deleteDatastore);
+            }
+
+            private function createDatastore(event:Event = null):void
+            {
+                if (_physicalMachine.id == 0)
+                {
+                    //Just add the new Datastore to the list
+                    if(_physicalMachine.datastores == null){
+                    	_physicalMachine.datastores = new ArrayCollection();                    	
+                    }
+                    _physicalMachine.datastores.addItem(datastoreForm.datastore);
+                }
+                else
+                {
+                    var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.ADD_DATASTORE);
+                    infrastructureEvent.datastore = datastoreForm.datastore;
+                    infrastructureEvent.infrastructureElement = _physicalMachine;
+                    dispatchEvent(infrastructureEvent);
+                }
+
+                closeForm();
+            }
+
+            private function editDatastore(event:Event = null):void
+            {
+                if (_physicalMachine.id == 0)
+                {
+                    //Just assign the new values to the existing Datastore
+                    var datastoreEdited:Datastore = datastoreForm.datastore;
+                }
+                else
+                {
+                    var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_DATASTORE);
+                    infrastructureEvent.datastore = datastoreForm.datastoreyCopy;
+                    infrastructureEvent.infrastructureElement = _physicalMachine;
+                    dispatchEvent(infrastructureEvent);
+                }
+
+                closeForm();
+            }
+
+            private function deleteDatastore(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    if (_physicalMachine.id == 0)
+                    {
+                        //Just remove the Datastore from the array
+                        var index:int = _physicalMachine.datastores.getItemIndex(datagrid.selectedItem);
+                        _physicalMachine.datastores.removeItemAt(index);
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+			
+			//Check if at leat one datastore is set to enable			
+			public function verifyDataStoreEnable():Boolean{
+				if(_physicalMachine.datastores){
+					for(var i:Number = 0 ; i < _physicalMachine.datastores.length ; i++){
+						if(_physicalMachine.datastores.getItemAt(i).enabled as Boolean == true){
+							return true;						
+						}
+					}
+				}else{
+					return false;
+				}
+								
+				return false;
+			}
+        ]]>
+    </mx:Script>
+
+    <mx:DataGrid id="datagrid"
+        width="100%"
+        dataProvider="{_physicalMachine.datastores}"
+        rowCount="3">
+        <mx:columns>
+            <mx:DataGridColumn id="UUID"
+                dataField="UUID"
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_DATASTORE_UUID')"/>
+            <mx:DataGridColumn id="directory"
+                width="75"
+                dataField="directory"
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_DIRECTORY')"/>
+            <mx:DataGridColumn id="sizeColumn"
+                width="75"
+                labelFunction="sizeLabelFunction"
+                dataField="size"
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_SIZE')"/>
+            <mx:DataGridColumn id="usedSizeColumns"
+                width="75"
+                labelFunction="usedSizeLabelFunction"
+                dataField="usedSize"
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_USED')"/>
+            <mx:DataGridColumn id="enabledColumn"
+                width="60"
+                labelFunction="enabledColumnLabelFunction"
+                dataField="enabled"
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_ENABLED')"/>
+        </mx:columns>
+    </mx:DataGrid>
+
+    <general:GeneralPanelToolBox 
+        width="100%" height="32"
+        styleName="GeneralDataPanelBottomSkin"
+        >
+        <mx:Button 
+            styleName="AddButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+            click="openFormToCreate()"
+            enabled="{_editableButton}"/>
+
+        <!-- DATASTORE DELETION IS DISABLED FOR NOW -->
+        <mx:Button 
+            enabled="{datagrid.selectedIndex > -1}" styleName="RemoveButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+            visible="false"
+            click="askDatastoreDeletion()"/>
+
+        <mx:Spacer width="100%"/>
+
+        <mx:Button 
+            enabled="{datagrid.selectedIndex > -1}"
+            styleName="ConfigurationButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+            click="openFormToEdit()"/>
+    </general:GeneralPanelToolBox>
+</mx:VBox>

@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_PHYSICALMACHINEADD')"
+    xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*">
+
+    <mx:Metadata>
+		[Event(name="PhysicalMachineFormAddClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.utils.AbicloudUtils;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
+            import net.undf.abicloud.vo.infrastructure.Rack;
+
+
+            //The DataCenter where the new Physical Machine will be stored
+            private var datacenter:DataCenter;
+
+            private var newPhysicalMachine:PhysicalMachine;
+
+            [Bindable]
+            private var racksDP:ArrayCollection;
+            
+             //To know if we can add new datastore or not
+            [Bindable]
+            private var _editableButton:Boolean;
+
+            /**
+             * Initializes this component
+             *
+             * If physicalMachine is null, means that we are creating a new PhysicalMachine
+             **/
+            public function init(dataCenter:DataCenter, selectedRack:Rack = null):void
+            {
+                newPhysicalMachine = new PhysicalMachine();
+                
+                _editableButton = true;
+
+                datacenter = dataCenter;
+                racksDP = AbiCloudModel.getInstance().infrastructureManager.racks;
+
+                //Cleaning the form
+                nameInput.text = "";
+                if (selectedRack)
+                    rackInput.selectedIndex = AbicloudUtils.getValuePositionInArray(racksDP,
+                                                                                    "id",
+                                                                                    selectedRack);
+                else
+                    rackInput.selectedIndex = -1;
+
+                descriptionInput.text = "";
+
+                ipInput.text = "";
+                ipServiceInput.text = "";
+                hypervisorTypeInput.selectedIndex = -1;
+                hypervisorPortInput.text = "";
+                userInput.text = "";
+                passwordInput.text = "";
+
+                ramInput.value = 0;
+                ramUnitsSelector.selectedIndex = 0;
+                cpuInput.value = cpuInput.minimum;
+                hdInput.value = 0;
+                hdUnitsSelector.selectedIndex = 3;
+                vswitchNameInput.text = "";
+                datastoreManagement.physicalMachine = newPhysicalMachine;
+                datastoreManagement.hypervisor = null;
+
+                validateForm();
+                nameInput.setFocus();
+            }
+
+            private function onChangeHypervisorTypeInput():void
+            {
+                if (hypervisorTypeInput.selectedIndex > -1)
+                {
+                    hypervisorPortInput.text = HyperVisorType(hypervisorTypeInput.selectedItem).defaultPort.toString();
+                }
+            }
+
+            /**
+             * When user clicks Accept button, we save the new physical machine
+             **/
+            private function onAccept():void
+            {
+                //Creating a new Physical Machine
+
+                newPhysicalMachine.name = nameInput.text;
+                newPhysicalMachine.assignedTo = rackInput.selectedItem as Rack;
+                newPhysicalMachine.dataCenter = datacenter
+                newPhysicalMachine.description = descriptionInput.text;
+                newPhysicalMachine.cpu = cpuInput.value;
+                newPhysicalMachine.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
+                newPhysicalMachine.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
+                newPhysicalMachine.vswitchName = vswitchNameInput.text;
+
+                //Creating a new Hypervisor for the new Physical Machine
+                var hypervisor:HyperVisor = new HyperVisor();
+                hypervisor.ip = ipInput.text;
+                hypervisor.ipService = ipServiceInput.text;
+                hypervisor.port = Number(hypervisorPortInput.text);
+                hypervisor.assignedTo = newPhysicalMachine;
+                hypervisor.type = hypervisorTypeInput.selectedItem as HyperVisorType;
+                hypervisor.user = userInput.text;
+                hypervisor.password = passwordInput.text;
+
+                //Saving all info
+                var physicalMachineCreation:PhysicalMachineCreation = new PhysicalMachineCreation();
+                physicalMachineCreation.physicalMachine = newPhysicalMachine;
+                physicalMachineCreation.hypervisors = new ArrayCollection(new Array(hypervisor));
+
+                //Announcing that user wants to create a new Physical Machine, along with hypervisors
+                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CREATE_PHYSICALMACHINE);
+                infrastructureEvent.physicalMachineCreation = physicalMachineCreation;
+                dispatchEvent(infrastructureEvent);
+
+                //Closing the form
+                close();
+            }
+
+            private function close():void
+            {
+                dispatchEvent(new Event("PhysicalMachineFormAddClose"));
+            }
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (rackInput.selectedIndex > -1 && nameInput.text.length > 0 && ipInput.text.length > 0 && hypervisorTypeInput.selectedIndex > -1 && hypervisorPortInput.text.length > 0)
+                    acceptButton.enabled = true;
+
+                else
+                    acceptButton.enabled = false;
+            }
+
+            /**
+             * if ipServiceInput is empty, we fill it
+             * with the same IP than ipInput
+             */
+            private function onIpInputFocusOut():void
+            {
+                if (ipServiceInput.text.length == 0)
+                    ipServiceInput.text = ipInput.text;
+            }
+
+            private function hypervisorTypeInputLabelFunction(item:Object):String
+            {
+                if (item && item is HyperVisorType)
+                    return HyperVisorType.HYPERVISOR_NAMES[HyperVisorType(item).id];
+                else
+                    return "-";
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form 
+        width="100%" height="100%"
+        paddingTop="3">
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                width="100%" height="20"
+                maxChars="29"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_RACK')"
+            required="true">
+            <mx:ComboBox id="rackInput"
+                width="100%" height="18"
+                labelField="name" dataProvider="{racksDP}"
+                change="validateForm()"
+                prompt="@Resource(bundle='Infrastructure', key='COMBOBOX_PROMPT_RACK')"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_DESCRIPTION')">
+            <mx:TextArea id="descriptionInput"
+                width="100%"
+                maxChars="99"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="10"/>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
+            <mx:NumericStepper id="cpuInput"
+                width="100" height="20"
+                minimum="1" maximum="32" stepSize="1"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+            direction="horizontal">
+
+            <mx:NumericStepper id="ramInput"
+                width="100" height="20"
+                minimum="{ramUnitsSelector.selectedItem.minimum}"
+                maximum="{ramUnitsSelector.selectedItem.maximum}"
+                stepSize="{ramUnitsSelector.selectedItem.stepSize}"/>
+
+            <mx:ComboBox id="ramUnitsSelector"
+                width="80" height="18"
+                labelField="label"
+                dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+                selectedIndex="0"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
+            direction="horizontal">
+
+            <mx:NumericStepper id="hdInput"
+                width="100" height="20"
+                minimum="{hdUnitsSelector.selectedItem.minimum}"
+                maximum="{hdUnitsSelector.selectedItem.maximum}"
+                stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
+
+            <mx:ComboBox id="hdUnitsSelector"
+                width="80" height="18"
+                labelField="label"
+                dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+                selectedIndex="3"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="10"/>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_IP_MANAGEMENT')"
+            required="true">
+            <mx:TextInput id="ipInput"
+                width="100%" height="20"
+                maxChars="39"
+                change="validateForm()"
+                restrict="0-9.:A-F"
+                focusOut="onIpInputFocusOut()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_IP_SERVICE')">
+            <mx:TextInput id="ipServiceInput"
+                width="100%" height="20"
+                maxChars="39"
+                restrict="0-9.:A-F"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
+            <mx:TextInput id="vswitchNameInput"
+                width="100%" height="20"
+                maxChars="39"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_HYPERVISOR_TYPE')"
+            required="true">
+            <mx:ComboBox id="hypervisorTypeInput"
+                width="100%" height="18"
+                dataProvider="{AbiCloudModel.getInstance().infrastructureManager.hypervisorTypesInUse}"
+                labelFunction="hypervisorTypeInputLabelFunction"
+                change="onChangeHypervisorTypeInput();validateForm()"
+                prompt="@Resource(bundle='Infrastructure', key='COMBOBOX_PROMPT_HYPERVISOR_TYPE')"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_PORT')"
+            required="true">
+            <mx:TextInput id="hypervisorPortInput"
+                height="20"
+                maxChars="5"
+                change="validateForm()"
+                restrict="0-9"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_USER')">
+            <mx:TextInput id="userInput"
+                width="100%" height="20"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="80%"
+            label="@Resource(bundle='Infrastructure', key='LABEL_PASSWORD')">
+            <mx:TextInput id="passwordInput"
+                width="100%" height="20"
+                displayAsPassword="true"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_DATASTORES')">
+            <physicalmachine:DataStoreManagement id="datastoreManagement"
+            	editableButton="{_editableButton}"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="15"/>
+
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="close()"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</general:AbiCloudPopUp>

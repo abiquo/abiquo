@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage">
+  <class catalog="kinton" name="VirtualImageConversionsHB" lazy="false" table="virtualimage_conversions"> 
+    <id name="id" type="java.lang.Integer">
+      <column name="id"/>
+      <generator class="identity"/>
+    </id>
+       
+    <many-to-one class="VirtualimageHB" lazy="false" name="image">
+      <column name="idImage" not-null="true"/>
+    </many-to-one>
+     
+    <property name="sourcePath" type="string">
+      <column length="255" name="sourcePath"/>
+    </property>
+        
+    <property name="targetPath" type="string">
+      <column length="255" name="targetPath" not-null="true"/>
+    </property>
+    
+    <property name="timestamp" type="java.util.Date">
+ 	  <column length="100" name="timestamp" not-null="true" />
+	</property>
+	<property name="size" type="java.lang.Long">
+      <column name="size" not-null="false"/>
+    </property>
+    
+    <property name="state" type="StateConversion" not-null="true"/>
+    
+    <property name="sourceType" type="DiskFormatType" />
+    
+    <property name="targetType" type="DiskFormatType" not-null="true"/>
+  </class>
+</hibernate-mapping>

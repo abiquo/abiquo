@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+	<class catalog="kinton"
+		name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB"
+		table="rack">
+		<id name="idRack" type="java.lang.Integer">
+			<column name="idRack" />
+			<generator class="identity" />
+		</id>
+		<many-to-one
+			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
+			lazy="false" fetch="select" name="datacenter">
+			<column name="idDataCenter" not-null="true" />
+		</many-to-one>
+		<property name="name" type="string">
+			<column length="20" name="name" not-null="true" />
+		</property>
+		<property name="shortDescription" type="string">
+			<column length="30" name="shortDescription" />
+		</property>
+		<property name="largeDescription" type="string">
+			<column length="100" name="largeDescription" />
+		</property>
+		<set inverse="true" lazy="true" name="physicalmachines" order-by="name">
+			<key>
+				<column name="idRack" not-null="true" />
+			</key>
+			<one-to-many
+				class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
+		</set>
+		<property name="vlan_id_min" type="java.lang.Integer">
+			<column name="vlan_id_min" />
+		</property>
+		<property name="vlan_id_max" type="java.lang.Integer">
+			<column name="vlan_id_max" />
+		</property>
+		<property name="vlans_id_avoided" type="string">
+			<column length="255" name="vlans_id_avoided" />
+		</property>
+		<property name="vlan_per_vdc_expected" type="java.lang.Integer">
+			<column name="vlan_per_vdc_expected" />
+		</property>
+		<property name="NRSQ" type="java.lang.Integer">
+			<column name="nrsq" />
+		</property>
+	</class>
+
+	<sql-query name="RACKS.FIND_BY_MIN_VLANS">
+		SELECT rack_filtered_dc.idRack
+		FROM
+		(
+		SELECT r.idRack
+		FROM rack r, virtualapp va, virtualdatacenter vdc, datacenter dc
+		WHERE va.idVirtualApp = :idVApp AND vdc.idVirtualDataCenter =
+		va.idVirtualDataCenter AND r.idDataCenter = vdc.idDataCenter
+		)
+		as rack_filtered_dc
+		LEFT JOIN vlan_network_assignment vn ON
+		rack_filtered_dc.idRack = vn.idRack
+		GROUP BY rack_filtered_dc.idRack
+		HAVING count(vn.vlan_network_id) + :vlan_vdc &lt;= ((r.vlan_id_max - r.vlan_id_min) - round((r.vlan_id_max - r.vlan_id_min) * (r.NRSQ/100) ,0))
+		ORDER BY count(vn.vlan_network_id) + :vlan_vdc ASC
+    </sql-query>
+  	<query name="RACKS.GET_PHYSICAL_MACHINE_BY_RACK">
+		Select pm
+		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm
+		     inner join pm.rack racks
+		where racks.idRack = :idRack
+	</query>
+  
+  	<query name="RACK.GET_LOWEST_VLANIDMAX_VALUE">
+	    select min(rack.vlan_id_max)
+		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB rack
+		where rack.datacenter.idDataCenter = :datacenterId
+	</query>
+
+</hibernate-mapping>

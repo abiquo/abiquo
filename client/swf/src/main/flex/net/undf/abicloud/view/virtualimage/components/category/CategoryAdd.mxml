@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='VirtualImage', key='POPUP_TITLE_CATEGORY_ADD')">
+
+    <mx:Metadata>
+		[Event(name="categoryAddClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.virtualimage.Category;
+
+
+            /**
+             * Initializes this component to create a new Repository
+             **/
+            public function init():void
+            {
+                nameInput.text = "";
+
+                validateForm();
+                nameInput.setFocus();
+            }
+
+
+            /**
+             * When user clicks Accept button, we save the new category
+             **/
+            private function onAccept():void
+            {
+                //Creating the new Category
+                var category:Category = new Category();
+                category.name = nameInput.text;
+
+                //Announcing that user wants to create a new Category
+                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.CREATE_CATEGORY);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.category = category;
+                dispatchEvent(event);
+
+                //Closing the form
+                close();
+            }
+
+            /**
+             * Cancels Repository creation
+             **/
+            private function close():void
+            {
+                //Closing the form
+                dispatchEvent(new Event("categoryAddClose"));
+            }
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (nameInput.text.length > 0)
+                    acceptButton.enabled = true;
+
+                else
+                    acceptButton.enabled = false;
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                height="20"
+                maxChars="29"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="close()"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</AbiCloudPopUp>

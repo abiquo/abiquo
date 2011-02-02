@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns1:Envelope xmlns:ns2="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:ns1="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ns4="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:ns3="http://schemas.dmtf.org/wbem/wscim/1/common" xmlns:ns5="http://www.abiquo.com/appliancemanager/repositoryspace">
+    <ns1:References>
+        <ns1:File ns1:href="[10.60.1.4:/opt/vm_repository]1/rs.bcn.abiquo.com/mw/AbiquoMW.vdi" ns1:id="mw.16" targetDatastore="/root/" destinationPath="1/rs.bcn.abiquo.com/mw/ec269ce7-2edf-40c7-b234-4fe6b1bae331-snapshot-AbiquoMW.vdi" repositoryManager="http://127.0.0.1:80/am" isManaged="true"/>
+    </ns1:References>
+    <ns1:Section xsi:type="ns1:NetworkSection_Type" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <ns1:Network ns1:name="vapp_network">
+            <ns1:Description>Appliance Network identifier</ns1:Description>
+        </ns1:Network>
+    </ns1:Section>
+    <ns1:Section xsi:type="ns1:abicloudNetwork_Type" ns1:uuid="7dafca7e-c20e-47c3-988c-193e5cce4299" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <ns1:networks ns1:vlan_tag="2" ns1:network_name="default_network">
+            <ns1:configuration ns1:fence_mode="bridge" ns1:secondary_DNS="" ns1:primary_DNS="" ns1:netmask="255.255.255.0" ns1:mask="24" ns1:network_address="192.168.0.0" ns1:gateway="192.168.0.1">
+                <ns1:dhcp_service ns1:dhcp_port="7911" ns1:dhcp_Address="127.0.0.1">
+                    <ns1:static_rules ns1:configureGateway="true" ns1:ip="192.168.0.2" ns1:name="080027752256_host" ns1:mac="080027752256"/>
+                </ns1:dhcp_service>
+            </ns1:configuration>
+        </ns1:networks>
+    </ns1:Section>
+    <ns1:Section xsi:type="ns1:DiskSection_Type" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <ns1:Disk ns1:populatedSize="4294967296" ns1:format="http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse" ns1:capacity="4294967296" ns1:fileRef="mw.16" ns1:diskId="disk_5"/>
+    </ns1:Section>
+    <ns1:VirtualSystemCollection ns1:id="6">
+        <ns1:VirtualSystem ns1:id="842fc325-0971-4c89-9cc0-037b133b24f7">
+            <ns1:Name>ABQ_842fc325-0971-4c89-9cc0-037b133b24f7</ns1:Name>
+            <ns1:Section xsi:type="ns1:VirtualHardwareSection_Type" ns1:transport="transport" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <ns1:System adminPassword="voycruzand0elrio" adminUser="root">
+                    <ns2:AutomaticRecoveryAction xsi:nil="true"/>
+                    <ns2:AutomaticShutdownAction xsi:nil="true"/>
+                    <ns2:AutomaticStartupAction xsi:nil="true"/>
+                    <ns2:AutomaticStartupActionDelay xsi:nil="true"/>
+                    <ns2:AutomaticStartupActionSequenceNumber xsi:nil="true"/>
+                    <ns2:Caption xsi:nil="true"/>
+                    <ns2:ChangeableType xsi:nil="true"/>
+                    <ns2:ConfigurationDataRoot xsi:nil="true"/>
+                    <ns2:ConfigurationFile xsi:nil="true"/>
+                    <ns2:ConfigurationID xsi:nil="true"/>
+                    <ns2:ConfigurationName xsi:nil="true"/>
+                    <ns2:CreationTime xsi:nil="true"/>
+                    <ns2:Description xsi:nil="true"/>
+                    <ns2:ElementName>Hypervisor</ns2:ElementName>
+                    <ns2:Generation xsi:nil="true"/>
+                    <ns2:InstanceID>842fc325-0971-4c89-9cc0-037b133b24f7</ns2:InstanceID>
+                    <ns2:LogDataRoot xsi:nil="true"/>
+                    <ns2:RecoveryFile xsi:nil="true"/>
+                    <ns2:SnapshotDataRoot xsi:nil="true"/>
+                    <ns2:SuspendDataRoot xsi:nil="true"/>
+                    <ns2:SwapFileDataRoot xsi:nil="true"/>
+                    <ns2:VirtualSystemIdentifier>http://10.60.1.81:8889/</ns2:VirtualSystemIdentifier>
+                    <ns2:VirtualSystemType>vbox</ns2:VirtualSystemType>
+                </ns1:System>
+                <ns1:Item>
+                    <ns4:Address>080027752256</ns4:Address>
+                    <ns4:AddressOnParent xsi:nil="true"/>
+                    <ns4:AllocationUnits>2</ns4:AllocationUnits>
+                    <ns4:AutomaticAllocation>false</ns4:AutomaticAllocation>
+                    <ns4:AutomaticDeallocation>false</ns4:AutomaticDeallocation>
+                    <ns4:Caption xsi:nil="true"/>
+                    <ns4:ChangeableType xsi:nil="true"/>
+                    <ns4:ConfigurationName>0</ns4:ConfigurationName>
+                    <ns4:Connection>eth0</ns4:Connection>
+                    <ns4:ConsumerVisibility xsi:nil="true"/>
+                    <ns4:Description>MAC Address asociated to private Network</ns4:Description>
+                    <ns4:ElementName>MAC Address</ns4:ElementName>
+                    <ns4:Generation xsi:nil="true"/>
+                    <ns4:HostResource xsi:nil="true"/>
+                    <ns4:InstanceID>895de3a4-bdd6-4543-b06d-512c143e702a</ns4:InstanceID>
+                    <ns4:Limit xsi:nil="true"/>
+                    <ns4:MappingBehavior xsi:nil="true"/>
+                    <ns4:OtherResourceType xsi:nil="true"/>
+                    <ns4:Parent>default_network</ns4:Parent>
+                    <ns4:PoolID xsi:nil="true"/>
+                    <ns4:Reservation xsi:nil="true"/>
+                    <ns4:ResourceSubType>0</ns4:ResourceSubType>
+                    <ns4:ResourceType>10</ns4:ResourceType>
+                    <ns4:VirtualQuantity xsi:nil="true"/>
+                    <ns4:Weight xsi:nil="true"/>
+                </ns1:Item>
+                <ns1:Item>
+                    <ns4:Address xsi:nil="true"/>
+                    <ns4:AddressOnParent xsi:nil="true"/>
+                    <ns4:AllocationUnits xsi:nil="true"/>
+                    <ns4:AutomaticAllocation xsi:nil="true"/>
+                    <ns4:AutomaticDeallocation xsi:nil="true"/>
+                    <ns4:Caption xsi:nil="true"/>
+                    <ns4:ChangeableType xsi:nil="true"/>
+                    <ns4:ConfigurationName xsi:nil="true"/>
+                    <ns4:ConsumerVisibility xsi:nil="true"/>
+                    <ns4:Description xsi:nil="true"/>
+                    <ns4:ElementName>CPU</ns4:ElementName>
+                    <ns4:Generation xsi:nil="true"/>
+                    <ns4:InstanceID>1</ns4:InstanceID>
+                    <ns4:Limit xsi:nil="true"/>
+                    <ns4:MappingBehavior xsi:nil="true"/>
+                    <ns4:OtherResourceType xsi:nil="true"/>
+                    <ns4:Parent xsi:nil="true"/>
+                    <ns4:PoolID xsi:nil="true"/>
+                    <ns4:Reservation xsi:nil="true"/>
+                    <ns4:ResourceSubType xsi:nil="true"/>
+                    <ns4:ResourceType>3</ns4:ResourceType>
+                    <ns4:VirtualQuantity>1</ns4:VirtualQuantity>
+                    <ns4:Weight xsi:nil="true"/>
+                </ns1:Item>
+                <ns1:Item>
+                    <ns4:Address xsi:nil="true"/>
+                    <ns4:AddressOnParent xsi:nil="true"/>
+                    <ns4:AllocationUnits xsi:nil="true"/>
+                    <ns4:AutomaticAllocation xsi:nil="true"/>
+                    <ns4:AutomaticDeallocation xsi:nil="true"/>
+                    <ns4:Caption xsi:nil="true"/>
+                    <ns4:ChangeableType xsi:nil="true"/>
+                    <ns4:ConfigurationName xsi:nil="true"/>
+                    <ns4:ConsumerVisibility xsi:nil="true"/>
+                    <ns4:Description xsi:nil="true"/>
+                    <ns4:ElementName>RAM</ns4:ElementName>
+                    <ns4:Generation xsi:nil="true"/>
+                    <ns4:InstanceID>2</ns4:InstanceID>
+                    <ns4:Limit xsi:nil="true"/>
+                    <ns4:MappingBehavior xsi:nil="true"/>
+                    <ns4:OtherResourceType xsi:nil="true"/>
+                    <ns4:Parent xsi:nil="true"/>
+                    <ns4:PoolID xsi:nil="true"/>
+                    <ns4:Reservation xsi:nil="true"/>
+                    <ns4:ResourceSubType xsi:nil="true"/>
+                    <ns4:ResourceType>4</ns4:ResourceType>
+                    <ns4:VirtualQuantity>256</ns4:VirtualQuantity>
+                    <ns4:Weight xsi:nil="true"/>
+                </ns1:Item>
+                <ns1:Item>
+                    <ns4:Address xsi:nil="true"/>
+                    <ns4:AddressOnParent xsi:nil="true"/>
+                    <ns4:AllocationUnits xsi:nil="true"/>
+                    <ns4:AutomaticAllocation xsi:nil="true"/>
+                    <ns4:AutomaticDeallocation xsi:nil="true"/>
+                    <ns4:Caption xsi:nil="true"/>
+                    <ns4:ChangeableType xsi:nil="true"/>
+                    <ns4:ConfigurationName xsi:nil="true"/>
+                    <ns4:ConsumerVisibility xsi:nil="true"/>
+                    <ns4:Description xsi:nil="true"/>
+                    <ns4:ElementName>Harddisk5'</ns4:ElementName>
+                    <ns4:Generation xsi:nil="true"/>
+                    <ns4:HostResource>ovf:/disk/disk_5</ns4:HostResource>
+                    <ns4:InstanceID>5</ns4:InstanceID>
+                    <ns4:Limit xsi:nil="true"/>
+                    <ns4:MappingBehavior xsi:nil="true"/>
+                    <ns4:OtherResourceType xsi:nil="true"/>
+                    <ns4:Parent xsi:nil="true"/>
+                    <ns4:PoolID xsi:nil="true"/>
+                    <ns4:Reservation xsi:nil="true"/>
+                    <ns4:ResourceSubType xsi:nil="true"/>
+                    <ns4:ResourceType>17</ns4:ResourceType>
+                    <ns4:VirtualQuantity xsi:nil="true"/>
+                    <ns4:Weight xsi:nil="true"/>
+                </ns1:Item>
+            </ns1:Section>
+            <ns1:Section xsi:type="ns1:AnnotationSection_Type" remoteDesktopPort="5900" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+        </ns1:VirtualSystem>
+    </ns1:VirtualSystemCollection>
+</ns1:Envelope>

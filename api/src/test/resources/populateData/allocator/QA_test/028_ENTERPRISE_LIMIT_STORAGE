@@ -1,0 +1,59 @@
+# test
+test.name=028_ENTERPRISE_LIMIT_STORAGE
+test.description=Checking enterprise limits
+
+#creating a physical infrastructure
+# -datacenters
+dc1
+
+# -racks
+dc1.r1
+dc1.r2
+
+# -Machines
+dc1.r1.m1:VMX_04,20,20,200
+dc1.r2.m2:VMX_04,30,30,200
+dc1.r2.m3:VMX_04,30,30,200
+
+#creating virtual infrastructure
+# -enterprise
+e1
+e2
+
+# -virtual image
+e1.vi1:dc1,2,2,2
+e1.vi2:dc1,2,2,2
+e2.vi3:dc1,2,2,2
+e2.vi4:dc1,2,2,2
+
+
+# -virtual datacenter
+e1.vdc1:dc1,VMX_04
+e2.vdc2:dc1,VMX_04
+
+# -virtual appliances
+e1.vdc1.va1
+e1.vdc1.va2
+#e2.vdc2.va3
+#e2.vdc2.va4
+
+# -virtual machine
+e1.vdc1.va1.vm1:vi1
+e1.vdc1.va1.vm2:vi2
+e1.vdc1.va1.vm3:vi3
+e1.vdc1.va2.vm4:vi4
+e1.vdc1.va2.vm5:vi4
+e1.vdc1.va2.vm6:vi4
+e1.vdc1.va2.vm7:vi4
+
+#Rules
+# -Minimal set of rules
+rule.fit.default:PROGRESSIVE # This one is mandatory
+
+# -Limits
+limit.e1:storage[5,10] 		#limiting enterprise to 5 soft and 8 hardlimit
+
+#Actions
+vdc1.v1:4					# volume created (4 GB)
+vdc1.v2:3:soft.storage				# volume created (total 7 GB). Soft limit!					
+vdc1.v3:4:hard.storage				# you cannot create this volume

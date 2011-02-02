@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<!-- This component renders an OVFPackage -->
+
+<mx:Canvas 
+    width="600" height="105"
+    backgroundAlpha="0"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.main.CommonAssets;
+            import mx.binding.utils.ChangeWatcher;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
+            import net.undf.abicloud.events.virtualimage.OVFPackageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.virtualimage.OVFPackage;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualImage")]
+            private var rb2:ResourceBundle;
+
+            //The OVFPackage to be renderer by this component
+            [Bindable]
+            private var _ovfPackage:OVFPackage;
+
+            //Watcher to watch download progress
+            private var _ovfPackageDownloadProgressWatcher:ChangeWatcher;
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+
+                if (value is OVFPackage)
+                    ovfPackage = value as OVFPackage;
+            }
+
+            public function set ovfPackage(value:OVFPackage):void
+            {
+                this._ovfPackage = value;
+
+                if (this._ovfPackageDownloadProgressWatcher && this._ovfPackageDownloadProgressWatcher.isWatching())
+                    this._ovfPackageDownloadProgressWatcher.unwatch();
+
+                if (_ovfPackage.ovfPackageStatus && this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING)
+                {
+                    //This OVFPackage is downloading, so we watch its progress
+                    this._ovfPackageDownloadProgressWatcher = ChangeWatcher.watch(this._ovfPackage,
+                                                                                  "downloadProgress",
+                                                                                  onDownloadProgressChange);
+
+                    //Setting the current download progress in download progress bar
+                    downloadProgressBar.setProgress(_ovfPackage.ovfPackageStatus.progress,
+                                                    100);
+                }
+
+            }
+
+            /**
+             * Called everytime the download progress of this OVFPackage change
+             */
+            private function onDownloadProgressChange(event:Event):void
+            {
+                //Setting the download progress bar
+                downloadProgressBar.setProgress(this._ovfPackage.ovfPackageStatus.progress,
+                                                100);
+            }
+
+            private function onDownloadCheckChange():void
+            {
+                if (downloadCheck.selected)
+                {
+                    if (this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD)
+                        //Since this OVFPackage is already downloaded, we ask user if he wants to download it again
+                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_ERROR_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("VirtualImage",
+                                                                                        "ALERT_CONFIRM_REDOWNLOAD_HEADER"),
+                                                ResourceManager.getInstance().getString("VirtualImage",
+                                                                                        "ALERT_CONFIRM_REDOWNLOAD_TEXT"),
+                                                Alert.YES | Alert.NO,
+                                                confirmRedownload);
+                    else
+                        putOVFPackageToDownload();
+                }
+                else
+                    removeOVFPackageFromDownload();
+            }
+
+            private function confirmRedownload(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    putOVFPackageToDownload();
+                }
+
+                else
+                    downloadCheck.selected = false;
+            }
+
+            private function putOVFPackageToDownload():void
+            {
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.OVFPACKAGE_SELECTED_TO_DOWNLOAD);
+                event.ovfPackage = _ovfPackage;
+                dispatchEvent(event);
+            }
+
+            private function removeOVFPackageFromDownload():void
+            {
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.OVFPACKAGE_UNSELECTED_TO_DOWNLOAD);
+                event.ovfPackage = _ovfPackage;
+                dispatchEvent(event);
+            }
+
+            private function askCancelDownload():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_ERROR_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_CANCEL_DOWNLOAD_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_CANCEL_DOWNLOAD_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        cancelDownload);
+            }
+
+            private function cancelDownload(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.CANCEL_DOWNLOAD_OVF_PACKAGE);
+                    event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                    event.ovfPackage = _ovfPackage;
+                    dispatchEvent(event);
+                }
+            }
+
+            private function onClickErrorImage():void
+            {
+                AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_ERROR_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "LABEL_DOWNLOAD_ERROR"),
+                                        _ovfPackage.ovfPackageStatus.error,
+                                        Alert.OK);
+            }
+
+            private function onClickProductURLLabel():void
+            {
+                if (_ovfPackage.productUrl.length > 0)
+                {
+                    navigateToURL(new URLRequest(_ovfPackage.productUrl), "_blank");
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <utils:ImageDefault id="ovfpackageIcon"
+        width="100"
+        left="5" top="7" bottom="7"
+        source="{this._ovfPackage.iconUrl}"
+        scaleContent="true"
+        defaultImagePath="{VirtualImageManager.DEFAULT_ICON_IMAGE_PATH}"/>
+
+    <mx:Label id="fileLabel"
+        left="106" top="5"
+        styleName="VirtualImageOVFPackageMiniatureFileLabel1"
+        maxWidth="400" text="{this._ovfPackage.name}" truncateToFit="true"
+        toolTip="{this._ovfPackage.name}"/>
+
+    <mx:Label id="productURLLabel"
+        left="106" top="22"
+        maxWidth="400" text="{this._ovfPackage.productUrl}"
+        buttonMode="true"
+        useHandCursor="true"
+        mouseChildren="false"
+        rollOver="productURLLabel.setStyle('textDecoration', 'underline')"
+        rollOut="productURLLabel.setStyle('textDecoration', 'none')"
+        click="onClickProductURLLabel()"/>
+
+    <mx:HBox paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+        left="106" top="40">
+
+        <mx:Label id="diskFormatLabel"
+            fontSize="11"
+            text="{this._ovfPackage.diskFormat}" truncateToFit="true"/>
+
+        <mx:Label id="fileSizeLabel"
+            fontSize="11"
+            text="{'(' + ((_ovfPackage.diskSizeMb / AbiCloudModel.GB_TO_MBYTES) > 1 ? ((_ovfPackage.diskSizeMb / AbiCloudModel.GB_TO_MBYTES).toFixed(2) + ' GB)') :
+																					  (_ovfPackage.diskSizeMb + ' MB)'))}"/>
+    </mx:HBox>
+
+    <mx:TextArea id="infoText"
+        left="106" right="5" top="58" bottom="5"
+		styleName="VirtualImageOVFPackageMiniatureInfoTextLabel"
+        text="{this._ovfPackage.description}"
+        editable="false"/>
+
+    <!-- Visible when the OVFPackage.status = NOT_DOWNLOAD -->
+    <mx:HBox 
+        right="5" top="5"
+        horizontalGap="2"
+        paddingRight="0"
+        paddingTop="0"
+        verticalAlign="top"
+        visible="{this._ovfPackage.ovfPackageStatus.status != OVFPackageInstanceStatus.DOWNLOADING}">
+
+        <!-- Visible when the OVFPackage.status = ERROR  -->
+        <mx:Image id="errorImage"
+            source="{CommonAssets.alert}"
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_DOWNLOAD_ERROR')"
+            visible="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.ERROR}"
+            useHandCursor="true"
+            buttonMode="true"
+            mouseChildren="false"
+            click="onClickErrorImage()"/>
+
+        <!-- Visible when the OVFPackage.status = DOWNLOAD  -->
+        <mx:Image id="downloadedImage"
+            source="{CommonAssets.checked}"
+            includeInLayout="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD}"
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_DOWNLOADED')"
+            visible="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD}"/>
+
+        <mx:Label text="@Resource(bundle='VirtualImage', key='LABEL_TO_DOWNLOAD')"/>
+        <mx:CheckBox id="downloadCheck"
+            selected="{this._ovfPackage.selectedToDownload}"
+            change="onDownloadCheckChange()"/>
+    </mx:HBox>
+
+    <!-- Visible when the OVFPackage.status = DOWNLOADING -->
+    <mx:ProgressBar id="downloadProgressBar"
+        width="75" height="12"
+        right="5" top="5"
+        styleName="OVFPackageMiniatureProgressbar1"
+        minimum="0" maximum="100" indeterminate="false" mode="manual"
+        label="%3%%" labelPlacement="center"
+        toolTip="@Resource(bundle='VirtualImage', key='LABEL_DOWNLOADING')"
+        visible="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING}"/>
+
+    <mx:Button id="cancelDownloadButton"
+        height="18"
+        right="5" top="22"
+        label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+        visible="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOADING}"
+        click="askCancelDownload()"/>
+
+    <mx:HRule 
+        width="100%"
+        bottom="0"/>
+</mx:Canvas>

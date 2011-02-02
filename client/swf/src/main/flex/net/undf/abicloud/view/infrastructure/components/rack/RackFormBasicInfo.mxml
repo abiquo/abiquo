@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+	horizontalAlign="center"
+    verticalAlign="middle"
+    paddingTop="10"
+    verticalScrollPolicy="off"
+    horizontalScrollPolicy="off"
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+
+    <mx:Script>
+        <![CDATA[
+            import mx.utils.ObjectUtil;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.vo.infrastructure.Rack;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+            [ResourceBundle("Infrastructure")]
+            private var rb:ResourceBundle;
+
+            //The Datacenter where the Rack is assigned
+            private var _datacenter:DataCenter;
+
+            //The new rack that will be created or edited
+            private var _rack:Rack;
+            
+            [Bindable]
+            public var isValid:Boolean;
+
+            /**
+             * Initializes this component, with the data center to which the new rack will be assigned
+             **/
+            public function init(dataCenter:DataCenter, rack:Rack = null):void
+            {
+                this._datacenter = dataCenter;
+                this._rack = rack;
+
+                if (this._rack)
+                {
+
+                    nameInput.text = this._rack.name;
+                    shortDescriptionInput.text = this._rack.shortDescription;
+                    largeDescriptionInput.text = this._rack.largeDescription;
+
+                    isValid = true;
+                }
+                else
+                {
+
+                    nameInput.text = "";
+                    shortDescriptionInput.text = "";
+                    largeDescriptionInput.text = "";
+
+                    isValid = false;
+                }
+
+                nameInput.setFocus();
+            }
+
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (nameInput.text.length > 0)
+                    isValid = true;
+
+                else
+                    isValid = false;
+            }
+           
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                height="20"
+                maxChars="19"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_SHORTDESCRIPTION')">
+            <mx:TextArea id="shortDescriptionInput"
+                maxChars="29"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_LARGEDESCRIPTION')">
+            <mx:TextArea id="largeDescriptionInput"
+                maxChars="99"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</mx:VBox>

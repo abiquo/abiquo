@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    initialize="onCreationComplete()"
+    horizontalAlign="center"
+    verticalAlign="middle"
+    paddingTop="10"
+    verticalScrollPolicy="off"
+    horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:privatenetwork="net.undf.abicloud.view.networking.components.privatenetwork.*"
+    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.binding.utils.ChangeWatcher;
+            import mx.managers.PopUpManager;
+
+            import net.undf.abicloud.business.managers.VirtualApplianceManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+
+            //Hashmap containing the Hypervisor types by Datacenter
+            private var _hypervisorTypesByDatacenter:Object;
+
+            [Bindable]
+            public var isFormValid:Boolean;
+            
+            [Bindable]
+            private var _virtualDatacenter:VirtualDataCenter;
+            
+            [Bindable]
+            private var isCreation:Boolean;
+
+            private function onCreationComplete():void
+            {
+                //The first Network created together with the VirtualDatacenter, is always the default one
+                privateNetworkForm.defaultNetworkFormItem.visible = false;
+                privateNetworkForm.defaultNetworkFormItem.includeInLayout = false;
+            }
+            
+            public function set virtualDatacenter(value:VirtualDataCenter):void{
+            	this._virtualDatacenter = value;
+            }
+
+            /**
+             * Initializes this component to create a new VirtualDatacenter
+             */
+            public function init():void
+            {
+                //Registering Keyboard events, for standard application behaivor
+                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+                
+                //onEdit
+                if(this._virtualDatacenter.id != 0){
+	                AbiCloudModel.getInstance().infrastructureManager.addEventListener("allowedDataCentersRetrieved",setPhysicalDataCenterFieldOnEditing);
+	                //Setting fields
+                	nameInput.text = this._virtualDatacenter.name;
+                	isFormValid = true;                
+                }else{
+                	this.isCreation = true;
+                	//Setting default values
+	                nameInput.text = "";
+	                physicalDataCenterInput.selectedIndex = -1;
+	                hyperTypeInput.selectedIndex = -1;
+	                hyperTypeInput.dataProvider = null;
+	                defaultPrivateNetworkRadioButton.selected = true;
+	                privateNetworkForm.init("default_network");
+                }              
+                
+
+                this._hypervisorTypesByDatacenter = new Object();                
+
+                nameInput.setFocus();
+                validateForm();
+            }
+            
+            /* --------------------Edit a VirtualDataCenter---------------------------- */
+            /**
+             * We cannot set the right value for physicalDataCenterInput when this component is shown,
+             * because we have to wait for the Datacenter list to come from server
+             */
+            public function setPhysicalDataCenterFieldOnEditing(event:Event = null):void
+            {
+                physicalDataCenterInput.selectedIndex = -1;
+
+                var length:int = physicalDataCenterInput.dataProvider.length;
+                var i:int;
+
+                for (i = 0; i < length; i++)
+                {
+                    if (DataCenter(physicalDataCenterInput.dataProvider[i]).id == this._virtualDatacenter.idDataCenter)
+                    {
+                        physicalDataCenterInput.selectedIndex = i;
+                        onPhysicalDatacenterInputChange();
+                        break;
+                    }
+                }
+            }
+            
+            
+
+            /**
+             * Everytime user selects a Datacenter, we need to set the appropiate list of Hypervisor types
+             */
+            private function onPhysicalDatacenterInputChange():void
+            {
+                if (this._hypervisorTypesByDatacenter.hasOwnProperty(DataCenter(physicalDataCenterInput.selectedItem).id))
+                {
+                    hyperTypeInput.dataProvider = this._hypervisorTypesByDatacenter[DataCenter(physicalDataCenterInput.selectedItem).id];
+                    validateForm();
+                }
+                else
+                {
+                    //We still do not have the Hypervisor types for this Datacenter
+                    AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.HYPERVISOR_TYPES_BY_DATACENTER_RETRIEVED,
+                                                                                       onHypervisorTypesRetrieved);
+                    var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_HYPERVISOR_TYPES_BY_DATACENTER);
+                    infrastructureEvent.dataCenter = physicalDataCenterInput.selectedItem as DataCenter;
+                    dispatchEvent(infrastructureEvent);
+                }
+            }
+
+            private function onHypervisorTypesRetrieved(infrastructureEvent:InfrastructureEvent):void
+            {
+                AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureEvent.HYPERVISOR_TYPES_BY_DATACENTER_RETRIEVED,
+                                                                                      onHypervisorTypesRetrieved);
+
+                hyperTypeInput.dataProvider = infrastructureEvent.hypervisorTypesByDatacenter;
+                validateForm();
+
+                //We save a cache of hypervisor types
+                this._hypervisorTypesByDatacenter[DataCenter(physicalDataCenterInput.selectedItem).id] = infrastructureEvent.hypervisorTypesByDatacenter;
+            	
+            	setHyperTypeFieldOnEditing();
+            }
+            
+             private function setHyperTypeFieldOnEditing(event:Event = null):void
+            {
+                hyperTypeInput.selectedIndex = -1;
+
+                //Hypervisortype list is retrieved upon application start
+                var length:int = hyperTypeInput.dataProvider.length;
+                var i:int;
+
+                for (i = 0; i < length; i++)
+                {
+                    if (HyperVisorType(hyperTypeInput.dataProvider[i]).id == this._virtualDatacenter.hyperType.id)
+                    {
+                        hyperTypeInput.selectedIndex = i;
+                        validateForm();
+                        break;
+                    }
+                }
+            }
+
+            private function hypervisorTypeInputLabelFunction(item:Object):String
+            {
+                if (item && item is HyperVisorType)
+                    return HyperVisorType.HYPERVISOR_NAMES[HyperVisorType(item).id];
+                else
+                    return "-";
+            }
+
+            private function onChangePrivateNetworkInput():void
+            {
+                if (privateNetworkInput.selectedValue == "default")
+                {
+                    privateNetworkForm.init("default_network");
+                }
+            }
+
+            /**
+             * Announces the creation of a VirtualDatacenter, and closes this component
+             */
+            private function onAccept():void
+            {
+                var virtualDatacenter:VirtualDataCenter = new VirtualDataCenter();
+                virtualDatacenter.name = nameInput.text;
+                virtualDatacenter.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                virtualDatacenter.idDataCenter = (physicalDataCenterInput.selectedItem as DataCenter).id;
+                virtualDatacenter.hyperType = hyperTypeInput.selectedItem as HyperVisorType;
+
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CREATE_VIRTUAL_DATACENTER);
+                event.virtualDataCenter = virtualDatacenter;
+                event.networkName = privateNetworkForm.networkName;
+                event.networkConfiguration = privateNetworkForm.networkConfiguration;
+                dispatchEvent(event);
+            }
+
+           /*  private function onVirtualDataCenterAdded(event:VirtualApplianceEvent):void
+            {
+                closeForm();
+            } 
+            private function closeForm():void
+            {
+                AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
+                                                                                        onVirtualDataCenterAdded);
+                dispatchEvent(new Event("VirtualDatacenterFormAddClose"));
+            }*/
+
+
+            /**
+             * Validation method
+             * It doesn't enables acceptButton if the virtualDataCenter name and physicalDataCenter
+             * is not selected
+             */
+            private function validateForm():void
+            {
+                if(this._virtualDatacenter.id != 0){
+                	if(nameInput.text.length == 0){
+                		isFormValid = false;
+                	}else{
+	                	isFormValid = true;
+                	}
+                }else{
+	                isFormValid = nameInput.text.length > 0 && physicalDataCenterInput.selectedIndex > -1 && hyperTypeInput.selectedIndex > -1 && privateNetworkForm.isFormValid;
+                }
+                
+            }
+            
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            private function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                /* if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                { */
+                    if (keyboardEvent.keyCode == 13)
+                        onAccept();
+                //}
+            }
+
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                form.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                form.visible = true;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form id="form"
+        paddingTop="3"
+        labelWidth="100">
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                height="20"
+                maxChars="39"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_SELECTDATACENTER')"
+            required="true">
+            <mx:ComboBox id="physicalDataCenterInput"
+                height="18"
+                labelField="name"
+                enabled="{isCreation}"
+                dataProvider="{AbiCloudModel.getInstance().infrastructureManager.allowedDataCenters}"
+                change="onPhysicalDatacenterInputChange()"
+                prompt="@Resource(bundle='VirtualAppliance', key='COMBOBOX_PROMPT_PHYSICALDATACENTER')"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_SELECTHYPERTYPE')"
+            required="true">
+            <mx:ComboBox id="hyperTypeInput"
+                height="18"
+                enabled="{isCreation}"
+                labelFunction="hypervisorTypeInputLabelFunction"
+                change="validateForm()"
+                prompt="@Resource(bundle='VirtualAppliance', key='COMBOBOX_PROMPT_HYPERTYPE')"/>
+        </mx:FormItem>
+
+
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_PRIVATE_NETWORK')"
+            direction="horizontal"
+            id="privateNetworkFormItem"
+            includeInLayout="{isCreation}"
+            visible="{isCreation}">
+
+            <mx:RadioButtonGroup id="privateNetworkInput"
+                change="onChangePrivateNetworkInput()"/>
+
+            <mx:RadioButton id="defaultPrivateNetworkRadioButton"
+                value="default"
+                label="@Resource(bundle='VirtualAppliance', key='LABEL_DEFAULT')"
+                groupName="privateNetworkInput"/>
+
+            <mx:RadioButton id="customPrivateNetworkRadioButton"
+                value="custom"
+                label="@Resource(bundle='VirtualAppliance', key='LABEL_CUSTOM')"
+                groupName="privateNetworkInput"/>
+        </mx:FormItem>
+
+        <vlan:PrivateVLANFormItems id="privateNetworkForm"
+            includeInLayout="{customPrivateNetworkRadioButton.selected}"
+            visible="{customPrivateNetworkRadioButton.selected}"
+            isFormValidChange="validateForm()"/>
+
+    </mx:Form>
+
+
+
+    <!-- BUTTONS -->
+   <!-- <mx:HBox 
+        width="100%"
+        horizontalAlign="center"
+        paddingBottom="10">
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                enabled="{isFormValid}"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="closeForm()"/>
+        </mx:FormItem>
+    </mx:HBox>-->
+</mx:VBox>

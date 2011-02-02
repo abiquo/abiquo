@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 	
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <import resource="classpath:META-INF/server/wink-core-context.xml"/>
+
+	<!-- provide annotation driven transactions in methods -->
+	<tx:annotation-driven />
+
+	<context:annotation-config/>
+	<context:component-scan base-package="com.abiquo"/>
+
+
+	<bean id="httpClientOVFPackage" 		class="com.abiquo.am.fileserver.HttpClientOVFPackage"/>
+	<bean id="ovfPackageInstanceDownloader" class="com.abiquo.am.services.OVFPackageInstanceDownloader">
+	<property name="httpClient">
+		<ref bean ="httpClientOVFPackage"/>
+	</property>
+	</bean>
+	
+	<bean id="ovfPackageInstanceService" 	class="com.abiquo.am.services.OVFPackageInstanceService">
+	<property name="downloader">
+		<ref bean ="ovfPackageInstanceDownloader"/>
+	</property>
+	</bean>
+	
+	<bean id="ovfPackageInstancesResource" class="com.abiquo.am.resources.OVFPackageInstancesResource">
+	<property name="service">
+		<ref bean ="ovfPackageInstanceService"/>
+	</property>
+	</bean>
+	
+
+    <bean id="resourceRegistrar" class="org.apache.wink.spring.Registrar">
+      <property name="classes">
+          <set value-type="java.lang.Class">
+          	<value>com.abiquo.appliancemanager.util.ApplianceManagerExceptionMapper</value>
+          </set>
+      </property>
+	  <property name="instances">
+	    <set>
+	      <ref bean="checkResource"/>
+	      <ref bean="diskFileResource"/>
+	      <ref bean="enterpriseRepositoriesResource"/>
+	      <ref bean="enterpriseRepositoryResource"/>
+	      <ref bean="ovfPackageInstanceResource"/>
+	      <ref bean="ovfPackageInstancesResource"/>
+	      
+	      
+	      <!-- aux -->
+	      <ref bean="ovfPackageInstanceService"/>
+	      <ref bean="ovfPackageInstanceDownloader"/>
+	      <ref bean="httpClientOVFPackage"/>
+	      
+	    </set>
+	  </property>
+	</bean>
+	
+	
+	<!-- 
+	<bean id="ovfPackageInstanceService" 	class="com.abiquo.am.services.OVFPackageInstanceService"/>
+	<bean id="ovfPackageInstanceDownloader" class="com.abiquo.am.services.OVFPackageInstanceDownloader"/>
+	<bean id="httpClientOVFPackage" 		class="com.abiquo.am.fileserver.HttpClientOVFPackage"/>
+--> 
+     <bean id="wink.customPropertiesFactory" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath:wink.properties</value>
+            </list>
+        </property>
+     </bean>
+
+     <bean id="wink.placeholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+        <property name="order" value="1" />
+        <property name="propertiesArray">
+            <list>
+                <props>
+                    <prop key="winkPropertiesFactory">wink.customPropertiesFactory</prop>
+                </props>
+             </list>
+        </property>
+     </bean>
+</beans>

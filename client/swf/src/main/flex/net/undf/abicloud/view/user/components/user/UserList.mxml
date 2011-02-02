@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:user="net.undf.abicloud.view.user.components.user.*">
+
+
+    <mx:Metadata>
+		[Event(name="selectedUserChange", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import net.undf.abicloud.view.main.CommonAssets;
+            import mx.core.UIComponent;
+            import mx.core.Application;
+            import mx.utils.ObjectUtil;
+            import mx.binding.utils.BindingUtils;
+            import net.undf.abicloud.vo.user.UserListOptions;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import mx.events.MenuEvent;
+            import mx.events.DataGridEvent;
+            import mx.controls.Alert;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import mx.events.CloseEvent;
+            import net.undf.abicloud.events.UserEvent;
+            import net.undf.abicloud.vo.user.Enterprise;
+            import net.undf.abicloud.vo.user.User;
+            import mx.managers.DragManager;
+            import mx.controls.Image;
+            import mx.core.DragSource;
+            import mx.collections.ArrayCollection;
+
+            //Array containing the list of users that this component is displaying
+            [Bindable]
+            private var _users:ArrayCollection = new ArrayCollection();
+
+            public function get users():ArrayCollection
+            {
+                return this._users;
+            }
+
+            [Bindable]
+            private var _selectedUser:User;
+
+            [Bindable(event="selectedUserChange")]
+            public function get selectedUser():User
+            {
+                return this._selectedUser;
+            }
+
+            public function set selectedUser(value:User):void
+            {
+                this._selectedUser = value;
+                dispatchEvent(new Event("selectedUserChange"));
+            }
+
+            [Bindable]
+            private var _enterprise:Enterprise;
+
+            public function set enterprise(value:Enterprise):void
+            {
+                this._enterprise = value;
+                //Going to first page
+                this._usersCurrentPage = 0;
+                usersPaginatorSlider.value = 1;
+                requestUsers();
+            }
+
+            //Data provider for "More Actions" Combo box
+            [Bindable]
+            public var moreActionsDP:Array = [ { label: ResourceManager.getInstance().getString("User",
+                                                                                                "LABEL_ACTIVATE"), data: 1 },
+                                               { label: ResourceManager.getInstance().getString("User",
+                                                                                                "LABEL_DESACTIVATE"), data: 2 } ];
+
+            //Pop Ups
+            private var _userAdd:UserAdd;
+
+            private var _userEdit:UserEdit;
+
+
+            //Needed variables for user's pagination
+            private var _usersCurrentPage:int;
+
+            private var _usersAsc:Boolean;
+
+            private var _usersOrderBy:String;
+
+            private var USERS_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
+
+
+            private function onCreationComplete():void
+            {
+                //Initializing variables
+                this._users = new ArrayCollection();
+
+                //Creating the Pop Ups
+                _userAdd = new UserAdd();
+                _userAdd.addEventListener("userAddClose", closeUserAdd);
+
+                _userEdit = new UserEdit();
+                _userEdit.addEventListener("userEditClose", closeUserEdit);
+
+                //Listening for changes in model related to Users
+                BindingUtils.bindSetter(usersUpdated, AbiCloudModel.getInstance().userManager,
+                                        "users");
+                AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.USERS_EDITED,
+                                                                         onUsersEdited);
+                AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.USERS_SESSION_CLOSED,
+                                                                         onUsersSessionClosed);
+                AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.USER_DELETED,
+                                                                         onUserDeleted);
+            }
+
+            public function init():void
+            {
+                this._enterprise = null;
+                selectedUser = null;
+
+                usersFilter.text = "";
+                this._usersCurrentPage = 0;
+                this._usersAsc = true;
+                this._usersOrderBy = "name";
+                usersPaginatorSlider.value = 1;
+
+                loggedUsersCheckbox.selected = false;
+            }
+
+            /**
+             * Request the list of users, building the appropriate options
+             **/
+            private function requestUsers():void
+            {
+            	USERS_RESULTS_PER_PAGE = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
+            	
+                var userListOptions:UserListOptions = new UserListOptions();
+                userListOptions.offset = this._usersCurrentPage * USERS_RESULTS_PER_PAGE;
+                userListOptions.length = USERS_RESULTS_PER_PAGE;
+                userListOptions.filter = usersFilter.text;
+                userListOptions.asc = this._usersAsc;
+                userListOptions.orderBy = this._usersOrderBy;
+                userListOptions.byEnterprise = this._enterprise;
+                userListOptions.loggedOnly = loggedUsersCheckbox.selected;
+
+                var event:UserEvent = new UserEvent(UserEvent.GET_USERS);
+                event.userListOptions = userListOptions;
+                dispatchEvent(event);
+            }
+
+            /**
+             * Handler to manage when there are new users available in model
+             **/
+            private function usersUpdated(usersArray:ArrayCollection):void
+            {
+            	USERS_RESULTS_PER_PAGE = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
+                this._users = usersArray;
+            }
+
+            /**
+             * Handler to manage when one or more user has been successfully edited
+             */
+            private function onUsersEdited(userEvent:UserEvent):void
+            {
+                if (this._enterprise)
+                {
+                    //If we are currently filtering users by an Enterprise, we must check that the edited
+                    //user still belongs to that enterprise. Otherwise, we remove it from the view
+                    var length:int = userEvent.users.length;
+                    var i:int;
+                    var user:User;
+                    var index:int;
+                    for (i = 0; i < length; i++)
+                    {
+                        user = userEvent.users.getItemAt(i) as User;
+                        if (user.enterprise.id != this._enterprise.id)
+                        {
+                            index = this._users.getItemIndex(user);
+                            //IMPERSONATE_CHANGE_ENTERPRISE
+                            //Fix a display bug when sys admin changes
+                            //current enterprise in "Home" view
+                            if(index != -1){
+                            	this._users.removeItemAt(index);
+                            }                            
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Handler to manage when the session from one or more users has been
+             * successfully closed
+             */
+            private function onUsersSessionClosed(userEvent:UserEvent):void
+            {
+                //Requesting again the list of users with opened sessions
+                this._usersCurrentPage = 0;
+                usersPaginatorSlider.value = 1;
+                requestUsers();
+            }
+
+            /**
+             * Handler called when a User has been deleted
+             */
+            private function onUserDeleted(userEvent:UserEvent):void
+            {
+                selectedUser = null;
+            }
+
+            /////////////////////////////////////
+            //Pop Ups handlers
+
+            private function closeUserAdd(event:Event):void
+            {
+                PopUpManager.removePopUp(this._userAdd);
+            }
+
+            private function closeUserEdit(event:Event):void
+            {
+                PopUpManager.removePopUp(this._userEdit);
+            }
+
+            /////////////////////////////////////
+            //Tool Bar Functions
+
+            /**
+             * When user clicks to add a new user
+             **/
+            private function addUser():void
+            {
+                if (this._enterprise)
+                {
+                    PopUpManager.addPopUp(this._userAdd, this, true);
+                    PopUpManager.centerPopUp(this._userAdd);
+
+                    this._userAdd.init(this._enterprise);
+                }
+            }
+
+            /**
+             * Ask user to confirm a user deletion
+             **/
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("User")]
+            private var rb2:ResourceBundle;
+
+            private function askUserDeletion():void
+            {
+                if (User(usersDataGrid.selectedItem).id == AbiCloudModel.getInstance().loginManager.user.id)
+                {
+                    //It is not possible to delete a user if it is logged in
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_UNABLE_DELETE_HEADER"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_UNABLE_DELETE_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }
+                else
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_USER_HEADER"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_DELETE_USER_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            deleteUser);
+                }
+            }
+
+            /**
+             * Deletes a user
+             **/
+            private function deleteUser(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var userEvent:UserEvent = new UserEvent(UserEvent.DELETE_USER);
+                    userEvent.user = usersDataGrid.selectedItem as User;
+                    dispatchEvent(userEvent);
+                }
+            }
+
+            /**
+             * When user clicks to edit a user
+             **/
+            private function editUser():void
+            {
+                if (AbiCloudModel.getInstance().loginManager.user.id == User(usersDataGrid.selectedItem).id)
+                {
+                    //The user that is currently logged can not be edited here
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_UNABLE_EDIT_HEADER"),
+                                            ResourceManager.getInstance().getString("User",
+                                                                                    "ALERT_UNABLE_EDIT_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }
+                else
+                {
+                    PopUpManager.addPopUp(this._userEdit, this, true);
+                    PopUpManager.centerPopUp(this._userEdit);
+
+                    this._userEdit.init(usersDataGrid.selectedItem as User);
+                }
+            }
+
+
+            private function onKeyDownUsersFilter(event:KeyboardEvent):void
+            {
+                //If user presses the Enter key, we launch the filter
+                if (event.keyCode == 13)
+                    onClickUsersFilter();
+            }
+
+            /**
+             * Filters the users list, searching for a pattern in any field
+             **/
+            private function onClickUsersFilter():void
+            {
+                //Going to first page
+                this._usersCurrentPage = 0;
+                usersPaginatorSlider.value = 1;
+
+                //Requesting the list of users filtered
+                requestUsers();
+            }
+
+            /**
+             * To sort the Data Grid by column
+             **/
+            private function onDGColumnHeaderRelease(event:DataGridEvent):void
+            {
+                event.preventDefault();
+
+                if (this._usersOrderBy == event.dataField)
+                    this._usersAsc = !this._usersAsc;
+                else
+                    this._usersOrderBy = event.dataField;
+
+                this._usersCurrentPage = 0;
+                usersPaginatorSlider.value = 1;
+                requestUsers();
+            }
+
+            /**
+             * Label function for Role column in usersDataGrid
+             **/
+            private function usersDataGridRoleColumnLabel(item:Object, column:DataGridColumn):String
+            {
+                return User(item).role.shortDescription;
+            }
+
+            /**
+             * Label function for name column in usersDataGrid
+             **/
+            private function usersDataGridNameColumnLabel(item:Object, column:DataGridColumn):String
+            {
+                return User(item).name + " " + User(item).surname;
+            }
+
+
+            /**
+             * When users clicks in Users DataGrid
+             */
+            private function onClickUsersDataGrid():void
+            {
+                if (usersDataGrid.selectedIndex > -1)
+                    selectedUser = usersDataGrid.selectedItem as User;
+                else
+                    selectedUser = null;
+            }
+
+            private function onClickMoreActions(menuEvent:MenuEvent):void
+            {
+                //We do not modify the selected users until changes are saved in server
+                var oldUsers:ArrayCollection = new ArrayCollection(usersDataGrid.selectedItems);
+                var copiedUsers:ArrayCollection = ObjectUtil.copy(oldUsers) as ArrayCollection;
+
+                var length:int = usersDataGrid.selectedItems.length;
+                var i:int;
+                var event:UserEvent;
+
+                switch (menuEvent.item.data)
+                {
+                    case 1:
+                        //Activate all selected users (except if a selected user is the same that the logged user)
+                        for (i = 0; i < length; i++)
+                        {
+                            if (User(copiedUsers[i]).id != AbiCloudModel.getInstance().loginManager.user.id)
+                                User(copiedUsers[i]).active = true;
+                        }
+
+                        event = new UserEvent(UserEvent.EDIT_USERS);
+                        break;
+
+                    case 2:
+                        //Desactivate all selected users (except if a selected user is the same that the logged user)
+                        for (i = 0; i < length; i++)
+                        {
+                            if (User(copiedUsers[i]).id != AbiCloudModel.getInstance().loginManager.user.id)
+                                User(copiedUsers[i]).active = false;
+                        }
+
+                        event = new UserEvent(UserEvent.EDIT_USERS);
+                        break;
+
+                    case 3:
+                        //Close session from all selected users (except if a selected user is the same that the logged user)
+                        for (i = 0; i < length; i++)
+                        {
+                            if (User(copiedUsers[i]).id == AbiCloudModel.getInstance().loginManager.user.id)
+                            {
+                                copiedUsers.removeItemAt(i);
+                                oldUsers.removeItemAt(i);
+                                break;
+                            }
+                        }
+
+                        event = new UserEvent(UserEvent.CLOSE_SESSION_USERS);
+                        break;
+
+                    case 4:
+                        //Close all active sessions (except the one from the logged user)
+                        event = new UserEvent(UserEvent.CLOSE_SESSION_USERS);
+                        copiedUsers = null;
+                        break;
+                }
+
+                //Dispatching event
+                event.users = copiedUsers;
+                event.oldUsers = oldUsers;
+                dispatchEvent(event);
+            }
+
+            private function onOpenMoreActions(event:Event):void
+            {
+                moreActionsButton.addEventListener(MenuEvent.ITEM_CLICK, onClickMoreActions);
+            }
+
+            private function onCloseMoreActions(event:Event):void
+            {
+                moreActionsButton.removeEventListener(MenuEvent.ITEM_CLICK, onClickMoreActions);
+            }
+
+            private var _isUsersPaginatorMouseDown:Boolean = false;
+
+            private function onMouseDownUsersPaginatorSlider():void
+            {
+                this._isUsersPaginatorMouseDown = true;
+                Application.application.addEventListener(MouseEvent.MOUSE_UP, onMouseUpUsersPaginatorSlider);
+            }
+
+            private function onMouseUpUsersPaginatorSlider(mouseEvent:MouseEvent):void
+            {
+                this._isUsersPaginatorMouseDown = false;
+                Application.application.removeEventListener(MouseEvent.MOUSE_UP,
+                                                            onMouseUpUsersPaginatorSlider);
+                onChangeUsersPaginator();
+            }
+
+            private function onChangeUsersPaginator():void
+            {
+                if (!this._isUsersPaginatorMouseDown && (this._usersCurrentPage != usersPaginatorSlider.value - 1))
+                {
+                    this._usersCurrentPage = usersPaginatorSlider.value - 1;
+                    requestUsers();
+                }
+            }
+
+            /**
+             * When user marks or unmarks the users logged Checkbox, we filter
+             * the user's list appropriately
+             */
+            private function onChangeLoggedUsersCheckbox():void
+            {
+
+                if (loggedUsersCheckbox.selected)
+                {
+                    //Adding  new actions to close sessions for selected users
+                    moreActionsDP = moreActionsDP.concat({ label: ResourceManager.getInstance().getString("User",
+                                                                                                          "LABEL_CLOSE_SESSION"), data: 3 });
+                    moreActionsDP = moreActionsDP.concat({ label: ResourceManager.getInstance().getString("User",
+                                                                                                          "LABEL_CLOSE_ALL_SESSIONS"), data: 4 });
+                }
+                else
+                {
+                    //Removing actions  to close sessions
+                    moreActionsDP = moreActionsDP.slice(0, 2);
+                }
+
+                //Going to first page
+                this._usersCurrentPage = 0;
+                usersPaginatorSlider.value = 1;
+
+                //Requesting users
+                requestUsers();
+            }
+
+
+            //////////////////////////////////////////
+            // DRAG & DROP FUNCTIONALITY (used to move Users between Enterprises) 
+
+            /**
+             * Register Mouse Move events, to know if user wants to start a drag operation
+             * from the UsersDataGrid
+             */
+            private function onMouseDownUsersDataGrid():void
+            {
+                if (usersDataGrid.selectedIndex > -1)
+                    usersDataGrid.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMoveUsersDataGrid);
+            }
+
+            /**
+             * Initializes a Drag operation from the UsersDataGrid
+             */
+            private function onMouseMoveUsersDataGrid(mouseEvent:MouseEvent):void
+            {
+                //We don't need this handler until user wants to initate another Drag operation
+                usersDataGrid.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMoveUsersDataGrid);
+
+                var dragSource:DragSource = new DragSource();
+                dragSource.addData(usersDataGrid.selectedItem, "User");
+
+                var dragProxy:Image = new Image();
+              
+                dragProxy.maintainAspectRatio = true;
+                dragProxy.width = 100;
+                dragProxy.height = 100;
+
+                AbicloudUtils.getImageFromStyle('UserListDragProxyUser', dragProxy);
+                var position:Point = localToGlobal(new Point(mouseEvent.localX, mouseEvent.localY));
+                DragManager.doDrag(UIComponent(Application.application), dragSource,
+                                   mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- Search & More actions Bar -->
+    <mx:HBox 
+        width="100%" height="32"
+        top="0"
+        paddingLeft="6"
+        paddingRight="6"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopSkin">
+
+        <mx:PopUpMenuButton id="moreActionsButton"
+            height="18"
+            color="#333333"
+            styleName="MoreActionsButton" dataProvider="{moreActionsDP}"
+            label="@Resource(bundle='User', key='LABEL_MORE_ACTIONS')"
+            labelField="label"
+            open="onOpenMoreActions(event)"
+            close="onCloseMoreActions(event)"/>
+
+        <mx:Spacer 
+            width="100%" height="10"/>
+
+        <mx:HBox 
+            width="100%"
+            horizontalAlign="right"
+            horizontalGap="3"
+            verticalAlign="middle">
+
+            <user:SecurableLoggedUsersCheckbox id="loggedUsersCheckbox"
+                change="onChangeLoggedUsersCheckbox()"/>
+
+            <mx:Image id="userListSeparator" 
+            	creationComplete="AbicloudUtils.getImageFromStyle('UserListSeparator', userListSeparator)"
+
+            	/>
+
+            <mx:Image 
+                id="userListMagnifier"
+                creationComplete="AbicloudUtils.getImageFromStyle('UserListMagnifier', userListMagnifier)"
+                
+                useHandCursor="true"
+                buttonMode="true"
+                mouseChildren="false"
+                click="onClickUsersFilter()"/>
+
+            <mx:TextInput id="usersFilter"
+                height="20"
+                toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+                keyDown="onKeyDownUsersFilter(event)"/>
+        </mx:HBox>
+
+
+    </mx:HBox>
+
+    <!-- Data Grid -->
+    <mx:DataGrid id="usersDataGrid"
+        width="100%"
+        top="31" bottom="31"
+        dataProvider="{this._users}" allowMultipleSelection="true"
+        click="onClickUsersDataGrid()"
+        mouseDown="onMouseDownUsersDataGrid()"
+        headerRelease="onDGColumnHeaderRelease(event)">
+
+
+        <mx:columns>
+            <mx:DataGridColumn id="nameDGColumn"
+                labelFunction="usersDataGridNameColumnLabel"
+                dataField="name"
+                sortable="true"
+                headerText="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"/>
+
+            <mx:DataGridColumn dataField="user"
+                sortable="true"
+                headerText="@Resource(bundle='User', key='TEXTINPUT_LABEL_USER')"/>
+
+            <mx:DataGridColumn dataField="email"
+                headerText="@Resource(bundle='User', key='TEXTINPUT_LABEL_EMAIL')"/>
+
+            <mx:DataGridColumn 
+                labelFunction="usersDataGridRoleColumnLabel"
+                dataField="role"
+                sortable="true"
+                headerText="@Resource(bundle='User', key='LABEL_ROLE')"/>
+
+            <mx:DataGridColumn 
+                width="60"
+                dataField="active"
+                sortable="true"
+                headerText="@Resource(bundle='User', key='LABEL_ACTIVATED')"
+                resizable="false">
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:Canvas 
+                            width="12" height="13">
+                            <mx:Script>
+                                <![CDATA[
+                                    import mx.resources.ResourceManager;
+                                    import net.undf.abicloud.vo.user.User;
+
+                                    [Bindable]
+                                    private var _user:User;
+
+                                    override public function set data(value:Object):void
+                                    {
+                                        super.data = value;
+                                        this._user = value as User;
+                                    }
+                                ]]>
+                            </mx:Script>
+                            <mx:Label 
+                                horizontalCenter="0"
+                                verticalCenter="0"
+                                text="{this._user.active ? ResourceManager.getInstance().getString('User', 'LABEL_YES') :
+									  							 ResourceManager.getInstance().getString('User', 'LABEL_NO')}"/>
+                        </mx:Canvas>
+                    </mx:Component>
+                </mx:itemRenderer>
+
+            </mx:DataGridColumn>
+        </mx:columns>
+    </mx:DataGrid>
+
+    <!-- Tool Box -->
+    <general:GeneralPanelToolBox 
+        bottom="0"
+        styleName="GeneralDataPanelBottomSkin">
+        <mx:Button id="addButton"
+            styleName="AddButton" enabled="{this._enterprise != null}"
+            toolTip="{addButton.enabled ? ResourceManager.getInstance().getString('User', 'BUTTON_NEW_USER_TOOLTIP') :
+												  ResourceManager.getInstance().getString('User', 'BUTTON_NEW_DISABLED_TOOLTIP')}"
+            click="addUser()"
+            visible="{! loggedUsersCheckbox.selected}"/>
+
+        <mx:Button id="deleteButton"
+            enabled="{this._selectedUser != null}" styleName="RemoveButton"
+            toolTip="@Resource(bundle='User', key='BUTTON_DEL_USER_TOOLTIP')"
+            click="askUserDeletion()"
+            visible="{! loggedUsersCheckbox.selected}"/>
+
+        <mx:Canvas 
+            width="100%" height="100%">
+            <mx:Label 
+                top="2"
+                horizontalCenter="0"
+                text="{ResourceManager.getInstance().getString('User', 'LABEL_PAGE') + ' ' + 
+					 	    usersPaginatorSlider.value + ' ' +
+					 	    ResourceManager.getInstance().getString('User', 'LABEL_OF') + ' ' +
+					 	    (int(Math.ceil(AbiCloudModel.getInstance().userManager.totalUsers / USERS_RESULTS_PER_PAGE)) > 0 ? 
+					 	     int(Math.ceil(AbiCloudModel.getInstance().userManager.totalUsers / USERS_RESULTS_PER_PAGE)) : '1')}"/>
+
+            <mx:HSlider id="usersPaginatorSlider"
+                bottom="3"
+                horizontalCenter="0"
+                minimum="1" snapInterval="1"
+                maximum="{int(Math.ceil(AbiCloudModel.getInstance().userManager.totalUsers / USERS_RESULTS_PER_PAGE))}"
+                liveDragging="true" showDataTip="false"
+                change="onChangeUsersPaginator()"
+                mouseDown="onMouseDownUsersPaginatorSlider()"/>
+        </mx:Canvas>
+
+        <mx:Button id="editButton"
+            enabled="{this._selectedUser != null	}"
+            styleName="ConfigurationButton"
+            toolTip="@Resource(bundle='User', key='BUTTON_EDIT_USER_TOOLTIP')"
+            click="editUser()"
+            visible="{! loggedUsersCheckbox.selected}"/>
+    </general:GeneralPanelToolBox>
+</mx:Canvas>

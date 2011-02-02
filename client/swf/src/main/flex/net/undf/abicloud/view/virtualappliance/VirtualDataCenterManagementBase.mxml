@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    initialize="onInitialize()"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:componentsVA="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*"
+    xmlns:virtualdatacenter="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.*"
+    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.collections.ArrayCollection;
+            import mx.containers.Canvas;
+            import mx.controls.Alert;
+            import mx.effects.Resize;
+            import mx.events.CloseEvent;
+            import mx.events.EffectEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.business.managers.CountdownManager;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.networking.virtualdatacenter.NetworkManagement;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceForm;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceList;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb2:ResourceBundle;
+
+            //Pop Ups
+            private var _virtualApplianceForm:VirtualApplianceForm;
+
+            private var _resizeEffect:Resize;
+
+            [Bindable]
+            private var virtualApplianceList:VirtualApplianceList;
+
+            [Bindable]
+            private var vdcNetworkManagement:NetworkManagement;
+
+            /////////////////////////////////////
+            //IBodyComponentChildren implementation (in progress...)
+
+            public function cleanView():void
+            {
+                //Cleaning this component everytime it is shown
+                hideMoreInfoContainer();
+                virtualInfrastructureToggledContainer.selectedIndex = 0;
+
+                virtualDatacenterList.init();
+                virtualApplianceList.init();
+                vdcNetworkManagement.init();
+            }
+
+
+            public function willShow():void
+            {
+                //selectedVirtualDataCenter = null;
+                checkVirtualDatacentersAndAppliances();
+
+                //Starting BackgroundUpdates
+                startBackgroundUpdates();
+            }
+
+            public function willHide():void
+            {
+                //Stop background updates
+                stopBackgroundUpdates();
+            }
+
+            /////////// END IBodyComponentChildren implementation ////////////////
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Resize effect used to show or hide the More info container
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 160;
+
+                //Creating PopUps
+                this._virtualApplianceForm = new VirtualApplianceForm();
+                this._virtualApplianceForm.addEventListener("VirtualApplianceFormClose",
+                                                            closeVirtualApplianceForm);
+
+                //CREATING VIRTUAL INFRASTRUCTURE SECTIONS
+
+                //VirtualApplianceList, for VirtualAppliances management
+                virtualApplianceList = new VirtualApplianceList();
+                virtualApplianceList.addEventListener("addVirtualAppliance",
+                                                      addVirtualAppliance);
+                virtualApplianceList.addEventListener("editVirtualAppliance",
+                                                      editVirtualAppliance);
+                virtualApplianceList.addEventListener("deleteVirtualAppliance",
+                                                      askVirtualApplianceDeletion);
+                virtualApplianceList.addEventListener("virtualApplianceSelected",
+                                                      showVirtualAppliance);
+
+
+                //NetworkManagement
+                vdcNetworkManagement = new NetworkManagement();
+                vdcNetworkManagement.addEventListener("selectedPrivateVLANChange",
+                                                      onSelectedPrivateVLANChange);
+
+                //ADDING VIRTUAL INFRASTRUCTURE SECTIONS
+                virtualInfrastructureToggledContainer.addContent(virtualApplianceList,
+                                                                 ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                                         "LABEL_VIRTUAL_APPLIANCES"));
+                virtualInfrastructureToggledContainer.addContent(vdcNetworkManagement,
+                                                                 ResourceManager.getInstance().getString("Networking",
+                                                                                                         "LABEL_NETWORK"));
+            }
+
+            private function onInitialize():void
+            {
+                //Listening for changes in model related to VirtualAppliances
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_CREATED,
+                                                                                     onVirtualApplianceCRUD);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_DELETED,
+                                                                                     onVirtualApplianceCRUD);
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
+                                                                                     onVirtualApplianceEdited);
+
+                //Listening for checks in VirtualDatacenters and VirtualAppliances
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED,
+                                                                                     onVirtualDatacentersAndAppliancesChecked);
+
+                //Listening for VirtualAppliances deletion petitions from view
+                addEventListener(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE, onDeleteVirtualAppliance);
+
+                virtualInfrastructureToggledContainer.selectedIndex = 0;
+            }
+
+            /**
+             * Shows a the moreInfoContainer component
+             */
+            protected function showMoreInfoContainer(selectedIndex:int = 0):void
+            {
+                moreInfoVS.selectedIndex = selectedIndex;
+
+                if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._resizeEffect.play([ moreInfoContainer ]);
+                }
+            }
+
+            /**
+             * Hides the MoreInfoContainer component
+             */
+            protected function hideMoreInfoContainer():void
+            {
+                if (moreInfoContainer.visible)
+                {
+                    this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                    this._resizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onEndResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideButton():void
+            {
+                hideMoreInfoContainer();
+            }
+
+
+            /////////////////////////////////////////
+            //VIRTUAL DATACENTERS
+
+            protected function onSelectedVirtualDatacenterChange():void
+            {
+                virtualApplianceList.selectedVirtualAppliance = null;
+                hideMoreInfoContainer();
+
+                //Filtering the VirtualAppliance by the VirtualDataCenter that has been selected
+                virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+
+                //Setting the VirtualDatacenter to manage its network
+                vdcNetworkManagement.virtualDatacenter = virtualDatacenterList.selectedVirtualDataCenter;
+            }
+
+            //////////////////////////////////////
+            //VIRTUAL APPLIANCE
+
+            /**
+             * Called everytime that new VirtualAppliance are available in model
+             */
+            private function setVirtualAppliances(value:ArrayCollection):void
+            {
+                var virtualAppliances:ArrayCollection = value;
+                var selectedVirtualAppliance:VirtualAppliance = virtualApplianceList.selectedVirtualAppliance;
+
+                //Trying to get again the virtual appliance that we had selected
+                if (selectedVirtualAppliance)
+                {
+                    //Looking if the new list of VirtualAppliances still has the Virtual Appliance that we had elected
+                    var length:int = virtualAppliances.length;
+                    var i:int;
+                    var virtualApplianceFound:Boolean = false;
+                    for (i = 0; i < length; i++)
+                    {
+                        if (selectedVirtualAppliance.id == VirtualAppliance(virtualAppliances.getItemAt(i)).id)
+                        {
+                            selectedVirtualAppliance = virtualAppliances.getItemAt(i) as VirtualAppliance;
+                            virtualApplianceFound = true;
+                            break;
+                        }
+                    }
+
+                    //If we havent found the selectedVirtualAppliance in the new Virtual Appliance list
+                    //means that has been deleted by another user
+                    if (!virtualApplianceFound)
+                        selectedVirtualAppliance = null;
+                }
+
+                //Setting the VirtualApplianceList component
+                virtualApplianceList.virtualAppliances = virtualAppliances;
+                virtualApplianceList.selectedVirtualAppliance = selectedVirtualAppliance;
+
+                //Showing againg the VirtualAppliances
+                virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+            }
+
+            /**
+             * Called when the Virtual Appliances has been checked
+             */
+            private function onVirtualApplianceCRUD(event:Event):void
+            {
+                setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
+            }
+
+            /**
+             * Handler for when a VirtualAppliance has been edited
+             */
+            private function onVirtualApplianceEdited(virtualApplianceEvent:VirtualApplianceEvent):void
+            {
+                //If we are currently filtering the VirtualAppliances by a certain virtualDataCenter
+                //and the edited VirtualAppliance no longer belongs to that VirtualDataCenter, we remove it
+                //from the view
+                if (virtualDatacenterList.selectedVirtualDataCenter && virtualApplianceEvent.virtualAppliance.virtualDataCenter.id != virtualDatacenterList.selectedVirtualDataCenter.id)
+                {
+                    virtualApplianceList.filterVirtualAppliancesByVirtualDataCenter(virtualDatacenterList.selectedVirtualDataCenter);
+                }
+            }
+
+            /**
+             * Handler called when a Virtual Appliance is deleted
+             */
+            private function onDeleteVirtualAppliance(event:VirtualApplianceEvent):void
+            {
+                hideMoreInfoContainer();
+            }
+
+            /**
+             * Opens a VirtualApplianceForm for creation
+             */
+            private function addVirtualAppliance(event:Event = null):void
+            {
+                PopUpManager.addPopUp(this._virtualApplianceForm, this, true);
+                PopUpManager.centerPopUp(this._virtualApplianceForm);
+
+                this._virtualApplianceForm.init(null, virtualDatacenterList.selectedVirtualDataCenter);
+            }
+
+            /**
+             * Asks user to confirm a VirtualAppliance deletion
+             */
+            private function askVirtualApplianceDeletion(event:Event = null):void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
+                                        Alert.YES | Alert.NO, virtualApplianceDeletionResponseHandler);
+            }
+
+            /**
+             * Handler to retrieve users response
+             */
+            private function virtualApplianceDeletionResponseHandler(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                    deleteVirtualAppliance();
+            }
+
+            /**
+             * Deletes a VirtualAppliance, once user has confirmed it
+             * If the Virtual Appliance is powered on, it will use a non blocking service
+             */
+            private function deleteVirtualAppliance():void
+            {
+                var virtualApplianceToDelete:VirtualAppliance = virtualApplianceList.selectedVirtualAppliance;
+                var virtualApplianceEvent:VirtualApplianceEvent;
+
+                if (virtualApplianceToDelete.state.id == State.RUNNING)
+                {
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE_NON_BLOCKING);
+                    virtualApplianceEvent.virtualAppliance = ObjectUtil.copy(virtualApplianceToDelete) as VirtualAppliance;
+                }
+                else
+                {
+                    virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE);
+                    virtualApplianceEvent.virtualAppliance = virtualApplianceToDelete;
+                }
+
+                dispatchEvent(virtualApplianceEvent);
+            }
+
+            /**
+             * Opens a VirtualApplianceForm for edition
+             */
+            private function editVirtualAppliance(event:Event = null):void
+            {
+                PopUpManager.addPopUp(this._virtualApplianceForm, this, true);
+                PopUpManager.centerPopUp(this._virtualApplianceForm);
+
+                this._virtualApplianceForm.init(virtualApplianceList.selectedVirtualAppliance);
+            }
+
+            /**
+             * Closes an opened VirtualApplianceForm
+             */
+            private function closeVirtualApplianceForm(event:Event):void
+            {
+                PopUpManager.removePopUp(this._virtualApplianceForm);
+                //Depending on user choice, we automatically open the virtual appliance after creation
+                if(this._virtualApplianceForm.automaticOpenCheck.selected 
+                && this._virtualApplianceForm.createdVirtualAppliance 
+                && !this._virtualApplianceForm.onCancelState){                	
+                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+                    virtualApplianceEvent.virtualAppliance = this._virtualApplianceForm.createdVirtualAppliance;
+                    dispatchEvent(virtualApplianceEvent);
+                }
+            }
+
+            /**
+             * Shows more information of a VirtualAppliance in a VirtualApplianceRenderer component
+             */
+            private function showVirtualAppliance(event:Event = null):void
+            {
+                showMoreInfoContainer(0);
+            }
+
+
+            ////////////////////////////////////////////
+            //NetworkManagement
+
+            private function onSelectedPrivateVLANChange(event:Event = null):void
+            {
+                if (vdcNetworkManagement.selectedPrivateVLAN)
+                {
+                    showMoreInfoContainer(1);
+                }
+                else
+                {
+                    hideMoreInfoContainer();
+                }
+            }
+
+            ////////////////////////////////////////////
+            //BACKGROUND UPDATES
+
+            /**
+             * Starts all backgrounds updates that this component may have
+             * Only this component control when the background updates can start
+             */
+            public function startBackgroundUpdates():void
+            {
+                //Registering new events
+                AbiCloudModel.getInstance().countdownManager.addEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                              checkVirtualDatacentersAndAppliances);
+
+                //Starting timer
+                AbiCloudModel.getInstance().countdownManager.startAutoCountdown(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
+            }
+
+            /**
+             * Stops all background automatic updates that this component may have
+             * The background updates can be stopped from outside, since this component can not always control
+             * when they are not longer necessary.
+             */
+            public function stopBackgroundUpdates():void
+            {
+                //Stopping timer
+                AbiCloudModel.getInstance().countdownManager.stopAutoCountdown();
+
+                //Unregistering all events for timer
+                AbiCloudModel.getInstance().countdownManager.removeEventListener(CountdownManager.COUNTDOWN_COMPLETE_EVENT,
+                                                                                 checkVirtualDatacentersAndAppliances);
+            }
+
+            public function checkVirtualDatacentersAndAppliances(event:Event = null):void
+            {
+            	//We need to differenciate the background process 
+            	//from the manual user interaction in order to show the
+            	//appropriate message in case of session expried
+            	AbiCloudModel.getInstance().virtualApplianceManager.callProcessComplete = false;
+            	if(event){
+            		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = true;
+            	}else{
+            		AbiCloudModel.getInstance().virtualApplianceManager.serverCallType = false;
+            	}
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
+                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(virtualApplianceEvent);
+            }
+
+            private function onVirtualDatacentersAndAppliancesChecked(event:Event):void
+            {
+                virtualDatacenterList.setVirtualDataCenters(AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters);
+                setVirtualAppliances(AbiCloudModel.getInstance().virtualApplianceManager.virtualAppliances);
+            }
+        ]]>
+    </mx:Script>
+    <!-- VIRTUAL DATACENTER -->
+
+
+    <general:GeneralPanel 
+        width="200" height="100%"
+        title="@Resource(bundle='VirtualAppliance', key='LABEL_VIRTUALDATACENTERS')">
+
+        <virtualdatacenter:VirtualDatacenterList id="virtualDatacenterList"
+            width="100%" height="100%"
+            selectedVirtualDataCenterChange="onSelectedVirtualDatacenterChange()"/>
+    </general:GeneralPanel>
+
+
+
+    <!-- VIRTUAL INFRASTRUCTURE -->
+
+    <general:GeneralPanel id="virtualInfrastructureContainer"
+        width="100%" height="100%"
+        creationPolicy="all"
+        title="{virtualDatacenterList.selectedVirtualDataCenter ? virtualDatacenterList.selectedVirtualDataCenter.name.toUpperCase() :
+						  															ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_ALL').toUpperCase()}">
+
+        <mx:Canvas 
+            width="100%" height="100%"
+            styleName="VirtualDataCenterManagementBaseCanvas1"
+            >
+            <general:GeneralToggledContainer id="virtualInfrastructureToggledContainer"
+                x="0" y="0"
+                left="5" right="5" top="5" bottom="5"/>
+        </mx:Canvas>
+
+
+        <!-- Virtual Infrastructure more info -->
+        <mx:VBox id="moreInfoContainer"
+            width="100%" height="0"
+            backgroundColor="#e9e9e9"
+            horizontalAlign="center"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalGap="0"
+            visible="false">
+
+            <mx:Button id="hideButton"
+                width="49" height="10"
+                styleName="UpDownButton"
+                click="onClickHideButton()"/>
+
+
+            <mx:ViewStack id="moreInfoVS"
+                width="100%" height="100%">
+
+                <!-- Virtual Appliance info -->
+                <componentsVA:VirtualApplianceRenderer id="virtualApplianceRenderer"
+                    width="100%" height="100%"
+                    virtualAppliance="{virtualApplianceList.selectedVirtualAppliance}"/>
+
+                <!-- VLAN info -->
+                <vlan:VLANRenderer id="vlanRenderer"
+                    width="100%" height="100%"
+                    vlanNetwork="{vdcNetworkManagement.selectedPrivateVLAN}"/>
+            </mx:ViewStack>
+
+        </mx:VBox>
+
+
+    </general:GeneralPanel>
+
+</mx:HDividedBox>

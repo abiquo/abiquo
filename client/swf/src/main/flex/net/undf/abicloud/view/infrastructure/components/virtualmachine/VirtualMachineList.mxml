@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Metadata>
+		[Event(name="virtualMachineSelected", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.controller.ThemeHandler;
+        	import net.undf.abicloud.view.main.CommonAssets;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.core.UIComponent;
+            import mx.core.Application;
+            import mx.managers.DragManager;
+            import mx.controls.Image;
+            import mx.core.DragSource;
+            import net.undf.abicloud.utils.customtree.CustomTreeNode;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import mx.collections.ArrayCollection;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+
+            [ResourceBundle("Infrastructure")]
+            private var rb:ResourceBundle;
+
+            //The VirtualMachine that is currently selected
+            private var _selectedVirtualMachine:VirtualMachine = null;
+
+
+
+            [Bindable(event="selectedVirtualMachineChange")]
+            public function get selectedVirtualMachine():VirtualMachine
+            {
+                return this._selectedVirtualMachine;
+            }
+
+            public function set selectedVirtualMachine(value:VirtualMachine):void
+            {
+                this._selectedVirtualMachine = value;
+                dispatchEvent(new Event("selectedVirtualMachineChange"));
+            }
+
+            //The Array of VirtualMachines
+            [Bindable]
+            private var _virtualMachines:ArrayCollection;
+
+            [Bindable]
+            private var _virtualMachinesFiltered:ArrayCollection = new ArrayCollection();
+
+            public function get virtualMachines():ArrayCollection
+            {
+                return this._virtualMachines;
+            }
+
+            public function set virtualMachines(value:ArrayCollection):void
+            {
+                this._virtualMachines = value;
+                filterVirtualMachines();
+            }
+
+            /**
+             * Initializes this component
+             */
+            public function init():void
+            {
+                onClickViewOptions('listMode');
+
+                clearVirtualMachinesFilter();
+
+                selectedVirtualMachine = null;
+                virtualMachines = null;
+
+                //Setting the default size level
+                iconSizeSlider.value = 1;
+            }
+
+            /**
+             * Clears the parameters used to filter the VirtualMachine list
+             */
+            public function clearVirtualMachinesFilter():void
+            {
+                virtualMachinesFilter.text = "";
+            }
+
+            private function onVirtualMachinesFilterKeyUp(event:KeyboardEvent):void
+            {
+                //If Enter key was pressed, launch the virtual machines filter
+                if (event.keyCode == 13)
+                    filterVirtualMachines();
+            }
+
+            /**
+             * Filters the virtual machines, checking for patterns in virtual machine's name
+             * and virtual machine's virtual image's name
+             */
+            private function filterVirtualMachines():void
+            {
+                var filterText:String = virtualMachinesFilter.text.toLocaleLowerCase();
+
+                if (filterText == null || filterText == "")
+                {
+                    //No filter needed
+                    this._virtualMachinesFiltered = this._virtualMachines;
+                }
+                else
+                {
+                    var virtualMachinesFiltered:ArrayCollection = new ArrayCollection();
+                    var length:int = this._virtualMachines.length;
+                    var i:int;
+                    var virtualMachine:VirtualMachine;
+                    var addVirtualMachine:Boolean;
+
+                    for (i = 0; i < length; i++)
+                    {
+                        virtualMachine = this._virtualMachines.getItemAt(i) as VirtualMachine;
+                        addVirtualMachine = false;
+
+                        //Looking for matches in name, virtual image name, user name, enterprise name
+                        if (virtualMachine.name.toLowerCase().indexOf(filterText) > -1)
+                        {
+                            addVirtualMachine = true;
+                        }else if(virtualMachine.user){
+                        	if(virtualMachine.user.name.toLocaleLowerCase().indexOf(filterText) > -1 || virtualMachine.user.surname.toLocaleLowerCase().indexOf(filterText) > -1){
+                        		addVirtualMachine = true;
+                        	}else if(virtualMachine.user.enterprise.name.toLocaleLowerCase().indexOf(filterText) > -1){
+                        		addVirtualMachine = true;
+                        	}
+                        }
+                        if(addVirtualMachine == false){
+                        	if(virtualMachine.virtualImage){
+	                        	if(virtualMachine.virtualImage.name.toLocaleLowerCase().indexOf(filterText) > -1){
+	                        		addVirtualMachine = true;
+	                        	}
+	                        }
+                        }
+                        
+                        if(addVirtualMachine){
+                        	virtualMachinesFiltered.addItem(virtualMachine);
+                        }
+                    }
+
+                    //Showing the filtered virtual machines
+                    this._virtualMachinesFiltered = virtualMachinesFiltered;
+                }
+            }
+
+            /**
+             * When user clicks on the VirtualMachine's Data Grid
+             */
+            private function onClickVirtualMachinesDataGrid():void
+            {
+                //There was no drop operation. We can remove this handler
+                virtualMachinesDataGrid.removeEventListener(MouseEvent.MOUSE_MOVE,
+                                                            onMouseMoveVirtualMachineDataGrid);
+
+                if (virtualMachinesDataGrid.selectedIndex > -1)
+                {
+                    selectedVirtualMachine = virtualMachinesDataGrid.selectedItem as VirtualMachine;
+                    dispatchEvent(new Event("virtualMachineSelected"));
+
+                    if (virtualMachinesTile)
+                        virtualMachinesTile.selectedIndex = virtualMachinesDataGrid.selectedIndex;
+                }
+            }
+
+            /**
+             * When user clicks on the VirtualMachine's Tile
+             */
+            private function onClickVirtualMachinesTile():void
+            {
+                if (virtualMachinesTile.selectedIndex > -1)
+                {
+                    selectedVirtualMachine = virtualMachinesTile.selectedItem as VirtualMachine;
+                    dispatchEvent(new Event("virtualMachineSelected"));
+
+                    virtualMachinesDataGrid.selectedIndex = virtualMachinesTile.selectedIndex;
+                }
+            }
+
+            /**
+             * Label function for column 'Virtual Image' in virtual machines DataGrid
+             */
+            private function vmDataGridVirtualImageLabel(item:Object, column:DataGridColumn):String
+            {
+                if (VirtualMachine(item).virtualImage)
+                    return VirtualMachine(item).virtualImage.name;
+                else
+                    return "-";
+            }
+
+            /**
+             * Label function for column 'Owner' in virtual machines DataGrid
+             */
+            private function vmDataGridOwnerLabel(item:Object, column:DataGridColumn):String
+            {
+                if (VirtualMachine(item).user)
+                    return VirtualMachine(item).user.name + ' ' + VirtualMachine(item).user.surname;
+                else
+                    return "-";
+            }
+
+            /**
+             * Label function for column 'Enterprise' in virtual machines Datagrid
+             */
+            private function vmDataGridEnterpriseLabel(item:Object, column:DataGridColumn):String
+            {
+                if (VirtualMachine(item).user)
+                    return VirtualMachine(item).enterprise.name;
+                else
+                    return "-";
+            }
+
+            /**
+             * Label function for column "HD" in Virtual Machines DataGrid
+             */
+            private function vmDataGridHDLabel(item:Object, column:DataGridColumn):String
+            {
+                var hdInGB:Number = VirtualMachine(item).hd / AbiCloudModel.GB_TO_BYTES;
+                return hdInGB.toFixed(2);
+            }
+
+
+            private function onClickViewOptions(viewMode:String):void
+            {
+                if (viewMode == 'listMode')
+                {
+                    listButton.selected = true;
+                    iconsButton.selected = false;
+                    viewModesVS.selectedIndex = 0;
+                }
+                else if (viewMode == 'iconsMode')
+                {
+                    listButton.selected = false;
+                    iconsButton.selected = true;
+                    viewModesVS.selectedIndex = 1;
+                }
+            }
+
+            //////////////////////////////////////////
+            // DRAG & DROP FUNCTIONALITY
+
+            /**
+             * Register Mouse Move events, to know if user wants to start a drag operaion
+             */
+            private function onMouseDownVirtualMachineDataGrid():void
+            {
+                if (virtualMachinesDataGrid.selectedIndex > -1)
+                    virtualMachinesDataGrid.addEventListener(MouseEvent.MOUSE_MOVE,
+                                                             onMouseMoveVirtualMachineDataGrid);
+            }
+
+            /**
+             * Initializes a Drag operation
+             */
+            private function onMouseMoveVirtualMachineDataGrid(mouseEvent:MouseEvent):void
+            {
+                //We don't need this handler until user wants to initate another Drag operation
+                virtualMachinesDataGrid.removeEventListener(MouseEvent.MOUSE_MOVE,
+                                                            onMouseMoveVirtualMachineDataGrid);
+
+                //To be able to interact with a CustomTree in a Drag Drop operation, we have to encapsulate the data
+                //in a CustomTreeNode
+                var customTreeNode:CustomTreeNode = new CustomTreeNode(virtualMachinesDataGrid.selectedItem);
+
+                var dragSource:DragSource = new DragSource();
+                dragSource.addData(customTreeNode, "CustomTreeNode");
+
+                var dragProxy:Image = new Image();
+                dragProxy.source = ThemeHandler.getInstance().getImageFromStyle("VirtualMachineIcon");
+                dragProxy.maintainAspectRatio = true;
+                dragProxy.width = 100;
+                dragProxy.height = 100;
+
+                var position:Point = localToGlobal(new Point(mouseEvent.localX, mouseEvent.localY));
+                DragManager.doDrag(UIComponent(Application.application), dragSource,
+                                   mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- View modes selector and filter -->
+    <mx:HBox id="virtualMachinesHeader"
+        width="100%" height="32"
+        horizontalGap="0"
+        paddingLeft="10"
+        paddingRight="10"
+        verticalAlign="middle"
+        styleName="GeneralDataPanelTopFullSkin">
+
+        <mx:Button id="listButton"
+            styleName="ListViewButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_LISTMODE_TOOLTIP')"
+            selected="true"
+            click="onClickViewOptions('listMode')"/>
+
+        <mx:Button id="iconsButton"
+            styleName="IconViewButton"
+            toolTip="@Resource(bundle='Common', key='BUTTON_ICONSMODE_TOOLTIP')"
+            click="onClickViewOptions('iconsMode')"/>
+
+        <mx:HBox id="vmHeaderMoreButtonsContainer"/>
+
+        <!-- Zoom for Virtual Machines Miniatures is currently disabled -->
+        <mx:HBox 
+            width="100%"
+            horizontalGap="0"
+            paddingBottom="6"
+            paddingLeft="6"
+            verticalAlign="middle"
+            visible="false">
+            <mx:HSlider id="iconSizeSlider"
+                width="100"
+                minimum="0.5" maximum="1.5" snapInterval="0.01"
+                showDataTip="false" liveDragging="true"
+                visible="{viewModesVS.selectedIndex == 1}"/>
+        </mx:HBox>
+        <mx:Spacer width="100%"/>
+        <mx:HBox 
+            width="100%"
+            horizontalAlign="right"
+            horizontalGap="3"
+            verticalAlign="middle">
+            <mx:Image source="{CommonAssets.magnifier}"/>
+            <mx:TextInput id="virtualMachinesFilter"
+                height="20"
+                toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+                keyUp="onVirtualMachinesFilterKeyUp(event)"/>
+        </mx:HBox>
+
+    </mx:HBox>
+
+    <!-- View modes -->
+    <mx:ViewStack id="viewModesVS"
+        width="100%"
+        top="31" bottom="0">
+
+        <!-- Data Grid -->
+        <mx:Canvas 
+            width="100%" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:DataGrid id="virtualMachinesDataGrid"
+                width="100%" height="100%"
+                dataProvider="{this._virtualMachinesFiltered}"
+                click="onClickVirtualMachinesDataGrid()"
+                mouseDown="onMouseDownVirtualMachineDataGrid()">
+
+                <mx:columns>
+                    <mx:DataGridColumn 
+                        width="200"
+                        dataField="name"
+                        headerText="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"/>
+
+                    <mx:DataGridColumn 
+                        width="150"
+                        labelFunction="vmDataGridOwnerLabel"
+                        dataField="user"
+                        headerText="@Resource(bundle='Infrastructure', key='LABEL_OWNER')"/>
+
+                    <mx:DataGridColumn 
+                        width="150"
+                        labelFunction="vmDataGridEnterpriseLabel"
+                        dataField="user"
+                        headerText="@Resource(bundle='Infrastructure', key='LABEL_ENTERPRISE')"/>
+
+                    <mx:DataGridColumn 
+                        width="150"
+                        labelFunction="vmDataGridVirtualImageLabel"
+                        headerText="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')"/>
+
+                    <mx:DataGridColumn 
+                        width="100"
+                        dataField="cpu"
+                        headerText="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"/>
+
+                    <mx:DataGridColumn 
+                        width="100"
+                        dataField="ram"
+                        headerText="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_RAM') + ' (MB)'}"/>
+
+                    <mx:DataGridColumn 
+                        width="100"
+                        labelFunction="vmDataGridHDLabel"
+                        dataField="hd"
+                        headerText="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_HD') + ' (GB)'}"/>
+
+                    <mx:DataGridColumn 
+                        width="36"
+                        headerText=""
+                        itemRenderer="net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineListStateItemRenderer"
+                        resizable="false"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:Canvas>
+
+
+        <!-- Icons -->
+        <mx:Canvas 
+            width="100%" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <mx:TileList id="virtualMachinesTile"
+                width="100%" height="100%"
+                paddingBottom="0"
+                paddingLeft="0"
+                paddingRight="0"
+                paddingTop="0"
+                dataProvider="{this._virtualMachinesFiltered}"
+                itemRenderer="net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineMiniature"
+                click="onClickVirtualMachinesTile()"/>
+        </mx:Canvas>
+    </mx:ViewStack>
+
+</mx:Canvas>
+

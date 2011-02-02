@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    initialize="onInitialize()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:virtualimage="net.undf.abicloud.view.virtualimage.components.virtualimage.*">
+
+    <mx:Metadata>
+		[Event(name="createVirtualImageFromOVFPackageList", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.security.SecurableResource;
+        	import net.undf.abicloud.vo.user.Role;
+        	import mx.effects.Resize;
+        	import mx.events.EffectEvent;
+        	import mx.binding.utils.BindingUtils;
+        	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageMiniature;
+        	import net.undf.abicloud.vo.virtualimage.VirtualImage;
+        	import mx.collections.ArrayCollection;
+        	import net.undf.abicloud.vo.virtualimage.Category;
+        	import net.undf.abicloud.view.main.CommonAssets;
+            import mx.binding.utils.ChangeWatcher;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.events.MenuEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+            import mx.utils.StringUtil;
+
+            import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.virtualimage.components.category.CategoryAdd;
+            import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageAccordionCategory;
+            import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageAccordionEvent;
+            import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageForm;
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.service.RemoteServiceType;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+            [Bindable]
+            private var virtualImageManager:VirtualImageManager;
+
+            //Flag indicating when this component is showing
+            private var isShowing:Boolean = false;
+
+            private var categoryAdd:CategoryAdd;
+
+            private var virtualImageForm:VirtualImageForm;
+            
+            [Bindable]
+            private var _virtualImage:VirtualImage;
+            
+            [Bindable]
+            public var hasSlaveImage:Boolean;
+            
+            private var _resizeEffect:Resize;
+            
+            private var _categoriesButtons:SecurableResource;
+
+            //The selected Datacenter
+            [Bindable]
+            private var selectedDatacenter:DataCenter;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                categoryAdd = new CategoryAdd();
+                categoryAdd.addEventListener("categoryAddClose", closeAddCategory);
+
+                virtualImageForm = new VirtualImageForm();
+                virtualImageForm.addEventListener("VirtualImageFormClose",
+                                                  closeVirtualImageForm);
+                virtualImageForm.addEventListener("VirtualImageCreated", onVirtualImageCreated);
+                                
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 230;
+                
+                BindingUtils.bindSetter(showHideBundleContainer,this,"hasSlaveImage");
+                
+                //Secure buttons to manage categories
+                 this._categoriesButtons = new SecurableResource("MANAGE_CATEGORIES_BUTTONS","APPLIANCE_LIBRARY");
+                 makeUnavailable();
+            }
+            
+            private function makeUnavailable():void{
+            	if (!_categoriesButtons || !_categoriesButtons.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
+                {
+                	this.addCategoryButton.visible = false;
+                	this.addCategoryButton.includeInLayout = false;
+                	this.deleteCategoryButton.visible = false;
+                	this.deleteCategoryButton.includeInLayout = false;	
+                }            
+            }
+            
+            private function showHideBundleContainer(value:Boolean):void{
+            	if(datacenterList.selectedIndex != -1){
+            		if(value){
+            			if (!bundleImagesContainer.visible)
+		                {
+		                    bundleImagesContainer.visible = true;
+		                    this._resizeEffect.play([ bundleImagesContainer ]);
+		                    return;
+		                }
+            		}
+            	}
+            	this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                this._resizeEffect.play([ bundleImagesContainer ], true);
+            	
+            }
+           
+            private function onEndResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                bundleImagesContainer.visible = false;
+            }
+
+            private function onInitialize():void
+            {
+                //Catching model
+                virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
+
+                //Listening events from model
+                ChangeWatcher.watch(virtualImageManager, "categories", onCategoriesChange);
+                ChangeWatcher.watch(virtualImageManager, "repository", onRepositoryChange);
+                virtualImageManager.addEventListener(VirtualImageEvent.CATEGORY_CREATED,
+                                                     onCategoryCreated);
+                virtualImageManager.addEventListener(VirtualImageEvent.CATEGORY_DELETED,
+                                                     onCategoryDeleted);
+                virtualImageManager.addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_EDITED,
+                                                     onVirtualImageEdited);
+                virtualImageManager.addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_DELETED,
+                                                     onVirtualImageDeleted);
+
+                //Listening for when a Virtual Image has been selected to edit from the VirtualImageAccordion
+                addEventListener(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_EDITION_REQUESTED,
+                                 editVirtualImage);
+                addEventListener(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_DOWNLOAD_REQUESTED,
+                                 downloadVirtualImage);
+                                 
+                virtualImageList.addEventListener(VirtualImageEvent.MINIATURE_CLICKED, onItemClicked);
+            }
+            
+            private function onItemClicked(event:VirtualImageEvent):void{
+            	this._virtualImage = event.virtualImageMiniature.virtualImage;
+            	if(VirtualImageMiniature(event.virtualImageMiniature).hasSlaveImage){
+            		hasSlaveImage = true;
+            		displayBundleImages();
+            	}else{
+            		hasSlaveImage = false;
+            	}
+            }
+
+            public function cleanView():void
+            {
+                selectedDatacenter = null;
+                virtualImageManager.repository = null;
+                hasSlaveImage = false;
+                //Deprecated
+                //virtualImageAccordion.clean();
+            }
+
+            public function willShow():void
+            {
+                isShowing = true;
+
+                //Clean old info that may be in model
+                virtualImageManager.repository = null;
+
+                //Requesting data
+                requestDatacenters();
+                requestCategories();
+            }
+
+            public function willHide():void
+            {
+                isShowing = false;
+                cleanView();
+            }
+
+
+            public function refreshVirtualImages():void
+            {
+                //Requesting again the list of Categories to refresh the list of Virtual Images
+                //Alert.show('resfresh');
+                //requestCategories();
+                
+                filterVirtualImages();
+            }
+
+            //////////////////////////////////////////////
+            //DATACENTERS & REPOSITORY
+
+            protected function requestDatacenters():void
+            {
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_ALLOWED_DATACENTERS);
+                dispatchEvent(event);
+            }
+
+            private function onClickDatacenterList():void
+            {
+                //clean the virtual images list when selecting the datacenter
+                virtualImageList.removeAllChildren();
+                
+                if (datacenterList.selectedIndex > -1)
+                {
+                    selectedDatacenter = datacenterList.selectedItem as DataCenter;
+                    requestRepositoryFormDatacenter(selectedDatacenter);
+                }
+                else
+                {
+                    cleanView();
+                }
+            }
+
+            private function requestRepositoryFormDatacenter(datacenter:DataCenter):void
+            {
+                //Clean old info
+                AbiCloudModel.getInstance().virtualImageManager.repository = null;
+
+                //Request the Repository for the current selected Datacenter
+                var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_DATACENTER_REPOSITORY);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.datacenter = datacenter;
+                dispatchEvent(event);
+            }
+
+            private function onRepositoryChange(event:Event):void
+            {
+                if (isShowing && virtualImageManager.repository)
+                {
+                    //Show the Virtual Images for this Repository
+                    //Deprecated
+                    /* virtualImageAccordion.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
+                    virtualImageAccordion.categories = virtualImageManager.categories; */
+                    
+                    displayVirtualImage();
+                }
+            }
+
+            private function getApplianceManagerFromDatacenter(datacenter:DataCenter):RemoteService
+            {
+                var length:int = datacenter.remoteServices.length;
+                for (var i:int = 0; i < length; i++)
+                {
+                    if (datacenter.remoteServices.getItemAt(i).remoteServiceType.valueOf == RemoteServiceType.APPLIANCE_MANAGER)
+                        return datacenter.remoteServices.getItemAt(i) as RemoteService;
+                }
+
+                //Not found
+                return null;
+            }
+
+            /**
+             * When user clicks to add a new category or virtual image
+             **/
+            private function onItemClickAddButton(event:MenuEvent):void
+            {
+                addButton.dataProvider = addButtonDataProvider; //To avoid an annoying graphic problem...
+
+                if (event.item.@id == "addVirtualImage" || event.item.@id == "addVirtualImageFromLocalFile")
+                {
+                    createVirtualImageFromLocalFile();
+                }
+
+                else if (event.item.@id == "addVirtualImageFromOVFPackageList")
+                {
+                    createVirtualImageFromOVFPackageList();
+                }
+
+                else if (event.item.@id == "addCategory")
+                {
+                    createCategory();
+                }
+            }
+
+            ////////////////////////////////
+            //CATEGORIES
+
+            private function requestCategories():void
+            {
+                //Requesting the list of virtual image categories for the current User Enterprise
+                var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_CATEGORIES);
+                virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(virtualImageEvent);
+            }
+
+            private function onCategoriesChange(event:Event):void
+            {
+            	categoriesCombo.selectedIndex = 0;
+            }
+
+            private function createCategory():void
+            {
+                PopUpManager.addPopUp(categoryAdd, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(categoryAdd);
+
+                categoryAdd.init();
+            }
+
+            private function closeAddCategory(event:Event):void
+            {
+                PopUpManager.removePopUp(categoryAdd);
+            }
+
+            private function askCategoryDeletion():void
+            {
+               // if (!VirtualImageAccordionCategory(virtualImageAccordion.selectedChild).category.isErasable)
+                if (categoriesCombo.selectedIndex == 0)
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_UNABLE_DELETE_CATEGORY_TEXT"),
+                                            Alert.OK, null);
+                else
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_DELETE_CATEGORY_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            deleteCategory);
+            }
+
+            private function deleteCategory(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                   /*  var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_CATEGORY);
+                    virtualImageEvent.category = VirtualImageAccordionCategory(virtualImageAccordion.selectedChild).category;
+                    dispatchEvent(virtualImageEvent); */
+                    
+                    var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_CATEGORY);
+                    virtualImageEvent.category = Category(categoriesCombo.selectedItem);
+                    dispatchEvent(virtualImageEvent);
+                }
+            }
+
+            private function onCategoryCreated(event:VirtualImageEvent):void
+            {
+                if (isShowing)
+                {
+                    //Deprecated
+                    //virtualImageAccordion.addCategory(event.category);
+                }
+            }
+
+            private function onCategoryDeleted(event:VirtualImageEvent):void
+            {
+                if (isShowing)
+                {
+                    //We need to reinitialize the whole VirtualImageAccordion
+                    //Deprecated
+                    //virtualImageAccordion.categories = virtualImageManager.categories;
+                }
+            }
+
+            ////////////////////////////////
+            //VIRTUAL IMAGES
+
+
+            private function createVirtualImageFromLocalFile():void
+            {
+                var applianceManager:RemoteService = getApplianceManagerFromDatacenter(selectedDatacenter);
+
+                if (applianceManager)
+                {
+                    PopUpManager.addPopUp(virtualImageForm, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(virtualImageForm);
+
+                    virtualImageForm.init(null, applianceManager);
+                }
+                else
+                {
+                    //The current selected Datacenter has no ApplianceManager configured
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_NO_AM_FOR_CREATING_VI_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualImage",
+                                                                                    "ALERT_NO_AM_FOR_CREATING_VI_TEXT"),
+                                            Alert.OK, null);
+                }
+            }
+
+            private function createVirtualImageFromOVFPackageList():void
+            {
+                dispatchEvent(new Event("createVirtualImageFromOVFPackageList"));
+            }
+
+            private function editVirtualImage(event:VirtualImageAccordionEvent):void
+            {
+                var applianceManager:RemoteService = getApplianceManagerFromDatacenter(selectedDatacenter);
+
+                PopUpManager.addPopUp(virtualImageForm, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(virtualImageForm);
+
+                virtualImageForm.init(event.virtualImage, applianceManager);
+            }
+
+            private function closeVirtualImageForm(event:Event):void
+            {
+                PopUpManager.removePopUp(virtualImageForm);
+            }
+
+            private function downloadVirtualImage(event:VirtualImageAccordionEvent):void
+            {
+                var applianceManager:RemoteService = getApplianceManagerFromDatacenter(selectedDatacenter);                
+                var downloadEnable:Boolean;
+            	var enterpriseId:int = int(event.virtualImage.path.substr(0,event.virtualImage.path.indexOf("/")));
+            	var fileURL:String = StringUtil.substitute("{0}{1}:{2}/am/files/{3}",
+                                                           applianceManager.protocol,
+                                                           applianceManager.domainName,
+                                                           applianceManager.port,
+                                                           event.virtualImage.path);
+            	//if the virtualImage is shared, everyone can download it
+            	if(event.virtualImage.shared == 1){
+            		downloadEnable = true;
+        		//else if the user is a sysadmin, he can download the image
+            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
+            		downloadEnable = true;
+        		//else if the user enterprise id == virtualImage enterprise id
+            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            		downloadEnable = true;
+            	}                
+                
+                //If the user is allowed, he can downnload the file
+                if(downloadEnable){
+	                ExternalInterface.call("downloadVirtualImageFile", fileURL);
+                }
+            }
+
+            /**
+             * Handler called when a Virtual Image has been created
+             */
+            private function onVirtualImageCreated(event:Event):void
+            {
+                if (isShowing)
+                {
+                    //We need to reinitialize the whole VirtualImageAccordion
+                    //Deprecated
+                    //virtualImageAccordion.categories = virtualImageManager.categories;
+                }
+                
+                displayVirtualImage();
+            }
+
+            /**
+             * HAndler called when a VirtualImage has been successfully edited
+             */
+            private function onVirtualImageEdited(virtualImageEvent:VirtualImageEvent):void
+            {
+                if (isShowing)
+                {
+                    //Notifying VirtualImageAccordion that a Virtual Image has been edited
+                    //Deprecated
+                    //virtualImageAccordion.virtualImageEdited(virtualImageEvent.virtualImage);
+                }
+                displayVirtualImage();
+            }
+
+            private function onVirtualImageDeleted(virtualImageEvent:VirtualImageEvent):void
+            {
+                if (isShowing)
+                {
+                    if (virtualImageEvent.virtualImage.master == null)
+                    {
+                        //Since the deleted Virtual Image as a Master, we need to reinitialize the whole VirtualImageAccordion
+                        //Deprecated
+                        //virtualImageAccordion.categories = virtualImageManager.categories;
+                    }
+                    else
+                    {
+                        //TODO: not reset the Accordion
+                        //Deprecated
+                        //virtualImageAccordion.categories = virtualImageManager.categories;
+                    }
+                }
+                
+                displayVirtualImage();
+            }
+            
+            
+            /////////New way of displaying virtual images////////////////////
+            private function displayVirtualImage():void{
+            	hasSlaveImage = false;
+            	virtualImageList.onInit(AbiCloudModel.getInstance().virtualImageManager.repository,
+            							categoriesCombo.selectedItem as Category,
+            							true,
+            							1.5,
+            							virtualImagesFilter.text,
+            							null);
+            }
+            
+            private function filterVirtualImages():void{
+            	hasSlaveImage = false;
+            	virtualImageList.category = categoriesCombo.selectedItem as Category;
+            	virtualImageList.filter = virtualImagesFilter.text;
+            	virtualImageList.requestVirtualImages();
+            }
+            
+            private function displayBundleImages():void{
+            	var virtualImageList:ArrayCollection = AbiCloudModel.getInstance().virtualImageManager.virtualImageList;
+            	var virtualImageMiniature:VirtualImageMiniature;
+            	virtualBundleImageList.removeAllChildren();
+            	for(var i:int = 0 ; i < virtualImageList.length ; i++){
+	            	if(VirtualImage(virtualImageList[i]).master != null){
+	            		if(VirtualImage(virtualImageList[i]).master.id == this._virtualImage.id){
+	            			virtualImageMiniature = new VirtualImageMiniature();
+		                    virtualImageMiniature.virtualImage = VirtualImage(virtualImageList[i]);
+		                    virtualImageMiniature.sizeMultiplier = 1.5;
+		                    virtualImageMiniature.editable = true;
+	            			virtualBundleImageList.addChild(virtualImageMiniature);
+	            		}
+	            	}
+	            }
+            }
+            
+            private function hideBundlesImages(event:MouseEvent):void{
+            	if(event.target is VirtualImageList){
+            		hasSlaveImage = false;
+            	}
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- addButton data provider -->
+    <mx:XMLList id="addButtonDataProvider">
+       <!-- <node id="addVirtualImage"
+            label="@Resource(bundle='VirtualImage', key='LABEL_VIRTUALIMAGE')">-->
+
+            <node id="addVirtualImageFromOVFPackageList"
+                label="@Resource(bundle='VirtualImage', key='LABEL_FROM_REPOSITORY_SPACE')"/>
+            <node id="addVirtualImageFromLocalFile"
+                label="@Resource(bundle='VirtualImage', key='LABEL_FROM_LOCAL_FILE')"/>
+            
+        <!--</node>
+        <node id="addCategory"
+            label="@Resource(bundle='VirtualImage', key='LABEL_CATEGORY')"/>-->
+    </mx:XMLList>
+
+    <!-- DATACENTERS -->
+    <general:GeneralPanel 
+        width="200" height="100%"
+        title="{ResourceManager.getInstance().getString('VirtualImage', 'LABEL_DATACENTERS').toUpperCase()}">
+
+        <mx:List id="datacenterList"
+            width="100%" height="100%"
+            borderStyle="none"
+            labelField="name"
+            dataProvider="{AbiCloudModel.getInstance().infrastructureManager.allowedDataCenters}"
+            variableRowHeight="true"
+            itemRenderer="net.undf.abicloud.view.virtualimage.components.datacenter.DatacenterListItemRenderer"
+            click="onClickDatacenterList()"/>
+
+        <general:GeneralPanelToolBox/>
+    </general:GeneralPanel>
+
+    <!-- VIRTUAL IMAGES -->
+    <general:GeneralPanel id="virtualInfrastructureContainer"
+        width="100%" height="100%"
+        title="{ResourceManager.getInstance().getString('VirtualImage', 'LABEL_VIRTUAL_IMAGES')}">
+
+        <!-- View modes selector and filter -->
+	    <mx:HBox id="virtualImagesHeader"
+	        width="100%" height="32"
+	        paddingLeft="10"
+	        paddingRight="10"
+	        verticalAlign="middle"
+	        styleName="GeneralDataPanelTopFullSkin"
+	        enabled="{datacenterList.selectedIndex != -1 ? true:false}">
+	
+	        <mx:Label text="@Resource(bundle='VirtualImage',key='LABEL_CATEGORY')"/>
+	        <mx:ComboBox id="categoriesCombo"
+	        	dataProvider="{virtualImageManager.categories}"
+	        	height="18"
+	        	labelField="name"
+	        	change="filterVirtualImages()"/>
+	       	<mx:Button id="addCategoryButton"
+                styleName="AddButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_ADD')"
+                click="createCategory()"/>
+            <mx:Button id="deleteCategoryButton"
+                styleName="RemoveButton"
+                enabled="{categoriesCombo.selectedIndex == 0 ? false:true}"
+                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                click="askCategoryDeletion()"/>
+	
+	        <mx:HBox id="vmHeaderMoreButtonsContainer"/>
+	
+		        <!-- Zoom for Virtual Machines Miniatures is currently disabled -->
+		        <mx:Spacer width="100%"/>
+		        <mx:HBox 
+		            width="100%"
+		            horizontalAlign="right"
+		            horizontalGap="3"
+		            verticalAlign="middle">
+		            <mx:Image source="{CommonAssets.magnifier}"
+		            	click="filterVirtualImages()"/>
+		            <mx:TextInput id="virtualImagesFilter"
+		                height="20"
+		                enter="filterVirtualImages()"
+		                toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+		                />
+	        </mx:HBox>
+	
+	    </mx:HBox>
+	        
+        
+      
+        <mx:Canvas 
+            width="100%" height="100%">
+            <mx:VBox
+            	width="100%" height="100%"
+            	borderStyle="solid">
+	            <virtualimage:VirtualImageList 
+	            	id="virtualImageList"
+	            	width="100%" height="100%"
+	            	visible="{datacenterList.selectedIndex != -1}"
+	            	click="hideBundlesImages(event)"
+	            	includeInLayout="{datacenterList.selectedIndex != -1}"/>	
+	            <mx:VBox
+	            	id="bundleImagesContainer"	
+	            	width="100%" height="0"
+		            horizontalAlign="center"
+		            visible="false">	            	            	
+		           <!-- visible="{datacenterList.selectedIndex != -1 &amp;&amp; hasSlaveImage}"
+		            includeInLayout="{datacenterList.selectedIndex != -1 &amp;&amp; hasSlaveImage}"-->
+		            <mx:HBox
+				        width="100%" height="32"
+				        paddingLeft="10"
+				        paddingRight="10"
+				        verticalAlign="middle"
+				        horizontalGap="0"
+				        styleName="GeneralDataPanelTopFullSkin"	>	            	
+						<mx:Label text="@Resource(bundle='VirtualImage',key='LABEL_BUNDLES')"/>
+						<mx:Label text=": {this._virtualImage.name}"/>
+		            </mx:HBox>			 
+					<mx:Tile
+		            	id="virtualBundleImageList"
+		            	width="100%" height="100%"/>            	
+	            </mx:VBox>
+            </mx:VBox>
+           <mx:Label 
+					styleName="VirtualImageManagementLabel1"
+	                text="@Resource(bundle='VirtualImage', key='LABEL_SELECT_DATACENTER')"
+	                visible="{datacenterList.selectedIndex == -1}"/>
+        </mx:Canvas>
+        <general:GeneralPanelToolBox styleName="GeneralDataPanelBottomSkin">
+            <mx:PopUpMenuButton id="addButton"
+                width="40" height="22"
+                styleName="AddButtonPlus" label="" labelField="@label"
+                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                dataProvider="{addButtonDataProvider}"
+                enabled="{selectedDatacenter != null}"
+                itemClick="onItemClickAddButton(event)"
+                closeDuration="0"/>
+        </general:GeneralPanelToolBox>
+    </general:GeneralPanel>
+</mx:HDividedBox>

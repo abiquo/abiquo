@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+     Copyright 2008 Marvin Herman Froeder
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ 
+    <!--                                      -->
+    <!--     POM RELATIONSHIPS                -->
+    <!--                                      -->
+
+    <!--       Maven coordinates              -->
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>client-theme-default-red</artifactId>
+    <packaging>swf</packaging>
+
+    <!--       Inheritances                   -->
+    <parent>
+        <groupId>com.abiquo.abicloud</groupId>
+        <artifactId>client</artifactId>
+        <version>1.7.5-SNAPSHOT</version>
+    </parent>
+
+   <!--       Project properties             -->
+    <properties>
+        <flexmojos.version>3.6.1</flexmojos.version>
+        <flex.sdk.version>3.4.0</flex.sdk.version>
+        <flex.sdk.revision>9271</flex.sdk.revision>
+    </properties>
+
+    <!--       Dependences                    -->
+    <dependencies>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>playerglobal</artifactId>
+            <version>${flex.sdk.version}.${flex.sdk.revision}</version>
+            <classifier>10</classifier>
+            <type>swc</type>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>flex-framework</artifactId>
+            <version>${flex.sdk.version}.${flex.sdk.revision}</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.adobe.flex.framework</groupId>
+                    <artifactId>playerglobal</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.degrafa</groupId>
+            <artifactId>degrafa</artifactId>
+            <version>3.1</version>
+            <type>swc</type>
+        </dependency>
+
+    </dependencies>
+   
+    <!--                                      -->
+    <!--       PROJECT INFORMATION            -->
+    <!--                                      -->
+    <name>Client Flex Default Red Theme</name>
+    <url>http://abicloud.org</url>
+    <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>LGPL</name>
+            <url>http://www.gnu.org/license/lgpl.html</url>
+        </license>
+    </licenses>
+  
+  
+    <!--                                      -->
+    <!--       BUILD SETTINGS                 -->
+    <!--                                      -->
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>src/test/flex</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+                <artifactId>maven-svn-revision-number-plugin</artifactId>
+                <version>1.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <entries>
+                        <entry>
+                            <path>../../</path>
+                            <prefix>svn.community</prefix>
+                        </entry>
+                    </entries>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.flexmojos</groupId>
+                <artifactId>flexmojos-maven-plugin</artifactId>
+                <version>${flexmojos.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <licenses>
+                        <flexbuilder3>0</flexbuilder3>
+                    </licenses>
+                    <sourceFile>main.mxml</sourceFile>
+                    <output>${project.build.directory}/${project.name}-${project.version}.swf</output>
+                    <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+                    <targetPlayer>10.0.0</targetPlayer>
+<!--
+	              <compiledLocales>
+                        <locale>en_US</locale>
+                        <locale>es_ES</locale>
+                    </compiledLocales>
+                    -->
+
+                    <skipTests>true</skipTests>
+                    <generateHtmlWrapper>false</generateHtmlWrapper>
+                    <!--
+                    <templateURI>folder:${basedir}/html-template</templateURI>
+                    <htmlName>index</htmlName>
+                    <parameters>
+                        <swf>${project.name}-${project.version}</swf>
+                        <title>AbiquoDefaultTheme</title>
+                        <width>100%</width>
+                        <height>100%</height>
+                        <bgcolor>0x000000</bgcolor>
+                        <appShowVersion>${project.version}-${svn.community.revision}</appShowVersion>
+                    </parameters>
+                    -->
+                </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>com.adobe.flex</groupId>
+                        <artifactId>compiler</artifactId>
+                        <version>${flex.sdk.version}.${flex.sdk.revision}</version>
+                        <type>pom</type>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.adobe.flex.compiler</groupId>
+                        <artifactId>license</artifactId>
+                        <version>${flex.sdk.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wrapper</goal>
+                        </goals>
+                    </execution>
+
+                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos issue-->
+                    <!-- application CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-application</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>application.css</sourceFile>
+							<output>target/themes/defaultRed/application.swf</output> 
+					  </configuration> 
+					</execution>
+					                     
+                    <!-- main CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-main</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>main.css</sourceFile>
+							<output>target/themes/defaultRed/main.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- virtualdatacenter CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-virtualdatacenter</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>virtualdatacenter.css</sourceFile>
+							<output>target/themes/defaultRed/virtualdatacenter.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- virtualimage CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-virtualimage</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>virtualimage.css</sourceFile>
+							<output>target/themes/defaultRed/virtualimage.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- virtualappliance CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-virtualappliance</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>virtualappliance.css</sourceFile>
+							<output>target/themes/defaultRed/virtualappliance.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- user CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-user</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>user.css</sourceFile>
+							<output>target/themes/defaultRed/user.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- metering CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-metering</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>metering.css</sourceFile>
+							<output>target/themes/defaultRed/metering.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- networking CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-networking</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>networking.css</sourceFile>
+							<output>target/themes/defaultRed/networking.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- infrastructure CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-infrastructure</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>infrastructure.css</sourceFile>
+							<output>target/themes/defaultRed/infrastructure.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- ConfigurationComponentsManagement CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-ConfigurationComponentsManagement</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>ConfigurationComponentsManagement.css</sourceFile>
+							<output>target/themes/defaultRed/ConfigurationComponentsManagement.swf</output> 
+					  </configuration> 
+					</execution>                     
+                    <!-- ConfigurationComponentsHeartBeat CSS file -->
+					<execution> 
+						<id>compile-css-to-swf-ConfigurationComponentsHeartBeat</id> 
+						<phase>compile</phase> 
+						<goals> 
+							<goal>compile-swf</goal> 
+						</goals> 
+						<configuration> 
+							<sourceFile>ConfigurationComponentsHeartBeat.css</sourceFile>
+							<output>target/themes/defaultRed/ConfigurationComponentsHeartBeat.swf</output> 
+					  </configuration> 
+					</execution>                     
+            </executions>
+
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>maven-assembly-descriptor.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <inherited>false</inherited>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.5.0</version>
+                <configuration>
+                    <header>${basedir}/header.txt</header>
+                    <failIfMissing>true</failIfMissing>
+                    <includes>
+                        <include>**/*.as</include>
+                        <!--<include>**/*.mxml</include>-->
+                        <include>**/*.css</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-headers</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

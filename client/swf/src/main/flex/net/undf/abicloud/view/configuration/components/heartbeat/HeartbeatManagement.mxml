@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    horizontalAlign="center"
+    paddingTop="0"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    initialize="onInitialize()"
+    show="onShow()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.binding.utils.ChangeWatcher;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.ConfigurationEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.configuration.Heartbeat;
+
+            [Bindable]
+            //Array used to show the last Heartbeat info available
+            private var _lastHeartbeatInfoSource:Array;
+
+            [Bindable]
+            //Array used to show the selected Heartbeat log full info
+            private var _selectedHeartbeatInfoSource:Array;
+
+            private function onInitialize():void
+            {
+                //Listening for updates in model
+                ChangeWatcher.watch(AbiCloudModel.getInstance().configurationManager,
+                                    "lastHeartbeatInfo", onLastHeartbeatInfoChange);
+            }
+
+            private function onShow():void
+            {
+                heartbeatTabBar.selectedIndex = 0;
+
+                if (AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled)
+                {
+                    //Getting last Heartbeat info
+                    var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_LAST_HEARTBEAT_INFO);
+                    dispatchEvent(configurationEvent);
+                }
+            }
+
+            /**
+             * Handler called everytime the last Heartbeat info is updated in model
+             */
+            private function onLastHeartbeatInfoChange(event:Event):void
+            {
+                //Building the data provider for the lastHeartbeatInfoDataGrid
+                this._lastHeartbeatInfoSource = buildHeartbeatInfoArray(AbiCloudModel.getInstance().configurationManager.lastHeartbeatInfo);
+            }
+
+            private function onClickTestHeartBeat():void
+            {
+                //Testing Heartbeating requesting the last heartbeat entry
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_LAST_HEARTBEAT_INFO);
+                dispatchEvent(configurationEvent);
+            }
+
+            private function askForLastHeartbeatEntries():void
+            {
+                //Asking for them
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_LAST_HEARTBEAT_ENTRIES);
+                configurationEvent.rows = heartbeatEntriesCount.value;
+                dispatchEvent(configurationEvent);
+            }
+
+            private function onChangeEnableDisableCheck():void
+            {
+                if (enableDisableCheck.selected)
+                {
+                    //User wants to enable Heartbeat
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Configuration",
+                                                                                    "ALERT_ENABLE_HEARTBEAT_HEADER"),
+                                            ResourceManager.getInstance().getString("Configuration",
+                                                                                    "ALERT_ENABLE_HEARTBEAT_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            enableDisableHeartbeat);
+                }
+                else
+                {
+                    //User wants to disable Heartbeat
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Configuration",
+                                                                                    "ALERT_DISABLE_HEARTBEAT_HEADER"),
+                                            ResourceManager.getInstance().getString("Configuration",
+                                                                                    "ALERT_DISABLE_HEARTBEAT_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            enableDisableHeartbeat);
+                }
+            }
+
+            private function enableDisableHeartbeat(closeEvent:CloseEvent):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    //User confirms Heartbeat enable disable
+                    var configurationEvent:ConfigurationEvent;
+
+                    if (enableDisableCheck.selected)
+                        configurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_HEARTBEAT_STATUS_ENABLED);
+                    else
+                        configurationEvent = new ConfigurationEvent(ConfigurationEvent.SET_HEARTBEAT_STATUS_DISABLED);
+
+                    dispatchEvent(configurationEvent);
+                }
+                else
+                {
+                    //User cancels operation
+                    enableDisableCheck.selected = !enableDisableCheck.selected;
+                }
+            }
+
+            private function onClickHeartbeatLog():void
+            {
+                if (heartbeatLogsDatagrid.selectedIndex > -1)
+                    //Building the data provider for the heartbeatLogDetailDatagrid
+                    this._selectedHeartbeatInfoSource = buildHeartbeatInfoArray(heartbeatLogsDatagrid.selectedItem as Heartbeat);
+            }
+
+            /**
+             * Helper function to build an Array with a Heartbeat class attributes, suitable to show in a Datagrid
+             */
+            private function buildHeartbeatInfoArray(heartbeat:Heartbeat):Array
+            {
+                var array:Array = new Array();
+
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_ABICLOUD_ID'), "value": heartbeat.abiCloudId });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_ABICLOUD_VERSION'), "value": heartbeat.abicloudVersion });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_ABICLOUD_DISTRIBUTION'), "value": heartbeat.abicloudDistribution });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_CLIENT_IP'), "value": heartbeat.clientIP });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_PHYSICAL_SERVERS'), "value": heartbeat.physicalServers });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_MACHINES'), "value": heartbeat.virtualMachines });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VOLUMES'), "value": heartbeat.volumes });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_DATACENTERS'), "value": heartbeat.virtualDataCenters });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_APPLIANCES'), "value": heartbeat.virtualAppliances });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_ORGANIZATIONS'), "value": heartbeat.organizations });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_CORES'), "value": heartbeat.virtualCores });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_CORES_ALLOCATED'), "value": heartbeat.totalVirtualCoresAllocated });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_CORES_USED'), "value": heartbeat.totalVirtualCoresUsed });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_MEMORY_ALLOCATED'), "value": heartbeat.totalVirtualMemoryAllocated });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_MEMORY_USED'), "value": heartbeat.totalVirtualMemoryUsed });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VOLUME_SPACE_ALLOCATED'), "value": heartbeat.totalVolumeSpaceAllocated });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VOLUME_SPACE_USED'), "value": heartbeat.totalVolumeSpaceUsed });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_VIRTUAL_IMAGES'), "value": heartbeat.totalVirtualImages });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_OS_NAME'), "value": heartbeat.operatingSystemName });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_OS_VERSION'), "value": heartbeat.operatingSystemVersion });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_DB_NAME'), "value": heartbeat.databaseName });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_DB_VERSION'), "value": heartbeat.databaseVersion });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_APP_SERVER_NAME'), "value": heartbeat.applicationServerName });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_APP_SERVER_VERSION'), "value": heartbeat.applicationServerVersion });
+                array.push({ "source": ResourceManager.getInstance().getString('Configuration',
+                                                                               'LABEL_JAVA_VERSION'), "value": heartbeat.javaVersion });
+
+                return array;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:TabBar id="heartbeatTabBar"
+        height="25"
+        paddingTop="0"
+        dataProvider="heartbeatVS" styleName="AlternativeTabBar"/>
+
+    <mx:ViewStack id="heartbeatVS"
+        width="100%" height="100%"
+        paddingTop="10"
+        minWidth="600" minHeight="400"
+        resizeToContent="true">
+
+        <!-- HEARTBEAT SETUP -->
+        <mx:VBox label="@Resource(bundle='Configuration', key='LABEL_SETUP')">
+
+            <mx:HBox 
+                width="100%"
+                paddingBottom="0"
+                paddingLeft="6"
+                paddingRight="0"
+                paddingTop="0"
+                verticalAlign="middle">
+
+                <mx:CheckBox id="enableDisableCheck"
+                    styleName="AlternativeCheckBox"
+                    selected="{AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled}"
+                    toolTip="{AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled ? ResourceManager.getInstance().getString('Configuration', 'LABEL_DISABLE_HEARTBEAT') :
+							 																				 ResourceManager.getInstance().getString('Configuration', 'LABEL_ENABLE_HEARTBEAT')}"
+                    change="onChangeEnableDisableCheck()"/>
+
+                <mx:Label 
+                    fontSize="13"
+                    fontWeight="bold"
+                    text="{AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled ? ResourceManager.getInstance().getString('Configuration', 'LABEL_HEARTBEAT_ENABLED') :
+							 																		   ResourceManager.getInstance().getString('Configuration', 'LABEL_HEARTBEAT_DISABLED')}"/>
+            </mx:HBox>
+
+            <mx:TextArea 
+                width="100%"
+                backgroundAlpha="0"
+                fontSize="11"
+                fontWeight="bold"
+                leading="6"
+                minHeight="100" selectable="true"
+                htmlText="@Resource(bundle='Configuration', key='LABEL_HEARTBEAT_REMINDER')"
+                editable="false"/>
+
+            <mx:HBox 
+                width="100%"
+                paddingBottom="0"
+                paddingLeft="0"
+                paddingRight="0"
+                paddingTop="0"
+                verticalAlign="middle">
+
+                <mx:Button id="testHeartbeatButton"
+                    height="18"
+                    label="@Resource(bundle='Configuration', key='LABEL_TEST_HEARTBEAT')"
+                    enabled="{AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled}"
+                    click="onClickTestHeartBeat()"/>
+
+                <!--mx:Label	id="testHeartbeatLabel"
+                     fontWeight="bold" fontSize="11" truncateToFit="true"
+                     text="{AbiCloudModel.getInstance().configurationManager.lastHeartbeatTestResult}"/-->
+            </mx:HBox>
+
+            <mx:Spacer height="15"/>
+
+            <mx:Label 
+                fontSize="12"
+                fontWeight="bold"
+                text="@Resource(bundle='Configuration', key='LAST_HEARTBEAT_ENTRY')"/>
+
+            <mx:DataGrid id="lastHeartbeatInfoDatagrid"
+                width="100%" height="100%"
+                dataProvider="{this._lastHeartbeatInfoSource}">
+
+                <mx:columns>
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_SOURCE')"
+                        dataField="source"
+                        sortable="true"/>
+
+                    <mx:DataGridColumn 
+                        width="175"
+                        headerText="@Resource(bundle='Configuration', key='LABEL_VALUE')"
+                        dataField="value"
+                        sortable="false"/>
+                </mx:columns>
+            </mx:DataGrid>
+        </mx:VBox>
+
+        <!-- HEARTBEAT LOGS -->
+        <mx:VBox label="@Resource(bundle='Configuration', key='LABEL_LOGS')">
+
+            <mx:HBox 
+                width="100%"
+                paddingBottom="0"
+                paddingLeft="0"
+                paddingRight="0"
+                paddingTop="0"
+                verticalAlign="middle">
+
+                <mx:Button id="askForLastHeartbeatEntriesButton"
+                    height="18"
+                    label="@Resource(bundle='Configuration', key='LABEL_SHOW')"
+                    click="askForLastHeartbeatEntries()"/>
+
+                <mx:Label text="@Resource(bundle='Configuration', key='LABEL_LAST')"/>
+
+                <mx:NumericStepper id="heartbeatEntriesCount"
+                    height="20"
+                    minimum="1" maximum="1000" stepSize="1" value="100"/>
+
+                <mx:Label text="@Resource(bundle='Configuration', key='LABEL_ENTRIES')"/>
+            </mx:HBox>
+
+            <mx:DataGrid id="heartbeatLogsDatagrid"
+                width="100%" height="40%"
+                dataProvider="{AbiCloudModel.getInstance().configurationManager.lastHeartbeatEntries}"
+                itemClick="onClickHeartbeatLog()">
+                <mx:columns>
+
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_CLIENT_IP')"
+                        dataField="clientIP"
+                        sortable="true"/>
+
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_PHYSICAL_SERVERS')"
+                        dataField="physicalServers"
+                        sortable="true"/>
+
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_VIRTUAL_MACHINES')"
+                        dataField="virtualMachines"
+                        sortable="true"/>
+
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_VIRTUAL_IMAGES')"
+                        dataField="totalVirtualImages"
+                        sortable="true"/>
+
+                </mx:columns>
+            </mx:DataGrid>
+
+            <mx:DataGrid id="heartbeatLogDetailDatagrid"
+                width="100%" height="60%"
+                dataProvider="{this._selectedHeartbeatInfoSource}">
+
+                <mx:columns>
+                    <mx:DataGridColumn headerText="@Resource(bundle='Configuration', key='LABEL_SOURCE')"
+                        dataField="source"
+                        sortable="true"/>
+
+                    <mx:DataGridColumn 
+                        width="175"
+                        headerText="@Resource(bundle='Configuration', key='LABEL_VALUE')"
+                        dataField="value"
+                        sortable="false"/>
+                </mx:columns>
+
+            </mx:DataGrid>
+        </mx:VBox>
+
+    </mx:ViewStack>
+</mx:VBox>

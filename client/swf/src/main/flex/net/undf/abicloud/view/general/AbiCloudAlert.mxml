@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    styleName="AbiCloudAlert" 
+    minWidth="300" minHeight="150" 
+    maxHeight="500" maxWidth="450"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:limit="net.undf.abicloud.view.general.components.limit.*">
+
+    <!-- AbiCLoudAlert
+
+         This class uses constants from Flex's Alert class, to let user to set 4 different buttons
+         and to retreive the apropiate response from the user, when the Alert is closed
+         Styles in application.css
+    -->
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.vo.result.BasicResult;
+        	import net.undf.abicloud.vo.virtualhardware.ExceedLimit;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import net.undf.abicloud.vo.virtualimage.Icon;
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.controller.ThemeHandler;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.core.UIComponent;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.managers.PopUpManager;
+            import mx.events.CloseEvent;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [Bindable]
+            private var _titleText:String;
+
+            [Bindable]
+            private var _headerText:String;
+
+            [Bindable]
+            private var _mainText:String;    
+            
+            //Use for displaying hard/soft limits
+            private var _exceededLimit:ExceedLimit;   
+            public var limitMessage:String;               
+
+            private static var _yesLabel:String = "Yes";
+
+            public static function set yesLabel(value:String):void
+            {
+                _yesLabel = value;
+            }
+
+            private static var _noLabel:String = "No";
+
+            public static function set noLabel(value:String):void
+            {
+                _noLabel = value;
+            }
+
+            private static var _okLabel:String = "Accept";
+
+            public static function set okLabel(value:String):void
+            {
+                _okLabel = value;
+            }
+
+            private static var _cancelLabel:String = "Cancel";
+
+            public static function set cancelLabel(value:String):void
+            {
+                _cancelLabel = value;
+            }
+
+            [Bindable]
+            private var _customAlertIconPath:String;
+
+            private var _flags:uint;
+
+            private var _allowCopyClipboard:Boolean = false;
+
+            private var _responseHandler:Function;
+
+            public static function showConfirmation(title:String, header:String,
+                                                    main:String, flags:uint = 0x4,
+                                                    responseHandler:Function = null,
+                                                    allowClipboard:Boolean = false):void
+            {
+                var customAlert:AbiCloudAlert = new AbiCloudAlert;
+
+                customAlert._titleText = title;
+                customAlert._headerText = header;
+                customAlert._mainText = main;
+                customAlert._responseHandler = responseHandler;
+                customAlert._flags = flags;
+                //The name of the style from wich the Alert will take the icon
+                customAlert._customAlertIconPath = "CommonAssetsAlertIconOk";
+                customAlert._allowCopyClipboard = allowClipboard;
+                customAlert.create();
+            }
+
+            public static function showAlert(title:String, header:String, main:String,
+                                             flags:uint = 0x4, responseHandler:Function = null,
+                                             allowClipboard:Boolean = false,
+                                             additionalObject:Object = null):void
+            {
+                var customAlert:AbiCloudAlert = new AbiCloudAlert;
+
+                customAlert._titleText = title;
+                customAlert._headerText = header;
+                customAlert._mainText = main;
+                customAlert._responseHandler = responseHandler;
+                customAlert._flags = flags;
+                //The name of the style from wich the Alert will take the icon
+                customAlert._customAlertIconPath = "CommonAssetsAlertIconAlert";
+                customAlert._allowCopyClipboard = allowClipboard;
+                
+                if(additionalObject){
+                	customAlert.limitMessage = BasicResult(additionalObject).message.toString();
+                }                	
+
+                customAlert.create();
+            }
+
+            public static function showError(title:String, header:String, main:String,
+                                             flags:uint = 0x4, responseHandler:Function = null,
+                                             allowClipboard:Boolean = false,
+                                             additionalObject:Object = null):void
+            {
+                var customAlert:AbiCloudAlert = new AbiCloudAlert();
+
+                customAlert._titleText = title;
+                customAlert._headerText = header;
+                customAlert._mainText = main;
+                customAlert._responseHandler = responseHandler;
+                customAlert._flags = flags;
+                //The name of the style from wich the Alert will take the icon
+                customAlert._customAlertIconPath = "CommonAssetsAlertIconError";
+                customAlert._allowCopyClipboard = allowClipboard;
+				
+				if(additionalObject){
+                	customAlert.limitMessage = BasicResult(additionalObject).message.toString();
+                } 
+                
+                customAlert.create();
+            }
+            
+            private function create():void
+            {
+                if (this._responseHandler != null)
+                    this.addEventListener(CloseEvent.CLOSE, _responseHandler);
+
+                //Registering Keyboard events, for standard application behaivor
+                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);          
+
+                PopUpManager.addPopUp(this, Application.application as DisplayObject,
+                                      true);
+                                      
+                //for specific case, we build a custom message
+                //affected alerts:
+                //- soft limit
+                //- hard limit
+                createCustomAlert();
+                
+                //Showing or hidding buttons
+                createButtons();
+
+                //Resize if necessary
+                callLater(resizeComponent);
+
+            }
+
+            private function resizeComponent():void
+            {
+                //if resize need to be done for limitations
+                if(limitMessage){
+                	width = 750;
+                	height = 400;
+                }else{
+	                //Making the AbiCloudAlert bigger if mainTextArea does not fit
+	                if (mainText.textHeight > mainText.minHeight)
+	                {
+	                    var newHeight:int = height + mainText.textHeight - mainText.minHeight;
+	                    //height = height + mainText.textHeight - mainText.minHeight;
+	                    if (newHeight <= maxHeight && newHeight >= minHeight)
+	                        height = newHeight;
+	                    else
+	                    {
+	                        //We can not make this component that big
+	                        height = maxHeight;
+	
+	                        //Making the component wider
+	                    }
+	                    width = maxWidth;
+	                }
+                }
+
+                PopUpManager.centerPopUp(this);
+            }
+            
+            /**
+             * Creates the apropiate message
+             */
+             private function createCustomAlert():void{
+
+                if(this._headerText == ResourceManager.getInstance().getString("VirtualAppliance","ALERT_SOFT_LIMITS_EXCEEDED_HEADER")
+                || this._headerText == ResourceManager.getInstance().getString("VirtualAppliance","ALERT_HARD_LIMITS_EXCEEDED_HEADER")){
+                	
+                	_exceededLimit = new ExceedLimit(limitMessage);	 
+	 				exceededLimitManagement.exceededLimit = _exceededLimit;
+                	exceededLimitManagement.color = uint(Number(mainText.getStyle("color")));		
+                	
+                	exceededLimitManagement.includeInLayout = true;
+                	exceededLimitManagement.visible = true;
+                }else{
+					mainText.includeInLayout = true;
+                	mainText.visible = true;
+                } 
+             }
+
+
+            /**
+             * Creates the apropiate buttons, using constants from Flex's Alert class
+             */
+            private function createButtons():void
+            {
+                //Showing buttons
+                if (this._flags & Alert.OK)
+                {
+                    okButton.visible = true;
+                    okButton.includeInLayout = true;
+                    okButton.label = _okLabel;
+                }
+
+                if (this._flags & Alert.YES)
+                {
+                    yesButton.visible = true;
+                    yesButton.includeInLayout = true;
+                    yesButton.label = _yesLabel;
+                }
+
+                if (this._flags & Alert.NO)
+                {
+                    noButton.visible = true;
+                    noButton.includeInLayout = true;
+                    noButton.label = _noLabel;
+                }
+
+                if (this._flags & Alert.CANCEL)
+                {
+                    cancelButton.visible = true;
+                    cancelButton.includeInLayout = true;
+                    cancelButton.label = _cancelLabel;
+                }
+
+                //Clipboard button
+                if (this._allowCopyClipboard)
+                {
+                    clipBoardButton.visible = true;
+                    clipBoardButton.includeInLayout = true;
+                    clipBoardButton.label = ResourceManager.getInstance().getString("Common",
+                                                                                    "BUTTON_COPY_CLIPBOARD");
+                }
+
+                //Setting focus on the button, with an order
+                if (cancelButton.visible)
+                    cancelButton.setFocus();
+                else if (noButton.visible)
+                    noButton.setFocus();
+                else if (yesButton.visible)
+                    yesButton.setFocus();
+                else if (okButton.visible)
+                    okButton.setFocus();                    
+            }
+
+            /**
+             * Closes this AbiCloudAlert dispatching the apropiate event
+             * depending on the pressed button
+             */
+            private function close(mouseEvent:MouseEvent):void
+            {
+                var closeEvent:CloseEvent = new CloseEvent(CloseEvent.CLOSE);
+
+                if (mouseEvent.target == okButton)
+                    closeEvent.detail = Alert.OK;
+                else if (mouseEvent.target == yesButton)
+                    closeEvent.detail = Alert.YES;
+                else if (mouseEvent.target == noButton)
+                    closeEvent.detail = Alert.NO;
+                else if (mouseEvent.target == cancelButton || mouseEvent.target == closeButton)
+                    closeEvent.detail = Alert.CANCEL;
+
+                dispatchEvent(closeEvent);
+
+                if (this._responseHandler != null)
+                    this.removeEventListener(CloseEvent.CLOSE, _responseHandler);
+
+                //Unregistering Keyboard events
+                this.removeEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+
+                PopUpManager.removePopUp(this);
+            }
+
+            private function onClickClipboardButton():void
+            {
+                System.setClipboard(this._mainText);
+            }
+
+            /**
+             * We replicate here the behaivor described in AbiCloud.mxml, since Events dispatched from a PopUp
+             * do not propagate outside
+             **/
+            private function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.keyCode == 13)
+                {
+                    //When users presses the Enter key, it is like a click
+                    keyboardEvent.target.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Label id="titleLabel"
+        left="32" top="5"
+        text="{_titleText}" styleName="AbiCloudAlertTitle"/>
+
+
+    <mx:Button id="closeButton"
+        right="4" top="0"
+        styleName="AbiCloudAlertCloseButton"
+        click="close(event)"/>
+
+
+    <mx:Image id="customAlertIcon"
+        left="23" top="38"
+        creationComplete="{AbicloudUtils.getImageFromStyle(_customAlertIconPath, customAlertIcon)}"/>
+<!--        source="{_customAlertIconPath}"/>-->
+
+
+    <mx:Label id="headerLabel"
+        left="70" top="36"
+        text="{_headerText}" styleName="AbiCloudAlertSubtitle"/>
+
+
+    <mx:TextArea id="mainText"
+        left="70" right="30" top="58" bottom="76"
+        styleName="AbicloudAlertMainText"
+        borderStyle="none"
+        verticalScrollPolicy="off"
+        horizontalScrollPolicy="off"
+        minHeight="45" minWidth="200" htmlText="{_mainText}"
+        editable="false"
+        includeInLayout="false"
+        visible="false"/>
+	
+	<!--Specific contain for Soft and Hard ressources limits-->
+	<limit:ExceededLimitManagement id="exceededLimitManagement"
+		left="70" right="30" top="58" bottom="76"
+		includeInLayout="false"
+		visible="false"/>		
+
+    <mx:HBox 
+        left="0" right="0" bottom="46"
+        horizontalAlign="center"
+        verticalAlign="middle">
+
+        <mx:Button id="okButton"
+            height="18"
+            includeInLayout="false"
+            click="close(event)"
+            visible="false"/>
+
+        <mx:Button id="yesButton"
+            height="18"
+            includeInLayout="false"
+            click="close(event)"
+            visible="false"/>
+
+        <mx:Button id="noButton"
+            height="18"
+            styleName="AlternativeButton" includeInLayout="false"
+            click="close(event)"
+            visible="false"/>
+
+        <mx:Button id="cancelButton"
+            height="18"
+            styleName="AlternativeButton" includeInLayout="false"
+            click="close(event)"
+            visible="false"/>
+
+        <mx:Button id="clipBoardButton"
+            height="18"
+            includeInLayout="false"
+            click="onClickClipboardButton()"
+            visible="false"/>
+    </mx:HBox>
+
+
+</mx:Canvas>

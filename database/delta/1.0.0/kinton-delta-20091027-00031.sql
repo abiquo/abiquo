@@ -1,0 +1,1 @@
+ALTER TABLE `kinton`.`virtualimage` ADD COLUMN `ovfid` VARCHAR(255)  NOT NULL AFTER `idEnterprise`;

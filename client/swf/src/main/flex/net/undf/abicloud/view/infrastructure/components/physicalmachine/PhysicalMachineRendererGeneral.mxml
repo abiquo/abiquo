@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Form 
+    width="100%" height="100%"
+    fontSize="11"
+    paddingBottom="6"
+    paddingLeft="6"
+    paddingRight="6"
+    paddingTop="6"
+    verticalGap="1"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.utils.AbicloudUtils;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import mx.collections.ArrayCollection;
+            import mx.resources.ResourceManager;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import mx.utils.ObjectUtil;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+
+            [Bindable]
+            private var _editMode:Boolean;
+            
+            [Bindable]
+            private var _hypervisorName:String;
+
+            public function set editMode(value:Boolean):void
+            {
+                this._editMode = value;
+
+                if (this._editMode)
+                {
+                    //Set the values that can be edited
+                    cpuInput.value = this._physicalMachine.cpu;
+                    ramUnitsSelector.selectedIndex = 0;
+                    ramInput.value = this._physicalMachine.ram / ramUnitsSelector.selectedItem.conversion;
+                    hdUnitsSelector.selectedIndex = 3;
+                    hdInput.value = this._physicalMachine.hd / hdUnitsSelector.selectedItem.conversion;
+
+                    //setHypervisorInformationOnEdition();
+                }
+            }
+
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+
+            [Bindable]
+            private var _hypervisors:ArrayCollection;
+            
+            [Bindable]
+            private var _hypervisor:HyperVisor;
+
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+                this._physicalMachine = value;
+
+                if (this._physicalMachine)
+                    retrieveHypervisor();
+                    //this._hypervisors = new ArrayCollection(AbiCloudModel.getInstance().infrastructureManager.getHyperVisorsByPhysicalMachine(this._physicalMachine));
+                else
+                    this._hypervisors = new ArrayCollection();
+
+                this._physicalMachineEdited = ObjectUtil.copy(value) as PhysicalMachine;
+            }
+
+            private var _physicalMachineEdited:PhysicalMachine;
+
+            /**
+             * Returns a copy (not original) of _physicalMachine, with the changes that can be made in this component
+             */
+            public function get physicalMachineEdited():PhysicalMachine
+            {
+                this._physicalMachineEdited.cpu = cpuInput.value;
+                this._physicalMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+                this._physicalMachineEdited.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion;
+
+                return this._physicalMachineEdited;
+            }
+            
+             /**
+             * Retrieve the hypervisor associated to this physicalMachine
+             */
+            private function retrieveHypervisor():void{
+            	var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_HYPERVISOR_BY_PHYSICAL_MACHINE);
+                event.physicalMachine = this._physicalMachine;
+                event.callback = setHypervisorInformationOnEdition;
+                dispatchEvent(event);
+            }
+            
+            
+            private function setHypervisorInformationOnEdition(hypervisor:HyperVisor):void{
+                if (hypervisor)
+                {                   
+                    this._hypervisor = hypervisor;
+                    this._hypervisorName = HyperVisorType.HYPERVISOR_NAMES[this._hypervisor.type.id];
+                }
+            }
+
+            /**
+             * Returns a copy (not original) of the hypervisors for this physical machine, with the changes
+             * that can be made in this component
+             */
+            public function get hypervisorsEdited():ArrayCollection
+            {
+                var hypervisors:ArrayCollection = ObjectUtil.copy(this._hypervisors) as ArrayCollection;
+                var hypervisor:HyperVisor;
+
+                if (hypervisors.length == 0)
+                {
+                    //The Physical Machine hadnt any previous Hypervisor, and we create a new one
+                    hypervisor = new HyperVisor();
+                    hypervisors.addItem(hypervisor);
+
+                }
+                else
+                {
+                    //We edit the values of the hypervisor that already exists
+                    hypervisor = hypervisors.getItemAt(0) as HyperVisor;
+                }
+
+                //Check if all hypervisor related fields are filled properly
+                if (ipInput.text.length > 0 && hypervisorPortInput.text.length > 0 && hypervisorTypeInput.selectedIndex > -1)
+                {
+                    hypervisor.ip = ipInput.text;
+                    hypervisor.port = Number(hypervisorPortInput.text);
+                    hypervisor.assignedTo = this._physicalMachine;
+                    hypervisor.type = hypervisorTypeInput.selectedItem as HyperVisorType;
+                }
+                else
+                {
+                    //We cannot create the Hypervisor because we do not have all necessary information, or it is invalid
+                    hypervisors.removeAll();
+                }
+
+                return hypervisors;
+            }
+
+           /*  private function setHypervisorInformationOnEdition():void
+            {
+                if (this._hypervisors.length > 0)
+                {
+                    var hypervisor:HyperVisor = this._hypervisors[0] as HyperVisor;
+
+                    //Filling Hypervisor related fields
+                    ipInput.text = hypervisor.ip;
+                    hypervisorPortInput.text = hypervisor.port.toString();
+                    var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
+                    hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
+                                                                                              "id",
+                                                                                              hypervisor.type);
+                }
+                else
+                {
+                    //For this Physical Machine there is any Hypervisor, and they are required
+                    ipInput.text = "";
+                    hypervisorTypeInput.selectedIndex = -1;
+                    hypervisorPortInput.text = "";
+                }
+
+            } */
+
+            private function onChangeHypervisorTypeInput():void
+            {
+                if (hypervisorTypeInput.selectedIndex > -1)
+                {
+                    hypervisorPortInput.text = HyperVisorType(hypervisorTypeInput.selectedItem).defaultPort.toString();
+                }
+            }
+        ]]>
+    </mx:Script>
+    <!-- Physical Machine information -->
+
+    <!--mx:Form id="form" width="50%"
+         verticalGap="1" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" fontSize="11"-->
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
+        direction="horizontal">
+
+        <mx:Label id="cpuLabel"
+            text="{_physicalMachine.cpu.toString()}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+
+        <mx:NumericStepper id="cpuInput"
+            width="100" height="17"
+            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+            minimum="1" maximum="32" stepSize="1" includeInLayout="{_editMode}"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+        direction="horizontal">
+
+        <mx:Label id="ramLabel"
+            text="{_physicalMachine.ram.toString() + ' MB'}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+
+        <mx:NumericStepper id="ramInput"
+            width="100" height="17"
+            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+            minimum="{ramUnitsSelector.selectedItem.minimum}"
+            maximum="{ramUnitsSelector.selectedItem.maximum}"
+            stepSize="{ramUnitsSelector.selectedItem.stepSize}"
+            includeInLayout="{_editMode}"
+            value="{this._physicalMachine.ram / ramUnitsSelector.selectedItem.conversion}"
+            visible="{_editMode}"/>
+
+        <mx:ComboBox id="ramUnitsSelector"
+            width="80" height="17"
+            labelField="label" dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+            selectedIndex="0" includeInLayout="{_editMode}"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
+        direction="horizontal">
+
+        <mx:Label id="hdLabel"
+            text="{Number(_physicalMachine.hd / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + ' GB'}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+
+        <mx:NumericStepper id="hdInput"
+            width="100" height="17"
+            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+            minimum="{hdUnitsSelector.selectedItem.minimum}"
+            maximum="{hdUnitsSelector.selectedItem.maximum}"
+            stepSize="{hdUnitsSelector.selectedItem.stepSize}"
+            includeInLayout="{_editMode}"
+            value="{this._physicalMachine.hd / hdUnitsSelector.selectedItem.conversion}"
+            visible="{_editMode}"/>
+
+        <mx:ComboBox id="hdUnitsSelector"
+            width="80" height="17"
+            labelField="label" dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+            selectedIndex="0" includeInLayout="{_editMode}"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_IP')">
+
+        <mx:Label id="ipLabel"
+            selectable="true"
+            text="{this._hypervisor.ip}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+
+        <mx:TextInput id="ipInput"
+            height="17"
+            maxChars="39" includeInLayout="{_editMode}"
+            restrict="0-9.:A-F"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
+        <mx:Label id="virtualSwitchNameLabel"
+            selectable="true" text="{_physicalMachine.vswitchName}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='LABEL_HYPERVISOR_TYPE')">
+
+        <mx:Label id="hypervisorTypeLabel"
+            text="{this._hypervisorName}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+             <!--this._hypervisors.length > 0 ? HyperVisorType.HYPERVISOR_NAMES[HyperVisor(this._hypervisors.getItemAt(0)).type.id] : ResourceManager.getInstance().getString('Common', 'LABEL_NOT_AVAILABLE')-->
+
+        <mx:ComboBox id="hypervisorTypeInput"
+            height="17"
+            dataProvider="{AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes}"
+            labelField="name" includeInLayout="{_editMode}"
+            change="onChangeHypervisorTypeInput()"
+            prompt="@Resource(bundle='Infrastructure', key='COMBOBOX_PROMPT_HYPERVISOR_TYPE')"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+
+    <mx:FormItem 
+        height="18"
+        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_PORT')">
+
+        <mx:Label id="hypervisorPortLabel"
+            selectable="true"
+            text="{this._hypervisor.port.toString()}"
+            includeInLayout="{! _editMode}"
+            visible="{! _editMode}"/>
+
+        <mx:TextInput id="hypervisorPortInput"
+            height="17"
+            maxChars="5" includeInLayout="{_editMode}"
+            restrict="0-9"
+            visible="{_editMode}"/>
+    </mx:FormItem>
+</mx:Form>

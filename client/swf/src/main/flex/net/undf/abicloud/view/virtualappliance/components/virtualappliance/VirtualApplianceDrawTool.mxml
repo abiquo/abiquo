@@ -1,0 +1,847 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    borderStyle="none"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:componentsVA="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*"
+    xmlns:componentsVM="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
+    xmlns:componentsNode="net.undf.abicloud.view.virtualappliance.components.node.*"
+    implements="net.undf.abicloud.view.virtualappliance.components.node.INodeViewController">
+
+
+    <mx:Metadata>
+		[Event(name="virtualApplianceDrawToolNew", type="flash.events.Event")]
+		[Event(name="virtualApplianceDrawToolOpen", type="flash.events.Event")]
+		[Event(name="virtualApplianceDrawToolDelete", type="flash.events.Event")]
+		[Event(name="virtualApplianceDrawToolSave", type="flash.events.Event")]
+		[Event(name="virtualApplianceDrawToolPowerOnOff", type="flash.events.Event")]
+		[Event(name="isVirtualApplianceModifiedChange", type="flash.events.Event")]
+		[Event(name="virtualApplianceCreateBundle", type="flash.events.Event")]
+		[Event(name="virtualApplianceDrawToolApplyChanges", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.core.Application;
+        	import mx.managers.PopUpManager;
+        	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualBundlesImages;
+        	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageMiniature;
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.controls.Image;
+            import mx.events.DragEvent;
+            import mx.managers.DragManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.*;
+            import net.undf.abicloud.view.virtualappliance.components.node.INodeView;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeRenderer;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeRendererBase;
+            import net.undf.abicloud.view.virtualappliance.components.node.NodeRendererEvent;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.virtualappliance.Node;
+            import net.undf.abicloud.vo.virtualappliance.NodeType;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import net.undf.abicloud.vo.virtualimage.VirtualImage;
+
+            //The Virtual Appliance to be drawn
+            [Bindable(event="_virtualApplianceChange")]
+            private var _virtualAppliance:VirtualAppliance = null;
+
+            //XML document that describes the node connections between Nodes from _virtualAppliance
+            private var _nodeConnections:XML;
+
+            [Bindable]
+            private var _isVirtualApplianceModified:Boolean;
+
+            [Bindable]
+            //Array containing a list of NodeRenderer components for the _virtualAppliance's nodes
+            private var _nodeRenderers:ArrayCollection;
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb2:ResourceBundle;
+            
+            private var _virtualBundlesImages:VirtualBundlesImages;
+
+            private function onCreationComplete():void
+            {
+                //Registering Nodes interaction
+                addEventListener(NodeRendererEvent.NODERENDERER_ERASE, onNodeRendererErase);
+                addEventListener(NodeRendererEvent.NODERENDERER_CHANGED, onNodeRendererChanged);
+
+                //Setting the INodeView
+                nodeTypeView.nodeViewController = this;
+                nodeDrawingView.nodeViewController = this;
+                _virtualBundlesImages = new VirtualBundlesImages()
+                _virtualBundlesImages.addEventListener("popupClose",onClose);
+                _virtualBundlesImages.addEventListener("virtualImagesAdded",onAddVirtualImages);
+            }
+            
+            private function onClose(event:Event):void{
+            	PopUpManager.removePopUp(this._virtualBundlesImages);
+            }
+            
+            private function onAddVirtualImages(event:Event):void{
+            	var nodeRenderer:NodeRenderer;
+                
+            	for(var i:int = 0 ; i < this._virtualBundlesImages.listOfVirtualImages.length; i++){
+            		//Creating the new NodeVirtualImage
+                    var virtualImage:VirtualImage = this._virtualBundlesImages.listOfVirtualImages[i] as VirtualImage;
+
+                    var node:NodeVirtualImage = new NodeVirtualImage();
+                    node.name = obtainNameForNewNode(virtualImage.name);
+                    node.idVirtualAppliance = this._virtualAppliance.id;
+                    node.nodeType.id = NodeType.VIRTUALIMAGE;
+                    node.virtualImage = virtualImage;
+                    node.modified = Node.NODE_NEW;
+
+                    //Getting the position where the user has made the drop operation
+                    /* point = new Point(event.localX - (NodeRendererBase.NODERENDERER_SIZE / 2),
+                                      event.localY - (NodeRendererBase.NODERENDERER_SIZE / 2));
+                    point = INodeView(nodesArea.selectedChild).fromINodeViewToNode(point); */
+                    node.posX = i*50 + 5;
+                    node.posY = i*50 + 5;
+
+                    //Creating the node renderer for the new node
+                    nodeRenderer = new NodeRenderer();
+                    nodeRenderer.node = node;
+                    var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
+                                                         nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
+                                                         nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
+                    nodeRenderer.bounds = bounds;
+                    this._nodeRenderers.addItem(nodeRenderer);
+
+                    //Announce to the INodeView that a new NodeRenderer has been added
+                    var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ADDED,
+                                                                                    false);
+                    nodeRendererEvent.nodeRenderer = nodeRenderer;
+                    dispatchEvent(nodeRendererEvent);
+
+                    //The VirtualAppliance has been modified
+                    this._isVirtualApplianceModified = true;
+                    dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+            	}
+            	onClose(null);
+            }
+
+            public function setDefaultView():void
+            {
+                onClickViewOptions('categoriesMode');
+            }
+
+            /**
+             * Sets the Virtual Appliance that will be drawn by this tool
+             */
+            public function set virtualAppliance(virtualAppliance:VirtualAppliance):void
+            {
+                this._virtualAppliance = virtualAppliance;
+                dispatchEvent(new Event("_virtualApplianceChange"));
+
+                this._isVirtualApplianceModified = false;
+                dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+
+                if (this._virtualAppliance)
+                {
+                    this._nodeConnections = new XML(this._virtualAppliance.nodeConnections);
+
+                    if (this._virtualAppliance.nodes == null || this._virtualAppliance.nodes.length == 0)
+                    {
+                        //Getting the list of nodes for this virtual appliance
+                        var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUALAPPLIANCE_NODES);
+                        virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
+                        dispatchEvent(virtualApplianceEvent);
+
+                        //Let's know when the nodes are available
+                        AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_NODES_RETRIEVED,
+                                                                                             onVirtualApplianceNodesRetrieved);
+                    }
+                    else
+                    {
+                        //We already have the Nodes for this VirtualAppliance
+                        createNodeRenderers();
+                    }
+                }
+                else if (this._nodeRenderers && this._nodeRenderers.length > 0)
+                {
+                    cleanNodeRenderers();
+                }
+            }
+
+            private function onVirtualApplianceNodesRetrieved(event:VirtualApplianceEvent):void
+            {
+                //Unregistering event
+                AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_NODES_RETRIEVED,
+                                                                                        onVirtualApplianceNodesRetrieved);
+
+                dispatchEvent(new Event("_virtualApplianceChange"));
+
+                //We are ready to draw nodes
+                createNodeRenderers();
+            }
+
+
+            /**
+             * Returns a copy of the VirtualAppliance being drawed
+             * Since the original VirtualAppliance is not modified until its changes are saved on server,
+             * we need to send a copy to the server
+             *
+             * For now, VirtualApplianceDrawTool only make changes to the list of nodes
+             * If in the future more changes are performed, they must be setted here, in the virtualApplianceCopy
+             */
+            public function get virtualApplianceCopy():VirtualAppliance
+            {
+                var virtualApplianceCopy:VirtualAppliance = ObjectUtil.copy(this._virtualAppliance) as VirtualAppliance;
+
+                //Building the list of Nodes for this VirtualAppliance, from the NodeRenderer's list
+                //_nodeRenderers does not contains the original nodes, so we can use directly the nodes it contains
+                if (this._nodeRenderers)
+                {
+                    var length:int = this._nodeRenderers.length;
+                    var i:int;
+                    var nodes:ArrayCollection = new ArrayCollection();
+                    for (i = 0; i < length; i++)
+                    {
+                        nodes.addItem(NodeRenderer(this._nodeRenderers.getItemAt(i)).node);
+                    }
+
+                    virtualApplianceCopy.nodes = nodes;
+                    virtualApplianceCopy.nodeConnections = this._nodeConnections.toXMLString();
+                }
+
+                return virtualApplianceCopy;
+            }
+
+            /**
+             * Flag indicating if the virtual appliance that this component is managing,
+             * has unsaved changes
+             */
+            [Bindable(event="isVirtualApplianceModifiedChange")]
+            public function get isVirtualApplianceModified():Boolean
+            {
+                return this._isVirtualApplianceModified;
+            }
+
+
+            /**
+             * Performs a "Start" or "Shutdown" action in the Virtual Appliance
+             **/
+            private function onClickPowerOnOffButton():void
+            {
+                if (this._isVirtualApplianceModified)
+                {
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }
+                else
+                {
+                    dispatchEvent(new Event("virtualApplianceDrawToolPowerOnOff"));
+                }
+
+            }
+
+            /**
+             * Performs an "Apply changes" action, when a Virtual Appliance is in a state of APPLY_CHANGES_NEEDED
+             */
+            private function onClickApplyChangesButton():void
+            {
+                if (this._isVirtualApplianceModified)
+                {
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }
+                else
+                {
+                    dispatchEvent(new Event("virtualApplianceDrawToolApplyChanges"));
+                }
+            }
+
+            /**
+             * Announces that user wants to create a new VirtualAppliance
+             */
+            private function onClickNewButton():void
+            {
+                dispatchEvent(new Event("virtualApplianceDrawToolNew"));
+            }
+
+            /**
+             * Announces that user wants to open another VirtualAppliance
+             */
+            private function onClickOpenButton():void
+            {
+                dispatchEvent(new Event("virtualApplianceDrawToolOpen"));
+            }
+
+            /**
+             * Announces that user wants to save the current VirtualAppliance
+             */
+            private function onClickSaveButton():void
+            {
+                //Since if a Virtual Appliance is Running, a non blocking service will be used
+                //to save it, we must set the virtual appliance as not modified, to let user get out
+                //from this screen without warning
+                if (this._virtualAppliance.state.id == State.RUNNING)
+                {
+                    this._isVirtualApplianceModified = false;
+                    dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                }
+
+                dispatchEvent(new Event("virtualApplianceDrawToolSave"));
+            }
+
+            /**
+             * Announces that user wants to delete the current VirtualAppliance
+             */
+            private function onClickDeleteButton():void
+            {
+                dispatchEvent(new Event("virtualApplianceDrawToolDelete"));
+            }
+
+            /**
+             * Announces that user wants to create a bundle from the current VirtualAppliance
+             */
+            private function onClickCreateBundleButton():void
+            {
+                if (this._isVirtualApplianceModified)
+                {
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }
+                else
+                {
+                    dispatchEvent(new Event("virtualApplianceCreateBundle"));
+                }
+            }
+
+            /**
+             * Switch between the different view options
+             */
+            private function onClickViewOptions(viewMode:String):void
+            {
+                //Turning off previous view to display nodes
+                INodeView(nodesArea.selectedChild).isDisplayingNodes = false;
+                INodeView(nodesArea.selectedChild).cleanNodes();
+
+                if (viewMode == 'categoriesMode')
+                {
+                    listButton.selected = true;
+                    iconsButton.selected = false;
+                    nodesArea.selectedIndex = 0;
+
+                    //In this mode, draw tools are not available
+                    DrawToolsManager.getInstance().currentTool = DrawToolsManager.NO_TOOL;
+                }
+                else if (viewMode == 'drawMode')
+                {
+                    listButton.selected = false;
+                    iconsButton.selected = true;
+                    nodesArea.selectedIndex = 1;
+
+                    //Setting the default draw tool
+                    DrawToolsManager.getInstance().currentTool = DrawToolsManager.SELECTION_TOOL;
+                }
+
+                //Turning on the current view to display nodes
+                INodeView(nodesArea.selectedChild).isDisplayingNodes = true;
+                if (this._nodeRenderers)
+                    INodeView(nodesArea.selectedChild).drawNodes(this._nodeRenderers,
+                                                                 this._nodeConnections);
+            }
+
+
+            private function onClickSelectionButton():void
+            {
+                //Setting the current tool
+                DrawToolsManager.getInstance().currentTool = DrawToolsManager.SELECTION_TOOL;
+            }
+
+
+            private function onClickRelationButton():void
+            {
+                //Setting the current tool
+                DrawToolsManager.getInstance().currentTool = DrawToolsManager.DRAW_CONNECTION_TOOL;
+            }
+
+            /////////////////////////////////////////
+            //Nodes interaction
+
+            /**
+             * Creates the list of NodeRenderer components for this VirtualAppliance
+             */
+            private function createNodeRenderers():void
+            {
+                this._nodeRenderers = new ArrayCollection();
+                INodeView(nodesArea.selectedChild).isDisplayingNodes = false;
+                INodeView(nodesArea.selectedChild).cleanNodes();
+
+                if (this._virtualAppliance.nodes != null)
+                {
+                    //We do not work with the original list of nodes, to be able to undo changes
+                    var nodeListCopy:ArrayCollection = ObjectUtil.copy(this._virtualAppliance.nodes) as ArrayCollection;
+
+                    //Creating the list of renderers
+                    var length:int = nodeListCopy.length;
+                    var i:int;
+
+                    var node:Node;
+                    var nodeRenderer:NodeRenderer;
+                    var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
+                                                         nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
+                                                         nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
+
+                    for (i = 0; i < length; i++)
+                    {
+                        node = nodeListCopy.getItemAt(i) as Node;
+                        nodeRenderer = new NodeRenderer();
+                        nodeRenderer.node = node;
+                        nodeRenderer.bounds = bounds
+                        this._nodeRenderers.addItem(nodeRenderer);
+                    }
+                }
+
+                //Displaying the Nodes in the current view
+                INodeView(nodesArea.selectedChild).isDisplayingNodes = true;
+                INodeView(nodesArea.selectedChild).drawNodes(this._nodeRenderers,
+                                                             this._nodeConnections);
+            }
+
+            private function cleanNodeRenderers():void
+            {
+                this._nodeRenderers = new ArrayCollection();
+                INodeView(nodesArea.selectedChild).cleanNodes();
+            }
+
+            /**
+             * Listener for when user wants to delete a NodeRenderer
+             */
+            private function onNodeRendererErase(nodeRendererEvent:NodeRendererEvent):void
+            {
+                var nodeRendererToErase:NodeRenderer = nodeRendererEvent.nodeRenderer as NodeRenderer;
+
+                //Checking the node state
+                if (nodeRendererToErase.node.modified == Node.NODE_NEW)
+                {
+                    //This is a new node that still does not exist in the Data Base. We delete it directly from the nodes list
+                    var index:int = this._nodeRenderers.getItemIndex(nodeRendererToErase);
+                    this._nodeRenderers.removeItemAt(index);
+
+                    //The VirtualAppliance has been modified
+                    this._isVirtualApplianceModified = true;
+                    dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                }
+                else if (nodeRendererToErase.node.modified != Node.NODE_ERASED)
+                {
+                    //This node exists in the Data Base, so we must mark it as ERASED
+                    nodeRendererToErase.node.modified = Node.NODE_ERASED;
+
+                    //The VirtualAppliance has been modified
+                    this._isVirtualApplianceModified = true;
+                    dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                }
+
+                //Announcing that a NodeRenderer has been deleted
+                var event:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASED,
+                                                                    false);
+                event.nodeRenderer = nodeRendererToErase;
+                dispatchEvent(event);
+            }
+
+            /**
+             * Listener for when a NodeRenderer has changed
+             * This means that its name has been edited, or that has been moved
+             */
+            private function onNodeRendererChanged(nodeRendererEvent:NodeRendererEvent):void
+            {
+                //Updating Node position, making a coordenates conversion using the INodeView component
+                //that is currently displaying the node
+                var currentNodeRendererPoint:Point = new Point(nodeRendererEvent.nodeRenderer.x,
+                                                               nodeRendererEvent.nodeRenderer.y);
+                var nodePoint:Point = INodeView(nodesArea.selectedChild).fromINodeViewToNode(currentNodeRendererPoint);
+
+                nodeRendererEvent.nodeRenderer.node.posX = nodePoint.x;
+                nodeRendererEvent.nodeRenderer.node.posY = nodePoint.y
+
+                //Marking the node has modified
+                if (nodeRendererEvent.nodeRenderer.node.modified == Node.NODE_NOT_MODIFIED)
+                    nodeRendererEvent.nodeRenderer.node.modified = Node.NODE_MODIFIED;
+
+                //This VirtualAppliance has been modified
+                this._isVirtualApplianceModified = true;
+                dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+            }
+
+
+
+            ////////////////////////////////////////////
+            //Nodes Area Drop functionality
+
+            /**
+             * To detect when user wants make a drop operation
+             **/
+            private function onDragEnterNodesArea(event:DragEvent):void
+            {
+                //We only accept drop operations when we have a VirtualAppliance
+                if (this._virtualAppliance != null && this._virtualAppliance.subState.id != State.UNKNOWN)
+                {
+                    if (event.dragSource.hasFormat("VirtualImage"))
+                    {
+                    	if(!isStatefulNodeAlreadyPresent(event.dragSource.dataForFormat("VirtualImage") as VirtualImage)){
+	                        //We can only accept VirtualImages which its Hypervisor type is
+	                        //the same than Virtual Appliances VirtualDataCenter Hypervisor type
+	                        var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
+	                        DragManager.acceptDragDrop(nodesArea);
+                    	}
+                    }
+                }
+
+            }
+
+            /**
+             * When user makes a drop operation over the Drawing Area
+             **/
+            private function onDragDropNodesArea(event:DragEvent):void
+            {
+                var nodeRenderer:NodeRenderer;
+                var point:Point;
+
+                //We must deal with the different types of Nodes...
+              if(event.dragInitiator is VirtualImageMiniature){
+                	//If the VM has bundles, we open the list
+                	if(VirtualImageMiniature(event.dragInitiator).hasSlaveImage == true){
+                		PopUpManager.addPopUp(this._virtualBundlesImages,Application.application as DisplayObject,true);
+                		PopUpManager.centerPopUp(this._virtualBundlesImages);
+                		this._virtualBundlesImages.init(VirtualImageMiniature(event.dragInitiator).virtualImage);
+                		return;
+                	}
+                }
+                
+                if (event.dragSource.hasFormat("VirtualImage"))
+                {
+                    //Creating the new NodeVirtualImage
+                    var virtualImage:VirtualImage = event.dragSource.dataForFormat("VirtualImage") as VirtualImage;
+
+                    var node:NodeVirtualImage = new NodeVirtualImage();
+                    node.name = obtainNameForNewNode(virtualImage.name);
+                    node.idVirtualAppliance = this._virtualAppliance.id;
+                    node.nodeType.id = NodeType.VIRTUALIMAGE;
+                    node.virtualImage = virtualImage;
+                    node.modified = Node.NODE_NEW;
+
+                    //Getting the position where the user has made the drop operation
+                    point = new Point(event.localX - (NodeRendererBase.NODERENDERER_SIZE / 2),
+                                      event.localY - (NodeRendererBase.NODERENDERER_SIZE / 2));
+                    point = INodeView(nodesArea.selectedChild).fromINodeViewToNode(point);
+                    node.posX = point.x;
+                    node.posY = point.y;
+
+                    //Creating the node renderer for the new node
+                    nodeRenderer = new NodeRenderer();
+                    nodeRenderer.node = node;
+                    var bounds:Rectangle = new Rectangle(nodesArea.x, nodesArea.y,
+                                                         nodesArea.width - NodeRendererBase.NODERENDERER_SIZE,
+                                                         nodesArea.height - NodeRendererBase.NODERENDERER_SIZE);
+                    nodeRenderer.bounds = bounds;
+                    this._nodeRenderers.addItem(nodeRenderer);
+
+                    //Announce to the INodeView that a new NodeRenderer has been added
+                    var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ADDED,
+                                                                                    false);
+                    nodeRendererEvent.nodeRenderer = nodeRenderer;
+                    dispatchEvent(nodeRendererEvent);
+
+                    //The VirtualAppliance has been modified
+                    this._isVirtualApplianceModified = true;
+                    dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                } 
+            }
+
+            /**
+             * To avoid to repeat names for nodes with the same virtual image, we check, before adding a new node,
+             * if a node exists with the same name
+             */
+            private function obtainNameForNewNode(originalName:String):String
+            {
+                var nodeRenderers:ArrayCollection = new ArrayCollection(this._nodeRenderers.toArray());
+                var length:int = nodeRenderers.length;
+                var nodeRenderer:NodeRenderer;
+                var incremental:int = 0;
+                var proposedName:String = originalName;
+                for (var i:int = 0; i < length; i++)
+                {
+                    nodeRenderer = nodeRenderers.getItemAt(i) as NodeRenderer;
+                    if (nodeRenderer.node.name == proposedName)
+                    {
+                        nodeRenderers.removeItemAt(i);
+                        incremental++;
+                        i = -1;
+                        length--;
+                        proposedName = originalName + ' (' + incremental + ')';
+                    }
+                }
+
+                return proposedName;
+            }
+            
+            /**
+             * If the same node (stateful) already exists
+             * we refuse the drop operation
+             */
+             private function isStatefulNodeAlreadyPresent(virtualImage:VirtualImage):Boolean{
+             	var nodeRenderer:NodeRenderer;
+             	var existingVirtualImage:VirtualImage;
+             	for(var i:int = 0 ; i < this._nodeRenderers.length ; i++){
+             		nodeRenderer = this._nodeRenderers.getItemAt(i) as NodeRenderer;
+             		existingVirtualImage = NodeVirtualImage(nodeRenderer.node).virtualImage;
+             		if(existingVirtualImage.stateful == 1 && existingVirtualImage.id == virtualImage.id){
+             			return true;
+             		}
+             	}
+             	return false;
+             }
+        ]]>
+    </mx:Script>
+
+    <!-- Buttons Tool Bar, for drawing options -->
+
+    <mx:HBox id="drawingToolBar"
+        x="0" width="100%" height="34"
+        top="0"
+        horizontalGap="2"
+        paddingLeft="7"
+        paddingRight="0"
+        verticalAlign="middle"
+        verticalScrollPolicy="off"
+        enabled="{this._virtualAppliance.subState.id != State.UNKNOWN ? true:false}"
+        styleName="GeneralDataPanelTopFullSkin">
+
+        <!-- DISABLED!
+
+             mx:Button id="newButton"
+             styleName="VirtualApplianceNewButton"
+             click="onClickNewButton()"
+             toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"/>
+
+             <mx:Button id="openButton"
+             styleName="VirtualApplianceOpenButton"
+             click="onClickOpenButton()"
+             toolTip="@Resource(bundle='Common', key='BUTTON_OPEN_TOOLTIP')"/-->
+
+
+        <mx:Button id="saveButton"
+            width="21" height="21"
+            styleName="VirtualApplianceSaveButton"
+            enabled="{this._isVirtualApplianceModified &amp;&amp; this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
+            toolTip="@Resource(bundle='Common', key='BUTTON_SAVE_TOOLTIP')"
+            click="onClickSaveButton()"/>
+
+
+        <mx:Image source="{CommonAssets.separator}"/>
+
+        <mx:Button id="selectionButton"
+            styleName="VirtualAppliancePointerButton"
+            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.SELECTION_TOOL}"
+            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
+            toolTip="@Resource(bundle='Common', key='BUTTON_SELECTION_TOOLTIP')"
+            click="onClickSelectionButton()"/>
+
+        <mx:Button id="relationButton"
+            styleName="VirtualApplianceDrawLineButton"
+            selected="{DrawToolsManager.getInstance().currentTool == DrawToolsManager.DRAW_CONNECTION_TOOL}"
+            enabled="{DrawToolsManager.getInstance().currentTool != DrawToolsManager.NO_TOOL}"
+            toolTip="@Resource(bundle='Common', key='BUTTON_LINE_TOOLTIP')"
+            click="onClickRelationButton()"/>
+
+        <!--
+             <mx:Button styleName="VirtualAppliancePrintButton" enabled="false"
+             toolTip="@Resource(bundle='Common', key='BUTTON_PRINT_TOOLTIP')"/>
+
+             <mx:Image source="{CommonAssets.separator}"/>
+
+             <mx:Button styleName="VirtualApplianceUndoButton" enabled="false"
+             toolTip="@Resource(bundle='Common', key='BUTTON_UNDO_TOOLTIP')"/>
+
+             <mx:Button styleName="VirtualApplianceRedoButton" enabled="false"
+             toolTip="@Resource(bundle='Common', key='BUTTON_REDO_TOOLTIP')"/>
+
+             <mx:Image source="{CommonAssets.separator}"/>
+
+             <mx:Button styleName="VirtualApplianceZoominButton" enabled="false"
+             toolTip="@Resource(bundle='Common', key='BUTTON_ZOOMIN_TOOLTIP')"/>
+
+             <mx:Button styleName="VirtualApplianceZoomoutButton" enabled="false"
+             toolTip="@Resource(bundle='Common', key='BUTTON_ZOOMOUT_TOOLTIP')"/> -->
+
+        <mx:Button id="listButton"
+            styleName="ListViewButton"
+            toolTip="@Resource(bundle='VirtualAppliance', key='TOOLTIP_CATEGORY_VIEW')"
+            click="onClickViewOptions('categoriesMode')"/>
+
+        <mx:Button id="iconsButton"
+            styleName="IconViewButton"
+            toolTip="@Resource(bundle='Common', key='TOOLTIP_DRAW_VIEW')"
+            click="onClickViewOptions('drawMode')"/>
+
+        <mx:Image source="{CommonAssets.separator}"/>
+
+        <mx:Label 
+            left="10" top="5"
+            fontWeight="normal"
+            text="@Resource(bundle='VirtualAppliance', key='LABEL_MODIFIED')"
+            visible="{this._isVirtualApplianceModified}"/>
+
+        <mx:Spacer 
+            width="100%" height="10"/>
+
+        <!--mx:Button id="deleteButton"
+             label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_DELETE')"
+             click="onClickDeleteButton()"
+             enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
+             styleName="VirtualApplianceEraseButton" height="16"/>
+
+
+             <mx:Spacer width="3" height="3"/>
+
+             <mx:Image source="{CommonAssets.separator}"/>
+
+             <mx:Spacer width="3" height="3"/-->
+
+        <mx:Button id="createBundleButton"
+            height="16"
+            label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_CREATE_BUNDLE')"
+            enabled="{this._virtualAppliance != null &amp;&amp; 
+				   			 (this._virtualAppliance.state.id == State.RUNNING || this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED)}"
+            styleName="VirtualApplianceEraseButton"
+            click="onClickCreateBundleButton()"/>
+
+
+        <mx:Spacer 
+            width="3" height="3"/>
+
+        <!--mx:Image source="{CommonAssets.separator}"/-->
+
+        <mx:Spacer 
+            width="3" height="3"/>
+
+        <mx:Button id="applyChangesButton"
+            height="16"
+            includeInLayout="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
+            label="@Resource(bundle='VirtualAppliance', key='LABEL_APPLY_CHANGES')"
+            styleName="VirtualApplianceEraseButton"
+            visible="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
+            click="onClickApplyChangesButton()"/>
+
+        <mx:Spacer 
+            width="3" height="3"/>
+
+<!--        <mx:Image         	id="virtualApplianceDrawToolSeparator"
+        	creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceDrawToolSeparator', virtualApplianceDrawToolSeparator)"
+/>
+-->
+        <mx:Button id="powerOnOffButton"
+            width="32" height="32"
+            right="1"
+            top="1"
+            bottom="1"
+            enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS
+				   			 &amp;&amp; this._virtualAppliance.state.id != State.FAILED &amp;&amp; this._virtualAppliance.nodes.length != 0}"
+            styleName="VirtualApplianceDeployButton"
+            selected="{_virtualAppliance.state.id == State.PAUSED || _virtualAppliance.state.id == State.RUNNING || _virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED}"
+            toolTip="{powerOnOffButton.selected ? ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_UNDEPLOY') : 
+				  	 									 ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_DEPLOY')}"
+            click="onClickPowerOnOffButton()"
+            useHandCursor="true"
+            mouseChildren="false"
+            buttonMode="true"/>
+
+    </mx:HBox>
+
+
+
+
+    <mx:Canvas id="drawingAreaContainer"
+        width="100%"
+        top="34" bottom="0">
+
+
+
+        <!-- Drawing area -->
+        <mx:Canvas id="nodesAreaCanvas"
+            width="100%" height="100%">
+
+            <mx:ViewStack id="nodesArea"
+                width="100%" height="100%"
+                enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
+                creationPolicy="all"
+                dragEnter="onDragEnterNodesArea(event)"
+                dragDrop="onDragDropNodesArea(event)">
+
+                <!-- Categories view -->
+                <componentsNode:NodeTypeView id="nodeTypeView"
+                    width="100%" height="100%"/>
+
+                <!-- DrawingArea view -->
+                <componentsNode:NodeDrawingView id="nodeDrawingView"
+                    width="100%" height="100%"/>
+            </mx:ViewStack>
+        </mx:Canvas>
+
+        <!-- VirtualApplianceDeploying component -->
+        <componentsVA:VirtualApplianceDeploying 
+            horizontalCenter="0"
+            verticalCenter="-20"
+            visible="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id == State.IN_PROGRESS}"
+            virtualAppliance="{this._virtualAppliance}"/>
+    </mx:Canvas>
+
+</mx:Canvas>

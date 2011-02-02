@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="201" height="201"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    useHandCursor="true"
+    buttonMode="true"
+    mouseChildren="false">
+
+    <!-- Miniature that represents a Virtual Appliance -->
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.main.StateIcons;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.controls.Image;
+            import mx.managers.DragManager;
+            import mx.core.DragSource;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import mx.events.ItemClickEvent;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+            import net.undf.abicloud.vo.infrastructure.State;
+
+            //The virtual image
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+                if (value && value is VirtualAppliance)
+                    virtualAppliance = value as VirtualAppliance;
+            }
+
+            public function set virtualAppliance(vA:VirtualAppliance):void
+            {
+                this._virtualAppliance = vA;
+            }
+
+            public function get virtualAppliance():VirtualAppliance
+            {
+                return this._virtualAppliance;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Canvas 
+        left="1" right="1" top="1" bottom="1"
+        styleName="VirtualApplianceMiniatureCanvas"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+        <utils:SmoothImage 
+            width="14" height="14"
+            right="10" top="10"
+            source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING : 
+				((this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.PAUSED : StateIcons.DISABLED)}"
+            visible="{this._virtualAppliance.state.id != State.IN_PROGRESS}"/>
+
+        <mx:SWFLoader id="busyIcon"
+            width="14" height="14"
+            right="10" top="10"
+            creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceBusyIconSmall', busyIcon)"
+            scaleContent="true"
+            maintainAspectRatio="true"
+            visible="{this._virtualAppliance.state.id == State.IN_PROGRESS}"/>
+
+        <utils:SmoothImage 
+        	id="virtualApplianceMiniatureAlertIcon"
+            width="18" height="18"
+            right="8" top="30"
+            creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceMiniatureAlertIcon', virtualApplianceMiniatureAlertIcon)"
+            visible="{this._virtualAppliance.error || this._virtualAppliance.state.id == State.FAILED}"/>
+
+        <utils:SmoothImage id="virtualApplianceIcon"
+            left="30" right="10" top="5" bottom="20"
+            horizontalCenter="0"
+            verticalCenter="0"
+            creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceIcon', virtualApplianceIcon)"
+            scaleContent="true"
+            maintainAspectRatio="true"/>
+
+
+        <mx:Label 
+            bottom="5"
+            fontSize="10"
+            fontWeight="bold"
+            horizontalCenter="0"
+            text="{_virtualAppliance.name}"/>
+    </mx:Canvas>
+
+</mx:Canvas>

@@ -1,0 +1,37 @@
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>src</directory>
+            <outputDirectory>themes/base</outputDirectory>
+            <includes>
+                <include>*.lst</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>target/themes/base</directory>
+            <outputDirectory>themes/base</outputDirectory>
+            <includes>
+                <include>*.swf</include>
+            </includes>
+        </fileSet>        
+        <fileSet>
+            <directory>src/assets/customcomponents/custompreloader</directory>
+            <outputDirectory>themes/base</outputDirectory>
+            <includes>
+                <include>CustomPreloaderLogo.png</include>
+            </includes>
+        </fileSet>        
+        <fileSet>
+            <directory>src/assets/virtualimage</directory>
+            <outputDirectory>themes/base</outputDirectory>
+            <includes>
+                <include>VirtualImage_defaultIcon.jpg</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

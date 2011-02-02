@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='VirtualImage', key='POPUP_TITLE_REPOSITORY_SPACE_ADD')">
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.events.virtualimage.OVFPackageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageList;
+
+            /**
+             * Initializes this component to create an OVFPackageList
+             **/
+            public function init():void
+            {
+                uriInput.text = "";
+                validateForm();
+                uriInput.setFocus();
+            }
+
+
+            /**
+             * When user clicks Accept button, we save the new OVFPackageList or the edited RepositorySpace
+             **/
+            private function onAccept():void
+            {
+                var ovfPackageList:OVFPackageList = new OVFPackageList();
+                ovfPackageList.url = uriInput.text;
+
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.CREATE_OVF_PACKAGE_LIST);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.ovfPackageList = ovfPackageList;
+                dispatchEvent(event);
+
+                close();
+            }
+
+
+            /**
+             * Close Form
+             **/
+            private function close():void
+            {
+                //Closing the form
+                dispatchEvent(new Event("OVFPackageListFormClose"));
+            }
+
+            /**
+             * Activates the Accept Button if the form is valid
+             **/
+            private function validateForm():void
+            {
+                if (uriInput.text.length > 0 && AbiCloudModel.getInstance().urlPattern.exec(uriInput.text))
+                    acceptButton.enabled = true;
+
+                else
+                    acceptButton.enabled = false;
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+        <mx:FormItem 
+            label="@Resource(bundle='VirtualImage', key='LABEL_URI')"
+            required="true">
+            <mx:TextInput id="uriInput"
+                width="150" height="20"
+                maxChars="200"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                click="onAccept()"/>
+
+            <mx:Button id="cancelButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                styleName="AlternativeButton"
+                click="close()"/>
+        </mx:FormItem>
+    </mx:Form>
+
+</AbiCloudPopUp>

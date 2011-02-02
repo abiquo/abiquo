@@ -1,0 +1,59 @@
+package <%= @package %>;
+
+import static org.testng.Assert.assertEquals;
+
+import java.util.List;
+
+import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.softwarementors.commons.test.SeedGenerator;
+import com.softwarementors.commons.testng.AssertEx;
+
+public class <%= @class %>Generator extends DefaultEntityGenerator<<%= @class %>>
+{
+
+    <% @assoc_generators.each do |generator| %>
+      <%= generator %>Generator <%= camelcase(generator, false) %>Generator;
+    <% end %>
+
+    public <%= @class %>Generator(SeedGenerator seed)
+    {
+        super(seed);
+        <% @assoc_generators.each do |generator| %>
+          <%= camelcase(generator, false) %>Generator = new <%= generator %>Generator(seed);
+        <% end %>
+    }
+
+    @Override
+    public void assertAllPropertiesEqual(<%= @class %> obj1, <%= @class %> obj2)
+    {
+      AssertEx.assertPropertiesEqualSilent(obj1, obj2, <%= @property_equals.join(',') %>);
+    }
+
+    @Override
+    public <%= @class %> createUniqueInstance()
+    {
+        // FIXME: Write here how to create the pojo
+
+        <%= @class %> <%= camelcase(@class, false) %> = new <%= @class %>();
+
+        <% @assoc_generators.each do |generator| %>
+        <%= generator %> <%= camelcase(generator, false) %> = <%= camelcase(generator, false) %>Generator.createUniqueInstance();
+        <%= camelcase(@class, false) %>.set<%= generator %>(<%= camelcase(generator, false) %>);
+        <% end %>
+
+        return <%= camelcase(@class, false) %>;
+    }
+
+    @Override
+    public void addAuxiliaryEntitiesToPersist(<%= @class %> entity, List<Object> entitiesToPersist)
+    {
+        super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+        
+        <% @assoc_generators.each do |generator| %>
+          <%= generator %> <%= camelcase(generator, false) %> = entity.get<%= generator %>();
+          <%= camelcase(generator, false) %>Generator.addAuxiliaryEntitiesToPersist(<%= camelcase(generator, false) %>, entitiesToPersist);
+          entitiesToPersist.add(<%= camelcase(generator, false) %>);
+        <% end %>
+    }
+
+}

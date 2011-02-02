@@ -1,0 +1,17 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static boolean <%= @upcase %>_REQUIRED = false;
+private final static String <%= @upcase %>_COLUMN = "<%= @property %>";
+private final static int <%= @upcase %>_MIN = Integer.MIN_VALUE;
+private final static int <%= @upcase %>_MAX = Integer.MAX_VALUE;
+
+@Column( name=<%= @upcase %>_COLUMN, nullable = !<%= @upcase %>_REQUIRED)
+@Range(min=<%= @upcase %>_MIN, max=<%= @upcase %>_MAX)
+private int <%= @property %>;
+
+public int get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( int <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

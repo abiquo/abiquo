@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Spacer;
+            import mx.events.ItemClickEvent;
+            import mx.collections.ArrayCollection;
+
+
+            private var _buttonList:ArrayCollection;
+
+            private var _defaultIndex:int = 0;
+
+            private var _selectedButton:HeaderButton;
+
+            private var _selectedIndex:int;
+
+            public function set defaultIndex(index:int):void
+            {
+                this._defaultIndex = index;
+            }
+
+
+            [Bindable(event="headerToggleButtonBarSelectedIndexUpdated")]
+            public function get selectedIndex():int
+            {
+                return this._selectedIndex;
+            }
+
+            /**
+             * Sets the data provider with HeaderButtons
+             **/
+            public function set dataProvider(array:ArrayCollection):void
+            {
+                _buttonList = new ArrayCollection();
+                this.removeAllChildren();
+
+                var headerButton:HeaderButton;
+                var length:int = array.length;
+                var i:int;
+                for (i = 0; i < length; i++)
+                {
+                    if (array.getItemAt(i) is HeaderButton)
+                    {
+                        headerButton = array.getItemAt(i) as HeaderButton;
+                        headerButton.addEventListener(MouseEvent.CLICK, onClickButton);
+
+                        //Check if this is the default selected button
+                        if (i == this._defaultIndex)
+                        {
+                            this._selectedButton = headerButton;
+                            this._selectedIndex = i;
+                            dispatchEvent(new Event("headerToggleButtonBarSelectedIndexUpdated"));
+                            headerButton.selected = true;
+                        }
+
+                        _buttonList.addItem(headerButton);
+                        this.addChild(headerButton);
+                    }
+                    else
+                    {
+                        var spacer:Spacer = new Spacer();
+                        spacer.width = 7;
+                        addChild(spacer);
+                        addChild(array.getItemAt(i) as DisplayObject);
+                        spacer = new Spacer();
+                        spacer.width = 7;
+                        addChild(spacer);
+                    }
+                }
+            }
+
+            public function onDashboardInteraction(itemClickEvent:ItemClickEvent):void
+            {
+                //Looking for the button that corresponds to the shortcurt
+                var length:int = _buttonList.length;
+                var headerButton:HeaderButton;
+                var i:int;
+                var dashboardHeaderButton:HeaderButton = itemClickEvent.item as HeaderButton;
+                for (i = 0; i < length; i++)
+                {
+                    headerButton = _buttonList.getItemAt(i) as HeaderButton;
+                    if (headerButton.index == dashboardHeaderButton.index)
+                    {
+                        //Unselecting the previous selected button
+                        this._selectedButton.selected = false;
+
+                        //Marking the clicked button as selected
+                        headerButton.selected = true;
+                        this._selectedButton = headerButton;
+                        this._selectedIndex = this._buttonList.getItemIndex(this._selectedButton);
+                        dispatchEvent(new Event("headerToggleButtonBarSelectedIndexUpdated"));
+
+                        //Notifying that this button has been clicked
+                        var event:ItemClickEvent = new ItemClickEvent("HeaderButtonClicked",
+                                                                      true);
+                        event.item = headerButton;
+                        dispatchEvent(event);
+                    }
+                }
+            }
+
+
+            /**
+             * When the user performs a "Click" action over a Button
+             **/
+            private function onClickButton(mouseEvent:MouseEvent):void
+            {
+                var buttonClicked:HeaderButton = mouseEvent.target as HeaderButton;
+                if (buttonClicked != this._selectedButton)
+                {
+                    //Unselecting the previous selected button
+                    this._selectedButton.selected = false;
+
+                    //Marking the clicked button as selected
+                    buttonClicked.selected = true;
+                    this._selectedButton = buttonClicked;
+                    this._selectedIndex = this._buttonList.getItemIndex(this._selectedButton);
+                    dispatchEvent(new Event("headerToggleButtonBarSelectedIndexUpdated"));
+
+                    //Notifying that this button has been clicked
+                    var event:ItemClickEvent = new ItemClickEvent("HeaderButtonClicked",
+                                                                  true);
+                    event.item = buttonClicked;
+                    dispatchEvent(event);
+                }
+
+            }
+        ]]>
+    </mx:Script>
+</mx:HBox>

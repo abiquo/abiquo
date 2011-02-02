@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    horizontalAlign="center"
+    paddingTop="10"
+    verticalAlign="top"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.binding.utils.ChangeWatcher;
+            import mx.core.UIComponent;
+            import mx.events.FlexEvent;
+            import mx.events.ValidationResultEvent;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+            import mx.validators.Validator;
+
+            import net.undf.abicloud.business.managers.ConfigurationManager;
+            import net.undf.abicloud.events.ConfigurationEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.configuration.Registration;
+
+
+            private static const industryDP:Array = [ "ComCarTelDataCommCbleNetOnlneServProv", "ServProvAspDpFspWebHost", "CompMftrHwSwPeriph",
+                                                      "Computer-RelRetWhlesaleDistr", "SolnsProvVarEBusnInteg", "OthrCommCompRelBusn",
+                                                      "MfgAndPrssOthrThnCompRltd", "Banking", "FinServVcAcc", "Insurance", "RealEstate",
+                                                      "Legal", "GovtFedInclMilit", "GovtState", "GovtLocal", "HlthcarePharmBiotechBiomed",
+                                                      "TransLogis", "Utilities", "ConstrArchEngg", "WhlesaleTradeDistrRetNonCompRel",
+                                                      "Education", "AgriMiningOilGas", "TravHospRecrEntertain", "MediaMrktgAdver",
+                                                      "NonProfitTrdAssoc", "BusnServ", "ConsNonComp", "OthrGenBusn" ];
+
+            private static const employeesDP:Array = [ "50", "99", "299", "499", "999", "1499", "2499", "4999", "9999", "19999", "more20000" ];
+
+            private static const revenueDP:Array = [ "1M", "5M", "10M", "20M", "50M", "100M", "200M", "500M", "more500M" ];
+
+            [Bindable]
+            private var _countryCodes:Array;
+
+            [Bindable]
+            private var _countryNames:Array;
+
+            [Bindable]
+            private var _usaStateCodes:Array;
+
+            [Bindable]
+            private var _usaStateNames:Array;
+
+            //ConfigurationManager, where Registration information is stored
+            [Bindable]
+            private var _configurationManager:ConfigurationManager;
+
+            [Bindable]
+            private var _registrationFormIsValid:Boolean;
+
+            private var _focussedFormControl:DisplayObject;
+
+            [Bindable]
+            private var abicloudModel:AbiCloudModel;
+
+
+            private function onCreationComplete():void
+            {
+                //Setting the configuration manager
+                this._configurationManager = AbiCloudModel.getInstance().configurationManager;
+                loadExternalXMLData();
+
+                //Binding the Registration info to this component
+                ChangeWatcher.watch(this._configurationManager, "registration", onRegistrationInfoChange);
+
+                setFormInputs();
+            }
+
+            private var _countriesLoader:URLLoader;
+
+            private var _statesLoader:URLLoader;
+
+            private function loadExternalXMLData():void
+            {
+                var length:int;
+                var i:int;
+
+                //Countries data
+                var countryNames:Array = new Array();
+                var countryCodes:Array = new Array();
+                length = countriesXML.country.length();
+                for (i = 0; i < length; i++)
+                {
+                    countryNames.push(String(countriesXML.country[i].name));
+                    countryCodes.push(String(countriesXML.country[i].code));
+                }
+                this._countryNames = countryNames;
+                this._countryCodes = countryCodes;
+
+                //USA states data
+                var usaStateNames:Array = new Array();
+                var usaStateCodes:Array = new Array();
+                length = usaStatesXML.state.length();
+                for (i = 0; i < length; i++)
+                {
+                    usaStateNames.push(String(usaStatesXML.state[i].@name));
+                    usaStateCodes.push(String(usaStatesXML.state[i].@abbreviation));
+                }
+                this._usaStateNames = usaStateNames;
+                this._usaStateCodes = usaStateCodes;
+            }
+
+            /**
+             * Handler called when the registration information changes
+             */
+            private function onRegistrationInfoChange(event:Event):void
+            {
+                setFormInputs();
+            }
+
+            /**
+             * Sets the Form information, with the Registration data, if it exists
+             */
+            public function setFormInputs():void
+            {
+                if (this._configurationManager.registration)
+                {
+                    //Company
+                    companyNameInput.text = this._configurationManager.registration.companyName;
+                    companyAddressInput.text = this._configurationManager.registration.companyAddress;
+                    companyCountryInput.selectedIndex = this._countryCodes.indexOf(this._configurationManager.registration.companyCountryCode);
+                    companyStateInput.selectedIndex = this._usaStateCodes.indexOf(this._configurationManager.registration.companyState);
+                    companyIndustryInput.selectedIndex = industryDP.indexOf(this._configurationManager.registration.companyIndustry);
+                    companyRevenueInput.selectedIndex = revenueDP.indexOf(this._configurationManager.registration.companySizeRevenue);
+                    companyEmployeesInput.selectedIndex = employeesDP.indexOf(this._configurationManager.registration.companySizeEmployees);
+
+                    //Contact
+                    contactNameInput.text = this._configurationManager.registration.contactName;
+                    contactTitleInput.text = this._configurationManager.registration.contactTitle;
+                    contactEmailInput.text = this._configurationManager.registration.contactEmail;
+                    contactPhoneInput.text = this._configurationManager.registration.contactPhone;
+
+                    //Subscribre and allows
+                    subscribeCommercialNewsInput.selected = this._configurationManager.registration.subscribeCommercialNews;
+                    subscribeDevelopmentNewsInput.selected = this._configurationManager.registration.subscribeDevelopmentNews;
+                    allowCommercialContactInput.selected = this._configurationManager.registration.allowCommercialContact;
+                }
+                else
+                {
+                    companyNameInput.text = "";
+                    companyAddressInput.text = "";
+                    companyCountryInput.selectedIndex = -1;
+                    companyStateInput.selectedIndex = -1;
+                    companyIndustryInput.selectedIndex = -1;
+                    companyRevenueInput.selectedIndex = -1;
+                    companyEmployeesInput.selectedIndex = -1;
+
+                    //Contact
+                    contactNameInput.text = "";
+                    contactTitleInput.text = "";
+                    contactEmailInput.text = "";
+                    contactPhoneInput.text = "";
+
+                    //Subscribre and allows
+                    subscribeCommercialNewsInput.selected = true;
+                    subscribeDevelopmentNewsInput.selected = true;
+                    allowCommercialContactInput.selected = true;
+                }
+
+                validateForm();
+            }
+
+            private function validateForm(event:Event = null):void
+            {
+                // Save a reference to the currently focussed form control
+                // so that the isValid() helper method can notify only
+                // the currently focussed form control and not affect
+                // any of the other form controls.
+                if (event)
+                    this._focussedFormControl = event.target as DisplayObject;
+                else
+                    this._focussedFormControl = null;
+
+                // Mark the form as valid to start with                
+                this._registrationFormIsValid = true;
+
+
+                // Run each validator in turn, using the isValid() 
+                // helper method and update the value of formIsValid
+                // accordingly.
+                validate(companyNameValidator);
+                validate(companyAddressValidator);
+                validate(companyCountryValidator);
+                validate(contactTitleValidator);
+                validate(contactNameValidator);
+                validate(contactEmailValidatorFormat);
+                validate(contactPhoneValidatorFormat);
+            }
+
+            private function validate(validator:Validator):Boolean
+            {
+                // Get a reference to the component that is the
+                // source of the validator.
+                var validatorSource:DisplayObject = validator.source as DisplayObject;
+
+                // Suppress events if the current control being validated is not
+                // the currently focussed control on the form. This stops the user
+                // from receiving visual validation cues on other form controls.
+                var suppressEvents:Boolean = (validatorSource != this._focussedFormControl);
+
+                // Carry out validation. Returns a ValidationResultEvent.
+                // Passing null for the first parameter makes the validator 
+                // use the property defined in the property tag of the
+                // <mx:Validator> tag.
+                var event:ValidationResultEvent = validator.validate(null, suppressEvents);
+
+                // Check if validation passed and return a boolean value accordingly.
+                var currentControlIsValid:Boolean = (event.type == ValidationResultEvent.VALID);
+
+                // Update the formIsValid flag
+                this._registrationFormIsValid = this._registrationFormIsValid && currentControlIsValid;
+                return currentControlIsValid;
+            }
+
+            private function onClickAcceptButton():void
+            {
+                var registration:Registration;
+
+                //First update in server before update in client
+                if (this._configurationManager.registration == null)
+                    registration = new Registration();
+                else
+                    registration = ObjectUtil.copy(AbiCloudModel.getInstance().configurationManager.registration) as Registration;
+
+                registration.companyName = companyNameInput.text;
+                registration.companyAddress = companyAddressInput.text;
+                if (companyCountryInput.selectedIndex > -1)
+                    registration.companyCountryCode = this._countryCodes[companyCountryInput.selectedIndex];
+                if (companyStateInput.selectedIndex > -1)
+                    registration.companyState = this._usaStateCodes[companyStateInput.selectedIndex];
+                if (companyIndustryInput.selectedIndex > -1)
+                    registration.companyIndustry = companyIndustryInput.selectedItem.toString();
+                if (companyRevenueInput.selectedIndex > -1)
+                    registration.companySizeRevenue = companyRevenueInput.selectedItem.toString();
+                if (companyEmployeesInput.selectedIndex > -1)
+                    registration.companySizeEmployees = companyEmployeesInput.selectedItem.toString();
+
+                registration.contactTitle = contactTitleInput.text;
+                registration.contactName = contactNameInput.text;
+                registration.contactPhone = contactPhoneInput.text;
+                registration.contactEmail = contactEmailInput.text;
+
+                registration.subscribeCommercialNews = subscribeCommercialNewsInput.selected;
+                registration.subscribeDevelopmentNews = subscribeDevelopmentNewsInput.selected;
+                registration.allowCommercialContact = allowCommercialContactInput.selected;
+
+                //Announcing to update registration info
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.SEND_REGISTRATION_INFO);
+                configurationEvent.registration = registration;
+                dispatchEvent(configurationEvent);
+            }
+
+            /**
+             * Label function used in industry, revenue and employees ComboBoxes
+             */
+            private function combosLabelFunction(item:Object):String
+            {
+                return ResourceManager.getInstance().getString("Configuration", item as String);
+            }
+
+            private function onTextInputValid(event:FlexEvent):void
+            {
+                UIComponent(event.target).styleName = "TextInput";
+            }
+
+            private function onTextInputInvalid(event:FlexEvent):void
+            {
+                UIComponent(event.target).styleName = "TextInputInvalid";
+            }
+
+            private function onComboBoxValid(event:FlexEvent):void
+            {
+                UIComponent(event.target).styleName = "ComboBox";
+            }
+
+            private function onComboBoxInvalid(event:FlexEvent):void
+            {
+                UIComponent(event.target).styleName = "ComboBoxInvalid";
+            }
+        ]]>
+    </mx:Script>
+    <mx:XML id="countriesXML"
+        source="/config/countries.xml"/>
+    <mx:XML id="usaStatesXML"
+        source="/config/usa_states.xml"/>
+
+    <mx:Form 
+        width="100%" height="100%"
+        paddingTop="3">
+        <mx:FormHeading 
+            fontSize="14"
+            label="@Resource(bundle='Configuration', key='LABEL_COMPANY')"/>
+
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="companyNameInput"
+                width="100%" height="20"
+                maxChars="60"
+                valid="onTextInputValid(event)"
+                invalid="onTextInputInvalid(event)"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_ADDRESS')"
+            required="true">
+            <mx:TextInput id="companyAddressInput"
+                width="100%" height="20"
+                maxChars="240"
+                valid="onTextInputValid(event)"
+                invalid="onTextInputInvalid(event)"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_COUNTRY')"
+            required="true">
+            <mx:ComboBox id="companyCountryInput"
+                width="340" height="18"
+                selectedIndex="-1" dataProvider="{this._countryNames}"
+                change="validateForm(event)"
+                valid="onComboBoxValid(event)"
+                invalid="onComboBoxInvalid(event)"
+                prompt="{ResourceManager.getInstance().getString('Configuration', 'COMBOBOX_PROMPT_CHOOSE')}"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_STATE')"
+            includeInLayout="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes[companyCountryInput.selectedIndex] == 'US') : false}"
+            visible="{companyCountryInput.selectedIndex > 0 ? (this._countryCodes[companyCountryInput.selectedIndex] == 'US') : false}">
+            <mx:ComboBox id="companyStateInput"
+                width="340" height="18"
+                selectedIndex="-1" dataProvider="{this._usaStateNames}"
+                prompt="{ResourceManager.getInstance().getString('Configuration', 'COMBOBOX_PROMPT_CHOOSE')}"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_INDUSTRY')">
+            <mx:ComboBox id="companyIndustryInput"
+                width="340" height="18"
+                selectedIndex="-1" dataProvider="{industryDP}"
+                labelFunction="combosLabelFunction"
+                prompt="{ResourceManager.getInstance().getString('Configuration', 'COMBOBOX_PROMPT_CHOOSE')}"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_REVENUE')"
+            direction="horizontal">
+            <mx:ComboBox id="companyRevenueInput"
+                width="150" height="18"
+                selectedIndex="-1" dataProvider="{revenueDP}"
+                labelFunction="combosLabelFunction"
+                prompt="{ResourceManager.getInstance().getString('Configuration', 'COMBOBOX_PROMPT_CHOOSE')}"/>
+
+            <mx:Label text="€"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_EMPLOYEES')">
+            <mx:ComboBox id="companyEmployeesInput"
+                width="150" height="18"
+                selectedIndex="-1" dataProvider="{employeesDP}"
+                labelFunction="combosLabelFunction"
+                prompt="@Resource(bundle='Configuration', key='COMBOBOX_PROMPT_CHOOSE')"/>
+        </mx:FormItem>
+
+    </mx:Form>
+
+    <mx:Form 
+        width="300" height="100%"
+        horizontalScrollPolicy="off" verticalScrollPolicy="off"
+        paddingTop="3">
+        <mx:FormHeading 
+            fontSize="14"
+            label="@Resource(bundle='Configuration', key='LABEL_CONTACT')"/>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_TITLE')"
+            required="true">
+            <mx:TextInput id="contactTitleInput"
+                width="100%" height="20"
+                maxChars="60"
+                valid="onTextInputValid(event)"
+                invalid="onTextInputInvalid(event)"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="contactNameInput"
+                width="100%" height="20"
+                maxChars="60"
+                valid="onTextInputValid(event)"
+                invalid="onTextInputInvalid(event)"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_PHONE')">
+            <mx:TextInput id="contactPhoneInput"
+                width="100%" height="20"
+                maxChars="60"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Configuration', key='LABEL_EMAIL')"
+            required="true">
+            <mx:TextInput id="contactEmailInput"
+                width="100%" height="20"
+                maxChars="60"
+                valid="onTextInputValid(event)"
+                invalid="onTextInputInvalid(event)"
+                change="validateForm(event)"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            direction="vertical">
+            <mx:CheckBox id="subscribeDevelopmentNewsInput"
+                label="@Resource(bundle='Configuration', key='LABEL_SUBSCRIBE_DEVELOPMENT_NEWS')"/>
+
+            <mx:CheckBox id="subscribeCommercialNewsInput"
+                label="@Resource(bundle='Configuration', key='LABEL_SUBSCRIBE_COMMERCIAL_NEWS')"/>
+
+            <mx:CheckBox id="allowCommercialContactInput"
+                label="@Resource(bundle='Configuration', key='LABEL_ALLOW_COMMERCIAL_CONTACT')"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="10"/>
+
+        <mx:FormItem width="100%">
+            <mx:Button id="acceptButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_SAVE')"
+                enabled="{this._registrationFormIsValid}"
+                click="onClickAcceptButton()"/>
+        </mx:FormItem>
+    </mx:Form>
+
+
+    <!-- FORM VALIDATORS -->
+
+    <mx:StringValidator id="companyNameValidator"
+        source="{companyNameInput}"
+        property="text"
+        minLength="1"/>
+
+    <mx:StringValidator id="companyAddressValidator"
+        source="{companyAddressInput}"
+        property="text"
+        minLength="1"/>
+
+    <mx:NumberValidator id="companyCountryValidator"
+        source="{companyCountryInput}"
+        property="selectedIndex"
+        minValue="0"
+        lowerThanMinError="companyAddressValidator.requiredFieldError"/>
+
+    <mx:StringValidator id="contactTitleValidator"
+        source="{contactTitleInput}"
+        property="text"
+        minLength="1"/>
+
+    <mx:StringValidator id="contactNameValidator"
+        source="{contactNameInput}"
+        property="text"
+        minLength="1"/>
+
+    <mx:EmailValidator id="contactEmailValidatorFormat"
+        source="{contactEmailInput}"
+        required="true"
+        property="text"/>
+
+    <mx:PhoneNumberValidator id="contactPhoneValidatorFormat"
+        source="{contactPhoneInput}"
+        required="false"
+        property="text"/>
+</mx:HBox>

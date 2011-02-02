@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:class="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://schemas.dmtf.org/wbem/wscim/1/cim-
+schema/2/CIM_ResourceAllocationSettingData" targetNamespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">
+	<xs:import namespace="http://schemas.dmtf.org/wbem/wscim/1/common" schemaLocation="cim-common.xsd"/>
+	<xs:element name="Caption" type="cim:cimString" nillable="true"/>
+	<xs:element name="Description" type="cim:cimString" nillable="true"/>
+	<xs:element name="InstanceId" type="cim:cimString" nillable="true"/>
+	<xs:element name="ResourceType" nillable="true">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="xs:anyType">
+					<xs:simpleType>
+						<xs:union>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:enumeration value="1"/>
+									<xs:enumeration value="2"/>
+									<xs:enumeration value="3"/>
+									<xs:enumeration value="4"/>
+									<xs:enumeration value="5"/>
+									<xs:enumeration value="6"/>
+									<xs:enumeration value="7"/>
+									<xs:enumeration value="8"/>
+									<xs:enumeration value="9"/>
+									<xs:enumeration value="10"/>
+									<xs:enumeration value="11"/>
+									<xs:enumeration value="12"/>
+									<xs:enumeration value="13"/>
+									<xs:enumeration value="14"/>
+									<xs:enumeration value="15"/>
+									<xs:enumeration value="16"/>
+									<xs:enumeration value="17"/>
+									<xs:enumeration value="18"/>
+									<xs:enumeration value="19"/>
+									<xs:enumeration value="20"/>
+									<xs:enumeration value="21"/>
+									<xs:enumeration value="22"/>
+									<xs:enumeration value="23"/>
+									<xs:enumeration value="24"/>
+									<xs:enumeration value="25"/>
+									<xs:enumeration value="26"/>
+									<xs:enumeration value="27"/>
+									<xs:enumeration value="28"/>
+									<xs:enumeration value="29"/>
+									<xs:enumeration value="30"/>
+									<xs:enumeration value="31"/>
+									<xs:enumeration value="32"/>
+									<xs:enumeration value="33"/>
+									<xs:enumeration value="34"/>
+									<!-- Other -->
+									<!-- Computer System -->
+									<!-- Processor-->
+									<!-- Memory-->
+									<!-- IDE Controller -->
+									<!-- Parallel SCSI HBA -->
+									<!-- FC HBA -->
+									<!-- iSCSI HBA -->
+									<!-- IB HCA -->
+									<!-- Ethernet Adapter -->
+									<!-- Other Network Adapter -->
+									<!-- I/O Slot -->
+									<!-- I/O Device -->
+									<!-- Floppy Drive -->
+									<!-- CD Drive -->
+									<!-- DVD drive -->
+									<!-- Disk Drive -->
+									<!-- Tape Drive -->
+									<!-- Storage Extent -->
+									<!-- Other storage device -->
+									<!-- Serial port -->
+									<!-- Parallel port -->
+									<!-- USB Controller -->
+									<!-- Graphics controller -->
+									<!-- IEEE 1394 Controller -->
+									<!-- Partitionable Unit -->
+									<!-- Base Partitionable Unit -->
+									<!-- Power Supply -->
+									<!-- Cooling Device -->
+									<!-- PCI Controller -->
+									<!-- PS2 Controller -->
+									<!-- SIO Controller -->
+									<!-- Keyboard -->
+									<!-- Pointing Device -->
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="30"/>
+									<xs:maxInclusive value="32769"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="32768"/>
+									<xs:maxInclusive value="65535"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:union>
+					</xs:simpleType>
+					<xs:anyAttribute namespace="##any"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="OtherResourceType" type="cim:cimString" nillable="true"/>
+	<xs:element name="ResourceSubType" type="cim:cimString" nillable="true"/>
+	<xs:element name="PoolID" type="cim:cimString" nillable="true"/>
+	<xs:element name="ConsumerVisibility" nillable="true">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="xs:anyType">
+					<xs:simpleType>
+						<xs:union>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:enumeration value="0"/>
+									<xs:enumeration value="2"/>
+									<xs:enumeration value="3"/>
+									<xs:enumeration value="4"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="5"/>
+									<xs:maxInclusive value="32768"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="32767"/>
+									<xs:maxInclusive value="65535"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:union>
+					</xs:simpleType>
+					<xs:anyAttribute namespace="##any"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="HostResource" type="xs:anyType" nillable="true"/>
+	<xs:element name="AllocationUnits" type="cim:cimString" nillable="true"/>
+	<xs:element name="VirtualQuantity" type="cim:cimUnsignedLong" nillable="true"/>
+	<xs:element name="Reservation" type="cim:cimUnsignedLong" nillable="true"/>
+	<xs:element name="Limit" type="cim:cimUnsignedLong" nillable="true"/>
+	<xs:element name="Weight" type="cim:cimUnsignedInt" nillable="true"/>
+	<xs:element name="AutomaticAllocation" type="cim:cimBoolean" nillable="true"/>
+	<xs:element name="AutomaticDeallocation" type="cim:cimBoolean" nillable="true"/>
+	<xs:element name="Parent" type="cim:cimString" nillable="true"/>
+	<xs:element name="Connection" type="cim:cimString" nillable="true"/>
+	<xs:element name="Address" type="cim:cimString" nillable="true"/>
+	<xs:element name="MappingBehavior" nillable="true">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="xs:anyType">
+					<xs:simpleType>
+						<xs:union>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:enumeration value="0"/>
+									<xs:enumeration value="1"/>
+									<xs:enumeration value="2"/>
+									<xs:enumeration value="3"/>
+									<xs:enumeration value="4"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="5"/>
+									<xs:maxInclusive value="32768"/>
+								</xs:restriction>
+							</xs:simpleType>
+							<xs:simpleType>
+								<xs:restriction base="xs:unsignedShort">
+									<xs:minInclusive value="32767"/>
+									<xs:maxInclusive value="65535"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:union>
+					</xs:simpleType>
+					<xs:anyAttribute namespace="##any"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AddressOnParent" type="cim:cimString" nillable="true"/>
+	<xs:element name="BusNumber" type="cim:cimUnsignedShort" nillable="true"/>
+	<xs:complexType name="CIM_ResourceAllocationSettingData_Type">
+		<xs:sequence>
+			<xs:element ref="class:Caption" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="class:Description" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="class:InstanceId" minOccurs="0"/>
+			<xs:element ref="class:ResourceType" minOccurs="0"/>
+			<xs:element ref="class:OtherResourceType" minOccurs="0"/>
+			<xs:element ref="class:ResourceSubType" minOccurs="0"/>
+			<xs:element ref="class:PoolID" minOccurs="0"/>
+			<xs:element ref="class:ConsumerVisibility" minOccurs="0"/>
+			<xs:element ref="class:HostResource" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="class:AllocationUnits" minOccurs="0"/>
+			<xs:element ref="class:VirtualQuantity" minOccurs="0"/>
+			<xs:element ref="class:Reservation" minOccurs="0"/>
+			<xs:element ref="class:Limit" minOccurs="0"/>
+			<xs:element ref="class:Weight" minOccurs="0"/>
+			<xs:element ref="class:AutomaticAllocation" minOccurs="0"/>
+			<xs:element ref="class:AutomaticDeallocation" minOccurs="0"/>
+			<xs:element ref="class:Parent" minOccurs="0"/>
+			<xs:element ref="class:Connection" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="class:Address" minOccurs="0"/>
+			<xs:element ref="class:MappingBehavior" minOccurs="0"/>
+			<xs:element ref="class:AddressOnParent" minOccurs="0"/>
+			<xs:element ref="class:BusNumber" minOccurs="0"/>
+			<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:anyAttribute namespace="##any"/>
+	</xs:complexType>
+	<xs:element name="CIM_ResourceAllocationSettingData" type="class:CIM_ResourceAllocationSettingData_Type"/>
+</xs:schema>

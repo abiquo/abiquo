@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="200" height="20"
+    styleName="DataCenterListRenderer" 
+    verticalScrollPolicy="off"
+    horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    backgroundAlpha="0"
+    rollOver="onRollOver()"
+    rollOut="onRollOut()">
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.vo.service.RemoteService;
+            import net.undf.abicloud.vo.service.RemoteServiceType;
+            import net.undf.abicloud.vo.infrastructure.DataCenter;
+
+            import mx.controls.List;
+            import mx.events.ItemClickEvent;
+
+            [Bindable]
+            private var _datacenterInfo:String = "";
+
+            [Bindable]
+            public var _datacenter:DataCenter;
+
+            [Bindable]
+            protected var _hasRemoteServices:Boolean = false;
+
+            private function onClickDataCenter(event:Event):void
+            {
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+
+                //Event type defined in DataCenterManagement.mxml
+                var itemClickEvent:ItemClickEvent = new ItemClickEvent("dataCenterSelected",
+                                                                       true);
+                itemClickEvent.item = this.data;
+                dispatchEvent(itemClickEvent);
+            }
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+
+                if (value is DataCenter)
+                {
+                    this._datacenter = value as DataCenter;
+
+                    //Setting the info that will be displayed
+                    this._datacenterInfo = List(this.owner).dataProvider.getItemIndex(this.data) + 1 + ' - ' + data.name;
+
+                    //Check if this Datacenter has all RemoteServices required
+                    checkDatacenterRS();
+                }
+            }
+
+            protected function checkDatacenterRS():void
+            {
+                var hasVirtualFactory:Boolean = false;
+                var hasVirtualSystemMonitor:Boolean = false;
+                this._hasRemoteServices = false;
+                var length:int = DataCenter(data).remoteServices.length;
+                var i:int = 0;
+                while (i < length && !this._hasRemoteServices)
+                {
+                    if (DataCenter(data).remoteServices[i].remoteServiceType.valueOf == RemoteServiceType.VIRTUAL_FACTORY)
+                    {
+                        hasVirtualFactory = true;
+                    }
+                    else if (DataCenter(data).remoteServices[i].remoteServiceType.valueOf ==  RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
+                    {
+                        hasVirtualSystemMonitor = true;
+                    }
+
+                    _hasRemoteServices = hasVirtualFactory && hasVirtualSystemMonitor;
+                    i++;
+                }
+            }
+
+            private function onDatacenterRSChange(event:Event):void
+            {
+                //When the Datacenter RemoteServices changes, we check again if it has
+                //all Remote Services required
+                checkDatacenterRS();
+            }
+
+            private function onRollOver():void
+            {
+                accessButton.visible = true;
+            }
+
+            private function onRollOut():void
+            {
+                accessButton.visible = false;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Label 
+        height="16"
+        verticalCenter="0"
+        left="0"
+        right="60"
+        text="{this._datacenterInfo}" maxWidth="160" truncateToFit="true"/>
+
+    <utils:SmoothImage 
+        width="18" height="18"
+        right="20"
+        verticalCenter="0"
+        id="dataCenterListRendererIcon"
+        creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('DataCenterListRendererIcon', dataCenterListRendererIcon)"
+        toolTip="@Resource(bundle='Infrastructure', key='LABEL_DATACENTER_HAS_NO_RS')"
+        visible="{! this._hasRemoteServices}"/>
+
+    <mx:Button id="accessButton"
+        right="0"
+        styleName="ListAccessButton"
+        toolTip="@Resource(bundle='Common', key='BUTTON_ENTER_TOOLTIP')"
+        visible="false"
+        click="onClickDataCenter(event)"/>
+</mx:Canvas>

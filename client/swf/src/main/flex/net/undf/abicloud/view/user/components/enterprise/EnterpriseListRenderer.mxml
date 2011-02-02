@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="200"
+    backgroundAlpha="0"
+    verticalScrollPolicy="off"
+    horizontalScrollPolicy="off"
+    dragEnter="dragEnterHandler(event)"
+    dragDrop="dragDropHandler(event)"
+    xmlns:mx="http://www.adobe.com/2006/mxml">
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.controls.Alert;
+            import mx.collections.ArrayCollection;
+            import net.undf.abicloud.events.UserEvent;
+            import mx.utils.ObjectUtil;
+            import mx.managers.DragManager;
+            import net.undf.abicloud.vo.user.User;
+            import mx.events.DragEvent;
+            import net.undf.abicloud.vo.user.Enterprise;
+
+            //The Enterprise to be rendered by this component
+            [Bindable]
+            private var _enterprise:Enterprise;
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+
+                if (value && value is Enterprise)
+                    this._enterprise = value as Enterprise;
+
+            }
+
+            /**
+             * A EnterpriseListRenderer accepts drops of Users
+             */
+            private function dragEnterHandler(dragEvent:DragEvent):void
+            {
+                if (dragEvent.dragSource.hasFormat("User") && this._enterprise)
+                {
+                    var userDragged:User = dragEvent.dragSource.dataForFormat("User") as User;
+                    if (userDragged.enterprise.id != this._enterprise.id)
+                    {
+                        DragManager.acceptDragDrop(this);
+                        DragManager.showFeedback(DragManager.MOVE);
+                    }
+                }
+            }
+
+            /**
+             * When user drops a User inside this EnterpriseListRenderer,
+             * the User will be assigned to the Enterprise that represents this component
+             */
+            private function dragDropHandler(dragEvent:DragEvent):void
+            {
+                var userDragged:User = dragEvent.dragSource.dataForFormat("User") as User;
+                var userCopy:User = ObjectUtil.copy(userDragged) as User;
+                userCopy.enterprise = this._enterprise;
+
+                var userEvent:UserEvent = new UserEvent(UserEvent.EDIT_USERS);
+                userEvent.oldUsers = new ArrayCollection([ userDragged ]);
+                userEvent.users = new ArrayCollection([ userCopy ]);
+                dispatchEvent(userEvent);
+            }
+        ]]>
+    </mx:Script>
+    <mx:Label 
+        text="{this._enterprise.name}" maxWidth="190" truncateToFit="true"/>
+</mx:Canvas>

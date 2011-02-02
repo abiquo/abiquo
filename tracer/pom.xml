@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--                                      -->
+    <!--        POM RELATIONSHIPS             -->
+    <!--                                      -->
+
+    <!--       Maven coordinates              -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.abiquo.abicloud</groupId>
+    <artifactId>tracer</artifactId>
+
+    <!--       Inheritances                   -->
+    <parent>
+        <artifactId>platform</artifactId>
+        <groupId>com.abiquo.abicloud</groupId>
+        <version>1.7.5-SNAPSHOT</version>
+    </parent>
+
+    <!--       Dependences                    -->
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-pool</artifactId>
+            <version>5.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+    </dependencies>
+
+    <!--                                      -->
+    <!--       PROJECT INFORMATION            -->
+    <!--                                      -->
+    <name>Tracer</name>
+    <url>http://abicloud.org</url>
+    <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>LGPL</name>
+            <url>http://www.gnu.org/license/lgpl.html</url>
+        </license>
+    </licenses>
+
+    <!--                                      -->
+    <!--       BUILD SETTINGS                 -->
+    <!--                                      -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

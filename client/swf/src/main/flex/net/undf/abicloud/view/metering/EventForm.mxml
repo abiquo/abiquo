@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<AbiCloudPopUp 
+    xmlns="net.undf.abicloud.view.general.*"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    titleText="@Resource(bundle='Metering', key='POPUP_TITLE_EVENT_DETAIL')">
+
+    <mx:Metadata>
+		[Event(name="EventFormClose", type="flash.events.Event")]
+	</mx:Metadata>
+
+    <mx:Script>
+        <![CDATA[
+            import net.undf.abicloud.vo.metering.Meter;
+
+            //The event to show the info
+            [Bindable]
+            private var _meter:Meter;
+
+            /**
+             * Initalizes this component with a new Meter to show its information
+             */
+            public function init(meter:Meter):void
+            {
+                this._meter = meter;
+
+                if (this._meter)
+                {
+                    //Setting Severity bar visual style
+                    severityBar.setStyle("barColor", Meter.SEVERITY_SCALE[this._meter.severity].color);
+                    severityBar.setProgress(Meter.SEVERITY_SCALE[this._meter.severity].value,
+                                            6);
+                }
+            }
+
+            private function sourceLabelFunction(meter:Meter):String
+            {
+                //Building the source
+                var path:String = meter.enterprise + ' / ' + meter.user + ' / ' + meter.datacenter + ' / ' + meter.rack + ' / ' + meter.physicalMachine + ' / ' + meter.storageSystem + ' / ' + meter.storagePool + ' / ' + meter.volume + ' / ' + meter.virtualDataCenter + ' / ' + meter.virtualApp + ' / ' + meter.virtualmachine + ' / ' + meter.network + ' / ' + meter.subnet + " ";
+
+                //Replacing two consecutive slashes or null ocurrences
+                var pattern:RegExp = / null /g;
+                path = path.replace(pattern, "");
+                pattern = /\/\//g;
+                return path.replace(pattern, "");
+            }
+
+            private function onClose():void
+            {
+                dispatchEvent(new Event("EventFormClose"));
+            }
+
+            /**
+             * Copies to system Clipboard the Event information
+             */
+            private function onCopyClipboard():void
+            {
+                var meterInfo:String = "";
+
+                meterInfo += "SOURCE: " + sourceLabelFunction(this._meter) + "\n\n";
+                meterInfo += "TIMESTAMP: " + this._meter.timestamp + "\n\n";
+                meterInfo += "ACTION PERFORMED: " + this._meter.actionperformed + "\n\n";
+                meterInfo += "PERFORMED BY: " + this._meter.performedby + "\n\n";
+                meterInfo += "STACK TRACE: " + this._meter.stacktrace + "\n\n";
+                meterInfo += "SEVERITY: " + this._meter.severity;
+
+                System.setClipboard(meterInfo);
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+
+        <mx:FormItem label="@Resource(bundle='Metering', key='LABEL_SOURCE')">
+            <mx:Label text="{sourceLabelFunction(this._meter)}"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Metering', key='LABEL_DATE')">
+            <mx:Label text="{this._meter.timestamp}"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Metering', key='LABEL_ACTION_PERFORMED')">
+            <mx:Label text="{this._meter.actionperformed}"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Metering', key='LABEL_PERFORMED_BY')">
+            <mx:Label text="{this._meter.performedby}"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Metering', key='LABEL_TRACE')">
+            <mx:TextArea 
+                width="275" height="175"
+                text="{this._meter.stacktrace}"
+                editable="false"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            width="100%"
+            label="@Resource(bundle='Metering', key='LABEL_SEVERITY')">
+            <mx:ProgressBar id="severityBar"
+                width="100%" height="12"
+                styleName="MeteringSeverityBar"
+                minimum="0" maximum="6" indeterminate="false" mode="manual"
+                label="{this._meter.severity}" labelPlacement="center"/>
+        </mx:FormItem>
+
+        <mx:Spacer height="15"/>
+
+        <mx:FormItem direction="horizontal">
+            <mx:Button id="closeButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_CLOSE')"
+                click="onClose()"/>
+
+            <mx:Button id="copyClipboardButton"
+                height="18"
+                label="@Resource(bundle='Common', key='BUTTON_COPY_CLIPBOARD')"
+                styleName="AlternativeButton"
+                click="onCopyClipboard()"/>
+        </mx:FormItem>
+    </mx:Form>
+</AbiCloudPopUp>

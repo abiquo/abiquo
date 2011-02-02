@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    width="100%" height="100%"
+    horizontalGap="0"
+    paddingBottom="0"
+    paddingLeft="20"
+    paddingRight="20"
+    paddingTop="0"
+    verticalAlign="middle"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="net.undf.abicloud.security.ISecurableComponent"
+    xmlns:components="net.undf.abicloud.view.main.components.*"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    alpha="0">
+
+
+    <mx:Metadata>
+		[Event(name="selectMenuOption", type="mx.events.ItemClickEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.binding.utils.ChangeWatcher;
+			import mx.binding.utils.BindingUtils;
+			import mx.utils.ObjectUtil;
+			import net.undf.abicloud.controller.ThemeHandler;
+			import mx.binding.utils.BindingUtils;
+			import net.undf.abicloud.vo.user.Role;
+			import net.undf.abicloud.utils.AbicloudUtils;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.ButtonLabelPlacement;
+			import mx.controls.Image;
+			import mx.core.Application;
+			import mx.effects.Fade;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			import mx.resources.ResourceBundle;
+			import mx.resources.ResourceManager;
+			
+			import net.undf.abicloud.business.managers.AuthorizationManager;
+			import net.undf.abicloud.events.LoginEvent;
+			import net.undf.abicloud.model.AbiCloudModel;
+			import net.undf.abicloud.security.SecurableResource;
+			import net.undf.abicloud.view.general.AbiCloudAlert;
+			import net.undf.abicloud.view.main.components.HeaderButton;
+			import net.undf.abicloud.view.user.components.user.UserEdit;
+			
+			[Bindable]
+			private var _headerLogo:String;
+			
+			private var usingDefaultInError : Boolean = false;
+			
+			public function set headerLogo(value:String):void
+			{
+				var path:String = "themes/logos/" + AbiCloudModel.getInstance().loginManager.user.enterprise.id + "/" + value;
+				
+				if(!usingDefaultInError){
+					this._headerLogo = path;		
+				}else{
+					this._headerLogo = value;
+				}
+				
+				trace("[SecurableHeader] set logo: " + value);
+			}
+			
+			//Pop Ups
+			private var _userEdit:UserEdit;
+			
+			private function onInitialize():void
+			{
+				defineSecurableResources();
+				checkSecurableResources();
+				
+				//Creating Pop Up
+				_userEdit = new UserEdit();
+				_userEdit.roleEditable = false;
+				_userEdit.activeEditable = false;
+				_userEdit.addEventListener("userEditClose", closeUserEdit);
+			}
+			
+			/**
+			 * Shows the SecurableHeader using a Fade effect
+			 */
+			private function onCreationComplete():void
+			{
+				var fade:Fade = new Fade();
+				fade.duration = 600;
+				fade.alphaFrom = 0;
+				fade.alphaTo = 1;
+				fade.play([ this ]);
+			}
+			
+			private function fu():void
+			{
+				
+			}           
+			
+			public function set authorizationManager(auth:AuthorizationManager):void
+			{
+				this._authorizationManager = auth;
+			}
+			
+			/**
+			 * Shows a Pop Up for user who has logged in can modify his data
+			 **/
+			private function onClickUserLoggedInfo():void
+			{
+				PopUpManager.addPopUp(this._userEdit, Application.application.document,
+					true);
+				PopUpManager.centerPopUp(this._userEdit);
+				
+				this._userEdit.init(AbiCloudModel.getInstance().loginManager.user);
+			}
+			
+			private function closeUserEdit(event:Event):void
+			{
+				PopUpManager.removePopUp(this._userEdit);
+			}
+			
+			private function onLogout():void
+			{
+				//Notifying that user wants to make logout
+				var event:LoginEvent = new LoginEvent(LoginEvent.LOGOUT);
+				event.logout = AbiCloudModel.getInstance().loginManager.session;
+				dispatchEvent(event);
+			}
+			
+			private function onClickAbiquoLink():void
+			{
+				var url:String = "http://www.abiquo.com";
+				navigateToURL(new URLRequest(url), "_blank");
+			}
+			
+			/////////////////////////////////////////////////////////////////////////////
+			//ISecurableComponent implementation
+			
+			//Securable Resources of this Securable Component
+			private var startButton:SecurableResource;
+			
+			private var infrastructureButton:SecurableResource;
+			
+			private var userButton:SecurableResource;
+			
+			private var virtualApplianceButton:SecurableResource;
+			
+			private var virtualImageButton:SecurableResource;
+			
+			private var meteringButton:SecurableResource;
+			
+			private var configurationButtonSecRes:SecurableResource;
+			
+			//Auhorization Manager that this Securable Component will use
+			private var _authorizationManager:AuthorizationManager = AbiCloudModel.getInstance().authorizationManager;
+			
+			public function defineSecurableResources():void
+			{
+				startButton = new SecurableResource("DASHBOARD_BUTTON", "MAIN");
+				userButton = new SecurableResource("USER_BUTTON", "MAIN");
+				infrastructureButton = new SecurableResource("INFRASTRUCTURE_BUTTON",
+					"MAIN");
+				virtualApplianceButton = new SecurableResource("VIRTUALAPP_BUTTON",
+					"MAIN");
+				virtualImageButton = new SecurableResource("VIRTUALIMAGE_BUTTON",
+					"MAIN");
+				meteringButton = new SecurableResource("METERING_BUTTON", "MAIN");
+				configurationButtonSecRes = new SecurableResource("CONFIG_BUTTON",
+					"MAIN");
+			}
+			
+			
+			/**
+			 * Checks that the current user is authorized to use each SecurableResource, and if so, creates the
+			 * appropiate button for user interaction
+			 **/
+			[ResourceBundle("Main")]
+			private var rb:ResourceBundle;
+			
+			public function checkSecurableResources():void
+			{
+				var menuOptions:ArrayCollection = new ArrayCollection();
+				var menuOption:HeaderButton;
+				
+				if (startButton.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					menuOption = new HeaderButton(0);
+					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+					menuOption.height = 61;
+					menuOption.label = ResourceManager.getInstance().getString("Main",
+						"HEADER_MENU_START");
+					menuOption.styleName = "MainHeaderStartButton";
+					menuOptions.addItem(menuOption);
+				}
+				
+				var o:Object = new Object();
+				o.source = "";
+				
+				ThemeHandler.getInstance().getImageFromStyle("CommonAssetsHeaderSpacer", o);
+				
+				//Adding separator
+				var headerSpacer:Image = new Image();
+				
+				headerSpacer.width = 2;
+				headerSpacer.height = 19;
+				
+				headerSpacer.source = o.source;
+				
+				menuOptions.addItem(headerSpacer);
+				
+				if (infrastructureButton.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					menuOption = new HeaderButton(1);
+					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+					menuOption.height = 61;
+					menuOption.label = ResourceManager.getInstance().getString("Main",
+						"HEADER_MENU_INFRASTRUCTURE")
+					menuOption.styleName = "MainHeaderInfrastructureButton";
+					menuOptions.addItem(menuOption);
+				}
+				
+				if (virtualApplianceButton.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					menuOption = new HeaderButton(2);
+					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+					menuOption.height = 61;
+					menuOption.label = ResourceManager.getInstance().getString("Main",
+						"HEADER_MENU_VIRTUALAPPLIANCE");
+					menuOption.styleName = "MainHeaderVirtualAppButton";
+					menuOptions.addItem(menuOption);
+				}
+				
+				if (virtualImageButton.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					menuOption = new HeaderButton(3);
+					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+					menuOption.height = 61;
+					menuOption.label = ResourceManager.getInstance().getString("Main",
+						"HEADER_MENU_VIRTUALIMAGE");
+					menuOption.styleName = "MainHeaderVirtualImageButton";
+					menuOptions.addItem(menuOption);
+				}
+				
+				
+				if (userButton.applyAuthorization(_authorizationManager))
+				{
+					//New feature
+					//Allow or deny access to 'users' section
+					//in client-config.xml.jsp
+					if(AbiCloudModel.getInstance().configurationManager.config.client_dashboard_allowUsersAccess.value == 1){
+						//Making available this resource
+						menuOption = new HeaderButton(4);
+						menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+						menuOption.height = 61;
+						menuOption.label = ResourceManager.getInstance().getString("Main",
+							"HEADER_MENU_USER");
+						menuOption.styleName = "MainHeaderUsersButton";
+						menuOptions.addItem(menuOption);
+						
+						//we replace the user name button by the user name text
+						userLoggedInfo.includeInLayout = true;
+						userLoggedInfo.visible = true;
+						userLoggedInfoText.includeInLayout = false;
+						userLoggedInfoText.visible = false;
+					}
+				}
+				
+				
+				if (meteringButton.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					menuOption = new HeaderButton(5);
+					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+					menuOption.height = 61;
+					menuOption.label = ResourceManager.getInstance().getString("Main",
+						"HEADER_MENU_METERING");
+					menuOption.styleName = "MainHeaderMeteringButton";
+					menuOptions.addItem(menuOption);
+				}
+				
+				//Adding another separator
+				var headerSpacer2:Image = new Image();
+				headerSpacer2.width = 2;
+				headerSpacer2.height = 19;
+				headerSpacer2.source = o.source;
+				
+				menuOptions.addItem(headerSpacer2);
+				
+				if (configurationButtonSecRes.applyAuthorization(_authorizationManager))
+				{
+					//Making available this resource
+					configurationButton.visible = true;
+					configurationButton.includeInLayout = true;
+				}
+				
+				//Setting the Data Provider for the header
+				menu.dataProvider = menuOptions;
+			}
+			
+			private function onClickDocumentationButton():void
+			{
+				var url:String = AbiCloudModel.getInstance().configurationManager.config.client_dashboard_abiquoURL.value;
+				navigateToURL(new URLRequest(url), "_blank");
+			}
+			
+			private function onClickSupportButton():void
+			{
+				//Loading the text file
+				var loader:URLLoader = new URLLoader();
+				loader.addEventListener(Event.COMPLETE, loadSupportFileCompleteHandler);
+				loader.addEventListener(IOErrorEvent.IO_ERROR, loadSupportFileErrorHandler);
+				loader.load(new URLRequest("config/Support_Alert.txt"));
+			}
+			
+			private function loadSupportFileCompleteHandler(event:Event):void
+			{
+				//Showing the text included in the file
+				AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Main",
+					"ALERT_SUPPORT_TITLE"),
+					ResourceManager.getInstance().getString("Main",
+						"ALERT_SUPPORT_HEADER"),
+					URLLoader(event.currentTarget).data.toString(),
+					Alert.OK,
+					null);
+			}
+			
+			private function loadSupportFileErrorHandler(ioErrorEvent:IOErrorEvent):void
+			{
+				//The Support_Alert.txt file is missing!!
+			}
+			
+			private function onClickConfigurationButton():void
+			{
+				dispatchEvent(new Event("openConfigurationManagement", true));
+			}
+			
+			/**
+			 * We don't need to implement this function, since the SecurableHeader will never become entirely unavailable
+			 **/
+			public function makeUnavailable():void
+			{
+			}
+			
+			private function headerLogoError(event:IOErrorEvent):void{
+				trace("Error loading logo, setting default");
+				
+				//if default logo is missing do not try to load it again or will loop forever
+				if(! usingDefaultInError){
+					usingDefaultInError = true;
+					headerLogo =  AbiCloudModel.getInstance().configurationManager.config.defaultHeaderLogo;
+				}else{
+					headerLogo =  AbiCloudModel.getInstance().configurationManager.config.forcedDefaultEnterpriseLogoPath;
+				}
+			}			
+		]]>
+	</mx:Script>
+
+    <!--mx:HBox height="64" verticalCenter="0" verticalAlign="middle" left="20" right="20" horizontalGap="0"-->
+    <mx:Canvas 
+        width="129" height="100%">
+        <utils:SmoothImage 
+            height="100%"
+            verticalCenter="7"
+            id="headerLogoImage"
+            source="{this._headerLogo}"
+            scaleContent="false"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            click="onClickAbiquoLink()"
+            ioError="headerLogoError(event)"
+            />
+    </mx:Canvas>
+
+    <mx:Spacer 
+        width="100%"
+        minWidth="10"/>
+
+    <mx:HBox 
+        horizontalGap="0"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalGap="0">
+
+
+        <components:HeaderToggleButtonBar id="menu"
+            styleName="MainHeaderToggleButtonBar"/>
+
+        <!-- Configuration, Documentation && Support Buttons -->
+
+
+        <mx:Button id="configurationButton"
+            label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_CONFIG')}"
+            styleName="MainHeaderConfigurationButton" labelPlacement="bottom"
+            includeInLayout="false"
+            visible="false"
+            click="onClickConfigurationButton()"/>
+
+        <mx:Button id="documentationButton"
+            label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_DOCUMENTATION')}"
+            styleName="MainHeaderDocumentationButton" labelPlacement="bottom"
+            click="onClickDocumentationButton()"/>
+
+        <mx:Button id="supportButton"
+            label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_SUPPORT')}"
+            styleName="MainHeaderSupportButton" labelPlacement="bottom"
+            click="onClickSupportButton()"/>
+    </mx:HBox>
+
+    <mx:Spacer width="100%" />
+
+    <mx:VBox 
+        height="100%"
+        horizontalAlign="right"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalAlign="middle"
+        verticalGap="-3"
+        minWidth="140" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+        id="verticalVbox" >
+        <mx:Label id="userLoggedInfo"
+        	visible="false"
+        	includeInLayout="false" 
+            fontSize="11"
+            fontWeight="bold"
+            textAlign="right"
+            truncateToFit="true"
+            text="{AbiCloudModel.getInstance().loginManager.user.name + ' ' + AbiCloudModel.getInstance().loginManager.user.surname}"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            rollOver="userLoggedInfo.setStyle('textDecoration', 'underline')"
+            rollOut="userLoggedInfo.setStyle('textDecoration', 'none')"
+            click="onClickUserLoggedInfo()"/>
+        <mx:Label id="userLoggedInfoText"
+            fontSize="11"
+            fontWeight="bold"
+            textAlign="right"
+            truncateToFit="true"
+            text="{AbiCloudModel.getInstance().loginManager.user.name + ' ' + AbiCloudModel.getInstance().loginManager.user.surname}"
+            mouseChildren="false"/>
+
+        <!--IMPERSONATE_CHANGE_ENTERPRISE-->
+        <mx:Label id="enterpriseLabel" 
+        	text="{AbiCloudModel.getInstance().loginManager.user.enterprise.name}"/>
+        	
+        <mx:Button id="logoutButton"
+            label="@Resource(bundle='Main', key='HEADER_MENU_LOGOUT')"
+            styleName="MainHeaderLogoutButton" labelPlacement="right"
+            click="onLogout()"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            rollOver="logoutButton.setStyle('textDecoration', 'underline')"
+            rollOut="logoutButton.setStyle('textDecoration', 'none')"/>
+       
+    </mx:VBox>
+</mx:HBox>
+<!--/mx:Canvas-->

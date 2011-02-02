@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    styleName="VirtualMachineRenderer"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    xmlns:virtualmachine="net.undf.abicloud.view.networking.virtualmachine.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.business.managers.ConfigurationManager;
+        	import net.undf.abicloud.view.main.CommonAssets;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+
+
+            public static const USED_BY_INFRASTRUCTURE_MANAGEMENT:int = 1;
+
+            public static const USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT:int = 2;
+
+
+            //The virtual machine that will be rendered
+            [Bindable]
+            protected var _virtualMachine:VirtualMachine;
+            
+            //Use in case of stateful with a custom name
+            [Bindable]
+            public var nodeName:String;
+
+            [Bindable(event="virtualMachineChange")]
+            public function get virtualMachine():VirtualMachine
+            {
+                return this._virtualMachine;
+            }
+
+            [Bindable]
+            private var _editMode:Boolean;
+
+
+            public function set virtualMachine(value:VirtualMachine):void
+            {
+                this._virtualMachine = value;
+                nodeName = null;
+                dispatchEvent(new Event("virtualMachineChange"));
+            }
+
+            //Depending on where this component is placed, some options will not be visible
+            protected var _usedBy:int = USED_BY_INFRASTRUCTURE_MANAGEMENT;
+
+            [Bindable(event="usedByChange")]
+            public function get usedBy():int
+            {
+                return this._usedBy;
+            }
+
+            public function set usedBy(value:int):void
+            {
+                this._usedBy = value;
+                dispatchEvent(new Event("usedByChange"));
+            }
+
+            /**
+             * Initializes this component with the virtual machine that will be rendered
+             **/
+            public function init():void
+            {
+                this._editMode = false;
+
+                if (virtualMachineVS != null)
+                    virtualMachineVS.selectedIndex = 0;
+            }
+
+            /**
+             * Performs a "Start" or "Shutdown" action in the Virtual Machine
+             */
+            private function onClickPowerOnOffButton():void
+            {
+                if (_virtualMachine.state.id == State.RUNNING || _virtualMachine.state.id == State.PAUSED)
+                {
+                    //The Virtual Machine is running. Asking user for confirmation
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_SHUTDOWN_VIRTUALMACHINE_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_SHUTDOWN_VIRTUALMACHINE_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            powerOffVirtualMachine);
+                }
+                else
+                {
+                    //The Virtual Appliance is powered off We proceed to power it on
+                    powerOnVirtualMachine();
+                }
+            }
+
+            private function powerOnVirtualMachine():void
+            {
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+
+                event.infrastructureElement = this._virtualMachine;
+                dispatchEvent(event);
+            }
+
+            private function powerOffVirtualMachine(closeEvent:CloseEvent = null):void
+            {
+                if (!closeEvent || closeEvent.detail == Alert.YES)
+                {
+                    //No confirmation required or user confirmed the power off
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE);
+
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+
+            /**
+             * Performs a "Pause" action in the Virtual Machine
+             */
+            private function onClickPauseButton():void
+            {
+                //Pause action is not supported with XEN Hypervisors
+                if (HyperVisor(_virtualMachine.assignedTo).type.id == HyperVisorType.XEN)
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_PAUSE_NOTSUPPORTED_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_PAUSE_NOTSUPPORTED_TEXT"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    var event:InfrastructureEvent;
+
+                    if (_virtualMachine.state.id == State.PAUSED)
+                    {
+                        //The virtual machine is paused. We proceed to resume it
+                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+                    }
+                    else if (_virtualMachine.state.id == State.RUNNING)
+                    {
+                        //The virtual machine is running. We procced to pause it
+                        event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE);
+                    }
+
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Performs a "Reboot" action in the Virtual Machine
+             **/
+            private function onClickRebootButton():void
+            {
+                //Asking confirmation
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_REBOOT_VIRTUALMACHINE_HEADER"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_REBOOT_VIRTUALMACHINE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        rebootVirtualMachine);
+
+
+            }
+
+            private function rebootVirtualMachine(closeEvent:CloseEvent):void
+            {
+                if (!closeEvent || closeEvent.detail == Alert.YES)
+                {
+                    //No confirmation required or user confirmed the reboot
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE);
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Initalizes a remote access Session against this Virtual Machine
+             */
+            private function onClickAccessRemoteButton(event:MouseEvent):void
+            {
+                event.stopImmediatePropagation();
+
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
+                {
+                    //This hypervisor type does not support graphical remote access
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_REMOTEACCESS_NOTSUPPORTED_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_REMOTEACCESS_NOTSUPPORTED_TEXT"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    //Check user screen resolution for java applet size
+                    var appletWidth:int;
+                    var appletHeight:int;
+                    if (Application.application.width <= 1024)
+                    {
+                        appletWidth = 800;
+                        appletHeight = 600;
+                    }
+                    else
+                    {
+                        appletWidth = 1024;
+                        appletHeight = 768;
+                    }
+
+                    var appletURL:String;
+                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX)
+                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" + this._virtualMachine.vdrpIP + "&vrdpPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+                    else
+                        appletURL = "tightvnc/tightvnc.html?vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+
+                    if (event.shiftKey)
+                    {
+                        //Open Java applet in new window
+                        navigateToURL(new URLRequest(appletURL), "_blank");
+                    }
+                    else
+                    {
+                        //Open Java applet using an iFrame in the same app window
+                        ExternalInterface.call("loadRemoteAccessJavaClient", appletURL);
+                    }
+                }
+            }
+
+            /**
+             * Forces refresh when a Virtual Machine is in state of progress
+             */
+            private function onClickForceRefreshStateButton():void
+            {
+                //Announcing that user wants to force refresh
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.FORCE_REFRESH_VIRTUAL_MACHINE_STATE);
+                event.infrastructureElement = this._virtualMachine;
+                dispatchEvent(event);
+            }
+
+            /**
+             * Sets this component in edit mode
+             */
+            private function onClickEdit():void
+            {
+                if (this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED && this._virtualMachine.state.id != State.IN_PROGRESS)
+                {
+                    this._editMode = true;
+
+                    //Setting the values that can be edited
+                    nameInput.text = this._virtualMachine.name;
+                    cpuInput.value = this._virtualMachine.cpu;
+                    ramUnitsSelector.selectedIndex = 0;
+                    ramInput.value = this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion;
+                    descriptionInput.text = this._virtualMachine.description;
+                }
+            }
+
+            /**
+             * Saves the changes made to the virtual machine being rendered
+             */
+            private function onClickAccept():void
+            {
+                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
+                var virtualMachineEdited:VirtualMachine = ObjectUtil.copy(this._virtualMachine) as VirtualMachine;
+
+                //Saving changes made by the user
+                virtualMachineEdited.name = nameInput.text;
+                virtualMachineEdited.cpu = cpuInput.value;
+                virtualMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+                //virtualMachineEdited.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion;
+                virtualMachineEdited.description = descriptionInput.text;
+
+                //Announcing that a virtual machine has been edited
+                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
+                infrastructureEvent.infrastructureElement = virtualMachineEdited;
+                if (this._virtualMachine.state.id != State.IN_PROGRESS)
+                    dispatchEvent(infrastructureEvent);
+
+                //Turning off edit mode
+                this._editMode = false;
+            }
+
+            /**
+             * Cancels the edition of the physical machine being rendered
+             */
+            private function onClickCancel():void
+            {
+                this._editMode = false;
+            }
+
+            private function doZoom(event:MouseEvent):void
+            {
+                if (this.enabled)
+                {
+                    if (zoomAll.isPlaying)
+                        zoomAll.reverse();
+                    else
+                        // If this is a ROLL_OUT event, play the effect backwards. 
+                        // If this is a ROLL_OVER event, play the effect forwards.
+                        zoomAll.play([ busyIcon ], event.type == MouseEvent.ROLL_OUT ? true : false);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Zoom id="zoomAll"
+        duration="400"
+        zoomWidthTo="1.4"
+        zoomHeightTo="1.4"
+        zoomWidthFrom="1"
+        zoomHeightFrom="1"/>
+
+    <!-- Virtual Machine state -->
+    <mx:HBox 
+        height="100%"
+        left="0"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off"
+		horizontalAlign="center"
+		horizontalGap="3"
+		paddingBottom="0"
+		paddingLeft="0"
+		paddingRight="0"
+		paddingTop="0"
+		verticalAlign="middle"
+        styleName="VerticalIndicatorBlackBarSkin">
+        
+        <mx:VBox 
+            width="27"
+			styleName="VirtualMachineRendererBaseVBox1"
+            >
+            <utils:SmoothImage id="startImage"
+                source="{(_virtualMachine.state.id == State.RUNNING) ? StyleManager.getStyleDeclaration('.VirtualMachineStateRunning').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
+
+            <utils:SmoothImage id="pauseImage"
+                source="{(_virtualMachine.state.id == State.PAUSED) ? StyleManager.getStyleDeclaration('.VirtualMachineStatePaused').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
+
+            <utils:SmoothImage id="stopImage"
+                source="{(_virtualMachine.state.id == State.POWERED_OFF || _virtualMachine.state.id == State.NOT_DEPLOYED) ? StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"
+                visible="{_virtualMachine.state.id == State.UNKNOWN || _virtualMachine.state.id == State.CRASHED ? false:true}"
+	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN || _virtualMachine.state.id == State.CRASHED ? false:true}"/>
+	
+            <utils:SmoothImage id="unknow_Image"
+	            source="{(_virtualMachine.state.id == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
+	            visible="{_virtualMachine.state.id == State.UNKNOWN}"
+	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN}"
+	            toolTip="@Resource(bundle='Main', key='LABEL_VM_CRASHED')"/>
+	        
+	        <utils:SmoothImage id="crashed_Image"
+	            source="{(_virtualMachine.state.id == State.CRASHED) ? CommonAssets.crashedIcon:null}"
+	            visible="{_virtualMachine.state.id == State.CRASHED}"
+	            includeInLayout="{_virtualMachine.state.id == State.CRASHED}"
+            	toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>
+
+        
+        </mx:VBox>
+
+        <mx:VBox id="vmMoreActions"
+            width="31" height="100%"
+			styleName="VirtualMachineVmMoreActions"
+			verticalScrollPolicy="off" horizontalScrollPolicy="off"
+            >                
+            <mx:Button id="accessRemoteButton"
+                styleName="RemoteAccessButton"
+                toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REMOTE_ACCESS')"
+                enabled="{(this._virtualMachine.vdrpIP != null) &amp;&amp; (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
+                click="onClickAccessRemoteButton(event)"
+                includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
+                visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"/>
+        </mx:VBox>
+    </mx:HBox>
+
+    <mx:HBox id="contentHBox"
+        height="100%"
+        left="58" right="63"
+        
+		styleName="VirtualMachineContentHBox1"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+        <!-- Virtual Machine information -->
+        <mx:Canvas 
+            width="120" height="100%"
+            verticalScrollPolicy="off" horizontalScrollPolicy="off">
+            <utils:SmoothImage id="virtualMachineIcon"
+                width="120" height="120"
+                horizontalCenter="0"
+                verticalCenter="0"
+                creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineIcon',virtualMachineIcon)"
+                maintainAspectRatio="true"/>
+
+            <mx:SWFLoader id="busyIcon"
+                width="80" height="80"
+                horizontalCenter="0"
+                verticalCenter="0"
+				creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineLoadingBigIcon',busyIcon)"                
+                toolTip="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
+                visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"
+                buttonMode="true"
+                useHandCursor="true"
+                mouseChildren="false"
+                click="onClickForceRefreshStateButton()"
+                rollOver="doZoom(event)"
+                rollOut="doZoom(event)"/>
+        </mx:Canvas>
+
+        <mx:VBox 
+            width="100%" height="100%"
+            paddingTop="3"
+            verticalGap="0"
+            minWidth="275">
+
+            <mx:HBox width="100%">
+                <mx:Label 
+					styleName="VirtualMachineLabel1"
+                    maxWidth="300" truncateToFit="true"
+                    text="{_virtualMachine.name}"
+                    toolTip="{_virtualMachine.name}"/>
+
+                <mx:TextInput id="nameInput"
+                    height="20"
+                    maxWidth="300" maxChars="100" includeInLayout="false"
+                    visible="false"/>
+
+                <utils:SmoothImage
+                	id="virtualMachineEditButtonIcon"
+                    height="17"
+                    creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineEditButtonIcon',virtualMachineEditButtonIcon)"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                    includeInLayout="{! this._editMode}"
+                    visible="{! this._editMode}"
+                    click="onClickEdit()"/>
+
+                <mx:Button 
+                    height="17"
+                    label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+                    includeInLayout="{this._editMode}"
+                    visible="{this._editMode}"
+                    click="onClickAccept()"/>
+
+                <mx:Button 
+                    height="17"
+                    label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+                    styleName="AlternativeButton"
+                    includeInLayout="{this._editMode}"
+                    visible="{this._editMode}"
+                    click="onClickCancel()"/>
+
+            </mx:HBox>
+
+            <mx:HBox 
+                width="100%" height="100%"
+                paddingBottom="0"
+                paddingLeft="0"
+                paddingRight="0"
+                paddingTop="0"
+                verticalAlign="middle">
+                <mx:TabBar id="virtualMachineTabBar"
+                    width="80"
+                    styleName="CustomVerticalTabBar"
+                    dataProvider="virtualMachineVS" direction="vertical"/>
+
+                <mx:ViewStack id="virtualMachineVS"
+                    width="100%" height="100%"
+                    paddingBottom="0"
+                    paddingLeft="0"
+                    paddingRight="0"
+                    paddingTop="0"
+                    creationPolicy="all">
+
+                    <!-- VirtualMachine general info -->
+                    <mx:Form 
+                        fontSize="11"
+                        paddingBottom="0"
+                        paddingLeft="0"
+                        paddingRight="0"
+                        paddingTop="0"
+                        verticalGap="0"
+                        label="@Resource(bundle='Infrastructure', key='LABEL_GENERAL')"
+                        horizontalScrollPolicy="off" verticalScrollPolicy="off">
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_UUID')">
+                            <mx:Label 
+                                text="{_virtualMachine.UUID}" selectable="true"
+                                truncateToFit="true"/>
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')">
+                            <mx:Label text="{nodeName != null ? nodeName:_virtualMachine.virtualImage.name}"/>
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='LABEL_OWNER')">
+                            <mx:Label text="{this._virtualMachine.enterprise.name + ' / ' + this._virtualMachine.user.name + ' ' + this._virtualMachine.user.surname}"/>
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
+                            direction="horizontal">
+
+                            <mx:Label id="cpuLabel"
+                                includeInLayout="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"
+                                text="{_virtualMachine.cpu.toString()}"
+                                visible="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"/>
+
+                            <!-- CPU IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
+                            <mx:NumericStepper id="cpuInput"
+                                width="75" height="17"
+                                fontSize="10"
+                                minimum="1" maximum="32" stepSize="1"
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+                            direction="horizontal">
+
+                            <mx:Label id="ramLabel"
+                                includeInLayout="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"
+                                text="{_virtualMachine.ram.toString() + ' MB'}"
+                                visible="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"/>
+
+                            <!-- RAM IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
+                            <mx:NumericStepper id="ramInput"
+                                width="75" height="17"
+                                fontSize="10"
+                                minimum="0"
+                                maximum="{ramUnitsSelector.selectedItem.maximum}"
+                                stepSize="{ramUnitsSelector.selectedItem.stepSize}"
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
+                                value="{this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion}"
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+
+                            <mx:ComboBox id="ramUnitsSelector"
+                                width="80" height="17"
+                                labelField="label"
+                                dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+                                selectedIndex="0"
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
+                            direction="horizontal">
+
+                            <mx:Label id="hdLabel"
+                                text="{Number(_virtualMachine.hd / AbiCloudModel.GB_TO_BYTES).toFixed(2).toString() + ' GB'}"/>
+
+                            <!-- TEMPORALY DISABLED
+                                 <mx:NumericStepper id="hdInput" height="17" width="75" fontSize="10"
+                                 minimum="0" maximum="{hdUnitsSelector.selectedItem.maximum}" stepSize="{hdUnitsSelector.selectedItem.stepSize}"
+                                 visible="{_editMode}" includeInLayout="{_editMode}"
+                                 value="{this._virtualMachine.hd / hdUnitsSelector.selectedItem.conversion}"/>
+
+                                 <mx:ComboBox id="hdUnitsSelector"
+                                 labelField="label"
+                                 dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+                                 selectedIndex="0"
+                                 height="17" width="80" fontSize="10"
+                                 visible="{_editMode}" includeInLayout="{_editMode}"/> -->
+                        </mx:FormItem>
+
+                        <mx:FormItem 
+                            height="17"
+                            label="@Resource(bundle='Infrastructure', key='LABEL_REMOTE_ACCESS')"
+                            visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
+                            includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
+                            direction="horizontal">
+                            <mx:Label id="remoteAccessLabel"
+                                text="{(this._virtualMachine.vdrpIP == null                                          || 
+                                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
+                                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+																												           _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
+                                selectable="true"/>
+
+                            <mx:Button id="copyRemoteAccessAddressButton"
+                                height="16"
+                                label="@Resource(bundle='Common', key='BUTTON_COPY_CLIPBOARD')"
+                                includeInLayout="false"
+                                click="System.setClipboard(remoteAccessLabel.text)"
+                                visible="false"/>
+                        </mx:FormItem>
+                    </mx:Form>
+
+                    <!-- Description -->
+                    <!-- Virtual Machine description -->
+                    <mx:VBox id="descriptionContainer"
+                        width="40%"
+                        paddingTop="4"
+                        verticalGap="0"
+                        label="@Resource(bundle='Infrastructure', key='LABEL_DESCRIPTION')">
+
+                        <mx:Label 
+                        	styleName="VirtualMachineLabel2"
+                        	maxHeight="30"
+                            text="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_DESCRIPTION')"/>
+
+                        <mx:TextArea 
+                            width="100%"
+                            backgroundAlpha="0"
+                            text="{_virtualMachine.description}"
+                            includeInLayout="{! _editMode}"
+                            visible="{! _editMode}"
+                            editable="false"/>
+
+                        <mx:TextArea id="descriptionInput"
+                            width="100%"
+                            maxChars="255" includeInLayout="{_editMode}"
+                            text="{_virtualMachine.description}"
+                            visible="{_editMode}"/>
+
+                    </mx:VBox>
+
+                    <!-- Networking -->
+                    <virtualmachine:VirtualMachineNICListSmall id="virtualMachineNICSmall"
+                        label="@Resource(bundle='Networking', key='LABEL_NETWORK')"
+                        virtualMachine="{_virtualMachine}"/>
+                </mx:ViewStack>
+            </mx:HBox>
+
+        </mx:VBox>
+        <!--/mx:HBox-->
+    </mx:HBox>
+
+    <!-- Virtual Machine actions -->
+    <mx:VBox 
+        width="57" height="100%"
+        right="0"
+        verticalAlign="middle"
+        verticalGap="0"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off"
+        enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.id != State.IN_PROGRESS &amp;&amp; (! this._editMode)}">
+
+        <mx:Button id="powerOnOffButton"
+            width="57" height="47"
+            styleName="StandardPowerButton"
+            enabled="{this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.POWERED_OFF}"
+            selected="{_virtualMachine.state.id == State.RUNNING}"
+            click="onClickPowerOnOffButton()"
+            useHandCursor="true"
+            mouseChildren="false"
+            buttonMode="true"/>
+
+        <mx:Button id="pauseButton"
+            width="57" height="47"
+            styleName="StandardPauseButton"
+            enabled="{_virtualMachine.state.id == State.PAUSED || _virtualMachine.state.id == State.RUNNING}"
+            selected="{_virtualMachine.state.id == State.PAUSED}"
+            click="onClickPauseButton()"
+            useHandCursor="true"
+            mouseChildren="false"
+            buttonMode="true"/>
+
+        <mx:Button id="rebootButton"
+            width="57" height="47"
+            styleName="StandardRebootButton"
+            enabled="{_virtualMachine.state.id == State.RUNNING}"
+            click="onClickRebootButton()"
+            useHandCursor="true"
+            mouseChildren="false"
+            buttonMode="true"/>
+    </mx:VBox>
+
+
+</mx:Canvas>

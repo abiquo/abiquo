@@ -1,0 +1,15 @@
+public final static String <%= @upcase %>_PROPERTY = "<%= @property %>";
+private final static boolean <%= @upcase %>_REQUIRED = true;
+private final static String <%= @upcase %>_COLUMN = "<%= @camelcase_first_upcase %>";
+
+@Column( name=<%= @upcase %>_COLUMN, nullable = !<%= @upcase %>_REQUIRED)
+private boolean <%= @property %>;
+
+@Required(value=<%= @upcase %>_REQUIRED)
+public boolean get<%= @camelcase_first_upcase %>() {
+    return this.<%= @property %>;
+}
+  
+private void set<%= @camelcase_first_upcase %>( boolean <%= @property %> ) {
+    this.<%= @property %> = <%= @property %>;
+}

@@ -1,0 +1,8 @@
+d1.r1.m1:XEN_3
+e1
+e1.vi1:d1:1:1:2
+e1.vd1:d1:XEN_3
+vlan1:vd1:r1
+e1.vd1.va1
+e1.vd1.va1.vm1:vi1:vnic1:vlan1
+allocate.vm1.m1

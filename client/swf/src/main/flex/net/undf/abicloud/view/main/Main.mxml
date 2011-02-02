@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:main="net.undf.abicloud.view.main.*"
+    xmlns:infrastructure="net.undf.abicloud.view.infrastructure.*"
+    xmlns:virtualappliance="net.undf.abicloud.view.virtualappliance.*"
+    xmlns:virtualimage="net.undf.abicloud.view.virtualimage.*"
+    xmlns:user="net.undf.abicloud.view.user.*"
+    xmlns:metering="net.undf.abicloud.view.metering.*">
+
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.controller.systemProperties.SystemPropertiesEventMap;
+        	import net.undf.abicloud.events.SystemPropertiesEvent;
+            import mx.core.UIComponent;
+            import net.undf.abicloud.view.configuration.ConfigurationManagement;
+            import mx.binding.utils.ChangeWatcher;
+            import net.undf.abicloud.view.configuration.ConfigurationManagementBase;
+            import net.undf.abicloud.view.configuration.components.heartbeat.HeartbeatReminder;
+            import mx.core.Application;
+            import mx.managers.PopUpManager;
+            import net.undf.abicloud.view.configuration.components.registration.RegistrationReminder;
+            import net.undf.abicloud.events.ConfigurationEvent;
+            import mx.resources.ResourceBundle;
+            import net.undf.abicloud.view.main.components.HeaderButton;
+            ;
+            import net.undf.abicloud.events.MainEvent;
+            import mx.events.ItemClickEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+
+            //Loading the ResourceBundle used for all components
+            [ResourceBundle("Common")]
+            private var commonRB:ResourceBundle;
+
+            //Loading the ResourceBundle used for Main
+            //Loading the ResourceBundle for infrastructure
+            [ResourceBundle("Main")]
+            private var mainRB:ResourceBundle;
+
+            //The ConfigurationManagement PopUp
+            private var _configurationManagement:ConfigurationManagement;
+
+            //Array Containing pending reminders to show, when users login
+            private var _pendingReminders:Array = new Array();
+
+            private var _isShowingReminder:Boolean = false;
+
+            [Bindable]
+            private var _currentBodyIndex:int = 0;
+
+            private var _nextBodyIndex:int;
+
+            [Bindable]
+            private var _headerLogo:String;
+
+            public function set headerLogo(value:String):void
+            {
+                this._headerLogo = value;
+            }
+
+
+            private function onInitialize():void
+            {
+                this._configurationManagement = new ConfigurationManagement();
+                addEventListener("openConfigurationManagement", onShowConfigurationManagement);
+                this._configurationManagement.addEventListener("closeConfigurationManagement",
+                                                               onCloseConfigurationManagement);
+
+                //Listening for Dashboard interactions
+                addEventListener("DashboardShortcurtClicked", onDashboardShortcurtClicked);
+
+                //Listening for selection on the HeaderButtons
+                addEventListener("HeaderButtonClicked", onSelectMenuOption);
+
+                //Listening events from IBodyComponents
+                addEventListener(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED, onIBodyComponentReadyToBeChanged);
+            }
+
+            private function onCreationComplete():void
+            {
+                IBodyComponent(body.selectedChild).bodyComponentWillShow();
+            }
+
+            /**
+             * Handler called when user interacts with Dashboard
+             */
+            private function onDashboardShortcurtClicked(event:ItemClickEvent):void
+            {
+                if (HeaderButton(event.item).index == 6)
+                    //Configuration management is opened in a PopUp
+                    onShowConfigurationManagement();
+                else
+                    //Just forward the event to the Header, to follow normal behaviour
+                    securableHeader.menu.onDashboardInteraction(event);
+            }
+
+            /**
+             * Method to initalize the Main component
+             **/
+            public function initMain():void
+            {
+//                // Load the System properties from server
+//                dispatchEvent(new SystemPropertiesEvent(SystemPropertiesEvent.GET_SYSTEM_PROPERTIES));
+            
+                //When the application's main component loads, we retrieve the common information for the whole application
+                var event:MainEvent = new MainEvent(MainEvent.GET_COMMON_INFORMATION);
+                dispatchEvent(event);
+
+                //Start the Configuration logic to check the current state of this Abicloud client
+                startConfigurationLogic();
+            }
+
+            private function onSelectMenuOption(event:ItemClickEvent):void
+            {
+                //Saving the index of the IBodyComponent selected by the user
+                this._nextBodyIndex = HeaderButton(event.item).index;
+
+                //We notify to the IBodyComponent that is being replaced from the main view
+                IBodyComponent(body.selectedChild).bodyComponentWillChange();
+            }
+
+            /**
+             * Function called when a IBodyComponent is ready to be changed
+             * for the next IBodyComponent selected by the user
+             */
+            private function onIBodyComponentReadyToBeChanged(event:Event):void
+            {
+                switchBody();
+            }
+
+            private function switchBody():void
+            {
+                //We notify the IBodyComponent that will be shown
+                this._currentBodyIndex = this._nextBodyIndex;
+                callLater(IBodyComponent(body.getChildAt(this._currentBodyIndex)).bodyComponentWillShow);
+            }
+
+
+            ////////////////////////////////////////////////////////////////////////////
+            //Configuration
+
+            private function onShowConfigurationManagement(event:Event = null):void
+            {
+                PopUpManager.addPopUp(this._configurationManagement, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._configurationManagement);
+
+                this._configurationManagement.init();
+            }
+
+            private function onCloseConfigurationManagement(event:Event = null):void
+            {
+                PopUpManager.removePopUp(this._configurationManagement);
+            }
+
+            /**
+             * Starts the Configuration check logic, when Abicloud launches. The logic is as follows:
+             * 1. Check if this is a registered copy of Abicloud
+             * 2. If it is not, invite user to do so.
+             * 3. If it is, check the current Heartbeating status
+             * 4. If enabled, the Configuration logic is done. If not enabled, invite user to enable it
+             */
+            private var registrationInfoChange:ChangeWatcher;
+
+            private var heartbeatingStatusChange:ChangeWatcher;
+
+            private function startConfigurationLogic():void
+            {
+                //Register Configuration related events
+                registrationInfoChange = ChangeWatcher.watch(AbiCloudModel.getInstance().configurationManager,
+                                                             "registration", onRegistrationInfoChange);
+                heartbeatingStatusChange = ChangeWatcher.watch(AbiCloudModel.getInstance().configurationManager,
+                                                               "isHeartbeatEnabled",
+                                                               onHeartbeatStatusChange);
+                AbiCloudModel.getInstance().configurationManager.addEventListener(ConfigurationEvent.SHOW_REGISTRATION_REMINDER_SCREEN,
+                                                                                  onShowRegistrationReminderScreen);
+                AbiCloudModel.getInstance().configurationManager.addEventListener(ConfigurationEvent.SHOW_HEARTBEAT_REMINDER_SCREEN,
+                                                                                  onShowHeartbeatReminderScreen);
+
+                //Request the Registration information
+                var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_REGISTRATION_INFO);
+                dispatchEvent(configurationEvent);
+            }
+
+
+            /**
+             * Handler called when the Registration info has changed
+             */
+            private function onRegistrationInfoChange(event:Event):void
+            {
+                registrationInfoChange.unwatch();
+
+                if (AbiCloudModel.getInstance().configurationManager.registration == null)
+                {
+                    //If this Abicloud is not yet registered, we ask if we have to present the Registration Reminder screen
+                    var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.ASK_FOR_REGISTRATION_REMINDER_SCREEN);
+                    dispatchEvent(configurationEvent);
+                }
+
+                //Request Heartbeating status
+                configurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_HEARTBEAT_STATUS);
+                dispatchEvent(configurationEvent);
+            }
+
+            /**
+             * Handler called when the Heartbeat status change
+             */
+            private function onHeartbeatStatusChange(event:Event):void
+            {
+                heartbeatingStatusChange.unwatch();
+
+                if (!AbiCloudModel.getInstance().configurationManager.isHeartbeatEnabled)
+                {
+                    //If Heartbeating is not enabled, ask if we have to present the Heartbeating Reminder screen
+                    var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.ASK_FOR_HEARTBEAT_REMINDER_SCREEN);
+                    dispatchEvent(configurationEvent);
+                }
+            }
+
+            /**
+             * When required, we show the registration reminder screen
+             */
+            private var _registrationReminder:RegistrationReminder;
+
+            private function onShowRegistrationReminderScreen(event:Event):void
+            {
+                this._registrationReminder = new RegistrationReminder();
+                this._registrationReminder.addEventListener("RegistrationReminderClose",
+                                                            onRegistrationReminderClose);
+                this._registrationReminder.addEventListener("RegistrationReminderGoToRegistration",
+                                                            onRegistrationReminderGoToRegistration);
+                if (this._isShowingReminder)
+                {
+                    //We cannot show this reminder now
+                    this._pendingReminders.push(this._registrationReminder);
+                }
+                else
+                {
+                    //We can show this reminder now
+                    this._isShowingReminder = true;
+                    PopUpManager.addPopUp(this._registrationReminder, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(this._registrationReminder);
+                }
+            }
+
+            private function removeRegistrationReminder():void
+            {
+                this._isShowingReminder = false;
+                PopUpManager.removePopUp(this._registrationReminder);
+                this._registrationReminder.removeEventListener("RegistrationReminderClose",
+                                                               onRegistrationReminderClose);
+                this._registrationReminder.removeEventListener("RegistrationReminderGoToRegistration",
+                                                               onRegistrationReminderGoToRegistration);
+                this._registrationReminder = null;
+            }
+
+            private function onRegistrationReminderClose(event:Event):void
+            {
+                removeRegistrationReminder();
+                checkPendingReminders();
+            }
+
+            private function onRegistrationReminderGoToRegistration(event:Event):void
+            {
+                removeRegistrationReminder();
+                onShowConfigurationManagement();
+            }
+
+            /**
+             * When required, we show the Hearbeat reminder screen
+             */
+            private var _heartbeatReminder:HeartbeatReminder;
+
+            private function onShowHeartbeatReminderScreen(event:Event):void
+            {
+                this._heartbeatReminder = new HeartbeatReminder();
+                this._heartbeatReminder.addEventListener("HeartbeatReminderClose",
+                                                         onHeartbeatReminderClose);
+                this._heartbeatReminder.addEventListener("HeartbeatReminderGoToHeartbeating",
+                                                         onHeartbeatReminderGoToHearbeating);
+
+                if (this._isShowingReminder)
+                {
+                    //We cannot show it now
+                    this._pendingReminders.push(this._heartbeatReminder);
+                }
+                else
+                {
+                    //We can show it now
+                    this._isShowingReminder = true;
+                    PopUpManager.addPopUp(this._heartbeatReminder, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(this._heartbeatReminder);
+                }
+
+            }
+
+            private function removeHeartbeatReminder():void
+            {
+                this._isShowingReminder = false;
+                PopUpManager.removePopUp(this._heartbeatReminder);
+//                this._heartbeatReminder.removeEventListener("HeartbeatReminderClose", onHeartbeatReminderClose);
+                this._heartbeatReminder.removeEventListener("HeartbeatReminderGoToHeartbeating",
+                                                            onHeartbeatReminderGoToHearbeating);
+                this._heartbeatReminder = null;
+            }
+
+            private function onHeartbeatReminderGoToHearbeating(event:Event):void
+            {
+                removeHeartbeatReminder();
+                onShowConfigurationManagement();
+
+                this._configurationManagement.showHearbeating();
+            }
+
+            private function onHeartbeatReminderClose(event:Event):void
+            {
+                removeHeartbeatReminder();
+                checkPendingReminders();
+            }
+
+            /**
+             * Checks if a pending reminder exists, and shows it
+             */
+            private function checkPendingReminders():void
+            {
+                if (this._pendingReminders.length > 0)
+                {
+                    var reminder:UIComponent = this._pendingReminders.pop() as UIComponent;
+
+                    //Showing the pending reminder
+                    PopUpManager.addPopUp(reminder, Application.application as DisplayObject,
+                                          true);
+                    PopUpManager.centerPopUp(reminder);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Canvas 
+        left="6" right="6" top="6" bottom="29"
+        styleName="MainWindow">
+
+        <!-- Header -->
+        <main:SecurableHeader id="securableHeader"
+            height="64"
+            left="0" right="0" top="0"
+            headerLogo="{this._headerLogo}"/>
+
+        <!-- Body -->
+
+        <!-- All components in the Body ViewStack implement IBodyComponent interface -->
+        <mx:ViewStack id="body"
+            left="13" right="13" top="64" bottom="13"
+            creationPolicy="auto" selectedIndex="{this._currentBodyIndex}">
+
+            <main:Dashboard/>
+
+            <infrastructure:Index/>
+
+            <virtualappliance:Index/>
+
+            <virtualimage:Index/>
+
+            <user:Index/>
+
+            <metering:Index/>
+
+        </mx:ViewStack>
+
+    </mx:Canvas>
+
+    <!-- Footer -->
+    <main:Footer 
+        height="24"
+        left="8" right="8" bottom="0"/>
+</mx:Canvas>

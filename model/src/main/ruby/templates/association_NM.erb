@@ -1,0 +1,51 @@
+static final String <%= @n.upcase %>_ASSOCIATION_TABLE = "<%= @n.peroperty%>_<%= @m.property %>";
+public static final String <%= @n.upcase %>_PROPERTY = "<%= @n.property %>";
+static final String <%= @n.upcase %>_ID_COLUMN = "id<%= @n.camelcase_first_update %>";
+static final String <%= @m.upcase %>_ID_COLUMN = "<%= @m.camelcase_first_update %>";
+
+@ManyToMany(fetch=FetchType.LAZY)
+@JoinTable(
+      name=<%= @n.upcase %>_ASSOCIATION_TABLE, 
+      joinColumns={@JoinColumn(name=<%= @m.upcase %>_ID_COLUMN)},
+      inverseJoinColumns={@JoinColumn(name=<%= @n.upcase %>_ID_COLUMN)}
+    )
+  private List<<%= @m.class_name %>> <%= @n.property %> = new ArrayList<<%= @m.class_name %>>();
+
+  public List<<%= @m.class_name %>> get<%= @n.camelcase_first_update %>() {
+      return Collections.unmodifiableList(this.<%= @property%>);
+  }
+
+  /* package */ void private_addTo<%= @n.camelcase_first_update %>(<%= @m.class_name %> value) {
+      this.<%= @n.property %>.add(value);
+  }
+
+  /* package */ void private_removeFrom<%= @n.camelcase_first_update %>(<%= @m.class_name %> value) {
+      this.<%= @n.property %>.remove(value);
+  }
+
+
+//code in ${M_CLASS}
+public static final String ${M_PROPERTY_ALL_UPPERCASE}_PROPERTY = "${M_PROPERTY_LOWERCASE}";
+
+@ManyToMany( mappedBy=${N_CLASS}.${N_PROPERTY_ALL_UPPERCASE}_PROPERTY, fetch=FetchType.LAZY ) 
+private List<${N_CLASS}> ${M_PROPERTY_LOWERCASE} = new ArrayList<${N_CLASS}>();
+
+@Required(value=true)
+public List<${N_CLASS}> get${M_PROPERTY_UPPERCASE}() {
+  return Collections.unmodifiableList(this.${M_PROPERTY_LOWERCASE});
+}
+
+public static boolean isValid${M_PROPERTY_UPPERCASE}( List<${N_CLASS}> value) {
+  return isValidPropert(${M_PROPERTY_ALL_UPPERCASE}_PROPERTY, value);
+}
+
+
+public void addTo${M_PROPERTY_UPPERCASE}( ${N_CLASS} value ) {
+  this.${M_PROPERTY_LOWERCASE}.add(value);
+  value.private_addTo${N_PROPERTY_UPPERCASE}(this);
+}
+
+public void removeFrom${M_PROPERTY_UPPERCASE}( ${N_CLASS} value ) {
+  this.${M_PROPERTY_LOWERCASE}.remove(value);
+  value.private_removeFrom${N_PROPERTY_UPPERCASE}(this);    
+}

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="10"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+            import mx.collections.ArrayCollection;
+            import mx.core.Application;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+            import net.undf.abicloud.vo.networking.IPPoolManagement;
+            import net.undf.abicloud.vo.networking.NetworkConfiguration;
+            import net.undf.abicloud.vo.networking.VlanNetwork;
+            import net.undf.abicloud.vo.result.ListRequest;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+            private const IP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_network_numberIpAdressesPerPage.value;
+
+            //Object to obtain the list of NICs filtered and paginated
+            private var listRequest:ListRequest;
+
+            //Total number of IPs that match the listRequest
+            [Bindable]
+            private var totalNumIPs:int;
+
+            //Array of IPAddress with the available IPs for this VDC and selected VLAN
+            [Bindable]
+            private var availableIP:ArrayCollection;
+
+            [Bindable]
+            private var _virtualDatacenter:VirtualDataCenter;
+
+            //The VirtualMachine to assign a new NIC
+            private var _virtualMachine:VirtualMachine;
+
+
+            public function get vlanNetwork():VlanNetwork
+            {
+                if (vlanList.selectedIndex > -1)
+                {
+                    return vlanList.selectedItem as VlanNetwork;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            public function init(virtualDatacenter:VirtualDataCenter, virtualMachine:VirtualMachine):void
+            {
+                _virtualDatacenter = virtualDatacenter;
+                _virtualMachine = virtualMachine;
+                availableIP = new ArrayCollection();
+                cleanFilteringOptions();
+            }
+
+            private function cleanFilteringOptions():void
+            {
+                listRequest = new ListRequest();
+                listRequest.numberOfNodes = IP_RESULTS_PER_PAGE;
+
+                ipFilter.text = "";
+                ipPaginator.value = 1;
+            }
+
+            private function onClickVLANList():void
+            {
+                if (vlanList.selectedIndex > -1)
+                {
+                    cleanFilteringOptions();
+                    requestIPAddresses();
+                }
+            }
+
+            private function requestIPAddresses():void
+            {
+                listRequest.offset = (ipPaginator.value - 1) * IP_RESULTS_PER_PAGE;
+                listRequest.filterLike = ipFilter.text;
+
+                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+                event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
+                event.listRequest = listRequest;
+                event.callback = setAvailablePrivateIPAddresses;
+                dispatchEvent(event);
+            }
+
+            public function setAvailablePrivateIPAddresses(list:ArrayCollection,
+                                                           totalNumEntities:int):void
+            {
+                availableIP = list;
+                totalNumIPs = totalNumEntities;
+            }
+
+            //////////////////////////////////
+            //Filtering, sorting and paginator
+
+            private function onKeyDownIpFilter(event:KeyboardEvent):void
+            {
+                //If user presses the Enter key, we launch the filter
+                if (event.keyCode == 13)
+                    requestIPAddresses();
+            }
+
+            private var _isIpPaginatorMouseDown:Boolean = false;
+
+            private function onMouseDownIpPaginator():void
+            {
+                _isIpPaginatorMouseDown = true;
+                Application.application.systemManager.addEventListener(MouseEvent.MOUSE_UP,
+                                                                       onMouseUpIpPaginator);
+            }
+
+            private function onMouseUpIpPaginator(mouseEvent:MouseEvent):void
+            {
+                _isIpPaginatorMouseDown = false;
+                Application.application.systemManager.removeEventListener(MouseEvent.MOUSE_UP,
+                                                                          onMouseUpIpPaginator);
+                onChangeIpPaginator();
+            }
+
+            private function onChangeIpPaginator():void
+            {
+                if (!_isIpPaginatorMouseDown)
+                {
+                    requestIPAddresses();
+                }
+            }
+
+            //////////////////////////////////
+
+            private function onAccept():void
+            {
+                //Assign the selected NIC to the Virtual Machine
+                /* var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE);
+                event.ipPoolManagement = availableIPList.selectedItem as IPPoolManagement;
+                event.virtualMachine = _virtualMachine;
+                dispatchEvent(event);
+
+                close(); */
+                dispatchEvent(new Event("onAssignNicToVirtualMachine"));
+            }
+
+            public function close():void
+            {
+                dispatchEvent(new Event("close"));
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        height="300"
+        horizontalGap="10"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0">
+
+        <general:GeneralSubPanel 
+            width="200" height="100%"
+            title="@Resource(bundle='Networking', key='LABEL_NETWORKS')">
+
+            <mx:List id="vlanList"
+                width="100%" height="100%"
+                borderStyle="none"
+                styleName="ListFull" labelField="networkName"
+                dataProvider="{_virtualDatacenter.network.networks}"
+                click="onClickVLANList()"/>
+        </general:GeneralSubPanel>
+
+        <general:GeneralSubPanel 
+            width="200" height="100%"
+            verticalAlign="middle"
+            verticalGap="-1"
+            title="{ResourceManager.getInstance().getString('Networking', 'LABEL_AVAILABLE_IP').toUpperCase()}">
+
+            <mx:HBox 
+                width="100%" height="32"
+                paddingLeft="6"
+                paddingRight="6"
+                verticalAlign="middle"
+                styleName="GeneralDataPanelTopFullSkin">
+
+                <mx:Spacer width="100%"/>
+
+                <mx:Image id="privateNICSelectorMagnifier"
+                	creationComplete="AbicloudUtils.getImageFromStyle('PrivateNICSelectorMagnifier', privateNICSelectorMagnifier)"
+                	/>
+
+                <mx:TextInput id="ipFilter"
+                    height="20"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+                    keyDown="onKeyDownIpFilter(event)"/>
+
+            </mx:HBox>
+
+            <mx:List id="availableIPList"
+                width="100%" height="100%"
+                dataProvider="{availableIP}">
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:HBox 
+                            backgroundAlpha="0"
+                            paddingBottom="0"
+                            paddingLeft="0"
+                            paddingRight="0"
+                            paddingTop="0"
+                            horizontalScrollPolicy="off"
+                            verticalScrollPolicy="off">
+                            <mx:Script>
+                                <![CDATA[
+                                	import net.undf.abicloud.utils.AbicloudUtils;
+                                    import net.undf.abicloud.vo.networking.IPPoolManagement;
+                                    import net.undf.abicloud.vo.networking.VlanNetwork;
+                                ]]>
+                            </mx:Script>
+                            <mx:Label 
+                                truncateToFit="true"
+                                text="{IPPoolManagement(data).ip}"/>
+
+                            <utils:SmoothImage
+                            	id="privateNICSelectorWorld"
+                            	creationComplete="AbicloudUtils.getImageFromStyle('PrivateNICSelectorWorld', privateNICSelectorWorld)" 
+                                toolTip="Gateway"
+                                visible="{parentDocument.vlanNetwork != null &amp;&amp;
+								VlanNetwork(parentDocument.vlanNetwork).configuration.gateway == IPPoolManagement(data).ip}"/>
+                        </mx:HBox>
+                    </mx:Component>
+                </mx:itemRenderer>
+            </mx:List>
+
+            <mx:Canvas 
+                width="100%" height="32"
+                styleName="GeneralDataPanelBottomSkin">
+                <mx:Label 
+                    top="2"
+                    horizontalCenter="0"
+                    text="{ipPaginator.value + ' ' +
+					ResourceManager.getInstance().getString('Networking', 'LABEL_OF') + ' ' +
+					(int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE)) > 0 ? 
+					int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE)) : '1')}"/>
+
+                <mx:HSlider id="ipPaginator"
+                    bottom="3"
+                    horizontalCenter="0"
+                    minimum="1" snapInterval="1"
+                    maximum="{int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE))}"
+                    liveDragging="true" showDataTip="false"
+                    change="onChangeIpPaginator()"
+                    mouseDown="onMouseDownIpPaginator()"/>
+            </mx:Canvas>
+        </general:GeneralSubPanel>
+    </mx:HBox>
+
+    <!-- BUTTONS -->
+    <mx:HBox 
+        width="100%"
+        horizontalAlign="center">
+        <mx:Button id="acceptButton"
+            height="18"
+            enabled="{availableIPList.selectedIndex > -1}"
+            label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+            click="onAccept()"/>
+
+        <mx:Button id="cancelButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+            styleName="AlternativeButton"
+            click="close()"/>
+    </mx:HBox>
+
+</mx:VBox>

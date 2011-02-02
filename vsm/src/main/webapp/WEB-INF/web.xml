@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+	<display-name>Abiquo Virtual System Monitor</display-name>
+
+	<!-- Listeners -->
+
+	<listener>
+		<listener-class>com.abiquo.vsm.web.listener.LicenseContextListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>com.abiquo.vsm.web.listener.JInteropLoggingListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>com.abiquo.vsm.web.listener.VSMListener</listener-class>
+	</listener>
+
+	<!-- Servlets -->
+
+	<servlet>
+		<servlet-name>CheckServlet</servlet-name>
+		<servlet-class>com.abiquo.vsm.web.servlet.CheckServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>ConsoleServlet</servlet-name>
+		<servlet-class>com.abiquo.vsm.web.servlet.ConsoleServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>RestServlet</servlet-name>
+		<servlet-class>org.apache.wink.server.internal.servlet.RestServlet</servlet-class>
+		<init-param>
+			<param-name>applicationConfigLocation</param-name>
+			<param-value>/WEB-INF/wink.config</param-value>
+		</init-param>
+	</servlet>
+	
+	<!-- Servlet mappings -->
+
+	<servlet-mapping>
+		<servlet-name>CheckServlet</servlet-name>
+		<url-pattern>/check</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>ConsoleServlet</servlet-name>
+		<url-pattern>/console</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+        <servlet-name>RestServlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

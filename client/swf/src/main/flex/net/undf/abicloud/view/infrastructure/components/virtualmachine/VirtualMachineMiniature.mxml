@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:Canvas 
+    width="151" height="151"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    rollOver="onRollOver()"
+    rollOut="onRollOut()"
+    mouseDown="onMouseDownVirtualMachineMiniature()"
+    mouseUp="onMouseUpVirtualMachineMiniature()"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import net.undf.abicloud.view.main.StateIcons;
+            import mx.controls.Alert;
+            import mx.controls.Image;
+            import mx.core.Application;
+            import mx.core.DragSource;
+            import mx.events.CloseEvent;
+            import mx.events.ItemClickEvent;
+            import mx.managers.DragManager;
+            import mx.resources.IResourceManager;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.utils.customtree.CustomTreeNode;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.infrastructure.InfrastructureElement;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+
+
+            private static const DEFAULT_WIDTH:int = 150;
+
+            private static const DEFAULT_HEIGHT:int = 150;
+
+            //The Virtual Machine that this VirtualMachineIcon represents
+            [Bindable]
+            private var _virtualMachine:VirtualMachine;
+
+
+            override public function set data(value:Object):void
+            {
+                super.data = value;
+
+                if (value && value is VirtualMachine)
+                    virtualMachine = data as VirtualMachine;
+            }
+
+            public function set virtualMachine(vM:VirtualMachine):void
+            {
+                this._virtualMachine = vM;
+            }
+
+            public function get virtualMachine():VirtualMachine
+            {
+                return this._virtualMachine;
+            }
+
+            /**
+             * Changes the size of this component by a multiplier
+             **/
+            public function set sizeMultiplier(multiplier:Number):void
+            {
+                this.width = DEFAULT_WIDTH * multiplier;
+                this.height = DEFAULT_HEIGHT * multiplier;
+            }
+
+            private function onRollOver():void
+            {
+                if (this._virtualMachine != null && this._virtualMachine.state.id != State.IN_PROGRESS)
+                {
+                    buttonsContainer.visible = true;
+                }
+            }
+
+            private function onRollOut():void
+            {
+                buttonsContainer.visible = false;
+            }
+
+            //////////////////////////////////////////
+            // DRAG & DROP FUNCTIONALITY
+
+            /**
+             * Register Mouse Move events, to know if user wants to start a drag operation
+             */
+            private function onMouseDownVirtualMachineMiniature():void
+            {
+                if (this._virtualMachine.state.id != State.IN_PROGRESS)
+                    this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+            }
+
+            private function onMouseUpVirtualMachineMiniature():void
+            {
+                this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+            }
+
+            /**
+             * Initializes a Drag operation
+             */
+            private function onMouseMove(mouseEvent:MouseEvent):void
+            {
+                //We don't need this handlers until user wants to initate another Drag operation
+                this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+
+                //To be able to interact with a CustomTree in a Drag Drop operation, we have to encapsulate the data
+                //in a CustomTreeNode
+                var customTreeNode:CustomTreeNode = new CustomTreeNode(this._virtualMachine);
+
+                var dragSource:DragSource = new DragSource();
+                dragSource.addData(customTreeNode, "CustomTreeNode");
+
+                var dragProxy:Image = new Image();
+                dragProxy.source = virtualMachineIcon.source;
+                dragProxy.width = virtualMachineIcon.width;
+                dragProxy.height = virtualMachineIcon.height;
+
+                DragManager.doDrag(this, dragSource, mouseEvent, dragProxy);
+            }
+
+
+            /**
+             * Performs a "Start" or "Shutdown" action in the Virtual Machine
+             */
+            private function onClickPowerOnOffButton(mouseEvent:MouseEvent):void
+            {
+                mouseEvent.stopImmediatePropagation();
+
+                if (_virtualMachine.state.id == State.RUNNING || _virtualMachine.state.id == State.PAUSED)
+                {
+                    //The Virtual Machine is running. Asking user for confirmation
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_SHUTDOWN_VIRTUALMACHINE_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_SHUTDOWN_VIRTUALMACHINE_TEXT"),
+                                            Alert.YES | Alert.NO,
+                                            powerOffVirtualMachine);
+                }
+                else
+                {
+                    //The Virtual Appliance is powered off We proceed to power it on
+                    powerOnVirtualMachine();
+                }
+            }
+
+            private function powerOnVirtualMachine():void
+            {
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+
+                event.infrastructureElement = this._virtualMachine;
+                dispatchEvent(event);
+            }
+
+            private function powerOffVirtualMachine(closeEvent:CloseEvent = null):void
+            {
+                if (!closeEvent || closeEvent.detail == Alert.YES)
+                {
+                    //No confirmation required or user confirmed the power off
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE);
+
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+
+            /**
+             * Performs a "Shutdown" action in the Virtual Machine
+             **/
+            private function onClickPauseButton(mouseEvent:MouseEvent):void
+            {
+                mouseEvent.stopImmediatePropagation();
+                //Pause action is not supported with XEN Hypervisors
+                if (HyperVisor(_virtualMachine.assignedTo).type.id == HyperVisorType.XEN)
+                {
+                    AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_PAUSE_NOTSUPPORTED_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_PAUSE_NOTSUPPORTED_TEXT"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    var event:InfrastructureEvent;
+
+                    if (_virtualMachine.state.id == State.PAUSED)
+                    {
+                        //The virtual machine is paused. We proceed to resume it
+                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+                    }
+                    else if (_virtualMachine.state.id == State.RUNNING)
+                    {
+                        //The virtual machine is running. We procced to pause it
+                        event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE);
+                    }
+
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Performs a "Reboot" action in the Virtual Machine
+             **/
+            private function onClickRebootButton(mouseEvent:MouseEvent):void
+            {
+                mouseEvent.stopImmediatePropagation();
+
+                //Asking confirmation
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_REBOOT_VIRTUALMACHINE_HEADER"),
+                                        ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_REBOOT_VIRTUALMACHINE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        rebootVirtualMachine);
+
+
+            }
+
+            private function rebootVirtualMachine(closeEvent:CloseEvent):void
+            {
+                if (!closeEvent || closeEvent.detail == Alert.YES)
+                {
+                    //No confirmation required or user confirmed the reboot
+                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE);
+                    event.infrastructureElement = this._virtualMachine;
+                    dispatchEvent(event);
+                }
+            }
+
+            /**
+             * Initalizes a remote access Session against this Virtual Machine
+             */
+            private function onClickAccessRemoteButton(event:MouseEvent):void
+            {
+                event.stopImmediatePropagation();
+
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
+                {
+                    //This hypervisor type does not support graphical remote access
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_REMOTEACCESS_NOTSUPPORTED_HEADER"),
+                                            ResourceManager.getInstance().getString("Infrastructure",
+                                                                                    "ALERT_REMOTEACCESS_NOTSUPPORTED_TEXT"),
+                                            Alert.OK);
+                }
+                else
+                {
+                    //Check user screen resolution for java applet size
+                    var appletWidth:int;
+                    var appletHeight:int;
+                    if (Application.application.width <= 1024)
+                    {
+                        appletWidth = 800;
+                        appletHeight = 600;
+                    }
+                    else
+                    {
+                        appletWidth = 1024;
+                        appletHeight = 768;
+                    }
+
+                    var appletURL:String;
+                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX)
+                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" + this._virtualMachine.vdrpIP + "&vrdpPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+                    else
+                        appletURL = "tightvnc/tightvnc.html?vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+
+                    if (event.shiftKey)
+                    {
+                        //Open Java applet in new window
+                        navigateToURL(new URLRequest(appletURL), "_blank");
+                    }
+                    else
+                    {
+                        //Open Java applet using an iFrame in the same app window
+                        ExternalInterface.call("loadRemoteAccessJavaClient", appletURL);
+                    }
+                }
+            }
+
+            /**
+             * Forces refresh when a Virtual Machine is in state of progress
+             */
+            private function onClickForceRefreshStateButton():void
+            {
+                //Announcing that user wants to force refresh
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.FORCE_REFRESH_VIRTUAL_MACHINE_STATE);
+                event.infrastructureElement = this._virtualMachine;
+                dispatchEvent(event);
+            }
+
+            private function doZoom(event:MouseEvent):void
+            {
+                if (this.enabled)
+                {
+                    if (zoomAll.isPlaying)
+                        zoomAll.reverse();
+                    else
+                        // If this is a ROLL_OUT event, play the effect backwards. 
+                        // If this is a ROLL_OVER event, play the effect forwards.
+                        zoomAll.play([ busyIcon ], event.type == MouseEvent.ROLL_OUT ? true : false);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Zoom id="zoomAll"
+        duration="400"
+        zoomWidthTo="1.4"
+        zoomHeightTo="1.4"
+        zoomWidthFrom="1"
+        zoomHeightFrom="1"/>
+
+    <mx:Canvas 
+        left="1" right="1" top="1" bottom="1"
+        styleName="VirtualMachineMiniatureCanvas1"
+        verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
+        <utils:SmoothImage id="virtualMachineIcon"
+            left="30" right="10" top="5" bottom="20"
+            horizontalCenter="0"
+            verticalCenter="0"
+            creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineIcon',virtualMachineIcon)"
+            scaleContent="true"
+            maintainAspectRatio="true"/>
+
+        <mx:Label 
+            bottom="5"
+			styleName="VirtualMachineLabel1"
+            horizontalCenter="0"
+            text="{_virtualMachine.name}"/>
+
+        <utils:SmoothImage 
+            width="14" height="14"
+            right="10" top="10"
+            source="{ (_virtualMachine.state.id == State.RUNNING) ? StateIcons.RUNNING :
+					  ((_virtualMachine.state.id == State.PAUSED) ? StateIcons.PAUSED : 
+					  StateIcons.STOPPED)
+				    }"
+            visible="{this._virtualMachine.state.id != State.IN_PROGRESS}"/>
+
+        <mx:SWFLoader id="busyIcon"
+            width="80" height="80"
+            horizontalCenter="0"
+            verticalCenter="-10"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualMachineBusyIcon', busyIcon)"
+            toolTip="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
+            visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"
+            buttonMode="true"
+            useHandCursor="true"
+            mouseChildren="false"
+            click="onClickForceRefreshStateButton()"
+            rollOver="doZoom(event)"
+            rollOut="doZoom(event)"/>
+
+        <!--mx:SWFLoader id="busyIcon"
+             source="assets/application/icons/loading_small.swf" scaleContent="true" maintainAspectRatio="true"
+             right="10" top="10" width="14" height="14"
+             visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"/ -->
+
+        <!--mx:Button height="18" bottom="25" horizontalCenter="0" styleName="AlternativeButton"
+             label="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
+             visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"
+             click="onClickForceRefreshStateButton()"/-->
+
+        <mx:HBox id="buttonsContainer"
+            width="100%" height="20%"
+            styleName="VirtualMachineButtonsContainer"
+            horizontalGap="0"
+            verticalAlign="middle"
+            verticalCenter="0"
+            hideEffect="{fadeOut}"
+            showEffect="{fadeIn}"
+            enabled="{this._virtualMachine.state.id != State.IN_PROGRESS}"
+            visible="false">
+
+            <mx:Button id="powerOnOffButton"
+                styleName="PowerOnOffButtonSmall"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.POWERED_OFF)}"
+                selected="{_virtualMachine.state.id == State.RUNNING}"
+                click="onClickPowerOnOffButton(event)"/>
+
+            <mx:Button id="pauseButton"
+                styleName="PauseButtonSmall"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (_virtualMachine.state.id == State.PAUSED || _virtualMachine.state.id == State.RUNNING)}"
+                selected="{_virtualMachine.state.id == State.PAUSED}"
+                click="onClickPauseButton(event)"/>
+
+            <mx:Button id="rebootButton"
+                styleName="RebootButtonSmall"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; _virtualMachine.state.id == State.RUNNING}"
+                click="onClickRebootButton(event)"/>
+
+            <mx:Spacer width="100%"/>
+
+            <mx:Button id="accessRemoteButton"
+                styleName="RemoteAccessButtonTransparent"
+                enabled="{this._virtualMachine.vdrpIP != null &amp;&amp; (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
+                click="onClickAccessRemoteButton(event)"/>
+        </mx:HBox>
+
+    </mx:Canvas>
+
+    <mx:Fade id="fadeOut"
+        duration="300"
+        alphaFrom="1.0"
+        alphaTo="0.0"/>
+    <mx:Fade id="fadeIn"
+        duration="300"
+        alphaFrom="0.0"
+        alphaTo="1.0"/>
+
+</mx:Canvas>

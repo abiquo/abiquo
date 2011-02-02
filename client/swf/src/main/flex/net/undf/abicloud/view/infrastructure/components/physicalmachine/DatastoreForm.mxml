@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.ComboBox;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.vo.infrastructure.Datastore;
+            import net.undf.abicloud.vo.infrastructure.HyperVisor;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+
+            //The Datastore being created or edited
+            private var _datastore:Datastore;
+
+            //The PhysicalMachine where the Datastore belongs
+            private var _physicalMachine:PhysicalMachine;
+
+            //The Hypervisor of the Physical Machine
+            private var _hypervisor:HyperVisor;
+
+            public function init(datastore:Datastore = null, physicalMachine:PhysicalMachine = null,
+                                 hypervisor:HyperVisor = null):void
+            {
+                _datastore = datastore;
+                _physicalMachine = physicalMachine;
+                _hypervisor = hypervisor;
+
+                if (_datastore)
+                {
+                    //Editing an existing Datastore
+                    titleText = ResourceManager.getInstance().getString('Infrastructure',
+                                                                        'POPUP_TITLE_DATASTORE_EDIT');
+
+                    //Setting values
+                    nameInput.text = _datastore.name;
+                    uuidInput.text = _datastore.UUID;
+
+                    directoryInput.text = _datastore.directory;
+                    
+                    if (_hypervisor && (_hypervisor.type.id == HyperVisorType.XENSERVER || _hypervisor.type.id == HyperVisorType.VMX))
+                    {
+                        disableFields();
+                        
+                    }
+                    
+                    if (_datastore.size / sizeSelector.selectedItem.conversion > 0)
+                    {
+                        sizeSelector.selectedIndex = 1;
+                        usedSizeSelector.selectedIndex = 1;
+                    }
+                    else
+                    {
+                        sizeSelector.selectedIndex = 0;
+                        usedSizeSelector.selectedIndex = 0;
+                    }
+
+                    sizeInput.value = _datastore.size / sizeSelector.selectedItem.conversion;
+                    usedSizeInput.value = _datastore.usedSize / usedSizeSelector.selectedItem.conversion;
+                    enabledInput.selected = _datastore.enabled;
+                }
+                else
+                {
+                    //Create a new Datastore
+                    titleText = ResourceManager.getInstance().getString('Infrastructure',
+                                                                        'POPUP_TITLE_DATASTORE_ADD');
+
+                    //Cleaning form
+                    nameInput.text = "";
+                    uuidInput.text = "";
+                    directoryInput.text = "";
+                    directoryInput.editable = true;
+                    sizeSelector.selectedIndex = 1;
+                    sizeInput.value = 0;
+                    usedSizeSelector.selectedIndex = 1;
+                    usedSizeInput.value = 0;
+                    enabledInput.selected = false;
+                }
+
+                validateForm();
+                nameInput.setFocus();
+            }
+            
+            //Disable fields in case of specifics hypervisors
+            private function disableFields():void{
+            	nameInput.editable = false;
+                uuidInput.editable = false;
+                directoryInput.editable = false;                
+				sizeInput.enabled = false;
+				sizeSelector.enabled = false;
+				usedSizeInput.enabled = false;
+				usedSizeSelector.enabled = false;
+            }
+
+            private function validateForm():void
+            {
+                if (nameInput.text.length > 0 && uuidInput.text.length > 0)
+                    acceptButton.enabled = true;
+                else
+                    acceptButton.enabled = false;
+            }
+
+            private function onAccept():void
+            {
+                if (_datastore)
+                {
+                    dispatchEvent(new Event("datastoreFormEdit"));
+                }
+                else
+                {
+                    dispatchEvent(new Event("datastoreFormCreate"));
+                }
+            }
+
+            private function close():void
+            {
+                dispatchEvent(new Event("datastoreFormClose"));
+            }
+
+            public function get datastore():Datastore
+            {
+                if (_datastore)
+                {
+                    _datastore.name = nameInput.text;
+                    _datastore.UUID = uuidInput.text;
+                    _datastore.directory = directoryInput.text;
+                    _datastore.size = sizeInput.value * sizeSelector.selectedItem.conversion; //Sent in Bytes
+                    _datastore.usedSize = usedSizeInput.value * usedSizeSelector.selectedItem.conversion; //Sent in Bytes
+                    _datastore.enabled = enabledInput.selected;
+
+                    return _datastore;
+                }
+                else
+                {
+                    var datastore:Datastore = new Datastore();
+
+                    datastore.name = nameInput.text;
+                    datastore.UUID = uuidInput.text;
+                    datastore.directory = directoryInput.text;
+                    datastore.size = sizeInput.value * sizeSelector.selectedItem.conversion; //Sent in Bytes
+                    datastore.usedSize = usedSizeInput.value * usedSizeSelector.selectedItem.conversion; //Sent in Bytes
+                    datastore.shared = false;
+                    datastore.enabled = enabledInput.selected;
+
+                    return datastore;
+                }
+            }
+
+            public function get datastoreyCopy():Datastore
+            {
+                if (_datastore)
+                {
+                    var datastore:Datastore = ObjectUtil.copy(_datastore) as Datastore;
+
+                    datastore.name = nameInput.text;
+                    datastore.UUID = uuidInput.text;
+                    datastore.directory = directoryInput.text;
+                    datastore.size = sizeInput.value * sizeSelector.selectedItem.conversion; //Sent in Bytes
+                    datastore.usedSize = usedSizeInput.value * usedSizeSelector.selectedItem.conversion; //Sent in Bytes
+                    datastore.enabled = enabledInput.selected;
+
+                    return datastore;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                        onAccept();
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3">
+
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
+            required="true">
+            <mx:TextInput id="nameInput"
+                height="20"
+                maxChars="29"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='LABEL_DATASTORE_UUID')"
+            required="true">
+            <mx:TextInput id="uuidInput"
+                height="20"
+                maxChars="29"
+                change="validateForm()"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_DIRECTORY')">
+            <mx:TextInput id="directoryInput"
+                height="20"
+                maxChars="128"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='LABEL_SIZE')"
+            direction="horizontal">
+            <mx:NumericStepper id="sizeInput"
+                width="100" height="20"
+                minimum="0" maximum="{sizeSelector.selectedItem.maximum}"
+                stepSize="{sizeSelector.selectedItem.stepSize}"/>
+
+            <mx:ComboBox id="sizeSelector"
+                width="80" height="18"
+                labelField="label"
+                dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+                selectedIndex="3"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='LABEL_USED')"
+            direction="horizontal">
+            <mx:NumericStepper id="usedSizeInput"
+                width="100" height="20"
+                minimum="0" maximum="{usedSizeSelector.selectedItem.maximum}"
+                stepSize="{usedSizeSelector.selectedItem.stepSize}"/>
+
+            <mx:ComboBox id="usedSizeSelector"
+                width="80" height="18"
+                labelField="label"
+                dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+                selectedIndex="3"/>
+        </mx:FormItem>
+
+        <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_ENABLED')">
+            <mx:CheckBox id="enabledInput"/>
+        </mx:FormItem>
+    </mx:Form>
+
+    <mx:HBox 
+        paddingBottom="10"
+        direction="horizontal">
+        <mx:Button id="acceptButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
+            click="onAccept()"/>
+
+        <mx:Button id="cancelButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
+            styleName="AlternativeButton"
+            click="close()"/>
+    </mx:HBox>
+</general:AbiCloudPopUp>

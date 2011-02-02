@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<script type="application/javascript">
+	var vrdpIP = 0;
+	var vrdpPort = 3389;
+	var width = 1024;
+	var height = 768;
+	var geometry = width + "x" + height;
+	
+	//Reading GET parameters
+	var urlParameters = document.location.search;
+		
+	if(urlParameters.length > 0)
+	{
+		urlParameters = urlParameters.split('?')[1];
+		urlParameters = urlParameters.split('&');
+			
+		for(var i = 0; i < urlParameters.length; i++)
+		{
+			var parameter = urlParameters[i];
+			var parameterName = parameter.split('=')[0];
+			var parameterValue = parameter.split('=')[1];
+				
+			if(parameterName == "vrdpIP")
+				vrdpIP = parameterValue;
+					
+			else if(parameterName == "vrdpPort")
+				vrdpPort = parameterValue;
+					
+			else if(parameterName == "width")
+				width = parameterValue;
+					
+			else if(parameterName == "height")
+				height = parameterValue;
+		}
+			
+		geometry = width + "x" + height;
+	}
+		
+	//Setting the title to this page
+	document.title = "VRDP session " + vrdpIP + ":" + vrdpPort;
+</script>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+</head>
+
+<body>
+
+	<script type="application/javascript">
+		var appletCode = "<applet code='net.propero.rdp.applet.RdpApplet.class'";
+		
+		appletCode += 	 "	archive='properJavaRDP-1.1.jar, properJavaRDP11-1.1.jar, properJavaRDP12-1.1.jar, properJavaRDP13-1.1.jar, properJavaRDP14-1.1.jar, java-getopt-1.0.13.jar, log4j-java1.1.jar'";
+		
+		appletCode +=	 "	name=\"properJavaRDP\" align=\"top' width=\"" + width + "\" height=\"" + 480 + "\">";
+		
+		appletCode +=	 "	<param name=\"code\" value=\"net.propero.rdp.applet.RdpApplet.class\">";
+		
+		appletCode +=	 " 	<param name=\"archive\" value=\"properJavaRDP-1.1.jar, properJavaRDP11-1.1.jar, properJavaRDP12-1.1.jar, properJavaRDP13-1.1.jar, properJavaRDP14-1.1.jar, java-getopt-1.0.13.jar, log4j-java1.1.jar\">";
+		
+		appletCode +=	 "	<param name=\"cabbase\" value=\"\">";
+		
+		appletCode +=	 "	<param name=\"name\" value=\"properJavaRDP\">";
+		
+		appletCode +=	 "	<param name=\"align\" value=\"top\">";
+		
+		appletCode +=	 "	<param name=\"server\" value=\"" + vrdpIP + "\">";
+		
+		appletCode +=	 "	<param name=\"port\" value=\"" + vrdpPort + "\">";
+		
+		appletCode +=	 "	<param name=\"width\" value=\"" + width + "\">";
+		
+		appletCode +=	 "	<param name=\"height\" value=\"" + height + "\">";
+		
+		appletCode +=	 "	<param name=\"geometry\" value=\"" + geometry + "\">";
+		
+		document.write(appletCode);
+	</script>  
+</body>
+</html>

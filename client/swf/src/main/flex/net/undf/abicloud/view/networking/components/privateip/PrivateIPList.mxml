@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="-1"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        
+            import mx.collections.ArrayCollection;
+            import mx.core.Application;
+            import mx.events.DataGridEvent;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.networking.virtualdatacenter.NetworkManagement;
+            import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+            import net.undf.abicloud.vo.networking.IPPoolManagement;
+            import net.undf.abicloud.vo.networking.VlanNetwork;
+            import net.undf.abicloud.vo.result.ListRequest;
+            import net.undf.abicloud.vo.user.Enterprise;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+			[Bindable]
+            private var IP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_network_numberIpAdressesPerPage.value;
+
+            private var networkManagement:NetworkManagement = null;
+
+            private var _enterprise:Enterprise;
+
+            public function set enterprise(value:Enterprise):void
+            {
+                _enterprise = value;
+            }
+
+            private var _virtualDatacenter:VirtualDataCenter;
+
+            public function set virtualDatacenter(value:VirtualDataCenter):void
+            {
+                _virtualDatacenter = value;
+            }
+
+            [Bindable]
+            private var _vlanNetwork:VlanNetwork;
+
+            public function get vlanNetwork():VlanNetwork
+            {
+                return _vlanNetwork;
+            }
+
+            public function set vlanNetwork(value:VlanNetwork):void
+            {
+                _vlanNetwork = value;
+            }
+
+            //Object to obtain the list of IPs filtered and paginated
+            private var listRequest:ListRequest;
+
+            //List of IPPoolManagement object
+            [Bindable]
+            private var ipList:ArrayCollection;
+
+            //Total number of private IPs that match the listRequest
+            [Bindable]
+            private var totalNumIPs:int;
+
+            public function init(enterprise:Enterprise = null, virtualDatacenter:VirtualDataCenter = null,
+                                 vlanNetwork:VlanNetwork = null):void
+            {
+            	
+            	IP_RESULTS_PER_PAGE = AbiCloudModel.getInstance().configurationManager.config.client_network_numberIpAdressesPerPage.value;
+            	
+                _enterprise = enterprise;
+                _virtualDatacenter = virtualDatacenter;
+                _vlanNetwork = vlanNetwork;
+
+
+                ipList = new ArrayCollection();
+                totalNumIPs = 0;
+
+                listRequest = new ListRequest();
+                listRequest.numberOfNodes = IP_RESULTS_PER_PAGE;
+
+                ipFilter.text = "";
+                ipPaginator.value = 1;
+
+                requestPrivateIP();
+            }
+
+
+            public function requestPrivateIP():void
+            {
+                var event:NetworkingEvent;
+                listRequest.offset = (ipPaginator.value - 1) * IP_RESULTS_PER_PAGE;
+                listRequest.filterLike = ipFilter.text;
+
+                if (_vlanNetwork != null)
+                {
+                    event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_VLAN);
+                    event.vlanNetwork = _vlanNetwork;
+                }
+                else if (_virtualDatacenter != null)
+                {
+                    event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_VDC);
+                    event.virtualDatacenter = _virtualDatacenter;
+                }
+                else if (_enterprise != null)
+                {
+                    event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_ENTERPRISE);
+                    event.enterprise = _enterprise;
+                }
+
+
+                if (event != null)
+                {
+                    event.listRequest = listRequest;
+                    event.callback = setPrivateIPs;
+                    dispatchEvent(event);
+                }
+            }
+
+            public function setPrivateIPs(list:ArrayCollection, totalNumEntities:int):void
+            {
+                ipList = list;
+                totalNumIPs = totalNumEntities;
+            }
+
+            //////////////////////////////////
+            //Filtering, sorting and paginator
+
+            private function onKeyDownIpFilter(event:KeyboardEvent):void
+            {
+                //If user presses the Enter key, we launch the filter
+                if (event.keyCode == 13)
+                {
+                    ipPaginator.value = 1;
+                    requestPrivateIP();
+                }
+
+            }
+
+            private var _isIpPaginatorMouseDown:Boolean = false;
+
+            private function onMouseDownIpPaginator():void
+            {
+                _isIpPaginatorMouseDown = true;
+                Application.application.addEventListener(MouseEvent.MOUSE_UP, onMouseUpIpPaginator);
+            }
+
+            private function onMouseUpIpPaginator(mouseEvent:MouseEvent):void
+            {
+                _isIpPaginatorMouseDown = false;
+                Application.application.removeEventListener(MouseEvent.MOUSE_UP,
+                                                            onMouseUpIpPaginator);
+                onChangeIpPaginator();
+            }
+
+            private function onChangeIpPaginator():void
+            {
+                if (!this._isIpPaginatorMouseDown)
+                {
+                    requestPrivateIP();
+                }
+            }
+
+            private function onDGHeaderRelease(event:DataGridEvent):void
+            {
+                ipPaginator.value = 1;
+                if (listRequest.orderBy == event.dataField)
+                {
+                    listRequest.asc = !listRequest.asc;
+                }
+                else
+                {
+                    listRequest.orderBy = event.dataField;
+                    listRequest.asc = true;
+                }
+                requestPrivateIP();
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%" height="32"
+		paddingLeft="6"
+		paddingRight="6"
+		verticalAlign="middle"
+        styleName="GeneralDataPanelTopFullSkin">
+
+        <mx:Spacer width="100%"/>
+
+        <mx:Image 
+        	id="privateIPListMagnifier"
+        	creationComplete="AbicloudUtils.getImageFromStyle('PrivateIPListMagnifier', privateIPListMagnifier)"
+        	/>
+
+        <mx:TextInput id="ipFilter"
+            height="20"
+            toolTip="@Resource(bundle='Common', key='BUTTON_FILTER_TOOLTIP')"
+            keyDown="onKeyDownIpFilter(event)"/>
+
+    </mx:HBox>
+
+    <mx:DataGrid id="privateIPDataGrid"
+        width="100%" height="100%"
+        dataProvider="{ipList}"
+        headerRelease="onDGHeaderRelease(event)">
+
+        <mx:columns>
+            <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
+                dataField="ip">
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:HBox 
+                            paddingBottom="0"
+                            paddingLeft="0"
+                            paddingRight="0"
+                            paddingTop="0"
+                            horizontalScrollPolicy="off"
+                            verticalScrollPolicy="off">
+                            <mx:Script>
+                                <![CDATA[
+                                	import net.undf.abicloud.utils.AbicloudUtils;
+                                    import net.undf.abicloud.vo.networking.IPPoolManagement;
+                                    import net.undf.abicloud.vo.networking.VlanNetwork;
+                                ]]>
+                            </mx:Script>
+                            <mx:Label 
+                                truncateToFit="true"
+                                text="{IPPoolManagement(data).ip}"/>
+
+                            <utils:SmoothImage
+                            	id="privateIPListGateway"
+                            	creationComplete="{AbicloudUtils.getImageFromStyle('PrivateIPListGateway', privateIPListGateway)}" 
+                                toolTip="Gateway"
+                                visible="{parentDocument.vlanNetwork != null &amp;&amp;
+									  	  VlanNetwork(parentDocument.vlanNetwork).configuration.gateway == IPPoolManagement(data).ip}"/>
+                        </mx:HBox>
+                    </mx:Component>
+                </mx:itemRenderer>
+            </mx:DataGridColumn>
+            <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
+                dataField="mac"/>
+            <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_VLAN')"
+                dataField="vlanNetworkName"/>
+            <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_VIRTUAL_APPLIANCE')"
+                dataField="virtualApplianceName"/>
+            <mx:DataGridColumn 
+                width="150"
+                headerText="@Resource(bundle='Networking', key='LABEL_VIRTUAL_MACHINE')"
+                dataField="virtualMachineName"/>
+        </mx:columns>
+    </mx:DataGrid>
+
+
+    <mx:Canvas 
+        width="100%" height="32"
+        styleName="GeneralDataPanelBottomSkin">
+        <mx:Label 
+            top="2"
+            horizontalCenter="0"
+            text="{ResourceManager.getInstance().getString('Networking', 'LABEL_PAGE') + ' ' + 
+				  ipPaginator.value + ' ' +
+				  ResourceManager.getInstance().getString('Networking', 'LABEL_OF') + ' ' +
+				  (int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE)) > 0 ? 
+				   int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE)) : '1')}"/>
+
+        <mx:HSlider id="ipPaginator"
+            bottom="3"
+            horizontalCenter="0"
+            minimum="1" snapInterval="1"
+            maximum="{int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE))}"
+            liveDragging="true" showDataTip="false"
+            change="onChangeIpPaginator()"
+            mouseDown="onMouseDownIpPaginator()"/>
+    </mx:Canvas>
+
+</mx:VBox>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Abiquo community edition
+    cloud management application for hybrid clouds
+    Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+    This application is free software; you can redistribute it and/or
+    modify it under the terms of the GNU LESSER GENERAL PUBLIC
+    LICENSE as published by the Free Software Foundation under
+    version 3 of the License
+
+    This software is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the
+    Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+    Boston, MA 02111-1307, USA.
+
+-->
+
+<EventMap 
+    xmlns="http://mate.asfusion.com/"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:debug="com.asfusion.mate.utils.debug.*">
+    
+   <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.business.Services;
+        	import net.undf.abicloud.events.SystemPropertiesEvent;
+            import net.undf.abicloud.controller.FaultHandler;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.utils.ScreenBlocker;
+
+            [Bindable]
+            private var services:Services = new Services();
+        ]]>
+
+    </mx:Script>
+    <!-- ******************************************************************************************************** -->
+    <!-- MainEvent.GET_SYSTEM_PROPERTIES ________________________________________________________________________ -->
+    <EventHandlers type="{SystemPropertiesEvent.GET_SYSTEM_PROPERTIES}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.systemPropertiesService}"
+            method="getSystemProperties"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 'client']}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{SystemPropertiesResultHandler}"
+                    method="handleGetSystemProperties"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{SystemPropertiesResultHandler}"
+                    method="sysPropsError"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+<!--
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+-->
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    <!-- ******************************************************************************************************** -->
+    <!-- MainEvent.SET_SYSTEM_PROPERTIES ________________________________________________________________________ -->
+    <EventHandlers type="{SystemPropertiesEvent.SET_SYSTEM_PROPERTIES}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.systemPropertiesService}"
+            method="modifySystemProperties"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 'client', event.properties]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{SystemPropertiesResultHandler}"
+                    method="handleSetSystemProperties"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{SystemPropertiesResultHandler}"
+                    method="sysPropsError"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
+</EventMap>

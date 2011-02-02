@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<!--
+     Lists and manage the OVFPackages that are in a OVFPackageList
+-->
+
+<mx:Canvas 
+    width="100%" height="100%"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:repositoryspace="net.undf.abicloud.view.virtualimage.components.repositoryspace.*"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:ovfpackage="net.undf.abicloud.view.virtualimage.components.ovfpackage.*">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.virtualimage.OVFPackageEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.virtualimage.components.ovfpackage.OVFPackageListForm;
+            import net.undf.abicloud.vo.virtualimage.OVFPackageList;
+
+            //Form to create RepositorySpaces
+            private var ovfPackageListForm:OVFPackageListForm;
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                ovfPackageListForm = new OVFPackageListForm();
+                ovfPackageListForm.addEventListener("OVFPackageListFormClose",
+                                                    closeOVFPackageListForm);
+            }
+
+            public function cleanView():void
+            {
+                AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.ovfPackageList = null;
+            }
+
+            public function willShow():void
+            {
+                //Requesting the list of OVFPackage names for the user's enterprise
+                var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.GET_OVF_PACKAGE_LIST_NAMES);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                dispatchEvent(event);
+            }
+
+            public function willHide():void
+            {
+                cleanView();
+            }
+
+            private function onClickOVFPackageListNamesList():void
+            {
+                if (ovfPackageListNames.selectedIndex > -1)
+                {
+                    //Recover the whole OVFPackageList with its OVFPackages
+                    var ovfPackageList:OVFPackageList = new OVFPackageList();
+                    ovfPackageList.name = ovfPackageListNames.selectedItem as String;
+
+                    var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.GET_OVF_PACKAGE_LIST);
+                    event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    event.ovfPackageList = ovfPackageList;
+                    dispatchEvent(event);
+                    
+                    //inform that we change the category
+                    ovfPackageListExplorer.selectedCategoryIndex = -1;
+                }
+                else
+                {
+                    //NO OVFPackageList is selected
+                    AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.ovfPackageList = null;
+                }
+            }
+
+            /**
+             * Opens a RepositorySpaceForm component to create a new RepositorySpace
+             */
+            private function addOVFPackageList():void
+            {
+                PopUpManager.addPopUp(ovfPackageListForm, this, true);
+                PopUpManager.centerPopUp(ovfPackageListForm);
+
+                ovfPackageListForm.init();
+            }
+
+            /**
+             * Closes the RepositorySpaceForm PopUp, used to create or edit
+             * RepositorySpaces
+             */
+            private function closeOVFPackageListForm(event:Event):void
+            {
+                PopUpManager.removePopUp(ovfPackageListForm);
+            }
+
+            private function askOVFPackageListDeletion():void
+            {
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_REPOSITORY_SPACE_HEADER"),
+                                        ResourceManager.getInstance().getString("VirtualImage",
+                                                                                "ALERT_DELETE_REPOSITORY_SPACE_TEXT"),
+                                        Alert.YES | Alert.NO,
+                                        deleteOVFPackageList);
+            }
+
+            /**
+             * Deletes a RepositorySpace, if user confirmed so
+             */
+            private function deleteOVFPackageList(closeEvent:CloseEvent = null):void
+            {
+                if (closeEvent.detail == Alert.YES)
+                {
+                    var ovfPackageList:OVFPackageList = new OVFPackageList();
+                    ovfPackageList.name = ovfPackageListNames.selectedItem as String;
+
+                    var event:OVFPackageEvent = new OVFPackageEvent(OVFPackageEvent.DELETE_OVF_PACKAGE_LIST);
+                    event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    event.ovfPackageList = ovfPackageList;
+                    dispatchEvent(event);
+                }
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:HBox 
+        width="100%"
+        top="0" bottom="0"
+        horizontalGap="20"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0">
+
+        <general:GeneralSubPanel 
+            width="200" height="100%"
+            title="@Resource(bundle='VirtualImage', key='LABEL_REPOSITORY_SPACES')">
+
+            <!-- OVFPackageList names  -->
+            <mx:List id="ovfPackageListNames"
+                width="100%" height="100%"
+                borderStyle="none"
+                styleName="ListFull"
+                dataProvider="{AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.ovfPackageListNames}"
+                click="onClickOVFPackageListNamesList()"/>
+
+            <general:GeneralSubPanelToolBox>
+                <mx:Button id="addRepoButton"
+                    styleName="AddButton"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                    click="addOVFPackageList()"/>
+
+                <mx:Button id="deleteRepoButton"
+                    enabled="{ovfPackageListNames.selectedIndex > -1}"
+                    styleName="RemoveButton"
+                    toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                    click="askOVFPackageListDeletion()"/>
+            </general:GeneralSubPanelToolBox>
+        </general:GeneralSubPanel>
+
+        <ovfpackage:OVFPackageListExplorer id="ovfPackageListExplorer"
+            ovfPackageList="{AbiCloudModel.getInstance().virtualImageManager.ovfPackageManager.ovfPackageList}"/>
+
+    </mx:HBox>
+
+</mx:Canvas>
