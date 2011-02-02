@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<assembly
+    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+
+    <id>dist</id>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+            	<!-- 
+            	<include>com.abiquo.abicloud:vsm*</include>
+                <include>com.abiquo.abicloud:vsm:jar:${artifact.version}:migration</include>
+                -->
+                <include>com.abiquo:commons-amqp</include>
+                <include>com.abiquo:aimstub</include>
+                <!-- 
+                <include>javax.servlet:servlet-api</include>
+                <include>javax.servlet:jsp-api</include>
+                -->
+                <include>javax.servlet:jstl</include>
+                <include>org.apache.wink:wink-server</include>
+                <include>org.apache.wink:wink-client</include>
+                <include>commons-codec:commons-codec</include>
+                <include>commons-pool:commons-pool</include>
+                <include>org.libvirt:libvirt</include>
+                <include>com.sun.jna:jna</include>
+                <include>com.vmware.vim25:vim25</include>
+                <include>dom4j:dom4j</include>
+                <include>j-interop:j-interop</include>
+                <include>j-interop:j-interopdeps</include>
+                <include>com.hyper9:jwbem</include>
+                <include>org.samba.jcifs:jcifs</include>
+                <include>org.apache.xmlrpc:xmlrpc-common</include>
+                <include>org.apache.xmlrpc:xmlrpc-client</include>
+                <include>org.apache.ws.commons.util:ws-commons-util</include>
+                <include>com.xensource:xenserver</include>
+                <include>ch.qos.logback:logback-core</include>
+                <include>ch.qos.logback:logback-classic</include>
+                <include>org.slf4j:slf4j-api</include>
+                <include>redis.clients:jedis</include>
+                <include>redis.clients:johm</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
+    <fileSets>
+        <fileSet>
+            <directory>src/dist/files</directory>
+            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>target</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <filtered>true</filtered>
+            <includes>
+                <include>vsm-migration.jar</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>
+

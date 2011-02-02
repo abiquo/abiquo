@@ -1,0 +1,10 @@
+Abiquo vsm-migration
+====================
+
+Run the script to migrate redis data model from 1.6.8 to 1.7
+  
+    - In Unix-like:
+        chmod u+x migrate.sh
+    
+    - Or just invoke java directly:
+        java -jar lib/vsm-migration.jar
