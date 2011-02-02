@@ -169,6 +169,8 @@ public enum APIError
         "The license already exists")
 
     ;
+    
+    // TODO: STATS
 
     /**
      * Internal error code
