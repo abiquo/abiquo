@@ -36,7 +36,6 @@
             <type>zip</type>
             <scope>runtime</scope>
         </dependency>
-        <!-- 
         <dependency>
             <groupId>com.abiquo.abicloud</groupId>
             <artifactId>client-theme</artifactId>
@@ -44,7 +43,6 @@
             <type>zip</type>
             <scope>runtime</scope>
         </dependency>
-        -->
     </dependencies>
 
     <!--                                      -->
@@ -70,13 +68,11 @@
                             <artifactId>client-swf</artifactId>
                             <type>zip</type>
                         </overlay>
-                        <!-- 
                         <overlay>
                             <groupId>com.abiquo.abicloud</groupId>
                             <artifactId>client-theme</artifactId>
                             <type>zip</type>
                         </overlay>
-                        -->
                     </overlays>
                 </configuration>
             </plugin>

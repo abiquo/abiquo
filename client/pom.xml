@@ -35,6 +35,7 @@
     <!--   Aggregations -->      
     <modules>
         <module>swf</module>
+        <module>theme</module>
         <module>war</module>
     </modules>
 
