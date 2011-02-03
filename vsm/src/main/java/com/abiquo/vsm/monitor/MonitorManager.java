@@ -35,7 +35,7 @@ import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.model.VirtualMachinesCache;
 import com.abiquo.vsm.monitor.Monitor.Type;
-import com.abiquo.vsm.monitor.esxi.ESXiMonitor;
+import com.abiquo.vsm.monitor.esxi.ExecutorBasedESXiPoller;
 import com.abiquo.vsm.monitor.hyperv.HyperVMonitor;
 import com.abiquo.vsm.monitor.libvirt.KVMMonitor;
 import com.abiquo.vsm.monitor.libvirt.XenMonitor;
@@ -76,7 +76,7 @@ public class MonitorManager
         // Register monitors
         registerMonitor(KVMMonitor.class);
         registerMonitor(XenMonitor.class);
-        registerMonitor(ESXiMonitor.class);
+        registerMonitor(ExecutorBasedESXiPoller.class);
         registerMonitor(HyperVMonitor.class);
         registerMonitor(XenServerMonitor.class);
         registerMonitor(VirtualBoxMonitor.class);
