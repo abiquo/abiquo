@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.7.5-SNAPSHOT</version>
+        <version>1.7.0</version>
     </parent>
 
     <dependencies>
@@ -254,7 +254,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.abiquo.vsm.migration.Migration</mainClass>
+                                    <mainClass>com.abiquo.vsm.migration.Migrator</mainClass>
                                     <addClasspath>true</addClasspath>
                                 </manifest>
                             </archive>

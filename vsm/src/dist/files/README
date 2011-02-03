@@ -1,10 +1,14 @@
 Abiquo vsm-migration
 ====================
 
-Run the script to migrate redis data model from 1.6.8 to 1.7
-  
-    - In Unix-like:
-        chmod u+x migrate.sh
-    
-    - Or just invoke java directly:
-        java -jar lib/vsm-migration.jar
+Run the script to migrate redis data model from 1.6.8 to 1.7:
+
+ > java -jar lib/vsm-migration.jar
+
+Usage:
+
+ > java -jar lib/vsm-migration.jar [-f <arg>] [-h <arg>] [-help] [-p <arg>]
+   -f,--file <arg>   CSV file with the machines to migrate.
+   -h,--host <arg>   Redis host.
+   -help,--help      Print this usage information.
+   -p,--port <arg>   Redis port.

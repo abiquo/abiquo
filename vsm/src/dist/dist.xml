@@ -30,6 +30,8 @@
                 <include>org.apache.wink:wink-client</include>
                 <include>commons-codec:commons-codec</include>
                 <include>commons-pool:commons-pool</include>
+                <include>commons-io:commons-io</include>
+                <include>commons-cli:commons-cli</include>
                 <include>org.libvirt:libvirt</include>
                 <include>com.sun.jna:jna</include>
                 <include>com.vmware.vim25:vim25</include>
