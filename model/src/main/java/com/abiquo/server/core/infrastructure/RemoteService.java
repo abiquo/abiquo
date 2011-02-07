@@ -36,6 +36,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.validation.Uri;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -93,6 +94,7 @@ public class RemoteService extends DefaultEntityBase
     @Required(value = URI_REQUIRED)
     @Length(min = URI_LENGTH_MIN, max = URI_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = URI_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @Uri
     public String getUri()
     {
         return this.uri;
