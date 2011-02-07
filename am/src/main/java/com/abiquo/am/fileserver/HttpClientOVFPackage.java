@@ -27,8 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.abiquo.am.fileserver.aux.FileInfo;
-import com.abiquo.am.fileserver.aux.PackageInfo;
+import com.abiquo.am.fileserver.info.FileInfo;
+import com.abiquo.am.fileserver.info.PackageInfo;
 import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.ning.http.client.AsyncHttpClient;

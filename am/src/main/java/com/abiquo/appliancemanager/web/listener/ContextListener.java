@@ -27,7 +27,7 @@ import javax.servlet.ServletContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.am.services.aux.TimeoutFSUtils;
+import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.am.services.notify.AMNotifierFactory;
 
 /**

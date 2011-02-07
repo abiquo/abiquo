@@ -2,3 +2,5 @@ target
 build
 .svn
 .class
+catalina.base_IS_UNDEFINED
+database/test/kinton-schema-test.sql

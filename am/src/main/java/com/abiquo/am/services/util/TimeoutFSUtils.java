@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services.aux;
+package com.abiquo.am.services.util;
 
 import java.io.File;
 import java.util.concurrent.Callable;

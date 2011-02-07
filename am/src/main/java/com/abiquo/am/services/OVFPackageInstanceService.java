@@ -54,8 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.abiquo.am.services.aux.OVFPackageInstanceFromOVFEnvelope;
-import com.abiquo.am.services.aux.OVFPackageInstanceToOVFEnvelope;
+import com.abiquo.am.services.util.OVFPackageInstanceFromOVFEnvelope;
+import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.DownloadException;

@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.fileserver.aux;
+package com.abiquo.am.fileserver.info;
 
 import java.io.File;
 import java.io.FileNotFoundException;
