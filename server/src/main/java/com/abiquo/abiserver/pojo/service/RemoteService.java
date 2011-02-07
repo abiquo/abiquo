@@ -229,21 +229,18 @@ public class RemoteService implements IPojo<RemoteServiceHB>
     public void setUri(String uri)
     {
         this.uri = uri;
-        try
-        {
-            URI u = new URI(uri);
+        URI u = URI.create(uri);
 
-            this.protocol = fixProtocol(u.getScheme());
-            this.domainName = u.getHost();
-            this.port = u.getPort();
-            this.serviceMapping = u.getPath();
-            if (serviceMapping.startsWith("/"))
-                serviceMapping = serviceMapping.replaceFirst("/", "");
-        }
-        catch (URISyntaxException e)
+        this.protocol = fixProtocol(u.getScheme());
+        this.domainName = u.getHost();
+        this.port = u.getPort();
+        if (port == -1)
         {
-
+        	port = 80;
         }
+        this.serviceMapping = u.getPath();
+        if (serviceMapping.startsWith("/"))
+            serviceMapping = serviceMapping.replaceFirst("/", "");
     }
 
     public static String getFullUri(String protocol, String domainName, Integer port,
