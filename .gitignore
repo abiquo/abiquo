@@ -7,3 +7,8 @@ database/test/kinton-schema-test.sql
 .project
 .settings
 .classpath
+.actionScriptProperties
+.flexProperties
+bin-debug
+client/swf/src/main/resources/config/client-config.xml
+client/swf/src/main/resources/themes
