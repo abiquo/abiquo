@@ -4,3 +4,6 @@ build
 .class
 catalina.base_IS_UNDEFINED
 database/test/kinton-schema-test.sql
+.project
+.settings
+.classpath
