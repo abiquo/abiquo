@@ -112,7 +112,7 @@ public class RemoteServiceService extends DefaultApiService
             flushErrors();
         }
         
-        ErrorsDto configurationErrors = checkStatus(dto.getType(), dto.getUri());
+        ErrorsDto configurationErrors = checkStatus(remoteService.getType(), remoteService.getUri());
 
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         remoteService.setStatus(status);
