@@ -197,7 +197,7 @@
                 infrastructureEvent.physicalMachineCreation = physicalMachineCreation;
                 dispatchEvent(infrastructureEvent);
                 //Closing the form
-                dispatchEvent(new Event("PhysicalMachineFormClose"));
+                dispatchEvent(new Event("PhysicalMachineFormEditClose"));
             }
 
             /**
@@ -206,7 +206,8 @@
             private function onCancel():void
             {
                 //Closing the form
-                dispatchEvent(new Event("PhysicalMachineFormClose"));
+                dispatchEvent(new Event("PhysicalMachineFormEditClose"));
+                
             }
 
             /**
