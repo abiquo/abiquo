@@ -101,20 +101,21 @@ public class RemoteServiceService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
         }
 
-        checkUniqueness(datacenter, dto);
-
-        ErrorsDto configurationErrors = checkStatus(dto.getType(), dto.getUri());
-
-        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
+        checkUniqueness(datacenter, dto);        
 
         RemoteService remoteService =
-            datacenter.createRemoteService(dto.getType(), dto.getUri(), status);
+            datacenter.createRemoteService(dto.getType(), dto.getUri(), 0);
 
         if (!remoteService.isValid())
         {
             validationErrors.addAll(remoteService.getValidationErrors());
             flushErrors();
         }
+        
+        ErrorsDto configurationErrors = checkStatus(dto.getType(), dto.getUri());
+
+        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
+        remoteService.setStatus(status);
 
         if (dto.getType() == RemoteServiceType.APPLIANCE_MANAGER)
         {
