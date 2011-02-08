@@ -2551,6 +2551,9 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
                 -- Name changed !!!
                 UPDATE IGNORE vdc_enterprise_stats SET vdcName = NEW.name
                 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+                -- Changes also in Vapp stats
+                UPDATE IGNORE vapp_enterprise_stats SET vdcName = NEW.name
+                WHERE idVirtualApp IN (SELECT idVirtualApp FROM virtualapp WHERE idVirtualDataCenter=NEW.idVirtualDataCenter);
             END IF; 
             UPDATE IGNORE vdc_enterprise_stats 
             SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
