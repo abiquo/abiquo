@@ -83,6 +83,8 @@
                     //Editing an existing RemoteService
                     titleText = ResourceManager.getInstance().getString("Infrastructure",
                                                                         "POPUP_TITLE_REMOTE_SERVICE_EDIT");
+					//Init all fields
+					remoteServiceFormItem.init();
 									
                     //Setting fields
                     remoteServiceFormItem.protocolInput.text = _remoteService.protocol;
