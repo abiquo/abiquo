@@ -110,10 +110,14 @@ public class MigratorTest extends TestBase
 
         RedisWrapper wrapper = new RedisWrapper(TEST_HOST, TEST_PORT, TEST_DATABASE);
 
-        wrapper.insertSubscription(uuid0, es, "10.60.1.79", "KVM", "user0", "password0");
-        wrapper.insertSubscription(uuid1, es, "10.60.1.80", "vmx-04", "user1", "password1");
-        wrapper.insertSubscription(uuid2, es, "10.60.1.80", "vmx-04", "user1", "password1");
-        wrapper.insertSubscription(uuid3, es, "10.60.1.80", "vmx-04", "user1", "password1");
+        wrapper.insertSubscription(uuid0, es, "http://10.60.1.79:8889/", "KVM", "user0",
+            "password0");
+        wrapper.insertSubscription(uuid1, es, "http://10.60.1.80:8889/", "vmx-04", "user1",
+            "password1");
+        wrapper.insertSubscription(uuid2, es, "http://10.60.1.80:8889/", "vmx-04", "user1",
+            "password1");
+        wrapper.insertSubscription(uuid3, es, "http://10.60.1.80:8889/", "vmx-04", "user1",
+            "password1");
 
         // Migrate to new model (1.7)
         new Migrator(TEST_HOST, TEST_PORT, TEST_DATABASE).migratePersistedModel();
@@ -125,19 +129,19 @@ public class MigratorTest extends TestBase
         assertEquals(dao.findAllPhysicalMachines().size(), 2);
         assertEquals(dao.findAllVirtualMachines().size(), 4);
 
-        PhysicalMachine machine79 = dao.findPhysicalMachineByAddress("10.60.1.79");
-        PhysicalMachine machine80 = dao.findPhysicalMachineByAddress("10.60.1.80");
+        PhysicalMachine machine79 = dao.findPhysicalMachineByAddress("http://10.60.1.79:8889/");
+        PhysicalMachine machine80 = dao.findPhysicalMachineByAddress("http://10.60.1.80:443/");
 
         assertNotNull(machine79);
         assertNotNull(machine80);
 
-        assertEquals(machine79.getAddress(), "10.60.1.79");
+        assertEquals(machine79.getAddress(), "http://10.60.1.79:8889/");
         assertEquals(machine79.getType(), "KVM");
         assertEquals(machine79.getUsername(), "user0");
         assertEquals(machine79.getPassword(), "password0");
 
-        assertEquals(machine80.getAddress(), "10.60.1.80");
-        assertEquals(machine80.getType(), "vmx-04");
+        assertEquals(machine80.getAddress(), "http://10.60.1.80:443/");
+        assertEquals(machine80.getType(), "VMX_04");
         assertEquals(machine80.getUsername(), "user1");
         assertEquals(machine80.getPassword(), "password1");
 

@@ -189,33 +189,41 @@ public class Migrator
 
         if (machine == null)
         {
-            VirtualMachinesCache cache = new VirtualMachinesCache();
-            dao.save(cache);
-
-            machine = new PhysicalMachine();
-
-            String finalType = type;
-
-            if (this.hypervisors.containsKey(type))
-            {
-                finalType = this.hypervisors.get(type).name();
-            }
-
             try
             {
                 URL url = new URL(address);
-                machine.setAddress(String.format("http://%s:%s/", url.getHost(), this.ports
-                    .get(finalType)));
-                machine.setType(finalType);
-                machine.setUsername(username);
-                machine.setPassword(password);
-                machine.setVirtualMachines(cache);
 
-                dao.save(machine);
+                String finalType = type;
 
-                this.machinesCount++;
-                logger.info("Physical machine migrated: {} {}", machine.getAddress(), machine
-                    .getType());
+                if (this.hypervisors.containsKey(type))
+                {
+                    finalType = this.hypervisors.get(type).name();
+                }
+
+                String finalURL =
+                    String.format("http://%s:%s/", url.getHost(), this.ports.get(finalType));
+
+                machine = dao.findPhysicalMachineByAddress(finalURL);
+
+                if (machine == null)
+                {
+                    VirtualMachinesCache cache = new VirtualMachinesCache();
+                    dao.save(cache);
+
+                    machine = new PhysicalMachine();
+
+                    machine.setAddress(finalURL);
+                    machine.setType(finalType);
+                    machine.setUsername(username);
+                    machine.setPassword(password);
+                    machine.setVirtualMachines(cache);
+
+                    dao.save(machine);
+
+                    this.machinesCount++;
+                    logger.info("Physical machine migrated: {} {}", machine.getAddress(), machine
+                        .getType());
+                }
             }
             catch (MalformedURLException e)
             {
