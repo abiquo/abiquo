@@ -128,23 +128,13 @@
         <testSourceDirectory>src/test/flex</testSourceDirectory>
         <plugins>
             <plugin>
-                <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
-                <artifactId>maven-svn-revision-number-plugin</artifactId>
-                <version>1.3</version>
+                <groupId>com.abiquo.git</groupId>
+                <artifactId>git-info</artifactId>
                 <executions>
-                    <execution>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
+                    <execution><goals><goal>git.info</goal></goals></execution>
                 </executions>
                 <configuration>
-                    <entries>
-                        <entry>
-                            <path>../../</path>
-                            <prefix>svn.community</prefix>
-                        </entry>
-                    </entries>
+                    <prefix>svn.community</prefix>
                 </configuration>
             </plugin>
             <plugin>
