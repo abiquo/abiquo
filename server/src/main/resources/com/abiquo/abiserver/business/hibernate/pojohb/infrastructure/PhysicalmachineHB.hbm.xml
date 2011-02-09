@@ -199,8 +199,16 @@
 		inner join pm.datastoresHB ds
 		where ds.idDatastore = :idDatastore
 	</query>
-
+	
 	<query name="PHYSICALMACHINE.GET_LIST_BY_RACK">
+		select distinct(pm)
+		from
+		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
+		pm
+		where pm.rack.idRack = :idRack
+	</query>
+
+	<query name="PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE">
 		select distinct(pm)
 		from
 		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB

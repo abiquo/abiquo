@@ -79,7 +79,7 @@ public interface InfrastructureCommand
      * @throws PersistenceException
      * @throws InfrastructureCommandException
      */
-    public abstract List<PhysicalmachineHB> getPhysicalMachinesByRack(
+    public abstract List<PhysicalMachine> getPhysicalMachinesByRack(
         final UserSession userSession, final Integer rackId, final String filters)
         throws InfrastructureCommandException;
 

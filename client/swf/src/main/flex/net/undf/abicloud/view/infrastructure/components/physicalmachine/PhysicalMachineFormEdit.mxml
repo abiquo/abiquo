@@ -82,60 +82,20 @@
                 hdInput.value = this.physicalMachine.hd / hdUnitsSelector.selectedItem.conversion;
                 vswitchNameInput.text = this.physicalMachine.vswitchName;
                 datastoreManagement.physicalMachine = this.physicalMachine;
-
-                retrievePhysicalMachineHypervisor();
+                
+                var hypervisor = this.physicalMachine.hypervisor;
+                ipInput.text = hypervisor.ip;
+                hypervisorPortInput.text = hypervisor.port.toString();
+                var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
+                hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
+                                                                                              "id",
+                                                                                              hypervisor.type);
+                userInput.text = hypervisor.user;
+                passwordInput.text = hypervisor.password;
+                datastoreManagement.hypervisor = hypervisor;
 
                 validateForm();
                 nameInput.setFocus();
-            }
-
-
-            private function retrievePhysicalMachineHypervisor():void
-            {
-                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_HYPERVISOR_BY_PHYSICAL_MACHINE);
-                event.physicalMachine = this.physicalMachine;
-                event.callback = setHypervisorInformationOnEdition;
-                dispatchEvent(event);
-            }
-            
-            private function setHypervisorInformationOnEdition(hypervisor:HyperVisor):void{
-                //We not use anymore the infrastructure concept
-                //we need to retrieve the proper hypervisor of the physical machine 
-                
-                _editableButton = true;
-                //hypervisors = AbiCloudModel.getInstance().infrastructureManager.getHyperVisorsByPhysicalMachine(physicalMachine);
-                if (hypervisor)
-                {
-                   
-                    //Filling Hypervisor related fields
-                    ipInput.text = hypervisor.ip;
-                    hypervisorPortInput.text = hypervisor.port.toString();
-                    var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
-                    hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
-                                                                                              "id",
-                                                                                              hypervisor.type);
-                    userInput.text = hypervisor.user;
-                    passwordInput.text = hypervisor.password;
-                    datastoreManagement.hypervisor = hypervisor;
-                    
-                    if(hypervisor.type.id == HyperVisorType.VMX){
-                    	_editableButton = false;
-                    }
-                }
-                /* else
-                {
-                    //For this Physical Machine there is any Hypervisor, and they are required
-                    ipInput.text = "";
-                    hypervisorTypeInput.selectedIndex = -1;
-                    hypervisorPortInput.text = "";
-                    userInput.text = "";
-                    passwordInput.text = "";
-                    datastoreManagement.hypervisor = null;
-                } */
-
-                //The Hypervisor information is editable only if the PhysicalMachine has not VirtualMachines
-                isHypervisorInfoEditable = AbiCloudModel.getInstance().infrastructureManager.getVirtualMachinesByPhysicalMachine(physicalMachine).length == 0; 
-            	
             }
 
             private function onChangeHypervisorTypeInput():void
@@ -154,44 +114,22 @@
                 //We do not modify the original data until changes are saved on server
 
                 //Editing the Physical Machine
-                var physicalMachine:PhysicalMachine = ObjectUtil.copy(this.physicalMachine) as PhysicalMachine;
-                physicalMachine.name = nameInput.text;
-                physicalMachine.description = descriptionInput.text;
-                physicalMachine.cpu = cpuInput.value;
-                physicalMachine.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
-                physicalMachine.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
-                physicalMachine.vswitchName = vswitchNameInput.text;
+                var pm:PhysicalMachine = ObjectUtil.copy(this.physicalMachine) as PhysicalMachine;
+                pm.name = nameInput.text;
+                pm.description = descriptionInput.text;
+                pm.cpu = cpuInput.value;
+                pm.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
+                pm.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
+                pm.vswitchName = vswitchNameInput.text;
 
-                //Now we have to deal with Hypervisors for this Physical Machine. We have either to edit an Hypervisor
-                //that already exists, or create a new one if the PhysicalMachine still does not have an Hypervisor
-                //(remember that for now we only deal with one hypervisor)
-                var hypervisors:Array = ObjectUtil.copy(this.hypervisors) as Array;
-                var hypervisor:HyperVisor;
-                if (!hypervisors || hypervisors.length == 0)
-                {
-                    hypervisors = new Array();
-                    hypervisor = new HyperVisor();
-                    hypervisors.push(hypervisor);
-
-                }
-                else
-                {
-                    hypervisor = hypervisors[0] as HyperVisor;
-                }
-
-                hypervisor.ip = ipInput.text;
+                var hypervisor = ObjectUtil.copy(this.physicalMachine.hypervisor) as HyperVisor;                
                 hypervisor.ipService = ipServiceInput.text;
-                hypervisor.port = Number(hypervisorPortInput.text);
-                hypervisor.assignedTo = this.physicalMachine;
-                hypervisor.type = hypervisorTypeInput.selectedItem as HyperVisorType;
-                hypervisor.user = userInput.text;
-                hypervisor.password = passwordInput.text;
+                
+                pm.hypervisor = hypervisor;
 
                 //Announcing that user wants to edit a Physical Machine, along with hypervisors
                 var physicalMachineCreation:PhysicalMachineCreation = new PhysicalMachineCreation();
-                physicalMachineCreation.physicalMachine = physicalMachine;
-                physicalMachineCreation.hypervisors = new ArrayCollection(hypervisors);
-
+                physicalMachineCreation.physicalMachine = pm;
 
                 var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_PHYSICALMACHINE);
                 infrastructureEvent.physicalMachineCreation = physicalMachineCreation;

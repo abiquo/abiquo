@@ -217,9 +217,15 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
-        Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_LIST_BY_RACK);
+        String namedQuery = filters == null || filters.isEmpty() ? PHYSICALMACHINE_GET_LIST_BY_RACK :
+        	"PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE";
+        
+        Query pmQuery = session.getNamedQuery(namedQuery);
         pmQuery.setInteger("idRack", rackId);
-        pmQuery.setString("filterLike", (filters == null || filters.isEmpty()) ? "%" : "%" + filters + "%");
+        if (filters != null && !filters.isEmpty())
+        {
+        	pmQuery.setString("filterLike", "%" + filters + "%");
+        }
 
         return pmQuery.list();
     }

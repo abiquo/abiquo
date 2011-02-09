@@ -391,6 +391,11 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         {
             physicalMachine.setRack(rack.toPojo());
         }
+        
+        if (hypervisor != null)
+        {
+        	physicalMachine.setHypervisor(hypervisor.toPojo(physicalMachine));
+        }
 
         return physicalMachine;
     }

@@ -258,17 +258,22 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * @throws InfrastructureCommandException
      * @see com.abiquo.abiserver.commands.InfrastructureCommand#getPhysicalMachinesByRack(java.lang.Integer)
      */
-    public List<PhysicalmachineHB> getPhysicalMachinesByRack(UserSession userSession,
+    public List<PhysicalMachine> getPhysicalMachinesByRack(UserSession userSession,
         Integer rackId, String filters)
     {
         factory.beginConnection();
 
         PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
         List<PhysicalmachineHB> availablePms = pmDAO.getPhysicalMachineByRack(rackId, filters);
-
+        List<PhysicalMachine> result = new ArrayList<PhysicalMachine>();
+        for (PhysicalmachineHB singleResult : availablePms)
+        {
+            result.add(singleResult.toPojo());
+        }
+        
         factory.endConnection();
 
-        return availablePms;
+        return result;
     }
 
     @Override
@@ -1231,92 +1236,42 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         Transaction transaction = null;
         try
         {
-            checkPhysicalMachineData(physicalMachineCreation.getPhysicalMachine());
+        	PhysicalMachine pm = physicalMachineCreation.getPhysicalMachine();
+            checkPhysicalMachineData(pm);
 
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            // The new rack for the Physical Machine
             PhysicalmachineHB physicalMachineHb =
-                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, physicalMachineCreation
-                    .getPhysicalMachine().getId());
+                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, pm.getId());
 
-            // The rack can not be changed since it affects to networking configuration
-            // physicalMachineHb.setRack(rackHB);
-
-            // Auxiliar physicalmachine object, used to keep a copy of the
-            // object before the
-            // modification
             PhysicalMachine physicalMachineAux = physicalMachineHb.toPojo();
 
             // Updating the other attributes
-            physicalMachineHb.setName(physicalMachineCreation.getPhysicalMachine().getName());
-            physicalMachineHb.setDescription(physicalMachineCreation.getPhysicalMachine()
-                .getDescription());
-            physicalMachineHb.setCpu(physicalMachineCreation.getPhysicalMachine().getCpu());
-            physicalMachineHb.setRam(physicalMachineCreation.getPhysicalMachine().getRam());
-            physicalMachineHb.setHd(physicalMachineCreation.getPhysicalMachine().getHd());
-            physicalMachineHb.setRealCpu(physicalMachineCreation.getPhysicalMachine().getRealCpu());
-            physicalMachineHb.setRealRam(physicalMachineCreation.getPhysicalMachine().getRealRam());
-            // physicalMachineHb.setRealHd(physicalMachineCreation.getPhysicalMachine().getRealHd());
-            physicalMachineHb.setIdState(physicalMachineCreation.getPhysicalMachine().getIdState());
-
-            session.update(physicalMachineHb);
-
-            // Updating or creating the Hypervisors
-            ArrayList<HyperVisor> hypervisorList = physicalMachineCreation.getHypervisors();
-            ArrayList<HyperVisor> createdHypervisorList = new ArrayList<HyperVisor>();
-            for (HyperVisor hypervisor : hypervisorList)
-            {
-                if (hypervisor.getId() > 0)
-                {
-                    // We have to update this Hypervisor
-                    HypervisorHB hypervisorToUpdate =
-                        (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
-
-                    // Updating fields
-                    hypervisorToUpdate.setShortDescription(hypervisor.getShortDescription());
-                    hypervisorToUpdate.setType(HypervisorType.fromValue(hypervisor.getType()
-                        .getName()));
-                    hypervisorToUpdate.setIp(hypervisor.getIp());
-                    hypervisorToUpdate.setIpService(hypervisor.getIpService());
-                    hypervisorToUpdate.setPort(hypervisor.getPort());
-                    hypervisorToUpdate.setPhysicalMachine(physicalMachineHb);
-                    hypervisorToUpdate.setUser(hypervisor.getUser());
-                    hypervisorToUpdate.setPassword(hypervisor.getPassword());
-
-                    session.update(hypervisorToUpdate);
-                    createdHypervisorList.add(hypervisorToUpdate.toPojo());
-                }
-                else
-                {
-                    // We are creating a new Hypervisor
-                    HypervisorHB hypervisorToCreate = hypervisor.toPojoHB();
-                    hypervisorToCreate.setPhysicalMachine(physicalMachineHb);
-
-                    session.save(hypervisorToCreate);
-                    createdHypervisorList.add(hypervisorToCreate.toPojo());
-                }
-            }
+            physicalMachineHb.setName(pm.getName());
+            physicalMachineHb.setDescription(pm.getDescription());
+            physicalMachineHb.setCpu(pm.getCpu());
+            physicalMachineHb.setRam(pm.getRam());
+            physicalMachineHb.setHd(pm.getHd());
+            physicalMachineHb.setRealCpu(pm.getRealCpu());
+            physicalMachineHb.setRealRam(pm.getRealRam());
+            physicalMachineHb.setIdState(pm.getIdState());         
+            physicalMachineHb.getHypervisor().setIpService(pm.getHypervisor().getIpService());            
+                        
+            session.update(physicalMachineHb);            
 
             dataResult.setSuccess(true);
             dataResult.setMessage("Physical Machine edited successfully");
-            dataResult.setData(createdHypervisorList);
+            dataResult.setData(physicalMachineCreation.getHypervisors());
 
             transaction.commit();
 
-            // Log the event
-            String hyperName = "NULL";
-            if (createdHypervisorList.size() > 0)
-            {
-                hyperName = createdHypervisorList.get(0).getName();
-            }
             traceLog(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
                 userSession, physicalMachineAux.getDataCenter(), null, "Physical machine '"
                     + physicalMachineAux.getName() + "' has been modified [Name: "
                     + physicalMachineHb.getName() + ", " + +physicalMachineHb.getCpu() + "CPUs, "
                     + physicalMachineHb.getRam() + " RAM, " + physicalMachineHb.getHd() + " HD, "
-                    + hyperName + " hypervisor]", null, (Rack) physicalMachineAux.getAssignedTo(),
+                    + physicalMachineHb.getHypervisor().getType().getValue() + " hypervisor]", null, (Rack) physicalMachineAux.getAssignedTo(),
                 physicalMachineAux, null, null);
         }
         catch (HibernateException e)

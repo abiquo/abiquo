@@ -30,6 +30,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.server.core.enumerator.HypervisorType;
 
 /**
@@ -158,14 +159,21 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
     {
         this.password = password;
     }
-
+    
     public HyperVisor toPojo()
+    {
+    	return toPojo(physicalMachine.toPojo());
+    }
+    
+    public HyperVisor toPojo(PhysicalMachine physicalMachine)
     {
         HyperVisor hyperVisor = new HyperVisor();
 
+        hyperVisor.setAssignedTo(physicalMachine);
+        
         hyperVisor.setId(idHyper);
         hyperVisor.setName(getType().getValue());
-        hyperVisor.setAssignedTo(physicalMachine.toPojo());
+        
 
         hyperVisor.setShortDescription(shortDescription);
         hyperVisor.setIp(ip);

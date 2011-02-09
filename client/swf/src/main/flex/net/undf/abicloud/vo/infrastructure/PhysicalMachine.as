@@ -65,6 +65,8 @@ package net.undf.abicloud.vo.infrastructure
         
         public var initiatorIQN:String;
 
+	public var hypervisor:HyperVisor;
+
         /* ------------- Constants ------------- */
         public static const STATE_STOPPED:int = 0;
 

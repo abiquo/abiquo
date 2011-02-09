@@ -75,6 +75,8 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     private Set<Datastore> datastores;
 
     private Integer idEnterprise;
+    
+    private HyperVisor hypervisor;
 
     public PhysicalMachine()
     {
@@ -296,8 +298,18 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     {
         return idEnterprise;
     }
+    
+    
 
-    public PhysicalmachineHB toPojoHB()
+    public HyperVisor getHypervisor() {
+		return hypervisor;
+	}
+
+	public void setHypervisor(HyperVisor hypervisor) {
+		this.hypervisor = hypervisor;
+	}
+
+	public PhysicalmachineHB toPojoHB()
     {
         PhysicalmachineHB physicalMachineHB = new PhysicalmachineHB();
 
@@ -348,6 +360,11 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         if (idEnterprise != null)
         {
             physicalMachineHB.setIdEnterprise((idEnterprise.intValue() != 0) ? idEnterprise : null);
+        }
+        
+        if (hypervisor != null)
+        {
+        	physicalMachineHB.setHypervisor(hypervisor.toPojoHB(physicalMachineHB));
         }
 
         return physicalMachineHB;
