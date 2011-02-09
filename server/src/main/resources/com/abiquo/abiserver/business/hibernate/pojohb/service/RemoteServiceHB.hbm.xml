@@ -39,4 +39,12 @@
 		where rs.uri = :uri
   </query>
   
+  
+  <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_LOCATION_BY_TYPE">
+      select rs.uri
+      from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs             
+      where rs.idDataCenter = :idDataCenter
+      and rs.remoteServiceType = :remoteServiceType
+  </query>
+  
 </hibernate-mapping>
