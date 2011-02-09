@@ -24,6 +24,7 @@ package com.abiquo.abiserver.commands.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -1102,14 +1103,19 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         // Recovering virtualSystemMonitor address
         String virtualSystemMonitor =
             RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualappOld);
+        
         Session session = HibernateUtil.getSession();
         Transaction transaction = session.beginTransaction();
         VirtualappHB virtualappHBPojo =
             (VirtualappHB) session.get("VirtualappExtendedHB", virtualappOld.getId());
+        
         Collection<NodeHB< ? >> nodesPojoList = virtualappHBPojo.getNodesHB();
         List<VirtualimageHB> listOfImagesToDelete = new ArrayList<VirtualimageHB>();
         for (Node node : nodesList)
         {
+            
+            session = checkOpenTransaction(session);
+            
             // Only should arrive here NodeVirtualImage nodes
             NodeVirtualImage nodevi = (NodeVirtualImage) node;
             if (nodevi.getModified() == Node.NODE_ERASED)
@@ -1184,16 +1190,23 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     }
                     updatenodesList.add(node);
                 }
-
+                
+                session = checkOpenTransaction(session);   
                 session.delete(nodePojo);
             }
             else if (nodevi.getVirtualMachine().getState().toEnum() != StateEnum.NOT_DEPLOYED)
             {
                 updatenodesList.add(node);
             }
+            
+            session = checkOpenTransaction(session);                
+            session.getTransaction().commit();            
         }
-        session.update("VirtualappExtendedHB", virtualappHBPojo);
-        transaction.commit();
+
+        
+//        session = checkOpenTransaction(session);
+//        session.update("VirtualappExtendedHB", virtualappHBPojo);        
+//        session.getTransaction().commit();
 
         // after all, clean all non-managed images
         deleteNonManagedImages(listOfImagesToDelete);
@@ -1201,7 +1214,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         virtualApplianceWs.removeNodes(nodesToDelete);
 
         return updatenodesList;
-
     }
 
     /**
