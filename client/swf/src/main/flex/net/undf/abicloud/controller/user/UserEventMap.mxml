@@ -253,6 +253,40 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- UserEvent.GET_ENTERPRISE ________________________________________________________________________ -->
+    <EventHandlers type="{UserEvent.GET_ENTERPRISE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.userService}"
+            method="getEnterprise"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{UserResultHandler}"
+                    method="handleGetEnterprise"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
 
 
     <!-- UserEvent.CREATE_ENTERPRISE ________________________________________________________________________ -->
