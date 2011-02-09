@@ -2037,7 +2037,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, cause,
                     "startVirtualAppliance", nl); // , BasicResult..CLOUD_LIMT_EXCEEDED
             String message =
-                "The virtual appliance can not be deployed. Please contact your System Administrator.";
+                "The virtual appliance can not be deployed. Please contact your Cloud Administrator.";
             dataResult.setMessage(message);
             return dataResult;
         }
@@ -2088,7 +2088,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
-                "The datacenter is not well configured. Contact your system administrator",
+                "The datacenter is not well configured. Contact your Cloud Administrator",
                 "eventingError", e);
         }
         catch (Exception e)
