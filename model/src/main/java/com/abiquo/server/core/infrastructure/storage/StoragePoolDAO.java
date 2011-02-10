@@ -65,14 +65,14 @@ public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
         return getResultList(criteria);
     }
 
-    private Criteria equalsDatacenter(Integer datacenterId, Order order)
-    {
-        Criteria crit =
-            createNestedCriteria(order, StoragePool.REMOTE_SERVICE_PROPERTY,
-                RemoteService.DATACENTER_PROPERTY);
-        crit.add(Restrictions.eq(Datacenter.ID_PROPERTY, datacenterId));
-        return crit;
-    }
+    // FIXME: change this
+	private Criteria equalsDatacenter(Integer datacenterId, Order order) {
+		Criteria crit = createNestedCriteria(order,
+				StoragePool.REMOTE_SERVICE_PROPERTY,
+				RemoteService.DATACENTER_PROPERTY);
+		crit.add(Restrictions.eq(Datacenter.ID_PROPERTY, datacenterId));
+		return crit;
+	}
 
     private Criteria equalsRemoteService(Integer remoteServiceId, Order order)
     {

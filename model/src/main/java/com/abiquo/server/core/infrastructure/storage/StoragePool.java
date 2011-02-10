@@ -73,29 +73,29 @@ public class StoragePool extends GenericEnityBase<String>
         this.id = id;
     }
 
-    public final static String HOST_PORT_PROPERTY = "hostPort";
-
-    private final static boolean HOST_PORT_REQUIRED = true;
-
-    private final static String HOST_PORT_COLUMN = "host_port";
-
-    private final static int HOST_PORT_MIN = Integer.MIN_VALUE;
-
-    private final static int HOST_PORT_MAX = Integer.MAX_VALUE;
-
-    @Column(name = HOST_PORT_COLUMN, nullable = !HOST_PORT_REQUIRED)
-    @Range(min = HOST_PORT_MIN, max = HOST_PORT_MAX)
-    private int hostPort;
-
-    public int getHostPort()
-    {
-        return this.hostPort;
-    }
-
-    public void setHostPort(int hostPort)
-    {
-        this.hostPort = hostPort;
-    }
+     public final static String HOST_PORT_PROPERTY = "hostPort";
+	
+	 private final static boolean HOST_PORT_REQUIRED = true;
+	
+	 private final static String HOST_PORT_COLUMN = "host_port";
+	
+	 private final static int HOST_PORT_MIN = Integer.MIN_VALUE;
+	
+	 private final static int HOST_PORT_MAX = Integer.MAX_VALUE;
+	
+//    @Column(name = HOST_PORT_COLUMN, nullable = !HOST_PORT_REQUIRED)
+//    @Range(min = HOST_PORT_MIN, max = HOST_PORT_MAX)
+//    private int hostPort;
+//
+//    public int getHostPort()
+//    {
+//        return this.hostPort;
+//    }
+//
+//    public void setHostPort(int hostPort)
+//    {
+//        this.hostPort = hostPort;
+//    }
 
     public final static String URL_MANAGEMENT_PROPERTY = "urlManagement";
 
@@ -109,21 +109,21 @@ public class StoragePool extends GenericEnityBase<String>
 
     private final static String URL_MANAGEMENT_COLUMN = "url_management";
 
-    @Column(name = URL_MANAGEMENT_COLUMN, nullable = !URL_MANAGEMENT_REQUIRED, length = URL_MANAGEMENT_LENGTH_MAX)
-    private String urlManagement;
-
-    @Required(value = URL_MANAGEMENT_REQUIRED)
-    @Length(min = URL_MANAGEMENT_LENGTH_MIN, max = URL_MANAGEMENT_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = URL_MANAGEMENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getUrlManagement()
-    {
-        return this.urlManagement;
-    }
-
-    public void setUrlManagement(String urlManagement)
-    {
-        this.urlManagement = urlManagement;
-    }
+//    @Column(name = URL_MANAGEMENT_COLUMN, nullable = !URL_MANAGEMENT_REQUIRED, length = URL_MANAGEMENT_LENGTH_MAX)
+//    private String urlManagement;
+//
+//    @Required(value = URL_MANAGEMENT_REQUIRED)
+//    @Length(min = URL_MANAGEMENT_LENGTH_MIN, max = URL_MANAGEMENT_LENGTH_MAX)
+//    @LeadingOrTrailingWhitespace(allowed = URL_MANAGEMENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+//    public String getUrlManagement()
+//    {
+//        return this.urlManagement;
+//    }
+//
+//    public void setUrlManagement(String urlManagement)
+//    {
+//        this.urlManagement = urlManagement;
+//    }
 
     public final static String NAME_PROPERTY = "name";
 
@@ -153,26 +153,24 @@ public class StoragePool extends GenericEnityBase<String>
         this.name = name;
     }
 
-    public final static String TYPE_PROPERTY = "type";
+	public final static String TYPE_PROPERTY = "type";
 
-    private final static boolean TYPE_REQUIRED = true;
+	private final static boolean TYPE_REQUIRED = true;
 
-    private final static String TYPE_COLUMN = "storage_technology";
+	private final static String TYPE_COLUMN = "storage_technology";
 
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = TYPE_COLUMN, nullable = !TYPE_REQUIRED)
-    private StorageTechnologyType type;
-
-    @Required(value = TYPE_REQUIRED)
-    public StorageTechnologyType getType()
-    {
-        return this.type;
-    }
-
-    public void setType(StorageTechnologyType type)
-    {
-        this.type = type;
-    }
+//	@Enumerated(value = javax.persistence.EnumType.STRING)
+//	@Column(name = TYPE_COLUMN, nullable = !TYPE_REQUIRED)
+//	private StorageTechnologyType type;
+//
+//	@Required(value = TYPE_REQUIRED)
+//	public StorageTechnologyType getType() {
+//		return this.type;
+//	}
+//
+//	public void setType(StorageTechnologyType type) {
+//		this.type = type;
+//	}
 
     public final static String HOST_IP_PROPERTY = "hostIp";
 
@@ -185,57 +183,63 @@ public class StoragePool extends GenericEnityBase<String>
     private final static boolean HOST_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String HOST_IP_COLUMN = "host_ip";
-
-    @Column(name = HOST_IP_COLUMN, nullable = !HOST_IP_REQUIRED, length = HOST_IP_LENGTH_MAX)
-    private String hostIp;
-
-    @Required(value = HOST_IP_REQUIRED)
-    @Length(min = HOST_IP_LENGTH_MIN, max = HOST_IP_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = HOST_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getHostIp()
-    {
-        return this.hostIp;
-    }
-
-    public void setHostIp(String hostIp)
-    {
-        this.hostIp = hostIp;
-    }
+//
+//    @Column(name = HOST_IP_COLUMN, nullable = !HOST_IP_REQUIRED, length = HOST_IP_LENGTH_MAX)
+//    private String hostIp;
+//
+//    @Required(value = HOST_IP_REQUIRED)
+//    @Length(min = HOST_IP_LENGTH_MIN, max = HOST_IP_LENGTH_MAX)
+//    @LeadingOrTrailingWhitespace(allowed = HOST_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+//    public String getHostIp()
+//    {
+//        return this.hostIp;
+//    }
+//
+//    public void setHostIp(String hostIp)
+//    {
+//        this.hostIp = hostIp;
+//    }
 
     public final static String REMOTE_SERVICE_PROPERTY = "remoteService";
 
     private final static boolean REMOTE_SERVICE_REQUIRED = true;
 
     private final static String REMOTE_SERVICE_ID_COLUMN = "idRemoteService";
-
-    @JoinColumn(name = REMOTE_SERVICE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_remoteService")
-    private RemoteService remoteService;
-
-    @Required(value = REMOTE_SERVICE_REQUIRED)
-    public RemoteService getRemoteService()
-    {
-        return this.remoteService;
-    }
-
-    public void setRemoteService(RemoteService remoteService)
-    {
-        this.remoteService = remoteService;
-    }
+//
+//    @JoinColumn(name = REMOTE_SERVICE_ID_COLUMN)
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @ForeignKey(name = "FK_" + TABLE_NAME + "_remoteService")
+//    private RemoteService remoteService;
+//
+//    @Required(value = REMOTE_SERVICE_REQUIRED)
+//    public RemoteService getRemoteService()
+//    {
+//        return this.remoteService;
+//    }
+//
+//    public void setRemoteService(RemoteService remoteService)
+//    {
+//        this.remoteService = remoteService;
+//    }
 
     // *************************** Mandatory constructors ***********************
 
+    @Column(name = "idCabin", nullable = false, length = 10)
+    private Integer idCabin = 1;
+    
+    @Column(name = "idTier", nullable = false, length = 10)
+    private Integer idTier = 1;
+    
     public StoragePool(String name, String urlManagement, StorageTechnologyType type,
         String hostIp, int hostPort, RemoteService remoteService)
     {
         super();
         setName(name);
-        setUrlManagement(urlManagement);
-        setType(type);
-        setHostIp(hostIp);
-        setHostPort(hostPort);
-        setRemoteService(remoteService);
+//		setUrlManagement(urlManagement);
+//		setType(type);
+//		setHostIp(hostIp);
+//		setHostPort(hostPort);
+//		setRemoteService(remoteService);
     }
 
 }
