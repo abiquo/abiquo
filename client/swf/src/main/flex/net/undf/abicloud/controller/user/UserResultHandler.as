@@ -22,7 +22,7 @@
 package net.undf.abicloud.controller.user
 {
     import mx.collections.ArrayCollection;
-
+    
     import net.undf.abicloud.controller.ResultHandler;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.BasicResult;
@@ -134,6 +134,18 @@ package net.undf.abicloud.controller.user
                 //Adding the list of enterprises to the model, and the total number of enterprises in server
                 AbiCloudModel.getInstance().userManager.totalEnterprises = enterpriseListResult.totalEnterprises;
                 AbiCloudModel.getInstance().userManager.enterprises = enterpriseListResult.enterprisesList;
+            }
+            else
+                //There was a problem retrieving the enterprises list
+                super.handleResult(result);
+        }
+        
+         public function handleGetEnterprise(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {                
+                //We retrieve an entire enterprise object to edit it
+                callback(DataResult(result).data as Enterprise);
             }
             else
                 //There was a problem retrieving the enterprises list

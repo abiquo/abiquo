@@ -284,34 +284,23 @@
              */
             public function onClickEditEnterpriseButton(event:MouseEvent):void
             {
-
                 if (this._selectedEnterprise)
                 {
-                    //editEnterpriseButton.dataProvider = editEnterpriseButton.dataProvider; //To avoid an annoying graphic problem...
-
                     //Edit an Enterprise
-                    editEnterprise();
+                    //editEnterprise();
                     
-                    //Not used anymore
-                    /* if (event.item.id == "editEnterprise")
-                    {
-                        //Edit an Enterprise
-                        editEnterprise();
-                    } */
+                    var enterpriseEvent:UserEvent = new UserEvent(UserEvent.GET_ENTERPRISE);
+                    enterpriseEvent.enterprise = this.selectedEnterprise;
+                    enterpriseEvent.callback = editEnterprise;
+                    dispatchEvent(enterpriseEvent);
                 }
             }
 
             /**
              * To edit an enterprise
              */
-            private function editEnterprise():void
+            private function editEnterprise(enterprise:Enterprise):void
             {
-                //not used anymore
-                /* PopUpManager.addPopUp(this._enterpriseForm, Application.application as DisplayObject,
-                                      true);
-                PopUpManager.centerPopUp(this._enterpriseForm);
-
-                this._enterpriseForm.init(this._selectedEnterprise); */
                 this._enterpriseEditForm = new EnterpriseFormManagement();
                 this._enterpriseEditForm.addEventListener("EnterpriseFormClose", closeEnterpriseForm);
                 
@@ -319,7 +308,8 @@
                                       true);
                 PopUpManager.centerPopUp(this._enterpriseEditForm);
 
-                this._enterpriseEditForm.init(this._selectedEnterprise);
+                //this._enterpriseEditForm.init(this._selectedEnterprise);
+                this._enterpriseEditForm.init(enterprise);
                 this._enterpriseEditForm.titleText = ResourceManager.getInstance().getString("User",
                                                                                 "POPUP_TITLE_ENTERPRISE_EDIT");
             }
@@ -473,14 +463,6 @@
                 mouseDown="onMouseDownEnterprisesPaginatorSlider()"/>
         </mx:Canvas>
 
-        <!--As we group all edit functionalities, we only need one button-->
-        <!--<mx:PopUpMenuButton id="editEnterpriseButton"
-            width="40" height="22"
-            styleName="ConfigurationButtonPlus"
-            dataProvider="{editEnterpriseButtonDP}" label="" showRoot="false"
-            labelField="label" enabled="{this._selectedEnterprise != null}"
-            itemClick="onClickEditEnterpriseButton(event)"
-            closeDuration="0"/>-->
         <mx:Button id="editEnterpriseButton"
             styleName="ConfigurationButton"
             label=""

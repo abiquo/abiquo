@@ -22,9 +22,9 @@
 package net.undf.abicloud.events
 {
     import flash.events.Event;
-
+    
     import mx.collections.ArrayCollection;
-
+    
     import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.user.User;
@@ -45,6 +45,8 @@ package net.undf.abicloud.events
         public static const CLOSE_SESSION_USERS:String = "deleteSessionUsersUserEvent";
 
         public static const GET_ENTERPRISES:String = "getEnterprisesUserEvent";
+        
+        public static const GET_ENTERPRISE:String = "getEnterpriseUserEvent";
 
         public static const CREATE_ENTERPRISE:String = "createEnterpriseUserEvent";
 
@@ -78,6 +80,8 @@ package net.undf.abicloud.events
         public var userListOptions:UserListOptions = new UserListOptions();
 
         public var listRequest:ListRequest;
+        
+        public var callback:Function;
         
         /* ------------- Constructor ------------- */
         public function UserEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)
