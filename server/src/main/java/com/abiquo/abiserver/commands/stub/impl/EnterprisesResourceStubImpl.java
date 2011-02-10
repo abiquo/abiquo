@@ -60,8 +60,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         ClientResponse response = post(uri, dto);
         if (response.getStatusCode() == 201)
         {
-            EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
-            Enterprise data = Enterprise.create(responseDto);
+            Enterprise data = getEnterprise(response);
 
             ErrorsDto errorsDcLimits = createDatacenterLimits(enterprise, data);
             ErrorsDto errorsMachines = assignMachines(enterprise, data);
@@ -241,4 +240,35 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         return result;
     }
+    
+    public DataResult<Enterprise> getEnterprise(Integer enterpriseId)
+    {
+    	DataResult<Enterprise> result = new DataResult<Enterprise>();
+    	
+    	String uri = createEnterpriseLink(enterpriseId);
+    	
+    	ClientResponse response = get(uri);
+    	
+    	if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+
+            Enterprise enterprise = getEnterprise(response);
+            
+            result.setData(enterprise);
+        }
+        else
+        {
+            populateErrors(response, result, "getEnterprise");
+        }
+    	
+    	return result;
+    }
+
+	protected Enterprise getEnterprise(ClientResponse response) 
+	{
+		EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
+		Enterprise enterprise = Enterprise.create(responseDto);
+		return enterprise;
+	}
 }

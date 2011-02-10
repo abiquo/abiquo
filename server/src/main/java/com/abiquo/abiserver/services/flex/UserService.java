@@ -29,6 +29,7 @@ import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
@@ -259,6 +260,19 @@ public class UserService
         try
         {
             return command.deleteEnterprise(userSession, enterprise);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+    
+    public BasicResult getEnterprise(final UserSession userSession, final Integer enterpriseId)
+    {
+    	UserCommand command = proxyCommand(userSession);
+        try
+        {
+            return command.getEnterprise(userSession, enterpriseId);
         }
         catch (UserSessionException e)
         {

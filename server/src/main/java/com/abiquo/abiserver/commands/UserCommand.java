@@ -144,5 +144,7 @@ public interface UserCommand
      */
     public abstract BasicResult deleteEnterprise(final UserSession userSession,
         final Enterprise enterprise);
+    
+    public DataResult<Enterprise> getEnterprise(final UserSession userSession, final Integer enterpriseId);
 
 }
