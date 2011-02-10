@@ -264,7 +264,7 @@
 
         <RemoteObjectInvoker instance="{services.userService}"
             method="getEnterprise"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{UserResultHandler}"
