@@ -230,16 +230,35 @@ public class VSMClient
     }
 
     /**
-     * Returns true is the subscription exists.
+     * Returns true if the subscription exists.
      * 
      * @param virtualMachineName The name of the virtual machine.
-     * @return Returns true is the subscription exists. Otherwise false.
+     * @return True if the subscription exists. Otherwise false.
      */
-    public boolean isSubscribed(String virtualMachineName)
+    public boolean isSubscribed(final String virtualMachineName)
     {
         try
         {
             VirtualMachineDto dto = getSubscription(virtualMachineName);
+            return true;
+        }
+        catch (VSMClientException e)
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the PhysicalMachine is already monitored.
+     *
+     * @param physicalMachineAddress The address of the physical machine
+     * @return True if the machine is already monitored. Otherwise false;
+     */
+    public boolean isMonitored(final String physicalMachineAddress)
+    {
+        try
+        {
+            PhysicalMachineDto dto = getMonitoredMachine(physicalMachineAddress);
             return true;
         }
         catch (VSMClientException e)
