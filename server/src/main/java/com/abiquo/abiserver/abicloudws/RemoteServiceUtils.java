@@ -350,7 +350,7 @@ public class RemoteServiceUtils
      * @throws RemoteServiceException, if a remote service check fails
      */
     public static void checkRemoteServicesFromVA(final VirtualAppliance virtualAppliance)
-        throws PersistenceException, RemoteServiceException
+        throws RemoteServiceException
     {
         DAOFactory factory = HibernateDAOFactory.instance();
         DataCenterDAO datacenterDAO = factory.getDataCenterDAO();

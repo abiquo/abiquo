@@ -1979,30 +1979,15 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         // Get the user POJO from the DB
         UserHB userHB = null;
-        try
-        {
-            DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection();
 
-            userHB = factory.getUserDAO().findById(idUser);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
-                sourceSubState, userHB, ComponentType.USER, "Unknown user " + idUser,
-                "startVirtualAppliance", e);
-        }
+        userHB = factory.getUserDAO().findById(idUser);
+        factory.endConnection();
         // Check the remote services
         try
         {
             RemoteServiceUtils.checkRemoteServicesFromVA(virtualAppliance);
-        }
-        catch (PersistenceException e)
-        {
-            return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
-                sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
-                "An error occured while retrieving remote services", "startVirtualAppliance", e);
         }
         catch (RemoteServiceException e)
         {
@@ -2016,7 +2001,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             createVirtualMachines(userSession, virtualAppliance, force, dataResult);
         }
         catch (HardLimitExceededException hl)
-        {
+        {        	
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
@@ -2054,6 +2039,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
         }
+        finally
+        {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+        }
 
         try
         {
@@ -2063,6 +2052,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+        	
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e.getMessage(),
                 "createVirtualMachines", e);
@@ -2075,17 +2066,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (EventingException e)
         {
-            try
-            {
-                undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            }
-            catch (VirtualApplianceCommandException ex)
-            {
-                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VAPP_POWERON, userSession, null, virtualAppliance
-                        .getVirtualDataCenter().getName(), ex.getMessage(), virtualAppliance, null,
-                    null, null, null);
-            }
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
@@ -2094,17 +2075,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-            try
-            {
-                undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            }
-            catch (VirtualApplianceCommandException ex)
-            {
-                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VAPP_POWERON, userSession, null, virtualAppliance
-                        .getVirtualDataCenter().getName(), ex.getMessage(), virtualAppliance, null,
-                    null, null, null);
-            }
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
@@ -2135,20 +2106,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 EventType.VAPP_POWERON, userSession, null, virtualAppliance.getVirtualDataCenter()
                     .getName(), dataResult.getMessage(), virtualAppliance, null, null, null, null);
 
-            // There was a problem changing the state of the virtual
-            // appliance
-            // We leave it with its old state
-            try
-            {
-                undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            }
-            catch (VirtualApplianceCommandException ex)
-            {
-                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VAPP_POWERON, userSession, null, virtualAppliance
-                        .getVirtualDataCenter().getName(), ex.getMessage(), virtualAppliance, null,
-                    null, null, null);
-            }
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             virtualAppliance = updateStateInDB(virtualAppliance, sourceState.toEnum()).getData();
             dataResult.setData(virtualAppliance);
@@ -2200,7 +2159,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 }
             }
         }
-
     }
 
     /*
@@ -2678,7 +2636,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
      */
     private List<VirtualmachineHB> undeployVirtualMachines(UserSession userSession,
         final VirtualAppliance virtualAppliance, final DataResult<VirtualAppliance> dataResult)
-        throws VirtualApplianceCommandException
     {
         VirtualMachineResourceStub vmachineResource =
             APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
