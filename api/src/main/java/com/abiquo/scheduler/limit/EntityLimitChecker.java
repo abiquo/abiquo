@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.jms.ResourceAllocationException;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.DefaultEntityWithLimits.LimitStatus;
@@ -33,6 +34,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.client.TracerFactory;
 
@@ -223,7 +225,56 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         {
             throw new LimitExceededException(statusMap, entity, requirements, actual, entityId);
         }
+    }
 
+    private void traceLimit(boolean hard, String entityId, LimitResource resource, T entity)
+    {
+        EventType etype =
+            hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
+        
+        
+        String message = "Not enough resources"; //String.format("%s exceed %s", entityId, resource.name()) 
+        
+        
+        TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
+            EventType.WORKLOAD_HARD_LIMIT_EXCEEDED, message);
+        
+        if(traceSystem(entity))
+        {            
+            TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
+                EventType.WORKLOAD_HARD_LIMIT_EXCEEDED, message, Platform.SYSTEM_PLATFORM);
+        }
+    }
+
+    private boolean exceptionDetail(T entity)
+    {
+        if (entity instanceof VirtualDatacenter)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean traceSystem(T entity)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean traceDetail(T entity)
+    {
+        if (entity instanceof VirtualDatacenter)
+        {
+            return true;
+        }
+
+        return false;
     }
 
 }
