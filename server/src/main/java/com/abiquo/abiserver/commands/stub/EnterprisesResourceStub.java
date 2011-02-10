@@ -33,4 +33,6 @@ public interface EnterprisesResourceStub
     public BasicResult deleteEnterprise(Integer enterpriseId);
 
     public DataResult<EnterpriseListResult> getEnterprises(ListRequest enterpriseListOptions);
+    
+    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);
 }

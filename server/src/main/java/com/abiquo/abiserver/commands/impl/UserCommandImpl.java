@@ -461,4 +461,13 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         return result;
     }
+    
+    public DataResult<Enterprise> getEnterprise(final UserSession userSession, final Integer enterpriseId)
+    {
+    	EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
+
+        DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+        
+        return dataResult;
+    }
 }
