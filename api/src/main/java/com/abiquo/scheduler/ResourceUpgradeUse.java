@@ -324,6 +324,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
         machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
+        machine.setRealCpuCores(machine.getRealCpuCores());
+        machine.setRealHardDiskInBytes(machine.getRealHardDiskInBytes());
+        machine.setRealRamInMb(machine.getRealRamInMb());
 
         datacenterRepo.updateMachine(machine);
     }
@@ -418,8 +421,16 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     public Collection<Integer> getVlansIdAvoidAsCollection(Rack rack)
     {
-        CsvReader reader = new CsvReader(new StringReader(rack.getVlansIdAvoided()));
+        
         Collection<Integer> vlans_avoided_collection = new HashSet();
+        String avoidedVLANs = rack.getVlansIdAvoided();
+        
+        if (avoidedVLANs == null || avoidedVLANs.isEmpty())
+        {
+        	return vlans_avoided_collection;
+        }
+        
+        CsvReader reader = new CsvReader(new StringReader(avoidedVLANs));
         String[] line = reader.readLine();
 
         if (line != null)

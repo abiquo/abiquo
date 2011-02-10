@@ -219,7 +219,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String REAL_RAM_IN_MB_COLUMN = "realram";
 
-    /* package */final static int REAL_RAM_IN_MB_MIN = 1;
+    /* package */final static int REAL_RAM_IN_MB_MIN = 0;
 
     /* package */final static int REAL_RAM_IN_MB_MAX = Integer.MAX_VALUE;
 
@@ -244,7 +244,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String REAL_CPU_CORES_COLUMN = "realCpu";
 
-    /* package */final static int REAL_CPU_CORES_MIN = 1;
+    /* package */final static int REAL_CPU_CORES_MIN = 0;
 
     /* package */final static int REAL_CPU_CORES_MAX = Integer.MAX_VALUE;
 
@@ -269,7 +269,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String REAL_HARD_DISK_IN_BYTES_COLUMN = "realStorage";
 
-    /* package */final static long REAL_HARD_DISK_IN_BYTES_MIN = 1;
+    /* package */final static long REAL_HARD_DISK_IN_BYTES_MIN = 0;
 
     /* package */final static long REAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
 
@@ -573,7 +573,7 @@ public class Machine extends DefaultEntityBase
 
     private final static boolean INITIATOR_IQN_REQUIRED = false;
 
-    final static int INITIATOR_IQN_LENGTH_MIN = 10;
+    final static int INITIATOR_IQN_LENGTH_MIN = 0;
 
     final static int INITIATOR_IQN_LENGTH_MAX = 256;
 
