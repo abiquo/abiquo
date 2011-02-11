@@ -324,9 +324,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
         machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
-        machine.setRealCpuCores(machine.getRealCpuCores());
-        machine.setRealHardDiskInBytes(machine.getRealHardDiskInBytes());
-        machine.setRealRamInMb(machine.getRealRamInMb());
+        machine.setRealCpuCores(machine.getVirtualCpuCores());
+        machine.setRealHardDiskInBytes(machine.getVirtualHardDiskInBytes());
+        machine.setRealRamInMb(machine.getVirtualRamInMb());
 
         datacenterRepo.updateMachine(machine);
     }
