@@ -167,6 +167,23 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertEquals(404, response.getStatusCode());
     }
+    
+    @Test
+    public void modifyUserEmailIsNotValid() throws ClientWebException
+    {
+    	User user = userGenerator.createUniqueInstance();
+        setup(user.getRole(), user.getEnterprise(), user);
+
+        String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        UserDto dto = response.getEntity(UserDto.class);
+        dto.setName("name");
+        dto.setEmail("bademailsyntaxis");
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), 400);
+    }
 
     @Test
     public void modifyUserWrongEnterprise() throws ClientWebException

@@ -89,7 +89,7 @@ public class UserGenerator extends DefaultEntityGenerator<User>
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
-        String email = newString(nextSeed(), 0, 255);
+        String email = "abc@example.com";
         String nick = newString(nextSeed(), 0, 255);
         return createInstance(enterprise, role, password, name, surname, email, nick);
     }
@@ -98,7 +98,7 @@ public class UserGenerator extends DefaultEntityGenerator<User>
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
-        String email = newString(nextSeed(), 0, 255);
+        String email = "abc@example.com";
         return createInstance(enterprise, role, password, name, surname, email, nick);
     }
 
