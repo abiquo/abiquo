@@ -26,7 +26,8 @@ import java.util.Map;
 
 import javax.jms.ResourceAllocationException;
 
-import com.abiquo.scheduler.workload.AllocatorException;
+import org.springframework.security.authoritymapping.XmlMappableAttributesRetriever.IgnoreCloseInputStream;
+
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
@@ -182,11 +183,11 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         LimitStatus totalLimitStatus;
 
-        if (statusMap.keySet().contains(LimitStatus.HARD_LIMIT))
+        if (statusMap.containsValue(LimitStatus.HARD_LIMIT))// statusMap.keySet().contains(LimitStatus.HARD_LIMIT))
         {
             totalLimitStatus = LimitStatus.HARD_LIMIT;
         }
-        else if (statusMap.keySet().contains(LimitStatus.SOFT_LIMIT))
+        else if (statusMap.containsValue(LimitStatus.SOFT_LIMIT))// (statusMap.keySet().contains(LimitStatus.SOFT_LIMIT))
         {
             totalLimitStatus = LimitStatus.SOFT_LIMIT;
         }
@@ -211,55 +212,44 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         EventType etype =
             hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
 
-        boolean trace = (hard || (!hard && force));
-        boolean thr = (hard || (!hard && !force));
-
-        if (trace)
+        String traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceSystem(entity))
         {
-            String systemTraceMessage = String.format("Not enough resources on %s", entityId);
-            switch (traceSystem(entity))
-            {
-                case DETAIL:
-                    systemTraceMessage = except.toString();
-                case NO_DETAIL:
-                    TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
-                        etype, systemTraceMessage, Platform.SYSTEM_PLATFORM);
-                    break;
-                default:
-                    break;
-            }
-
-            String enterprTraceMessage = String.format("Not enough resources on %s", entityId);
-            switch (traceEnterprise(entity, hard))
-            {
-                case DETAIL:
-                    enterprTraceMessage = except.toString();
-                case NO_DETAIL:
-                    TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
-                        etype, enterprTraceMessage);
-                    break;
-                default:
-                    break;
-            }
-        }// trace
-
-        if (thr)
-        {
-            switch (returnExcption(entity))
-            {
-                case DETAIL:
-                    throw except;
-
-                case NO_DETAIL:
-                    /***
-                     * TODO CONFIRMAR SOFT LIMIT SIN DETAIL ?? 
-                     */
-                    throw new LimitExceededExceptionNoDetail(except);
-
-                default:
-                    break;
-            }
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage, Platform.SYSTEM_PLATFORM);
+                break;
+            default:
+                break;
         }
+
+        traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceEnterprise(entity, force))
+        {
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage);
+                break;
+            default:
+                break;
+        }
+
+        switch (returnExcption(entity, hard, force))
+        {
+            case DETAIL:
+                throw except;
+
+            case NO_DETAIL:
+                throw new LimitExceededExceptionNoDetail(except);
+
+            default:
+                break;
+        }
+
     }
 
     enum InformationSecurity
@@ -278,24 +268,31 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         return InformationSecurity.DETAIL;
     }
 
-    private InformationSecurity traceEnterprise(T entity, boolean hard)
+    private InformationSecurity traceEnterprise(T entity, boolean force)
     {
         if (entity instanceof VirtualDatacenter)
         {
-            return InformationSecurity.DETAIL;
-        }
-
-        return hard ? InformationSecurity.NO_DETAIL : InformationSecurity.IGNORE;
-    }
-
-    private InformationSecurity returnExcption(T entity)
-    {
-
-        if (entity instanceof VirtualDatacenter)
-        {
-            return InformationSecurity.DETAIL;
+            return force ? InformationSecurity.DETAIL : InformationSecurity.IGNORE;
         }
 
         return InformationSecurity.NO_DETAIL;
+    }
+
+    private InformationSecurity returnExcption(T entity, boolean hard, boolean force)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            if (hard)
+            {
+                return InformationSecurity.DETAIL;
+            }
+            else
+            {
+                return force ? InformationSecurity.IGNORE : InformationSecurity.DETAIL;
+            }
+        }
+
+        return hard ? InformationSecurity.NO_DETAIL : InformationSecurity.IGNORE;
     }
 }
