@@ -143,10 +143,17 @@ public class PhysicalMachineResource extends AbstractResource
 
         String[] credentials = getBasicAuthCredentials(auth);
 
-        PhysicalMachine pm =
-            vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType(),
+        PhysicalMachine pm;
+        if (credentials.length != 0)
+        {
+        	pm = vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType(),
                 credentials[0], credentials[1]);
-
+        }
+        else
+        {
+        	pm = vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType());
+        }
+        
         return toDto(pm);
     }
 
