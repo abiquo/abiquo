@@ -58,6 +58,11 @@ public class LimitExceededException extends AllocatorException
         this.entityId = entityId;
     }
 
+    public String getEntityId()
+    {
+        return entityId;
+    }
+
     public Map<LimitResource, LimitStatus> getResourcesStatus()
     {
         return status;
