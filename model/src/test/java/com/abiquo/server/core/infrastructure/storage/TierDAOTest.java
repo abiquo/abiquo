@@ -2,16 +2,14 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class StoragePoolDAOTest extends DefaultDAOTestBase<StoragePoolDAO, StoragePool>
+public class TierDAOTest extends DefaultDAOTestBase<TierDAO, Tier>
 {
 
     @BeforeMethod
@@ -24,15 +22,15 @@ public class StoragePoolDAOTest extends DefaultDAOTestBase<StoragePoolDAO, Stora
     }
 
     @Override
-    protected StoragePoolDAO createDao(EntityManager entityManager)
+    protected TierDAO createDao(EntityManager entityManager)
     {
-        return new StoragePoolDAO(entityManager);
+        return new TierDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<StoragePool> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<Tier> createEntityInstanceGenerator()
     {
-        return new StoragePoolGenerator(getSeed());
+        return new TierGenerator(getSeed());
     }
 
     @Override
@@ -42,9 +40,9 @@ public class StoragePoolDAOTest extends DefaultDAOTestBase<StoragePoolDAO, Stora
     }
 
     @Override
-    public StoragePoolGenerator eg()
+    public TierGenerator eg()
     {
-        return (StoragePoolGenerator) super.eg();
+        return (TierGenerator) super.eg();
     }
 
     

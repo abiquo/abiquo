@@ -3,12 +3,12 @@
   import com.abiquo.server.core.common.DefaultEntityTestBase;
   import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class StoragePoolTest extends DefaultEntityTestBase<StoragePool>
+  public class CabinetTest extends DefaultEntityTestBase<Cabinet>
   {
 
       @Override
-      protected InstanceTester<StoragePool> createEntityInstanceGenerator()
+      protected InstanceTester<Cabinet> createEntityInstanceGenerator()
       {
-          return new StoragePoolGenerator(getSeed());
+          return new CabinetGenerator(getSeed());
       }
   }

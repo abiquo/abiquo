@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "")
-public class StoragePoolDto extends SingleResourceTransportDto {
+public class TierDto extends SingleResourceTransportDto {
 	private Integer id;
 
 	public Integer getId() {
@@ -24,6 +24,16 @@ public class StoragePoolDto extends SingleResourceTransportDto {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	private String description;
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

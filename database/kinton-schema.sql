@@ -1491,8 +1491,8 @@ CREATE TABLE `kinton`.`tier` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 /*!40000 ALTER TABLE `tier` DISABLE KEYS */;
-LOCK TABLES `kinton`.`tier` WRITE;
 -- Insert arbitrary values to tier.
+LOCK TABLES `kinton`.`tier` WRITE;
 INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (1, 'Default Tier 1','Description of the default tier 1');
 INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (2, 'Default Tier 2','Description of the default tier 2');
 INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (3, 'Default Tier 3','Description of the default tier 3');
