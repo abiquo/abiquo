@@ -26,8 +26,6 @@ import java.util.Map;
 
 import javax.jms.ResourceAllocationException;
 
-import org.springframework.security.authoritymapping.XmlMappableAttributesRetriever.IgnoreCloseInputStream;
-
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
@@ -179,8 +177,6 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         throws LimitExceededException
     {
 
-        final String entityId = getEntityIdentifier(entity);
-
         LimitStatus totalLimitStatus;
 
         if (statusMap.containsValue(LimitStatus.HARD_LIMIT))// statusMap.keySet().contains(LimitStatus.HARD_LIMIT))
@@ -199,7 +195,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         if (totalLimitStatus != LimitStatus.OK)
         {
             LimitExceededException exc =
-                new LimitExceededException(statusMap, entity, requirements, actual, entityId);
+                new LimitExceededException(statusMap, entity, requirements, actual, getEntityIdentifier(entity));
 
             traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
         }
@@ -207,9 +203,9 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
     private void traceLimit(boolean hard, boolean force, T entity, LimitExceededException except)
     {
-        String entityId = getEntityIdentifier(entity);
+        final String entityId = getEntityIdentifier(entity);
 
-        EventType etype =
+        final EventType etype =
             hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
 
         String traceMessage = String.format("Not enough resources on %s", entityId);

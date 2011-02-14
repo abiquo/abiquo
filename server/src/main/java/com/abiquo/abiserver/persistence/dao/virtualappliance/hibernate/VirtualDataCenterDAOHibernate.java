@@ -30,9 +30,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -59,11 +58,6 @@ public class VirtualDataCenterDAOHibernate extends HibernateDAO<VirtualDataCente
     private static final String VIRTUAL_DATACENTERS_BY_ENTERPRISE_AND_DATACENTER =
         "VIRTUAL_DATACENTER_BY_ENTERPRISE_AND_DATACENTER";
 
-//    private static final String SUM_VM_RESOURCES =
-//        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a  "
-//            + "where vi.idVM = vm.idVM and vi.idNode = n.idNode and n.idVirtualApp = a.idVirtualApp "
-//            + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0";
-
     private static final String SUM_VOLUMES_RESOURCES =
         "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
@@ -72,10 +66,6 @@ public class VirtualDataCenterDAOHibernate extends HibernateDAO<VirtualDataCente
             + " where ipm.dhcp_service_id=nc.dhcp_service_id and vn.network_configuration_id = nc.network_configuration_id and vn.network_id = dc.network_id and rm.idManagement = ipm.idManagement "
             + " and ipm.mac is not null " //
             + " and rm.idVirtualDataCenter = :virtualDatacenterId";
-
-    // "select count(rm.idManagement) from rasd r, rasd_management rm "
-    // +
-    // "where r.resourceType = rm.idResourceType and rm.idResourceType = '10' and r.resourceSubType = '1' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
     @Override
     public VirtualDataCenterHB findByIdNamed(Integer id)
@@ -142,44 +132,36 @@ public class VirtualDataCenterDAOHibernate extends HibernateDAO<VirtualDataCente
 
     private final static Long MB_TO_BYTES = 1024l * 1024l;
 
-    @Override
-    public ResourceAllocationLimitHB getCurrentResourcesAllocated(int virtualDatacenterId)
+    public long getCurrentStorageAllocated(int virtualDatacenterId)
     {
-        VirtualDataCenterHB vdc = findById(virtualDatacenterId);
-
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-
-        // TODO deprecate this: server not longer check for CPU, RAM and HD resource allocation
-        // limits
-        //
-        // Object[] vmResources =
-        // (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-        // .setParameter("virtualDatacenterId", virtualDatacenterId)
-        // .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
-        // .uniqueResult();
-        //
-        // Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
-        // Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
-        // Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
             (BigDecimal) session.createSQLQuery(SUM_VOLUMES_RESOURCES)
                 .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
+        return storage == null ? 0 : storage.longValue() * MB_TO_BYTES;
+    }
+
+    public long getCurrentPublicIpAllocated(int virtualDatacenterId)
+    {
+        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+
         BigInteger publicIps =
             (BigInteger) session.createSQLQuery(COUNT_PUBLIC_IP_RESOURCES)
                 .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
-        // privateVlan = vdc.getNetwork().getNetworks().size();
+        return publicIps == null ? 0 : publicIps.longValue();
 
-        ResourceAllocationLimitHB limits = new ResourceAllocationLimitHB();
-        limits.setCpu(new LimitHB(0, 0));
-        limits.setRam(new LimitHB(0, 0));
-        limits.setCpu(new LimitHB(0, 0));
-        limits.setStorage(new LimitHB(storage == null ? 0 : storage.longValue() * MB_TO_BYTES, 0));
-        limits.setPublicIP(new LimitHB(publicIps == null ? 0 : publicIps.longValue(), 0));
-        // limits.setVlan(new LimitHB(privateVlan, 0));
+    }
 
-        return limits;
+    public long getCurrentVlanAllocated(int virtualDatacenterId)
+    {
+        final DAOFactory daoF = HibernateDAOFactory.instance();
+
+        Integer vlanCount =
+            daoF.getVlanNetworkDAO().findByVirtualDatacenter(virtualDatacenterId).size();
+
+        return vlanCount == null ? 0 : vlanCount;
     }
 }

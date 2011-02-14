@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
 
@@ -107,6 +106,9 @@ public interface DataCenterDAO extends DAO<DatacenterHB, Integer>
      */
     ArrayList<RackHB> getRacks(Integer datacenterId, String filters);
 
-    ResourceAllocationLimitHB getCurrentResourcesAllocated(int datacenterId, int enterpriseId);
+    
+    long getCurrentStorageAllocated(int idEnterprise, int idDatacenter);
+
+    long getCurrentPublicIpAllocated(int idEnterprise, int idDatacenter);
 
 }

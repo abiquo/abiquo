@@ -21,21 +21,18 @@
 
 package com.abiquo.abiserver.scheduler.limit;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
-import com.abiquo.abiserver.scheduler.limit.ResourceLimitStatus.ResourceLimitRange;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.LimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.SoftLimitExceededException;
-import com.abiquo.abiserver.scheduler.workload.core.exception.ResourceAllocationException;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.client.TracerFactory;
 
@@ -48,6 +45,24 @@ import com.abiquo.tracer.client.TracerFactory;
  */
 public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 {
+
+    public enum LimitResource
+    {
+        STORAGE, VLAN, PUBLICIP;
+    }
+
+    /**
+     * Describe the total resource reservation requirements intervals.
+     */
+    enum ResourceLimitRange
+    {
+        /** the current machine will not exceed any resource reservation requirements. */
+        OK,
+        /** the current machine will exceed the total recommended resource reservation. */
+        SOFT,
+        /** the current machine will exceed the total allowed resource reservation requirements. */
+        HARD
+    };
 
     /**
      * Gets the limits defined on this entity.
@@ -65,29 +80,9 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      * @return an ResourceAllocationLimit holding the total resource allocation on its <strong>hard
      *         limits</strong>, if some resource do not apply to the current entity set it to 0.
      */
-    protected abstract ResourceAllocationLimitHB getActualAllocation(CHECK_ENTITY entity);
+    abstract long getActualAllocation(CHECK_ENTITY entity, LimitResource resourceType);
 
-    /**
-     * Discard limits not applied on the current entity.
-     * 
-     * @param limitStatus, the full list of resource limits.
-     * @return the ResourceLimitStatus that applies to the current entity.
-     */
-    protected abstract List<ResourceLimitStatus> getFilterResourcesStatus(
-        List<ResourceLimitStatus> limitStatus);
-
-    /**
-     * Check the being use resource utilization for the given entity.
-     * 
-     * @param entity, the entity to check its limit status.
-     * @throws ResourceAllocationException, if can not obtain the total resource allocation or
-     *             LimitExceededException, only {@link HardLimitExceededException}, actually force
-     *             the soft limit.
-     */
-    public void checkCurrentLimits(final CHECK_ENTITY entity)
-    {
-        checkLimits(entity, new VirtualMachineRequirementsEmpty(), true);
-    }
+    abstract String getEntityName(CHECK_ENTITY entity);
 
     /**
      * Check the resource allocation limits on the current entity when adding new resource
@@ -101,79 +96,49 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      *             hard limit is exceeded. {@link SoftLimitExceededException}, on force = false and
      *             the soft limit is exceeded.
      */
-    public void checkLimits(final CHECK_ENTITY entity, final VirtualMachineRequirements required,
-        final boolean force)
+    public void checkLimits(final CHECK_ENTITY entity, final LimitResource resourceType,
+        long required, final boolean force)
     {
 
-        final ResourceAllocationLimitHB limits = getLimit(entity);
+        ResourceAllocationLimitHB limits = getLimit(entity);
 
-        if (limits == null || allNoLimits(limits))
+        LimitHB limit = null;
+        switch (resourceType)
+        {
+            case STORAGE:
+                limit = limits.getStorage();
+                break;
+
+            case PUBLICIP:
+                limit = limits.getStorage();
+                break;
+
+            case VLAN:
+                limit = limits.getStorage();
+                break;
+
+            default:
+                break;
+        }
+
+        if (limit == null || noLimits(limit))
         {
             return;
         }
 
-        final ResourceAllocationLimitHB actualAllocated = getActualAllocation(entity);
+        final Long actual = getActualAllocation(entity, resourceType);
 
-        List<ResourceLimitStatus> entityResourceStatus =
-            getResourcesStatus(entity, limits, actualAllocated, required);
+        ResourceLimitRange status = limitStatus(actual, required, limit);
 
-        entityResourceStatus = getFilterResourcesStatus(entityResourceStatus);
-
-        checkResourceLimits(force, entityResourceStatus, entity, required, actualAllocated);
-    }
-
-    /**
-     * Gets the list of all resources with his limit status.
-     */
-    private List<ResourceLimitStatus> getResourcesStatus(final CHECK_ENTITY entity,
-        final ResourceAllocationLimitHB limits, final ResourceAllocationLimitHB actualAllocated,
-        final VirtualMachineRequirements required)
-    {
-        final List<ResourceLimitStatus> limitStatus = new LinkedList<ResourceLimitStatus>();
-
-        final Long actualCpu = actualAllocated.getCpu().getHard();
-        final Long actualRam = actualAllocated.getRam().getHard();
-        final Long actualHd = actualAllocated.getHd().getHard();
-        final Long actualStorage = actualAllocated.getStorage().getHard();
-        final Long actualRepository = actualAllocated.getRepository().getHard();
-        final Long actualPublicIp = actualAllocated.getPublicIP().getHard();
-        final Long actualPublicVlan = actualAllocated.getVlan().getHard();
-
-        limitStatus.add(limitStatus(actualCpu, required.getCpu(), limits.getCpu(), "CPU"));
-        limitStatus.add(limitStatus(actualRam, required.getRam(), limits.getRam(), "RAM"));
-        limitStatus.add(limitStatus(actualHd, required.getHd(), limits.getHd(), "HD"));
-
-        limitStatus.add(limitStatus(actualStorage, required.getStorage(), limits.getStorage(),
-            "Storage"));
-        limitStatus.add(limitStatus(actualRepository, required.getRepository(),
-            limits.getRepository(), "Repository"));
-
-        limitStatus.add(limitStatus(actualPublicIp, required.getPublicIP(), limits.getPublicIP(),
-            "Public IP"));
-        limitStatus.add(limitStatus(actualPublicVlan, required.getPrivateVLAN(), limits.getVlan(),
-            "Private VLAN"));
-
-        return limitStatus;
+        checkResourceLimits(force, status, resourceType, entity, required, actual, limit);
     }
 
     /**
      * @return true if all the soft and hard limits are set to 0 (unlimited)
      */
-    private boolean allNoLimits(final ResourceAllocationLimitHB limit)
+    private boolean noLimits(final LimitHB limit)
     {
-        return (limit.getCpu().getHard() == 0
-            && limit.getCpu().getSoft() == 0
-            && limit.getRam().getHard() == 0
-            && limit.getRam().getSoft() == 0
-            && limit.getHd().getHard() == 0
-            && limit.getHd().getSoft() == 0
-            && (limit.getRepository() == null || (limit.getRepository().getSoft() == 0 && limit
-                .getRepository().getHard() == 0))
-            && (limit.getPublicIP() == null || (limit.getPublicIP().getSoft() == 0 && limit
-                .getPublicIP().getHard() == 0))
-            && (limit.getVlan() == null || (limit.getVlan().getSoft() == 0 && limit.getVlan()
-                .getHard() == 0)) && (limit.getStorage() == null || (limit.getStorage().getSoft() == 0 && limit
-            .getStorage().getHard() == 0)));
+        return (limit == null || limit.getSoft() == 0 && limit.getHard() == 0);
     }
 
     /**
@@ -186,8 +151,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      * @param type, the entity type
      * @return a range indicating where the resource limit is.
      */
-    protected ResourceLimitStatus limitStatus(final long actual, final long required,
-        final LimitHB limit, final String type)
+    protected ResourceLimitRange limitStatus(final long actual, final long required,
+        final LimitHB limit)
     {
         final long current = actual + required;
 
@@ -213,72 +178,129 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
             range = ResourceLimitRange.OK;
         }
 
-        return new ResourceLimitStatus(range, type);
+        return range;
     }
 
     /**
      * Throws an exception if some of the considered resource limit status exceed some limit.
      */
-    private void checkResourceLimits(final boolean force,
-        final List<ResourceLimitStatus> resourcesStatus, final CHECK_ENTITY entity,
-        final VirtualMachineRequirements requirements, final ResourceAllocationLimitHB actual)
-        throws SoftLimitExceededException, HardLimitExceededException
+    private void checkResourceLimits(final boolean force, ResourceLimitRange status,
+        LimitResource resourceType, final CHECK_ENTITY entity, final long requirements,
+        final long actual, LimitHB limit) throws SoftLimitExceededException,
+        HardLimitExceededException
     {
 
-        String entityName = getEntityName(entity);
-
-        String softExceed = new String();
-        String hardExceed = new String();
-
-        for (final ResourceLimitStatus resource : resourcesStatus)
+        switch (status)
         {
-            if (resource.getLimit() == ResourceLimitRange.HARD)
-            {
-                hardExceed += resource.getType() + "\n";
+            case HARD:
+                traceLimit(true, force, entity, new HardLimitExceededException(entity,
+                    requirements,
+                    actual,
+                    limit,
+                    resourceType));
+                break;
+            case SOFT:
+                traceLimit(false, force, entity, new SoftLimitExceededException(entity,
+                    requirements,
+                    actual,
+                    limit,
+                    resourceType));
+                break;
+            default: // OK
+                break;
+        }
+    }
 
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
-                    EventType.WORKLOAD_HARD_LIMIT_EXCEEDED,
-                    String.format("%s exceed %s", entityName, resource.getType()));
-            }
-            else if (resource.getLimit() == ResourceLimitRange.SOFT)
-            {
-                if (force)
-                {
-                    TracerFactory.getTracer().log(SeverityType.WARNING, ComponentType.WORKLOAD,
-                        EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED,
-                        String.format("%s exceed %s", entityName, resource.getType()));
-                }
-                else
-                {
-                    softExceed += resource.getType() + "\n";
-                }
-            }
-        } // all resources
+    private void traceLimit(boolean hard, boolean force, CHECK_ENTITY entity,
+        LimitExceededException except)
+    {
+        final String entityId = getEntityName(entity);
 
-        if (!hardExceed.isEmpty())
+        final EventType etype =
+            hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
+
+        String traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceSystem(entity))
         {
-            final String cause = String.format("%s exceed %s hard limits", entityName, hardExceed);
-
-            throw new HardLimitExceededException(cause,
-                resourcesStatus,
-                entity,
-                requirements,
-                actual);
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage, Platform.SYSTEM_PLATFORM);
+                break;
+            default:
+                break;
         }
 
-        if (!softExceed.isEmpty())
+        traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceEnterprise(entity, force))
         {
-            final String cause = String.format("%s exceed % soft limits", entityName, softExceed);
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage);
+                break;
+            default:
+                break;
+        }
 
-            throw new SoftLimitExceededException(cause,
-                resourcesStatus,
-                entity,
-                requirements,
-                actual);
+        switch (returnExcption(entity, hard, force))
+        {
+            case DETAIL:
+                throw except;
+
+            case NO_DETAIL:
+                throw except; // TODO new LimitExceededExceptionNoDetail(except);
+
+            default:
+                break;
         }
 
     }
 
-    abstract String getEntityName(CHECK_ENTITY entity);
+    enum InformationSecurity
+    {
+        DETAIL, NO_DETAIL, IGNORE;
+    }
+
+    private InformationSecurity traceSystem(CHECK_ENTITY entity)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            return InformationSecurity.IGNORE;
+        }
+
+        return InformationSecurity.DETAIL;
+    }
+
+    private InformationSecurity traceEnterprise(CHECK_ENTITY entity, boolean force)
+    {
+        if (entity instanceof VirtualDatacenter)
+        {
+            return force ? InformationSecurity.DETAIL : InformationSecurity.IGNORE;
+        }
+
+        return InformationSecurity.NO_DETAIL;
+    }
+
+    private InformationSecurity returnExcption(CHECK_ENTITY entity, boolean hard, boolean force)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            if (hard)
+            {
+                return InformationSecurity.DETAIL;
+            }
+            else
+            {
+                return force ? InformationSecurity.IGNORE : InformationSecurity.DETAIL;
+            }
+        }
+
+        return hard ? InformationSecurity.NO_DETAIL : InformationSecurity.IGNORE;
+    }
 
 }
