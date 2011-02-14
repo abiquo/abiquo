@@ -2001,19 +2001,22 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             createVirtualMachines(userSession, virtualAppliance, force, dataResult);
         }
         catch (HardLimitExceededException hl)
-        {        	
+        {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
         }
         catch (SoftLimitExceededException sl)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
                 "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
         }
         catch (NotEnoughResourcesException nl)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
                 String.format("There is not enough resources in datacenter "
                     + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
@@ -2029,19 +2032,17 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (VirtualImageException e)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
                 "createVirtualMachines", e);
         }
         catch (Exception e1)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
-        }
-        finally
-        {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
         }
 
         try
