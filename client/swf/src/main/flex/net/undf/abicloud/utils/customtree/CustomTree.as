@@ -406,7 +406,7 @@ package net.undf.abicloud.utils.customtree
 	            //Removing the children from the inner List's dataProvider
 	            for (i = 0; i < numChildren; i++)
 	            {
-	                this._innerListDataProvider.removeItemAt(branchPosition + 1);
+	                this._innerListDataProvider.removeItemAt(rackBranchPosition + 1);
 	            } 
             }
 

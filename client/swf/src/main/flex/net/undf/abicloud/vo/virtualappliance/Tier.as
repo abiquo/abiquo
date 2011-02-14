@@ -21,32 +21,35 @@
 
 package net.undf.abicloud.vo.virtualappliance
 {
-    import net.undf.abicloud.vo.infrastructure.VirtualMachine;
-    import net.undf.abicloud.vo.virtualappliance.Tier;
-    import net.undf.abicloud.vo.virtualimage.VirtualImage;
+    import mx.collections.ArrayCollection;
 
     /**
-     * This class represents a VirtualAppliance Node, that contains a Virtual Image
+     *
+     * @author Xavier Thevenot
+     *
      */
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage")]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.Tier")]
     [Bindable]
-    public class NodeVirtualImage extends Node
+    public class Tier
     {
-        public var virtualImage:VirtualImage;
+        public var id:int;
 
-        //Related Tier object
-        public var tier:Tier;
+        public var name:String;
+        
+        public var description:String;
 
-        //The Virtual Machine where this Node has been deployed.
-        //It may be null
-        public var virtualMachine:VirtualMachine;
+        public var enable:Boolean;
+        
+        public var listOfPools:ArrayCollection;
 
-        public function NodeVirtualImage()
+        public function Tier()
         {
-            super();
-            virtualImage = new VirtualImage();
-            virtualMachine = null;
+            id = 0;
+            name = "";
+            description = "";
+            enable = true;
+            listOfPools = new ArrayCollection();           
         }
 
     }

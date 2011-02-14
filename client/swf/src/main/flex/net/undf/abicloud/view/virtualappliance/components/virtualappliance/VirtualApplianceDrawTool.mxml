@@ -208,6 +208,8 @@
                                                                                         onVirtualApplianceNodesRetrieved);
 
                 dispatchEvent(new Event("_virtualApplianceChange"));
+                
+                this._virtualAppliance = event.virtualAppliance;
 
                 //We are ready to draw nodes
                 createNodeRenderers();
