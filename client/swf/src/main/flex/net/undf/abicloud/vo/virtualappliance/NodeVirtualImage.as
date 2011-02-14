@@ -22,7 +22,6 @@
 package net.undf.abicloud.vo.virtualappliance
 {
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
-    import net.undf.abicloud.vo.virtualappliance.Tier;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
 
     /**
@@ -34,9 +33,6 @@ package net.undf.abicloud.vo.virtualappliance
     public class NodeVirtualImage extends Node
     {
         public var virtualImage:VirtualImage;
-
-        //Related Tier object
-        public var tier:Tier;
 
         //The Virtual Machine where this Node has been deployed.
         //It may be null

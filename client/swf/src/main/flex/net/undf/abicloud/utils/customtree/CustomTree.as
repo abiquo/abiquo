@@ -69,7 +69,7 @@ package net.undf.abicloud.utils.customtree
     {
 
         //The data provider for the inner List of this CustomTree. It will contain only CustomTreeNodes
-        private var _innerListDataProvider:ArrayCollection;
+        protected var _innerListDataProvider:ArrayCollection;
         
         [Bindable]
         private var _selectedElement:InfrastructureElement;
@@ -94,7 +94,7 @@ package net.undf.abicloud.utils.customtree
         /**
          * Creation Complete event handler
          **/
-        private function creationCompleteHandler(flexEvent:FlexEvent):void
+        protected function creationCompleteHandler(flexEvent:FlexEvent):void
         {
             //Preparing the inner List
             super.itemRenderer = this._customTreeNodeRenderer;
@@ -127,7 +127,7 @@ package net.undf.abicloud.utils.customtree
         /**
          * The data descriptor for this CustomTree
          **/
-        private var _customTreeDataDescriptor:ICustomTreeDataDescriptor;
+        protected var _customTreeDataDescriptor:ICustomTreeDataDescriptor;
 
         public function set customTreeDataDescriptor(descriptor:ICustomTreeDataDescriptor):void
         {
@@ -322,9 +322,10 @@ package net.undf.abicloud.utils.customtree
         /**
          * Shows a opened branch's children in the inner list
          */
-        private function openBranch(branch:CustomTreeNode):void
+        protected function openBranch(branch:CustomTreeNode):void
         {
-            //AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.PHYSICALMACHINE_BY_RACK_RETRIEVED,updatePhysicalMachineList);
+            
+            //In case of
             if(branch.item is Rack){
             
             	//we open the taag and retrieve the list of physical machine
@@ -389,7 +390,7 @@ package net.undf.abicloud.utils.customtree
         	}        	
         }
 
-        private function closeBranch(branch:CustomTreeNode):void
+        protected function closeBranch(branch:CustomTreeNode):void
         {
             //Getting the branch position
             var rackBranchPosition:int = this._innerListDataProvider.getItemIndex(branch);
