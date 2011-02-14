@@ -43,8 +43,8 @@ import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 
 /**
- * The HyperV monitor.
- *
+ * The ESXi monitor.
+ * 
  * @author ibarrera
  */
 @Monitor(type = Type.VMX_04)
@@ -91,7 +91,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     public void shutdown()
     {
         String physicalmachines = StringUtils.join(monitoredMachines, ", ");
-        LOGGER.debug("Stopping HyperV monitor for: {}", physicalmachines);
+        LOGGER.debug("Stopping ESXi monitor for: {}", physicalmachines);
 
         executor.stop();
     }
@@ -99,7 +99,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     @Override
     public void start()
     {
-        LOGGER.debug("Starting HyperV monitor");
+        LOGGER.debug("Starting ESXi monitor");
 
         executor.start();
     }
@@ -131,7 +131,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
     /**
      * Creates and initializes the {@link PeriodicalExecutor}.
-     *
+     * 
      * @param poller The poller to be executed.
      * @param pollInterval The polling execution interval.
      * @return The PeriodicalExecutor.
@@ -154,7 +154,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
     /**
      * Performs synchronous polling calls to get the state of the monitored virtual machines.
-     *
+     * 
      * @author ibarrera
      */
     private class Poller extends AbstractTask
@@ -221,7 +221,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
         /**
          * Propagates events for each created and destroyed virtual machine.
-         *
+         * 
          * @param pm The physical machine being monitored.
          * @param currentVMs The current virtual machines in the hypervisor.
          */
