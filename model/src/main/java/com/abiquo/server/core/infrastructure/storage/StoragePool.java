@@ -44,6 +44,12 @@ public class StoragePool extends GenericEnityBase<String> {
 
 	protected StoragePool() {
 	}
+	
+	public StoragePool(String id, String name)
+	{
+		this.setId(id);
+		this.setName(name);
+	}
 
     private final static String ID_COLUMN = "idStorage";
 
