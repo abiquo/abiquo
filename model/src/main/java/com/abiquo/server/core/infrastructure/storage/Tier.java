@@ -1,35 +1,19 @@
-/**
- * Abiquo community edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.server.core.infrastructure.storage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -42,7 +26,7 @@ public class Tier extends DefaultEntityBase {
 	protected Tier() {
 	}
 
-	private final static String ID_COLUMN = "idTier";
+	private final static String ID_COLUMN = "id";
 
 	@Id
 	@GeneratedValue
@@ -55,7 +39,7 @@ public class Tier extends DefaultEntityBase {
 
 	public final static String NAME_PROPERTY = "name";
 	private final static boolean NAME_REQUIRED = true;
-	private final static int NAME_LENGTH_MIN = 1;
+	private final static int NAME_LENGTH_MIN = 0;
 	private final static int NAME_LENGTH_MAX = 255;
 	private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 	private final static String NAME_COLUMN = "name";
@@ -74,9 +58,43 @@ public class Tier extends DefaultEntityBase {
 		this.name = name;
 	}
 
+	public final static String DATACENTER_PROPERTY = "datacenter";
+	private final static boolean DATACENTER_REQUIRED = true;
+	private final static String DATACENTER_ID_COLUMN = "idDataCenter";
+
+	@JoinColumn(name = DATACENTER_ID_COLUMN)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@ForeignKey(name = "FK_" + TABLE_NAME + "_datacenter")
+	private Datacenter datacenter;
+
+	@Required(value = DATACENTER_REQUIRED)
+	public Datacenter getDatacenter() {
+		return this.datacenter;
+	}
+
+	public void setDatacenter(Datacenter datacenter) {
+		this.datacenter = datacenter;
+	}
+
+	public final static String ENABLED_PROPERTY = "enabled";
+	private final static boolean ENABLED_REQUIRED = true;
+	private final static String ENABLED_COLUMN = "isEnabled";
+
+	@Column(name = ENABLED_COLUMN, nullable = !ENABLED_REQUIRED)
+	private boolean enabled;
+
+	@Required(value = ENABLED_REQUIRED)
+	public boolean getEnabled() {
+		return this.enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
 	public final static String DESCRIPTION_PROPERTY = "description";
 	private final static boolean DESCRIPTION_REQUIRED = true;
-	private final static int DESCRIPTION_LENGTH_MIN = 1;
+	private final static int DESCRIPTION_LENGTH_MIN = 0;
 	private final static int DESCRIPTION_LENGTH_MAX = 255;
 	private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 	private final static String DESCRIPTION_COLUMN = "description";

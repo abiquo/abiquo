@@ -52,7 +52,7 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
-import com.abiquo.server.core.infrastructure.storage.Cabinet;
+import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.StoragePool;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -135,7 +135,7 @@ public class TestDataAccessManager {
 				Session.class, User.class, EnterpriseResources.class,
 				Enterprise.class, Hypervisor.class, Datastore.class,
 				Machine.class, Rack.class, StoragePool.class, Tier.class,
-				Cabinet.class, RemoteService.class, Repository.class,
+				StorageDevice.class, RemoteService.class, Repository.class,
 				CloudUsage.class, Datacenter.class, Network.class, Role.class,
 				SystemProperty.class, Rasd.class, License.class, Task.class);
 

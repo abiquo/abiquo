@@ -68,16 +68,16 @@ WHERE s.idRemoteService = r.idRemoteService;
 -- REESTRUCTURE THE STORAGE_POOL TABLE
 ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `idStorageDevice` int(10) unsigned NOT NULL;
 ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `idTier` int(10) unsigned NOT NULL;
-ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `isEnabled` tinyint(1) unsigned NOT NULL default '1',
+ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `isEnabled` tinyint(1) unsigned NOT NULL default '1';
 
 /*!40000 ALTER TABLE `storage_pool` DISABLE KEYS */;
 UPDATE `storage_pool` s, `remote_service` r, `storage_device` c
-SET s.idCabin = c.id, s.idTier = 1, s.isEnabled = 1
+SET s.idStorageDevice = c.id, s.idTier = 1, s.isEnabled = 1
 WHERE r.idRemoteService = s.idRemoteService 
   AND r.idDatacenter = r.idDatacenter;
 /*!40000 ALTER TABLE `storage_pool` ENABLE KEYS */;
 
-ALTER TABLE `kinton`.`storage_pool` ADD CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idCabin`) REFERENCES `kinton`.`storage_device` (`id`) ON DELETE CASCADE;
+ALTER TABLE `kinton`.`storage_pool` ADD CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idStorageDevice`) REFERENCES `kinton`.`storage_device` (`id`) ON DELETE CASCADE;
 ALTER TABLE `kinton`.`storage_pool` ADD CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`id`) ON DELETE RESTRICT;
 ALTER TABLE `kinton`.`storage_pool` DROP FOREIGN KEY `idRemoteServiceFK_1`;
 ALTER TABLE `kinton`.`storage_pool` DROP KEY `idRemoteServiceFK_1`;

@@ -28,16 +28,16 @@
   import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
   @Repository("jpaCabinetDAO")
-  public class CabinetDAO extends DefaultDAOBase<Integer, Cabinet>
+  public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice>
   {
-      public CabinetDAO()
+      public StorageDeviceDAO()
       {
-          super(Cabinet.class);
+          super(StorageDevice.class);
       }
 
-      public CabinetDAO(EntityManager entityManager)
+      public StorageDeviceDAO(EntityManager entityManager)
       {
-          super(Cabinet.class, entityManager);
+          super(StorageDevice.class, entityManager);
       }
 
       

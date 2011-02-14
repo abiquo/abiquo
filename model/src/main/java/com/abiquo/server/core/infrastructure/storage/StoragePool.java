@@ -111,22 +111,22 @@ public class StoragePool extends GenericEnityBase<String> {
 		this.tier = tier;
 	}
 
-	public final static String CABINET_PROPERTY = "cabinet";
-	private final static boolean CABINET_REQUIRED = true;
-	private final static String CABINET_ID_COLUMN = "idCabin";
+	public final static String DEVICE_PROPERTY = "device";
+	private final static boolean DEVICE_REQUIRED = true;
+	private final static String DEVICE_ID_COLUMN = "idStorageDevice";
 
-	@JoinColumn(name = CABINET_ID_COLUMN)
+	@JoinColumn(name = DEVICE_ID_COLUMN)
 	@ManyToOne(fetch = FetchType.LAZY)
-	@ForeignKey(name = "FK_" + TABLE_NAME + "_cabinet")
-	private Cabinet cabinet;
+	@ForeignKey(name = "FK_" + TABLE_NAME + "_device")
+	private StorageDevice device;
 
-	@Required(value = CABINET_REQUIRED)
-	public Cabinet getCabinet() {
-		return this.cabinet;
+	@Required(value = DEVICE_REQUIRED)
+	public StorageDevice getDevice() {
+		return this.device;
 	}
 
-	public void setCabinet(Cabinet cabinet) {
-		this.cabinet = cabinet;
+	public void setDevice(StorageDevice device) {
+		this.device = device;
 	}
 
 }

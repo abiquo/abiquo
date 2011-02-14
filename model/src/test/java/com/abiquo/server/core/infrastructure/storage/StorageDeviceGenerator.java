@@ -29,14 +29,14 @@ import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class CabinetGenerator extends DefaultEntityGenerator<Cabinet>
+public class StorageDeviceGenerator extends DefaultEntityGenerator<StorageDevice>
 {
 
     
       DatacenterGenerator datacenterGenerator;
     
 
-    public CabinetGenerator(SeedGenerator seed)
+    public StorageDeviceGenerator(SeedGenerator seed)
     {
         super(seed);
         
@@ -45,17 +45,17 @@ public class CabinetGenerator extends DefaultEntityGenerator<Cabinet>
     }
 
     @Override
-    public void assertAllPropertiesEqual(Cabinet obj1, Cabinet obj2)
+    public void assertAllPropertiesEqual(StorageDevice obj1, StorageDevice obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, Cabinet.MANAGEMENT_PORT_PROPERTY,Cabinet.NAME_PROPERTY,Cabinet.ISCSI_IP_PROPERTY,Cabinet.STORAGE_TECHNOLOGY_PROPERTY,Cabinet.MANAGEMENT_IP_PROPERTY,Cabinet.ISCSI_PORT_PROPERTY);
+      AssertEx.assertPropertiesEqualSilent(obj1, obj2, StorageDevice.MANAGEMENT_PORT_PROPERTY,StorageDevice.NAME_PROPERTY,StorageDevice.ISCSI_IP_PROPERTY,StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,StorageDevice.MANAGEMENT_IP_PROPERTY,StorageDevice.ISCSI_PORT_PROPERTY);
     }
 
     @Override
-    public Cabinet createUniqueInstance()
+    public StorageDevice createUniqueInstance()
     {
         // FIXME: Write here how to create the pojo
 
-        Cabinet cabinet = new Cabinet();
+        StorageDevice cabinet = new StorageDevice();
 
         
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
@@ -70,7 +70,7 @@ public class CabinetGenerator extends DefaultEntityGenerator<Cabinet>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Cabinet entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(StorageDevice entity, List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
         

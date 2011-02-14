@@ -37,7 +37,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
     
       TierGenerator tierGenerator;
     
-      CabinetGenerator cabinetGenerator;
+      StorageDeviceGenerator cabinetGenerator;
     
 
     public StoragePoolGenerator(SeedGenerator seed)
@@ -46,7 +46,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         
           tierGenerator = new TierGenerator(seed);
         
-          cabinetGenerator = new CabinetGenerator(seed);
+          cabinetGenerator = new StorageDeviceGenerator(seed);
         
     }
 
@@ -65,8 +65,8 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         Tier tier = tierGenerator.createUniqueInstance();
         storagePool.setTier(tier);
         
-        Cabinet cabinet = cabinetGenerator.createUniqueInstance();
-        storagePool.setCabinet(cabinet);
+        StorageDevice device = cabinetGenerator.createUniqueInstance();
+        storagePool.setDevice(device);
         
         storagePool.setId(UUID.randomUUID().toString());
         storagePool.setName("LoPutoStorage");
@@ -84,9 +84,9 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
           tierGenerator.addAuxiliaryEntitiesToPersist(tier, entitiesToPersist);
           entitiesToPersist.add(tier);
         
-          Cabinet cabinet = entity.getCabinet();
-          cabinetGenerator.addAuxiliaryEntitiesToPersist(cabinet, entitiesToPersist);
-          entitiesToPersist.add(cabinet);
+          StorageDevice device = entity.getDevice();
+          cabinetGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
+          entitiesToPersist.add(device);
         
     }
 

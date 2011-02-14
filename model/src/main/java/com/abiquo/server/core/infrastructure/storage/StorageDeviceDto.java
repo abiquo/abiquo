@@ -26,7 +26,7 @@
   import com.abiquo.model.transport.SingleResourceTransportDto;
 
   @XmlRootElement(name = "")
-  public class CabinetDto extends SingleResourceTransportDto
+  public class StorageDeviceDto extends SingleResourceTransportDto
   {
       private Integer id;
       public Integer getId()

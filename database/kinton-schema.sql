@@ -1524,13 +1524,13 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`storage_pool`;
 CREATE TABLE  `kinton`.`storage_pool` (
   `idStorage` varchar(40) NOT NULL,
-  `idCabin` int(10) unsigned NOT NULL,
+  `idStorageDevice` int(10) unsigned NOT NULL,
   `idTier` int(10) unsigned NOT NULL,
   `isEnabled` tinyint(1) unsigned NOT NULL default '1',
   `version_c` integer NOT NULL DEFAULT 1,
   `name` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`idStorage`),
-  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idCabin`) REFERENCES `kinton`.`cabinet` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idStorageDevice`) REFERENCES `kinton`.`storage_device` (`id`) ON DELETE CASCADE,
   CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

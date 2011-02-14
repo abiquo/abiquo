@@ -30,7 +30,7 @@ import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class CabinetDAOTest extends DefaultDAOTestBase<CabinetDAO, Cabinet>
+public class StorageDeviceDAOTest extends DefaultDAOTestBase<StorageDeviceDAO, StorageDevice>
 {
 
     @BeforeMethod
@@ -43,15 +43,15 @@ public class CabinetDAOTest extends DefaultDAOTestBase<CabinetDAO, Cabinet>
     }
 
     @Override
-    protected CabinetDAO createDao(EntityManager entityManager)
+    protected StorageDeviceDAO createDao(EntityManager entityManager)
     {
-        return new CabinetDAO(entityManager);
+        return new StorageDeviceDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<Cabinet> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<StorageDevice> createEntityInstanceGenerator()
     {
-        return new CabinetGenerator(getSeed());
+        return new StorageDeviceGenerator(getSeed());
     }
 
     @Override
@@ -61,9 +61,9 @@ public class CabinetDAOTest extends DefaultDAOTestBase<CabinetDAO, Cabinet>
     }
 
     @Override
-    public CabinetGenerator eg()
+    public StorageDeviceGenerator eg()
     {
-        return (CabinetGenerator) super.eg();
+        return (StorageDeviceGenerator) super.eg();
     }
 
     

@@ -24,12 +24,12 @@
   import com.abiquo.server.core.common.DefaultEntityTestBase;
   import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class CabinetTest extends DefaultEntityTestBase<Cabinet>
+  public class StorageDeviceTest extends DefaultEntityTestBase<StorageDevice>
   {
 
       @Override
-      protected InstanceTester<Cabinet> createEntityInstanceGenerator()
+      protected InstanceTester<StorageDevice> createEntityInstanceGenerator()
       {
-          return new CabinetGenerator(getSeed());
+          return new StorageDeviceGenerator(getSeed());
       }
   }

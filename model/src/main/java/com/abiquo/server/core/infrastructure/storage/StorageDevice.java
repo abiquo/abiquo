@@ -40,15 +40,15 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = Cabinet.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = Cabinet.TABLE_NAME)
-public class Cabinet extends DefaultEntityBase {
-	public static final String TABLE_NAME = "cabinet";
+@Table(name = StorageDevice.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = StorageDevice.TABLE_NAME)
+public class StorageDevice extends DefaultEntityBase {
+	public static final String TABLE_NAME = "storage_device";
 
-	protected Cabinet() {
+	protected StorageDevice() {
 	}
 
-	private final static String ID_COLUMN = "idCabin";
+	private final static String ID_COLUMN = "id";
 
 	@Id
 	@GeneratedValue

@@ -56,7 +56,7 @@
 
 		<!-- storage -->
 		<class>com.abiquo.server.core.infrastructure.storage.Tier</class>
-		<class>com.abiquo.server.core.infrastructure.storage.Cabinet</class>
+		<class>com.abiquo.server.core.infrastructure.storage.StorageDevice</class>
     	<class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
 		<class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
 		<!-- end: storage -->
