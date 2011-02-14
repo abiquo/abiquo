@@ -43,7 +43,7 @@ import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 
 /**
- * The HyperV monitor.
+ * The ESXi monitor.
  * 
  * @author ibarrera
  */
