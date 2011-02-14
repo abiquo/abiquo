@@ -1483,29 +1483,23 @@ USE kinton;
 --
 DROP TABLE IF EXISTS `kinton`.`tier`;
 CREATE TABLE `kinton`.`tier` (
-    `idTier` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
     `name` varchar(40) NOT NULL,
     `description` varchar(255) NOT NULL,
+    `isEnabled` tinyint(1) unsigned NOT NULL default '1',
+    `idDataCenter` int(10) unsigned NOT NULL,
     `version_c` integer NOT NULL DEFAULT 1,
-     PRIMARY KEY  (`idTier`)
+     PRIMARY KEY  (`id`),
+     CONSTRAINT `tier_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
-/*!40000 ALTER TABLE `tier` DISABLE KEYS */;
--- Insert arbitrary values to tier.
-LOCK TABLES `kinton`.`tier` WRITE;
-INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (1, 'Default Tier 1','Description of the default tier 1');
-INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (2, 'Default Tier 2','Description of the default tier 2');
-INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (3, 'Default Tier 3','Description of the default tier 3');
-INSERT INTO `kinton`.`tier` (idTier, name, description) VALUES (4, 'Default Tier 4','Description of the default tier 4');
-UNLOCK TABLES;
 /*!40000 ALTER TABLE `tier` ENABLE KEYS */;
 --
 -- Definition of table `kinton`.`cabin`
 --
 
-DROP TABLE IF EXISTS `kinton`.`cabinet`;
-CREATE TABLE `kinton`.`cabinet` (
-  `idCabin` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `kinton`.`storage_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(256) NOT NULL,
   `idDataCenter` int(10) unsigned NOT NULL,
   `management_ip` varchar(256) NOT NULL,
@@ -1514,14 +1508,14 @@ CREATE TABLE `kinton`.`cabinet` (
   `iscsi_port` int(5) unsigned NOT NULL DEFAULT '0',
   `storage_technology` varchar(256) DEFAULT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (`idCabin`),
-  CONSTRAINT `cabinet_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
+  PRIMARY KEY  (`id`),
+  CONSTRAINT `storage_device_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE `cabinet` DISABLE KEYS */;
-LOCK TABLES `kinton`.`cabinet` WRITE;
+/*!40000 ALTER TABLE `storage_device` DISABLE KEYS */;
+LOCK TABLES `kinton`.`storage_device` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `cabinet` ENABLE KEYS */;
+/*!40000 ALTER TABLE `storage_device` ENABLE KEYS */;
 
 --
 -- Definition of table `kinton`.`storage_pool`
@@ -1532,11 +1526,12 @@ CREATE TABLE  `kinton`.`storage_pool` (
   `idStorage` varchar(40) NOT NULL,
   `idCabin` int(10) unsigned NOT NULL,
   `idTier` int(10) unsigned NOT NULL,
+  `isEnabled` tinyint(1) unsigned NOT NULL default '1',
   `version_c` integer NOT NULL DEFAULT 1,
   `name` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`idStorage`),
-  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idCabin`) REFERENCES `kinton`.`cabinet` (`idCabin`) ON DELETE CASCADE,
-  CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`idTier`) ON DELETE RESTRICT
+  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idCabin`) REFERENCES `kinton`.`cabinet` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
