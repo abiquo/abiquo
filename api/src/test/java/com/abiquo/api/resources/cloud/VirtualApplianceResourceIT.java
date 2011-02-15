@@ -41,6 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -177,6 +178,27 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         setup(ent, datacenter, vdc, vapp1);
         ClientResponse response = get(resolveVirtualApplianceActionGetIPsURI(new Random().nextInt(), vapp1.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());  
-    }    
+    }
+    
+    @Test
+    public void updateVirtualAppliance() throws Exception
+    {
+    	VirtualAppliance vapp = vappGenerator.createInstance(vdc);        
+        setup(ent, datacenter, vdc, vapp);
+        
+        VirtualApplianceDto dto = ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
+        
+        String expectedName = "virtualApplianceName";
+        
+        dto.setName(expectedName);
+        
+        String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
+        ClientResponse response = put(uri, dto);
+        
+        assertEquals(response.getStatusCode(), 200);
+        VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);
+        
+        assertEquals(responseDto.getName(), expectedName);
+    }
     
 }

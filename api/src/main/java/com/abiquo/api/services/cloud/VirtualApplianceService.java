@@ -215,4 +215,16 @@ public class VirtualApplianceService extends DefaultApiService
 
         return vapp;
     }
+    
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualAppliance updateVirtualAppliance(Integer vdcId, Integer vappId, VirtualApplianceDto dto)
+    {
+    	VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+    	
+    	vapp.setName(dto.getName());
+    	
+    	repo.updateVirtualAppliance(vapp);
+    	
+    	return vapp;
+    }
 }

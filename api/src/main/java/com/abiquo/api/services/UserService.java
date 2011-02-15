@@ -195,11 +195,15 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
-
-        repo.updateUser(old);
-
-        return old;
+        
+        return updateUser(old);
     }
+
+	public User updateUser(User user) {
+		repo.updateUser(user);
+
+        return user;
+	}
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeUser(Integer id)
