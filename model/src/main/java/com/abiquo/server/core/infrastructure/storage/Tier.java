@@ -26,8 +26,22 @@ public class Tier extends DefaultEntityBase {
 	protected Tier() {
 	}
 
+	/**
+	 * Public constructor with the mandatory attributes.
+	 * @param name name of the tier
+	 * @param description description of the tier level
+	 * @param dc datacenter the Tier belongs to.
+	 */
+	public Tier(final String name, final String description, final Datacenter dc)
+	{
+		this.setName(name);
+		this.setDescription(description);
+		this.setDatacenter(dc);
+		this.setEnabled(Boolean.TRUE);
+	}
+	
 	private final static String ID_COLUMN = "id";
-
+	
 	@Id
 	@GeneratedValue
 	@Column(name = ID_COLUMN, nullable = false)

@@ -1,57 +1,49 @@
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class TierDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
+@XmlRootElement(name = "")
+public class TierDto extends SingleResourceTransportDto {
+	private Integer id;
 
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
+	public Integer getId() {
+		return id;
+	}
 
-      private String name;
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-public String getName()
-{
-    return name;
+	private String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	private boolean enabled;
+
+	public boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	private String description;
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 }
-
-public void setName(String name)
-{
-    this.name = name;
-}
-
-private boolean enabled;
-
-public boolean getEnabled()
-{
-    return enabled;
-}
-
-public void setEnabled(boolean enabled)
-{
-    this.enabled = enabled;
-}
-
-private String description;
-
-public String getDescription()
-{
-    return description;
-}
-
-public void setDescription(String description)
-{
-    this.description = description;
-}
-
-  }

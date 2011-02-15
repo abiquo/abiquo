@@ -152,7 +152,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         assertEquals(204, response.getStatusCode());
     }
 
-    private DatacenterDto createDatacenter()
+    protected DatacenterDto createDatacenter()
     {
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         setup(datacenter);
