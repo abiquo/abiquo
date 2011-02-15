@@ -20,60 +20,16 @@
  */
 package com.abiquo.api.common;
 
-import org.springframework.security.Authentication;
-import org.springframework.security.GrantedAuthority;
 
 /**
  * Stub to inject an authenticated user called `sysadmin` for service tests.
  * 
  * @author dcalavera
  */
-public class SysadminAuthenticationStub implements Authentication
+public class SysadminAuthenticationStub extends AuthenticationStub
 {
-
-    @Override
-    public String getName()
-    {
-        return "sysadmin";
-    }
-
-    @Override
-    public boolean isAuthenticated()
-    {
-        return true;
-    }
-
-    @Override
-    public GrantedAuthority[] getAuthorities()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getCredentials()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getDetails()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal()
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setAuthenticated(boolean arg0) throws IllegalArgumentException
-    {
-
-    }
+	public SysadminAuthenticationStub()
+	{
+		super("sysadmin");
+	}
 }
