@@ -33,28 +33,6 @@
 			<artifactId>model</artifactId>
 			<classifier>transport</classifier>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.softwarementors.bzngine</groupId>
-					<artifactId>bzngine</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-entitymanager</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate-validator</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency> 
 			<groupId>com.abiquo</groupId>
@@ -74,11 +52,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.apache.wink</groupId>
 			<artifactId>wink-json-provider</artifactId>
-			<version>1.1.2-incubating</version>
+            <version>1.1.2-incubating</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -86,11 +63,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- 		
 		<dependency>
 			<groupId>org.apache.wink</groupId>
 			<artifactId>wink-server</artifactId>
-			<version>1.1.2-incubating</version>
+            <version>1.1.2-incubating</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -98,7 +74,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
- -->
+		<dependency>
+            <groupId>org.apache.wink</groupId>
+            <artifactId>wink-common</artifactId>
+            <version>1.1.2-incubating</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
  
 		<!-- HTTP server / client -->
 			
@@ -155,6 +141,11 @@
     		<artifactId>commons-io</artifactId>
     		<version>2.0</version>
 		</dependency>
+		<dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.4</version>
+        </dependency>
 
 		<!-- JSON -->
 		<!-- TODO use jackson.version -->
@@ -375,9 +366,14 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <excludes>
+                        <exclude>**/*</exclude>
+                    </excludes>
+                    <!-- 
                 	<includes>
 						<include>**/*IT.java</include>
-					</includes>					
+					</includes>
+					-->					
                 </configuration>
             </plugin>
 		</plugins>
