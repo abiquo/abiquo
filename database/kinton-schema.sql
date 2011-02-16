@@ -897,7 +897,7 @@ CREATE TABLE  `kinton`.`virtualapp` (
   `subState` varchar(50) NOT NULL,
   `high_disponibility` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
   `error` int(1) unsigned NOT NULL,
-  `nodeconnections` varchar(255),
+  `nodeconnections` text,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idVirtualApp`),
   KEY `VirtualApp_FK4` (`idVirtualDataCenter`),
