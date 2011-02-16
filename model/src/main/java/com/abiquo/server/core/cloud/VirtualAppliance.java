@@ -115,19 +115,14 @@ public class VirtualAppliance extends DefaultEntityBase
 
     private final static boolean NODECONNECTIONS_REQUIRED = false;
 
-    private final static int NODECONNECTIONS_LENGTH_MIN = 0;
-
-    private final static int NODECONNECTIONS_LENGTH_MAX = 255;
-
     private final static boolean NODECONNECTIONS_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String NODECONNECTIONS_COLUMN = "nodeconnections";
 
-    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, length = NODECONNECTIONS_LENGTH_MAX)
+    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition="TEXT")
     private String nodeconnections;
 
     @Required(value = NODECONNECTIONS_REQUIRED)
-    @Length(min = NODECONNECTIONS_LENGTH_MIN, max = NODECONNECTIONS_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = NODECONNECTIONS_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getNodeconnections()
     {
