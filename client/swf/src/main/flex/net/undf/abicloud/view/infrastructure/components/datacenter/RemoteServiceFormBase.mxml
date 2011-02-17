@@ -34,6 +34,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.controls.Alert;
+        	import mx.events.CloseEvent;
+        	import net.undf.abicloud.view.general.AbiCloudAlert;
         	import mx.binding.utils.BindingUtils;
             import mx.collections.ArrayCollection;
             import mx.resources.ResourceBundle;
@@ -157,11 +160,69 @@
              */
             private function onAccept():void
             {
-                var infrastructureEvent:InfrastructureEvent;
-
                 if (this._remoteService)
                 {
-                    //Editing the RemoteService
+                    if(this._remoteService.remoteServiceType.valueOf == RemoteServiceType.DHCP){
+                    	askRemoteServiceEdition(RemoteServiceType.DHCP);
+                    }else if(this._remoteService.remoteServiceType.valueOf == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR){
+                    	askRemoteServiceEdition(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+                    }else{
+                    	editRemoteService();
+                    }                    
+                }
+                else
+                {
+                    var infrastructureEvent:InfrastructureEvent;
+                    infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CREATE_REMOTE_SERVICE);
+                    infrastructureEvent.dataCenter = _datacenter;
+                    infrastructureEvent.remoteService = createNewRemoteService();
+	                dispatchEvent(infrastructureEvent);
+	                close();
+                }
+            }
+            
+            /**
+             * Asks user to confirm the Remote Service edition
+             */
+            private function askRemoteServiceEdition(type:String):void
+            {
+                var headerText:String;
+                var bodyText:String;
+                if(type == RemoteServiceType.DHCP){
+                	headerText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_EDIT_DHCP_REMOTE_SERVICE_HEADER");
+                	bodyText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_EDIT_DHCP_REMOTE_SERVICE_TEXT");
+                }else{
+                	headerText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_EDIT_VSM_REMOTE_SERVICE_HEADER");
+                	bodyText = ResourceManager.getInstance().getString("Infrastructure",
+                                                                                "ALERT_EDIT_VSM_REMOTE_SERVICE_TEXT");
+                }
+                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_TITLE_LABEL"),
+                                        headerText,
+                                        bodyText,
+                                        Alert.YES | Alert.NO, editRemoteService);
+            }
+
+            /**
+             * Announces a Remote Service edition, if user confirmed so
+             */
+            private function editRemoteService(closeEvent:CloseEvent = null):void
+            {
+                var _editRemoteService:Boolean;
+                if(closeEvent == null){
+                	_editRemoteService = true;
+                }else{
+	                if (closeEvent.detail == Alert.YES)
+	                {
+	                    _editRemoteService = true;
+	                }                	
+                }
+                
+                if(_editRemoteService){
+                	//Editing the RemoteService
                     var remoteServiceToEdit:RemoteService = ObjectUtil.copy(_remoteService) as RemoteService;
                     remoteServiceToEdit.protocol = remoteServiceFormItem.protocolInput.text;
                     remoteServiceToEdit.domainName = remoteServiceFormItem.domainNameInput.text;
@@ -170,19 +231,13 @@
                     remoteServiceToEdit.name = remoteServiceFormItem.formedUri;
                     remoteServiceToEdit.status = remoteServiceFormItem.remoteServiceStatus;
 
+                    var infrastructureEvent:InfrastructureEvent;
                     infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_REMOTE_SERVICE);
                     infrastructureEvent.dataCenter = _datacenter;
                     infrastructureEvent.remoteService = remoteServiceToEdit;
+                  	dispatchEvent(infrastructureEvent);
+	                close();
                 }
-                else
-                {
-                    infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CREATE_REMOTE_SERVICE);
-                    infrastructureEvent.dataCenter = _datacenter;
-                    infrastructureEvent.remoteService = createNewRemoteService();
-                }
-
-                dispatchEvent(infrastructureEvent);
-                close();
             }
 
             protected function createNewRemoteService():RemoteService
