@@ -38,4 +38,4 @@ call mvn install:install-file -DgroupId=org.apache -DartifactId=thrift -Dversion
 call mvn install:install-file -DgroupId=com.xensource -DartifactId=xenserver -Dversion=5.6.0-1 -Dpackaging=jar -Dfile=xenserver-5.6.0-1.jar
 call mvn install:install-file -DgroupId=com.degrafa -DartifactId=degrafa -Dversion=3.1 -Dpackaging=swc -Dfile=degrafa-3.1.swc
 call mvn install:install-file -DgroupId=com.flexspy -DartifactId=flexspy -Dversion=1.3 -Dpackaging=swc -Dfile=flexspy-1.3.swc
-call mvn install:install-file -DgroupId=redis.clients -DartifactId=johm -Dversion=0.4.0-SNAPSHOT -Dpackaging=jar -Dfile=johm-0.4.0-SNAPSHOT.jar
+call mvn install:install-file -DgroupId=redis.clients -DartifactId=johm -Dversion=0.5.0-SNAPSHOT -Dpackaging=jar -Dfile=johm-0.5.0-SNAPSHOT.jar

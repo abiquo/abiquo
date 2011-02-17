@@ -4,7 +4,7 @@ mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=wiseman -
 mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=wiseman-tools -Dversion=1.0 -Dpackaging=jar -Dfile=$DIRNAME/wiseman-tools.jar
 mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=vboxws -Dversion=1.6 -Dpackaging=jar -Dfile=$DIRNAME/vboxws_java16.jar
 mvn install:install-file -DgroupId=org.virtualbox -DartifactId=vboxjws -Dversion=4.0.0 -Dpackaging=jar -Dfile=$DIRNAME/vboxjws.jar
-mvn install:install-file -DgroupId=redis.clients -DartifactId=johm -Dversion=0.4.0-SNAPSHOT -Dpackaging=jar -Dfile=$DIRNAME/johm-0.4.0-SNAPSHOT.jar
+mvn install:install-file -DgroupId=redis.clients -DartifactId=johm -Dversion=0.5.0-SNAPSHOT -Dpackaging=jar -Dfile=$DIRNAME/johm-0.5.0-SNAPSHOT.jar
 mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=flex-messaging-common -Dversion=3.0 -Dpackaging=jar -Dfile=$DIRNAME/flex-messaging-common-3.0.jar
 mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=flex-messaging-core -Dversion=3.0 -Dpackaging=jar -Dfile=$DIRNAME/flex-messaging-core-3.0.jar
 mvn install:install-file -DgroupId=com.abiquo.nomavenlibs -DartifactId=flex-messaging-opt -Dversion=3.0 -Dpackaging=jar -Dfile=$DIRNAME/flex-messaging-opt-3.0.jar
