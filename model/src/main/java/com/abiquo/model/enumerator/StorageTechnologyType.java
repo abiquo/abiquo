@@ -21,6 +21,7 @@
 
 package com.abiquo.model.enumerator;
 
+
 public enum StorageTechnologyType
 {
     ZFS(8080, 3260),
@@ -53,4 +54,5 @@ public enum StorageTechnologyType
     {
         return DEFAULT_CONTEXT_PATH;
     }
+    
 }

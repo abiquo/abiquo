@@ -1,5 +1,6 @@
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -32,10 +33,8 @@ public class TierGenerator extends DefaultEntityGenerator<Tier>
     @Override
     public Tier createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
 
         Tier tier = new Tier();
-
         
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         tier.setDatacenter(datacenter);
@@ -43,6 +42,31 @@ public class TierGenerator extends DefaultEntityGenerator<Tier>
         tier.setDescription("LoPutoTier Description");
         tier.setEnabled(true);
         return tier;
+    }
+    
+    public Tier createInstance(Datacenter datacenter, String tierName)
+    {
+    	Tier tier = new Tier();
+    	
+    	tier.setDatacenter(datacenter);
+    	tier.setName(tierName);
+    	tier.setDescription("Tier description for tier " + tierName);
+    	tier.setEnabled(Boolean.TRUE);
+    	
+    	return tier;
+    }
+    
+    public List<Tier> createTiersForDatacenter(Datacenter datacenter)
+    {
+    	List<Tier> listOfTiers = new ArrayList<Tier>();
+    	
+        for (Integer i = 1; i <= 4; i ++)
+        {
+        	Tier currentTier = createInstance(datacenter, "Tier " + i.toString());
+        	listOfTiers.add(currentTier);
+        }
+        
+    	return listOfTiers;
     }
 
     @Override

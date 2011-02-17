@@ -550,4 +550,17 @@ public class RESTBuilder implements IRESTBuilder
     {
         return null;
     }
+
+    @Override
+    public List<RESTLink> buildTierLinks(Integer datacenterId, Integer tierId)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildStorageDeviceLinks(Integer datacenterId, Integer deviceId)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

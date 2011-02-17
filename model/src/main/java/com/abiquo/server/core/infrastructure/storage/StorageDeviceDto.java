@@ -19,96 +19,105 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  @XmlRootElement(name = "")
-  public class StorageDeviceDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
+import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private int managementPort;
-
-public int getManagementPort()
+@XmlRootElement(name = "storage_device")
+public class StorageDeviceDto extends SingleResourceTransportDto implements Serializable
 {
-    return managementPort;
+    /**
+     * Default serial version UID. 
+     */
+    private static final long serialVersionUID = 1L;
+    
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private int managementPort;
+
+    public int getManagementPort()
+    {
+        return managementPort;
+    }
+
+    public void setManagementPort(int managementPort)
+    {
+        this.managementPort = managementPort;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    private String iscsiIp;
+
+    public String getIscsiIp()
+    {
+        return iscsiIp;
+    }
+
+    public void setIscsiIp(String iscsiIp)
+    {
+        this.iscsiIp = iscsiIp;
+    }
+
+    private StorageTechnologyType storageTechnology;
+
+    public StorageTechnologyType getStorageTechnology()
+    {
+        return storageTechnology;
+    }
+
+    public void setStorageTechnology(StorageTechnologyType storageTechnology)
+    {
+        this.storageTechnology = storageTechnology;
+    }
+
+    private String managementIp;
+
+    public String getManagementIp()
+    {
+        return managementIp;
+    }
+
+    public void setManagementIp(String managementIp)
+    {
+        this.managementIp = managementIp;
+    }
+
+    private int iscsiPort;
+
+    public int getIscsiPort()
+    {
+        return iscsiPort;
+    }
+
+    public void setIscsiPort(int iscsiPort)
+    {
+        this.iscsiPort = iscsiPort;
+    }
+
 }
-
-public void setManagementPort(int managementPort)
-{
-    this.managementPort = managementPort;
-}
-
-private String name;
-
-public String getName()
-{
-    return name;
-}
-
-public void setName(String name)
-{
-    this.name = name;
-}
-
-private String iscsiIp;
-
-public String getIscsiIp()
-{
-    return iscsiIp;
-}
-
-public void setIscsiIp(String iscsiIp)
-{
-    this.iscsiIp = iscsiIp;
-}
-
-private String storageTechnology;
-
-public String getStorageTechnology()
-{
-    return storageTechnology;
-}
-
-public void setStorageTechnology(String storageTechnology)
-{
-    this.storageTechnology = storageTechnology;
-}
-
-private String managementIp;
-
-public String getManagementIp()
-{
-    return managementIp;
-}
-
-public void setManagementIp(String managementIp)
-{
-    this.managementIp = managementIp;
-}
-
-private int iscsiPort;
-
-public int getIscsiPort()
-{
-    return iscsiPort;
-}
-
-public void setIscsiPort(int iscsiPort)
-{
-    this.iscsiPort = iscsiPort;
-}
-
-  }

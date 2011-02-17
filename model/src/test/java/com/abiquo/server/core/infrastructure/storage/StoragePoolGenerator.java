@@ -70,6 +70,9 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         
         storagePool.setId(UUID.randomUUID().toString());
         storagePool.setName("LoPutoStorage");
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
         
         return storagePool;
     }

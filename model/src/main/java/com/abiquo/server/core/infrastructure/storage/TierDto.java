@@ -1,49 +1,65 @@
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
-public class TierDto extends SingleResourceTransportDto {
-	private Integer id;
+@XmlRootElement(name = "tier")
+public class TierDto extends SingleResourceTransportDto implements Serializable
+{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3685896838634529469L;
 
-	public Integer getId() {
-		return id;
-	}
+    private Integer id;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public Integer getId()
+    {
+        return id;
+    }
 
-	private String name;
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	private boolean enabled;
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public boolean getEnabled() {
-		return enabled;
-	}
+    private boolean enabled;
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public boolean getEnabled()
+    {
+        return enabled;
+    }
 
-	private String description;
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    private String description;
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
 
 }

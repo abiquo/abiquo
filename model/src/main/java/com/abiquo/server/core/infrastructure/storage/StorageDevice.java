@@ -23,6 +23,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -34,6 +35,9 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.model.validation.Ip;
+import com.abiquo.model.validation.Port;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -48,6 +52,18 @@ public class StorageDevice extends DefaultEntityBase {
 	protected StorageDevice() {
 	}
 
+	public StorageDevice(final String name, final String managementIP, final Integer managementPort,
+	    final String iscsiIP, final Integer iscsiPort, StorageTechnologyType storageTechnology, final Datacenter dc)
+	{
+	    this.setName(name);
+	    this.setManagementIp(managementIP);
+	    this.setManagementPort(managementPort);
+	    this.setIscsiIp(iscsiIP);
+	    this.setIscsiPort(iscsiPort);
+	    this.setStorageTechnology(storageTechnology);
+	    this.setDatacenter(dc);
+	}
+	
 	private final static String ID_COLUMN = "id";
 
 	@Id
@@ -69,6 +85,7 @@ public class StorageDevice extends DefaultEntityBase {
 	@Range(min = MANAGEMENT_PORT_MIN, max = MANAGEMENT_PORT_MAX)
 	private Integer managementPort;
 
+	@Port
 	public Integer getManagementPort() {
 		return this.managementPort;
 	}
@@ -129,6 +146,7 @@ public class StorageDevice extends DefaultEntityBase {
 	@Required(value = ISCSI_IP_REQUIRED)
 	@Length(min = ISCSI_IP_LENGTH_MIN, max = ISCSI_IP_LENGTH_MAX)
 	@LeadingOrTrailingWhitespace(allowed = ISCSI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+	@Ip
 	public String getIscsiIp() {
 		return this.iscsiIp;
 	}
@@ -138,23 +156,20 @@ public class StorageDevice extends DefaultEntityBase {
 	}
 
 	public final static String STORAGE_TECHNOLOGY_PROPERTY = "storageTechnology";
-	private final static boolean STORAGE_TECHNOLOGY_REQUIRED = false;
-	private final static int STORAGE_TECHNOLOGY_LENGTH_MIN = 0;
+	private final static boolean STORAGE_TECHNOLOGY_REQUIRED = true;
 	private final static int STORAGE_TECHNOLOGY_LENGTH_MAX = 255;
-	private final static boolean STORAGE_TECHNOLOGY_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 	private final static String STORAGE_TECHNOLOGY_COLUMN = "storage_technology";
-
+	
+	@Enumerated(value = javax.persistence.EnumType.STRING)
 	@Column(name = STORAGE_TECHNOLOGY_COLUMN, nullable = !STORAGE_TECHNOLOGY_REQUIRED, length = STORAGE_TECHNOLOGY_LENGTH_MAX)
-	private String storageTechnology;
+	private StorageTechnologyType storageTechnology;
 
 	@Required(value = STORAGE_TECHNOLOGY_REQUIRED)
-	@Length(min = STORAGE_TECHNOLOGY_LENGTH_MIN, max = STORAGE_TECHNOLOGY_LENGTH_MAX)
-	@LeadingOrTrailingWhitespace(allowed = STORAGE_TECHNOLOGY_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-	public String getStorageTechnology() {
+	public StorageTechnologyType getStorageTechnology() {
 		return this.storageTechnology;
 	}
 
-	public void setStorageTechnology(String storageTechnology) {
+	public void setStorageTechnology(StorageTechnologyType storageTechnology) {
 		this.storageTechnology = storageTechnology;
 	}
 
@@ -171,6 +186,7 @@ public class StorageDevice extends DefaultEntityBase {
 	@Required(value = MANAGEMENT_IP_REQUIRED)
 	@Length(min = MANAGEMENT_IP_LENGTH_MIN, max = MANAGEMENT_IP_LENGTH_MAX)
 	@LeadingOrTrailingWhitespace(allowed = MANAGEMENT_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+	@Ip
 	public String getManagementIp() {
 		return this.managementIp;
 	}
@@ -189,6 +205,7 @@ public class StorageDevice extends DefaultEntityBase {
 	@Range(min = ISCSI_PORT_MIN, max = ISCSI_PORT_MAX)
 	private int iscsiPort;
 
+	@Port
 	public int getIscsiPort() {
 		return this.iscsiPort;
 	}

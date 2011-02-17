@@ -166,7 +166,9 @@ public enum APIError
         "Could not initialize licensing ciphers"), LICENSE_CIHPER_KEY("LICENSE-3",
         "Could not read licensing cipher key"), LICENSE_OVERFLOW("LICENSE-4",
         "The maximum number of managed cores has been reached"), LICENSE_DUPLICATED("LICENSE-5",
-        "The license already exists")
+        "The license already exists"), 
+        
+    NON_EXISTENT_TIER("TIER-0", "The requested tier doesn not exist");
 
     ;
     

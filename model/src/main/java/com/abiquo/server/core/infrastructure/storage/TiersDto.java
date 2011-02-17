@@ -3,6 +3,7 @@
  */
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -26,6 +27,10 @@ public class TiersDto extends WrapperDto<TierDto>{
 	@XmlElement(name = "tier")
 	public List<TierDto> getCollection() {
 		
+		if (collection == null)
+		{
+			collection = new ArrayList<TierDto>();
+		}
 		return collection;
 	}
 

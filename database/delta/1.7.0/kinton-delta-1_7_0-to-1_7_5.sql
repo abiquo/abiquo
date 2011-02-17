@@ -69,6 +69,9 @@ WHERE s.idRemoteService = r.idRemoteService;
 ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `idStorageDevice` int(10) unsigned NOT NULL;
 ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `idTier` int(10) unsigned NOT NULL;
 ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `isEnabled` tinyint(1) unsigned NOT NULL default '1';
+ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `totalSizeInMb` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `usedSizeInMb` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0;
+ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `availableSizeInMb` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0;
 
 /*!40000 ALTER TABLE `storage_pool` DISABLE KEYS */;
 UPDATE `storage_pool` s, `remote_service` r, `storage_device` c

@@ -31,6 +31,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.common.GenericEnityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -128,5 +129,71 @@ public class StoragePool extends GenericEnityBase<String> {
 	public void setDevice(StorageDevice device) {
 		this.device = device;
 	}
+	
+    public final static String TOTAL_SIZE_PROPERTY = "totalSizeInMb";
+
+    private final static String TOTAL_SIZE_COLUMN = "totalSizeInMb";
+
+    private final static long TOTAL_SIZE_MIN = Long.MIN_VALUE;
+
+    private final static long TOTAL_SIZE_MAX = Long.MAX_VALUE;
+
+    @Column(name = TOTAL_SIZE_COLUMN, nullable = false)
+    @Range(min = TOTAL_SIZE_MIN, max = TOTAL_SIZE_MAX)
+    private long totalSizeInMb;
+
+    public long getTotalSizeInMb()
+    {
+        return this.totalSizeInMb;
+    }
+
+    public void setTotalSizeInMb(long totalSizeInMb)
+    {
+        this.totalSizeInMb = totalSizeInMb;
+    }
+    
+    public final static String USED_SIZE_PROPERTY = "usedSizeInMb";
+
+    private final static String USED_SIZE_COLUMN = "usedSizeInMb";
+
+    private final static long USED_SIZE_MIN = Long.MIN_VALUE;
+
+    private final static long USED_SIZE_MAX = Long.MAX_VALUE;
+
+    @Column(name = USED_SIZE_COLUMN, nullable = false)
+    @Range(min = USED_SIZE_MIN, max = USED_SIZE_MAX)
+    private long usedSizeInMb;
+
+    public long getUsedSizeInMb()
+    {
+        return this.usedSizeInMb;
+    }
+
+    public void setUsedSizeInMb(long usedSize)
+    {
+        this.usedSizeInMb = usedSize;
+    }
+    
+    public final static String AVAILABLE_SIZE_PROPERTY = "availableSizeInMb";
+
+    private final static String AVAILABLE_SIZE_COLUMN = "availableSizeInMb";
+
+    private final static long AVAILABLE_SIZE_MIN = Long.MIN_VALUE;
+
+    private final static long AVAILABLE_SIZE_MAX = Long.MAX_VALUE;
+
+    @Column(name = AVAILABLE_SIZE_COLUMN, nullable = false)
+    @Range(min = AVAILABLE_SIZE_MIN, max = AVAILABLE_SIZE_MAX)
+    private long availableSizeInMb;
+
+    public long getAvailableSizeInMb()
+    {
+        return this.availableSizeInMb;
+    }
+
+    public void setAvailableSizeInMb(long availableSize)
+    {
+        this.availableSizeInMb = availableSize;
+    }
 
 }

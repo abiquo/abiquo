@@ -23,6 +23,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
@@ -53,22 +54,37 @@ public class StorageDeviceGenerator extends DefaultEntityGenerator<StorageDevice
     @Override
     public StorageDevice createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
 
-        StorageDevice cabinet = new StorageDevice();
+        StorageDevice device = new StorageDevice();
 
         
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
-        cabinet.setDatacenter(datacenter);
-        cabinet.setIscsiIp("192.168.1.1");
-        cabinet.setIscsiPort(80);
-        cabinet.setManagementIp("102.168.1.2");
-        cabinet.setManagementPort(8080);
-        cabinet.setName("LoPutoCabinet");        
+        device.setDatacenter(datacenter);
+        device.setIscsiIp("192.168.1.1");
+        device.setIscsiPort(80);
+        device.setManagementIp("102.168.1.2");
+        device.setManagementPort(8080);
+        device.setName("LoPutoCabinet");        
+        device.setStorageTechnology(StorageTechnologyType.LVM);
 
-        return cabinet;
+        return device;
     }
 
+	public StorageDevice createDeviceForInstance(Datacenter datacenter) {
+        
+		StorageDevice device = new StorageDevice();
+
+        device.setDatacenter(datacenter);
+        device.setIscsiIp("192.168.1.1");
+        device.setIscsiPort(80);
+        device.setManagementIp("102.168.1.2");
+        device.setManagementPort(8080);
+        device.setName("LoPutoCabinet");     
+        device.setStorageTechnology(StorageTechnologyType.LVM);
+
+        return device;
+	}
+	
     @Override
     public void addAuxiliaryEntitiesToPersist(StorageDevice entity, List<Object> entitiesToPersist)
     {
@@ -80,5 +96,7 @@ public class StorageDeviceGenerator extends DefaultEntityGenerator<StorageDevice
           entitiesToPersist.add(datacenter);
         
     }
+
+
 
 }

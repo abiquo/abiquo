@@ -19,26 +19,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.persistence.EntityManager;
+import java.util.List;
 
-  import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManager;
 
-  import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
-  @Repository("jpaCabinetDAO")
-  public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice>
-  {
-      public StorageDeviceDAO()
-      {
-          super(StorageDevice.class);
-      }
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-      public StorageDeviceDAO(EntityManager entityManager)
-      {
-          super(StorageDevice.class, entityManager);
-      }
+@Repository("jpaCabinetDAO")
+public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice> {
 
-      
-  }
+	public StorageDeviceDAO() {
+		super(StorageDevice.class);
+	}
+
+	public StorageDeviceDAO(EntityManager entityManager) {
+		super(StorageDevice.class, entityManager);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<StorageDevice> getDevicesByDatacenter(Integer datacenterId) {
+		
+		Criteria criteria = createCriteria(Restrictions.eq("datacenter.id",
+				datacenterId));
+		return criteria.list();
+	
+	}
+
+}
