@@ -53,7 +53,7 @@ class Node extends DefaultEntityBase
 
     protected Node()
     {
-        setType("1"); // node virtual image
+        setType(NodeVirtualImage.DISCRIMINATOR); // node virtual image
     }
 
     public Node(String type)
