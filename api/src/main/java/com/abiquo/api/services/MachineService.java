@@ -273,21 +273,6 @@ public class MachineService extends DefaultApiService
             .equals(rackId));
     }
 
-    public Machine moveMachine(Integer machineId, Integer newRackId)
-    {
-        Machine machine = getMachine(machineId);
-        Rack rack = repo.findRackById(newRackId);
-
-        if (rack.getDatacenter().getId() != machine.getDatacenter().getId())
-        {
-            // FIXME: error
-        }
-
-        machine.setRack(rack);
-        repo.updateMachine(machine);
-        return machine;
-    }
-
     private void isValidMachine(Machine machine)
     {
         if (!machine.isValid())

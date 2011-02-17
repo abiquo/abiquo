@@ -358,6 +358,10 @@
 							<name>abiquo.server.networking.vlanPerVdc</name>
 							<value>10</value>
 						</systemProperty>
+						<systemProperty>
+						    <name>abicloud.tracer.brokerUrl</name>
+						    <value>tcp://localhost:6996</value>
+						</systemProperty>
 					</systemProperties>
 				</configuration>
 				<executions>

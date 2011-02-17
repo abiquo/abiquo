@@ -31,9 +31,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -44,6 +47,9 @@ public class VirtualMachineService
 {
     @Autowired
     VirtualMachineRep repo;
+    
+    @Autowired
+    VirtualApplianceService vappService;
 
     public VirtualMachineService()
     {
@@ -53,6 +59,7 @@ public class VirtualMachineService
     public VirtualMachineService(EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
+        this.vappService = new VirtualApplianceService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(Hypervisor hypervisor)
@@ -77,12 +84,32 @@ public class VirtualMachineService
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
 
-    public VirtualMachine getVirtualMachine(Integer vmId)
+    public VirtualMachine getVirtualMachine(Integer vdcId, Integer vappId, Integer vmId)
     {
-        return repo.findVirtualMachineById(vmId);
+        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+        
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);        
+        
+        if (vm == null || !isAssignedTo(vmId, vapp.getId()))
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALMACHINE);
+        }
+        return vm;
+    }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
+    public VirtualMachine updateVirtualMachine(Integer vdcId, Integer vappId, Integer vmId, VirtualMachineDto dto)
+    {
+    	VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
+    	
+    	old.setName(dto.getName());
+    	
+    	updateVirtualMachine(old);
+    	
+    	return old;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)    
     public void updateVirtualMachine(VirtualMachine vm)
     {
         repo.update(vm);
@@ -102,10 +129,10 @@ public class VirtualMachineService
         {
             if (vm.getId().equals(vmId))
             {
-                return Boolean.TRUE;
+                return true;
             }
         }
-        return Boolean.FALSE;
+        return false;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
