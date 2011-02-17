@@ -77,9 +77,17 @@
                //List of Virtual Images which will be added
                listOfVirtualImages = new ArrayCollection();
                
-               
-               
+               addEventListener(KeyboardEvent.KEY_UP,
+                				 checkEnter);
             }
+
+            
+            private function checkEnter(event:KeyboardEvent):void
+            {
+                if (event.keyCode == Keyboard.ENTER)
+                    addVirtualImage();
+            }
+               
             
             private function onVirtualImageSelectedUnselected(event:VirtualImageEvent):void{
             	if(event.type == VirtualImageEvent.VIRTUAL_IMAGE_CHECKED){
@@ -117,7 +125,9 @@
                 _virtualImageList.refresh();
                 
                 addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_CHECKED,onVirtualImageSelectedUnselected);
-               addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_UNCHECKED,onVirtualImageSelectedUnselected);
+                addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_UNCHECKED,onVirtualImageSelectedUnselected);
+                
+                this.setFocus();
             }
             
             private function onClose():void{

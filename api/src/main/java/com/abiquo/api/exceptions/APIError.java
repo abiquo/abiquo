@@ -166,11 +166,17 @@ public enum APIError
         "Could not initialize licensing ciphers"), LICENSE_CIHPER_KEY("LICENSE-3",
         "Could not read licensing cipher key"), LICENSE_OVERFLOW("LICENSE-4",
         "The maximum number of managed cores has been reached"), LICENSE_DUPLICATED("LICENSE-5",
-        "The license already exists")
-
+        "The license already exists"),
+   
+    // STATISTICS
+    NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"),
+    NON_EXISTENT_STATS_FOR_DATACENTER("STATS-1", "Non existent statistical data found for the requested datacenter"),
+    NON_EXISTENT_STATS_FOR_DCLIMITS("STATS-2", "Non existent statistical data found for the requested enterprise in this datacenter"),
+    NON_EXISTENT_STATS_FOR_ENTERPRISE("STATS-3", "Non existent statistical data found for the requested enterprise"),
+    
     ;
     
-    // TODO: STATS
+   
 
     /**
      * Internal error code

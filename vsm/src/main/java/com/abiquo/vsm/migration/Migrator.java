@@ -23,7 +23,11 @@ package com.abiquo.vsm.migration;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -39,6 +43,7 @@ import redis.clients.jedis.Jedis;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.model.VirtualMachinesCache;
+import com.abiquo.vsm.monitor.Monitor.Type;
 import com.abiquo.vsm.redis.dao.RedisDao;
 import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 
@@ -58,6 +63,10 @@ public class Migrator
 
     private int subscriptionsCount;
 
+    private Map<String, Integer> ports;
+
+    private Map<String, Type> hypervisors;
+
     public Migrator(String host, int port, int database)
     {
         this.host = host;
@@ -66,6 +75,20 @@ public class Migrator
 
         this.machinesCount = 0;
         this.subscriptionsCount = 0;
+
+        this.ports = new HashMap<String, Integer>();
+        this.ports.put(Type.VMX_04.name(), 443);
+        this.ports.put(Type.HYPERV_301.name(), 5985);
+        this.ports.put(Type.KVM.name(), 8889);
+        this.ports.put(Type.VBOX.name(), 8889);
+        this.ports.put(Type.XEN_3.name(), 8889);
+        this.ports.put(Type.XENSERVER.name(), 9363);
+
+        this.hypervisors = new HashMap<String, Type>();
+        this.hypervisors.put("vmx-04", Type.VMX_04);
+        this.hypervisors.put("xenserver", Type.XENSERVER);
+        this.hypervisors.put("xen-3", Type.XEN_3);
+        this.hypervisors.put("hyperv-301", Type.HYPERV_301);
     }
 
     public void migratePersistedModel()
@@ -83,21 +106,24 @@ public class Migrator
 
             PhysicalMachine machine = insertMachine(dao, address, type, username, password);
 
-            VirtualMachine virtualMachine = dao.findVirtualMachineByName(virtualMachineName);
-
-            if (virtualMachine == null)
+            if (machine != null)
             {
-                virtualMachine = new VirtualMachine();
-                virtualMachine.setName(virtualMachineName);
-                virtualMachine.setPhysicalMachine(machine);
+                VirtualMachine virtualMachine = dao.findVirtualMachineByName(virtualMachineName);
 
-                dao.save(virtualMachine);
+                if (virtualMachine == null)
+                {
+                    virtualMachine = new VirtualMachine();
+                    virtualMachine.setName(virtualMachineName);
+                    virtualMachine.setPhysicalMachine(machine);
 
-                this.subscriptionsCount++;
-                logger.info("Subscription migrated: {}", virtualMachineName);
+                    dao.save(virtualMachine);
+
+                    this.subscriptionsCount++;
+                    logger.info("Subscription migrated: {}", virtualMachineName);
+                }
+
+                wrapper.deleteSubscription(id);
             }
-
-            wrapper.deleteSubscription(id);
         }
     }
 
@@ -163,21 +189,48 @@ public class Migrator
 
         if (machine == null)
         {
-            VirtualMachinesCache cache = new VirtualMachinesCache();
-            dao.save(cache);
+            try
+            {
+                URL url = new URL(address);
 
-            machine = new PhysicalMachine();
+                String finalType = type;
 
-            machine.setAddress(address);
-            machine.setType(type);
-            machine.setUsername(username);
-            machine.setPassword(password);
-            machine.setVirtualMachines(cache);
+                if (this.hypervisors.containsKey(type))
+                {
+                    finalType = this.hypervisors.get(type).name();
+                }
 
-            dao.save(machine);
+                String finalURL =
+                    String.format("http://%s:%s/", url.getHost(), this.ports.get(finalType));
 
-            this.machinesCount++;
-            logger.info("Physical machine migrated: {} {}", address, type);
+                machine = dao.findPhysicalMachineByAddress(finalURL);
+
+                if (machine == null)
+                {
+                    VirtualMachinesCache cache = new VirtualMachinesCache();
+                    dao.save(cache);
+
+                    machine = new PhysicalMachine();
+
+                    machine.setAddress(finalURL);
+                    machine.setType(finalType);
+                    machine.setUsername(username);
+                    machine.setPassword(password);
+                    machine.setVirtualMachines(cache);
+
+                    dao.save(machine);
+
+                    this.machinesCount++;
+                    logger.info("Physical machine migrated: {} {}", machine.getAddress(), machine
+                        .getType());
+                }
+            }
+            catch (MalformedURLException e)
+            {
+                logger.error("Invalid physical machine address {}", address);
+                return null;
+            }
+
         }
 
         return machine;
