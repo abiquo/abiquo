@@ -242,7 +242,7 @@
         <pluginRepository>
             <id>abiquo-repo</id>
             <name>Abiquo Maven Repository</name>
-            <url>http://repo.community.abiquo.com/plugins</url>
+            <url>http://repo.community.abiquo.com/repo</url>
         </pluginRepository>
     </pluginRepositories>
 
