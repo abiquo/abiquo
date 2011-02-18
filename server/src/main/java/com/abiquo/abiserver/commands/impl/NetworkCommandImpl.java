@@ -182,6 +182,12 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         throws NetworkCommandException
     {
         NetworkHB netHB = vdc.getNetwork();
+
+        if (netHB == null)
+        {
+            return;
+        }
+
         if (netHB.getNetworks().size() >= AbiConfigManager.getInstance().getAbiConfig()
             .getVlanPerVDC())
         {
@@ -210,9 +216,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
 
             // Retrieve the list of the IPAddress that will compose the IP pool.
             List<IPAddress> listIPs =
-                IPNetworkRang.calculateWholeRange(
-                    IPAddress.newIPAddress(configuration.getNetworkAddress()),
-                    configuration.getMask());
+                IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(configuration
+                    .getNetworkAddress()), configuration.getMask());
 
             // Check the number of
             checkVlanEntryValues(configuration, networkName, listIPs);
@@ -236,8 +241,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             traceLog(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER, EventType.VLAN_CREATED,
                 userSession, dc.toPojo(), vdc.getName(),
                 "A new VLAN with in a private range with name '" + vlan.getNetworkName()
-                    + "' has been created in " + vdc.getName(), null, null, null,
-                userSession.getUser(), userSession.getEnterpriseName());
+                    + "' has been created in " + vdc.getName(), null, null, null, userSession
+                    .getUser(), userSession.getEnterpriseName());
 
             factory.endConnection();
 
@@ -258,8 +263,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         {
             traceLog(SeverityType.WARNING, ComponentType.VIRTUAL_DATACENTER,
                 EventType.VLAN_CREATED, userSession, null, null,
-                "Can not create the vlan, invalid values '", null, null, null,
-                userSession.getUser(), userSession.getEnterpriseName());
+                "Can not create the vlan, invalid values '", null, null, null, userSession
+                    .getUser(), userSession.getEnterpriseName());
 
             factory.rollbackConnection();
             throw ne;
@@ -318,16 +323,15 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             // Ready to delete
             dhcpServiceDAO.makeTransient(dhcpService);
             vlanDAO.makeTransient(vlanHB);
-            netConfDAO.makeTransient(netConf);            
-            
+            netConfDAO.makeTransient(netConf);
 
             netHB.getNetworks().remove(vlanHB);
             netDAO.makePersistent(netHB);
 
             traceLog(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER, EventType.VAPP_DELETE,
                 userSession, null, null, "The VLAN with name " + vlanHB.getNetworkName()
-                    + "' has been deleted", null, null, null, userSession.getUser(),
-                userSession.getEnterpriseName());
+                    + "' has been deleted", null, null, null, userSession.getUser(), userSession
+                    .getEnterpriseName());
 
             factory.endConnection();
         }
@@ -395,9 +399,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
 
             // Retrieve the list of the IPAddress that will compose the IP pool.
             List<IPAddress> listIPs =
-                IPNetworkRang.calculateWholeRange(
-                    IPAddress.newIPAddress(configuration.getNetworkAddress()),
-                    configuration.getMask());
+                IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(configuration
+                    .getNetworkAddress()), configuration.getMask());
 
             // Check the entry values.
             checkVlanEntryValues(newConfiguration, networkName, listIPs);
@@ -424,16 +427,16 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 // Change also the gateway, because the previous IP didn't return the IP related to
                 // the Gateway !
                 IpPoolManagementHB gatewayIp =
-                    ipManDAO.getIpPoolManagementByVLANandIP(vlanHB.getVlanNetworkId(),
-                        IPAddress.newIPAddress(vlanHB.getConfiguration().getGateway()));
+                    ipManDAO.getIpPoolManagementByVLANandIP(vlanHB.getVlanNetworkId(), IPAddress
+                        .newIPAddress(vlanHB.getConfiguration().getGateway()));
                 gatewayIp.setVlanNetworkName(networkName);
                 ipManDAO.makePersistent(gatewayIp);
             }
 
             // Get if the new gateway IP is used by any VM
             IpPoolManagementHB ipHBGateway =
-                ipManDAO.getIpPoolManagementByVLANandIP(vlanHB.getVlanNetworkId(),
-                    IPAddress.newIPAddress(newConfiguration.getGateway()));
+                ipManDAO.getIpPoolManagementByVLANandIP(vlanHB.getVlanNetworkId(), IPAddress
+                    .newIPAddress(newConfiguration.getGateway()));
             if (ipHBGateway == null)
             {
                 throw new NetworkCommandException("Gateway must be an IP inside the network range");
@@ -965,8 +968,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                 EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, userSession, null, null, "IP Address "
                     + ipPoolHB.getIp() + " from VLAN " + vlanHB.getNetworkName()
-                    + "can not be released for Database errors ", null, null, null,
-                userSession.getUser(), userSession.getEnterpriseName());
+                    + "can not be released for Database errors ", null, null, null, userSession
+                    .getUser(), userSession.getEnterpriseName());
 
             factory.rollbackConnection();
             throw new NetworkCommandException("Can not release the NIC for Database errors");
@@ -1052,8 +1055,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                 EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, userSession, null, null, "IP Address "
                     + ipPoolHB.getIp() + " from VLAN " + vlan.getNetworkName()
-                    + "can not be asigned for Database errors ", null, null, null,
-                userSession.getUser(), userSession.getEnterpriseName());
+                    + "can not be asigned for Database errors ", null, null, null, userSession
+                    .getUser(), userSession.getEnterpriseName());
 
             factory.rollbackConnection();
             throw new NetworkCommandException("Can not assign the NIC for Database errors");
@@ -1311,7 +1314,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         vlan.setDefaultNetwork(defaultNetwork);
 
         networkDAO.makePersistent(vlan);
-        
+
         // Diferences between public and private vlans.
         // · Private ones stored in virtual datacenter.
         // · Public ones stored in physical datacenter.
@@ -1327,7 +1330,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             DatacenterHB datacenter = dataDAO.getDatacenterWhereThePublicNetworkStays(idNetwork);
             dhcpService = defineTheDHCP(datacenter, listOfIpsToCreate, null, vlan);
         }
-        
+
         configuration.setDhcpService(dhcpService);
         configuration = netConfDAO.makePersistent(configuration);
 

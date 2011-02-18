@@ -305,6 +305,9 @@
              */
             private function addVirtualAppliance(event:Event = null):void
             {
+                //Remove button focus to avoid a bad behaviour in virtual appliance view
+                this.setFocus();
+                
                 PopUpManager.addPopUp(this._virtualApplianceForm, this, true);
                 PopUpManager.centerPopUp(this._virtualApplianceForm);
 

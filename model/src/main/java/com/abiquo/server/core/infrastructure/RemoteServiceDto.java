@@ -21,9 +21,6 @@
 
 package com.abiquo.server.core.infrastructure;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -50,14 +47,7 @@ public class RemoteServiceDto extends SingleResourceTransportDto
 
     public String getUri()
     {
-        try
-        {
-            return type == null || uri == null ? uri : type.fixUri(new URI(uri));
-        }
-        catch (URISyntaxException e)
-        {
-            return uri;
-        }
+        return uri;
     }
 
     public void setUri(String uri)

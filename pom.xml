@@ -81,9 +81,6 @@
                         <include>**/*.h</include>
                     </includes>
                     <excludes>
-                        <exclude>nomaven-libs/**/*.*</exclude>
-                        <exclude>installer/**/*.*</exclude>
-                        <exclude>deployer/**/*.*</exclude>
                         <exclude>database/**/*.*</exclude>
                         <exclude>client/**/*.*</exclude>
                     </excludes>
@@ -234,146 +231,18 @@
     <!-- Repositories -->
     <repositories>
         <repository>
-            <id>maven-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven 1</name>
-            <url>http://download.java.net/maven/1/</url>
-            <layout>legacy</layout>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven 2</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
-        <repository>
-            <id>maven2-repository.maven.org</id>
-            <name>Apache Central Repository</name>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-        <repository>
-            <id>jboss</id>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>jboss-snapshot</id>
-            <url>http://snapshots.jboss.org/maven2</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>apache-releases</id>
-            <url>https://repository.apache.org/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>apache-snapshots</id>
-            <url>https://repository.apache.org/content/repositories/snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>jasig-m2</id>
-            <name>JASIG Maven2 Repository</name>
-            <url>http://developer.jasig.org/repo/content/repositories/m2</url>
-        </repository>
-        <repository>
-            <id>flex-mojos-repository</id>
-            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>wp5.e-taxonomy.eu</id>
-            <url>http://wp5.e-taxonomy.eu/cdmlib/mavenrepo</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <id>abiquo-repo</id>
+            <name>Abiquo Maven Repository</name>
+            <url>http://repo.community.abiquo.com/repo</url>
         </repository>
     </repositories>
 
     <!-- Plugin Repositories -->
     <pluginRepositories>
         <pluginRepository>
-            <id>mc-release</id>
-            <name>Local Maven repository of releases</name>
-            <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-        </pluginRepository>
-        <pluginRepository>
-            <id>jboss-plugins</id>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>jboss-snapshot-plugins</id>
-            <url>http://snapshots.jboss.org/maven2</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>codehaus-plugins-snapshots</id>
-            <url>http://snapshots.repository.codehaus.org/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-        <pluginRepository>
-            <id>local</id>
-            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <id>abiquo-repo</id>
+            <name>Abiquo Maven Repository</name>
+            <url>http://repo.community.abiquo.com/plugins</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -381,11 +250,11 @@
     <distributionManagement>
         <repository>
             <id>artifactory</id>
-            <url>http://artifactory.bcn.abiquo.com/libs-releases-local</url>
+            <url>http://repo.community.abiquo.com/libs-releases-local</url>
         </repository>
         <snapshotRepository>
             <id>artifactory</id>
-            <url>http://artifactory.bcn.abiquo.com/libs-snapshots-local</url>
+            <url>http://repo.community.abiquo.com/libs-snapshots-local</url>
         </snapshotRepository>
     </distributionManagement>
 
