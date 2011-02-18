@@ -249,11 +249,11 @@
     <!-- Distribution Management -->
     <distributionManagement>
         <repository>
-            <id>artifactory</id>
+            <id>abiquo-repo</id>
             <url>http://repo.community.abiquo.com/libs-releases-local</url>
         </repository>
         <snapshotRepository>
-            <id>artifactory</id>
+            <id>abiquo-repo</id>
             <url>http://repo.community.abiquo.com/libs-snapshots-local</url>
         </snapshotRepository>
     </distributionManagement>
