@@ -57,12 +57,12 @@
 			<version>4.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.abiquo.nomavenlibs</groupId>
+			<groupId>com.sun.wiseman</groupId>
 			<artifactId>wiseman</artifactId>
 			<version>1.6</version>
 		</dependency>
 		<dependency>
-			<groupId>com.abiquo.nomavenlibs</groupId>
+			<groupId>com.sun.wiseman</groupId>
 			<artifactId>wiseman-tools</artifactId>
 			<version>1.0</version>
 		</dependency>
