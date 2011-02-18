@@ -109,27 +109,27 @@
             <version>5.1.6</version>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.adobe.blazeds</groupId>
             <artifactId>flex-messaging-common</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.adobe.blazeds</groupId>
             <artifactId>flex-messaging-core</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.adobe.blazeds</groupId>
             <artifactId>flex-messaging-opt</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.adobe.blazeds</groupId>
             <artifactId>flex-messaging-proxy</artifactId>
             <version>3.0</version>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.adobe.blazeds</groupId>
             <artifactId>flex-messaging-remoting</artifactId>
             <version>3.0</version>
         </dependency>
@@ -151,7 +151,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.abiquo.nomavenlibs</groupId>
+            <groupId>com.sun.wiseman</groupId>
             <artifactId>wiseman</artifactId>
             <version>1.6</version>
         </dependency>
