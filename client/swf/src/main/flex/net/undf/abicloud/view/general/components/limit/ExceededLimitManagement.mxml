@@ -61,21 +61,21 @@
      </mx:HBox>
 	 <mx:HBox>
 	 	<!--info for used ressources-->
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label fontWeight="bold" text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'LABEL_USED')}"/>
         </mx:Box>
      </mx:HBox>
      <mx:HBox paddingBottom="5">
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'LABEL_CPU')+': '+_exceededLimit.usedCPU}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.usedRAM}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.usedHD}"/>
         </mx:Box>
@@ -105,21 +105,21 @@
         </mx:Box>
      </mx:HBox>
      <mx:HBox paddingBottom="5">
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label 
             	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusCPU) ? 'bold':'normal'}"
             	color="{_exceededLimit.limitExceeded(_exceededLimit.statusCPU) ? _exceededColor:_color}"
             	id="requiredCPU" text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'LABEL_CPU')+': '+_exceededLimit.requiredCPU}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label 
             	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusRAM) ? 'bold':'normal'}"
             	color="{_exceededLimit.limitExceeded(_exceededLimit.statusRAM) ? _exceededColor:_color}"
             	id="requiredRAM" text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.requiredRAM}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label 
             	fontWeight="{_exceededLimit.limitExceeded(_exceededLimit.statusHD) ? 'bold':'normal'}"
             	color="{_exceededLimit.limitExceeded(_exceededLimit.statusHD) ? _exceededColor:_color}"
@@ -160,15 +160,15 @@
         </mx:Box>
      </mx:HBox>
      <mx:HBox paddingBottom="5">
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'LABEL_CPU')+': '+_exceededLimit.softCPU}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.softRAM}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.softHD}"/>
         </mx:Box>
@@ -197,15 +197,15 @@
         </mx:Box>
      </mx:HBox>
      <mx:HBox paddingBottom="5">
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'LABEL_CPU')+': '+_exceededLimit.hardCPU}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_RAM')+': '+_exceededLimit.hardRAM}"/>
         </mx:Box>
-        <mx:Box width="100">
+        <mx:Box width="100" horizontalScrollPolicy="off">
             <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure',
 	                                                                         'TEXTINPUT_LABEL_HD')+': '+_exceededLimit.hardHD}"/>
         </mx:Box>
