@@ -318,7 +318,8 @@ public class UserService extends DefaultApiService
     	final Pattern pattern;
     	final Matcher matchers;
     	final String EMAIL_PATTERN = 
-    		"[a-z0-9_\\.]{1,15}@[a-z0-9_]+\\.[a-z]{2,}"; 
+    		"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" +
+    		"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"; 
     	pattern = Pattern.compile(EMAIL_PATTERN);
     	matchers = pattern.matcher(email);
     	return matchers.matches();
