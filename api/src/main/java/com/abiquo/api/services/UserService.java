@@ -208,6 +208,7 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
+        
 
         return updateUser(old);
     }
