@@ -109,6 +109,7 @@
                    
                     //Filling Hypervisor related fields
                     ipInput.text = hypervisor.ip;
+                    ipServiceInput.text = hypervisor.ipService;
                     hypervisorPortInput.text = hypervisor.port.toString();
                     var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
                     hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
