@@ -156,6 +156,7 @@
 
             private function closeForm(event:Event = null):void
             {
+                dispatchEvent(new Event('popupClose'));
                 PopUpManager.removePopUp(datastoreForm);
             }
 
