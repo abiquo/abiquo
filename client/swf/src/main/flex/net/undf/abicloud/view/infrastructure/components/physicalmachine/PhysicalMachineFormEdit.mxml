@@ -107,11 +107,17 @@
                 //We not use anymore the infrastructure concept
                 //we need to retrieve the proper hypervisor of the physical machine 
                 
-                var hypervisor:HyperVisor = this.physicalMachine.hypervisor;
-                ipInput.text = hypervisor.ip;
-                hypervisorPortInput.text = hypervisor.port.toString();
-                var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
-                hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
+                _editableButton = true;
+                //hypervisors = AbiCloudModel.getInstance().infrastructureManager.getHyperVisorsByPhysicalMachine(physicalMachine);
+                if (hypervisor)
+                {
+                   
+                    //Filling Hypervisor related fields
+                    ipInput.text = hypervisor.ip;
+                    ipServiceInput.text = hypervisor.ipService;
+                    hypervisorPortInput.text = hypervisor.port.toString();
+                    var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
+                    hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
                                                                                               "id",
                                                                                               hypervisor.type);
                 userInput.text = hypervisor.user;
