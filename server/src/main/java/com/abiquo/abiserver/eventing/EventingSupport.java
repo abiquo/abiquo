@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.RemoteServiceUtils;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
@@ -64,9 +63,9 @@ public final class EventingSupport
      * @param virtualSystemMonitorAddress the abicloud virtual system monitor address
      * @throws EventingException the eventing exception
      */
-    public static void subscribe(final String virtualSystemAddress, final HypervisorType hypervisorType,
-        final String virtualSystemID, final String virtualSystemMonitorAddress)
-        throws EventingException
+    public static void subscribe(final String virtualSystemAddress,
+        final HypervisorType hypervisorType, final String virtualSystemID,
+        final String virtualSystemMonitorAddress) throws EventingException
     {
         try
         {
@@ -329,8 +328,17 @@ public final class EventingSupport
     {
         try
         {
+            if (emptyString(user) || emptyString(password))
+            {
+                throw new EventingException("User and password are required fields.");
+            }
+
             VSMClient vsmClient = new VSMClient(virtualSystemMonitorAddress);
-            vsmClient.monitor(virtualSystemAddress, hypervisorType.name(), user, password);
+
+            if (!vsmClient.isMonitored(virtualSystemAddress))
+            {
+                vsmClient.monitor(virtualSystemAddress, hypervisorType.name(), user, password);
+            }
         }
         catch (Exception e)
         {
@@ -350,18 +358,31 @@ public final class EventingSupport
      * @throws EventingException
      */
     public static void unMonitorPhysicalMachine(String virtualSystemAddress,
-        final String virtualSystemMonitorAddress,
-        final String user, final String password) throws EventingException
+        final String virtualSystemMonitorAddress, final String user, final String password)
+        throws EventingException
     {
         try
         {
+            if (emptyString(user) || emptyString(password))
+            {
+                throw new EventingException("User and password are required fields.");
+            }
+
             VSMClient vsmClient = new VSMClient(virtualSystemMonitorAddress);
-            vsmClient.shutdown(virtualSystemAddress);
+
+            if (vsmClient.isMonitored(virtualSystemAddress))
+            {
+                vsmClient.shutdown(virtualSystemAddress);
+            }
         }
         catch (Exception e)
         {
             throw new EventingException(e);
         }
     }
-    
+
+    private static boolean emptyString(final String value)
+    {
+        return value == null ? false : value.isEmpty();
+    }
 }
