@@ -120,10 +120,10 @@
                     hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
                                                                                               "id",
                                                                                               hypervisor.type);
-                userInput.text = hypervisor.user;
-                passwordInput.text = hypervisor.password;
-                datastoreManagement.hypervisor = hypervisor;
-
+	                userInput.text = hypervisor.user;
+	                passwordInput.text = hypervisor.password;
+	                datastoreManagement.hypervisor = hypervisor;
+	            }
                 validateForm();
                 nameInput.setFocus();
             }
