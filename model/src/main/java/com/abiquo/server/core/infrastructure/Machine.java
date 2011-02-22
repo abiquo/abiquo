@@ -629,10 +629,10 @@ public class Machine extends DefaultEntityBase
     // ********************************** Others
     // ********************************
 
-    public Hypervisor createHypervisor(HypervisorType type, String description, String ip,
+    public Hypervisor createHypervisor(HypervisorType type, String ip,
         String ipService, int port, String user, String password)
     {
-        return new Hypervisor(this, type, description, ip, ipService, port, user, password);
+        return new Hypervisor(this, type, ip, ipService, port, user, password);
     }
 
     @Override

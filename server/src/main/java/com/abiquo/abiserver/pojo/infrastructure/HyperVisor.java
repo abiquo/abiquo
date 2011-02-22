@@ -37,8 +37,6 @@ import com.abiquo.server.core.enumerator.HypervisorType;
  */
 public class HyperVisor extends InfrastructureElement implements IPojo<HypervisorHB>
 {
-    private String shortDescription;
-
     private String ip;
 
     private String ipService;
@@ -54,7 +52,6 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
     public HyperVisor()
     {
         super();
-        shortDescription = "";
         ip = "";
         ipService = "";
         port = 0;
@@ -71,16 +68,6 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
     public void setIpService(String ipService)
     {
         this.ipService = ipService;
-    }
-
-    public String getShortDescription()
-    {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription)
-    {
-        this.shortDescription = shortDescription;
     }
 
     public String getIp()
@@ -138,7 +125,6 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
         HypervisorHB hyperVisorHB = new HypervisorHB();
 
         hyperVisorHB.setIdHyper(super.getId());
-        hyperVisorHB.setShortDescription(shortDescription);
         hyperVisorHB.setVirtualmachines(new HashSet<VirtualmachineHB>(0));
         hyperVisorHB.setIp(ip);
         hyperVisorHB.setIpService(ipService);
