@@ -1368,7 +1368,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     .getId());
 
             // Updating the Hypervisor
-            hypervisorHB.setShortDescription(hypervisor.getShortDescription());
             hypervisorHB.setType(HypervisorType.fromValue(hypervisor.getType().getName()));
             hypervisorHB.setIp(hypervisor.getIp());
             hypervisorHB.setIpService(hypervisor.getIpService());

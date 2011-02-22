@@ -257,10 +257,8 @@ public class PopulateInfrastructureModelTest
         HypervisorHB hyp = new HypervisorHB();
 
         hyp.setIp(ip);
-        hyp.setShortDescription(ip); // default Service IP is the same
         hyp.setPort(hType.defaultPort);
-        hyp.setShortDescription("test");
-
+        
         hyp.setType(hType);
         hyp.setPhysicalMachine(physicalMachien);
 

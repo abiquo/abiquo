@@ -28,8 +28,6 @@ package net.undf.abicloud.vo.infrastructure
     {
 
         /* ------------- Public atributes ------------- */
-        public var shortDescription:String;
-
         public var ip:String;
 
         public var port:int;
@@ -46,7 +44,6 @@ package net.undf.abicloud.vo.infrastructure
         public function HyperVisor()
         {
             super();
-            shortDescription = "";
             ip = "";
             type = new HyperVisorType();
             ipService = "";

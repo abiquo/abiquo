@@ -379,7 +379,6 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`hypervisor`;
 CREATE TABLE  `kinton`.`hypervisor` (
   `id` int(20) unsigned NOT NULL auto_increment,
-  `description` varchar(100) NOT NULL,
   `idPhysicalMachine` int(20) unsigned NOT NULL,
   `ip` varchar(39) NOT NULL,
   `ipService` varchar(39) NOT NULL,

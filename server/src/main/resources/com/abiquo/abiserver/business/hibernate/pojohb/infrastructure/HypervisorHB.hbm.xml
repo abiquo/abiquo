@@ -9,9 +9,6 @@
 			<column name="id" />
 			<generator class="identity" />
 		</id>
-		<property name="shortDescription" type="string">
-			<column length="100" name="description" not-null="true" />
-		</property>
 		<property name="ip" type="string">
 			<column length="39" name="ip" not-null="true" />
 		</property>

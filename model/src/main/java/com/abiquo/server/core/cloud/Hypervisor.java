@@ -75,33 +75,6 @@ public class Hypervisor extends DefaultEntityBase
 
     // ************************** Validation support ****************************
     // ******************************* Properties *******************************
-    public final static String DESCRIPTION_PROPERTY = "description";
-
-    private final static boolean DESCRIPTION_REQUIRED = true;
-
-    private final static int DESCRIPTION_LENGTH_MIN = 0;
-
-    private final static int DESCRIPTION_LENGTH_MAX = 255;
-
-    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String DESCRIPTION_COLUMN = "description";
-
-    @Column(name = DESCRIPTION_COLUMN, nullable = !DESCRIPTION_REQUIRED, length = USER_LENGTH_MAX)
-    private String description;
-
-    @Required(value = DESCRIPTION_REQUIRED)
-    @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getDescription()
-    {
-        return this.description;
-    }
-
-    private void setDescription(String description)
-    {
-        this.description = description;
-    }
 
     public final static String IP_PROPERTY = "ip";
 
@@ -277,12 +250,11 @@ public class Hypervisor extends DefaultEntityBase
 
     // *************************** Mandatory constructors ***********************
     // TODO: define mandatory constructors
-    public Hypervisor(Machine machine, HypervisorType type, String description, String ip,
+    public Hypervisor(Machine machine, HypervisorType type, String ip,
         String ipService, int port, String user, String password)
     {
         setMachine(machine);
         setType(type);
-        setDescription(description);
         setIp(ip);
         setIpService(ipService);
         setPort(port);
