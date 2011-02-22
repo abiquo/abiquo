@@ -56,6 +56,6 @@
     <mx:SWFLoader 
         width="14" height="14"
         includeInLayout="{this._virtualMachine.state.id == State.IN_PROGRESS}"
-        source="StyleManager.getStyleDeclaration('.VirtualMachineLoadingIcon').getStyle('source')"
+        source="{StyleManager.getStyleDeclaration('.VirtualMachineLoadingIcon').getStyle('source')}"
         visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"/>
 </mx:HBox>

@@ -149,9 +149,13 @@ public class OVFPackageConventions
      */
     public static String customEncode(String path)
     {
-        path = path.replaceAll(":", "%3A");
-        path = path.replaceAll("\\?", "%3F");
-        path = path.replaceAll("&", "%26");
+        path = path.replaceAll(":", "/abiport");
+        path = path.replaceAll("\\?", "/abiintermark");
+        path = path.replaceAll("&", "/abiandper");
+
+        // path = path.replaceAll(":", "%3A");
+        // path = path.replaceAll("\\?", "%3F");
+        // path = path.replaceAll("&", "%26");
 
         return path;
     }
@@ -166,9 +170,13 @@ public class OVFPackageConventions
      */
     public String customDencode(String path)
     {
-        path = path.replaceAll("%3A", ":");
-        path = path.replaceAll("%3F", "\\?");
-        path = path.replaceAll("%26", "&");
+        path = path.replaceAll("/abiport", ":");
+        path = path.replaceAll("/abiintermark", "\\?");
+        path = path.replaceAll("/abiandper", "&");
+
+        // path = path.replaceAll("%3A", ":");
+        // path = path.replaceAll("%3F", "\\?");
+        // path = path.replaceAll("%26", "&");
 
         return path;
     }
