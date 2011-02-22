@@ -37,10 +37,6 @@
 	<module>abicloudDefault</module>
 	<module>themeBase</module>
 	<module>themeFonts</module>
-	<module>themeBlue</module>
-	<module>themeRed</module>
-	<module>themeGreen</module>
-	<module>themeGrey</module>
     </modules>
 
     <dependencies>
@@ -125,5 +121,19 @@
     <name>Client Flex</name>
     <url>http://www.abiquo.com</url>
     <inceptionYear>2009</inceptionYear>
+
+	<!-- And profiles -->
+    <profiles>
+		 <!-- Profiles defined by target -->
+        <profile>
+            <id>libs</id>
+            <modules>
+				<module>themeBlue</module>
+				<module>themeRed</module>
+				<module>themeGreen</module>
+				<module>themeGrey</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
