@@ -3128,7 +3128,7 @@ CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_l
     FOR EACH ROW BEGIN      
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
             --  Creates a New row in dc_enterprise_stats to store this enterprise's statistics
-            INSERT INTO dc_enterprise_stats 
+            INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             VALUES 
@@ -3171,7 +3171,7 @@ CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_l
                 WHERE idDataCenter = OLD.idDataCenter;                
             ELSEIF  OLD.idEnterprise IS NULL AND NEW.idEnterprise IS NOT NULL THEN
                 -- We got a new limit defined (or updated)
-            	INSERT INTO dc_enterprise_stats 
+            	INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             	VALUES 
@@ -3198,7 +3198,6 @@ CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_l
 -- ******************************************************************************************
 CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN
-	INSERT INTO debug_msg (msg) VALUES (CONCAT('DC Limit DELETED!!! with ',IFNULL(OLD.publicIPHard,'NULL'),' for DC ', IFNULL(OLD.idDataCenter,'NULL')));
         DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;
         UPDATE IGNORE cloud_usage_stats 
         SET vCpuReserved = vCpuReserved - OLD.cpuHard,

@@ -14,6 +14,7 @@ UNLOCK TABLES;
 -- STATISTICS TRIGGERS 
 
 -- Fixes PublicIPs Total, Reserved for Infrastructure View
+DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`update_network_configuration_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_ip_pool_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_vlan_network_update_stats`;
@@ -23,6 +24,29 @@ DROP TRIGGER if exists `kinton`.`dclimit_created`;
 DROP TRIGGER if exists `kinton`.`dclimit_updated`;    
 DROP TRIGGER if exists `kinton`.`dclimit_deleted`;
 DELIMITER |
+CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
+    FOR EACH ROW BEGIN
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+            -- Checks for changes
+            IF OLD.name != NEW.name THEN
+                -- Name changed !!!
+                UPDATE IGNORE vdc_enterprise_stats SET vdcName = NEW.name
+                WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+                -- Changes also in Vapp stats
+                UPDATE IGNORE vapp_enterprise_stats SET vdcName = NEW.name
+                WHERE idVirtualApp IN (SELECT idVirtualApp FROM virtualapp WHERE idVirtualDataCenter=NEW.idVirtualDataCenter);
+            END IF; 
+            UPDATE IGNORE vdc_enterprise_stats 
+            SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
+                memoryReserved = memoryReserved - OLD.ramHard + NEW.ramHard,
+                localStorageReserved = localStorageReserved - OLD.hdHard + NEW.hdHard,
+                -- publicIPsReserved = publicIPsReserved - OLD.publicIPHard + NEW.publicIPHard,
+                extStorageReserved = extStorageReserved - OLD.storageHard + NEW.storageHard,
+                vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
+            WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;            
+        END IF;
+    END;
+|
 -- ******************************************************************************************
 -- Description: 
 --  * Registers/Unregister new IPS defined for a datacenter's network
@@ -303,7 +327,7 @@ CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_l
                 WHERE idDataCenter = OLD.idDataCenter;                
             ELSEIF  OLD.idEnterprise IS NULL AND NEW.idEnterprise IS NOT NULL THEN
                 -- We got a new limit defined (or updated)
-            	INSERT INTO dc_enterprise_stats 
+            	INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             	VALUES 
@@ -340,7 +364,7 @@ CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_l
     FOR EACH ROW BEGIN      
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
             --  Creates a New row in dc_enterprise_stats to store this enterprise's statistics
-            INSERT INTO dc_enterprise_stats 
+            INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             VALUES 
