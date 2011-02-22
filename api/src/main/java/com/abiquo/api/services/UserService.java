@@ -210,9 +210,13 @@ public class UserService extends DefaultApiService
         }
         
 
-        repo.updateUser(old);
+        return updateUser(old);
+    }
 
-        return old;
+    public User updateUser(User user) {
+        repo.updateUser(user);
+
+        return user;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -315,8 +319,8 @@ public class UserService extends DefaultApiService
     	final Pattern pattern;
     	final Matcher matchers;
     	final String EMAIL_PATTERN = 
-    		"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:" +
-    		"[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+    		"[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@" +
+    		"(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
     	pattern = Pattern.compile(EMAIL_PATTERN);
     	matchers = pattern.matcher(email);
     	return matchers.matches();
