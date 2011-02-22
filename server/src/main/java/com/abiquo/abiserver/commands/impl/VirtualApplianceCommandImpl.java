@@ -2676,32 +2676,36 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     VirtualMachine virtualMachine = nodeVI.getVirtualMachine();
                     if (virtualMachine != null)
                     {
-                        logger.debug("HD used: " + virtualMachine.getHd());
                         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-                        logger.debug("Restoring the physical machine resources");
-
-                        session = HibernateUtil.getSession();
-                        transaction = session.beginTransaction();
-                        HypervisorHB hypervisorHB =
-                            (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
-                        transaction.commit();
-
-                        PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
-                        PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
-                        logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
-                            + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
-
-                        // scheduler.rollback(virtualMachine, physicalMachine);
-
-                        try
+                        
+                        if(hypervisor != null)
                         {
-                            vmachineResource.deallocate(userSession, virtualDatacenterId,
-                                virtualApplianceId, virtualMachine.getId());
-                        }
-                        catch (Exception e)
-                        {
-                            throw new VirtualApplianceCommandException(e);
-                        }
+                            logger.debug("Undeploy all the virtual machines");
+                            
+                            session = HibernateUtil.getSession();
+                            transaction = session.beginTransaction();
+                            HypervisorHB hypervisorHB =
+                                (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
+                            transaction.commit();
+                            
+                            PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
+                            PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
+                            logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
+                                + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
+                            
+                            // scheduler.rollback(virtualMachine, physicalMachine);
+                            
+                            try
+                            {
+                                vmachineResource.deallocate(userSession, virtualDatacenterId,
+                                    virtualApplianceId, virtualMachine.getId());
+                            }
+                            catch (Exception e)
+                            {
+                                throw new VirtualApplianceCommandException(e);
+                            }
+                        } // vm is allocated
+                        
 
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
