@@ -70,9 +70,28 @@ public class StatisticsRep extends DefaultRepBase
         return this.cloudUsageDAO.findById(idDatacenter);
     }
 
+    /**
+     * Total Cloud Usage has some special cases when showing limits
+     * 
+     * Limits are not total sum of limits by DC. 
+     * Instead they must show limits defined for all the enterprises, that is CloudUsage with datacenterId = -1 
+     * 
+     * 
+     * @return
+     */
     public CloudUsage findTotalCloudUsage()
     {
-        return this.cloudUsageDAO.sumTotalCloudUsage();
+    	CloudUsage cuTotal = this.cloudUsageDAO.sumTotalCloudUsage();
+    	
+    	CloudUsage cuLimits = this.cloudUsageDAO.findById(-1);
+    	
+    	cuTotal.setPublicIPsReserved(cuLimits.getPublicIPsReserved());
+    	cuTotal.setStorageReserved(cuLimits.getStorageReserved());
+    	cuTotal.setVirtualCpuReserved(cuLimits.getVirtualCpuReserved());
+    	cuTotal.setVirtualMemoryReserved(cuLimits.getVirtualMemoryReserved());
+    	cuTotal.setVirtualStorageReserved(cuLimits.getVirtualStorageReserved());
+    	
+    	return cuTotal;
     }
 
     public EnterpriseResources findTotalEnterpriseResources()
