@@ -34,6 +34,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.common.GenericEnityBase;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -46,10 +47,15 @@ public class StoragePool extends GenericEnityBase<String> {
 	protected StoragePool() {
 	}
 	
-	public StoragePool(String id, String name)
+	public StoragePool(String id, String name, Long availableSize, Long totalSize, Long usedSize, StorageDevice device, Tier tier)
 	{
 		this.setId(id);
 		this.setName(name);
+		this.setAvailableSizeInMb(availableSize);
+		this.setTotalSizeInMb(totalSize);
+		this.setUsedSizeInMb(usedSize);
+		this.setDevice(device);
+		this.setTier(tier);
 	}
 
     private final static String ID_COLUMN = "idStorage";
@@ -142,6 +148,7 @@ public class StoragePool extends GenericEnityBase<String> {
     @Range(min = TOTAL_SIZE_MIN, max = TOTAL_SIZE_MAX)
     private long totalSizeInMb;
 
+    @Required(value = true)
     public long getTotalSizeInMb()
     {
         return this.totalSizeInMb;
@@ -164,6 +171,7 @@ public class StoragePool extends GenericEnityBase<String> {
     @Range(min = USED_SIZE_MIN, max = USED_SIZE_MAX)
     private long usedSizeInMb;
 
+    @Required(value = true)
     public long getUsedSizeInMb()
     {
         return this.usedSizeInMb;
@@ -186,6 +194,7 @@ public class StoragePool extends GenericEnityBase<String> {
     @Range(min = AVAILABLE_SIZE_MIN, max = AVAILABLE_SIZE_MAX)
     private long availableSizeInMb;
 
+    @Required(value = true)
     public long getAvailableSizeInMb()
     {
         return this.availableSizeInMb;

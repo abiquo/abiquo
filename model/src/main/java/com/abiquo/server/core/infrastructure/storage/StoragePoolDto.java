@@ -21,30 +21,78 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "")
-public class StoragePoolDto extends SingleResourceTransportDto {
-	private String id;
+public class StoragePoolDto extends SingleResourceTransportDto implements Serializable
+{
+    /**
+     * Generated serial version UID 
+     */
+    private static final long serialVersionUID = -7872199668681832268L;
+    
+    private String id;
 
-	public String getId() {
-		return id;
-	}
+    public String getId()
+    {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id)
+    {
+        this.id = id;
+    }
 
-	private String name;
+    private String name;
 
-	public String getName() {
-		return name;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+    
+    private long totalSizeInMb;
+
+    public long getTotalSizeInMb()
+    {
+        return this.totalSizeInMb;
+    }
+
+    public void setTotalSizeInMb(long totalSizeInMb)
+    {
+        this.totalSizeInMb = totalSizeInMb;
+    }
+    
+    private long usedSizeInMb;
+
+    public long getUsedSizeInMb()
+    {
+        return this.usedSizeInMb;
+    }
+
+    public void setUsedSizeInMb(long usedSize)
+    {
+        this.usedSizeInMb = usedSize;
+    }
+    
+    private long availableSizeInMb;
+
+    public long getAvailableSizeInMb()
+    {
+        return this.availableSizeInMb;
+    }
+
+    public void setAvailableSizeInMb(long availableSize)
+    {
+        this.availableSizeInMb = availableSize;
+    }
 
 }

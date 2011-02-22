@@ -19,26 +19,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.persistence.EntityManager;
+import java.util.List;
 
-  import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManager;
+
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-  @Repository("jpaStoragePoolDAO")
-  public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
-  {
-      public StoragePoolDAO()
-      {
-          super(StoragePool.class);
-      }
+@Repository("jpaStoragePoolDAO")
+public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
+{
+    public StoragePoolDAO()
+    {
+        super(StoragePool.class);
+    }
 
-      public StoragePoolDAO(EntityManager entityManager)
-      {
-          super(StoragePool.class, entityManager);
-      }
+    public StoragePoolDAO(EntityManager entityManager)
+    {
+        super(StoragePool.class, entityManager);
+    }
 
-      
-  }
+    @SuppressWarnings("unchecked")
+    public List<StoragePool> getPoolsByStorageDevice(Integer deviceId)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("device.id", deviceId));
+        return criteria.list();
+    }
+
+}

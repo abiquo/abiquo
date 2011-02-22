@@ -19,6 +19,15 @@ import com.abiquo.server.core.common.DefaultRepBase;
 @Repository
 public class StorageRep extends DefaultRepBase
 {
+	@Autowired 
+	private TierDAO tierDAO;
+	
+	@Autowired
+	private StorageDeviceDAO deviceDAO;
+	
+	@Autowired
+	private StoragePoolDAO poolDAO;
+	
 	public StorageRep() 
 	{
 		
@@ -31,27 +40,32 @@ public class StorageRep extends DefaultRepBase
         
         this.tierDAO = new TierDAO(entityManager);
         this.deviceDAO = new StorageDeviceDAO(entityManager);
+        this.poolDAO = new StoragePoolDAO(entityManager);
 	}
 	
-	@Autowired 
-	private TierDAO tierDAO;
-	
-	@Autowired
-	private StorageDeviceDAO deviceDAO;
-	
-	public List<Tier> getTiersByDatacenter(final Integer datacenterId)
+	public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
+    {
+        return deviceDAO.getDeviceById(datacenterId, deviceId);
+    }
+
+	public Tier findTierById(final Integer datacenterId, final Integer tierId) 
 	{
-		return tierDAO.getTiersByDatacenter(datacenterId);
+		return tierDAO.getTierById(datacenterId, tierId);
 	}
 
 	public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId) 
 	{
 		return deviceDAO.getDevicesByDatacenter(datacenterId);
 	}
+	
+    public List<StoragePool> getPoolsByDevice(final Integer deviceId)
+    {
+        return poolDAO.getPoolsByStorageDevice(deviceId);
+    }
 
-	public Tier findTierById(Integer datacenterId, Integer tierId) 
+    public List<Tier> getTiersByDatacenter(final Integer datacenterId)
 	{
-		return tierDAO.getTierById(datacenterId, tierId);
+		return tierDAO.getTiersByDatacenter(datacenterId);
 	}
 
     public StorageDevice insertDevice(StorageDevice sd)
@@ -60,6 +74,25 @@ public class StorageRep extends DefaultRepBase
         deviceDAO.flush();
         
         return sd;
+    }
+    
+    public StoragePool insertPool(StoragePool sp)
+    {
+        poolDAO.persist(sp);
+        poolDAO.flush();
+        
+        return sp;
+    }
+    
+    public void removeDevice(StorageDevice sd)
+    {   
+        deviceDAO.remove(sd);
+        deviceDAO.flush();
+    }
+
+    public void updateDevice(StorageDevice sd)
+    {
+        deviceDAO.flush();        
     }
 
 }

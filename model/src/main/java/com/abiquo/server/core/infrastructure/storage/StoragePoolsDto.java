@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -38,6 +39,10 @@ public class StoragePoolsDto extends WrapperDto<StoragePoolDto>
     @XmlElement(name = "storagePool")
     public List<StoragePoolDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<StoragePoolDto>();
+        }
         return collection;
     }
 }

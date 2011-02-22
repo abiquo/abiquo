@@ -43,12 +43,21 @@ public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<StorageDevice> getDevicesByDatacenter(Integer datacenterId) {
+	public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId) {
 		
 		Criteria criteria = createCriteria(Restrictions.eq("datacenter.id",
 				datacenterId));
 		return criteria.list();
 	
 	}
+
+    public StorageDevice getDeviceById(final Integer datacenterId, final Integer deviceId)
+    {
+        Criteria criteria =
+            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
+                Restrictions.eq("id", deviceId));
+        Object obj = criteria.uniqueResult();
+        return (StorageDevice) obj;
+    }
 
 }

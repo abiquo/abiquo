@@ -286,7 +286,7 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildStoragePoolLinks(Integer datacenterId, RemoteServiceType type,
+    public List<RESTLink> buildStoragePoolLinks(final Integer datacenterId, final Integer deviceId,
         StoragePoolDto storagePool)
     {
         return null;

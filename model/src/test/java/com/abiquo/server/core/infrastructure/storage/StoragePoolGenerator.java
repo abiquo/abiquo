@@ -34,26 +34,24 @@ import com.softwarementors.commons.testng.AssertEx;
 public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
 {
 
-    
-      TierGenerator tierGenerator;
-    
-      StorageDeviceGenerator cabinetGenerator;
-    
+    TierGenerator tierGenerator;
+
+    StorageDeviceGenerator cabinetGenerator;
 
     public StoragePoolGenerator(SeedGenerator seed)
     {
         super(seed);
-        
-          tierGenerator = new TierGenerator(seed);
-        
-          cabinetGenerator = new StorageDeviceGenerator(seed);
-        
+
+        tierGenerator = new TierGenerator(seed);
+
+        cabinetGenerator = new StorageDeviceGenerator(seed);
+
     }
 
     @Override
     public void assertAllPropertiesEqual(StoragePool obj1, StoragePool obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, StoragePool.NAME_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, StoragePool.NAME_PROPERTY);
     }
 
     @Override
@@ -61,19 +59,35 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
     {
         StoragePool storagePool = new StoragePool();
 
-        
         Tier tier = tierGenerator.createUniqueInstance();
         storagePool.setTier(tier);
-        
+
         StorageDevice device = cabinetGenerator.createUniqueInstance();
         storagePool.setDevice(device);
-        
+
         storagePool.setId(UUID.randomUUID().toString());
         storagePool.setName("LoPutoStorage");
         storagePool.setAvailableSizeInMb(1000L);
         storagePool.setTotalSizeInMb(1000L);
         storagePool.setUsedSizeInMb(0L);
-        
+
+        return storagePool;
+    }
+
+    public StoragePool createInstanceIntoDevice(StorageDevice device)
+    {
+        StoragePool storagePool = new StoragePool();
+
+        Tier tier = tierGenerator.createInstance(device.getDatacenter(), "Default Tier");
+
+        storagePool.setTier(tier);
+        storagePool.setDevice(device);
+        storagePool.setId(UUID.randomUUID().toString());
+        storagePool.setName("LoPutoStorage");
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
+
         return storagePool;
     }
 
@@ -81,16 +95,15 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
     public void addAuxiliaryEntitiesToPersist(StoragePool entity, List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
-          Tier tier = entity.getTier();
-          tierGenerator.addAuxiliaryEntitiesToPersist(tier, entitiesToPersist);
-          entitiesToPersist.add(tier);
-        
-          StorageDevice device = entity.getDevice();
-          cabinetGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
-          entitiesToPersist.add(device);
-        
+
+        Tier tier = entity.getTier();
+        tierGenerator.addAuxiliaryEntitiesToPersist(tier, entitiesToPersist);
+        entitiesToPersist.add(tier);
+
+        StorageDevice device = entity.getDevice();
+        cabinetGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
+        entitiesToPersist.add(device);
+
     }
 
 }
