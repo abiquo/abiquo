@@ -168,7 +168,7 @@ public enum APIError
         "The maximum number of managed cores has been reached"), LICENSE_DUPLICATED("LICENSE-5",
         "The license already exists"), 
         
-    NON_EXISTENT_TIER("TIER-0", "The requested tier doesn not exist");
+    NON_EXISTENT_TIER("TIER-0", "The requested tier doesn not exist"),
 
     // STATISTICS
     NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"),
