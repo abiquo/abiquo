@@ -22,6 +22,7 @@
 package com.abiquo.abiserver.persistence.dao.virtualappliance.hibernate;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.functors.InvokerTransformer;
@@ -49,7 +50,7 @@ public class NodeVirtualImageDAOHibernate extends HibernateDAO<NodeVirtualImageH
     // implement extra functionality
 
     @SuppressWarnings("unchecked")
-    public Collection<NodeVirtualImage> getNodesDecorated(Collection<Integer> nodeIds)
+    public Collection<NodeVirtualImage> getNodesDecorated(final Collection<Integer> nodeIds)
     {
         Collection<NodeVirtualImageHB> nodes =
             getSession().createQuery(FIND_BY_IDS).setParameterList("ids", nodeIds).list();
@@ -57,15 +58,21 @@ public class NodeVirtualImageDAOHibernate extends HibernateDAO<NodeVirtualImageH
         return CollectionUtils.collect(nodes, InvokerTransformer.getInstance("toDecorator"));
     }
 
-    public void refresh(NodeVirtualImageHB node)
+    public void refresh(final NodeVirtualImageHB node)
     {
         getSession().refresh(node);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Collection<NodeVirtualImageHB> getNodes(Collection<Integer> nodeIds)
+    public Collection<NodeVirtualImageHB> getNodes(final Collection<Integer> nodeIds)
     {
         return getSession().createQuery(FIND_BY_IDS).setParameterList("ids", nodeIds).list();
+    }
+
+    @Override
+    public List<NodeVirtualImageHB> findByImage(final Integer idImage)
+    {
+        return findByProperty("virtualImageHB.idImage", idImage);
     }
 }
