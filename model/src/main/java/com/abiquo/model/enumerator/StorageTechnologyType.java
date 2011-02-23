@@ -21,18 +21,19 @@
 
 package com.abiquo.model.enumerator;
 
-
 public enum StorageTechnologyType
 {
-    ZFS(8080, 3260),
-    LVM(8080, 3260),
-    NEXENTA(8180, 3260),
+    OPENSOLARIS(8080, 3260),
+
+    NEXENTA(8080, 3260),
+
+    LVM(8180, 3260),
+
     NETAPP(8280, 3260);
-    
+
     private Integer defaultManagementPort;
+
     private Integer defaultSCSIPort;
-    
-    private static final String DEFAULT_CONTEXT_PATH = "/fs_rest/";
 
     private StorageTechnologyType(final Integer defaultManagementPort, final Integer defaultSCSIPort)
     {
@@ -44,15 +45,10 @@ public enum StorageTechnologyType
     {
         return defaultManagementPort;
     }
-    
+
     public Integer getISCSIPort()
     {
         return defaultSCSIPort;
     }
 
-    public String getMapping()
-    {
-        return DEFAULT_CONTEXT_PATH;
-    }
-    
 }
