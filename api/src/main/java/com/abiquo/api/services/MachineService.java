@@ -126,7 +126,7 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), "", machineDto.getIp(), machineDto
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
                 .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
                 .getPassword());
 
