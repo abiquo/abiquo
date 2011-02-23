@@ -133,8 +133,7 @@ public enum APIError
         "Missing query parameter ip"),
 
     // STORAGE POOL
-    NOT_ASSIGNED_STORAGE_POOL_DATACENTER_REMOTE_SERVICE("SP-0",
-        "The storage pool is not assigned to the datacenter or remote service"), MISSING_REQUIRED_QUERY_PARAMETER_IQN(
+    MISSING_REQUIRED_QUERY_PARAMETER_IQN(
         "SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL("SP-2",
         "The id of the Storage Pool and the id of the submitted object must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
@@ -169,7 +168,7 @@ public enum APIError
         "The license already exists"), 
         
     // TIERS    
-    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"),
+    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1", "Embedded Tier of the StoragePool can not be null"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"),

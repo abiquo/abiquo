@@ -1,52 +1,25 @@
-/**
- * Abiquo community edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.server.core.infrastructure.storage;
-
-import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
-public class StoragePoolDto extends SingleResourceTransportDto implements Serializable
+@XmlRootElement(name = "storagePool")
+public class StoragePoolDto extends SingleResourceTransportDto
 {
-    /**
-     * Generated serial version UID 
-     */
-    private static final long serialVersionUID = -7872199668681832268L;
     
-    private String id;
+    private String idStorage;
 
-    public String getId()
+    public String getIdStorage()
     {
-        return id;
+        return idStorage;
     }
 
-    public void setId(String id)
+    public void setIdStorage(String idStorage)
     {
-        this.id = id;
+        this.idStorage = idStorage;
     }
-
+    
     private String name;
 
     public String getName()
@@ -58,41 +31,71 @@ public class StoragePoolDto extends SingleResourceTransportDto implements Serial
     {
         this.name = name;
     }
-    
+
     private long totalSizeInMb;
 
     public long getTotalSizeInMb()
     {
-        return this.totalSizeInMb;
+        return totalSizeInMb;
     }
 
     public void setTotalSizeInMb(long totalSizeInMb)
     {
         this.totalSizeInMb = totalSizeInMb;
     }
-    
+
     private long usedSizeInMb;
 
     public long getUsedSizeInMb()
     {
-        return this.usedSizeInMb;
+        return usedSizeInMb;
     }
 
-    public void setUsedSizeInMb(long usedSize)
+    public void setUsedSizeInMb(long usedSizeInMb)
     {
-        this.usedSizeInMb = usedSize;
+        this.usedSizeInMb = usedSizeInMb;
     }
-    
+
     private long availableSizeInMb;
 
     public long getAvailableSizeInMb()
     {
-        return this.availableSizeInMb;
+        return availableSizeInMb;
     }
 
-    public void setAvailableSizeInMb(long availableSize)
+    public void setAvailableSizeInMb(long availableSizeInMb)
     {
-        this.availableSizeInMb = availableSize;
+        this.availableSizeInMb = availableSizeInMb;
     }
+
+    private boolean enabled;
+
+    public boolean getEnabled()
+    {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+    
+    /**
+     * @param tier the tier to set
+     */
+    public void setTier(TierDto tier)
+    {
+        this.tier = tier;
+    }
+
+    /**
+     * @return the tier
+     */
+    public TierDto getTier()
+    {
+        return tier;
+    }
+
+    private TierDto tier;   
 
 }
