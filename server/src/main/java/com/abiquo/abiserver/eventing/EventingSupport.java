@@ -357,7 +357,7 @@ public final class EventingSupport
      * @param virtualSystemAddress the physical machine addres to monitor
      * @throws EventingException
      */
-    public static void unMonitorPhysicalMachine(String virtualSystemAddress,
+    public static void unMonitorPhysicalMachine(String virtualSystemAddress, HypervisorType hypervisorType,
         final String virtualSystemMonitorAddress, final String user, final String password)
         throws EventingException
     {
