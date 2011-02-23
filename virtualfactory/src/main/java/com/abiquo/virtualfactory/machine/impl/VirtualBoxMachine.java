@@ -738,9 +738,12 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
             IProgress oProgress = vBoxHyper.getConsole().powerDown();
 
-            waitOperation(oProgress, OPERATION_TIMEOUT);
+            waitOperation(oProgress, 10000);
 
-            vBoxHyper.getSession().unlockMachine();
+            if (vBoxHyper.getSession().getState() == SessionState.Locked)
+            {
+                vBoxHyper.getSession().unlockMachine();
+            }
         }
     }
 
@@ -749,21 +752,15 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      */
     private void waitOperation(IProgress progress, long totalms) throws VirtualMachineException
     {
-
-        boolean ends = false;
-
-        for (long current = 0; current < totalms && !ends; current = current + 10000)
+        for (long current = 0; current < totalms; current = current + 1000)
         {
             try
             {
-                progress.waitForCompletion(5000);
+                progress.waitForCompletion(500);
 
                 if (progress.getCompleted())
                 {
-                    ends = true;
-
-                    long rc = progress.getResultCode();
-                    if (rc != 0)
+                    if (progress.getResultCode() != 0)
                     {
                         throw new VirtualMachineException(progress.getErrorInfo().getText());
                     }
@@ -772,31 +769,24 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             catch (Exception e)
             {
                 // timeout
-
                 e.printStackTrace();
             }
 
             try
             {
-                Thread.sleep(5000);
+                Thread.sleep(500);
             }
             catch (InterruptedException e)
             {
                 throw new VirtualMachineException(e);
             }
 
-            String desc = progress.getDescription();
-
             logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
                 progress.getOperationPercent());
         }
 
-        if (!ends)
-        {
-
-            throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
-                progress.getDescription(), totalms / 1000));
-        }
+        throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
+            progress.getDescription(), totalms / 1000));
 
     }
 
@@ -896,12 +886,14 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         // detachExtendedDisks(machine);
         // machine.saveSettings();
         // oSession.unlockMachine();
+        //
+        // if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+        // {
+        // // Deleting from the rimp
+        // // removeImage();
+        // }
+        //
 
-        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-        {
-            // Deleting from the rimp
-            // removeImage();
-        }
         // Deregistering machine
         List<IMedium> mediumsToDelete =
             machine.unregister(CleanupMode.DetachAllReturnHardDisksOnly);
