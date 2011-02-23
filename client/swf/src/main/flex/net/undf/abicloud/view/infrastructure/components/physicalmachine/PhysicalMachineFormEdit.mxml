@@ -87,6 +87,11 @@
 
                 validateForm();
                 nameInput.setFocus();
+                
+                if(!datastoreManagement.hasEventListener('popupClose')){
+                	datastoreManagement.addEventListener('popupClose',validateForm);
+                }
+                
             }
 
 
@@ -213,7 +218,7 @@
             /**
              * Activates the Accept Button if the form is valid
              **/
-            private function validateForm():void
+            private function validateForm(event:Event = null):void
             {
                 if (nameInput.text.length > 0 && ipInput.text.length > 0 && hypervisorTypeInput.selectedIndex > -1 && hypervisorPortInput.text.length > 0)
                     acceptButton.enabled = true;
@@ -287,7 +292,8 @@
             label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_DESCRIPTION')">
             <mx:TextArea id="descriptionInput"
                 width="100%"
-                maxChars="99"/>
+                maxChars="99"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:Spacer height="10"/>
@@ -295,7 +301,8 @@
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
             <mx:NumericStepper id="cpuInput"
                 width="100" height="20"
-                minimum="1" maximum="32" stepSize="1"/>
+                minimum="1" maximum="32" stepSize="1"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -306,13 +313,15 @@
                 width="100" height="20"
                 minimum="{ramUnitsSelector.selectedItem.minimum}"
                 maximum="{ramUnitsSelector.selectedItem.maximum}"
-                stepSize="{ramUnitsSelector.selectedItem.stepSize}"/>
+                stepSize="{ramUnitsSelector.selectedItem.stepSize}"
+                change="validateForm()"/>
 
             <mx:ComboBox id="ramUnitsSelector"
                 width="80" height="18"
                 labelField="label"
                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
-                selectedIndex="0"/>
+                selectedIndex="0"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -323,13 +332,15 @@
                 width="100" height="20"
                 minimum="{hdUnitsSelector.selectedItem.minimum}"
                 maximum="{hdUnitsSelector.selectedItem.maximum}"
-                stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
+                stepSize="{hdUnitsSelector.selectedItem.stepSize}"
+                change="validateForm()"/>
 
             <mx:ComboBox id="hdUnitsSelector"
                 width="80" height="18"
                 labelField="label"
                 dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
-                selectedIndex="3"/>
+                selectedIndex="3"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:Spacer height="10"/>
@@ -353,7 +364,8 @@
             <mx:TextInput id="ipServiceInput"
                 width="100%" height="20"
                 maxChars="39"
-                restrict="0-9.:A-F"/>
+                restrict="0-9.:A-F"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -361,7 +373,8 @@
             label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
             <mx:TextInput id="vswitchNameInput"
                 width="100%" height="20"
-                maxChars="39"/>
+                maxChars="39"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -392,7 +405,8 @@
             width="80%"
             label="@Resource(bundle='Infrastructure', key='LABEL_USER')">
             <mx:TextInput id="userInput"
-                width="100%" height="20"/>
+                width="100%" height="20"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -400,7 +414,8 @@
             label="@Resource(bundle='Infrastructure', key='LABEL_PASSWORD')">
             <mx:TextInput id="passwordInput"
                 width="100%" height="20"
-                displayAsPassword="true"/>
+                displayAsPassword="true"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_DATASTORES')">
