@@ -752,7 +752,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         boolean ends = false;
 
-        for (long current = 0; current < totalms && !ends; current = current + 5000)
+        for (long current = 0; current < totalms && !ends; current = current + 10000)
         {
             try
             {
@@ -772,12 +772,21 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             catch (Exception e)
             {
                 // timeout
-                
+
                 e.printStackTrace();
             }
 
+            try
+            {
+                Thread.sleep(5000);
+            }
+            catch (InterruptedException e)
+            {
+                throw new VirtualMachineException(e);
+            }
+
             String desc = progress.getDescription();
-            
+
             logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
                 progress.getOperationPercent());
         }
