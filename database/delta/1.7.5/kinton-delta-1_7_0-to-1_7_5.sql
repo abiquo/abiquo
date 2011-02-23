@@ -10,6 +10,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
+
 -- STATISTICS TRIGGERS 
 
 -- Fixes PublicIPs Total, Reserved for Infrastructure View
