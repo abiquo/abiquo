@@ -33,18 +33,32 @@ import com.abiquo.vsm.VSMManager;
  */
 public class RedisDaoFactory
 {
-    private final static JedisPool jedisPool;
+    private static JedisPool jedisPool;
 
     static
     {
-        VSMManager manager = VSMManager.getInstance();
-
-        jedisPool = new JedisPool(manager.getRedisHost(), manager.getRedisPort());
-        JOhm.setPool(jedisPool);
+        createAndSetPool(false);
     }
 
     public static RedisDao getInstance()
     {
         return new RedisDao();
+    }
+
+    public static void refreshPool()
+    {
+        createAndSetPool(true);
+    }
+
+    private static void createAndSetPool(boolean refresh)
+    {
+        if (refresh)
+        {
+            jedisPool.destroy();
+        }
+
+        VSMManager manager = VSMManager.getInstance();
+        jedisPool = new JedisPool(manager.getRedisHost(), manager.getRedisPort());
+        JOhm.setPool(jedisPool);
     }
 }
