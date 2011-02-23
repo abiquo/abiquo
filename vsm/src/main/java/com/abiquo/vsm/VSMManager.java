@@ -152,6 +152,8 @@ public class VSMManager
 
         if (ping)
         {
+            RedisDaoFactory.refreshPool();
+
             subscriber = new RedisSubscriber(redisHost, redisPort);
             subscriberExecutor.execute(subscriber);
         }
