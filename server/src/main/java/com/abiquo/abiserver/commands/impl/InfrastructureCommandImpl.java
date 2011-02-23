@@ -964,12 +964,20 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         String password = hypervisor.getPassword();
         String virtualSystemAddress =
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
+        
         try
         {
-            // Monitors the physical machine
-            EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisor.toPojoHB()
-                .getType(), virtualSystemMonitorAddress, user, password);
-
+        	EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisor.toPojoHB()
+                    .getType(), virtualSystemMonitorAddress, user, password);
+        } catch (EventingException e)
+        {
+        	errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createPhysicalMachine", e);
+        	return dataResult;
+        }
+        
+        try
+        {            
             PhysicalMachine physicalMachine = physicalMachineCreation.getPhysicalMachine();
             // Checks non-zero values in PhysicalMachine data
             checkPhysicalMachineData(physicalMachine);

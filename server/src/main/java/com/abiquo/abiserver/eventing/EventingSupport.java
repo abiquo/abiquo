@@ -328,7 +328,7 @@ public final class EventingSupport
     {
         try
         {
-            if (emptyString(user) || emptyString(password))
+            if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }
@@ -363,7 +363,7 @@ public final class EventingSupport
     {
         try
         {
-            if (emptyString(user) || emptyString(password))
+        	if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }
