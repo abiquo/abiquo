@@ -85,11 +85,13 @@ public class StatisticsRep extends DefaultRepBase
     	
     	CloudUsage cuLimits = this.cloudUsageDAO.findById(-1);
     	
-    	cuTotal.setPublicIPsReserved(cuLimits.getPublicIPsReserved());
-    	cuTotal.setStorageReserved(cuLimits.getStorageReserved());
-    	cuTotal.setVirtualCpuReserved(cuLimits.getVirtualCpuReserved());
-    	cuTotal.setVirtualMemoryReserved(cuLimits.getVirtualMemoryReserved());
-    	cuTotal.setVirtualStorageReserved(cuLimits.getVirtualStorageReserved());
+    	if (cuTotal != null && cuLimits != null){
+    		cuTotal.setPublicIPsReserved(cuLimits.getPublicIPsReserved());
+        	cuTotal.setStorageReserved(cuLimits.getStorageReserved());
+        	cuTotal.setVirtualCpuReserved(cuLimits.getVirtualCpuReserved());
+        	cuTotal.setVirtualMemoryReserved(cuLimits.getVirtualMemoryReserved());
+        	cuTotal.setVirtualStorageReserved(cuLimits.getVirtualStorageReserved());    		
+    	}
     	
     	return cuTotal;
     }
