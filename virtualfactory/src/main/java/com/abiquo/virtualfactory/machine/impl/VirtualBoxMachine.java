@@ -780,7 +780,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             {
                 throw new VirtualMachineException(e);
             }
-
             logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
                 progress.getOperationPercent());
         }
