@@ -969,12 +969,21 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         String password = hypervisor.getPassword();
         String virtualSystemAddress =
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
+        
+        HypervisorType hypervisorType = hypervisor.toPojoHB().getType();
         try
         {
-            // Monitors the physical machine
-            EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisor.toPojoHB()
-                .getType(), virtualSystemMonitorAddress, user, password);
-
+        	EventingSupport.monitorPhysicalMachine(virtualSystemAddress, 
+        			hypervisorType, virtualSystemMonitorAddress, user, password);
+        } catch (EventingException e)
+        {
+        	errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createPhysicalMachine", e);
+        	return dataResult;
+        }
+        
+        try
+        {            
             PhysicalMachine physicalMachine = physicalMachineCreation.getPhysicalMachine();
             // Checks non-zero values in PhysicalMachine data
             checkPhysicalMachineData(physicalMachine);
@@ -1053,7 +1062,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
             try
             {
-                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress,
+                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
                     virtualSystemMonitorAddress, user, password);
             }
             catch (EventingException e1)
@@ -1111,7 +1120,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 }
             }
 
-            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress,
+            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
                 virtualSystemMonitorAddress, user, password);
 
             factory.endConnection();
