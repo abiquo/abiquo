@@ -54,6 +54,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
+import com.sun.istack.FinalArrayList;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -300,5 +301,13 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}", params);
+    }
+    
+    protected String createTiersLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/tiers", params);
     }
 }
