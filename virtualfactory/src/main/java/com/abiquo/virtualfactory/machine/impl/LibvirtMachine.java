@@ -119,6 +119,8 @@ public class LibvirtMachine extends AbsVirtualMachine
     private String domainXml;
 
     private final String kvmemulation;
+    
+    private String targetDatstore;
 
     /**
      * Instantiates a new Libvirt machine.
@@ -1310,15 +1312,15 @@ public class LibvirtMachine extends AbsVirtualMachine
         String hypervisorLocation = libvirtHyper.getAddress().getHost();
         VirtualDisk diskBase = config.getVirtualDiskBase();
         imagePath = diskBase.getImagePath();
-        String datastore = getDatastore(diskBase);
+        targetDatstore = getDatastore(diskBase);
 
         logger.debug("Cloning image[{}]", imagePath);
 
         Iface aimclient =
             TTransportProxy.getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-        aimclient.copyFromRepositoryToDatastore(imagePath, datastore, getMachineName().toString());
+        aimclient.copyFromRepositoryToDatastore(imagePath, targetDatstore, getMachineName().toString());
 
-        logger.debug("Cloning success, at [{}] ", datastore + getMachineName().toString());
+        logger.debug("Cloning success, at [{}] ", targetDatstore + getMachineName().toString());
     }
 
     /**
@@ -1326,21 +1328,24 @@ public class LibvirtMachine extends AbsVirtualMachine
      */
     protected void removeImage() throws VirtualMachineException
     {
-        String hypervisorLocation = libvirtHyper.getAddress().getHost();
-        VirtualDisk diskBase = config.getVirtualDiskBase();
-        String datastore = getDatastore(diskBase);
-
-        try
+        if(targetDatstore != null)
         {
-            Iface aimclient =
-                TTransportProxy
-                    .getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-            aimclient.deleteVirtualImageFromDatastore(datastore, getMachineName().toString());
+            String hypervisorLocation = libvirtHyper.getAddress().getHost();
+            
+            try
+            {
+                Iface aimclient =
+                    TTransportProxy
+                        .getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
+            
+                aimclient.deleteVirtualImageFromDatastore(targetDatstore, getMachineName().toString());
+            }
+            catch (Exception e)
+            {
+                throw new VirtualMachineException(e);
+            }
         }
-        catch (Exception e)
-        {
-            throw new VirtualMachineException(e);
-        }
+        // else is an statefull one
     }
 
     /**
