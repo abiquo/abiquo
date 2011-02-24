@@ -308,6 +308,15 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/tiers", params);
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/storage/tiers", params);
+    }
+    
+    protected String createTierLink(final Integer datacenterId, final Integer tierId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("tier", tierId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/storage/tiers/{tier}", params);
     }
 }
