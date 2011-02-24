@@ -1218,8 +1218,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (virtualAppliance.getNodes().size() >= virtualappOld.getNodes().size())
         {
             // The VA must wait for events when the VA is running and a node is added
-            if (virtualAppliance.getState().toEnum() == StateEnum.RUNNING
-                && !compareNodes(virtualappOld.getNodes(), virtualAppliance.getNodes()))
+            // if (virtualAppliance.getState().toEnum() == StateEnum.RUNNING
+            // && !compareNodes(virtualappOld.getNodes(), virtualAppliance.getNodes()))
+
+            if (!compareNodes(virtualappOld.getNodes(), virtualAppliance.getNodes()))
             {
                 return true;
             }
