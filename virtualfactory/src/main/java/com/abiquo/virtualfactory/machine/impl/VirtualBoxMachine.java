@@ -752,8 +752,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
             waitOperation(oProgress, 10000);
 
-            if (vBoxHyper.getSession().getState() == SessionState.Locked)
-            {
+            if(vBoxHyper.getSession().getState() == SessionState.Locked)
+            {                
                 vBoxHyper.getSession().unlockMachine();
             }
         }
