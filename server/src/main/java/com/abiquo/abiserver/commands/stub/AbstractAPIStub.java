@@ -54,7 +54,6 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
-import com.sun.istack.FinalArrayList;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -72,60 +71,62 @@ public class AbstractAPIStub
         this.apiUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
     }
 
-    protected ClientResponse get(String uri, String user, String password)
+    protected ClientResponse get(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).get();
     }
 
-    protected ClientResponse post(String uri, Object dto, String user, String password)
+    protected ClientResponse post(final String uri, final Object dto, final String user,
+        final String password)
     {
         return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).post(dto);
     }
 
-    protected ClientResponse put(String uri, Object dto, String user, String password)
+    protected ClientResponse put(final String uri, final Object dto, final String user,
+        final String password)
     {
         return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
-    protected ClientResponse delete(String uri, String user, String password)
+    protected ClientResponse delete(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).delete();
     }
 
-    protected ClientResponse get(String uri)
+    protected ClientResponse get(final String uri)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).get();
     }
 
-    protected ClientResponse post(String uri, Object dto)
+    protected ClientResponse post(final String uri, final Object dto)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).post(dto);
     }
 
-    protected Resource resource(String uri)
+    protected Resource resource(final String uri)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML);
     }
 
-    protected ClientResponse put(String uri, Object dto)
+    protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
 
-    protected ClientResponse delete(String uri)
+    protected ClientResponse delete(final String uri)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).delete();
     }
 
-    private Resource resource(String uri, String user, String password)
+    private Resource resource(final String uri, final String user, final String password)
     {
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
         long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
@@ -152,7 +153,8 @@ public class AbstractAPIStub
         return user;
     }
 
-    protected void populateErrors(ClientResponse response, BasicResult result, String methodName)
+    protected void populateErrors(final ClientResponse response, final BasicResult result,
+        final String methodName)
     {
         result.setSuccess(false);
         if (response.getStatusCode() == 401 || response.getStatusCode() == 403)
@@ -170,7 +172,8 @@ public class AbstractAPIStub
         }
     }
 
-    protected String createEnterprisesLink(String filter, Integer offset, Integer numResults)
+    protected String createEnterprisesLink(final String filter, Integer offset,
+        final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/enterprises", Collections.emptyMap());
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
@@ -189,24 +192,25 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
-    protected String createEnterpriseLink(int enterpriseId)
+    protected String createEnterpriseLink(final int enterpriseId)
     {
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
             .singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
-    protected String createRoleLink(int roleId)
+    protected String createRoleLink(final int roleId)
     {
         return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
             "role", valueOf(roleId)));
     }
 
-    protected String createUsersLink(String enterpriseId)
+    protected String createUsersLink(final String enterpriseId)
     {
         return createUsersLink(enterpriseId, null, null);
     }
 
-    protected String createUsersLink(String enterpriseId, Integer offset, Integer numResults)
+    protected String createUsersLink(final String enterpriseId, Integer offset,
+        final Integer numResults)
     {
         String uri =
             URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
@@ -224,12 +228,12 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
-    protected String createUserLink(int enterpriseId, int userId)
+    protected String createUserLink(final int enterpriseId, final int userId)
     {
         return createUserLink(valueOf(enterpriseId), userId);
     }
 
-    protected String createUserLink(String enterpriseIdOrWildcard, int userId)
+    protected String createUserLink(final String enterpriseIdOrWildcard, final int userId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseIdOrWildcard);
@@ -243,7 +247,8 @@ public class AbstractAPIStub
         return createVirtualDatacentersLink(null, null);
     }
 
-    protected String createVirtualDatacentersLink(Enterprise enterprise, DataCenter datacenter)
+    protected String createVirtualDatacentersLink(final Enterprise enterprise,
+        final DataCenter datacenter)
     {
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (enterprise != null)
@@ -259,7 +264,7 @@ public class AbstractAPIStub
             new HashMap<String, String>(), queryParams);
     }
 
-    protected String createMachineLink(PhysicalMachine machine)
+    protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;
         if (machine.getRack() != null)
@@ -280,12 +285,13 @@ public class AbstractAPIStub
             params);
     }
 
-    protected String createRemoteServicesLink(Integer datacenterId)
+    protected String createRemoteServicesLink(final Integer datacenterId)
     {
         return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");
     }
 
-    protected String createRemoteServiceLink(Integer datacenterId, String remoteServiceType)
+    protected String createRemoteServiceLink(final Integer datacenterId,
+        final String remoteServiceType)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -295,28 +301,12 @@ public class AbstractAPIStub
             params);
     }
 
-    protected String createDatacenterLink(Integer datacenterId)
+    protected String createDatacenterLink(final Integer datacenterId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}", params);
     }
-    
-    protected String createTiersLink(final Integer datacenterId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/storage/tiers", params);
-    }
-    
-    protected String createTierLink(final Integer datacenterId, final Integer tierId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
-        params.put("tier", tierId.toString());
-
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/storage/tiers/{tier}", params);
-    }
 }
