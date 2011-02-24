@@ -45,7 +45,7 @@ public class RedisDaoFactory
         return new RedisDao();
     }
 
-    public static void refreshPool()
+    public static void refreshConnectionsPool()
     {
         createAndSetPool(true);
     }
