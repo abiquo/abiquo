@@ -71,13 +71,19 @@
             public var vfWatcher:ChangeWatcher;
             public var vsmWatcher:ChangeWatcher;
             public var amWatcher:ChangeWatcher;
+            //Define Watcher for replicating Port
+            public var vfPortWatcher:ChangeWatcher;
+            public var vsmPortWatcher:ChangeWatcher;
+            public var amPortWatcher:ChangeWatcher;
             
-
+			//Check if we are deleting the replicate IP
+			protected var _isDeleting:Boolean;
+			
             public function init():void
             {
                 nameInput.text = "";
                 situationInput.text = "";
-                
+                _isDeleting = false;
                 //Check if all remote services URIs are well formed
                 BindingUtils.bindSetter(uriChange,virtualFactoryInput,"isUriValid");
                 BindingUtils.bindSetter(uriChange,virtualSystemMonitorInput,"isUriValid");
@@ -221,6 +227,11 @@
                 {
                     if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
                         onAccept();
+                   	 if(keyboardEvent.keyCode == Keyboard.BACKSPACE){
+                    	_isDeleting = true;
+                    }else{
+                    	_isDeleting = false;
+                    }
                 }
             }
             
@@ -230,10 +241,16 @@
             		vfWatcher = BindingUtils.bindSetter(updateFields,virtualFactoryInput.domainNameInput, "text");
             		vsmWatcher = BindingUtils.bindSetter(updateFields, virtualSystemMonitorInput.domainNameInput,"text");
             		amWatcher = BindingUtils.bindSetter(updateFields, applianceManagerInput.domainNameInput,"text");
+            		vfPortWatcher = BindingUtils.bindSetter(updatePortFields,virtualFactoryInput.portInput, "text");
+            		vsmPortWatcher = BindingUtils.bindSetter(updatePortFields, virtualSystemMonitorInput.portInput,"text");
+            		amPortWatcher = BindingUtils.bindSetter(updatePortFields, applianceManagerInput.portInput,"text"); 
             	}else{
             		vfWatcher.unwatch();
             		vsmWatcher.unwatch();
             		amWatcher.unwatch();
+            		vfPortWatcher.unwatch();
+            		vsmPortWatcher.unwatch();
+            		amPortWatcher.unwatch();
             	}          
             }
             
@@ -246,10 +263,36 @@
             
             //Update fields if the data bindings is activate
             protected function updateFields(value:String):void{
-            	virtualFactoryInput.domainNameInput.text = value;
-            	virtualSystemMonitorInput.domainNameInput.text = value;
-            	applianceManagerInput.domainNameInput.text = value; 
-            	validateAllIPs();            	
+            	var updateField:Boolean
+            	if(_isDeleting){
+            		updateField = true;
+            	}else if(value != ""){
+            		updateField = true;
+            	}
+            	
+            	if(updateField){
+	            	virtualFactoryInput.domainNameInput.text = value;
+	            	virtualSystemMonitorInput.domainNameInput.text = value;
+	            	applianceManagerInput.domainNameInput.text = value; 
+	            	validateAllIPs();            	            		            		
+            	}            	
+            }
+            
+            //Update port fields if the data bindings is activate
+            protected function updatePortFields(value:String):void{
+            	var updateField:Boolean
+            	if(_isDeleting){
+            		updateField = true;
+            	}else if(value != ""){
+            		updateField = true;
+            	}
+            	
+            	if(updateField){
+	            	virtualFactoryInput.portInput.text = value;
+	            	virtualSystemMonitorInput.portInput.text = value;
+	            	applianceManagerInput.portInput.text = value; 
+	            	validateAllIPs();            	            		            		
+            	}            	
             }
         ]]>
     </mx:Script>
