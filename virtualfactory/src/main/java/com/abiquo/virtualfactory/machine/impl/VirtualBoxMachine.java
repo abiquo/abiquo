@@ -752,8 +752,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
             waitOperation(oProgress, 10000);
 
-            if (vBoxHyper.getSession().getState() == SessionState.Locked)
-            {
+            if(vBoxHyper.getSession().getState() == SessionState.Locked)
+            {                
                 vBoxHyper.getSession().unlockMachine();
             }
         }
@@ -901,11 +901,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         // machine.saveSettings();
         // oSession.unlockMachine();
 
-        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-        {
-            // Deleting from the rimp
-            // removeImage();
-        }
+//        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+//        {
+//            // Deleting from the rimp
+//            // removeImage();
+//        }
+        
+        
         // Deregistering machine
         List<IMedium> mediumsToDelete =
             machine.unregister(CleanupMode.DetachAllReturnHardDisksOnly);
