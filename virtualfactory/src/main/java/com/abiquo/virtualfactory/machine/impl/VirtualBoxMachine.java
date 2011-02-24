@@ -221,6 +221,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         machine =
             vbox.createMachine(null, config.getMachineName(), "Other", config.getMachineId()
                 .toString(), Boolean.TRUE);
+
         logger.info("VirtualBox machine created succesfully");
     }
 
@@ -282,7 +283,17 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             machine.addStorageController(sataStorageControllerName, StorageBus.SATA);
 
         // Adding the scsci controller
-        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI);
+
+        /**
+         * Setting the I/O cache prevents to the virtual machine process to hang when power off.
+         * <p>
+         * http://www.virtualbox.org/ticket/8276
+         * </p>
+         * (12:13:44 PM) klaus-vb: apuig: the workaround is disabling async I/O for the controller,
+         * by ticking "use host I/O cache" for the scsi controller in the VM config.
+         */
+        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI).setUseHostIOCache(
+            true);
 
         if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
         {
@@ -736,11 +747,15 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             vBoxHyper.reconnect();
             machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
+
             IProgress oProgress = vBoxHyper.getConsole().powerDown();
 
-            waitOperation(oProgress, OPERATION_TIMEOUT);
+            waitOperation(oProgress, 10000);
 
-            vBoxHyper.getSession().unlockMachine();
+            if (vBoxHyper.getSession().getState() == SessionState.Locked)
+            {
+                vBoxHyper.getSession().unlockMachine();
+            }
         }
     }
 
@@ -749,54 +764,43 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      */
     private void waitOperation(IProgress progress, long totalms) throws VirtualMachineException
     {
-
-        boolean ends = false;
-
-        for (long current = 0; current < totalms && !ends; current = current + 10000)
+        for (long current = 0; current < totalms; current = current + 1000)
         {
             try
             {
-                progress.waitForCompletion(5000);
+                progress.waitForCompletion(500);
 
                 if (progress.getCompleted())
                 {
-                    ends = true;
-
-                    long rc = progress.getResultCode();
-                    if (rc != 0)
+                    if (progress.getResultCode() != 0)
                     {
                         throw new VirtualMachineException(progress.getErrorInfo().getText());
                     }
+
+                    return;
                 }
             }
             catch (Exception e)
             {
                 // timeout
-
                 e.printStackTrace();
             }
 
             try
             {
-                Thread.sleep(5000);
+                Thread.sleep(500);
             }
             catch (InterruptedException e)
             {
                 throw new VirtualMachineException(e);
             }
 
-            String desc = progress.getDescription();
-
             logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
                 progress.getOperationPercent());
         }
 
-        if (!ends)
-        {
-
-            throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
-                progress.getDescription(), totalms / 1000));
-        }
+        throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
+            progress.getDescription(), totalms / 1000));
 
     }
 
