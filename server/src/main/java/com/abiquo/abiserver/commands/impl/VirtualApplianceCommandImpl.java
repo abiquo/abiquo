@@ -3032,51 +3032,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         NodeVirtualImageHB nodeVi = (NodeVirtualImageHB) nodePojo;
 
-                        if (virtualAppliance.getSubState().toEnum() == StateEnum.CRASHED)
-                        {
-                            // Before deleting logic
-                            beforeDeletingNode(session, nodeVi);
-                            // Delete Rasds
-                            deleteRasdFromNode(session, nodeVi);
-                            // Deleting from database
-                            session.delete(nodePojo);
-                            // Deleting from nodes list
-                            nodesPojoList.remove(nodePojo);
-                            // Rolling back physical machine resources
-                            VirtualmachineHB virtualMachineHB = nodeVi.getVirtualMachineHB();
-                            VirtualMachine virtualMachine = virtualMachineHB.toPojo();
-                            HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-                            // Restores the physical resources just if an hypervisor has been
-                            // assigned to the virtual machine
-                            if (hypervisor != null)
-                            {
-                                logger.debug("Restoring the physical machine resources");
-                                HypervisorHB hypervisorHB = virtualMachineHB.getHypervisor();
-                                PhysicalmachineHB physicalMachineHB =
-                                    hypervisorHB.getPhysicalMachine();
-                                PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
-                                logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
-                                    + virtualMachine.getRam() + "hd used: "
-                                    + virtualMachine.getHd());
-
-                                Integer virtualMachineId = virtualMachine.getId();
-
-                                vmachineResource.deallocate(userSession, virtualDatacenterId,
-                                    virtualApplianceId, virtualMachineId);
-
-                            }
-                            // If there is no other virtual machine CRASHED in this virtual
-                            // appliance
-                            if (!isAnotherVMCrashed(virtualAppliance, virtualMachine.getName()))
-                            {
-                                State changesNeededSubState =
-                                    new State(virtualAppliance.getState().toEnum());
-                                virtualAppliance.setSubState(changesNeededSubState);
-                                virtualappHBPojo.setSubState(changesNeededSubState.toEnum());
-                            }
-
-                        }
-                        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
+                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
                         {
                             // Before deleting logic
                             beforeDeletingNode(session, nodeVi);
@@ -3183,35 +3139,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return updatenodesList;
 
     }
-
-    /**
-     * Checks if there is another VM Crashed different from the machine name as parameter
-     * 
-     * @param virtualAppliance the virtual appliance to checj
-     * @param vmachineName the virtual machine name
-     * @return true if there is another VM crashed, false if contrary
-     */
-    private boolean isAnotherVMCrashed(VirtualAppliance virtualAppliance, String vmachineName)
-    {
-        boolean isAnotherVMCrashed = false;
-        Collection<Node> nodesList = virtualAppliance.getNodes();
-        for (Node node : nodesList)
-        {
-            if (node.isNodeTypeVirtualImage())
-            {
-                NodeVirtualImage nodevi = (NodeVirtualImage) node;
-                if (nodevi.getVirtualMachine().getState().toEnum().compareTo(StateEnum.CRASHED) == 0)
-                {
-                    if (!nodevi.getVirtualMachine().getName().equals(vmachineName))
-                    {
-                        isAnotherVMCrashed = true;
-                    }
-                }
-            }
-        }
-        return isAnotherVMCrashed;
-    }
-
+ 
     /*
      * (non-Javadoc)
      * @see
