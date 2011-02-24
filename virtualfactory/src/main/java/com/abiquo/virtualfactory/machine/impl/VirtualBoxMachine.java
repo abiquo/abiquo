@@ -221,6 +221,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         machine =
             vbox.createMachine(null, config.getMachineName(), "Other", config.getMachineId()
                 .toString(), Boolean.TRUE);
+
         logger.info("VirtualBox machine created succesfully");
     }
 
@@ -282,7 +283,17 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             machine.addStorageController(sataStorageControllerName, StorageBus.SATA);
 
         // Adding the scsci controller
-        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI);
+
+        /**
+         * Setting the I/O cache prevents to the virtual machine process to hang when power off.
+         * <p>
+         * http://www.virtualbox.org/ticket/8276
+         * </p>
+         * (12:13:44 PM) klaus-vb: apuig: the workaround is disabling async I/O for the controller,
+         * by ticking "use host I/O cache" for the scsi controller in the VM config.
+         */
+        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI).setUseHostIOCache(
+            true);
 
         if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
         {
@@ -736,6 +747,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             vBoxHyper.reconnect();
             machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
+
             IProgress oProgress = vBoxHyper.getConsole().powerDown();
 
             waitOperation(oProgress, 10000);
@@ -764,6 +776,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                     {
                         throw new VirtualMachineException(progress.getErrorInfo().getText());
                     }
+
+                    return;
                 }
             }
             catch (Exception e)
