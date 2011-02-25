@@ -220,7 +220,12 @@
              **/
             private function validateForm(event:Event = null):void
             {
-                if (nameInput.text.length > 0 && ipInput.text.length > 0 && hypervisorTypeInput.selectedIndex > -1 && hypervisorPortInput.text.length > 0)
+                if (nameInput.text.length > 0 
+                && ipInput.text.length > 0 
+                && hypervisorTypeInput.selectedIndex > -1 
+                && hypervisorPortInput.text.length > 0
+                && userInput.text.length > 0
+                && passwordInput.text.length > 0)
                     acceptButton.enabled = true;
 
                 else
@@ -403,6 +408,7 @@
 
         <mx:FormItem 
             width="80%"
+            required="true"
             label="@Resource(bundle='Infrastructure', key='LABEL_USER')">
             <mx:TextInput id="userInput"
                 width="100%" height="20"
@@ -411,6 +417,7 @@
 
         <mx:FormItem 
             width="80%"
+            required="true"
             label="@Resource(bundle='Infrastructure', key='LABEL_PASSWORD')">
             <mx:TextInput id="passwordInput"
                 width="100%" height="20"
