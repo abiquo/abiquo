@@ -594,10 +594,10 @@ public class LibvirtMachine extends AbsVirtualMachine
             dom = conn.domainLookupByName(getMachineName());
             dom.undefine();
 
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-            {
+            //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            //{
                 removeImage();
-            }
+            //}
 
             detachExtendedDisksFromConfig(config);
         }
