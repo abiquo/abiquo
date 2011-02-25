@@ -336,9 +336,12 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
         //search if the virtualImage matches with search parameters
         private function searchInVirtualMachine(virtualImage:VirtualImage, filter:String):Boolean{
 
-        	if(virtualImage.description.toUpperCase().search(filter.toUpperCase()) != -1){
-        		return true;
-        	}        	
+        	if(virtualImage.description){
+	        	if(virtualImage.description.toUpperCase().search(filter.toUpperCase()) != -1){
+	        		return true;
+	        	}        	        		
+        	}
+        	
         	if(virtualImage.name.toUpperCase().search(filter.toUpperCase()) != -1){
         		return true;
         	}        	
