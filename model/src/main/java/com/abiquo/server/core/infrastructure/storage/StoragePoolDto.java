@@ -80,22 +80,4 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.enabled = enabled;
     }
     
-    /**
-     * @param tier the tier to set
-     */
-    public void setTier(TierDto tier)
-    {
-        this.tier = tier;
-    }
-
-    /**
-     * @return the tier
-     */
-    public TierDto getTier()
-    {
-        return tier;
-    }
-
-    private TierDto tier;   
-
 }

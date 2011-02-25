@@ -12,7 +12,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
 
     TierGenerator tierGenerator;
 
-    StorageDeviceGenerator cabinetGenerator;
+    StorageDeviceGenerator deviceGenerator;
 
     public StoragePoolGenerator(SeedGenerator seed)
     {
@@ -20,7 +20,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
 
         tierGenerator = new TierGenerator(seed);
 
-        cabinetGenerator = new StorageDeviceGenerator(seed);
+        deviceGenerator = new StorageDeviceGenerator(seed);
 
     }
 
@@ -38,7 +38,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         Tier tier = tierGenerator.createUniqueInstance();
         storagePool.setTier(tier);
 
-        StorageDevice device = cabinetGenerator.createUniqueInstance();
+        StorageDevice device = deviceGenerator.createUniqueInstance();
         storagePool.setDevice(device);
 
         storagePool.setIdStorage(UUID.randomUUID().toString());
@@ -66,6 +66,23 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
 
         return storagePool;
     }
+    
+    public StoragePool createInstanceIntoTier(Tier tier)
+    {
+        StoragePool storagePool = new StoragePool();
+
+        StorageDevice device = deviceGenerator.createDeviceForInstance(tier.getDatacenter());
+
+        storagePool.setTier(tier);
+        storagePool.setDevice(device);
+        storagePool.setIdStorage(UUID.randomUUID().toString());
+        storagePool.setName("LoPutoStorage");
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
+
+        return storagePool;
+    }
 
     @Override
     public void addAuxiliaryEntitiesToPersist(StoragePool entity, List<Object> entitiesToPersist)
@@ -77,7 +94,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         entitiesToPersist.add(tier);
 
         StorageDevice device = entity.getDevice();
-        cabinetGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
+        deviceGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
         entitiesToPersist.add(device);
 
     }

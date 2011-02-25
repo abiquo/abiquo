@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaStoragePoolDAO")
+@SuppressWarnings("unchecked")
 public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
 {
     public StoragePoolDAO()
@@ -23,7 +24,7 @@ public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
         super(StoragePool.class, entityManager);
     }
 
-    @SuppressWarnings("unchecked")
+   
     public List<StoragePool> getPoolsByStorageDevice(Integer deviceId)
     {
         Criteria criteria = createCriteria(Restrictions.eq("device.id", deviceId));
@@ -36,6 +37,12 @@ public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
             createCriteria(Restrictions.eq("device.id", deviceId)).add(Restrictions.eq("idStorage", poolId));
         Object obj = criteria.uniqueResult();
         return (StoragePool) obj;
+    }
+
+    public List<StoragePool> findPoolsByTier(Tier tier)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("tier", tier));
+        return criteria.list();
     }
 
 }

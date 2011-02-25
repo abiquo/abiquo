@@ -87,7 +87,8 @@ public interface IRESTBuilder
     /*
      * Premium methods
      */
-    public List<RESTLink> buildStoragePoolLinks(Integer datacenterId, Integer deviceId, String poolId, StoragePoolDto storagePool);
+    public List<RESTLink> buildStoragePoolLinks(Integer datacenterId, Integer deviceId,
+        final Integer tierId, String poolId, StoragePoolDto storagePool);
 
     public List<RESTLink> buildDatastoreLinks(Integer datacenterId, Integer rackId,
         Integer machineId, Datastore datastore);
@@ -108,7 +109,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildLimitsLinks(Enterprise enterprise, Datacenter datacenter,
         DatacenterLimitsDto dto);
-    
+
     public List<RESTLink> buildTierLinks(final Integer datacenterId, final Integer tierId);
+
     public List<RESTLink> buildStorageDeviceLinks(final Integer datacenterId, final Integer deviceId);
 }

@@ -58,6 +58,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolById(deviceId, poolId);
     }
     
+    public List<StoragePool> findPoolsByTier(final Tier tier)
+    {
+        return poolDAO.findPoolsByTier(tier);
+    }
+    
 	public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId) 
 	{
 		return deviceDAO.getDevicesByDatacenter(datacenterId);
@@ -106,6 +111,9 @@ public class StorageRep extends DefaultRepBase
         deviceDAO.flush();        
     }
 
-
+    public void updateTier(Tier tier)
+    {
+        tierDAO.flush();        
+    }
 
 }
