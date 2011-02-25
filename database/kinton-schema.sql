@@ -1850,7 +1850,6 @@ DROP TRIGGER IF EXISTS `kinton`.`enterprise_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`create_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_physicalmachine_update_stats`;
-DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_nodevirtualimage_update_stats`;
@@ -2195,46 +2194,6 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
   END;
 --
 --
---
--- Triggers ON virtualmachine
--- ******************************************************************************************
--- Description:
---  * Updates resources (cpu, ram, hd) used by Enterprise
---
--- Fires: ON INSERT an virtualmachine for the virtualmachine table
---
--- FIXME: This Trigger is probably NEVER used, tested with imported VM and created from Abiquo.
--- All operations are watched in AFTER UPDATE TRIGGER
--- ******************************************************************************************
-|
-CREATE TRIGGER `kinton`.`create_virtualmachine_update_stats` AFTER INSERT ON `kinton`.`virtualmachine`
-  FOR EACH ROW BEGIN
-    DECLARE idDataCenterObj INTEGER;
-    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    --   Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
-    IF NEW.state = "RUNNING" AND NEW.idType = 1 THEN
-      UPDATE IGNORE enterprise_resources_stats
-        SET vCpuUsed = vCpuUsed + NEW.cpu,
-          memoryUsed = memoryUsed + NEW.ram,
-          localStorageUsed = localStorageUsed + NEW.hd
-      WHERE idEnterprise = NEW.idEnterprise;
-      UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-      WHERE idDataCenter = idDataCenterObj;
-    END IF;
-    IF NEW.state != "NOT_DEPLOYED" AND NEW.idType = 1 THEN
-      --
-      SELECT pm.idDataCenter INTO idDataCenterObj
-      FROM hypervisor hy, physicalmachine pm
-      WHERE NEW.idHypervisor=hy.id
-      AND hy.idPhysicalMachine=pm.idPhysicalMachine;
-      --
-      UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-      WHERE idDataCenter = idDataCenterObj;
-    END IF;
-  END IF;
-  END;
---
---
 -- ******************************************************************************************
 -- Description: 
 --  * Updates resources (cpu, ram, hd) used by Enterprise
@@ -2251,6 +2210,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
@@ -2270,7 +2230,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;     
-        IF NEW.idType = 1 AND (NEW.state != OLD.state OR OLD.idType != NEW.idType) THEN
+        IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             -- Activates if state changes or machines are captured
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
@@ -2321,7 +2281,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
             END IF;     
-            IF OLD.state = "NOT_DEPLOYED" OR OLD.state = "UNKNOWN" OR OLD.idType != NEW.idType THEN
+            IF OLD.state = "NOT_DEPLOYED" OR OLD.state = "UNKNOWN"  THEN -- OR OLD.idType != NEW.idType
                 -- VMachine Deployed or VMachine imported
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
