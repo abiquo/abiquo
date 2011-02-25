@@ -104,6 +104,9 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     /** The Virtual NIC list */
     private final List<VirtualNIC> vnicList;
 
+    /** Timeout to wait for a virtual machine state transition. */
+    private final static Integer OPERATION_TIMEOUT = 2 * 60000; // 2 minutes
+
     /*
      * The cloned image name. private String clonedImageName;
      */
@@ -218,6 +221,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         machine =
             vbox.createMachine(null, config.getMachineName(), "Other", config.getMachineId()
                 .toString(), Boolean.TRUE);
+
         logger.info("VirtualBox machine created succesfully");
     }
 
@@ -279,7 +283,17 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             machine.addStorageController(sataStorageControllerName, StorageBus.SATA);
 
         // Adding the scsci controller
-        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI);
+
+        /**
+         * Setting the I/O cache prevents to the virtual machine process to hang when power off.
+         * <p>
+         * http://www.virtualbox.org/ticket/8276
+         * </p>
+         * (12:13:44 PM) klaus-vb: apuig: the workaround is disabling async I/O for the controller,
+         * by ticking "use host I/O cache" for the scsi controller in the VM config.
+         */
+        machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI).setUseHostIOCache(
+            true);
 
         if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
         {
@@ -358,11 +372,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
-                        .getFile());
+                    new URL(phymach_ip.getProtocol(),
+                        phymach_ip.getHost(),
+                        8889,
+                        phymach_ip.getFile());
 
-                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                    .getVSwitchName(), bridgeName);
+                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
+                    virtualNIC.getVSwitchName(), bridgeName);
 
                 attachNetworkAdapter(machine, virtualNIC.getMacAddress(), abiquoPrefix + "_"
                     + virtualNIC.getVlanTag(), vnicList.indexOf(virtualNIC));
@@ -402,13 +418,15 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
-                        .getFile());
+                    new URL(phymach_ip.getProtocol(),
+                        phymach_ip.getHost(),
+                        8889,
+                        phymach_ip.getFile());
 
                 if (mustDeleteVLAN(bridgeName))
                 {
-                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                        .getVSwitchName(), bridgeName);
+                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
+                        virtualNIC.getVSwitchName(), bridgeName);
 
                 }
             }
@@ -646,12 +664,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         newVDI = vBoxHyper.getVirtualBox().createHardDisk(diskVDI.getFormat(), clonedImagePath);
         IProgress progress = diskVDI.cloneTo(newVDI, diskVDI.getVariant(), null);
-        progress.waitForCompletion(10000000);
-        long rc = progress.getResultCode();
-        if (rc != 0)
-        {
-            throw new VirtualMachineException("An error was occurred when cloning the disk");
-        }
+
+        waitOperation(progress, 15 * 60000); // 15 minutes
 
         logger.info("Cloning success, at [{}] ", clonedImagePath);
     }
@@ -671,15 +685,11 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         // openExistingSession();
         ISession oSession = vBoxHyper.getSession();
+
         IProgress oProgress = machine.launchVMProcess(oSession, sessionType, env);
         logger.info("Session for VM " + config.getMachineId().toString() + " is opened...");
-        oProgress.waitForCompletion(10000);
 
-        long rc = oProgress.getResultCode();
-        if (rc != 0)
-        {
-            throw new VirtualMachineException(oProgress.getErrorInfo().getText());
-        }
+        waitOperation(oProgress, 10000); // 10 seconds
 
         // This hacks are necesarry since state synchronization does not work well in Vbox
         try
@@ -737,15 +747,61 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             vBoxHyper.reconnect();
             machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
+
             IProgress oProgress = vBoxHyper.getConsole().powerDown();
-            oProgress.waitForCompletion(100000);
-            long rc = oProgress.getResultCode();
-            if (rc != 0)
-            {
-                throw new VirtualMachineException(oProgress.getErrorInfo().getText());
+
+            waitOperation(oProgress, 10000);
+
+            if(vBoxHyper.getSession().getState() == SessionState.Locked)
+            {                
+                vBoxHyper.getSession().unlockMachine();
             }
-            vBoxHyper.getSession().unlockMachine();
         }
+    }
+
+    /**
+     * Check every 5 seconds if the operation ended.
+     */
+    private void waitOperation(IProgress progress, long totalms) throws VirtualMachineException
+    {
+        for (long current = 0; current < totalms; current = current + 1000)
+        {
+            try
+            {
+                progress.waitForCompletion(500);
+
+                if (progress.getCompleted())
+                {
+                    if (progress.getResultCode() != 0)
+                    {
+                        throw new VirtualMachineException(progress.getErrorInfo().getText());
+                    }
+
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                // timeout
+                e.printStackTrace();
+            }
+
+            try
+            {
+                Thread.sleep(500);
+            }
+            catch (InterruptedException e)
+            {
+                throw new VirtualMachineException(e);
+            }
+
+            logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
+                progress.getOperationPercent());
+        }
+
+        throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
+            progress.getDescription(), totalms / 1000));
+
     }
 
     /**
@@ -845,24 +901,30 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         // machine.saveSettings();
         // oSession.unlockMachine();
 
-        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-        {
-            // Deleting from the rimp
-            // removeImage();
-        }
+//        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+//        {
+//            // Deleting from the rimp
+//            // removeImage();
+//        }
+        
+        
         // Deregistering machine
         List<IMedium> mediumsToDelete =
             machine.unregister(CleanupMode.DetachAllReturnHardDisksOnly);
 
         // Deleting mediums
         IProgress oProgress = machine.delete(mediumsToDelete);
-        oProgress.waitForCompletion(100000);
-        long rc = oProgress.getResultCode();
-        if (rc != 0)
+
+        try
+        {
+            waitOperation(oProgress, OPERATION_TIMEOUT);
+        }
+        catch (VirtualMachineException e)
         {
             logger.error("An error was found when deleting the hard disk from the virtual machine"
                 + oProgress.getErrorInfo());
         }
+
         // Closing the sessions
         vBoxHyper.logout();
     }
@@ -879,8 +941,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         for (IMediumAttachment hdAttachement : attachments)
         {
             IMedium hardDisk = hdAttachement.getMedium();
-            machine.detachDevice(scsiStorageControllerName, hdAttachement.getPort(), hdAttachement
-                .getDevice());
+            machine.detachDevice(scsiStorageControllerName, hdAttachement.getPort(),
+                hdAttachement.getDevice());
             machine.saveSettings();
             hardDisk.close();
         }
@@ -957,8 +1019,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         for (IMediumAttachment hdAttachement : attachments)
         {
             IMedium hardDisk = hdAttachement.getMedium();
-            machine.detachDevice(sataStorageControllerName, hdAttachement.getPort(), hdAttachement
-                .getDevice());
+            machine.detachDevice(sataStorageControllerName, hdAttachement.getPort(),
+                hdAttachement.getDevice());
             machine.saveSettings();
             hardDisk.close();
         }
@@ -1107,8 +1169,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         machine.lockMachine(oSession, LockType.Write);
         machine = vBoxHyper.getConsole().getMachine();
         List<VirtualDisk> newExtendedDiskList =
-            addNewVirtualDisks(newConfiguration.getExtendedVirtualDiskList(), config
-                .getExtendedVirtualDiskList());
+            addNewVirtualDisks(newConfiguration.getExtendedVirtualDiskList(),
+                config.getExtendedVirtualDiskList());
         attachExtendedDisks(newExtendedDiskList, vbox, machine);
         machine.saveSettings();
 
@@ -1261,8 +1323,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             aimclient.copyFromDatastoreToRepository(machineName, snapshotName, destinationPath,
                 sourceFolder);
 
-            logger.info("Creating an instance of the virtual machine: {} DONE", config
-                .getMachineName());
+            logger.info("Creating an instance of the virtual machine: {} DONE",
+                config.getMachineName());
         }
         catch (Exception e)
         {
