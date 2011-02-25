@@ -103,11 +103,11 @@ public class HyperVMachine extends AbsHyperVMachine
             {
                 virtualSysteManagementServiceExt.destroyVirtualSystem(vmDispatch);
 
-                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-                {
+                //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+                //{
                     // Just deleted the base disk when the virtual disk is stateless
                     deleteBaseDisk();
-                }
+                //}
             }
             else
             {
