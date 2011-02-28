@@ -207,7 +207,9 @@ public class VirtualimageAllocationService
             }
             if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
             {
-                throw new NotEnoughResourcesException("Not enough VLAN resource to instantiate the required virtual appliance");
+                throw new NotEnoughResourcesException(String.format(
+                    "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
+                    rack.getName()));
             }
 
             log.debug("The network assigned to the VM, VLAN network ID: {},  "
@@ -215,20 +217,9 @@ public class VirtualimageAllocationService
 
             final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
 
-            try
-            {
-                candidateMachines =
-                    datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
-                        hdRequiredOnDatastore, enterprise);
-            }
-            catch (PersistenceException e)
-            {
-                final String msg =
-                    "Not enough physical machine capacity to instantiate the required virtual machine.\n"
-                        + e.getMessage();
-
-                throw new NotEnoughResourcesException(msg);
-            }
+            candidateMachines =
+                datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
+                    hdRequiredOnDatastore, enterprise);
         }
 
         return candidateMachines;
