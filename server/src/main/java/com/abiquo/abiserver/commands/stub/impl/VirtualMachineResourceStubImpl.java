@@ -21,6 +21,10 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import static com.abiquo.tracer.Enterprise.enterprise;
+import static com.abiquo.tracer.Platform.platform;
+import static com.abiquo.tracer.Rack.rack;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +46,14 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.Datacenter;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Machine;
+import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.UserInfo;
+import com.abiquo.tracer.VirtualDatacenter;
+import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.URIResolver;
 
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
@@ -141,7 +151,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
         else if (message.startsWith("ALLOC-0"))
         {
-            throw new NotEnoughResourcesException(message);
+           
+            
+            // the user can't see the details of the error, only be traced to system.
+            throw new NotEnoughResourcesException("There isn't enough resources to create the virtual machine");
         }
         else
         {
@@ -154,6 +167,72 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             throw new SchedulerException(message);
         }
     }
+    
+    
+    private void traceSytemError()
+    {
+        UserInfo ui = new UserInfo();
+        ui.setId(performedUser.getUserIdDb());
+        ui.setUsername(performedUser.getUser());
+        ui.setEnterprise(performedUser.getEnterpriseName());
+
+        Platform platform = platform("abiquo");
+        com.abiquo.tracer.Enterprise enterprise = null;
+        if (ent != null)
+        {
+            enterprise = com.abiquo.tracer.Enterprise.enterprise(ent);
+        }
+        else
+        {
+            enterprise = enterprise(ui.getEnterprise());
+        }
+
+        if (user != null)
+        {
+            enterprise.setUser(com.abiquo.tracer.User.user(user));
+        }
+
+        // Set a datacenter object, with name
+        if (dataCenter != null)
+        {
+            Datacenter datacenter = Datacenter.datacenter(dataCenter.getName());
+            if (rack != null)
+            {
+                com.abiquo.tracer.Rack r = rack(rack.getName());
+                if (machine != null)
+                {
+                    r.setMachine(Machine.machine(machine.getName()));
+                }
+                datacenter.setRack(r);
+            }
+            platform.setDatacenter(datacenter);
+        }
+
+        // Set a virtualdatacenter object, with name
+        if (virtualDatacenterName != null)
+        {
+            VirtualDatacenter vdc = VirtualDatacenter.virtualDatacenter(virtualDatacenterName);
+            if (vapp != null)
+            {
+                vdc.setVirtualAppliance(com.abiquo.tracer.VirtualAppliance.virtualAppliance(vapp
+                    .getName()));
+            }
+            enterprise.setVirtualDatacenter(vdc);
+        }
+
+        platform.setEnterprise(enterprise);
+
+        if (description != null)
+        {
+            TracerFactory.getTracer().log(severity, component, event, description, ui, platform);
+        }
+        else
+        {
+            TracerFactory.getTracer().log(severity, component, event, ui, platform);
+        }
+
+    }
+    
 
     private String resolveVirtualMachineUrl(Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId)

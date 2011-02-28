@@ -389,6 +389,10 @@ public class VirtualimageAllocationService
                     bestTarget = target;
                 }
             }
+            else
+            {
+                log.error(String.format("Machine %s rejected by some load rule.", target.getName()));
+            }
         }
 
         if (bestTarget == null)
