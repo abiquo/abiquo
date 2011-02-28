@@ -139,7 +139,8 @@ public enum APIError
         "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
         "SP-6", "Could not get the requested Storage Pool from the target device"),CONFLICT_VOLUMES_CREATED("SP-7", 
-            "Can not delete the Storage Pool. There are volumes created in pool "),
+            "Can not delete the Storage Pool. There are volumes created in pool "),STORAGE_POOL_DUPLICATED("SP-8","Duplicated Storage Pool"),
+            STORAGE_POOL_TIER_IS_DISABLED("SP-9","Tier is disabled"),   
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -178,14 +179,14 @@ public enum APIError
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"),
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED("DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS
     NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"), NON_EXISTENT_STATS_FOR_DATACENTER(
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"),  
 
     ;
 

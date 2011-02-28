@@ -1,6 +1,7 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import com.abiquo.server.core.common.GenericEntityGenerator;
@@ -42,7 +43,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         storagePool.setDevice(device);
 
         storagePool.setIdStorage(UUID.randomUUID().toString());
-        storagePool.setName("LoPutoStorage");
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
         storagePool.setAvailableSizeInMb(1000L);
         storagePool.setTotalSizeInMb(1000L);
         storagePool.setUsedSizeInMb(0L);
@@ -59,7 +60,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         storagePool.setTier(tier);
         storagePool.setDevice(device);
         storagePool.setIdStorage(UUID.randomUUID().toString());
-        storagePool.setName("LoPutoStorage");
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
         storagePool.setAvailableSizeInMb(1000L);
         storagePool.setTotalSizeInMb(1000L);
         storagePool.setUsedSizeInMb(0L);
@@ -76,7 +77,7 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
         storagePool.setTier(tier);
         storagePool.setDevice(device);
         storagePool.setIdStorage(UUID.randomUUID().toString());
-        storagePool.setName("LoPutoStorage");
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
         storagePool.setAvailableSizeInMb(1000L);
         storagePool.setTotalSizeInMb(1000L);
         storagePool.setUsedSizeInMb(0L);

@@ -38,6 +38,14 @@ public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
         Object obj = criteria.uniqueResult();
         return (StoragePool) obj;
     }
+    
+    public StoragePool findPoolByName(Integer deviceId, String name)
+    {
+        Criteria criteria =
+            createCriteria(Restrictions.eq("device.id", deviceId)).add(Restrictions.eq("name", name));
+        Object obj = criteria.uniqueResult();
+        return (StoragePool) obj;
+    }
 
     public List<StoragePool> findPoolsByTier(Tier tier)
     {

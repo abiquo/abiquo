@@ -60,4 +60,13 @@ public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice> {
         return (StorageDevice) obj;
     }
 
+    public StorageDevice findDeviceById(Integer datacenterId, String managementIp)
+    {
+        Criteria criteria =
+            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
+                Restrictions.eq("managementIp", managementIp));
+        Object obj = criteria.uniqueResult();
+        return (StorageDevice) obj;
+    }
+
 }
