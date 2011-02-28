@@ -151,10 +151,12 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
         else if (message.startsWith("ALLOC-0"))
         {
-           
-            
-            // the user can't see the details of the error, only be traced to system.
-            throw new NotEnoughResourcesException("There isn't enough resources to create the virtual machine");
+            // trace to system with all the detailed cause.
+            TracerFactory.getTracer().log(SeverityType.MINOR, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_POWERON, message, Platform.SYSTEM_PLATFORM);
+
+            // the user can't see the details of the detailed error cause.
+            throw new NotEnoughResourcesException("There isn't enough resources to create the virtual machine.");
         }
         else
         {
@@ -167,72 +169,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             throw new SchedulerException(message);
         }
     }
-    
-    
-    private void traceSytemError()
-    {
-        UserInfo ui = new UserInfo();
-        ui.setId(performedUser.getUserIdDb());
-        ui.setUsername(performedUser.getUser());
-        ui.setEnterprise(performedUser.getEnterpriseName());
-
-        Platform platform = platform("abiquo");
-        com.abiquo.tracer.Enterprise enterprise = null;
-        if (ent != null)
-        {
-            enterprise = com.abiquo.tracer.Enterprise.enterprise(ent);
-        }
-        else
-        {
-            enterprise = enterprise(ui.getEnterprise());
-        }
-
-        if (user != null)
-        {
-            enterprise.setUser(com.abiquo.tracer.User.user(user));
-        }
-
-        // Set a datacenter object, with name
-        if (dataCenter != null)
-        {
-            Datacenter datacenter = Datacenter.datacenter(dataCenter.getName());
-            if (rack != null)
-            {
-                com.abiquo.tracer.Rack r = rack(rack.getName());
-                if (machine != null)
-                {
-                    r.setMachine(Machine.machine(machine.getName()));
-                }
-                datacenter.setRack(r);
-            }
-            platform.setDatacenter(datacenter);
-        }
-
-        // Set a virtualdatacenter object, with name
-        if (virtualDatacenterName != null)
-        {
-            VirtualDatacenter vdc = VirtualDatacenter.virtualDatacenter(virtualDatacenterName);
-            if (vapp != null)
-            {
-                vdc.setVirtualAppliance(com.abiquo.tracer.VirtualAppliance.virtualAppliance(vapp
-                    .getName()));
-            }
-            enterprise.setVirtualDatacenter(vdc);
-        }
-
-        platform.setEnterprise(enterprise);
-
-        if (description != null)
-        {
-            TracerFactory.getTracer().log(severity, component, event, description, ui, platform);
-        }
-        else
-        {
-            TracerFactory.getTracer().log(severity, component, event, ui, platform);
-        }
-
-    }
-    
 
     private String resolveVirtualMachineUrl(Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId)
