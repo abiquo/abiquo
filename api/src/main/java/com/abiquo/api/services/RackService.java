@@ -69,14 +69,37 @@ public class RackService extends DefaultApiService
             errors.add(APIError.RACK_DUPLICATED_NAME);
         }
         flushErrors();
-
-        Rack rack =
-            datacenter.createRack(rackDto.getName(), Rack.VLAN_ID_MIN_DEFAULT_VALUE,
-                Rack.VLAN_ID_MAX_DEFAULT_VALUE, Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE,
-                Rack.NRSQ_DEFAULT_VALUE);
+        Integer vlanIdMax,vlanIdMin,vlanPerVdcExpected,nrsq;
+        vlanIdMax = rackDto.getVlanIdMax();
+        vlanIdMin = rackDto.getVlanIdMin();
+        vlanPerVdcExpected = rackDto.getVlanPerVdcExpected();
+        nrsq = rackDto.getNrsq();
+        String vlansIdAvoided = rackDto.getVlansIdAvoided();
+        if(rackDto.getVlanIdMax() == null)
+        {
+        	vlanIdMax = Rack.VLAN_ID_MAX_DEFAULT_VALUE;
+        }
+        if(rackDto.getVlanIdMin() == null)
+        {
+        	vlanIdMin = Rack.VLAN_ID_MIN_DEFAULT_VALUE;
+        }
+        if(rackDto.getVlanPerVdcExpected() == null)
+        {
+        	vlanPerVdcExpected =Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE;
+        }
+        if((rackDto.getNrsq() == null) || (rackDto.getNrsq() > 100))
+        {
+        	nrsq = Rack.NRSQ_DEFAULT_VALUE;
+        }
+        if(rackDto.getVlansIdAvoided() == null)
+        {
+        	vlansIdAvoided = Rack.VLANS_ID_AVOIDED_DEFAULT_VALUE;
+        }
+        Rack rack = datacenter.createRack(rackDto.getName(), vlanIdMin,
+                vlanIdMax, vlanPerVdcExpected,nrsq);
         rack.setShortDescription(rackDto.getShortDescription());
         rack.setLongDescription(rackDto.getLongDescription());
-        rack.setVlansIdAvoided(Rack.VLANS_ID_AVOIDED_DEFAULT_VALUE);
+        rack.setVlansIdAvoided(vlansIdAvoided);
 
         isValidRack(rack);
         repo.insertRack(rack);
