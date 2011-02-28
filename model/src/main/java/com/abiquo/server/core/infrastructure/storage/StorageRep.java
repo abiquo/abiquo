@@ -116,4 +116,10 @@ public class StorageRep extends DefaultRepBase
         tierDAO.flush();        
     }
 
+    public void updatePool(StoragePool pool)
+    {
+        poolDAO.flush();
+    }
+
+
 }
