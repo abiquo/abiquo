@@ -130,10 +130,9 @@ public class VirtualimageAllocationService
     @Autowired
     NetworkAssignmentDAO networkAssignmentDao;
 
-    /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */    
+    /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */
     SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
 
-    
     @Resource(name = "physicalmachineRuleFinder")
     // premium impl by replacements
     public void setRuleFinder(SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
@@ -179,12 +178,6 @@ public class VirtualimageAllocationService
         {
             candidateMachines =
                 findFirstPassCandidatesOnFreeRack(virtualDatacenter, vimage, enterprise);
-
-            if (candidateMachines.isEmpty())
-            {
-                final String cause = "Any machine can full fit the required resources on any rack";
-                throw new NotEnoughResourcesException(cause);
-            }
         }
         else
         {
@@ -231,7 +224,7 @@ public class VirtualimageAllocationService
             catch (PersistenceException e)
             {
                 final String msg =
-                    "Not enough physical machine capacity to instantiate the required virtual appliance.\n"
+                    "Not enough physical machine capacity to instantiate the required virtual machine.\n"
                         + e.getMessage();
 
                 throw new NotEnoughResourcesException(msg);
@@ -250,7 +243,9 @@ public class VirtualimageAllocationService
         final VirtualDatacenter virtualDatacenter, final VirtualImage vimage,
         final Enterprise enterprise) throws NotEnoughResourcesException
     {
-        log.debug("There is no rack assigned to the network attached to the VM");
+        log.debug("First virtual machine of the current virtual appliance "
+            + "(no rack assigned to the network attached). "
+            + "Selecting the rack to be used on the hole virtual appliance.");
 
         // Gets the rack candidates that would fit a new virtual datacenter
         final List<Integer> rackOrderedList =
@@ -271,8 +266,7 @@ public class VirtualimageAllocationService
 
         if (candidateRackList.isEmpty())
         {
-            final String msg =
-                "Not enough networking resources to instantiate the required virtual appliance";
+            final String msg = "Any rack can be selected: all exceed the max VLAN allowed.";
             throw new NotEnoughResourcesException(msg);
         }
 
@@ -285,16 +279,22 @@ public class VirtualimageAllocationService
                     datacenterRepo.findCandidateMachines(idRackCandidate, idVirtualDatacenter,
                         hdRequiredOnDatastore, enterprise);
 
+                log.debug(String.format(
+                    "All the virtual machines of the current virtual appliance "
+                        + "will be deployed on the rack id : %d", idRackCandidate));
+
                 return machinesOnRack;
             }
             catch (PersistenceException e)
             {
+                log.error(String.format("Rack id [%d] can't be used : %s", e.getMessage()));
+
                 continue;
             }
         }
 
         final String msg =
-            "Not enough physical machine capacity to instantiate the required virtual appliance on any rack";
+            "Any rack can be selected: Any have enough physical machine capacity to instantiate the required virtual appliance.";
         throw new NotEnoughResourcesException(msg);
     }
 
@@ -403,11 +403,28 @@ public class VirtualimageAllocationService
         if (bestTarget == null)
         {
             final String cause =
-                "Any resource fulfill the target requirements based on the current workload rules";
+                String.format("There are %d candidate machines but all are discarted by the "
+                    + "current workload rules (RAM and CPU oversubscription). \n %s",
+                    firstPassCandidates.size(), candidateNames(firstPassCandidates));
+
             throw new NotEnoughResourcesException(cause);
         }
 
         return bestTarget;
+    }
+
+    private String candidateNames(Collection<Machine> firstPassCandidates)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Machine candidate : firstPassCandidates)
+        {
+            sb.append(candidate.getName());
+            sb.append("ip - ");
+            sb.append(candidate.getHypervisor().getIp());
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 
     protected boolean isGoodEnough(final long fitTarget)
