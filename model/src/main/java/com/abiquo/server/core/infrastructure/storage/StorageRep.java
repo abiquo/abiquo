@@ -28,6 +28,9 @@ public class StorageRep extends DefaultRepBase
 	@Autowired
 	private StoragePoolDAO poolDAO;
 	
+	@Autowired
+	private VolumeManagementDAO volumeDAO;
+	
 	public StorageRep() 
 	{
 		
@@ -73,6 +76,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.getPoolsByStorageDevice(deviceId);
     }
 
+    public List<VolumeManagement> getVolumesByPool(final StoragePool pool)
+    {
+        return volumeDAO.getVolumesByPool(pool);
+    }
+    
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
 	{
 		return tierDAO.getTiersByDatacenter(datacenterId);
@@ -120,6 +128,5 @@ public class StorageRep extends DefaultRepBase
     {
         poolDAO.flush();
     }
-
 
 }

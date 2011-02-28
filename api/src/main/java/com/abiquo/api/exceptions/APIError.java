@@ -138,7 +138,8 @@ public enum APIError
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
-        "SP-6", "Could not get the requested Storage Pool from the target device"),
+        "SP-6", "Could not get the requested Storage Pool from the target device"),CONFLICT_VOLUMES_CREATED("SP-7", 
+            "Can not delete the Storage Pool. There are volumes created in pool "),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
