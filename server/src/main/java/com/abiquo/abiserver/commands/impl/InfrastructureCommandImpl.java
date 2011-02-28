@@ -750,7 +750,15 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-
+            
+            VlanNetworkParameters vlanNetParameters = rack.getVlanNetworkParameters();
+            if(vlanNetParameters == null)
+            {
+            	vlanNetParameters = new VlanNetworkParameters(2, 4094, 
+            			"", 80, 8);
+            	rack.setVlanNetworkParameters(vlanNetParameters);
+            }
+            
             RackHB rackHB = rack.toPojoHB();
             session.save(rackHB);
 
