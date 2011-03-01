@@ -414,7 +414,7 @@ public class VirtualimageAllocationService
         for (Machine candidate : firstPassCandidates)
         {
             sb.append(candidate.getName());
-            sb.append("ip - ");
+            sb.append(" ip - ");
             sb.append(candidate.getHypervisor().getIp());
             sb.append("\n");
         }

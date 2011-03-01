@@ -21,10 +21,6 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
-import static com.abiquo.tracer.Enterprise.enterprise;
-import static com.abiquo.tracer.Platform.platform;
-import static com.abiquo.tracer.Rack.rack;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,13 +42,9 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.Datacenter;
 import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Machine;
 import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.UserInfo;
-import com.abiquo.tracer.VirtualDatacenter;
 import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.URIResolver;
 
@@ -152,7 +144,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         else if (message.startsWith("ALLOC-0"))
         {
             // trace to system with all the detailed cause.
-            TracerFactory.getTracer().log(SeverityType.MINOR, ComponentType.VIRTUAL_APPLIANCE,
+            TracerFactory.getTracer().log(SeverityType.NORMAL, ComponentType.VIRTUAL_APPLIANCE,
                 EventType.VAPP_POWERON, message, Platform.SYSTEM_PLATFORM);
 
             // the user can't see the details of the detailed error cause.

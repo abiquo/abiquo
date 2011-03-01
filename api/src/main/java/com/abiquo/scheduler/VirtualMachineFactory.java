@@ -140,7 +140,7 @@ public class VirtualMachineFactory
         if (datastores.isEmpty())
         {
             final String cause =
-                "The target physical machine has no datastores. The virtual machine can not be deployed";
+                "The target physical machine has no datastores.";
             throw new NotEnoughResourcesException(cause);
         }
 
@@ -163,7 +163,7 @@ public class VirtualMachineFactory
         if (betterDatastore == null)
         {
             final String cause =
-                "The target physical machine has no datastores enabled. The virtual machine can not be deployed";
+                "The target physical machine has no datastores enabled with the required free size.";
             throw new NotEnoughResourcesException(cause);
         }
 
