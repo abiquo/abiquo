@@ -2648,10 +2648,10 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
         DECLARE incr INTEGER;
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
         SET incr = NEW.usedSize-OLD.usedSize;
-        SELECT rs.idDataCenter INTO idDataCenterObj
-        FROM storage_pool sp, remote_service rs
+        SELECT sd.idDataCenter INTO idDataCenterObj
+        FROM storage_pool sp, storage_device sd
         WHERE OLD.idStorage = sp.idStorage
-        AND sp.idRemoteService = rs.idRemoteService;
+        AND sp.idStorageDevice = sd.id;
         --      
         SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
         FROM rasd_management rasd, virtualapp vapp
@@ -3367,14 +3367,14 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     AND vdc.idDataCenter = idDataCenterObj;
     --
     SELECT IF (SUM(r.limitResource) IS NULL, 0, SUM(r.limitResource)) INTO storageUsed
-    FROM storage_pool sp, remote_service rs, volume_management vm, rasd_management rm, rasd r
+    FROM storage_pool sp, storage_device sd, volume_management vm, rasd_management rm, rasd r
     WHERE vm.idStorage = sp.idStorage
-    AND sp.idRemoteService = rs.idRemoteService
+    AND sp.idStorageDevice = sd.id
     AND vm.idManagement = rm.idManagement
     AND r.instanceID = rm.idResource
     AND rm.idResourceType = 8
     AND (vm.state = 1 OR vm.state = 2)
-    AND rs.idDataCenter = idDataCenterObj;
+    AND sd.idDataCenter = idDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsTotal
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
