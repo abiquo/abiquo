@@ -84,7 +84,7 @@ public enum RemoteServiceType
 
     public boolean checkUniqueness()
     {
-        return this == STORAGE_SYSTEM_MONITOR || this == APPLIANCE_MANAGER
+        return this == APPLIANCE_MANAGER
             || this == VIRTUAL_FACTORY;
     }
 
