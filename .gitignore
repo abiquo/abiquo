@@ -12,3 +12,9 @@ database/test/kinton-schema-test.sql
 bin-debug
 client/swf/src/main/resources/config/client-config.xml
 client/swf/src/main/resources/themes
+*~
+api/test-output/
+server/test-output/
+virtualfactory/test-output/
+
+
