@@ -161,7 +161,13 @@
              **/
             private function validateForm():void
             {
-                if (rackInput.selectedIndex > -1 && nameInput.text.length > 0 && ipInput.text.length > 0 && hypervisorTypeInput.selectedIndex > -1 && hypervisorPortInput.text.length > 0)
+                if (rackInput.selectedIndex > -1 
+                && nameInput.text.length > 0 
+                && ipInput.text.length > 0 
+                && hypervisorTypeInput.selectedIndex > -1 
+                && hypervisorPortInput.text.length > 0
+                && userInput.text.length > 0
+                && passwordInput.text.length > 0)
                     acceptButton.enabled = true;
 
                 else
@@ -334,17 +340,21 @@
 
         <mx:FormItem 
             width="80%"
+            required="true"
             label="@Resource(bundle='Infrastructure', key='LABEL_USER')">
             <mx:TextInput id="userInput"
-                width="100%" height="20"/>
+                width="100%" height="20"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem 
             width="80%"
+            required="true"
             label="@Resource(bundle='Infrastructure', key='LABEL_PASSWORD')">
             <mx:TextInput id="passwordInput"
                 width="100%" height="20"
-                displayAsPassword="true"/>
+                displayAsPassword="true"
+                change="validateForm()"/>
         </mx:FormItem>
 
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_DATASTORES')">
