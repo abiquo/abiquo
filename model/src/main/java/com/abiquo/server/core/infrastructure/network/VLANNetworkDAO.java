@@ -99,27 +99,6 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    // private final static String VLAN_TAG_USED = "SELECT vlan_tag " //
-    // + "FROM vlan_network vn, " //
-    // + "vlan_network_assignment vna " //
-    // + "WHERE vn.vlan_network_id = vna.vlan_network_id " + //
-    // "AND vna.idRack = :idRack";
-
-    // FIXME named parameter idRack is not working !!!!
-    private final static String VLAN_TAG_USED = "SELECT vn FROM " //
-        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
-        + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
-        + "WHERE vn.id = vna.vlanNetwork.id " + //
-        "AND vna.rack.id = :idRack ";
-
-    // FIXME named parameter idRack is not working !!!!
-    private final static String VLAN_ID_TAG_USED = "SELECT vn.id FROM " //
-        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
-        + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
-        + "WHERE vna.rack.id = :idRack " + //
-
-        "AND vn.id = vna.vlanNetwork.id ";
-
     public List<Integer> getVLANsIdUsedInRack(Rack rack)
     {
         String idRack = String.valueOf(rack.getId());
@@ -136,12 +115,6 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
         return query.list();
     }
-
-    private final static String PUBLIC_VLAN_NETWORKS_BY_RACK = "SELECT vlan " //
-        + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, " //
-        + "com.abiquo.server.core.infrastructure.Rack rack " //
-        + "WHERE vlan.vlan_network_id = rack.datacenter.network.networkId " //
-        + "AND rack.idRack = :idRack";
 
     public List<VLANNetwork> findPublicVLANNetworksByRack(Rack rack)
     {
@@ -161,4 +134,17 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
+    private final String GET_VLAN_DATACENTER =
+        "SELECT dc " //
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " // 
+            + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
+            + "WHERE net.id = vlan.network.id AND vlan.id = :id";
+
+    public boolean isPublic(VLANNetwork vlan)
+    {
+        Query query = getSession().createQuery(GET_VLAN_DATACENTER);
+        query.setParameter("id", vlan.getId());
+
+        return query.uniqueResult() != null;
+    }
 }
