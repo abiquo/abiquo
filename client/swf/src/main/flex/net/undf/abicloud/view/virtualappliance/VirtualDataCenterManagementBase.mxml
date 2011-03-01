@@ -319,13 +319,25 @@
              */
             private function askVirtualApplianceDeletion(event:Event = null):void
             {
-                AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
+                if(virtualApplianceList.selectedVirtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_DELETING_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }else{
+                
+                	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
                                         Alert.YES | Alert.NO, virtualApplianceDeletionResponseHandler);
+                }
             }
 
             /**
