@@ -271,8 +271,16 @@
                                                                                     "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
                                             Alert.OK,
                                             null);
-                }
-                else
+                }else if(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }else
                 {
                     dispatchEvent(new Event("virtualApplianceDrawToolPowerOnOff"));
                 }
@@ -294,8 +302,8 @@
                                                                                     "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
                                             Alert.OK,
                                             null);
-                }
-                else
+                
+                }else
                 {
                     dispatchEvent(new Event("virtualApplianceDrawToolApplyChanges"));
                 }

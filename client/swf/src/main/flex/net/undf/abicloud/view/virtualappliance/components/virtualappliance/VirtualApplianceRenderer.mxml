@@ -72,8 +72,16 @@
              **/
             private function onClickPowerOnOffButton():void
             {
-                if (!this._virtualAppliance.nodes || this._virtualAppliance.nodes.length == 0)
-                {
+                if(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED){
+                	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_APPLY_CHANGES_NEEDED_TEXT"),
+                                            Alert.OK,
+                                            null);
+                }else if (!this._virtualAppliance.nodes || this._virtualAppliance.nodes.length == 0){
                     //Before POWERING ON or OFF, we need to retrieve the list of nodes for this Virtual Appliance
                     var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUALAPPLIANCE_NODES);
                     event.virtualAppliance = this._virtualAppliance;
@@ -82,8 +90,7 @@
                     //Lets know when the nodes are successfully retrieved
                     AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_NODES_RETRIEVED,
                                                                                          onVirtualApplianceNodesRetrieved);
-                }
-                else
+                }else
                 {
                     powerOnOffVirtualAppliance();
                 }
