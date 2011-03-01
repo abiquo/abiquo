@@ -34,6 +34,7 @@ import com.abiquo.virtualfactory.model.VirtualDisk;
 import com.abiquo.virtualfactory.model.VirtualDiskType;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
+import com.abiquo.virtualfactory.repositorymanager.RepositoryManagerException;
 import com.abiquo.virtualfactory.repositorymanager.RepositoryManagerStub;
 import com.xensource.xenapi.Host;
 import com.xensource.xenapi.Network;
@@ -472,31 +473,49 @@ public class XenServerMachine extends AbsVirtualMachine
         String imagePath = config.getVirtualDiskBase().getImagePath();
         String destination = config.getMachineId().toString() + DISK_FILE_EXTENSION;
 
-        repositoryManager.copy(imagePath, hypervisor.getAbiquoRepositoryID() + "/" + destination);
+        try
+        {
+            repositoryManager.copy(imagePath, hypervisor.getAbiquoRepositoryID() + "/"
+                + destination);
 
-        // Rescan the repository to add the copied image
-        SR sr = SR.getByUuid(hypervisor.getConn(), hypervisor.getAbiquoRepositoryID());
-        sr.scan(hypervisor.getConn());
+            // Rescan the repository to add the copied image
+            SR sr = SR.getByUuid(hypervisor.getConn(), hypervisor.getAbiquoRepositoryID());
+            sr.scan(hypervisor.getConn());
 
-        // The copied image has the same UUID than the machine UUID
-        VDI vdi = VDI.getByUuid(hypervisor.getConn(), config.getMachineId().toString());
+            // The copied image has the same UUID than the machine UUID
+            VDI vdi = VDI.getByUuid(hypervisor.getConn(), config.getMachineId().toString());
 
-        // Copy the image to its target repository
-        SR deploySR = getDeployRepository(config.getVirtualDiskBase());
+            // Copy the image to its target repository
+            SR deploySR = getDeployRepository(config.getVirtualDiskBase());
 
-        LOGGER.debug("Moving disk from Abiquo Repository to XenServer {} Repository...", deploySR
-            .getNameLabel(hypervisor.getConn()));
+            LOGGER.debug("Moving disk from Abiquo Repository to XenServer {} Repository...",
+                deploySR.getNameLabel(hypervisor.getConn()));
 
-        VDI newVDI = vdi.copy(hypervisor.getConn(), deploySR);
-        newVDI.setNameLabel(hypervisor.getConn(), config.getMachineName());
+            VDI newVDI = vdi.copy(hypervisor.getConn(), deploySR);
+            newVDI.setNameLabel(hypervisor.getConn(), config.getMachineName());
 
-        LOGGER.debug("Virtual Disk Image was moved and has UUID: "
-            + newVDI.getUuid(hypervisor.getConn()));
+            LOGGER.debug("Virtual Disk Image was moved and has UUID: "
+                + newVDI.getUuid(hypervisor.getConn()));
 
-        // Destroy the source VDI (it is not needed anymore)
-        vdi.destroy(hypervisor.getConn());
+            // Destroy the source VDI (it is not needed anymore)
+            vdi.destroy(hypervisor.getConn());
 
-        return newVDI;
+            return newVDI;
+        }
+        catch (RepositoryManagerException ex)
+        {
+            // RepositoryManagerException are controlled exception
+            throw ex;
+        }
+        catch (Exception ex)
+        {
+            // Scan failure exceptions and exceptions due to corrupt SRs
+            String msg =
+                String.format("Could not copy the image [%s] to the selected datastore."
+                    + " Please, verify all Storage Repositories are available.", imagePath);
+
+            throw new Exception(msg);
+        }
     }
 
     /**
