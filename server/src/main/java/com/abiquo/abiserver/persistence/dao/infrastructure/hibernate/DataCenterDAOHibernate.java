@@ -67,15 +67,24 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
 
     private final static String GET_RACKS_BY_DATACENTER = "DATACENTER.GET_RACKS_BY_DATACENTER";
 
-//    private static final String SUM_VM_RESOURCES =
-//        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-//            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
-//            + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
+    // private static final String SUM_VM_RESOURCES =
+    // "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
+    // + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
+    // +
+    // " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     private static final String SUM_STORAGE_RESOURCES =
-        "select sum(r.limitResource) from volume_management vm, storage_pool sp, remote_service rs, rasd_management rm, virtualdatacenter vdc, rasd r "
-            + " where vm.idStorage = sp.idStorage and sp.idRemoteService = rs.idRemoteService and vm.idManagement = rm.idManagement and rm.idVirtualDataCenter = vdc.idVirtualDataCenter and rm.idResource= r.instanceID "
-            + " and rs.idDatacenter = :datacenterId and vdc.idEnterprise=:enterpriseId";
+        "select sum(r.limitResource) "
+            + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
+            + "where "
+            + "vm.idManagement = rm.idManagement "
+            + "and rm.idResource = r.instanceID "
+            + "and vm.idStorage = sp.idStorage " 
+            + "and sp.idStorageDevice = sd.id "
+            + "and sd.idDataCenter = :datacenterId "
+            + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+            + "and vdc.idEnterprise = :enterpriseId"
+            ;
 
     private static final String COUNT_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "
@@ -209,7 +218,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<RackHB> getRacks(Integer datacenterId, String filters)
+    public ArrayList<RackHB> getRacks(final Integer datacenterId, final String filters)
     {
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final Query query = session.getNamedQuery(GET_RACKS_BY_DATACENTER);
@@ -223,7 +232,8 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
     private final static Long MB_TO_BYTES = 1024l * 1024l;
 
     @Override
-    public ResourceAllocationLimitHB getCurrentResourcesAllocated(int datacenterId, int enterpriseId)
+    public ResourceAllocationLimitHB getCurrentResourcesAllocated(final int datacenterId,
+        final int enterpriseId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -242,19 +252,16 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         // Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
-            (BigDecimal) session.createSQLQuery(SUM_STORAGE_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigDecimal) session.createSQLQuery(SUM_STORAGE_RESOURCES).setParameter("datacenterId",
+                datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) session.createSQLQuery(COUNT_IP_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) session.createSQLQuery(COUNT_IP_RESOURCES).setParameter("datacenterId",
+                datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger vlans =
-            (BigInteger) session.createSQLQuery(COUNT_VLAN_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) session.createSQLQuery(COUNT_VLAN_RESOURCES).setParameter("datacenterId",
+                datacenterId).setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         ResourceAllocationLimitHB limits = new ResourceAllocationLimitHB();
 
