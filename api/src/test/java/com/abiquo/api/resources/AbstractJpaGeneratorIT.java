@@ -40,7 +40,7 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
     }
-
+    
     protected ClientResponse get(String uri, String username, String password)
     {
         String basicAuth = basicAuth(username, password);

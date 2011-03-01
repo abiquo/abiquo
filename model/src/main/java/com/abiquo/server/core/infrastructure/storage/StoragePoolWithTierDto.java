@@ -4,12 +4,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "storagePool")
-public class StoragePoolDto extends SingleResourceTransportDto
+@XmlRootElement(name = "storagePoolWithTier")
+public class StoragePoolWithTierDto extends SingleResourceTransportDto
 {
     
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/storagepooldto+xml";
+    public static final String MEDIA_TYPE = "application/storagepoolwithtierdto+xml";
+    
     private String idStorage;
 
     public String getIdStorage()
@@ -81,5 +82,20 @@ public class StoragePoolDto extends SingleResourceTransportDto
     {
         this.enabled = enabled;
     }
+    
+    private TierDto tier;
+    
+    public void setTier(TierDto tier)
+    {
+        this.tier = tier;
+    }
+
+    public TierDto getTier()
+    {
+        return tier;
+    }
+
+
+    
     
 }

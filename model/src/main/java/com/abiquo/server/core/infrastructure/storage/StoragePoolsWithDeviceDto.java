@@ -32,19 +32,19 @@ import com.abiquo.model.transport.WrapperDto;
 /**
  * Represent a collection of pools
  */
-@XmlRootElement(name = "storagePools")
-public class StoragePoolsDto extends WrapperDto<StoragePoolDto>
+@XmlRootElement(name = "storagePoolsWithDevice")
+public class StoragePoolsWithDeviceDto extends WrapperDto<StoragePoolWithDeviceDto>
 {
     private static final long serialVersionUID = 1L;
-    public static final String MEDIA_TYPE = "application/storagepoolsdto+xml";
+    public static final String MEDIA_TYPE = "application/storagepoolswithdevicedto+xml";
 
     @Override
-    @XmlElement(name = "storagePool")
-    public List<StoragePoolDto> getCollection()
+    @XmlElement(name = "storagePoolWithDevice")
+    public List<StoragePoolWithDeviceDto> getCollection()
     {
         if (collection == null)
         {
-            collection = new ArrayList<StoragePoolDto>();
+            collection = new ArrayList<StoragePoolWithDeviceDto>();
         }
         return collection;
     }

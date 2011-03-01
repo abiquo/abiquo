@@ -98,6 +98,12 @@ public class AbstractAPIStub
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).get();
     }
+    
+    protected ClientResponse get(final String uri, final String mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).get();
+    }
 
     protected ClientResponse post(final String uri, final Object dto)
     {
