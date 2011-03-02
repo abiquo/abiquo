@@ -29,7 +29,7 @@ public enum StorageTechnologyType
 
     LVM(8180, 3260),
 
-    NETAPP(8280, 3260);
+    NETAPP(80, 3260);
 
     private Integer defaultManagementPort;
 
