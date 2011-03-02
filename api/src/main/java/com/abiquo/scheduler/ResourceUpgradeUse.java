@@ -198,8 +198,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                        .getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
 
                     vlanNetworkDao.flush();
@@ -218,7 +218,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
         else
         {
-            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
+            log
+                .debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
             for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
             {
                 VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
@@ -231,8 +232,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
 
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                        .getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
                     final NetworkAssignment nb =
                         new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -274,13 +275,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             if (!assigned)
             {
-                if (vlanNetwork.getTag() != null)
+                if (!vlanNetworkDao.isPublic(vlanNetwork))
                 {
                     vlanNetwork.setTag(null);
                     vlanNetworkDao.flush();
                     // vlanNetworkDao.persist(vlanNetwork);
                 }
+
                 NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
+
                 if (na != null)
                 {
                     netAssignDao.remove(na);
@@ -305,11 +308,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu());
+                .getVirtualCpusUsed()
+                + used.getCpu());
 
         final int newRam =
             (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam());
+                .getVirtualRamUsedInMb()
+                + used.getRam());
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -318,7 +323,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes()
+                + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
