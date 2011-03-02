@@ -24,7 +24,6 @@ package com.abiquo.abiserver.commands.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -478,13 +477,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         Transaction transaction = null;
 
         Integer virtualApplianceId = virtualAppliance.getId();
+
         try
         {
-            // Deletes only if the resource is deployed and not all the VM are crashed
-            if (mustUndeploy(StateEnum.valueOf(virtualAppliance.getState().getDescription())))
-            {
-                basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
-            }
+            basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
 
             if (basicResult.getSuccess())
             {
@@ -538,7 +534,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     {
         switch (state)
         {
-            case APPLY_CHANGES_NEEDED:
             case PAUSED:
             case POWERED_OFF:
             case REBOOTED:
@@ -1596,6 +1591,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
         BasicResult basicResult = new BasicResult();
         basicResult.setSuccess(true);
+
+        if (!mustUndeploy(virtualAppliance.getState().toEnum()))
+        {
+            errorManager.reportError(resourceManager, dataResult,
+                "shutdownVirtualApplianceInvalidState", virtualAppliance.getId(), "Invalid state "
+                    + virtualAppliance.getState());
+            dataResult.setData(virtualAppliance);
+
+            return dataResult;
+        }
 
         // getting the nodes from the virtualappliance, because it comes without
         // them
