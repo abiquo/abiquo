@@ -24,6 +24,7 @@ package com.abiquo.abiserver.pojo.infrastructure;
 import java.util.HashSet;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.server.core.enumerator.HypervisorType;
@@ -132,8 +133,16 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
     {
         this.password = password;
     }
-
+    
     public HypervisorHB toPojoHB()
+    {
+    	PhysicalMachine physicalMachine = (PhysicalMachine) super.getAssignedTo();
+    	
+    	return toPojoHB(((physicalMachine) == null) ? null : physicalMachine
+                .toPojoHB());
+    }
+
+    public HypervisorHB toPojoHB(PhysicalmachineHB physicalMachine)
     {
         HypervisorHB hyperVisorHB = new HypervisorHB();
 
@@ -144,9 +153,7 @@ public class HyperVisor extends InfrastructureElement implements IPojo<Hyperviso
         hyperVisorHB.setIpService(ipService);
         hyperVisorHB.setPort(port);
 
-        PhysicalMachine physicalMachine = (PhysicalMachine) super.getAssignedTo();
-        hyperVisorHB.setPhysicalMachine(((physicalMachine) == null) ? null : physicalMachine
-            .toPojoHB());
+        hyperVisorHB.setPhysicalMachine(physicalMachine);
 
         hyperVisorHB.setType(HypervisorType.fromValue(type.getName()));
         hyperVisorHB.setUser(user);

@@ -149,18 +149,14 @@ public class InfrastructureService
     {
 
         InfrastructureCommand command = proxyCommand(session);
-        DataResult<ArrayList<PhysicalMachine>> result =
-            new DataResult<ArrayList<PhysicalMachine>>();
+        DataResult<List<PhysicalMachine>> result = new DataResult<List<PhysicalMachine>>();
         try
         {
-            List<PhysicalmachineHB> commandResult =
+            List<PhysicalMachine> commandResult =
                 command.getPhysicalMachinesByRack(session, rackId, filters);
 
-            result.setData(new ArrayList<PhysicalMachine>());
-            for (PhysicalmachineHB singleResult : commandResult)
-            {
-                result.getData().add(singleResult.toPojo());
-            }
+            result.setData(commandResult);
+            
             result.setSuccess(Boolean.TRUE);
 
         }
