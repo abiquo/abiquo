@@ -24,6 +24,8 @@ package com.abiquo.api.services;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
@@ -144,6 +146,12 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
+        if(!emailIsValid(user.getEmail()))
+        {
+        	errors.add(APIError.EMAIL_IS_INVALID);
+        	flushErrors();
+        }
+        
 
         repo.insertUser(user);
 
@@ -175,7 +183,12 @@ public class UserService extends DefaultApiService
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());
         old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
-
+        
+        if(!emailIsValid(user.getEmail()))
+        {
+        	errors.add(APIError.EMAIL_IS_INVALID);
+        	flushErrors();
+        }
         if (user.searchLink(RoleResource.ROLE) != null)
         {
             old.setRole(findRole(user));
@@ -195,10 +208,15 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
+        
 
-        repo.updateUser(old);
+        return updateUser(old);
+    }
 
-        return old;
+    public User updateUser(User user) {
+        repo.updateUser(user);
+
+        return user;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -295,5 +313,16 @@ public class UserService extends DefaultApiService
         {
             throw new AccessDeniedException("");
         }
+    }
+    private Boolean emailIsValid(String email)
+    {
+    	final Pattern pattern;
+    	final Matcher matchers;
+    	final String EMAIL_PATTERN = 
+    		"[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@" +
+    		"(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
+    	pattern = Pattern.compile(EMAIL_PATTERN);
+    	matchers = pattern.matcher(email);
+    	return matchers.matches();
     }
 }

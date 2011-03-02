@@ -95,7 +95,7 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     @BeforeClass
     public static void setUpServer() throws Exception
-    {
+   {
         ClientConfig conf = new ClientConfig();
         conf.readTimeout(CLIENT_TIMEOUT);
         client = new RestClient(conf);
