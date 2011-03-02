@@ -566,6 +566,12 @@
 	/**custom property**/
 	source:Embed("/assets/application/icons/red_ball.png");
  }
+
+ .genericShared
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/yellow_ball.png");
+ }
  
  .crashedIcon{
  	source:Embed("/assets/application/icons/crashed.png");
