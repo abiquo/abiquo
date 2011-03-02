@@ -1651,15 +1651,18 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idVirtualImageConversion` int(1) unsigned,
   `idDiskStatefulConversion` int(1) unsigned,
   `version_c` int(11) default 0,
+  `idTier` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
   KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
   KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
   KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
+  KEY `idTier_FK4` (`idTier`),
   CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
   CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE
+  CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
