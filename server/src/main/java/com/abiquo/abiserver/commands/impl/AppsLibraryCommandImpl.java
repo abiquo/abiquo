@@ -754,14 +754,19 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause);
         }
 
-        if (vimage.getShared() == 1
-            && user.getEnterpriseHB().getIdEnterprise() != vimage.getIdEnterprise())
+        if (vimage.getShared() == 1)
         {
-            final String cause =
-                String
+            Integer userEnterpriseId = user.getEnterpriseHB().getIdEnterprise();
+            Integer vimageEnterpriseId = vimage.getIdEnterprise();
+            
+            if(userEnterpriseId.intValue() != vimageEnterpriseId.intValue())
+            {                
+                final String cause =
+                    String
                     .format("Only users from the original enterprise can delete a shared virtual image ");
-
-            throw new AppsLibraryCommandException(cause);
+                
+                throw new AppsLibraryCommandException(cause);
+            }            
         }
 
         // final String formatUri = vimage.getDiskFormatTypeHB().getUri();
