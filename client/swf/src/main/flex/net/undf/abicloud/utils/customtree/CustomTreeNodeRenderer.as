@@ -111,16 +111,6 @@ package net.undf.abicloud.utils.customtree
                 //Setting the proper Label text
                 this._label.text = this._customTreeNode.labelText;
                 
-                //In case of Tier, add the enable/disable state to the label
-                /* if(this._customTreeNode.item is Tier){
-                	if(Tier(this._customTreeNode.item).enable){
-                		this._label.text += " (enable)";
-                	}else{
-                		this._label.text += " (disable)";
-                	}
-                	this._label.enabled = Tier(this._customTreeNode.item).enable;
-                } */
-
                 //Setting the proper node icon
                 if (this._customTreeNode.customTreeDataDescriptor.isBranch(this._customTreeNode.item))
                 {
