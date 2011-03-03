@@ -133,6 +133,7 @@ public class Allocator implements IAllocator
         Machine targetMachine = null;
 
         int retry = 0;
+        String errorCause = null;
         while (targetMachine == null && retry < RETRIES_AFTER_CHECK)
         {
             retry++;
@@ -155,22 +156,25 @@ public class Allocator implements IAllocator
                 {
                     log.error("Discarted machine [{}] : Not Enough Resources [{}]",
                         targetMachine.getName(), e);
+                    
+                    errorCause = String.format("Machine : %s error: %s", targetMachine.getName(), e.getMessage());
                     targetMachine = null;
                 }
             }
             else
             {
-                log.error("Discarted machine [{}] : Machine is not MANAGED",
-                    targetMachine.getName());
+                log.error("Machine [{}] is not MANAGED", targetMachine.getName());
+                errorCause = String.format("Machine : %s error: %s", targetMachine.getName(), "is not MANAGED");
                 targetMachine = null;
+
             }
         }// retry until check
 
         // SOME CANDIDATE ?
         if (targetMachine == null)
         {
-            final String cause =
-                "Allocator can not select a machine on the current virtual datacenter";
+            final String cause = String.format("Allocator can not select a machine on the current virtual datacenter. " +
+            		"Last candidate error : %s.",  errorCause != null ? errorCause : "can not be confirmed as MANAGED.");            
             throw new NotEnoughResourcesException(cause);
         }
 

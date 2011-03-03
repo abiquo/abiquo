@@ -66,7 +66,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
         }
         catch (LimitExceededException limite)
         {
@@ -75,19 +76,22 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceAllocationException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
         }
         catch (AllocatorException e)
         {
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
         }
         catch (Exception e)
         {
             e.printStackTrace(); // FIXME delete
 
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
         }
         finally
         {
@@ -107,7 +111,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()),
+                e.getMessage())));
         }
         finally
         {
@@ -126,11 +131,21 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(e.getMessage()));
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
+                e.getMessage())));
         }
         finally
         {
             flushErrors();
         }
     }
+
+    private String virtualMachineInfo(Integer vmid)
+    {
+        VirtualMachine vm = vmachineDao.findById(vmid);
+
+        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
+            vm.getUuid());
+    }
+
 }

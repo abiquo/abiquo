@@ -43,7 +43,9 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.URIResolver;
 
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
@@ -141,7 +143,12 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
         else if (message.startsWith("ALLOC-0"))
         {
-            throw new NotEnoughResourcesException(message);
+            // trace to system with all the detailed cause.
+            TracerFactory.getTracer().log(SeverityType.NORMAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_POWERON, message, Platform.SYSTEM_PLATFORM);
+
+            // the user can't see the details of the detailed error cause.
+            throw new NotEnoughResourcesException("There isn't enough resources to create the virtual machine.");
         }
         else
         {

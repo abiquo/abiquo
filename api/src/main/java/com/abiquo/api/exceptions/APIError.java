@@ -206,7 +206,7 @@ public enum APIError
 
     public APIError addCause(String cause)
     {
-        this.message = String.format("%s.\ncaused by:%s", this.message, cause);
+        this.message = cause;//String.format("%s.\ncaused by:%s", this.message, cause);
         return this;
     }
 
