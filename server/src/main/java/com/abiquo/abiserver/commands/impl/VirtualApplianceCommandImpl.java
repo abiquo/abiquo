@@ -480,8 +480,24 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         try
         {
-            basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
-
+            Boolean needToShutdown = Boolean.FALSE;
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            virtualappHBPojo =
+                (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
+            if (mustUndeploy(virtualappHBPojo.getState()))
+            {
+                needToShutdown = Boolean.TRUE;
+            }
+            transaction.commit();
+            session = null;
+            transaction = null;
+            
+            if (needToShutdown)
+            {
+                basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
+            }
+            
             if (basicResult.getSuccess())
             {
                 session = HibernateUtil.getSession();
