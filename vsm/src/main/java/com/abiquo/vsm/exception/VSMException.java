@@ -37,7 +37,7 @@ public class VSMException extends WebApplicationException
     private String message;
 
     /**
-     * Creates a new <code>ResourceException</code>.
+     * Creates a new <code>VSMException</code>.
      * 
      * @param message The error message.
      */
@@ -48,7 +48,7 @@ public class VSMException extends WebApplicationException
     }
 
     /**
-     * Creates a new <code>ResourceException</code>.
+     * Creates a new <code>VSMException</code>.
      * 
      * @param message The error message.
      * @param cause The exception cause.
@@ -60,7 +60,7 @@ public class VSMException extends WebApplicationException
     }
 
     /**
-     * Creates a new <code>ResourceException</code>.
+     * Creates a new <code>VSMException</code>.
      * 
      * @param status The error status code.
      * @param message The error message.
@@ -72,7 +72,7 @@ public class VSMException extends WebApplicationException
     }
 
     /**
-     * Creates a new <code>ResourceException</code>.
+     * Creates a new <code>VSMException</code>.
      * 
      * @param status The error status code.
      * @param message The error message.

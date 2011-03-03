@@ -27,12 +27,15 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
+@SuppressWarnings("unchecked")
 @Repository("jpaVolumeManagementDAO")
 public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
 {
@@ -99,6 +102,13 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
 
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
+        
+    public List<VolumeManagement> getVolumesByPool(StoragePool sp)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("storagePool",
+            sp));
+        return criteria.list();
+    }
 
     private <T> List<T> getSQLQueryResults(Session session, Query query, Class<T> objectClass,
         int idFieldPosition)
@@ -117,4 +127,5 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
 
         return result;
     }
+
 }

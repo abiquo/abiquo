@@ -34,6 +34,7 @@ package net.undf.abicloud.utils.customtree
     
     import net.undf.abicloud.controller.ThemeHandler;
 
+
     public class CustomTreeNodeRenderer extends HBox implements IListItemRenderer
     {
 
@@ -109,7 +110,7 @@ package net.undf.abicloud.utils.customtree
             {
                 //Setting the proper Label text
                 this._label.text = this._customTreeNode.labelText;
-
+                
                 //Setting the proper node icon
                 if (this._customTreeNode.customTreeDataDescriptor.isBranch(this._customTreeNode.item))
                 {

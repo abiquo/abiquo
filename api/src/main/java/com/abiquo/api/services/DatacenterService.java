@@ -42,6 +42,7 @@ import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 
 @Service
 @Transactional(readOnly = true)
@@ -91,6 +92,13 @@ public class DatacenterService extends DefaultApiService
         DatacenterDto responseDto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
 
+        // Add the default tiers
+        for (int i=1; i<=4; i++)
+        {
+        	Tier tier = new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
+        	repo.insertTier(tier);
+        }
+        
         // Add the Remote Services in database in case are informed in the request
         if (dto.getRemoteServices() != null)
         {

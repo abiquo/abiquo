@@ -41,6 +41,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.api.util.RESTLinkBuildersImpl;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 import com.google.common.collect.Iterables;
 
 public class RESTHandler extends CheckLocationHeaderHandler
@@ -77,6 +78,7 @@ public class RESTHandler extends CheckLocationHeaderHandler
         createRESTBuilder(context, builder);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void handleResponse(MessageContext context) throws Throwable
     {
@@ -91,7 +93,10 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 SingleResourceTransportDto resource = (SingleResourceTransportDto) entity;
 
                 ResponseBuilder builder = new ResponseBuilderImpl();
-                builder.location(new URI(resource.getEditLink().getHref()));
+                if (!(entity instanceof WrapperDto))
+                {
+                    builder.location(new URI(resource.getEditLink().getHref()));
+                }
                 builder.entity(resource);
                 builder.status(HttpServletResponse.SC_CREATED);
 

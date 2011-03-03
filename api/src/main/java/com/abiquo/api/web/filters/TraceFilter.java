@@ -82,7 +82,7 @@ public class TraceFilter implements Filter
     {
         String message = String.format("Method: %s, Path: %s, Query: %s", method, path, query);
 
-        LOGGER.debug("Incoming API request. " + message);
+        LOGGER.trace("Incoming API request. " + message);
         // traceInfo(EventType.API_REQUEST, message);
     }
 
@@ -101,7 +101,7 @@ public class TraceFilter implements Filter
             String.format("Method: %s, Path: %s, Query: %s, Status code: %d", method, path, query,
                 status);
 
-        LOGGER.info("Outcoming API request. " + message);
+        LOGGER.trace("Outcoming API request. " + message);
         // traceInfo(EventType.API_RESPONSE, message);
     }
 

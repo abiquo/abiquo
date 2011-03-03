@@ -66,9 +66,17 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
     private final static String GET_RACKS_BY_DATACENTER = "DATACENTER.GET_RACKS_BY_DATACENTER";
 
     private static final String SUM_STORAGE_RESOURCES =
-        "select sum(r.limitResource) from volume_management vm, storage_pool sp, remote_service rs, rasd_management rm, virtualdatacenter vdc, rasd r "
-            + " where vm.idStorage = sp.idStorage and sp.idRemoteService = rs.idRemoteService and vm.idManagement = rm.idManagement and rm.idVirtualDataCenter = vdc.idVirtualDataCenter and rm.idResource= r.instanceID "
-            + " and rs.idDatacenter = :datacenterId and vdc.idEnterprise=:enterpriseId";
+        "select sum(r.limitResource) "
+            + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
+            + "where "
+            + "vm.idManagement = rm.idManagement "
+            + "and rm.idResource = r.instanceID "
+            + "and vm.idStorage = sp.idStorage " 
+            + "and sp.idStorageDevice = sd.id "
+            + "and sd.idDataCenter = :datacenterId "
+            + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+            + "and vdc.idEnterprise = :enterpriseId"
+            ;
 
     private static final String COUNT_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "
@@ -203,7 +211,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
 
     @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<RackHB> getRacks(Integer datacenterId, String filters)
+    public ArrayList<RackHB> getRacks(final Integer datacenterId, final String filters)
     {
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final Query query = session.getNamedQuery(GET_RACKS_BY_DATACENTER);

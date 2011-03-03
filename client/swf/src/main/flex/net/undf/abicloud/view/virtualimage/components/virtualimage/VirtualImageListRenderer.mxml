@@ -52,41 +52,11 @@
                 		onSelectedToStatefulCheckboxChange();
                 	}
                 }
-                
-
-               /*  this._nodeIcon = "";
-                this._nodeName = "";
-                this._nodeSize = 0;
-
-                //Setting fields to display
-                if (data is NodeVirtualImage)
-                {
-                    this._node = data as NodeVirtualImage;
-                    this._nodeName = this._node.name;
-                    this._nodeIcon = (this._node.virtualImage.icon) ? this._node.virtualImage.icon.path : null;
-                    this._nodeSize = this._node.virtualImage.hdRequired;
-                    ;
-                } */
             }
 
             private function onSelectedToStatefulCheckboxChange():void
             {
-                /* var nodeListItemEvent:NodeListItemEvent;
-                if (selectedToStatefulCheckbox.selected)
-                {
-                    this._node.virtualImage.stateful = VirtualImage.TYPE_STATEFUL;
-                    nodeListItemEvent = new NodeListItemEvent(NodeListItemEvent.NODE_LIST_ITEM_SELECTED_TO_STATEFUL,
-                                                              true);
-                }
-                else
-                {
-                    this._node.virtualImage.stateful = VirtualImage.TYPE_STATELESS;
-                    nodeListItemEvent = new NodeListItemEvent(NodeListItemEvent.NODE_LIST_ITEM_UNSELECTED_TO_STATEFUL,
-                                                              true);
-                }
-
-                dispatchEvent(nodeListItemEvent); */
-				var virtualImageEvent:VirtualImageEvent;
+              	var virtualImageEvent:VirtualImageEvent;
 				if(selectedToStatefulCheckbox.selected){
 					virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.VIRTUAL_IMAGE_CHECKED);
 					

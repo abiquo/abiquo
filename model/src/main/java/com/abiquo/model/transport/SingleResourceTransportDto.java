@@ -95,9 +95,12 @@ public abstract class SingleResourceTransportDto implements Serializable
 
         for (RESTLink link : getLinks())
         {
-            if (link.getRel().equals(rel))
+            if (link.getRel() != null)
             {
-                return link;
+                if (link.getRel().equals(rel))
+                {
+                    return link;
+                }
             }
         }
         return null;

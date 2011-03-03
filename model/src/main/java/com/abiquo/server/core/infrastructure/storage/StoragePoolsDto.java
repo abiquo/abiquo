@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -29,15 +30,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Represent a collection of racks
+ * Represent a collection of pools
  */
 @XmlRootElement(name = "storagePools")
 public class StoragePoolsDto extends WrapperDto<StoragePoolDto>
 {
+    private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/storagepoolsdto+xml";
+
     @Override
     @XmlElement(name = "storagePool")
     public List<StoragePoolDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<StoragePoolDto>();
+        }
         return collection;
     }
 }

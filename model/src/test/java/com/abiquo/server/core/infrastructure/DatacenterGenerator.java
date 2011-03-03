@@ -24,6 +24,8 @@ import java.util.List;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.TierGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -31,6 +33,7 @@ public class DatacenterGenerator extends DefaultEntityGenerator<Datacenter>
 {
 
     private NetworkGenerator networkGenerator;
+    private TierGenerator tierGenerator;
 
     public DatacenterGenerator(SeedGenerator seed)
     {
@@ -65,7 +68,7 @@ public class DatacenterGenerator extends DefaultEntityGenerator<Datacenter>
 
         Datacenter dc = new Datacenter(name, situation);
         dc.setNetwork(networkGenerator.createUniqueInstance());
-
+        
         return dc;
     }
 

@@ -163,9 +163,6 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
 
     /**
      * Method to create the hibernate pojo object
-     * 
-     * @deprecated all the persistence should be throught the api and we don't need this method any
-     *             more
      */
     @Override
     public VirtualDataCenterHB toPojoHB()
