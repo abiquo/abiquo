@@ -14,6 +14,7 @@
         <security:intercept-url pattern="/admin/enterprises/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
         <security:intercept-url pattern="/admin/roles/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
         <security:intercept-url pattern="/admin/statistics/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
+        <security:intercept-url pattern="/admin/**/tiers" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" method="GET" />
         <security:intercept-url pattern="/admin/**" access="ROLE_SYS_ADMIN" />
         <security:intercept-url pattern="/cloud/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
         <security:intercept-url pattern="/config/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />
