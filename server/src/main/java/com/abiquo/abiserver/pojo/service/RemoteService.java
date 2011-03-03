@@ -252,7 +252,9 @@ public class RemoteService implements IPojo<RemoteServiceHB>
 
         if (!StringUtils.isEmpty(serviceMapping))
         {
-            fullURL = UriHelper.appendPathToBaseUri(fullURL, serviceMapping);
+        	if(!serviceMapping.equals("bpm") && !serviceMapping.equals("dhcp")){
+        		fullURL = UriHelper.appendPathToBaseUri(fullURL, serviceMapping);
+        	}	
         }
 
         return fullURL;
