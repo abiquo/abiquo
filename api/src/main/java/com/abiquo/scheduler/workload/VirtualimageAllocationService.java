@@ -278,7 +278,7 @@ public class VirtualimageAllocationService
             }
             catch (PersistenceException e)
             {
-                log.error(String.format("Rack id [%d] can't be used : %s", e.getMessage()));
+                log.error(String.format("Rack id [%d] can't be used : %s", idRackCandidate, e.getMessage()));
 
                 continue;
             }
