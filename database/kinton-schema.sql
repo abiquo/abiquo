@@ -1268,7 +1268,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.infra.vlanIdMax","4094","Maximum value for vlan ID"),
  ("client.infra.useVirtualBox","0","Support (1) or not (0) Virtual Box"),
  ("client.dashboard.dashboardUpdateInterval","30","Time interval in seconds"),
- ("client.infra.defaultHypervisorPassword","voycruzand0elrio","Default Hypervisor password used when creating Physical Machines"),
+ ("client.infra.defaultHypervisorPassword","temporal","Default Hypervisor password used when creating Physical Machines"),
  ("client.infra.defaultHypervisorPort","8889","Default Hypervisor port used when creating Physical Machines"),
  ("client.infra.defaultHypervisorUser","root","Default Hypervisor user used when creating Physical Machines"),
  ("client.storage.volumeMaxSizeValues","1,2,4,8,16,32,64,128,256","Comma separated values, with the allowed sizes when creating or editing a VolumeManagement"),
