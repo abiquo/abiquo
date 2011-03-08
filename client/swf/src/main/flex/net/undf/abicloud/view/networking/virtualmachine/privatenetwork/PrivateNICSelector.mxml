@@ -114,7 +114,11 @@
                 event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
                 event.listRequest = listRequest;
                 event.callback = setAvailablePrivateIPAddresses;
-                dispatchEvent(event);
+                
+                //to avoid a bug, don't dispatch if the vlanNetwork is not selected
+                if(vlanList.selectedItem){                	
+	                dispatchEvent(event);
+                }
             }
 
             public function setAvailablePrivateIPAddresses(list:ArrayCollection,
