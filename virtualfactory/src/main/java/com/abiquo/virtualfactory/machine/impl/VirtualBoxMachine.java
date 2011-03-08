@@ -386,13 +386,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
         catch (VLANException e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + machineName,
                 e);
         }
         catch (MalformedURLException e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + machineName,
                 e);
         }
@@ -433,13 +433,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
         catch (VLANException e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + machineName,
                 e);
         }
         catch (MalformedURLException e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + machineName,
                 e);
         }

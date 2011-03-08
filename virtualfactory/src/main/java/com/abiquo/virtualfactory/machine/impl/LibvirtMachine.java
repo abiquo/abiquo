@@ -1003,7 +1003,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         }
         catch (VLANException e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + getMachineName(),
                 e);
         }
@@ -1039,7 +1039,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         }
         catch (Exception e)
         {
-            throw new VirtualMachineException("An error was occurred when configuring the nerworking for virtual machine :"
+            throw new VirtualMachineException("An error was occurred when configuring the networking for virtual machine :"
                 + getMachineName(),
                 e);
         }
