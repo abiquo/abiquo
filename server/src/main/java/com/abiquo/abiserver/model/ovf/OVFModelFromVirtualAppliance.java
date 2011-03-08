@@ -56,8 +56,10 @@ import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
@@ -65,6 +67,7 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
+import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -608,9 +611,11 @@ public class OVFModelFromVirtualAppliance
     {
         DAOFactory factory = HibernateDAOFactory.instance();
         VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
+        VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
 
         factory.beginConnection();
         VirtualDataCenterHB vdc = vdcDAO.findById(virtualAppliance.getVirtualDataCenter().getId());
+        VirtualappHB persistedVapp = vappDAO.findByIdNamedExtended(virtualAppliance.getId());
 
         AbicloudNetworkType network = vdc.getNetwork();
         AbicloudNetworkType networkToDeploy = new AbicloudNetworkType();
@@ -618,8 +623,9 @@ public class OVFModelFromVirtualAppliance
         VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
 
         List<Integer> listOfVLANidentifiers = new ArrayList<Integer>();
-        for (Node node : virtualAppliance.getNodes())
+        for (NodeHB nodeHB : persistedVapp.getNodesHB())
         {
+            Node node = nodeHB.toPojo();
             NodeVirtualImageHB nvi = ((NodeVirtualImage) node).toPojoHB();
             VirtualmachineHB vmHB = vmDAO.findById(nvi.getVirtualMachineHB().getIdVm());
             for (ResourceManagementHB rasman : vmHB.getResman())
@@ -651,7 +657,7 @@ public class OVFModelFromVirtualAppliance
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
             for (IpPoolManagementHB man : service.getIpPoolManagement())
             {
-                if (man.getVirtualMachine() != null)
+                if (man.getVirtualMachine() != null && man.getVirtualApp().getIdVirtualApp() == virtualAppliance.getId())
                 {
                     IpPoolType rule = new IpPoolType();
                     rule.setConfigureGateway(man.getConfigureGateway());
