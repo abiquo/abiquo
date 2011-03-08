@@ -30,6 +30,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageH
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
+import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -74,7 +75,7 @@ public interface AppsLibraryCommand
      * @param idRepo, if 0, indicate stateful images
      * @param idCategory, if 0 indicate return all the categories
      */
-    List<VirtualimageHB> getVirtualImageByCategoryAndHypervisorCompatible(UserSession userSession,
+    List<VirtualImage> getVirtualImageByCategoryAndHypervisorCompatible(UserSession userSession,
         Integer idEnterprise, Integer idRepo, Integer idCategory, Integer idHypervisorType)
         throws AppsLibraryCommandException;
 

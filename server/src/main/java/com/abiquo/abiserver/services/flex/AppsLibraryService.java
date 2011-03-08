@@ -331,17 +331,9 @@ public class AppsLibraryService
         AppsLibraryCommand proxyService = proxyService(userSession);
         try
         {
-
-            List<VirtualimageHB> vimagesHb =
+            List<VirtualImage> vimages =
                 proxyService.getVirtualImageByCategoryAndHypervisorCompatible(userSession,
                     idEnterprise, idRepo, idCategory, idHypervisorType);
-            List<VirtualImage> vimages = new LinkedList<VirtualImage>();
-
-            for (VirtualimageHB viHb : vimagesHb)
-            {
-                vimages.add(viHb.toPojo());
-
-            }
 
             result.setData(vimages);
             result.setSuccess(true);
@@ -778,15 +770,15 @@ public class AppsLibraryService
         list.setUrl("unused URL"); // TODO missing URL
 
         List<OVFPackage> packs = new LinkedList<OVFPackage>();
-        
-        if(listDto.getOvfPackages() != null)
-        {            
+
+        if (listDto.getOvfPackages() != null)
+        {
             for (OVFPackageDto packDto : listDto.getOvfPackages())
             {
                 packs.add(transform(packDto));
-            }            
+            }
         }
-        
+
         list.setOvfpackages(packs);
         return list;
     }
