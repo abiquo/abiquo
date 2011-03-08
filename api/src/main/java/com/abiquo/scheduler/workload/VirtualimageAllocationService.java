@@ -285,7 +285,7 @@ public class VirtualimageAllocationService
         }
 
         final String msg =
-            "Any rack can be selected: Any have enough physical machine capacity to instantiate the required virtual appliance.";
+            "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance.";
         throw new NotEnoughResourcesException(msg);
     }
 
