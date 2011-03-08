@@ -154,7 +154,7 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarted machine [{}] : Not Enough Resources [{}]",
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
                         targetMachine.getName(), e);
                     
                     errorCause = String.format("Machine : %s error: %s", targetMachine.getName(), e.getMessage());
