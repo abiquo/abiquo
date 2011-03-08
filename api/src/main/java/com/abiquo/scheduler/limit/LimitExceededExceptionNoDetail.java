@@ -19,17 +19,22 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.scheduler.limit;
+package com.abiquo.scheduler.limit;
 
-/**
- * Any requirement, used to check the current limits (when Editing Enterpirse, Datacenter or
- * VirtualDatacenter)
- */
-public class VirtualMachineRequirementsEmpty extends VirtualMachineRequirements
+public class LimitExceededExceptionNoDetail extends LimitExceededException
 {
+    private static final long serialVersionUID = 7377142657394476370L;
 
-    public VirtualMachineRequirementsEmpty()
+    public LimitExceededExceptionNoDetail(LimitExceededException e)
     {
-        super();
+        super(e.getResourcesStatus(), e.getEntity(), e.getRequirements(), e.getActual(), e
+            .getEntityId());
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format("Not enough resources on %s ", this.getEntityId());
+    }
+
 }

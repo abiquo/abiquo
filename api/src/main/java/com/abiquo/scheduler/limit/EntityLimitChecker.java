@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.jms.ResourceAllocationException;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.DefaultEntityWithLimits.LimitStatus;
@@ -33,6 +34,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.client.TracerFactory;
 
@@ -175,55 +177,118 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         throws LimitExceededException
     {
 
+        LimitStatus totalLimitStatus;
+
+        if (statusMap.containsValue(LimitStatus.HARD_LIMIT))// statusMap.keySet().contains(LimitStatus.HARD_LIMIT))
+        {
+            totalLimitStatus = LimitStatus.HARD_LIMIT;
+        }
+        else if (statusMap.containsValue(LimitStatus.SOFT_LIMIT))// (statusMap.keySet().contains(LimitStatus.SOFT_LIMIT))
+        {
+            totalLimitStatus = LimitStatus.SOFT_LIMIT;
+        }
+        else
+        {
+            totalLimitStatus = LimitStatus.OK;
+        }
+
+        if (totalLimitStatus != LimitStatus.OK)
+        {
+            LimitExceededException exc =
+                new LimitExceededException(statusMap, entity, requirements, actual, getEntityIdentifier(entity));
+
+            traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
+        }
+    }
+
+    private void traceLimit(boolean hard, boolean force, T entity, LimitExceededException except)
+    {
         final String entityId = getEntityIdentifier(entity);
 
-        StringBuffer softExceed = new StringBuffer();
-        StringBuffer hardExceed = new StringBuffer();
+        final EventType etype =
+            hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
 
-        for (LimitResource resource : statusMap.keySet())
+        String traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceSystem(entity))
         {
-            LimitStatus status = statusMap.get(resource);
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage, Platform.SYSTEM_PLATFORM);
+                break;
+            default:
+                break;
+        }
 
-            switch (status)
-            {
-                case HARD_LIMIT:
-                    // trace the incident and abort execution
-                    TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
-                        EventType.WORKLOAD_HARD_LIMIT_EXCEEDED,
-                        String.format("%s exceed %s", entityId, resource.name()));
-
-                    hardExceed.append(resource.name()).append(',');
-
-                    break;
-
-                case SOFT_LIMIT:
-                    if (force)
-                    {
-                        // trace the incident but continue
-                        TracerFactory.getTracer().log(SeverityType.WARNING, ComponentType.WORKLOAD,
-                            EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED,
-                            String.format("%s exceed %s", entityId, resource.name()));
-                    }
-                    else
-                    {
-                        // operation will fail until force set to true
-                        softExceed.append(resource.name()).append(',');
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        } // all resources
-
-        String hardLimit = hardExceed.toString();
-        String softLimit = softExceed.toString();
-
-        if (!hardLimit.isEmpty() || !softLimit.isEmpty())
+        traceMessage = String.format("Not enough resources on %s", entityId);
+        switch (traceEnterprise(entity, force))
         {
-            throw new LimitExceededException(statusMap, entity, requirements, actual, entityId);
+            case DETAIL:
+                traceMessage = except.toString();
+            case NO_DETAIL:
+                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                    traceMessage);
+                break;
+            default:
+                break;
+        }
+
+        switch (returnExcption(entity, hard, force))
+        {
+            case DETAIL:
+                throw except;
+
+            case NO_DETAIL:
+                throw new LimitExceededExceptionNoDetail(except);
+
+            default:
+                break;
         }
 
     }
 
+    enum InformationSecurity
+    {
+        DETAIL, NO_DETAIL, IGNORE;
+    }
+
+    private InformationSecurity traceSystem(T entity)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            return InformationSecurity.IGNORE;
+        }
+
+        return InformationSecurity.DETAIL;
+    }
+
+    private InformationSecurity traceEnterprise(T entity, boolean force)
+    {
+        if (entity instanceof VirtualDatacenter)
+        {
+            return force ? InformationSecurity.DETAIL : InformationSecurity.IGNORE;
+        }
+
+        return InformationSecurity.NO_DETAIL;
+    }
+
+    private InformationSecurity returnExcption(T entity, boolean hard, boolean force)
+    {
+
+        if (entity instanceof VirtualDatacenter)
+        {
+            if (hard)
+            {
+                return InformationSecurity.DETAIL;
+            }
+            else
+            {
+                return force ? InformationSecurity.IGNORE : InformationSecurity.DETAIL;
+            }
+        }
+
+        return hard ? InformationSecurity.NO_DETAIL : InformationSecurity.IGNORE;
+    }
 }

@@ -21,11 +21,8 @@
 
 package com.abiquo.abiserver.scheduler.limit.exception;
 
-import java.util.List;
-
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
-import com.abiquo.abiserver.scheduler.limit.ResourceLimitStatus;
-import com.abiquo.abiserver.scheduler.limit.VirtualMachineRequirements;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB;
+import com.abiquo.abiserver.scheduler.limit.EntityLimitChecker.LimitResource;
 
 /**
  * When require to deploy a new VirtualMachien and the ResourceAllocationLimit allowed on the
@@ -33,13 +30,13 @@ import com.abiquo.abiserver.scheduler.limit.VirtualMachineRequirements;
  */
 public class HardLimitExceededException extends LimitExceededException
 {
+
     private static final long serialVersionUID = -83588483436562648L;
 
-    public HardLimitExceededException(String cause, List<ResourceLimitStatus> resourcesStatus,
-        Object entity, VirtualMachineRequirements requirements, ResourceAllocationLimitHB actual)
+    public HardLimitExceededException(Object entity, long required, long actual, LimitHB limit,
+        LimitResource resource)
     {
-        super(cause, resourcesStatus, entity, requirements, actual);
-
+        super(entity, required, actual, limit, resource);
     }
 
 }

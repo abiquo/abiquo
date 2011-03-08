@@ -24,7 +24,6 @@ package com.abiquo.abiserver.persistence.dao.virtualappliance;
 import java.util.Collection;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
 
@@ -64,5 +63,10 @@ public interface VirtualDataCenterDAO extends DAO<VirtualDataCenterHB, Integer>
     Collection<VirtualDataCenterHB> getVirtualDatacentersFromEnterpriseAndDatacenter(
         Integer enterpriseId, Integer datacenterId);
 
-    public ResourceAllocationLimitHB getCurrentResourcesAllocated(int virtualDatacenterId);
+    long getCurrentStorageAllocated(int virtualDatacenterId);
+
+    long getCurrentPublicIpAllocated(int virtualDatacenterId);
+
+    long getCurrentVlanAllocated(int virtualDatacenterId);
+
 }

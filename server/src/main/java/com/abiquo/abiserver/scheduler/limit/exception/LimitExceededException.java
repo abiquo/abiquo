@@ -21,42 +21,39 @@
 
 package com.abiquo.abiserver.scheduler.limit.exception;
 
-import java.util.List;
-
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
-import com.abiquo.abiserver.scheduler.limit.ResourceLimitStatus;
-import com.abiquo.abiserver.scheduler.limit.VirtualMachineRequirements;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB;
+import com.abiquo.abiserver.scheduler.limit.EntityLimitChecker.LimitResource;
 import com.abiquo.abiserver.scheduler.workload.exception.AllocatorException;
 
 public class LimitExceededException extends AllocatorException
 {
     private static final long serialVersionUID = 1052785278699629101L;
 
-    private List<ResourceLimitStatus> resourcesStatus;
-
     /**
      * Resource limit exceeded for entity {Enterprise, Datacenter or VirtualDatacenter}
      */
-    private Object entity; // TODO IPojoHB<IPojo< ? >>
+    private final Object entity; // TODO IPojoHB<IPojo< ? >>
 
-    private VirtualMachineRequirements requirements;
+    private final long required;
 
-    private ResourceAllocationLimitHB actual;
+    private final long actual;
 
-    public LimitExceededException(String cause, List<ResourceLimitStatus> resourcesStatus,
-        Object entity, VirtualMachineRequirements requirements,
-        ResourceAllocationLimitHB actual)
+    private final LimitHB limit;
+
+    private final LimitResource resource;
+
+    public LimitExceededException(Object entity, long required, long actual, LimitHB limit,
+        LimitResource resource)
     {
-        super(cause);
+        super(String.format(
+            "Limit exceeded %s : actual allocated %d, required %d and limits set to [%d , %d]",
+            resource.name(), actual, required, limit.getSoft(), limit.getHard()));
+        
         this.entity = entity;
-        this.resourcesStatus = resourcesStatus;
-        this.requirements = requirements;
+        this.required = required;
         this.actual = actual;
-    }
-
-    public List<ResourceLimitStatus> getResourcesStatus()
-    {
-        return resourcesStatus;
+        this.limit = limit;
+        this.resource = resource;
     }
 
     public Object getEntity()
@@ -64,14 +61,23 @@ public class LimitExceededException extends AllocatorException
         return entity;
     }
 
-    public VirtualMachineRequirements getRequirements()
+    public long getRequired()
     {
-        return requirements;
+        return required;
     }
 
-    public ResourceAllocationLimitHB getActual()
+    public long getActual()
     {
         return actual;
     }
 
+    public LimitHB getLimit()
+    {
+        return limit;
+    }
+
+    public LimitResource getResource()
+    {
+        return resource;
+    }
 }
