@@ -398,7 +398,7 @@ public class VirtualimageAllocationService
         if (bestTarget == null)
         {
             final String cause =
-                String.format("There are %d candidate machines but all are discarted by the "
+                String.format("There are %d candidate machines but all are discarded by the "
                     + "current workload rules (RAM and CPU oversubscription). \n %s",
                     firstPassCandidates.size(), candidateNames(firstPassCandidates));
 
