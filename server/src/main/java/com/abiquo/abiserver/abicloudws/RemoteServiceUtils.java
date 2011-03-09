@@ -101,18 +101,23 @@ public class RemoteServiceUtils
      * @throws RemoteServiceException
      */
     public static String getVirtualSystemMonitorFromVA(final VirtualAppliance virtualAppliance)
-        throws PersistenceException, RemoteServiceException
+        throws RemoteServiceException
     {
-        String destination = null;
+        return getVirtualSystemMonitor(virtualAppliance.getVirtualDataCenter().getIdDataCenter());
+    }
+
+    public static String getVirtualSystemMonitor(final int datacenterId)
+        throws RemoteServiceException
+    {
         DAOFactory factory = HibernateDAOFactory.instance();
         DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
+        String destination = null;
 
         factory.beginConnection();
-        DatacenterHB myDatacenter =
-            datacenterDAO.findById(virtualAppliance.getVirtualDataCenter().getIdDataCenter());
+        DatacenterHB myDatacenter = datacenterDAO.findById(datacenterId);
         factory.endConnection();
 
-         Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
+        Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
         for (RemoteServiceHB remoteServiceHB : remoteServices)
         {
             if (remoteServiceHB.getRemoteServiceType() == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
@@ -124,33 +129,31 @@ public class RemoteServiceUtils
 
         if (destination == null)
         {
-            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter");
+            throw new RemoteServiceException("There is no VirtualSystemMonitor remote service configured for this datacenter.");
         }
 
         return destination;
     }
-    
+
     /**
-     * Private helper to get the VirtualSystemMonitorAddress address from a physical machine
-     * object
+     * Private helper to get the VirtualSystemMonitorAddress address from a physical machine object
      * 
      * @param physicalMachine the physical machine
      * @return the address destination
      * @throws PersistenceException
      * @throws RemoteServiceException
      */
-    public static String getVirtualSystemMonitorFromPhysicalMachine(final PhysicalMachine physicalMachine)
-        throws PersistenceException, RemoteServiceException
+    public static String getVirtualSystemMonitorFromPhysicalMachine(
+        final PhysicalMachine physicalMachine) throws PersistenceException, RemoteServiceException
     {
         String destination = null;
         DAOFactory factory = HibernateDAOFactory.instance();
         DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
-        
+
         Rack rack = (Rack) physicalMachine.getAssignedTo();
-        
+
         factory.beginConnection();
-        DatacenterHB myDatacenter =
-            datacenterDAO.findById(rack.getDataCenter().getId());
+        DatacenterHB myDatacenter = datacenterDAO.findById(rack.getDataCenter().getId());
         factory.endConnection();
 
         Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
@@ -205,10 +208,10 @@ public class RemoteServiceUtils
 
         return destination;
     }
-    
+
     /**
-     * Private helper to get the Virtual system monitor address from the datacenter id. Requires a nested
-     * transaction
+     * Private helper to get the Virtual system monitor address from the datacenter id. Requires a
+     * nested transaction
      * 
      * @param datacenterId the datacenter ID
      * @return the address destination
