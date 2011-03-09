@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
