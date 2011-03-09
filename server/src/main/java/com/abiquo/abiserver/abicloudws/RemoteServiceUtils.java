@@ -375,5 +375,32 @@ public class RemoteServiceUtils
             remoteServiceClient.ping();
         }
     }
+    
+    /**
+     * Checks the remote service SSM
+     * @param virtualDatacenter
+     * @throws RemoteServiceException 
+     */
+    public static void checkRemoteServiceSSM(final VirtualDataCenterHB virtualDatacenter ) throws RemoteServiceException{
+        DAOFactory factory = HibernateDAOFactory.instance();
+        DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
+      
+        factory.beginConnection();            
+        DatacenterHB myDatacenter = datacenterDAO.findById(virtualDatacenter.getIdDataCenter());
+
+        factory.endConnection();
+
+        Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
+        for (RemoteServiceHB remoteServiceHB : remoteServices)
+        {
+            // Check SSM
+            if (remoteServiceHB.getRemoteServiceType().canBeChecked() && remoteServiceHB.getRemoteServiceType() == RemoteServiceType.STORAGE_SYSTEM_MONITOR)
+            {
+                RemoteServiceClient remoteServiceClient = new RemoteServiceClient(remoteServiceHB.getUri());
+                remoteServiceClient.ping();
+            }
+        }
+  
+    }
 
 }
