@@ -34,7 +34,7 @@ public class TracerContextHolder
     private static ThreadLocal<TracerContext> contextHolder = new ThreadLocal<TracerContext>();
 
     /**
-     * Initialises the tracer context.
+     * Initializes the tracer context.
      * 
      * @param context The current tracer context.
      */
