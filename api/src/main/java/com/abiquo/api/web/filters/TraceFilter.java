@@ -35,7 +35,10 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.context.SecurityContextHolder;
 
+import com.abiquo.api.tracer.TracerContext;
+import com.abiquo.api.tracer.TracerContextHolder;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
@@ -62,6 +65,8 @@ public class TraceFilter implements Filter
         StatusExposingServletResponse res =
             new StatusExposingServletResponse((HttpServletResponse) response);
 
+        createTracerContext(request, response);
+
         // Code before servlet
         traceRequest(req.getMethod(), req.getRequestURI(), req.getQueryString());
 
@@ -69,6 +74,8 @@ public class TraceFilter implements Filter
 
         // Code after servlet
         traceResponse(req.getMethod(), req.getRequestURI(), req.getQueryString(), res.getStatus());
+
+        destroyTracerContext(request, response);
     }
 
     /**
@@ -82,7 +89,7 @@ public class TraceFilter implements Filter
     {
         String message = String.format("Method: %s, Path: %s, Query: %s", method, path, query);
 
-        LOGGER.debug("Incoming API request. " + message);
+        LOGGER.trace("Incoming API request. " + message);
         // traceInfo(EventType.API_REQUEST, message);
     }
 
@@ -101,7 +108,7 @@ public class TraceFilter implements Filter
             String.format("Method: %s, Path: %s, Query: %s, Status code: %d", method, path, query,
                 status);
 
-        LOGGER.info("Outcoming API request. " + message);
+        LOGGER.trace("Outcoming API request. " + message);
         // traceInfo(EventType.API_RESPONSE, message);
     }
 
@@ -127,6 +134,25 @@ public class TraceFilter implements Filter
     public void destroy()
     {
         LOGGER.info("TraceFilter destroyed");
+    }
+
+    private void createTracerContext(final ServletRequest request, final ServletResponse response)
+    {
+        HttpServletRequest req = (HttpServletRequest) request;
+
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String resource = req.getRequestURI().replaceAll(req.getContextPath(), "");
+
+        TracerContext context = new TracerContext();
+        context.setHierachy(resource);
+        context.setUsername(currentUser);
+
+        TracerContextHolder.initialize(context);
+    }
+
+    private void destroyTracerContext(final ServletRequest request, final ServletResponse response)
+    {
+        TracerContextHolder.clearContext();
     }
 
     /**
