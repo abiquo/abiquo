@@ -32,22 +32,41 @@ public class TracerContext implements Serializable
     /** Serial UID. */
     private static final long serialVersionUID = 1L;
 
-    /** The current platform hierachy. */
-    private String hierachy;
+    /** The current platform hierarchy. */
+    private String hierarchy;
+
+    /** The id of the user who performs the action. */
+    private Integer userId;
 
     /** The name of the user who performs the action. */
     private String username;
 
+    /** The id of the enterprise of the user who performs the action. */
+    private Integer enterpriseId;
+
+    /** The name of the enterprise of the user who performs the action. */
+    private String enterpriseName;
+
     // Getters and setters
 
-    public String getHierachy()
+    public String getHierarchy()
     {
-        return hierachy;
+        return hierarchy;
     }
 
-    public void setHierachy(final String hierachy)
+    public void setHierarchy(final String hierarchy)
     {
-        this.hierachy = hierachy;
+        this.hierarchy = hierarchy;
+    }
+
+    public Integer getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(final Integer userId)
+    {
+        this.userId = userId;
     }
 
     public String getUsername()
@@ -58,6 +77,26 @@ public class TracerContext implements Serializable
     public void setUsername(final String username)
     {
         this.username = username;
+    }
+
+    public Integer getEnterpriseId()
+    {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(final Integer enterpriseId)
+    {
+        this.enterpriseId = enterpriseId;
+    }
+
+    public String getEnterpriseName()
+    {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(final String enterpriseName)
+    {
+        this.enterpriseName = enterpriseName;
     }
 
 }

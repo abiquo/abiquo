@@ -28,28 +28,16 @@
         <security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
     </security:http>
 
-    <security:authentication-provider >		
+    <security:authentication-provider user-service-ref="userDetailsService">		
 		<security:password-encoder hash="md5" />
-		<security:jdbc-user-service id="userDetailsService"
-			data-source-ref="dataSource"
-			role-prefix="ROLE_"
-			users-by-username-query="${security.auth.usersQuery}"
-			authorities-by-username-query="${security.auth.rolesQuery}" />
 	</security:authentication-provider>
 
 	<bean id="tokenService" class="org.springframework.security.ui.rememberme.TokenBasedRememberMeServices">
 		<property name="userDetailsService" ref="userDetailsService" />
 		<property name="alwaysRemember" value="true" />
 		<property name="key" value="abiquo-auth-key" />
-		<property name="cookieName" value="${security.token.cookieName}" />
-		<property name="tokenValiditySeconds" value="${security.token.timeout}" />
+		<property name="cookieName" value="auth" />
+		<property name="tokenValiditySeconds" value="1800" />
 	</bean>
-
-
-    <bean id="propertyConfigurer"
-        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location">
-            <value>classpath:security/security.properties</value>
-        </property>
-    </bean>
+	
 </beans>

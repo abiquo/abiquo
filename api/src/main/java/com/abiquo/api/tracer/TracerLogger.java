@@ -71,7 +71,7 @@ public class TracerLogger
 
             String log =
                 String.format("[%s|%s|%s|%s] (%s) %s", severity.name(), component.name(), event
-                    .name(), tracerContext.getHierachy(), tracerContext.getUsername(), message);
+                    .name(), tracerContext.getHierarchy(), tracerContext.getUsername(), message);
 
             LOGGER.info(log);
         }

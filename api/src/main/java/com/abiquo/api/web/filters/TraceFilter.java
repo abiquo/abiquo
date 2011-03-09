@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.context.SecurityContextHolder;
 
+import com.abiquo.api.spring.security.AbiquoUserDetails;
 import com.abiquo.api.tracer.TracerContext;
 import com.abiquo.api.tracer.TracerContextHolder;
 
@@ -117,13 +118,23 @@ public class TraceFilter implements Filter
     {
         HttpServletRequest req = (HttpServletRequest) request;
 
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Get hierarchy information
         String resource = req.getRequestURI().replaceAll(req.getContextPath(), "");
 
-        TracerContext context = new TracerContext();
-        context.setHierachy(resource);
-        context.setUsername(currentUser);
+        // Get current user information
+        AbiquoUserDetails userDetails =
+            (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
 
+        // Creatate the tracer context
+        TracerContext context = new TracerContext();
+        context.setHierarchy(resource);
+        context.setUserId(userDetails.getUserId());
+        context.setUsername(userDetails.getUsername());
+        context.setEnterpriseId(userDetails.getEnterpriseId());
+        context.setEnterpriseName(userDetails.getEnterpriseName());
+
+        // Publish teh context the context
         TracerContextHolder.initialize(context);
     }
 
