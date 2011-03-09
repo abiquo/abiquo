@@ -277,7 +277,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         }
     }
 
-    private void deleteVirtualAppliance(EnvelopeType envelope) throws EmptyEnvelopeException,
+    protected void deleteVirtualAppliance(EnvelopeType envelope) throws EmptyEnvelopeException,
         IdNotFoundException, SectionException, MalformedURLException, VirtualMachineException,
         PluginException, HypervisorException
     {
