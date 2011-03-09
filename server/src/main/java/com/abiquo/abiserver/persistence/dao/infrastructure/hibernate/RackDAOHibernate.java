@@ -82,27 +82,4 @@ public class RackDAOHibernate extends HibernateDAO<RackHB, Integer> implements R
         }
     }
 
-    @Override
-    public Integer getLowestVlanIdMax(Integer datacenterId) throws PersistenceException
-    {
-        try
-        {
-            final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            final Query query = session.getNamedQuery(GET_LOWEST_VLANIDMAX_VALUE);
-            query.setInteger("datacenterId", datacenterId);
-            if (query.uniqueResult() != null)
-            {
-                return (Integer) query.uniqueResult();
-            }
-            else
-            {
-                return null;
-            }
-
-        }
-        catch (final HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
 }

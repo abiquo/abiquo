@@ -23,18 +23,40 @@ package com.abiquo.api.services.cloud;
 
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+
+import org.springframework.security.context.SecurityContextHolder;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
+import com.abiquo.api.common.AuthenticationStub;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 
 public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 {
+	@AfterMethod
+    public void tearDown()
+    {
+        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
+            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
+            "hypervisor", "physicalmachine", "rack",
+            "datacenter", "network", "user", "role", "enterprise");
+    }
+	
     @Test
     public void findVirtualDatacenterAssignedToUser()
     {
@@ -88,5 +110,55 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 
         vdcs = service.getVirtualDatacenters(null, null, user);
         Assert.assertSize(vdcs, 2);
+    }
+    
+    @Test
+    public void createVirtualDatacenterByUserWithVdcsAssigned()
+    {
+    	Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+    	Datacenter d = datacenterGenerator.createUniqueInstance();
+    	Machine machine = machineGenerator.createMachine(d);
+    	Hypervisor hypervisor = hypervisorGenerator.createInstance(machine, HypervisorType.KVM);
+    	VirtualDatacenter vdc = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
+    	
+    	VirtualDatacenter vdc1 = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
+    	
+    	setup(enterprise, d, machine, hypervisor, vdc);
+    	
+    	Role role = roleGenerator.createInstance(Role.Type.USER);
+    	User user = userGenerator.createInstance(enterprise, role);
+    	user.setAvailableVirtualDatacenters(vdc.getId().toString());
+    	
+    	setup(role, user);
+    	
+    	SecurityContextHolder.getContext().setAuthentication(new AuthenticationStub(user.getNick()));
+    	
+    	EntityManager em = getEntityManagerWithAnActiveTransaction();
+    	
+    	DatacenterService datacenterService = new DatacenterService(em);
+    	VirtualDatacenterService service = new VirtualDatacenterService(em);
+    	
+    	Datacenter datacenter = datacenterService.getDatacenter(d.getId());
+    	
+    	VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
+    	NetworkConfigurationDto configDto = new NetworkConfigurationDto();
+        configDto.setAddress("192.168.0.0");
+        configDto.setDefaultNetwork(true);
+        configDto.setFenceMode("bridge");
+        configDto.setGateway("192.168.0.1");
+        configDto.setMask(24);
+        configDto.setNetMask("255.255.255.248");
+        configDto.setNetworkName("KVM VLAN");
+        configDto.setPrimaryDNS("10.0.0.1");
+        configDto.setSecondaryDNS("10.0.0.1");
+
+        dto.setNetworkConfiguration(configDto);
+    	
+    	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);
+    	
+    	UserService userService = new UserService(em);
+    	
+    	User currentUser = userService.getCurrentUser();
+    	Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith("," + virtualDatacenter.getId()));
     }
 }

@@ -122,9 +122,16 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     private static final String SUM_STORAGE_RESOURCES =
-        "select sum(r.limitResource) from volume_management vm, storage_pool sp, remote_service rs, rasd_management rm, virtualdatacenter vdc, rasd r "
-            + " where vm.idStorage = sp.idStorage and sp.idRemoteService = rs.idRemoteService and vm.idManagement = rm.idManagement and rm.idVirtualDataCenter = vdc.idVirtualDataCenter and rm.idResource= r.instanceID "
-            + " and rs.idDatacenter = :datacenterId and vdc.idEnterprise=:enterpriseId";
+        "select sum(r.limitResource) "
+        + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
+        + "where "
+        + "vm.idManagement = rm.idManagement "
+        + "and rm.idResource = r.instanceID "
+        + "and vm.idStorage = sp.idStorage " 
+        + "and sp.idStorageDevice = sd.id "
+        + "and sd.idDataCenter = :datacenterId "
+        + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+        + "and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "

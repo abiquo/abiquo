@@ -443,7 +443,6 @@ public class PopulateModelTest
         hyp.setIp("test");
         hyp.setIpService("test");
         hyp.setPort(0);
-        hyp.setShortDescription("test");
 
         // XXX hyp.setPhysicalMachine(physicalMachine);
 

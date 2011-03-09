@@ -75,6 +75,11 @@ public class VSMService
                 + virtualMachineName + " on " + physicalMachineAddress, ex);
         }
     }
+    
+    public PhysicalMachine monitor(String physicalMachineAddress, String type)
+    {
+    	return monitor(physicalMachineAddress, type, null, null);
+    }
 
     public PhysicalMachine monitor(String physicalMachineAddress, String type, String username,
         String password)

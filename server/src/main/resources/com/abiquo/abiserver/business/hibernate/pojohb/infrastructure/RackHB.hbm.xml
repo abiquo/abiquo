@@ -70,10 +70,10 @@
 		where racks.idRack = :idRack
 	</query>
   
-  	<query name="RACK.GET_LOWEST_VLANIDMAX_VALUE">
-	    select min(rack.vlan_id_max)
-		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB rack
-		where rack.datacenter.idDataCenter = :datacenterId
-	</query>
+<!--  	<query name="RACK.GET_LOWEST_VLANIDMAX_VALUE">-->
+<!--	    select min(rack.vlan_id_max)-->
+<!--		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB rack-->
+<!--		where rack.datacenter.idDataCenter = :datacenterId-->
+<!--	</query>-->
 
 </hibernate-mapping>

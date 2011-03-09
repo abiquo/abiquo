@@ -43,8 +43,6 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
 
     private Integer idHyper;
 
-    private String shortDescription;
-
     private Set<VirtualmachineHB> virtualmachines = new HashSet<VirtualmachineHB>(0);
 
     private String ip;
@@ -65,11 +63,6 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
     {
     }
 
-    public HypervisorHB(String shortDescription)
-    {
-        this.shortDescription = shortDescription;
-    }
-
     public String getIpService()
     {
         return ipService;
@@ -88,16 +81,6 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
     public void setIdHyper(Integer idHyper)
     {
         this.idHyper = idHyper;
-    }
-
-    public String getShortDescription()
-    {
-        return shortDescription;
-    }
-
-    public void setShortDescription(String shortDescription)
-    {
-        this.shortDescription = shortDescription;
     }
 
     public Set<VirtualmachineHB> getVirtualmachines()
@@ -175,7 +158,6 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
         hyperVisor.setName(getType().getValue());
         
 
-        hyperVisor.setShortDescription(shortDescription);
         hyperVisor.setIp(ip);
         hyperVisor.setIpService(ipService);
         hyperVisor.setPort(port);

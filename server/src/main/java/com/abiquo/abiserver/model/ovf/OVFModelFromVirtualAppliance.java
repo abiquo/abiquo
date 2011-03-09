@@ -546,12 +546,6 @@ public class OVFModelFromVirtualAppliance
 
                 StateEnum vmState = nodeVirtualImage.getVirtualMachine().getState().toEnum();
 
-                // Ignore the the crashed virtual machines
-                if (vmState.compareTo(StateEnum.CRASHED) == 0)
-                {
-                    continue;
-                }
-
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
                     createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());

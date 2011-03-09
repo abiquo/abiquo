@@ -794,7 +794,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             {
                 throw new VirtualMachineException(e);
             }
-
             logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
                 progress.getOperationPercent());
         }
@@ -900,14 +899,14 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         // detachExtendedDisks(machine);
         // machine.saveSettings();
         // oSession.unlockMachine();
+        //
+        // if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+        // {
+        // // Deleting from the rimp
+        // // removeImage();
+        // }
+        //
 
-//        if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-//        {
-//            // Deleting from the rimp
-//            // removeImage();
-//        }
-        
-        
         // Deregistering machine
         List<IMedium> mediumsToDelete =
             machine.unregister(CleanupMode.DetachAllReturnHardDisksOnly);

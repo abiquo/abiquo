@@ -50,6 +50,8 @@
     <!-- end: configuration -->
     
     <!-- storage -->
+    <orm:entity class="com.abiquo.server.core.infrastructure.storage.Tier"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.storage.StorageDevice"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.StoragePool"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.VolumeManagement"></orm:entity>
     <!-- end: storage -->

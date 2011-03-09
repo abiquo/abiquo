@@ -17,7 +17,7 @@ ofile = open('test/kinton-schema-test.sql', 'w')
 # Create the base schema
 ifile = open('kinton-schema.sql', 'r')
 replaced_string = ifile.read().replace('kinton','kinton_test')
-replaced_string = re.compile(r'LOCK\s*TABLES[^;]+;\s+INSERT[^;]+;\s+UNLOCK\s*TABLES\s*;', 
+replaced_string = re.compile(r'LOCK\s*TABLES[^;]+;\s+(INSERT[^;]+;\s+)*UNLOCK\s*TABLES\s*;', 
         re.IGNORECASE).sub((lambda x: ''), replaced_string)
 # replaced_string = replaced_string.replace('source accounting/accounting-apply-patch.sql','')
 ofile.write(replaced_string)

@@ -139,7 +139,16 @@ public class VirtualDatacenterResource extends AbstractResource
     public static VirtualDatacenterDto createTransferObject(VirtualDatacenter vdc,
         IRESTBuilder builder) throws Exception
     {
-        VirtualDatacenterDto response = new VirtualDatacenterDto();
+        VirtualDatacenterDto response = createTransferObject(vdc);
+        response =
+            addLinks(builder, response, vdc.getDatacenter().getId(), vdc.getEnterprise().getId());
+
+        return response;
+    }
+
+	public static VirtualDatacenterDto createTransferObject(
+			VirtualDatacenter vdc) {
+		VirtualDatacenterDto response = new VirtualDatacenterDto();
         response.setId(vdc.getId());
         response.setHypervisorType(vdc.getHypervisorType());
         response.setName(vdc.getName());
@@ -151,10 +160,7 @@ public class VirtualDatacenterResource extends AbstractResource
         response.setStorageLimits(vdc.getStorageSoft(), vdc.getStorageHard());
         response.setVlansLimits(vdc.getVlanSoft(), vdc.getVlanHard());
         response.setPublicIPLimits(vdc.getPublicIpsSoft(), vdc.getPublicIpsHard());
-        response =
-            addLinks(builder, response, vdc.getDatacenter().getId(), vdc.getEnterprise().getId());
-
-        return response;
-    }
+		return response;
+	}
 
 }

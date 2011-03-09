@@ -83,6 +83,17 @@ public enum HypervisorType
     {
         return name().toLowerCase().replace("_", "-");
     }
+    
+    public boolean requiresCredentials()
+    {
+    	switch (this) {
+		case KVM:
+		case XEN_3:
+			return false;
+		default:
+			return true;
+		}
+    }
 
     /**
      * @return build a pseudo-random MAC address depending on the HypervisorType.

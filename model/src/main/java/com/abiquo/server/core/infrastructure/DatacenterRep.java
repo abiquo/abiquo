@@ -44,6 +44,8 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.TierDAO;
 
 @Repository
 public class DatacenterRep extends DefaultRepBase
@@ -93,6 +95,9 @@ public class DatacenterRep extends DefaultRepBase
 
     @Autowired
     private VirtualMachineDAO virtualMachineDao;
+    
+    @Autowired
+    private TierDAO tierDao;
 
     public DatacenterRep()
     {
@@ -321,6 +326,12 @@ public class DatacenterRep extends DefaultRepBase
         this.machineDao.flush();
     }
 
+	public void insertTier(Tier tier) {
+		
+		this.tierDao.persist(tier);
+		this.tierDao.flush();
+	}
+	
     public void insertHypervisor(Hypervisor hypervisor)
     {
         assert hypervisor != null;
@@ -552,4 +563,5 @@ public class DatacenterRep extends DefaultRepBase
         }
         return false;
     }
+
 }

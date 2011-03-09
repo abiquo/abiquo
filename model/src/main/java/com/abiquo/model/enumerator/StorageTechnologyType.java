@@ -23,28 +23,32 @@ package com.abiquo.model.enumerator;
 
 public enum StorageTechnologyType
 {
-    ZFS(3260, "/fs_rest/"),
-    LVM(3260, "/fs_rest/"),
-    NEXENTA(3260, "/fs_rest/"),
-    NETAPP(3260, "/fs_rest/");
+    OPENSOLARIS(8080, 3260),
 
-    private Integer port;
+    NEXENTA(8080, 3260),
 
-    private String mapping;
+    LVM(8180, 3260),
 
-    private StorageTechnologyType(final Integer port, final String mapping)
+    NETAPP(80, 3260);
+
+    private Integer defaultManagementPort;
+
+    private Integer defaultSCSIPort;
+
+    private StorageTechnologyType(final Integer defaultManagementPort, final Integer defaultSCSIPort)
     {
-        this.port = port;
-        this.mapping = mapping;
+        this.defaultManagementPort = defaultManagementPort;
+        this.defaultSCSIPort = defaultSCSIPort;
     }
 
-    public Integer getPort()
+    public Integer getManagementPort()
     {
-        return port;
+        return defaultManagementPort;
     }
 
-    public String getMapping()
+    public Integer getISCSIPort()
     {
-        return mapping;
+        return defaultSCSIPort;
     }
+
 }

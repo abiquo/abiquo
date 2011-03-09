@@ -105,7 +105,7 @@ public class MachineServiceTest extends AbstractGeneratorTest
 
         VirtualMachineService vmService = new VirtualMachineService(em);
 
-        VirtualMachine virtualMachine = vmService.getVirtualMachine(vm.getId());
+        VirtualMachine virtualMachine = vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         Assert.assertNull(virtualMachine.getHypervisor());
         Assert.assertNull(virtualMachine.getDatastore());
         Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);

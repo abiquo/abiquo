@@ -22,6 +22,7 @@
 package com.abiquo.abiserver.persistence.dao.virtualappliance;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
 import com.abiquo.abiserver.persistence.DAO;
@@ -41,4 +42,6 @@ public interface NodeVirtualImageDAO extends DAO<NodeVirtualImageHB, Integer>
     public Collection<NodeVirtualImageHB> getNodes(Collection<Integer> nodeIds);
 
     public void refresh(NodeVirtualImageHB node);
+
+    public List<NodeVirtualImageHB> findByImage(final Integer idImage);
 }
