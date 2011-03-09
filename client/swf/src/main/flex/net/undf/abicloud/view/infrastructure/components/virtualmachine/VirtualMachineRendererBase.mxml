@@ -379,20 +379,14 @@
 
             <utils:SmoothImage id="stopImage"
                 source="{(_virtualMachine.state.id == State.POWERED_OFF || _virtualMachine.state.id == State.NOT_DEPLOYED) ? StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"
-                visible="{_virtualMachine.state.id == State.UNKNOWN || _virtualMachine.state.id == State.CRASHED ? false:true}"
-	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN || _virtualMachine.state.id == State.CRASHED ? false:true}"/>
+                visible="{_virtualMachine.state.id == State.UNKNOWN ? false:true}"
+	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN ? false:true}"/>
 	
             <utils:SmoothImage id="unknow_Image"
 	            source="{(_virtualMachine.state.id == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
 	            visible="{_virtualMachine.state.id == State.UNKNOWN}"
 	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN}"
-	            toolTip="@Resource(bundle='Main', key='LABEL_VM_CRASHED')"/>
-	        
-	        <utils:SmoothImage id="crashed_Image"
-	            source="{(_virtualMachine.state.id == State.CRASHED) ? CommonAssets.crashedIcon:null}"
-	            visible="{_virtualMachine.state.id == State.CRASHED}"
-	            includeInLayout="{_virtualMachine.state.id == State.CRASHED}"
-            	toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>
+	            toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>	        
 
         
         </mx:VBox>

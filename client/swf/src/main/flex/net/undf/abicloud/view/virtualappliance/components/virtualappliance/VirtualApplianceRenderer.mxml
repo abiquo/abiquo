@@ -253,20 +253,14 @@
 
         <utils:SmoothImage id="stopImage"
             source="{(this._virtualAppliance.state.id == State.POWERED_OFF || this._virtualAppliance.state.id == State.NOT_DEPLOYED) ? StateIcons.POWERED_OFF:StateIcons.DISABLED}"
-            visible="{this._virtualAppliance.subState.id == State.UNKNOWN || this._virtualAppliance.subState.id == State.CRASHED ? false:true}"
-            includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN || this._virtualAppliance.subState.id == State.CRASHED ? false:true}"/>
+            visible="{this._virtualAppliance.subState.id == State.UNKNOWN ? false:true}"
+            includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN ? false:true}"/>
 
 		<utils:SmoothImage id="unknow_Image"
             source="{(this._virtualAppliance.subState.id == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
             visible="{this._virtualAppliance.subState.id == State.UNKNOWN}"
             includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN}"
-            toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>
-        
-        <utils:SmoothImage id="crashed_Image"
-            source="{(this._virtualAppliance.subState.id == State.CRASHED) ? CommonAssets.crashedIcon:null}"
-            visible="{this._virtualAppliance.subState.id == State.CRASHED}"
-            includeInLayout="{this._virtualAppliance.subState.id == State.CRASHED}"
-            toolTip="@Resource(bundle='Main', key='LABEL_VM_CRASHED')"/>
+            toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>       
 
     </mx:VBox>
 

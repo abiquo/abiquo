@@ -382,19 +382,10 @@
                                         width="14" height="14"
                                         horizontalCenter="0"
                                         verticalCenter="0"
-                                        includeInLayout="{this._virtualAppliance.subState.id != State.CRASHED &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"
+                                        includeInLayout="{this._virtualAppliance.subState.id != State.UNKNOWN}"
                                         source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING : 
 						   										((this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.POWERED_OFF)}"
-                                        visible="{this._virtualAppliance.subState.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.subState.id != State.CRASHED &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"/>
-									
-									<utils:SmoothImage 
-									        width="18" height="18"
-									        horizontalCenter="0"
-                                        	verticalCenter="0"
-									        source="{CommonAssets.crashedIcon}"
-									        toolTip="@Resource(bundle='Infrastructure', key='LABEL_VM_CRASHED')"
-									        includeInLayout="{this._virtualAppliance.subState.id == State.CRASHED}"
-									        visible="{this._virtualAppliance.subState.id == State.CRASHED}"/>
+                                        visible="{this._virtualAppliance.subState.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"/>
 									        
 									   <utils:SmoothImage 
 									        width="18" height="18"

@@ -54,10 +54,8 @@ package net.undf.abicloud.vo.infrastructure
         public static const BUNDLING:int = 13;
 
         public static const STATEFUL:int = 14;
-
-        public static const CRASHED:int = 15;
         
-        public static const UNKNOWN:int = 16;
+        public static const UNKNOWN:int = 15;
         
 
         public var id:int;
