@@ -51,6 +51,7 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
@@ -552,19 +553,17 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      * @param idCategory, if 0 indicate return all the categories
      */
     @Override
-    public List<VirtualimageHB> getVirtualImageByCategoryAndHypervisorCompatible(
+    public List<VirtualImage> getVirtualImageByCategoryAndHypervisorCompatible(
         final UserSession userSession, final Integer idEnterprise, final Integer idRepository,
         final Integer idCategory, final Integer idHypervisorType)
         throws AppsLibraryCommandException
     {
         // TODO check the userSession belongs to the same idEnterprise
         final DAOFactory factory = HibernateDAOFactory.instance();
-        final List<VirtualimageHB> virtualImages = new LinkedList<VirtualimageHB>();
+        final List<VirtualImage> virtualImages = new LinkedList<VirtualImage>();
 
         final HypervisorType hypervisorType = HypervisorType.fromId(idHypervisorType);
-        final DiskFormatType baseFormat = hypervisorType.baseFormat;
 
-        // Getting the WHOLE list of virtual images
         final Collection<VirtualimageHB> virtualImagesHB =
             getAvailableVirtualImages(idEnterprise, idRepository, idCategory);
 
@@ -576,7 +575,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             {
                 if (isVirtualImageConvertedOrCompatible(virtualImageHB, hypervisorType))
                 {
-                    virtualImages.add(virtualImageHB);
+                    virtualImages.add(virtualImageHB.toPojo());
                 }
             }
 
@@ -615,7 +614,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final Collection<VirtualImageConversionsHB> conversions =
             factory.getVirtualImageConversionsDAO().getConversion(vi, hypervisorType.baseFormat);
 
-        // the converision do not exist
+        // the conversion do not exist
         if (conversions == null || conversions.size() == 0)
         {
             return false;
@@ -758,15 +757,15 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         {
             Integer userEnterpriseId = user.getEnterpriseHB().getIdEnterprise();
             Integer vimageEnterpriseId = vimage.getIdEnterprise();
-            
-            if(userEnterpriseId.intValue() != vimageEnterpriseId.intValue())
-            {                
+
+            if (userEnterpriseId.intValue() != vimageEnterpriseId.intValue())
+            {
                 final String cause =
                     String
-                    .format("Only users from the original enterprise can delete a shared virtual image ");
-                
+                        .format("Only users from the original enterprise can delete a shared virtual image ");
+
                 throw new AppsLibraryCommandException(cause);
-            }            
+            }
         }
 
         // final String formatUri = vimage.getDiskFormatTypeHB().getUri();
