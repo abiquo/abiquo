@@ -126,6 +126,7 @@
                     this._rack.name = this._rackFormBasicInfo.nameInput.text;
                     this._rack.shortDescription = this._rackFormBasicInfo.shortDescriptionInput.text;
                     this._rack.largeDescription = this._rackFormBasicInfo.largeDescriptionInput.text;
+                    this._rack.vlanNetworkParameters = null;
 
                     event = new InfrastructureEvent(InfrastructureEvent.CREATE_RACK);
                     event.infrastructureElement = this._rack;

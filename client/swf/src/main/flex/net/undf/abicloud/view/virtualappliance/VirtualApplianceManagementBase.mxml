@@ -533,7 +533,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER"),
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER")+" "+this._virtualAppliance.name,
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
                                         Alert.YES | Alert.NO,
