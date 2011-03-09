@@ -583,10 +583,14 @@
             {
                 dataCenterList.selectedIndex = -1;
                 onClickDataCenterList();
-                //Setting the Google Maps to its original position
-                dataCentersMap.panTo(new LatLng(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value,
-                                                AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value));
+                if(dataCentersMap.isLoaded()){
+	                //Setting the Google Maps to its original position
+	                dataCentersMap.panTo(new LatLng(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value,
+	                                                AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value));
+	            }
+                	
             }
+                
 
             //////////////////////////////////////////
             // FULL SCREEN FUNCTIONALITY
