@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
@@ -378,17 +379,20 @@ public class RemoteServiceUtils
             remoteServiceClient.ping();
         }
     }
-    
+
     /**
      * Checks the remote service SSM
+     * 
      * @param virtualDatacenter
-     * @throws RemoteServiceException 
+     * @throws RemoteServiceException
      */
-    public static void checkRemoteServiceSSM(final VirtualDataCenterHB virtualDatacenter ) throws RemoteServiceException{
+    public static void checkRemoteServiceSSM(final VirtualDataCenterHB virtualDatacenter)
+        throws RemoteServiceException
+    {
         DAOFactory factory = HibernateDAOFactory.instance();
         DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
-      
-        factory.beginConnection();            
+
+        factory.beginConnection();
         DatacenterHB myDatacenter = datacenterDAO.findById(virtualDatacenter.getIdDataCenter());
 
         factory.endConnection();
@@ -397,13 +401,15 @@ public class RemoteServiceUtils
         for (RemoteServiceHB remoteServiceHB : remoteServices)
         {
             // Check SSM
-            if (remoteServiceHB.getRemoteServiceType().canBeChecked() && remoteServiceHB.getRemoteServiceType() == RemoteServiceType.STORAGE_SYSTEM_MONITOR)
+            if (remoteServiceHB.getRemoteServiceType().canBeChecked()
+                && remoteServiceHB.getRemoteServiceType() == RemoteServiceType.STORAGE_SYSTEM_MONITOR)
             {
-                RemoteServiceClient remoteServiceClient = new RemoteServiceClient(remoteServiceHB.getUri());
+                RemoteServiceClient remoteServiceClient =
+                    new RemoteServiceClient(remoteServiceHB.getUri());
                 remoteServiceClient.ping();
             }
         }
-  
+
     }
 
 }
