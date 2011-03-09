@@ -133,12 +133,14 @@ public enum APIError
         "Missing query parameter ip"),
 
     // STORAGE POOL
-    NOT_ASSIGNED_STORAGE_POOL_DATACENTER_REMOTE_SERVICE("SP-0",
-        "The storage pool is not assigned to the datacenter or remote service"), MISSING_REQUIRED_QUERY_PARAMETER_IQN(
-        "SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL("SP-2",
-        "The id of the Storage Pool and the id of the submitted object must be the same"), NON_EXISTENT_STORAGE_POOL(
+    MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(
+        "SP-2", "The id of the Storage Pool and the id of the submitted object must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
-        "There was an unexpected error while modifying the Storage Pool"),
+        "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
+        "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
+        "SP-6", "Could not get the requested Storage Pool from the target device"),CONFLICT_VOLUMES_CREATED("SP-7", 
+            "Can not edit or delete the Storage Pool. There are volumes created "),STORAGE_POOL_DUPLICATED("SP-8","Duplicated Storage Pool"),
+            STORAGE_POOL_TIER_IS_DISABLED("SP-9","Tier is disabled"),   
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -167,16 +169,27 @@ public enum APIError
         "Could not read licensing cipher key"), LICENSE_OVERFLOW("LICENSE-4",
         "The maximum number of managed cores has been reached"), LICENSE_DUPLICATED("LICENSE-5",
         "The license already exists"),
-   
+
+    // TIERS
+    NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1",
+        "Embedded Tier of the StoragePool can not be null"), MISSING_TIER_LINK("TIER-2",
+        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
+        "TIER-5",
+        "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"),
+        TIER_CONFLICT_DISABLING_TIER("TIER-6","Can not disable a Tier with associated Storage Pools"),
+
+    // DEVICES
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED("DEVICE-1", "Duplicated Storage Device"),
+
     // STATISTICS
-    NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"),
-    NON_EXISTENT_STATS_FOR_DATACENTER("STATS-1", "Non existent statistical data found for the requested datacenter"),
-    NON_EXISTENT_STATS_FOR_DCLIMITS("STATS-2", "Non existent statistical data found for the requested enterprise in this datacenter"),
-    NON_EXISTENT_STATS_FOR_ENTERPRISE("STATS-3", "Non existent statistical data found for the requested enterprise"),
-    
+    NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"), NON_EXISTENT_STATS_FOR_DATACENTER(
+        "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
+        "STATS-2",
+        "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
+        "STATS-3", "Non existent statistical data found for the requested enterprise"),   
+
     ;
-    
-   
 
     /**
      * Internal error code
@@ -198,25 +211,25 @@ public enum APIError
         return this.message;
     }
 
-    APIError(String code, String message)
+    APIError(final String code, final String message)
     {
         this.code = code;
         this.message = message;
     }
 
-    public APIError addCause(String cause)
+    public APIError addCause(final String cause)
     {
         this.message = cause;//String.format("%s.\ncaused by:%s", this.message, cause);
         return this;
     }
 
-    public static void main(String[] args)
+    public static void main(final String[] args)
     {
         APIError[] errors = APIError.values();
         Arrays.sort(errors, new Comparator<APIError>()
         {
             @Override
-            public int compare(APIError err1, APIError err2)
+            public int compare(final APIError err1, final APIError err2)
             {
                 return String.CASE_INSENSITIVE_ORDER.compare(err1.code, err2.code);
             }
@@ -226,8 +239,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 }

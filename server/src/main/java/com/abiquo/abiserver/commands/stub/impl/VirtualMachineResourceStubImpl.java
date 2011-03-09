@@ -30,6 +30,7 @@ import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -74,6 +75,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 
+        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/allocate");
+        
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
@@ -100,10 +103,12 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException
     {
-        String vappUrl =
+        String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 
-        ClientResponse response = resource(vappUrl).delete();
+        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/deallocate");
+        
+        ClientResponse response = resource(vmachineUrl).delete();
 
         if (response.getStatusCode() / 200 != 1)
         {

@@ -43,6 +43,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
+import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
@@ -88,6 +89,8 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new DatacenterRep(em);
+        datacenterLimitsDao = new DatacenterLimitsDAO(em);
+        userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
     }
 
@@ -154,8 +157,23 @@ public class VirtualDatacenterService extends DefaultApiService
         Collection<IPAddress> addressRange = calculateIPRange(config);
 
         createDhcp(datacenter, vdc, vlan, networkConfiguration, addressRange);
+        
+        assignVirtualDatacenterToUser(vdc);
 
         return vdc;
+    }
+    
+    private void assignVirtualDatacenterToUser(VirtualDatacenter vdc)
+    {
+    	User currentUser = userService.getCurrentUser();
+    	
+    	if (currentUser.getRole().getType() == Role.Type.USER && currentUser.getAvailableVirtualDatacenters() != null)
+    	{
+    		String availableVirtualDatacenters = currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
+    		currentUser.setAvailableVirtualDatacenters(availableVirtualDatacenters);
+    		
+    		userService.updateUser(currentUser);
+    	}
     }
 
     protected boolean isValidEnterpriseDatacenter(Enterprise enterprise, Datacenter datacenter)

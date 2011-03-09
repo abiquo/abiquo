@@ -74,7 +74,7 @@ public class TestEntityGenerationUtils
     public static HypervisorHB createHypervisor(String description, PhysicalmachineHB machine,
         HypervisorType type)
     {
-        HypervisorHB hypervisor = new HypervisorHB(description);
+        HypervisorHB hypervisor = new HypervisorHB();
         hypervisor.setPhysicalMachine(machine);
         hypervisor.setPort(8080);
         hypervisor.setIp("127.0.0.0");

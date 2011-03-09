@@ -21,7 +21,6 @@
 
 package net.undf.abicloud.view.main
 {
-	import mx.controls.Alert;
 	import mx.styles.StyleManager;
 	
 	public class CommonAssets
@@ -64,6 +63,9 @@ package net.undf.abicloud.view.main
 		
 		[Bindable]
 		public static var genericKO:Object;
+		
+		[Bindable]
+		public static var genericShared:Object;		
 
 		[Bindable]
 		public static var genericLoadingSmall:Object;
@@ -138,6 +140,7 @@ package net.undf.abicloud.view.main
 			
 			CommonAssets.genericOK = getImage("genericOK");
 			CommonAssets.genericKO = getImage("genericKO");
+			CommonAssets.genericShared = getImage("genericShared");
 			CommonAssets.genericIdle = getImage("genericIdle");
 			
 			CommonAssets.alertIconError = getImage("genericLoadingSmall");

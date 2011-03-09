@@ -29,6 +29,7 @@ Diego Parrilla   <dparrilla_at_abiquo.com>
 Albert Puig		 <apuig_at_abiquo.com>
 Sergio Rubio	 <srubio_at_abiquo.com>
 Enric Ruiz		 <eruiz_at_abiquo.com>
+Susana Acedo	 <susana.acedo_at_abiquo.com>
 
 There are many others who have contributed ideas; we thank them,
 abiCloud is much better because of them.

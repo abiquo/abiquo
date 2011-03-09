@@ -51,13 +51,15 @@ void EventsMonitor::callback(const char* uuid, const char* event)
 
     void* reply = redisCommand(c, "PUBLISH EventingChannel %s|%s|http://%s:%s/", uuid, event, EventsMonitor::machineAddress.c_str(), EventsMonitor::machinePort.c_str());
 
-    if (reply == NULL)
+    if (reply != NULL)
     {
-            LOG("Unable to notify event. %s", c->errstr);
+        freeReplyObject(reply);
+        redisFree(c);
+    }
+    else
+    {
+        LOG("Unable to notify event. %s", c->errstr);
     }   
-
-    freeReplyObject(reply);
-    redisFree(c);
 }
 
 bool EventsMonitor::initialize(dictionary * configuration)

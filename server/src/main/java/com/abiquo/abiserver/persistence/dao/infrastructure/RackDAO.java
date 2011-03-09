@@ -56,12 +56,5 @@ public interface RackDAO extends DAO<RackHB, Integer>
      * @return all the matching physicalmachine elements.
      */
     List<PhysicalmachineHB> getPhysicalMachines(Integer rackId, String filters);
-
-    /**
-     * @param datacenterId identifier of the datacenter.
-     * @return the Lowest value of the 'vlan_id_max' parameters inside the datacenter.
-     * @throws PersistenceException if any problem occurs its encapsulated into this exception
-     */
-    Integer getLowestVlanIdMax(final Integer datacenterId) throws PersistenceException;
 }
 

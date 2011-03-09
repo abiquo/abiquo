@@ -34,7 +34,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.abiserver.business.authentication.TokenUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
@@ -47,8 +46,6 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 
-//@Service
-@Transactional
 public class AppsLibraryStubImpl implements AppsLibraryStub
 {
 
@@ -64,7 +61,7 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
     final String password;
 
-    public AppsLibraryStubImpl(UserSession session)
+    public AppsLibraryStubImpl(final UserSession session)
     {
         client = new RestClient();
         baseUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
@@ -78,7 +75,7 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
         this.password = user.getPassword();
     }
 
-    private void setAuthCookie(Resource resource)
+    private void setAuthCookie(final Resource resource)
     {
         long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);

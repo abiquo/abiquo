@@ -750,7 +750,15 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-
+            
+            VlanNetworkParameters vlanNetParameters = rack.getVlanNetworkParameters();
+            if(vlanNetParameters == null)
+            {
+            	vlanNetParameters = new VlanNetworkParameters(2, 4094, 
+            			"", 80, 8);
+            	rack.setVlanNetworkParameters(vlanNetParameters);
+            }
+            
             RackHB rackHB = rack.toPojoHB();
             session.save(rackHB);
 
@@ -969,12 +977,21 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         String password = hypervisor.getPassword();
         String virtualSystemAddress =
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
+        
+        HypervisorType hypervisorType = hypervisor.toPojoHB().getType();
         try
         {
-            // Monitors the physical machine
-            EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisor.toPojoHB()
-                .getType(), virtualSystemMonitorAddress, user, password);
-
+        	EventingSupport.monitorPhysicalMachine(virtualSystemAddress, 
+        			hypervisorType, virtualSystemMonitorAddress, user, password);
+        } catch (EventingException e)
+        {
+        	errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createPhysicalMachine", e);
+        	return dataResult;
+        }
+        
+        try
+        {            
             PhysicalMachine physicalMachine = physicalMachineCreation.getPhysicalMachine();
             // Checks non-zero values in PhysicalMachine data
             checkPhysicalMachineData(physicalMachine);
@@ -1053,7 +1070,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
             try
             {
-                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress,
+                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
                     virtualSystemMonitorAddress, user, password);
             }
             catch (EventingException e1)
@@ -1111,7 +1128,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 }
             }
 
-            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress,
+            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
                 virtualSystemMonitorAddress, user, password);
 
             factory.endConnection();
@@ -1368,7 +1385,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     .getId());
 
             // Updating the Hypervisor
-            hypervisorHB.setShortDescription(hypervisor.getShortDescription());
             hypervisorHB.setType(HypervisorType.fromValue(hypervisor.getType().getName()));
             hypervisorHB.setIp(hypervisor.getIp());
             hypervisorHB.setIpService(hypervisor.getIpService());

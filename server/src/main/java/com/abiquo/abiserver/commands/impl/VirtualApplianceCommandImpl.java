@@ -480,8 +480,24 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         try
         {
-            basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
-
+            Boolean needToShutdown = Boolean.FALSE;
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            virtualappHBPojo =
+                (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
+            if (mustUndeploy(virtualappHBPojo.getState()))
+            {
+                needToShutdown = Boolean.TRUE;
+            }
+            transaction.commit();
+            session = null;
+            transaction = null;
+            
+            if (needToShutdown)
+            {
+                basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
+            }
+            
             if (basicResult.getSuccess())
             {
                 session = HibernateUtil.getSession();
@@ -2019,19 +2035,22 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             createVirtualMachines(userSession, virtualAppliance, force, dataResult);
         }
         catch (HardLimitExceededException hl)
-        {        	
+        {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
         }
         catch (SoftLimitExceededException sl)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
                 "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
         }
         catch (NotEnoughResourcesException nl)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
                 String.format("There is not enough resources in datacenter "
                     + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
@@ -2050,19 +2069,17 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (VirtualImageException e)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
                 "createVirtualMachines", e);
         }
         catch (Exception e1)
         {
+        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
-        }
-        finally
-        {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
         }
 
         try
@@ -2685,32 +2702,36 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     VirtualMachine virtualMachine = nodeVI.getVirtualMachine();
                     if (virtualMachine != null)
                     {
-                        logger.debug("HD used: " + virtualMachine.getHd());
                         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-                        logger.debug("Restoring the physical machine resources");
-
-                        session = HibernateUtil.getSession();
-                        transaction = session.beginTransaction();
-                        HypervisorHB hypervisorHB =
-                            (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
-                        transaction.commit();
-
-                        PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
-                        PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
-                        logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
-                            + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
-
-                        // scheduler.rollback(virtualMachine, physicalMachine);
-
-                        try
+                        
+                        if(hypervisor != null)
                         {
-                            vmachineResource.deallocate(userSession, virtualDatacenterId,
-                                virtualApplianceId, virtualMachine.getId());
-                        }
-                        catch (Exception e)
-                        {
-                            throw new VirtualApplianceCommandException(e);
-                        }
+                            logger.debug("Undeploy all the virtual machines");
+                            
+                            session = HibernateUtil.getSession();
+                            transaction = session.beginTransaction();
+                            HypervisorHB hypervisorHB =
+                                (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
+                            transaction.commit();
+                            
+                            PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
+                            PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
+                            logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
+                                + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
+                            
+                            // scheduler.rollback(virtualMachine, physicalMachine);
+                            
+                            try
+                            {
+                                vmachineResource.deallocate(userSession, virtualDatacenterId,
+                                    virtualApplianceId, virtualMachine.getId());
+                            }
+                            catch (Exception e)
+                            {
+                                throw new VirtualApplianceCommandException(e);
+                            }
+                        } // vm is allocated
+                        
 
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
@@ -3011,51 +3032,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         NodeVirtualImageHB nodeVi = (NodeVirtualImageHB) nodePojo;
 
-                        if (virtualAppliance.getSubState().toEnum() == StateEnum.CRASHED)
-                        {
-                            // Before deleting logic
-                            beforeDeletingNode(session, nodeVi);
-                            // Delete Rasds
-                            deleteRasdFromNode(session, nodeVi);
-                            // Deleting from database
-                            session.delete(nodePojo);
-                            // Deleting from nodes list
-                            nodesPojoList.remove(nodePojo);
-                            // Rolling back physical machine resources
-                            VirtualmachineHB virtualMachineHB = nodeVi.getVirtualMachineHB();
-                            VirtualMachine virtualMachine = virtualMachineHB.toPojo();
-                            HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-                            // Restores the physical resources just if an hypervisor has been
-                            // assigned to the virtual machine
-                            if (hypervisor != null)
-                            {
-                                logger.debug("Restoring the physical machine resources");
-                                HypervisorHB hypervisorHB = virtualMachineHB.getHypervisor();
-                                PhysicalmachineHB physicalMachineHB =
-                                    hypervisorHB.getPhysicalMachine();
-                                PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
-                                logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
-                                    + virtualMachine.getRam() + "hd used: "
-                                    + virtualMachine.getHd());
-
-                                Integer virtualMachineId = virtualMachine.getId();
-
-                                vmachineResource.deallocate(userSession, virtualDatacenterId,
-                                    virtualApplianceId, virtualMachineId);
-
-                            }
-                            // If there is no other virtual machine CRASHED in this virtual
-                            // appliance
-                            if (!isAnotherVMCrashed(virtualAppliance, virtualMachine.getName()))
-                            {
-                                State changesNeededSubState =
-                                    new State(virtualAppliance.getState().toEnum());
-                                virtualAppliance.setSubState(changesNeededSubState);
-                                virtualappHBPojo.setSubState(changesNeededSubState.toEnum());
-                            }
-
-                        }
-                        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
+                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
                         {
                             // Before deleting logic
                             beforeDeletingNode(session, nodeVi);
@@ -3162,35 +3139,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return updatenodesList;
 
     }
-
-    /**
-     * Checks if there is another VM Crashed different from the machine name as parameter
-     * 
-     * @param virtualAppliance the virtual appliance to checj
-     * @param vmachineName the virtual machine name
-     * @return true if there is another VM crashed, false if contrary
-     */
-    private boolean isAnotherVMCrashed(VirtualAppliance virtualAppliance, String vmachineName)
-    {
-        boolean isAnotherVMCrashed = false;
-        Collection<Node> nodesList = virtualAppliance.getNodes();
-        for (Node node : nodesList)
-        {
-            if (node.isNodeTypeVirtualImage())
-            {
-                NodeVirtualImage nodevi = (NodeVirtualImage) node;
-                if (nodevi.getVirtualMachine().getState().toEnum().compareTo(StateEnum.CRASHED) == 0)
-                {
-                    if (!nodevi.getVirtualMachine().getName().equals(vmachineName))
-                    {
-                        isAnotherVMCrashed = true;
-                    }
-                }
-            }
-        }
-        return isAnotherVMCrashed;
-    }
-
+ 
     /*
      * (non-Javadoc)
      * @see

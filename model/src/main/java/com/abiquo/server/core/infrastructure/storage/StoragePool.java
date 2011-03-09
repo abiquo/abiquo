@@ -18,11 +18,11 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 package com.abiquo.server.core.infrastructure.storage;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -33,9 +33,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.server.core.common.GenericEnityBase;
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -49,89 +47,54 @@ public class StoragePool extends GenericEnityBase<String>
     protected StoragePool()
     {
     }
+    
+    public StoragePool(String id, String name, Long availableSize, Long totalSize, Long usedSize, StorageDevice device, Tier tier)
+    {
+        this.setIdStorage(id);
+        this.setName(name);
+        this.setAvailableSizeInMb(availableSize);
+        this.setTotalSizeInMb(totalSize);
+        this.setUsedSizeInMb(usedSize);
+        this.setDevice(device);
+        this.setTier(tier);
+    }
 
-    private final static String ID_COLUMN = "idStorage";
+    public final static String ID_STORAGE_PROPERTY = "idStorage";
 
-    /* package */final static int ID_LENGTH_MIN = 1;
+    private final static boolean ID_STORAGE_REQUIRED = true;
 
-    /* package */final static int ID_LENGTH_MAX = 40;
+    private final static int ID_STORAGE_LENGTH_MIN = 0;
 
-    private final static boolean ID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static int ID_STORAGE_LENGTH_MAX = 255;
+
+    private final static boolean ID_STORAGE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String ID_STORAGE_COLUMN = "idStorage";
 
     @Id
-    @Column(name = ID_COLUMN, nullable = false, length = ID_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = ID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    private String id;
+    @Column(name = ID_STORAGE_COLUMN, nullable = !ID_STORAGE_REQUIRED, length = ID_STORAGE_LENGTH_MAX)
+    private String idStorage;
 
-    public String getId()
+    @Required(value = ID_STORAGE_REQUIRED)
+    @Length(min = ID_STORAGE_LENGTH_MIN, max = ID_STORAGE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ID_STORAGE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIdStorage()
     {
-        return this.id;
+        return this.idStorage;
     }
 
-    public void setId(String id)
+    public void setIdStorage(String idStorage)
     {
-        this.id = id;
-    }
-
-    public final static String HOST_PORT_PROPERTY = "hostPort";
-
-    private final static boolean HOST_PORT_REQUIRED = true;
-
-    private final static String HOST_PORT_COLUMN = "host_port";
-
-    private final static int HOST_PORT_MIN = Integer.MIN_VALUE;
-
-    private final static int HOST_PORT_MAX = Integer.MAX_VALUE;
-
-    @Column(name = HOST_PORT_COLUMN, nullable = !HOST_PORT_REQUIRED)
-    @Range(min = HOST_PORT_MIN, max = HOST_PORT_MAX)
-    private int hostPort;
-
-    public int getHostPort()
-    {
-        return this.hostPort;
-    }
-
-    public void setHostPort(int hostPort)
-    {
-        this.hostPort = hostPort;
-    }
-
-    public final static String URL_MANAGEMENT_PROPERTY = "urlManagement";
-
-    private final static boolean URL_MANAGEMENT_REQUIRED = true;
-
-    /* package */final static int URL_MANAGEMENT_LENGTH_MIN = 0;
-
-    /* package */final static int URL_MANAGEMENT_LENGTH_MAX = 255;
-
-    private final static boolean URL_MANAGEMENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String URL_MANAGEMENT_COLUMN = "url_management";
-
-    @Column(name = URL_MANAGEMENT_COLUMN, nullable = !URL_MANAGEMENT_REQUIRED, length = URL_MANAGEMENT_LENGTH_MAX)
-    private String urlManagement;
-
-    @Required(value = URL_MANAGEMENT_REQUIRED)
-    @Length(min = URL_MANAGEMENT_LENGTH_MIN, max = URL_MANAGEMENT_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = URL_MANAGEMENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getUrlManagement()
-    {
-        return this.urlManagement;
-    }
-
-    public void setUrlManagement(String urlManagement)
-    {
-        this.urlManagement = urlManagement;
+        this.idStorage = idStorage;
     }
 
     public final static String NAME_PROPERTY = "name";
 
     private final static boolean NAME_REQUIRED = true;
 
-    /* package */final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 0;
 
-    /* package */final static int NAME_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -153,89 +116,146 @@ public class StoragePool extends GenericEnityBase<String>
         this.name = name;
     }
 
-    public final static String TYPE_PROPERTY = "type";
+    public final static String TOTAL_SIZE_IN_MB_PROPERTY = "totalSizeInMb";
 
-    private final static boolean TYPE_REQUIRED = true;
+    private final static boolean TOTAL_SIZE_IN_MB_REQUIRED = true;
 
-    private final static String TYPE_COLUMN = "storage_technology";
+    private final static String TOTAL_SIZE_IN_MB_COLUMN = "totalSizeInMb";
 
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = TYPE_COLUMN, nullable = !TYPE_REQUIRED)
-    private StorageTechnologyType type;
+    private final static long TOTAL_SIZE_IN_MB_MIN = 0L;
 
-    @Required(value = TYPE_REQUIRED)
-    public StorageTechnologyType getType()
+    private final static long TOTAL_SIZE_IN_MB_MAX = Long.MAX_VALUE;
+
+    @Column(name = TOTAL_SIZE_IN_MB_COLUMN, nullable = !TOTAL_SIZE_IN_MB_REQUIRED)
+    @Range(min = TOTAL_SIZE_IN_MB_MIN, max = TOTAL_SIZE_IN_MB_MAX)
+    private long totalSizeInMb;
+
+    public long getTotalSizeInMb()
     {
-        return this.type;
+        return this.totalSizeInMb;
     }
 
-    public void setType(StorageTechnologyType type)
+    public void setTotalSizeInMb(long totalSizeInMb)
     {
-        this.type = type;
+        this.totalSizeInMb = totalSizeInMb;
     }
 
-    public final static String HOST_IP_PROPERTY = "hostIp";
+    public final static String DEVICE_PROPERTY = "device";
 
-    private final static boolean HOST_IP_REQUIRED = true;
+    private final static boolean DEVICE_REQUIRED = true;
 
-    /* package */final static int HOST_IP_LENGTH_MIN = 0;
+    private final static String DEVICE_ID_COLUMN = "idStorageDevice";
 
-    /* package */final static int HOST_IP_LENGTH_MAX = 255;
-
-    private final static boolean HOST_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String HOST_IP_COLUMN = "host_ip";
-
-    @Column(name = HOST_IP_COLUMN, nullable = !HOST_IP_REQUIRED, length = HOST_IP_LENGTH_MAX)
-    private String hostIp;
-
-    @Required(value = HOST_IP_REQUIRED)
-    @Length(min = HOST_IP_LENGTH_MIN, max = HOST_IP_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = HOST_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getHostIp()
-    {
-        return this.hostIp;
-    }
-
-    public void setHostIp(String hostIp)
-    {
-        this.hostIp = hostIp;
-    }
-
-    public final static String REMOTE_SERVICE_PROPERTY = "remoteService";
-
-    private final static boolean REMOTE_SERVICE_REQUIRED = true;
-
-    private final static String REMOTE_SERVICE_ID_COLUMN = "idRemoteService";
-
-    @JoinColumn(name = REMOTE_SERVICE_ID_COLUMN)
+    @JoinColumn(name = DEVICE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_remoteService")
-    private RemoteService remoteService;
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_device")
+    private StorageDevice device;
 
-    @Required(value = REMOTE_SERVICE_REQUIRED)
-    public RemoteService getRemoteService()
+    @Required(value = DEVICE_REQUIRED)
+    public StorageDevice getDevice()
     {
-        return this.remoteService;
+        return this.device;
     }
 
-    public void setRemoteService(RemoteService remoteService)
+    public void setDevice(StorageDevice device)
     {
-        this.remoteService = remoteService;
+        this.device = device;
     }
 
-    // *************************** Mandatory constructors ***********************
+    public final static String USED_SIZE_IN_MB_PROPERTY = "usedSizeInMb";
 
-    public StoragePool(String name, String urlManagement, StorageTechnologyType type,
-        String hostIp, int hostPort, RemoteService remoteService)
+    private final static boolean USED_SIZE_IN_MB_REQUIRED = true;
+
+    private final static String USED_SIZE_IN_MB_COLUMN = "usedSizeInMb";
+
+    private final static long USED_SIZE_IN_MB_MIN = 0L;
+
+    private final static long USED_SIZE_IN_MB_MAX = Long.MAX_VALUE;
+
+    @Column(name = USED_SIZE_IN_MB_COLUMN, nullable = !USED_SIZE_IN_MB_REQUIRED)
+    @Range(min = USED_SIZE_IN_MB_MIN, max = USED_SIZE_IN_MB_MAX)
+    private long usedSizeInMb;
+
+    public long getUsedSizeInMb()
     {
-        super();
-        setName(name);
-        setUrlManagement(urlManagement);
-        setType(type);
-        setHostIp(hostIp);
-        setHostPort(hostPort);
-        setRemoteService(remoteService);
+        return this.usedSizeInMb;
+    }
+
+    public void setUsedSizeInMb(long usedSizeInMb)
+    {
+        this.usedSizeInMb = usedSizeInMb;
+    }
+
+    public final static String AVAILABLE_SIZE_IN_MB_PROPERTY = "availableSizeInMb";
+
+    private final static boolean AVAILABLE_SIZE_IN_MB_REQUIRED = true;
+
+    private final static String AVAILABLE_SIZE_IN_MB_COLUMN = "availableSizeInMb";
+
+    private final static long AVAILABLE_SIZE_IN_MB_MIN = 0L;
+
+    private final static long AVAILABLE_SIZE_IN_MB_MAX = Long.MAX_VALUE;
+
+    @Column(name = AVAILABLE_SIZE_IN_MB_COLUMN, nullable = !AVAILABLE_SIZE_IN_MB_REQUIRED)
+    @Range(min = AVAILABLE_SIZE_IN_MB_MIN, max = AVAILABLE_SIZE_IN_MB_MAX)
+    private long availableSizeInMb;
+
+    public long getAvailableSizeInMb()
+    {
+        return this.availableSizeInMb;
+    }
+
+    public void setAvailableSizeInMb(long availableSizeInMb)
+    {
+        this.availableSizeInMb = availableSizeInMb;
+    }
+
+    public final static String TIER_PROPERTY = "tier";
+
+    private final static boolean TIER_REQUIRED = true;
+
+    private final static String TIER_ID_COLUMN = "idTier";
+
+    @JoinColumn(name = TIER_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_tier")
+    private Tier tier;
+
+    @Required(value = TIER_REQUIRED)
+    public Tier getTier()
+    {
+        return this.tier;
+    }
+
+    public void setTier(Tier tier)
+    {
+        this.tier = tier;
+    }
+
+    public final static String ENABLED_PROPERTY = "enabled";
+
+    private final static boolean ENABLED_REQUIRED = true;
+
+    private final static String ENABLED_COLUMN = "isEnabled";
+
+    @Column(name = ENABLED_COLUMN, nullable = !ENABLED_REQUIRED)
+    private boolean enabled;
+
+    @Required(value = ENABLED_REQUIRED)
+    public boolean getEnabled()
+    {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public String getId()
+    {
+        return this.getIdStorage();
     }
 
 }

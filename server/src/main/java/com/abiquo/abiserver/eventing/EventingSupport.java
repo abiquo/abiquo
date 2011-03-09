@@ -328,7 +328,7 @@ public final class EventingSupport
     {
         try
         {
-            if (emptyString(user) || emptyString(password))
+            if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }
@@ -357,13 +357,13 @@ public final class EventingSupport
      * @param virtualSystemAddress the physical machine addres to monitor
      * @throws EventingException
      */
-    public static void unMonitorPhysicalMachine(String virtualSystemAddress,
+    public static void unMonitorPhysicalMachine(String virtualSystemAddress, HypervisorType hypervisorType,
         final String virtualSystemMonitorAddress, final String user, final String password)
         throws EventingException
     {
         try
         {
-            if (emptyString(user) || emptyString(password))
+        	if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }

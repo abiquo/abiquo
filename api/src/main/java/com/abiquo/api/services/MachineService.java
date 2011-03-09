@@ -126,7 +126,7 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), "", machineDto.getIp(), machineDto
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
                 .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
                 .getPassword());
 
@@ -271,21 +271,6 @@ public class MachineService extends DefaultApiService
 
         return (machine.getDatacenter().getId().equals(datacenterId) && machine.getRack().getId()
             .equals(rackId));
-    }
-
-    public Machine moveMachine(Integer machineId, Integer newRackId)
-    {
-        Machine machine = getMachine(machineId);
-        Rack rack = repo.findRackById(newRackId);
-
-        if (rack.getDatacenter().getId() != machine.getDatacenter().getId())
-        {
-            // FIXME: error
-        }
-
-        machine.setRack(rack);
-        repo.updateMachine(machine);
-        return machine;
     }
 
     private void isValidMachine(Machine machine)

@@ -123,15 +123,15 @@
                     userInput.text = hypervisor.user;
                     passwordInput.text = hypervisor.password;
                     datastoreManagement.hypervisor = hypervisor;
-
-                    if(hypervisor.type.id == HyperVisorType.VMX)
-                    {
-                          _editableButton = false;
+                    
+                    if(hypervisor.type.id == HyperVisorType.VMX){
+                    	_editableButton = false;
                     }
-                 }
+                }
 
-                 //The Hypervisor information is editable only if the PhysicalMachine has not VirtualMachines
-                 isHypervisorInfoEditable = AbiCloudModel.getInstance().infrastructureManager.getVirtualMachinesByPhysicalMachine(physicalMachine).length == 0; 
+                //The Hypervisor information is editable only if the PhysicalMachine has not VirtualMachines
+                isHypervisorInfoEditable = AbiCloudModel.getInstance().infrastructureManager.getVirtualMachinesByPhysicalMachine(physicalMachine).length == 0; 
+            	
             }
 
             private function onChangeHypervisorTypeInput():void
@@ -158,7 +158,7 @@
                 pm.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
                 pm.vswitchName = vswitchNameInput.text;
 
-                var hypervisor = ObjectUtil.copy(this.physicalMachine.hypervisor) as HyperVisor;                
+                var hypervisor:HyperVisor = ObjectUtil.copy(this.physicalMachine.hypervisor) as HyperVisor;                
                 hypervisor.ipService = ipServiceInput.text;
                 
                 pm.hypervisor = hypervisor;

@@ -18,54 +18,31 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "storagePool")
 public class StoragePoolDto extends SingleResourceTransportDto
 {
+    
     private static final long serialVersionUID = 1L;
+    public static final String MEDIA_TYPE = "application/storagepooldto+xml";
+    private String idStorage;
 
-    private String id;
-
-    public String getId()
+    public String getIdStorage()
     {
-        return id;
+        return idStorage;
     }
 
-    public void setId(String id)
+    public void setIdStorage(String idStorage)
     {
-        this.id = id;
+        this.idStorage = idStorage;
     }
-
-    private int hostPort;
-
-    public int getHostPort()
-    {
-        return hostPort;
-    }
-
-    public void setHostPort(int hostPort)
-    {
-        this.hostPort = hostPort;
-    }
-
-    private String urlManagement;
-
-    public String getUrlManagement()
-    {
-        return urlManagement;
-    }
-
-    public void setUrlManagement(String urlManagement)
-    {
-        this.urlManagement = urlManagement;
-    }
-
+    
     private String name;
 
     public String getName()
@@ -78,28 +55,52 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private StorageTechnologyType type;
+    private long totalSizeInMb;
 
-    public StorageTechnologyType getType()
+    public long getTotalSizeInMb()
     {
-        return type;
+        return totalSizeInMb;
     }
 
-    public void setType(StorageTechnologyType type)
+    public void setTotalSizeInMb(long totalSizeInMb)
     {
-        this.type = type;
+        this.totalSizeInMb = totalSizeInMb;
     }
 
-    private String hostIp;
+    private long usedSizeInMb;
 
-    public String getHostIp()
+    public long getUsedSizeInMb()
     {
-        return hostIp;
+        return usedSizeInMb;
     }
 
-    public void setHostIp(String hostIp)
+    public void setUsedSizeInMb(long usedSizeInMb)
     {
-        this.hostIp = hostIp;
+        this.usedSizeInMb = usedSizeInMb;
     }
 
+    private long availableSizeInMb;
+
+    public long getAvailableSizeInMb()
+    {
+        return availableSizeInMb;
+    }
+
+    public void setAvailableSizeInMb(long availableSizeInMb)
+    {
+        this.availableSizeInMb = availableSizeInMb;
+    }
+
+    private boolean enabled;
+
+    public boolean getEnabled()
+    {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+    
 }

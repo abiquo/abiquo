@@ -64,10 +64,7 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
 
     @Autowired
-    VirtualMachineService vmService;
-
-    @Autowired
-    VirtualApplianceService vappService;
+    VirtualMachineService vmService;    
 
     @Autowired
     VirtualMachineAllocatorService service;
@@ -94,13 +91,7 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
-
-        VirtualMachine vm = vmService.getVirtualMachine(vmId);
-        if (vm == null || !vmService.isAssignedTo(vmId, vapp.getId()))
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALMACHINE);
-        }
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);        
 
         return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
@@ -113,16 +104,8 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        // Check the parameters virtual app- virtual datacenters are correct.
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        VirtualMachine vm = vmService.getVirtualMachine(vmId);
-        if (vm == null || !vmService.isAssignedTo(vmId, vapp.getId()))
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALMACHINE);
-        }
-
-        // Get the list of ipPoolManagements objects
         List<IpPoolManagement> all = ipService.getListIpPoolManagementByMachine(vm);
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
         for (IpPoolManagement ip : all)
@@ -132,9 +115,22 @@ public class VirtualMachineResource extends AbstractResource
 
         return ips;
     }
+    
+    @PUT
+    public VirtualMachineDto updateVirtualMachine(
+		@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
+        VirtualMachineDto dto,
+        @Context IRESTBuilder restBuilder) throws Exception
+    {
+    	VirtualMachine vm = vmService.updateVirtualMachine(vdcId, vappId, vmId, dto);
+    	
+    	return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
+    }
 
     @PUT
-    // TODO action ??
+    @Path("action/allocate")
     public synchronized VirtualMachineDto allocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId,
@@ -155,8 +151,8 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     @DELETE
-    // TODO action ??
-    public synchronized void deallocateallocate(
+    @Path("action/deallocate")
+    public synchronized void deallocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId,
         @Context IRESTBuilder restBuilder) throws Exception

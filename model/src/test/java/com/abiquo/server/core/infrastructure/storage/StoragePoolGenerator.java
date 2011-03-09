@@ -18,79 +18,107 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
-import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.server.core.common.GenericEntityGenerator;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
 {
-    RemoteServiceGenerator remoteServiceGenerator;
+
+    TierGenerator tierGenerator;
+
+    StorageDeviceGenerator deviceGenerator;
 
     public StoragePoolGenerator(SeedGenerator seed)
     {
         super(seed);
-        remoteServiceGenerator = new RemoteServiceGenerator(seed);
+
+        tierGenerator = new TierGenerator(seed);
+
+        deviceGenerator = new StorageDeviceGenerator(seed);
+
     }
 
     @Override
-    public void assertAllPropertiesEqual(StoragePool pool1, StoragePool pool2)
+    public void assertAllPropertiesEqual(StoragePool obj1, StoragePool obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(pool1, pool2, StoragePool.HOST_PORT_PROPERTY,
-            StoragePool.URL_MANAGEMENT_PROPERTY, StoragePool.NAME_PROPERTY,
-            StoragePool.TYPE_PROPERTY, StoragePool.HOST_IP_PROPERTY);
-
-        remoteServiceGenerator.assertAllPropertiesEqual(pool1.getRemoteService(), pool2
-            .getRemoteService());
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, StoragePool.NAME_PROPERTY);
     }
 
     @Override
     public StoragePool createUniqueInstance()
     {
-        RemoteService remoteService =
-            remoteServiceGenerator.createInstance(RemoteServiceType.STORAGE_SYSTEM_MONITOR);
+        StoragePool storagePool = new StoragePool();
 
-        return createInstance(remoteService);
+        Tier tier = tierGenerator.createUniqueInstance();
+        storagePool.setTier(tier);
+
+        StorageDevice device = deviceGenerator.createUniqueInstance();
+        storagePool.setDevice(device);
+
+        storagePool.setIdStorage(UUID.randomUUID().toString());
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
+
+        return storagePool;
     }
 
-    public StoragePool createInstance(RemoteService remoteService)
+    public StoragePool createInstanceIntoDevice(StorageDevice device)
     {
-        // Random values
-        String id = newString(nextSeed(), StoragePool.ID_LENGTH_MIN, StoragePool.ID_LENGTH_MAX);
-        String name =
-            newString(nextSeed(), StoragePool.NAME_LENGTH_MIN, StoragePool.NAME_LENGTH_MAX);
-        String url =
-            newString(nextSeed(), StoragePool.URL_MANAGEMENT_LENGTH_MIN,
-                StoragePool.URL_MANAGEMENT_LENGTH_MAX);
-        String hostIp =
-            newString(nextSeed(), StoragePool.HOST_IP_LENGTH_MIN, StoragePool.HOST_IP_LENGTH_MAX);
-        int hostPort = nextSeed();
-        StorageTechnologyType type = newEnum(StorageTechnologyType.class, nextSeed());
+        StoragePool storagePool = new StoragePool();
 
-        StoragePool pool = new StoragePool(name, url, type, hostIp, hostPort, remoteService);
-        pool.setId(id);
+        Tier tier = tierGenerator.createInstance(device.getDatacenter(), "Default Tier");
 
-        return pool;
+        storagePool.setTier(tier);
+        storagePool.setDevice(device);
+        storagePool.setIdStorage(UUID.randomUUID().toString());
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
+
+        return storagePool;
+    }
+    
+    public StoragePool createInstanceIntoTier(Tier tier)
+    {
+        StoragePool storagePool = new StoragePool();
+
+        StorageDevice device = deviceGenerator.createDeviceForInstance(tier.getDatacenter());
+
+        storagePool.setTier(tier);
+        storagePool.setDevice(device);
+        storagePool.setIdStorage(UUID.randomUUID().toString());
+        storagePool.setName("LoPutoStorage" + String.valueOf(new Random().nextInt()));
+        storagePool.setAvailableSizeInMb(1000L);
+        storagePool.setTotalSizeInMb(1000L);
+        storagePool.setUsedSizeInMb(0L);
+
+        return storagePool;
     }
 
     @Override
     public void addAuxiliaryEntitiesToPersist(StoragePool entity, List<Object> entitiesToPersist)
     {
-        if (entity.getRemoteService() != null)
-        {
-            remoteServiceGenerator.addAuxiliaryEntitiesToPersist(entity.getRemoteService(),
-                entitiesToPersist);
-            entitiesToPersist.add(entity.getRemoteService());
-        }
-
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        Tier tier = entity.getTier();
+        tierGenerator.addAuxiliaryEntitiesToPersist(tier, entitiesToPersist);
+        entitiesToPersist.add(tier);
+
+        StorageDevice device = entity.getDevice();
+        deviceGenerator.addAuxiliaryEntitiesToPersist(device, entitiesToPersist);
+        entitiesToPersist.add(device);
+
     }
 
 }

@@ -46,7 +46,6 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
     public void assertAllPropertiesEqual(Hypervisor obj1, Hypervisor obj2)
     {
         assertEquals(obj1.getId(), obj2.getId());
-        assertEquals(obj1.getDescription(), obj2.getDescription());
         assertEquals(obj1.getType(), obj2.getType());
         assertEquals(obj1.getIp(), obj2.getIp());
         assertEquals(obj1.getIpService(), obj2.getIpService());
@@ -78,7 +77,6 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
 
     public Hypervisor createInstance(Machine machine, HypervisorType type)
     {
-        String description = newString(nextSeed(), 0, 255);
         String ip = newString(nextSeed(), 0, 39);
         String ipService = newString(nextSeed(), 0, 39);
         int port = nextSeed();
@@ -86,7 +84,7 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
         String user = newString(nextSeed(), 0, 255);
         String password = newString(nextSeed(), 0, 255);
 
-        return machine.createHypervisor(type, description, ip, ipService, port, user, password);
+        return machine.createHypervisor(type, ip, ipService, port, user, password);
     }
 
     @Override

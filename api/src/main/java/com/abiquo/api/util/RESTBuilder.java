@@ -286,8 +286,8 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildStoragePoolLinks(Integer datacenterId, RemoteServiceType type,
-        StoragePoolDto storagePool)
+    public List<RESTLink> buildStoragePoolLinks(final Integer datacenterId, final Integer deviceId,
+        final Integer tierId, final String poolId)
     {
         return null;
     }
@@ -548,6 +548,19 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildLimitsLinks(Enterprise enterprise, Datacenter datacenter,
         DatacenterLimitsDto dto)
     {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildTierLinks(Integer datacenterId, Integer tierId)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildStorageDeviceLinks(Integer datacenterId, Integer deviceId)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 }

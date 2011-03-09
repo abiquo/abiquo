@@ -379,7 +379,6 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`hypervisor`;
 CREATE TABLE  `kinton`.`hypervisor` (
   `id` int(20) unsigned NOT NULL auto_increment,
-  `description` varchar(100) NOT NULL,
   `idPhysicalMachine` int(20) unsigned NOT NULL,
   `ip` varchar(39) NOT NULL,
   `ipService` varchar(39) NOT NULL,
@@ -1269,7 +1268,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.infra.vlanIdMax","4094","Maximum value for vlan ID"),
  ("client.infra.useVirtualBox","0","Support (1) or not (0) Virtual Box"),
  ("client.dashboard.dashboardUpdateInterval","30","Time interval in seconds"),
- ("client.infra.defaultHypervisorPassword","voycruzand0elrio","Default Hypervisor password used when creating Physical Machines"),
+ ("client.infra.defaultHypervisorPassword","temporal","Default Hypervisor password used when creating Physical Machines"),
  ("client.infra.defaultHypervisorPort","8889","Default Hypervisor port used when creating Physical Machines"),
  ("client.infra.defaultHypervisorUser","root","Default Hypervisor user used when creating Physical Machines"),
  ("client.storage.volumeMaxSizeValues","1,2,4,8,16,32,64,128,256","Comma separated values, with the allowed sizes when creating or editing a VolumeManagement"),
@@ -1479,40 +1478,44 @@ CREATE TABLE  `kinton`.`enterprise_limits_by_datacenter` (
 
 USE kinton;
 
+-- 
+-- Definition of table `kinton`.`tier`.
 --
--- Definition of table `kinton`.`publicip`
+DROP TABLE IF EXISTS `kinton`.`tier`;
+CREATE TABLE `kinton`.`tier` (
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(40) NOT NULL,
+    `description` varchar(255) NOT NULL,
+    `isEnabled` tinyint(1) unsigned NOT NULL default '1',
+    `idDataCenter` int(10) unsigned NOT NULL,
+    `version_c` integer NOT NULL DEFAULT 1,
+     PRIMARY KEY  (`id`),
+     CONSTRAINT `tier_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+/*!40000 ALTER TABLE `tier` ENABLE KEYS */;
+--
+-- Definition of table `kinton`.`cabin`
 --
 
-DROP TABLE IF EXISTS `kinton`.`publicip`;
-CREATE TABLE  `kinton`.`publicip` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `ip` varchar(15) character set utf8 NOT NULL,
-  `netMask` int(3) unsigned NOT NULL,
-  `idGateway` int(10) unsigned default NULL,
+CREATE TABLE `kinton`.`storage_device` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(256) NOT NULL,
   `idDataCenter` int(10) unsigned NOT NULL,
-  `idEnterprise` int(10) unsigned default NULL,
-  `idNode` int(10) unsigned default NULL,
-  `quarantine` int(1) unsigned NOT NULL default '0',
-  `version_c` int(11) default 0,
+  `management_ip` varchar(256) NOT NULL,
+  `management_port` int(5) unsigned NOT NULL DEFAULT '0',
+  `iscsi_ip` varchar(256) NOT NULL,
+  `iscsi_port` int(5) unsigned NOT NULL DEFAULT '0',
+  `storage_technology` varchar(256) DEFAULT NULL,
+  `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`id`),
-  KEY `FK_1` (`idDataCenter`),
-  KEY `FK_2` (`idEnterprise`),
-  KEY `FK_3` (`idNode`),
-  KEY `FK_4` (`idGateway`),
-  CONSTRAINT `FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE,
-  CONSTRAINT `FK_2` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL,
-  CONSTRAINT `FK_3` FOREIGN KEY (`idNode`) REFERENCES `node` (`idNode`) ON DELETE SET NULL,
-  CONSTRAINT `FK_4` FOREIGN KEY (`idGateway`) REFERENCES `gateway` (`idGateway`) ON DELETE SET NULL
+  CONSTRAINT `storage_device_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `kinton`.`publicip`
---
-
-/*!40000 ALTER TABLE `publicip` DISABLE KEYS */;
-LOCK TABLES `publicip` WRITE;
+/*!40000 ALTER TABLE `storage_device` DISABLE KEYS */;
+LOCK TABLES `kinton`.`storage_device` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `publicip` ENABLE KEYS */;
+/*!40000 ALTER TABLE `storage_device` ENABLE KEYS */;
 
 --
 -- Definition of table `kinton`.`storage_pool`
@@ -1521,16 +1524,17 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`storage_pool`;
 CREATE TABLE  `kinton`.`storage_pool` (
   `idStorage` varchar(40) NOT NULL,
+  `idStorageDevice` int(10) unsigned NOT NULL,
+  `idTier` int(10) unsigned NOT NULL,
+  `isEnabled` tinyint(1) unsigned NOT NULL default '1',
   `version_c` integer NOT NULL DEFAULT 1,
-  `idRemoteService` int(10) unsigned NOT NULL,
+  `totalSizeInMb` bigint(20) unsigned NOT NULL default 0,
+  `usedSizeInMb` bigint(20) unsigned NOT NULL default 0,
+  `availableSizeInMb` bigint(20) unsigned NOT NULL default 0,
   `name` varchar(256) DEFAULT NULL,
-  `url_management` varchar(256) NOT NULL,
-  `host_ip` varchar(256) NOT NULL,
-  `host_port` int(5) unsigned NOT NULL DEFAULT '0',
-  `storage_technology` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`idStorage`),
-  KEY `idRemoteServiceFK_1` (`idRemoteService`),
-  CONSTRAINT `idRemoteServiceFK_1` FOREIGN KEY (`idRemoteService`) REFERENCES `remote_service` (`idRemoteService`) ON DELETE CASCADE
+  CONSTRAINT `storage_pool_FK1` FOREIGN KEY (`idStorageDevice`) REFERENCES `kinton`.`storage_device` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `storage_pool_FK2` FOREIGN KEY (`idTier`) REFERENCES `kinton`.`tier` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -1541,7 +1545,6 @@ CREATE TABLE  `kinton`.`storage_pool` (
 LOCK TABLES `storage_pool` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `storage_pool` ENABLE KEYS */;
-
 
 --
 -- Definition of table `kinton`.`volume_management`
@@ -1647,15 +1650,18 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idVirtualImageConversion` int(1) unsigned,
   `idDiskStatefulConversion` int(1) unsigned,
   `version_c` int(11) default 0,
+  `idTier` int(10) unsigned NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
   KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
   KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
   KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
+  KEY `idTier_FK4` (`idTier`),
   CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
   CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE
+  CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -1851,7 +1857,6 @@ DROP TRIGGER IF EXISTS `kinton`.`enterprise_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`create_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_physicalmachine_update_stats`;
-DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_nodevirtualimage_update_stats`;
@@ -1872,6 +1877,7 @@ DROP TRIGGER IF EXISTS `kinton`.`create_ip_pool_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_vlan_network_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_vlan_network_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_ip_pool_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`update_network_configuration_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`dclimit_created`;
 DROP TRIGGER IF EXISTS `kinton`.`dclimit_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`dclimit_deleted`;
@@ -2195,46 +2201,6 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
   END;
 --
 --
---
--- Triggers ON virtualmachine
--- ******************************************************************************************
--- Description:
---  * Updates resources (cpu, ram, hd) used by Enterprise
---
--- Fires: ON INSERT an virtualmachine for the virtualmachine table
---
--- FIXME: This Trigger is probably NEVER used, tested with imported VM and created from Abiquo.
--- All operations are watched in AFTER UPDATE TRIGGER
--- ******************************************************************************************
-|
-CREATE TRIGGER `kinton`.`create_virtualmachine_update_stats` AFTER INSERT ON `kinton`.`virtualmachine`
-  FOR EACH ROW BEGIN
-    DECLARE idDataCenterObj INTEGER;
-    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    --   Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
-    IF NEW.state = "RUNNING" AND NEW.idType = 1 THEN
-      UPDATE IGNORE enterprise_resources_stats
-        SET vCpuUsed = vCpuUsed + NEW.cpu,
-          memoryUsed = memoryUsed + NEW.ram,
-          localStorageUsed = localStorageUsed + NEW.hd
-      WHERE idEnterprise = NEW.idEnterprise;
-      UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-      WHERE idDataCenter = idDataCenterObj;
-    END IF;
-    IF NEW.state != "NOT_DEPLOYED" AND NEW.idType = 1 THEN
-      --
-      SELECT pm.idDataCenter INTO idDataCenterObj
-      FROM hypervisor hy, physicalmachine pm
-      WHERE NEW.idHypervisor=hy.id
-      AND hy.idPhysicalMachine=pm.idPhysicalMachine;
-      --
-      UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
-      WHERE idDataCenter = idDataCenterObj;
-    END IF;
-  END IF;
-  END;
---
---
 -- ******************************************************************************************
 -- Description: 
 --  * Updates resources (cpu, ram, hd) used by Enterprise
@@ -2251,6 +2217,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
@@ -2270,7 +2237,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;     
-        IF NEW.idType = 1 AND (NEW.state != OLD.state OR OLD.idType != NEW.idType) THEN
+        IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             -- Activates if state changes or machines are captured
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
@@ -2321,7 +2288,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
             END IF;     
-            IF OLD.state = "NOT_DEPLOYED" OR OLD.state = "UNKNOWN" OR OLD.idType != NEW.idType THEN
+            IF OLD.state = "NOT_DEPLOYED" OR OLD.state = "UNKNOWN"  THEN -- OR OLD.idType != NEW.idType
                 -- VMachine Deployed or VMachine imported
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
@@ -2644,10 +2611,10 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
         DECLARE incr INTEGER;
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
         SET incr = NEW.usedSize-OLD.usedSize;
-        SELECT rs.idDataCenter INTO idDataCenterObj
-        FROM storage_pool sp, remote_service rs
+        SELECT sd.idDataCenter INTO idDataCenterObj
+        FROM storage_pool sp, storage_device sd
         WHERE OLD.idStorage = sp.idStorage
-        AND sp.idRemoteService = rs.idRemoteService;
+        AND sp.idStorageDevice = sd.id;
         --      
         SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
         FROM rasd_management rasd, virtualapp vapp
@@ -2724,7 +2691,7 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
     FOR EACH ROW BEGIN
         DECLARE state VARCHAR(50);
-                DECLARE idState INTEGER;
+        DECLARE idState INTEGER;
         DECLARE idImage INTEGER;
         DECLARE idDataCenterObj INTEGER;
         DECLARE idEnterpriseObj INTEGER;
@@ -2804,7 +2771,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                     FROM virtualdatacenter vdc
                     WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
                     -- 
-                    UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed + 1 WHERE idDataCenter = idDataCenterObj;
+                    -- UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed + 1 WHERE idDataCenter = idDataCenterObj;
                     UPDATE IGNORE enterprise_resources_stats 
                         SET     publicIPsUsed = publicIPsUsed + 1
                         WHERE idEnterprise = idEnterpriseObj;
@@ -2832,7 +2799,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                     FROM virtualdatacenter vdc
                     WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
                     -- 
-                    UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = idDataCenterObj;
+                    -- UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = idDataCenterObj;
                     UPDATE IGNORE enterprise_resources_stats 
                         SET     publicIPsUsed = publicIPsUsed - 1
                         WHERE idEnterprise = idEnterpriseObj;
@@ -2855,7 +2822,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 AND OLD.idManagement = ipm.idManagement;
                 -- Datacenter found ---> Not PublicIPReserved
                 IF idDataCenterObj IS NOT NULL THEN
-                    UPDATE IGNORE cloud_usage_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = idDataCenterObj;
+                    UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = idDataCenterObj;
                     -- Registers Accounting Event
                     SELECT vdc.idEnterprise INTO idEnterpriseObj
                     FROM virtualdatacenter vdc
@@ -2946,6 +2913,29 @@ CREATE TRIGGER `kinton`.`create_ip_pool_management_update_stats` AFTER INSERT ON
   END;
 |
 -- ******************************************************************************************
+-- Description:
+--  * When a new IP is deleted from a datacenter at VLAN Creation
+--
+-- Fires: On an DELETE for the ip_pool_management
+-- ******************************************************************************************
+CREATE TRIGGER `kinton`.`delete_ip_pool_management_update_stats` AFTER DELETE ON `kinton`.`ip_pool_management`
+  FOR EACH ROW BEGIN
+    DECLARE idDataCenterObj INTEGER;
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+      -- Query for Public Ips deleted (disabled)
+      SELECT distinct dc.idDataCenter INTO idDataCenterObj
+      FROM vlan_network vn, network_configuration nc, datacenter dc
+      WHERE OLD.dhcp_service_id = nc.dhcp_service_id
+      AND vn.network_configuration_id = nc.network_configuration_id
+      AND vn.network_id = dc.network_id;
+      IF idDataCenterObj IS NOT NULL THEN
+	-- detects IP disabled/enabled at Edit Public Ips
+        UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
+      END IF;
+    END IF;
+  END;
+|
+-- ******************************************************************************************
 -- Description: 
 -- * Registers Created VLAN for Accounting for enterprise, dc, vdc
 --
@@ -2996,23 +2986,13 @@ FOR EACH ROW
 BEGIN
     DECLARE idVirtualDataCenterObj INTEGER;
     DECLARE idEnterpriseObj INTEGER;
-    DECLARE numPublicIpsDeleted INTEGER;
     DECLARE idDataCenterObj INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
-            -- Query for new Public Ips created
-            SELECT COUNT(*) INTO numPublicIpsDeleted
-            FROM ip_pool_management ipm, network_configuration nc
-            WHERE ipm.dhcp_service_id=nc.dhcp_service_id
-            AND OLD.network_configuration_id = nc.network_configuration_id
-            AND OLD.network_id in (select distinct network_id from datacenter);
             -- Query for Datacenter
             SELECT dc.idDataCenter INTO idDataCenterObj
             FROM datacenter dc
             WHERE dc.network_id = OLD.network_id;
-            --
-            IF numPublicIpsDeleted > 0 THEN
-                UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-numPublicIpsDeleted WHERE idDataCenter = idDataCenterObj;
-            END IF;
+            -- Deleted PublicIps are deteceted in network_configuration
             -- VLAN Accounting  
             SELECT vdc.idVirtualDataCenter, e.idEnterprise INTO idVirtualDataCenterObj, idEnterpriseObj
             FROM virtualdatacenter vdc, enterprise e
@@ -3060,7 +3040,7 @@ CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON
                 WHERE NEW.idManagement = rm.idManagement
                 AND vdc.idVirtualDataCenter = rm.idVirtualDataCenter;
                 -- New Public IP assignment for a VDC ---> Reserved
-                UPDATE IGNORE cloud_usage_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed+1 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idEnterprise = idEnterpriseObj;
                 UPDATE IGNORE vdc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idDataCenter = idDataCenterObj;
@@ -3070,6 +3050,39 @@ CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON
             END IF;
         END IF;
     END;
+|
+-- ******************************************************************************************
+-- Description: 
+--  * Registers/Unregister new IPS defined for a datacenter's network
+--
+-- Fires: On IP Creation / Deletion in a Datacenter
+-- ******************************************************************************************
+CREATE TRIGGER `kinton`.`update_network_configuration_update_stats` AFTER UPDATE ON  `network_configuration`
+FOR EACH ROW BEGIN
+	DECLARE newPublicIps INTEGER;
+	DECLARE idDataCenterObj INTEGER;
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE network_configuration with dhcp_service_id OLD ',IFNULL(OLD.dhcp_service_id,'NULL'),' and NEW ', IFNULL(NEW.dhcp_service_id,'NULL')));
+	 IF OLD.dhcp_service_id IS NULL AND NEW.dhcp_service_id IS NOT NULL THEN
+	 	-- New Public IPs added
+	 	SELECT count(*), dc.idDataCenter INTO newPublicIps, idDataCenterObj
+	      FROM vlan_network vn, datacenter dc, ip_pool_management ipm
+	      WHERE ipm.dhcp_service_id = NEW.dhcp_service_id
+	      AND vn.network_configuration_id = NEW.network_configuration_id
+	      AND vn.network_id = dc.network_id;	 	
+	      -- INSERT INTO debug_msg (msg) VALUES (CONCAT('New Public Ips Detected ',IFNULL(newPublicIps,'NULL'),' for DC ', IFNULL(idDataCenterObj,'NULL')));
+	      UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+newPublicIps WHERE idDataCenter = idDataCenterObj;
+	 END IF;
+	IF NEW.dhcp_service_id IS NULL AND OLD.dhcp_service_id IS NOT NULL THEN
+	 	-- New Public IPs deleted 
+	 	SELECT count(*), dc.idDataCenter INTO newPublicIps, idDataCenterObj
+	      FROM vlan_network vn, datacenter dc, ip_pool_management ipm
+	      WHERE ipm.dhcp_service_id = OLD.dhcp_service_id
+	      AND vn.network_configuration_id = OLD.network_configuration_id
+	      AND vn.network_id = dc.network_id;	 	
+	      -- INSERT INTO debug_msg (msg) VALUES (CONCAT('New Public Ips Deleted ',IFNULL(newPublicIps,'NULL'),' for DC ', IFNULL(idDataCenterObj,'NULL')));
+	      UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal - newPublicIps WHERE idDataCenter = idDataCenterObj;	
+	 END IF;
+END;
 |
 -- ******************************************************************************************
 -- Description: 
@@ -3107,39 +3120,37 @@ CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_l
 -- ******************************************************************************************
 CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN      
+    -- Creation : idEnterprise and idDatacenter are NOT NULL: update with NEW.stat
+    -- Deletion: idEnterprise is NULL -> update with  - NEW.stat
+    -- INSERT or DELETE Triggers are used when deleting Enterprises or inserting new Enterprises
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
-            IF NEW.idEnterprise IS NULL OR NEW.idDataCenter IS NULL THEN
+            IF OLD.idEnterprise IS NOT NULL AND NEW.idEnterprise IS NULL THEN
                 -- Limit is not used anymore. Statistics are removed
-                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;
+                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;                
                 UPDATE IGNORE cloud_usage_stats 
                 SET vCpuReserved = vCpuReserved - OLD.cpuHard,
                     vMemoryReserved = vMemoryReserved - OLD.ramHard,
                     vStorageReserved = vStorageReserved - OLD.hdHard,
                     storageReserved = storageReserved - OLD.storageHard,
-                    -- repositoryReserved = repositoryReserved - OLD.repositoryHard + NEW.repositoryHard,
                     publicIPsReserved = publicIPsReserved - OLD.publicIPHard,
                     vlanReserved = vlanReserved - OLD.vlanHard
-                WHERE idDataCenter = OLD.idDataCenter;
-            ELSE 
-                -- Update statistics fields
-                UPDATE IGNORE dc_enterprise_stats 
-                SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
-                    memoryReserved = memoryReserved - OLD.ramHard + NEW.ramHard,
-                    localStorageReserved = localStorageReserved - OLD.hdHard + NEW.hdHard,
-                    extStorageReserved = extStorageReserved - OLD.storageHard + NEW.storageHard,
-                    repositoryReserved = repositoryReserved - OLD.repositoryHard + NEW.repositoryHard,
-                    -- publicIPsReserved = publicIPsReserved - OLD.publicIPHard + NEW.publicIPHard,
-                    vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
-                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = NEW.idDataCenter;
+                WHERE idDataCenter = OLD.idDataCenter;                
+            ELSEIF  OLD.idEnterprise IS NULL AND NEW.idEnterprise IS NOT NULL THEN
+                -- We got a new limit defined (or updated)
+            	INSERT IGNORE INTO dc_enterprise_stats 
+                (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
+                extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
+            	VALUES 
+                (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
+                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);                                
                 -- Update cloud usage
                 UPDATE IGNORE cloud_usage_stats 
-                SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
-                    vMemoryReserved = vMemoryReserved - OLD.ramHard + NEW.ramHard,
-                    vStorageReserved = vStorageReserved - OLD.hdHard + NEW.hdHard,
-                    storageReserved = storageReserved - OLD.storageHard + NEW.storageHard,
-                    -- repositoryReserved = repositoryReserved - OLD.repositoryHard + NEW.repositoryHard,
-                    publicIPsReserved = publicIPsReserved - OLD.publicIPHard + NEW.publicIPHard,
-                    vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
+                SET vCpuReserved = vCpuReserved  + NEW.cpuHard,
+                    vMemoryReserved = vMemoryReserved + NEW.ramHard,
+                    vStorageReserved = vStorageReserved  + NEW.hdHard,
+                    storageReserved = storageReserved  + NEW.storageHard,
+                    publicIPsReserved = publicIPsReserved  + NEW.publicIPHard,
+                    vlanReserved = vlanReserved  + NEW.vlanHard
                 WHERE idDataCenter = NEW.idDataCenter;
             END IF;             
         END IF;
@@ -3363,14 +3374,14 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     AND vdc.idDataCenter = idDataCenterObj;
     --
     SELECT IF (SUM(r.limitResource) IS NULL, 0, SUM(r.limitResource)) INTO storageUsed
-    FROM storage_pool sp, remote_service rs, volume_management vm, rasd_management rm, rasd r
+    FROM storage_pool sp, storage_device sd, volume_management vm, rasd_management rm, rasd r
     WHERE vm.idStorage = sp.idStorage
-    AND sp.idRemoteService = rs.idRemoteService
+    AND sp.idStorageDevice = sd.id
     AND vm.idManagement = rm.idManagement
     AND r.instanceID = rm.idResource
     AND rm.idResourceType = 8
     AND (vm.state = 1 OR vm.state = 2)
-    AND rs.idDataCenter = idDataCenterObj;
+    AND sd.idDataCenter = idDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsTotal
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc

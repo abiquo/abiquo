@@ -34,8 +34,6 @@ package net.undf.abicloud.vo.virtualappliance
     {
         public var virtualImage:VirtualImage;
 
-        //public var stateful:int;
-
         //The Virtual Machine where this Node has been deployed.
         //It may be null
         public var virtualMachine:VirtualMachine;

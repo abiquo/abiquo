@@ -116,7 +116,7 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
                 MediaType.APPLICATION_XML);
 
         RemoteServiceDto dto = new RemoteServiceDto();
-        dto.setType(RemoteServiceType.STORAGE_SYSTEM_MONITOR);
+        dto.setType(RemoteServiceType.APPLIANCE_MANAGER);
         dto.setUri("http://localhost:8080/ssm");
         dto.setStatus(1);
 

@@ -28,6 +28,8 @@ import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,6 +85,18 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
+    
+    public VirtualApplianceService()
+    {
+    	
+    }
+    
+    public VirtualApplianceService(EntityManager em)
+    {
+    	this.repo = new VirtualDatacenterRep(em);
+    	this.vdcService = new VirtualDatacenterService(em);
+    	this.remoteService = new RemoteServiceService(em);
+    }
 
     /**
      * Retrieves the list of virtual appliances by an unique virtual datacenter
@@ -214,5 +228,17 @@ public class VirtualApplianceService extends DefaultApiService
         repo.insertVirtualAppliance(vapp);
 
         return vapp;
+    }
+    
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualAppliance updateVirtualAppliance(Integer vdcId, Integer vappId, VirtualApplianceDto dto)
+    {
+    	VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+    	
+    	vapp.setName(dto.getName());
+    	
+    	repo.updateVirtualAppliance(vapp);
+    	
+    	return vapp;
     }
 }
