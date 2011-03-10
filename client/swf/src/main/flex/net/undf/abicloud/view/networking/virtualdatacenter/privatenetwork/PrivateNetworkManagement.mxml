@@ -111,7 +111,9 @@
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
-            	dispatchEvent(event);
+            	if(this._virtualDatacenter){
+	            	dispatchEvent(event);            		
+            	}
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{

@@ -659,7 +659,7 @@
         <InlineInvoker method="ScreenBlocker.blockScreen"/>
 
         <!-- Make call to the server here -->
-        <RemoteObjectInvoker instance="{services.virtualApplianceService}"
+        <RemoteObjectInvoker instance="{services.networkingService}"
             method="getPrivateNetworksByVirtualDatacenter"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id]}">
 
