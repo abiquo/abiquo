@@ -1,4 +1,4 @@
-Copyright © 2006-2010 Abiquo Holdings S.L.  All rights reserved.
+Copyright © 2006-2011 Abiquo Holdings S.L.  All rights reserved.
  “Abiquo” is a trademark of Abiquo, Inc.
 
 This software is licensed to you under the terms of the Lesser General Public License version 3 set out below. 
