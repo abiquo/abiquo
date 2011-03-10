@@ -62,8 +62,7 @@
 	 <mx:HBox>
 	 	<!--info for used ressources-->
         <mx:Box width="100" horizontalScrollPolicy="off">
-            <mx:Label fontWeight="bold" text="{ResourceManager.getInstance().getString('Infrastructure',
-	                                                                         'LABEL_USED')}"/>
+            <mx:Label fontWeight="bold" text="{ResourceManager.getInstance().getString('Infrastructure','LABEL_USED').toUpperCase()}"/>
         </mx:Box>
      </mx:HBox>
      <mx:HBox paddingBottom="5">
@@ -227,4 +226,7 @@
 	                                                                         'TEXTINPUT_LABEL_IP')+': '+_exceededLimit.hardIP}"/>
         </mx:Box>
     </mx:HBox>
+    <mx:Label id="performAction" 
+    	text="{resourceManager.getString('VirtualAppliance','ALERT_SOFT_LIMITS_EXCEEDED_TEXT')}"
+    	fontWeight="bold"/>
 </mx:VBox>
