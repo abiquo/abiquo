@@ -116,7 +116,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(idEnterprise);
 
-        List<String> availables = enterpriseRepository.getAllOVF(true);
+        List<String> availables = enterpriseRepository.getAllOVF(false);
 
         OVFPackageInstanceStatusListDto list = new OVFPackageInstanceStatusListDto();
 
