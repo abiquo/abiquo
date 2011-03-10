@@ -20,9 +20,13 @@
  */
 package com.abiquo.api.tracer;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.commons.amqp.impl.tracer.TracerProducer;
+import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -40,6 +44,9 @@ public class TracerLogger
     /** The tracer logger. */
     private static TracerLogger tracerLogger;
 
+    /** The RabbitMQ producer */
+    private TracerProducer producer;
+
     /**
      * Gets the singleton instance of the logger.
      * 
@@ -51,7 +58,16 @@ public class TracerLogger
         {
             tracerLogger = new TracerLogger();
         }
+
         return tracerLogger;
+    }
+
+    /**
+     * Private constructor to ensure singleton access.
+     */
+    private TracerLogger()
+    {
+        producer = new TracerProducer();
     }
 
     /**
@@ -68,25 +84,32 @@ public class TracerLogger
         try
         {
             TracerContext tracerContext = TracerContextHolder.getContext();
+            Trace trace = new Trace();
 
-            String log =
-                String.format("[%s|%s|%s|%s] (%s) %s", severity.name(), component.name(), event
-                    .name(), tracerContext.getHierarchy(), tracerContext.getUsername(), message);
+            trace.setSeverity(severity.name());
+            trace.setComponent(component.name());
+            trace.setEvent(event.name());
+            trace.setHierarchy(tracerContext.getHierarchy());
+            trace.setEnterpriseId(tracerContext.getEnterpriseId());
+            trace.setEnterpriseName(tracerContext.getEnterpriseName());
+            trace.setUserId(tracerContext.getUserId());
+            trace.setUsername(tracerContext.getUsername());
 
-            LOGGER.info(log);
+            LOGGER.info(trace.toString());
+
+            producer.openChannel();
+            producer.publish(trace);
+            producer.closeChannel();
         }
         catch (IllegalStateException ex)
         {
             // Just ignore this error for the moment; it appears if the method is invoked outside
             // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
+            LOGGER.warn("Could not send the trace.");
         }
-    }
-
-    /**
-     * Private constructor to ensure singleton access.
-     */
-    private TracerLogger()
-    {
-
+        catch (IOException e)
+        {
+            LOGGER.error("Could not publish the trace.", e);
+        }
     }
 }
