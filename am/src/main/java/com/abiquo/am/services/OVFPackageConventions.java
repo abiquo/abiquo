@@ -44,6 +44,8 @@ public class OVFPackageConventions
 
     public final static String FORMATS_PATH = "formats"; // TODO on EnterpriseRepositoryHandler
 
+    public final static String OVF_BUNDLE_IMPORTED_PREFIX = "http://bundle-imported/";
+
     /**
      * XXX document me !!! return the last segment of the OVF location path. (ends with ''.ovf'')
      */
@@ -57,6 +59,11 @@ public class OVFPackageConventions
     boolean isValidOVFLocation(final String ovfid)
     {
         return ovfid.startsWith(OVF_LOCATION_PREFIX) && ovfid.endsWith(OVF_LOCATION_POSTFIX);
+    }
+
+    boolean isImportedBundleOvfId(final String ovfId)
+    {
+        return ovfId.startsWith(OVF_BUNDLE_IMPORTED_PREFIX);
     }
 
     boolean isBundleOvfId(final String ovfId)
