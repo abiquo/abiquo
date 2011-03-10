@@ -573,6 +573,12 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
 
         String datastorePath = getDatastorePathFromRepository(repository);
+
+        if (datastorePath == null)
+        {
+            throw new Exception("Not valid datastore path " + diskBase.getLocation());
+        }
+
         String imagePath = diskBase.getImagePath();
         String sourcePath = datastorePath + imagePath;
         String destinationRepository = getDatastore(diskBase);
@@ -605,6 +611,10 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             }
         }
 
+        if (path == null)
+        {
+            return null;
+        }
         return path.endsWith("/") ? path : path + "/";
     }
 
@@ -619,7 +629,11 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             repo = new String(matcher.group(1));
         }
 
-        return repo;
+        if (repo == null)
+        {
+            return null;
+        }
+        return repo.equalsIgnoreCase("null") ? null : repo;
     }
 
     private String getDatastore(final VirtualDisk disk)
