@@ -73,8 +73,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
+        .getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -137,8 +137,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
-                        .toString());
+                    String.format("Can not obtain the datacenter with id [%s]",
+                        idDatacenter.toString());
             }
 
             factory.rollbackConnection();
@@ -758,19 +758,26 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         {
             Integer userEnterpriseId = user.getEnterpriseHB().getIdEnterprise();
             Integer vimageEnterpriseId = vimage.getIdEnterprise();
-            
-            if(userEnterpriseId.intValue() != vimageEnterpriseId.intValue())
-            {                
+
+            if (userEnterpriseId.intValue() != vimageEnterpriseId.intValue())
+            {
                 final String cause =
                     String
-                    .format("Only users from the original enterprise can delete a shared virtual image ");
-                
+                        .format("Only users from the original enterprise can delete a shared virtual image ");
+
                 throw new AppsLibraryCommandException(cause);
-            }            
+            }
         }
 
         // final String formatUri = vimage.getDiskFormatTypeHB().getUri();
-        final String viOvf = vimage.getOvfId();
+        String viOvf = vimage.getOvfId();
+
+        if (viOvf == null)
+        {
+            // this is a bundle of an imported virtual machine (it havent OVF)
+            viOvf = codifyBundleImportedOVFid(vimage.getPathName());
+        }
+
         final Integer idEnterprise = vimage.getIdEnterprise();
         final Integer idDatacenter = vimage.getRepository().getDatacenter().getIdDataCenter();
 
@@ -822,6 +829,11 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
 
         return null;
+    }
+
+    private String codifyBundleImportedOVFid(final String vipath)
+    {
+        return String.format("http://bundle-imported/%s", vipath);
     }
 
     private String getApplianceManagerUriOnRepository(final Integer idRepository)
