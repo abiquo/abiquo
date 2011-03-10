@@ -238,6 +238,11 @@
                 	
                 	exceededLimitManagement.includeInLayout = true;
                 	exceededLimitManagement.visible = true;
+                	if(this._headerText == ResourceManager.getInstance().getString("VirtualAppliance","ALERT_SOFT_LIMITS_EXCEEDED_HEADER")){
+                		exceededLimitManagement.type = 'soft';
+                	}else{
+                		exceededLimitManagement.type = 'hard';
+                	}
                 }else{
 					mainText.includeInLayout = true;
                 	mainText.visible = true;

@@ -36,6 +36,9 @@
         [Bindable]
         private var _exceededColor:uint = 0xFF0000;
         
+        [Bindable]
+        public var type:String;
+        
         public function get exceededLimit():ExceedLimit{
         	return this._exceededLimit;
         }
@@ -227,6 +230,6 @@
         </mx:Box>
     </mx:HBox>
     <mx:Label id="performAction" 
-    	text="{resourceManager.getString('VirtualAppliance','ALERT_SOFT_LIMITS_EXCEEDED_TEXT')}"
+    	text="{type == 'soft' ? resourceManager.getString('VirtualAppliance','ALERT_SOFT_LIMITS_EXCEEDED_TEXT') : resourceManager.getString('VirtualAppliance','ALERT_HARD_LIMITS_EXCEEDED_TEXT') }"
     	fontWeight="bold"/>
 </mx:VBox>
