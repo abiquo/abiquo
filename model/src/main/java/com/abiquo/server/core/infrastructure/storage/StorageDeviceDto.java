@@ -28,14 +28,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "storage_device")
+@XmlRootElement(name = "device")
 public class StorageDeviceDto extends SingleResourceTransportDto implements Serializable
 {
     /**
-     * Default serial version UID. 
+     * Default serial version UID.
      */
     private static final long serialVersionUID = 1L;
-    
+
     private Integer id;
 
     public Integer getId()
@@ -43,7 +43,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -55,7 +55,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return managementPort;
     }
 
-    public void setManagementPort(int managementPort)
+    public void setManagementPort(final int managementPort)
     {
         this.managementPort = managementPort;
     }
@@ -67,7 +67,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -79,7 +79,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return iscsiIp;
     }
 
-    public void setIscsiIp(String iscsiIp)
+    public void setIscsiIp(final String iscsiIp)
     {
         this.iscsiIp = iscsiIp;
     }
@@ -91,7 +91,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return storageTechnology;
     }
 
-    public void setStorageTechnology(StorageTechnologyType storageTechnology)
+    public void setStorageTechnology(final StorageTechnologyType storageTechnology)
     {
         this.storageTechnology = storageTechnology;
     }
@@ -103,7 +103,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return managementIp;
     }
 
-    public void setManagementIp(String managementIp)
+    public void setManagementIp(final String managementIp)
     {
         this.managementIp = managementIp;
     }
@@ -115,7 +115,7 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         return iscsiPort;
     }
 
-    public void setIscsiPort(int iscsiPort)
+    public void setIscsiPort(final int iscsiPort)
     {
         this.iscsiPort = iscsiPort;
     }

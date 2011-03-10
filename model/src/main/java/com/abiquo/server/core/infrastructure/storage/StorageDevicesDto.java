@@ -33,21 +33,22 @@ import com.abiquo.model.transport.WrapperDto;
 
 /**
  * @author jdevesa@abiquo.com
- *
  */
-@XmlRootElement(name = "tiers")
-public class StorageDevicesDto extends WrapperDto<StorageDeviceDto>{
+@XmlRootElement(name = "devices")
+public class StorageDevicesDto extends WrapperDto<StorageDeviceDto>
+{
 
-	/**
-	 * Generated serial version UID
-	 */
-	private static final long serialVersionUID = -8258548072929133424L;
+    /**
+     * Generated serial version UID
+     */
+    private static final long serialVersionUID = -8258548072929133424L;
 
-	@Override
-	@XmlElement(name = "tier")
-	public List<StorageDeviceDto> getCollection() {
-		
-		return collection;
-	}
+    @Override
+    @XmlElement(name = "device")
+    public List<StorageDeviceDto> getCollection()
+    {
+
+        return collection;
+    }
 
 }
