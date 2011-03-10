@@ -47,10 +47,35 @@ public class FileInfo implements AsyncHandler<Boolean>
     {
         if (status.getStatusCode() / 200 != 1)
         {
-            String error =
-                String.format("%d - %s \n%s", status.getStatusCode(), status.getStatusText(),
-                    status.getUrl().toString());
-            
+            String error;
+
+            if (status.getStatusCode() == 401)
+            {
+                error =
+                    String.format("[Unauthorized] You might not have permissions to read "
+                        + "the file or folder at the following location: %s", fileUrl);
+            }
+            else if (status.getStatusCode() == 403)
+            {
+                error =
+                    String.format("[Forbidden] You might not have permissions to read "
+                        + "the file or folder at the following location: %s", fileUrl);
+            }
+            else if (status.getStatusCode() == 404)
+            {
+                error =
+                    String.format(
+                        "[Not Found] The file or folder at the location: %s does not exist",
+                        fileUrl);
+            }
+            else
+            // generic error status message
+            {
+                error =
+                    String.format("%d - [%s] at the location : %s", status.getStatusCode(),
+                        status.getStatusText(), status.getUrl().toString());
+            }
+
             getPackage().onError(error);
 
             return STATE.ABORT;

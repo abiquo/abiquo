@@ -100,7 +100,10 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
-
+            
+            [Bindable]
+			private var _canShare:Boolean;
+			
             private function onCreationComplete():void
             {
                 //Caching VirtualImageManager
@@ -173,7 +176,7 @@
                 virtualImageFileSelected = false;
                 creatingVirtualImage = false;
                 virtualImageFormVS.selectedIndex = 0;
-                               
+                                            
                 //we use the list of categories but removing the first one
                 //Show all categories
                 categoriesList = ObjectUtil.copy(virtualImageManager.categories) as ArrayCollection;
@@ -193,6 +196,11 @@
                                                                         "POPUP_TITLE_VIRTUALIMAGE_EDIT");
 
                     //Setting fields
+                    if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == this._virtualImage.idEnterprise){
+                    	this._canShare = true;
+                    }else{
+                    	this._canShare = false;
+                    }
                     nameInput.text = virtualImage.name;
                     descriptionInput.text = virtualImage.description;
                     diskFormatTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.diskFormatTypes.toArray(),
@@ -220,6 +228,7 @@
                                                                         "POPUP_TITLE_VIRTUALIMAGE_ADD");
 
                     //Cleaning fields
+                    this._canShare = true;
                     nameInput.text = "";
                     descriptionInput.text = "";
                     diskFormatTypeInput.selectedIndex = -1;
@@ -618,7 +627,8 @@
                 visible="{this._virtualImage != null}">
                 <mx:TextInput id="pathInput"
                     width="300" height="20"
-                    editable="false"/>
+                    editable="false"
+                    change="validateForm()"/>
 
                 <mx:Button id="downloadButton"
                     height="18"
@@ -642,6 +652,7 @@
             <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
                 <mx:NumericStepper id="cpuInput"
                     width="100" height="20"
+                    change="validateForm()"
                     minimum="1" maximum="32" stepSize="1"/>
             </mx:FormItem>
 
@@ -651,12 +662,14 @@
                 <mx:NumericStepper id="ramInput"
                     width="100" height="20"
                     minimum="0"
+                    change="validateForm()"
                     maximum="{ramUnitsSelector.selectedItem.maximum}"
                     stepSize="{ramUnitsSelector.selectedItem.stepSize}"/>
 
                 <mx:ComboBox id="ramUnitsSelector"
                     width="80" height="18"
                     labelField="label"
+                    change="validateForm()"
                     dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                     selectedIndex="0"/>
             </mx:FormItem>
@@ -666,12 +679,14 @@
                 direction="horizontal">
                 <mx:NumericStepper id="hdInput"
                     width="100" height="20"
+                    change="validateForm()"
                     minimum="0" maximum="{hdUnitsSelector.selectedItem.maximum}"
                     stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
 
                 <mx:ComboBox id="hdUnitsSelector"
                     width="80" height="18"
                     labelField="label"
+                    change="validateForm()"
                     dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
                     selectedIndex="3"/>
             </mx:FormItem>
@@ -680,6 +695,7 @@
 
                 <mx:TextInput id="iconInput"
                     height="18"
+                    change="validateForm()"
                     text="{Icon(iconsList.selectedItem).name}"
                     editable="false"/>
 
@@ -719,9 +735,10 @@
 
             <mx:FormItem 
                 label="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
-                includeInLayout="{this._virtualImage != null}"
-                visible="{this._virtualImage != null}">
-                <mx:CheckBox id="publicImageInput"/>
+                includeInLayout="{this._virtualImage != null &amp;&amp; this._canShare}"
+                visible="{this._virtualImage != null &amp;&amp; this._canShare}">
+                <mx:CheckBox id="publicImageInput"
+                	change="validateForm()"/>
             </mx:FormItem>
         </mx:Form>
 

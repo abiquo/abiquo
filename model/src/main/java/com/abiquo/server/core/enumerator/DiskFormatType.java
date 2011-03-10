@@ -23,33 +23,52 @@ package com.abiquo.server.core.enumerator;
 
 public enum DiskFormatType
 {
-    /* 0 */UNKNOWN("http://unknown", "Unknown format", DiskFormatTypeAlias.UNKNOWN),
-    /* 1 */RAW("http://raw", "Disk format device", DiskFormatTypeAlias.RAW),
-    /* 2 */INCOMPATIBLE("http://incompatible", "Incompatible disk type",
-        DiskFormatTypeAlias.INCOMPATIBLE),
-    /* 3 */VMDK_STREAM_OPTIMIZED(
+    /* 0 */
+    UNKNOWN("http://unknown", "Unknown format", DiskFormatTypeAlias.UNKNOWN),
+
+    /* 1 */
+    RAW("http://raw", "Disk format device", DiskFormatTypeAlias.RAW),
+
+    /* 2 */
+    INCOMPATIBLE("http://incompatible", "Incompatible disk type", DiskFormatTypeAlias.INCOMPATIBLE),
+
+    /* 3 */
+    VMDK_STREAM_OPTIMIZED(
         "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized",
         "VMWare streamOptimized format", DiskFormatTypeAlias.VMDK_STREAM_OPTIMIZED),
-    /* 4 */VMDK_FLAT(
+
+    /* 4 */
+    VMDK_FLAT(
         "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat",
         "VMWare Fixed Disk", DiskFormatTypeAlias.VMDK_FLAT),
-    /* 5 */VMDK_SPARSE(
+
+    /* 5 */
+    VMDK_SPARSE(
         "http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse",
         "VMWare Sparse Disk", DiskFormatTypeAlias.VMDK_SPARSE),
-    /* 6 */VHD_FLAT(
-        "http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat",
+
+    /* 6 */
+    VHD_FLAT("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat",
         "VHD Fixed Disk", DiskFormatTypeAlias.VHD),
-    /* 7 */VHD_SPARSE(
-        "http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse",
+
+    /* 7 */
+    VHD_SPARSE("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse",
         "VHD Sparse Disk", DiskFormatTypeAlias.VHD),
-    /* 8 */VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat",
-        "VDI Fixed disk", DiskFormatTypeAlias.VDI),
-    /* 9 */VDI_SPARSE("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse",
+
+    /* 8 */
+    VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat", "VDI Fixed disk",
+        DiskFormatTypeAlias.VDI),
+
+    /* 9 */
+    VDI_SPARSE("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_sparse",
         "VDI Sparse disk", DiskFormatTypeAlias.VDI),
-    /* 10 */QCOW2_FLAT("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat",
+
+    /* 10 */
+    QCOW2_FLAT("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_flat",
         "QCOW2 Fixed disk", DiskFormatTypeAlias.QCOW2),
-    /* 11 */QCOW2_SPARSE(
-        "http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse",
+
+    /* 11 */
+    QCOW2_SPARSE("http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse",
         "QCOW2 Sparse disk", DiskFormatTypeAlias.QCOW2);
 
     public final String uri, description;

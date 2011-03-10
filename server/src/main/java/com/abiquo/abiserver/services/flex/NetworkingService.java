@@ -24,15 +24,14 @@ package com.abiquo.abiserver.services.flex;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.abiquo.abiserver.abicloudws.IVirtualApplianceWS;
-import com.abiquo.abiserver.abicloudws.VirtualApplianceWS;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.commands.NetworkCommand;
-import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.impl.NetworkCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
@@ -58,6 +57,9 @@ public class NetworkingService
      */
     NetworkCommand networkCommand;
 
+    /** The stub used to connect to the API. */
+    private NetworkResourceStub networkStub;
+
     /**
      * Constructor The implemention of the BasicCommand and the ResourceLocator to be used is
      * defined here
@@ -65,6 +67,12 @@ public class NetworkingService
     public NetworkingService()
     {
         networkCommand = new NetworkCommandImpl();
+        networkStub = new NetworkResourceStubImpl();
+    }
+
+    private NetworkResourceStub proxyStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
 
     /**
@@ -786,5 +794,16 @@ public class NetworkingService
         }
 
         return basicResult;
+    }
+
+    /**
+     * Return the list of virtual networks from a virtual datacenter
+     * @param userSession user who performs the action
+     * @param vdcId identifier of the virtual datacenter
+     * @return a BasicResult
+     */
+    public BasicResult getPrivateNetworksByVirtualDatacenter(UserSession userSession, Integer vdcId)
+    {
+        return proxyStub(userSession).getPrivateNetworks(vdcId);
     }
 }

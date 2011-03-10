@@ -148,7 +148,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // {
             // ManagedObjectReference dsmor =
             // disks.createVMFSDatastore(vmwareConfig.getXxIscsiTarget(), vmwareConfig.getXxIqn());
-            //                
+            //
             // logger.info("---------------------- win datastore VMSF ----------------------------");
             // }
             // catch (Exception e)
@@ -156,7 +156,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // // TODO Auto-generated catch block
             // e.printStackTrace();
             // }
-            //            
+            //
 
             if (!isVMAlreadyCreated())
             {
@@ -395,8 +395,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // TODO #createVMConfigSpec defines not convenient default data, change this
             vmConfigSpec = configureVM(crmor, hostmor);
 
-            logger.info("Machine name :{} Machine ID: {} ready to be created", machineName, config
-                .getMachineId());
+            logger.info("Machine name :{} Machine ID: {} ready to be created", machineName,
+                config.getMachineId());
 
             ManagedObjectReference resourcePool =
                 utils.getAppUtil().getServiceUtil().getMoRefProp(crmor, "resourcePool");
@@ -452,6 +452,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             try
             {
+                utils.reconnect();
                 deconfigureNetwork();
             }
             catch (Exception e)
@@ -494,8 +495,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     HostConfigManager configMgr = (HostConfigManager) cmobj;
                     ManagedObjectReference nwSystem = configMgr.getNetworkSystem();
 
-                    utils.getAppUtil().getServiceUtil().getVimService().removePortGroup(nwSystem,
-                        portGroup);
+                    utils.getAppUtil().getServiceUtil().getVimService()
+                        .removePortGroup(nwSystem, portGroup);
                     logger.debug("Removing port group: " + portGroup);
                 }
 
@@ -528,8 +529,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         }
         catch (Exception e) // getDynamicProperty
         {
-            logger.warn("Can not get the dynamic property 'name' for the VM [{}]", vmMOR
-                .get_value());
+            logger.warn("Can not get the dynamic property 'name' for the VM [{}]",
+                vmMOR.get_value());
         }
 
         try

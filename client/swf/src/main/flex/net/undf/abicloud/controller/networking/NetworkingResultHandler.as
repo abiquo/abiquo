@@ -279,7 +279,22 @@ package net.undf.abicloud.controller.networking
                 super.handleResult(result);
             }
         }
+        
+        public function handleGetPrivateNetworksByVirtualDatacenter(result:BasicResult,
+                                                             callback:Function):void
+        {
+            if (result.success)
+            {
+                //Return the Private Networks to who asked for them
+                callback(DataResult(result).data as ArrayCollection);
+            }
+            else
+            {
+                //There was a problem
+                super.handleResult(result);
+            }
+        }
+        
     }
-
 
 }

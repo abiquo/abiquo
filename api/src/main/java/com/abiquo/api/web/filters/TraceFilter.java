@@ -35,12 +35,11 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.context.SecurityContextHolder;
 
-import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Platform;
-import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
+import com.abiquo.api.spring.security.AbiquoUserDetails;
+import com.abiquo.api.tracer.TracerContext;
+import com.abiquo.api.tracer.TracerContextHolder;
 
 /**
  * Traces Request, Response and Exception thrown by API Resources.
@@ -62,13 +61,13 @@ public class TraceFilter implements Filter
         StatusExposingServletResponse res =
             new StatusExposingServletResponse((HttpServletResponse) response);
 
-        // Code before servlet
+        createTracerContext(request, res);
         traceRequest(req.getMethod(), req.getRequestURI(), req.getQueryString());
 
         chain.doFilter(request, res);
 
-        // Code after servlet
         traceResponse(req.getMethod(), req.getRequestURI(), req.getQueryString(), res.getStatus());
+        destroyTracerContext(request, res);
     }
 
     /**
@@ -83,7 +82,6 @@ public class TraceFilter implements Filter
         String message = String.format("Method: %s, Path: %s, Query: %s", method, path, query);
 
         LOGGER.trace("Incoming API request. " + message);
-        // traceInfo(EventType.API_REQUEST, message);
     }
 
     /**
@@ -102,19 +100,6 @@ public class TraceFilter implements Filter
                 status);
 
         LOGGER.trace("Outcoming API request. " + message);
-        // traceInfo(EventType.API_RESPONSE, message);
-    }
-
-    /**
-     * Logs a trace in the Tracer component.
-     * 
-     * @param event An EventType field
-     * @param message The message to log
-     */
-    private void traceInfo(final EventType event, final String message)
-    {
-        TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.API, event, message,
-            Platform.SYSTEM_PLATFORM);
     }
 
     @Override
@@ -127,6 +112,35 @@ public class TraceFilter implements Filter
     public void destroy()
     {
         LOGGER.info("TraceFilter destroyed");
+    }
+
+    private void createTracerContext(final ServletRequest request, final ServletResponse response)
+    {
+        HttpServletRequest req = (HttpServletRequest) request;
+
+        // Get hierarchy information
+        String resource = req.getRequestURI().replaceAll(req.getContextPath(), "");
+
+        // Get current user information
+        AbiquoUserDetails userDetails =
+            (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+
+        // Creatate the tracer context
+        TracerContext context = new TracerContext();
+        context.setHierarchy(resource);
+        context.setUserId(userDetails.getUserId());
+        context.setUsername(userDetails.getUsername());
+        context.setEnterpriseId(userDetails.getEnterpriseId());
+        context.setEnterpriseName(userDetails.getEnterpriseName());
+
+        // Publish teh context the context
+        TracerContextHolder.initialize(context);
+    }
+
+    private void destroyTracerContext(final ServletRequest request, final ServletResponse response)
+    {
+        TracerContextHolder.clearContext();
     }
 
     /**

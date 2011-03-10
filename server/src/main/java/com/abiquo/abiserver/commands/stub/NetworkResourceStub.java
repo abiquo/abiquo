@@ -19,14 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef MACROS_H
-#define MACROS_H
+/**
+ * 
+ */
+package com.abiquo.abiserver.commands.stub;
 
-// string macros
-#define emptyString(s) (strlen(s) == 0)
+import com.abiquo.abiserver.pojo.result.BasicResult;
 
-// iniparser macros
-#define getStringProperty(c, e) iniparser_getstring(c, e, '\0')
-#define getIntProperty(c, e) iniparser_getint(c, e, -1)
-
-#endif
+/**
+ * @author jdevesa
+ *
+ */
+public interface NetworkResourceStub
+{
+    public BasicResult getPrivateNetworks(final Integer vdcId);
+}

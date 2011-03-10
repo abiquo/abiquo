@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.utils.ObjectUtil;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.resources.ResourceBundle;
@@ -303,6 +304,23 @@
                 DragManager.doDrag(UIComponent(Application.application), dragSource,
                                    mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
             }
+            
+            private function compareVirtualImageName(virtualImg1:Object, virtualImg2:Object):int{
+            	var virtImg1:String;
+            	var virtImg2:String;
+            	
+            	if (VirtualMachine(virtualImg1).virtualImage)
+                    virtImg1 = VirtualMachine(virtualImg1).virtualImage.name;
+                else
+                    virtImg1 = "-";
+                
+                if (VirtualMachine(virtualImg2).virtualImage)
+                    virtImg2 = VirtualMachine(virtualImg2).virtualImage.name;
+                else
+                    virtImg2 = "-";
+                    
+            	return ObjectUtil.stringCompare(virtImg1,virtImg2);
+            }
         ]]>
     </mx:Script>
 
@@ -393,6 +411,7 @@
                     <mx:DataGridColumn 
                         width="150"
                         labelFunction="vmDataGridVirtualImageLabel"
+                        sortCompareFunction="compareVirtualImageName"
                         headerText="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')"/>
 
                     <mx:DataGridColumn 

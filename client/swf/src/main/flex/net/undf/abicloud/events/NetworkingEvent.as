@@ -80,6 +80,8 @@ package net.undf.abicloud.events
 
         public static const GET_PRIVATE_NETWORKS_BY_ENTERPRISE:String = "getPrivateNetworksByEnterpriseNetworkingEvent";
         
+        public static const GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER:String = "getPrivateNetworksByVirtualDatacenterNetworkingEvent";
+        
         public static const REORDER_NIC_INTO_VIRTUAL_MACHINE:String = "reorderNicIntoVirtualMachineEvent";
 
         /* ------------- Public atributes ------------- */
