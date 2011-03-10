@@ -83,8 +83,20 @@
             {
                 _virtualDatacenter = virtualDatacenter;
                 _virtualMachine = virtualMachine;
+                getNetworksByVirtualDatacenter();
                 availableIP = new ArrayCollection();
                 cleanFilteringOptions();
+            }
+            
+            private function getNetworksByVirtualDatacenter():void{
+            	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
+            	event.virtualDatacenter = this._virtualDatacenter;
+            	event.callback = populatePrivateNetworks;
+            	dispatchEvent(event);
+            }
+            
+            private function populatePrivateNetworks(networks:ArrayCollection):void{
+            	_virtualDatacenter.network.networks = networks;
             }
 
             private function cleanFilteringOptions():void
