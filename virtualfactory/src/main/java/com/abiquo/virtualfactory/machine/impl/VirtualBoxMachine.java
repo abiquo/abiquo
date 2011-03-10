@@ -26,6 +26,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.ws.WebServiceException;
 
@@ -50,9 +52,10 @@ import org.virtualbox_4_0.NetworkAdapterType;
 import org.virtualbox_4_0.SessionState;
 import org.virtualbox_4_0.StorageBus;
 
+import com.abiquo.aimstub.Aim.Iface;
+import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.RimpException;
 import com.abiquo.aimstub.TTransportProxy;
-import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.VirtualBoxHypervisor;
@@ -561,22 +564,76 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     protected void cloneVirtualDisk() throws Exception
     {
         VirtualDisk diskBase = config.getVirtualDiskBase();
-        String imagePath = diskBase.getImagePath();
-        String repository = diskBase.getRepository();
-        String destinationPath = repository + imagePath;
 
+        String repository = extractRepository(diskBase.getLocation());
+
+        if (repository == null)
+        {
+            throw new Exception("Not valid repository " + diskBase.getLocation());
+        }
+
+        String datastorePath = getDatastorePathFromRepository(repository);
+
+        if (datastorePath == null)
+        {
+            throw new Exception("Not valid datastore path " + diskBase.getLocation());
+        }
+
+        String imagePath = diskBase.getImagePath();
+        String sourcePath = datastorePath + imagePath;
         String destinationRepository = getDatastore(diskBase);
 
-        logger.info("Assigning the virtual disk [{}] from repository[{}]", destinationPath,
+        logger.info("Assigning the virtual disk [{}] from repository[{}]", sourcePath,
             destinationRepository);
 
         String clonedImagePath = destinationRepository + machineName;
 
-        cloneThroughAPI(destinationPath, clonedImagePath);
-
-        // clonethroughAIM();
+        cloneThroughAPI(sourcePath, clonedImagePath);
 
         logger.debug("Image cloned at [{}]", clonedImagePath);
+    }
+
+    private String getDatastorePathFromRepository(final String repository) throws RimpException,
+        TException
+    {
+        String aimLocation = vBoxHyper.getAddress().getHost();
+        int aimPort = vBoxHyper.getAddress().getPort();
+
+        Iface aim = TTransportProxy.getInstance(aimLocation, aimPort);
+        List<Datastore> datastores = aim.getDatastores();
+        String path = null;
+
+        for (Datastore datastore : datastores)
+        {
+            if (datastore.device.contains(repository))
+            {
+                path = datastore.path;
+            }
+        }
+
+        if (path == null)
+        {
+            return null;
+        }
+        return path.endsWith("/") ? path : path + "/";
+    }
+
+    private String extractRepository(final String input)
+    {
+        Pattern pattern = Pattern.compile("\\[(.*?)\\]");
+        Matcher matcher = pattern.matcher(input);
+        String repo = null;
+
+        if (matcher.find())
+        {
+            repo = new String(matcher.group(1));
+        }
+
+        if (repo == null)
+        {
+            return null;
+        }
+        return repo.equalsIgnoreCase("null") ? null : repo;
     }
 
     private String getDatastore(final VirtualDisk disk)
@@ -752,8 +809,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
             waitOperation(oProgress, 10000);
 
-            if(vBoxHyper.getSession().getState() == SessionState.Locked)
-            {                
+            if (vBoxHyper.getSession().getState() == SessionState.Locked)
+            {
                 vBoxHyper.getSession().unlockMachine();
             }
         }
