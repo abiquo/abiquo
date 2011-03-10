@@ -110,11 +110,11 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
                 break;
 
             case PUBLICIP:
-                limit = limits.getStorage();
+                limit = limits.getPublicIP();
                 break;
 
             case VLAN:
-                limit = limits.getStorage();
+                limit = limits.getVlan();
                 break;
 
             default:
