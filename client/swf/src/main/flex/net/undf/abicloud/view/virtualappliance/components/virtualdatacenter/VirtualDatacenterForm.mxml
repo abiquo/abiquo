@@ -76,9 +76,7 @@
              */
             public function init():void
             {
-                //Registering Keyboard events, for standard application behaivor
-                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
-                
+                                
                 //onEdit
                 if(this._virtualDatacenter.id != 0){
 	                AbiCloudModel.getInstance().infrastructureManager.addEventListener("allowedDataCentersRetrieved",setPhysicalDataCenterFieldOnEditing);
@@ -245,23 +243,8 @@
 	                isFormValid = nameInput.text.length > 0 && physicalDataCenterInput.selectedIndex > -1 && hyperTypeInput.selectedIndex > -1 && privateNetworkForm.isFormValid;
                 }
                 
-            }
-            
-            /**
-             * Basic behaivour is as follows:
-             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
-             * like Accept Button has been pressed
-             */
-            private function keyboardHandler(keyboardEvent:KeyboardEvent):void
-            {
-                /* if (keyboardEvent.target == acceptButton || keyboardEvent.target == cancelButton)
-                    super.keyboardHandler(keyboardEvent);
-                else
-                { */
-                    if (keyboardEvent.keyCode == 13)
-                        onAccept();
-                //}
-            }
+            }           
+           
 
             /**
              * To hide contents when a resize effect starts. For performance purposes
