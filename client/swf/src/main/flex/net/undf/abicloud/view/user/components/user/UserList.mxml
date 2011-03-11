@@ -466,7 +466,9 @@
                 //Dispatching event
                 event.users = copiedUsers;
                 event.oldUsers = oldUsers;
-                dispatchEvent(event);
+                if(length != 0){
+	                dispatchEvent(event);                	
+                }
             }
 
             private function onOpenMoreActions(event:Event):void
