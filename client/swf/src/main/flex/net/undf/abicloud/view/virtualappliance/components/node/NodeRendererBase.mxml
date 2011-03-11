@@ -37,30 +37,9 @@
     rollOut="onRollOut()">
 
 
-    <!-- Effects shown by this component, to better user interaction -->
-    <mx:Glow id="glowEffect"
-        color="#444444"
-        duration="100"
-        alphaFrom="1.0"
-        alphaTo="0.3"
-        blurXFrom="0.0"
-        blurXTo="20.0"
-        blurYFrom="0.0"
-        blurYTo="20.0"/>
-
-    <mx:Glow id="unglowEffect"
-        color="#222222"
-        duration="100"
-        alphaFrom="0.3"
-        alphaTo="1.0"
-        blurXFrom="20.0"
-        blurXTo="0.0"
-        blurYFrom="20.0"
-        blurYTo="0.0"/>
-
-
     <mx:Script>
         <![CDATA[
+        	import mx.states.State;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.controls.Alert;
             import mx.core.Application;
@@ -75,6 +54,7 @@
             import net.undf.abicloud.view.virtualappliance.components.virtualappliance.DrawToolsManager;
             import net.undf.abicloud.vo.virtualappliance.Node;
             import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.infrastructure.State;
 
             public static const NODERENDERER_SIZE:int = 100;
 
@@ -111,6 +91,9 @@
 
             [ResourceBundle("VirtualAppliance")]
             private var rb2:ResourceBundle;
+                       
+            [Bindable]
+            private var _pendingStatus:String;
 
 
             /**
@@ -151,6 +134,8 @@
                 {
                     this._nodeIconSource = (NodeVirtualImage(this._node).virtualImage.icon) ? NodeVirtualImage(this._node).virtualImage.icon.path : null;
                     setSourcesFromNodeVirtualImage();
+                    //We highlight pending changes when the virtuall appliance is running
+                    updatePendingStatus();
                 }
 
                 dispatchEvent(new Event("nodeChange"));
@@ -161,7 +146,28 @@
             {
                 return this._node;
             }
-
+			
+			private function updatePendingStatus():void{
+				this._pendingStatus = "";
+				//Need to be deleted
+				if(NodeVirtualImage(this._node).modified == Node.NODE_ERASED){
+					this.enabled = false;
+					this._pendingStatus = "NodeVirtualImageDeleted";
+					this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
+				}else if(NodeVirtualImage(this._node).virtualMachine){
+					//Need to be added
+					if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.NOT_DEPLOYED){							
+						this._pendingStatus = "NodeVirtualImageAdded";
+					}
+				}else{
+					this.enabled = true;
+				}
+				
+				if(nodeRenedererBase){
+					AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);
+				}
+			}
+			
             private function setSourcesFromNodeVirtualImage():void
             {
                 var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
@@ -388,7 +394,17 @@
                 {
                     isSelected = false;
                 }
-
+                
+                //We add the remove state
+                if(NodeVirtualImage(this._node).virtualMachine){
+	                if(NodeVirtualImage(this._node).virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.RUNNING){	
+	
+		                this.enabled = false;
+						this._pendingStatus = "NodeVirtualImageDeleted";   
+						this._infoToolTip = resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED');
+						AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase);             	
+	                }                	
+                }
                 //We have to Unregister the Connector for this NodeRenderer
                 if (this._connector)
                 {
@@ -559,14 +575,13 @@
         left="5" top="3">
 
         <utils:SmoothImage 
-id="nodeRenedererBase" 
+			id="nodeRenedererBase" 
             width="18" height="18"
             horizontalCenter="0"
             verticalCenter="0"
-			creationComplete="AbicloudUtils.getImageFromStyle('NodeRenedererBase', nodeRenedererBase)"
-            includeInLayout="{_node.modified == Node.CRASH}"
-            toolTip="@Resource(bundle='VirtualAppliance', key='LABEL_NODE_CRASH')"
-            visible="{_node.modified == Node.CRASH}"/>
+            visible="{this._pendingStatus.length != 0}"
+            creationComplete="{AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase)}"	
+            toolTip="{this._pendingStatus == 'NodeVirtualImageDeleted' ? resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED'):resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_ADDED')}"/>
 
     </mx:HBox>
 
