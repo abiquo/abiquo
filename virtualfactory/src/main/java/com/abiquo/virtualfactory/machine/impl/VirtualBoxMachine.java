@@ -604,9 +604,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             // Maybe to change the UUID parent is not necessary
             diskVDI = vbox.openMedium(imageRemotePath, DeviceType.HardDisk, AccessMode.ReadWrite);
-            // diskVDI.setIDs(true, UUID.randomUUID().toString(), false, "-");
-            // --> VERR_VD_IMAGE_READ_ONLY (-3205) - Image is read-only..
-            // diskVDI = vbox.findMedium(imageRemotePath, DeviceType.HardDisk);
 
         }
         catch (javax.xml.ws.WebServiceException wse)
@@ -625,24 +622,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                     "Can not open of find on media registry the HardDisk [" + imageRemotePath + "]";
                 throw new VirtualMachineException(msg2, wse2);
             }
-        }
-        catch (VBoxException vbe)
-        {
-            String msg =
-                "Can not open the HardDisk on [{}] (now try to find on media registry) caused by [{}]";
-            logger.warn(msg, imageRemotePath, vbe);
-
-            try
-            {
-                diskVDI = vbox.findMedium(imageRemotePath, DeviceType.HardDisk);
-            }
-            catch (javax.xml.ws.WebServiceException wse2)
-            {
-                String msg2 =
-                    "Can not open of find on media registry the HardDisk [" + imageRemotePath + "]";
-                throw new VirtualMachineException(msg2, wse2);
-            }
-        }
+        }       
 
         newVDI = vBoxHyper.getVirtualBox().createHardDisk(diskVDI.getFormat(), clonedImagePath);
         IProgress progress = diskVDI.cloneTo(newVDI, diskVDI.getVariant(), null);
