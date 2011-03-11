@@ -328,3 +328,15 @@
 		selected-up-skin:		Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
 		selected-disabled-skin: Embed("/assets/virtualappliance/deployBigButton/selected_over_skin.png");
 	}
+
+	.NodeVirtualImageAdded
+	{
+		/**custom property**/
+		source:Embed("/assets/virtualappliance/added.png");
+	}
+
+	.NodeVirtualImageDeleted
+	{
+		/**custom property**/
+		source:Embed("/assets/virtualappliance/deleted.png");
+	}

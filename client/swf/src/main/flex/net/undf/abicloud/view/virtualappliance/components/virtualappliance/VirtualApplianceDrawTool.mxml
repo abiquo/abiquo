@@ -479,6 +479,9 @@
             {
                 var nodeRendererToErase:NodeRenderer = nodeRendererEvent.nodeRenderer as NodeRenderer;
 
+                //Announcing that a NodeRenderer has been deleted
+                var event:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASED,
+                                                                    false);
                 //Checking the node state
                 if (nodeRendererToErase.node.modified == Node.NODE_NEW)
                 {
@@ -489,22 +492,33 @@
                     //The VirtualAppliance has been modified
                     this._isVirtualApplianceModified = true;
                     dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                    
+                    event.nodeRenderer = nodeRendererToErase;
+                	dispatchEvent(event);
                 }
                 else if (nodeRendererToErase.node.modified != Node.NODE_ERASED)
                 {
+                    var dispatch:Boolean;
+                    //Added, saved, but no running
+                    if(NodeVirtualImage(nodeRendererToErase.node).virtualMachine.state.id != State.RUNNING){	
+                    	dispatch = true;
+                    }else{
+                    	dispatch = false;
+                    }
                     //This node exists in the Data Base, so we must mark it as ERASED
                     nodeRendererToErase.node.modified = Node.NODE_ERASED;
 
                     //The VirtualAppliance has been modified
                     this._isVirtualApplianceModified = true;
                     dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
+                    
+                    if(dispatch){
+                    	event.nodeRenderer = nodeRendererToErase;
+                		dispatchEvent(event);
+                    }
                 }
 
-                //Announcing that a NodeRenderer has been deleted
-                var event:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_ERASED,
-                                                                    false);
-                event.nodeRenderer = nodeRendererToErase;
-                dispatchEvent(event);
+               
             }
 
             /**
