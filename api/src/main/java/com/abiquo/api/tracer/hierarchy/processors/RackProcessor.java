@@ -24,18 +24,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.resources.RacksResource;
 import com.abiquo.api.tracer.hierarchy.AbstractHierarchyProcessor;
-import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.Rack;
 
 /**
- * Processes the hierarchy to extract {@link Datacenter} data.
+ * Processes the hierarchy to extract {@link Rack} data.
  * 
  * @author ibarrera
  */
 @Service
-public class DatacenterProcessor extends AbstractHierarchyProcessor<Datacenter>
+public class RackProcessor extends AbstractHierarchyProcessor<Rack>
 {
     /** The DAO used to get the resource information. */
     @Autowired
@@ -44,15 +44,15 @@ public class DatacenterProcessor extends AbstractHierarchyProcessor<Datacenter>
     @Override
     protected String getIdentifierPrefix()
     {
-        return DatacentersResource.DATACENTERS_PATH;
+        return RacksResource.RACKS_PATH;
     }
 
     @Override
     @Transactional(readOnly = true)
     protected String getResourceName(final String resourceId)
     {
-        Datacenter datacenter = dao.findById(Integer.valueOf(resourceId));
-        return datacenter.getName();
+        Rack rack = dao.findRackById(Integer.valueOf(resourceId));
+        return rack.getName();
     }
 
 }
