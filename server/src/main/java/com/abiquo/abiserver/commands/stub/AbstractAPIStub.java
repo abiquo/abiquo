@@ -321,5 +321,13 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}", params);
     }
+    
+    protected String createPrivateNetworksLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
+    }
 
 }
