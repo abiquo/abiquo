@@ -116,6 +116,7 @@
 
             private var _usersOrderBy:String;
 
+            [Bindable]
             private var USERS_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
 
 
@@ -320,25 +321,28 @@
              **/
             private function editUser():void
             {
+            	var id:int =AbiCloudModel.getInstance().loginManager.user.id; 
                 if (AbiCloudModel.getInstance().loginManager.user.id == User(usersDataGrid.selectedItem).id)
                 {
                     //The user that is currently logged can not be edited here
-                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                    /* AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_UNABLE_EDIT_HEADER"),
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_UNABLE_EDIT_TEXT"),
                                             Alert.OK,
-                                            null);
+                                            null); */
+                	this._userEdit.activeEditable = false;
+                	this._userEdit.roleEditable = false;
+                }else{
+                	this._userEdit.activeEditable = true;
+                	this._userEdit.roleEditable = false;
                 }
-                else
-                {
-                    PopUpManager.addPopUp(this._userEdit, this, true);
-                    PopUpManager.centerPopUp(this._userEdit);
+                PopUpManager.addPopUp(this._userEdit, this, true);
+                PopUpManager.centerPopUp(this._userEdit);
 
-                    this._userEdit.init(usersDataGrid.selectedItem as User);
-                }
+                this._userEdit.init(usersDataGrid.selectedItem as User);
             }
 
 

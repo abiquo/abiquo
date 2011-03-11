@@ -141,6 +141,9 @@
              * To set the list of available virtual datacenters
              **/
             private function virtualDataCenterAlreadySelected(id:int):Boolean{
+            	if(!this._userToEdit.availableVirtualDatacenters){
+            		return false;
+            	}
             	for(var i:int = 0 ; i < this._userToEdit.availableVirtualDatacenters.length ; i++){
             		if(this._userToEdit.availableVirtualDatacenters[i] == id){
             			return true;
