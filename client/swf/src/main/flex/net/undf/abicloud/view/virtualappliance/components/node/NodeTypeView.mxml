@@ -221,7 +221,7 @@
                     for (i = 0; i < length; i++)
                     {
                         //We do not draw erased nodes
-                        if (NodeRenderer(this._nodeRenderers.getItemAt(i)).node.modified != Node.NODE_ERASED)
+                        //if (NodeRenderer(this._nodeRenderers.getItemAt(i)).node.modified != Node.NODE_ERASED)
                             drawNode(this._nodeRenderers.getItemAt(i) as NodeRenderer);
                     }
                 }
