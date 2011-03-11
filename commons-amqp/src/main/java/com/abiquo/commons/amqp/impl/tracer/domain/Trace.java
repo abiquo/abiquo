@@ -21,6 +21,8 @@
 
 package com.abiquo.commons.amqp.impl.tracer.domain;
 
+import java.util.Map;
+
 import com.abiquo.commons.amqp.domain.Queuable;
 import com.abiquo.commons.amqp.util.JSONUtils;
 
@@ -55,12 +57,15 @@ public class Trace implements Queuable
     /** The current platform hierarchy. */
     private String hierarchy;
 
+    /** The hierarchy data. */
+    private Map<String, String> hierarchyData;
+
     public String getUsername()
     {
         return username;
     }
 
-    public void setUsername(String username)
+    public void setUsername(final String username)
     {
         this.username = username;
     }
@@ -70,7 +75,7 @@ public class Trace implements Queuable
         return userId;
     }
 
-    public void setUserId(int userId)
+    public void setUserId(final int userId)
     {
         this.userId = userId;
     }
@@ -80,7 +85,7 @@ public class Trace implements Queuable
         return enterpriseName;
     }
 
-    public void setEnterpriseName(String enterpriseName)
+    public void setEnterpriseName(final String enterpriseName)
     {
         this.enterpriseName = enterpriseName;
     }
@@ -90,7 +95,7 @@ public class Trace implements Queuable
         return enterpriseId;
     }
 
-    public void setEnterpriseId(int enterpriseId)
+    public void setEnterpriseId(final int enterpriseId)
     {
         this.enterpriseId = enterpriseId;
     }
@@ -100,7 +105,7 @@ public class Trace implements Queuable
         return severity;
     }
 
-    public void setSeverity(String severity)
+    public void setSeverity(final String severity)
     {
         this.severity = severity;
     }
@@ -110,7 +115,7 @@ public class Trace implements Queuable
         return component;
     }
 
-    public void setComponent(String component)
+    public void setComponent(final String component)
     {
         this.component = component;
     }
@@ -120,7 +125,7 @@ public class Trace implements Queuable
         return event;
     }
 
-    public void setEvent(String event)
+    public void setEvent(final String event)
     {
         this.event = event;
     }
@@ -130,9 +135,19 @@ public class Trace implements Queuable
         return hierarchy;
     }
 
-    public void setHierarchy(String hierarchy)
+    public void setHierarchy(final String hierarchy)
     {
         this.hierarchy = hierarchy;
+    }
+
+    public Map<String, String> getHierarchyData()
+    {
+        return hierarchyData;
+    }
+
+    public void setHierarchyData(final Map<String, String> hierarchyData)
+    {
+        this.hierarchyData = hierarchyData;
     }
 
     @Override
