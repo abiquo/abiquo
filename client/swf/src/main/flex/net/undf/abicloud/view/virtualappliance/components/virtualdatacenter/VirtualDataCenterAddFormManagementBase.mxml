@@ -76,7 +76,7 @@
             {
                 //Cleaning view
                 toggledContainer.selectedIndex = 0;
-                this._virtualDataCenterAdd.virtualDatacenter = this._virtualDataCenter;
+                this._virtualDataCenterAdd.virtualDatacenter = virtualDatacenter;
                 this._virtualDataCenterAdd.init();
                 
                 //Registering Keyboard events, for standard application behaivor
@@ -84,7 +84,7 @@
                 
                 //Registering when a VirtualDatacenter has been created
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                     onVirtualDataCenterAdded);
+                                                                                     onVirtualDataCenterAdded);                                                                                     
                 //Registering when a VirtualDatacenter has been edited
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_EDITED,
                                                                                      onVirtualDataCenterAdded);
@@ -171,7 +171,7 @@
             private function closeForm():void
             {
                 AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                        onVirtualDataCenterAdded);
+                                                                                        onVirtualDataCenterAdded);                                                                                       
                 AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
                                                                                         onVirtualDataCenterAdded);
                 dispatchEvent(new Event("VirtualDatacenterFormAddClose"));

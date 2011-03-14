@@ -214,16 +214,6 @@
                 dispatchEvent(event);
             }
 
-           /*  private function onVirtualDataCenterAdded(event:VirtualApplianceEvent):void
-            {
-                closeForm();
-            } 
-            private function closeForm():void
-            {
-                AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                        onVirtualDataCenterAdded);
-                dispatchEvent(new Event("VirtualDatacenterFormAddClose"));
-            }*/
 
 
             /**
