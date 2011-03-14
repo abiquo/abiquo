@@ -38,11 +38,13 @@ package net.undf.abicloud.view.networking.virtualdatacenter.privatenetwork
 
             if (value is VlanNetwork && VlanNetwork(value).defaultNetwork)
             {
-                setStyle("fontWeight", "normal");
+                setStyle("fontWeight", "bold");                
+                setStyle("fontStyle", "italic");
             }
             else
             {
                 setStyle("fontStyle", "normal");
+                setStyle("fontWeight", "normal");
             }
         }
     }
