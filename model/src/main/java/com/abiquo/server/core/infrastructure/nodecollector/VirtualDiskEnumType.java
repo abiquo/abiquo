@@ -102,7 +102,7 @@ public enum VirtualDiskEnumType {
 
     public static VirtualDiskEnumType fromValue(String v) {
         for (VirtualDiskEnumType c: VirtualDiskEnumType.values()) {
-            if (c.value.equals(v)) {
+            if (c.name().equalsIgnoreCase(v)) {
                 return c;
             }
         }
