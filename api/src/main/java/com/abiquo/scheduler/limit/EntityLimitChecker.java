@@ -195,7 +195,11 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         if (totalLimitStatus != LimitStatus.OK)
         {
             LimitExceededException exc =
-                new LimitExceededException(statusMap, entity, requirements, actual, getEntityIdentifier(entity));
+                new LimitExceededException(statusMap,
+                    entity,
+                    requirements,
+                    actual,
+                    getEntityIdentifier(entity));
 
             traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
         }

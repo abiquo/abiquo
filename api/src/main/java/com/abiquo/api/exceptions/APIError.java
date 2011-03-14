@@ -48,13 +48,16 @@ public enum APIError
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
-        "ENTERPRISE-6", "Cannot delete the current user enterprise"),
+        "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
+        "ENTERPRISE-7", "Enterprise name can't be empty"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
         "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
-        "Limits by enterprise and datacenter don't exist"),
+        "Limits by enterprise and datacenter don't exist"), LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
@@ -100,7 +103,8 @@ public enum APIError
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
-        "USER-4", "Duplicated nick for the user"),EMAIL_IS_INVALID("USER-5", "The email isn't valid"),
+        "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
+        "The email isn't valid"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -138,9 +142,10 @@ public enum APIError
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
         "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
-        "SP-6", "Could not get the requested Storage Pool from the target device"),CONFLICT_VOLUMES_CREATED("SP-7", 
-            "Can not edit or delete the Storage Pool. There are volumes created "),STORAGE_POOL_DUPLICATED("SP-8","Duplicated Storage Pool"),
-            STORAGE_POOL_TIER_IS_DISABLED("SP-9","Tier is disabled"),   
+        "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
+        "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
+        "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
+        "Tier is disabled"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -176,18 +181,19 @@ public enum APIError
         "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
         "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
-        "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"),
-        TIER_CONFLICT_DISABLING_TIER("TIER-6","Can not disable a Tier with associated Storage Pools"),
+        "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
+        "TIER-6", "Can not disable a Tier with associated Storage Pools"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED("DEVICE-1", "Duplicated Storage Device"),
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED(
+        "DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS
     NON_EXISTENT_STATS("STATS-0", "Non existent statistical data found"), NON_EXISTENT_STATS_FOR_DATACENTER(
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"),   
+        "STATS-3", "Non existent statistical data found for the requested enterprise"),
 
     ;
 
@@ -219,7 +225,7 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.message = cause;//String.format("%s.\ncaused by:%s", this.message, cause);
+        this.message = String.format("%s\nCaused by:\n", message, cause);
         return this;
     }
 
@@ -239,8 +245,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 }

@@ -158,6 +158,12 @@ public class EnterpriseService extends DefaultApiService
 
         userService.checkUserCredentials(old);
 
+        if (dto.getName().isEmpty())
+        {
+            errors.add(APIError.ENTERPRISE_EMPTY_NAME);
+            flushErrors();
+        }
+
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
             errors.add(APIError.ENTERPRISE_DUPLICATED_NAME);
@@ -303,11 +309,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {
@@ -326,7 +341,7 @@ public class EnterpriseService extends DefaultApiService
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
         DatacenterLimits old = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
-
+        
         old.setRamLimitsInMb(new Limit((long) dto.getRamSoftLimitInMb(), (long) dto
             .getRamHardLimitInMb()));
         old.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
@@ -380,7 +395,7 @@ public class EnterpriseService extends DefaultApiService
         return datacenterService.getDatacenter(datacenterId);
     }
 
-    private void isValidEnterprise(Enterprise enterprise)
+    protected void isValidEnterprise(Enterprise enterprise)
     {
         if (!enterprise.isValid())
         {

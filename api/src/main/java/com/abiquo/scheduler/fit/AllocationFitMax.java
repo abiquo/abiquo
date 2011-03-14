@@ -31,8 +31,8 @@ import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
  * A ''Basic Virtual Machine Unit'' is used in order compute how many of these ''Basic Unit VM''
  * fills on the current machine.
  * <p>
- * Basic Virtual Machine Unit refers to BASE_CPU, BASE_RAM and BASE_HD sizes. Each resource type is
- * equally combined.
+ * Basic Virtual Machine Unit refers to BASE_CPU and BASE_RAM. Each resource type is equally
+ * combined.
  */
 public class AllocationFitMax implements IAllocationFit
 {
@@ -43,24 +43,16 @@ public class AllocationFitMax implements IAllocationFit
     /** Standard virtual machine RAM utilization (1/2 Gb). */
     private final long BASE_RAM = 512;
 
-    /** Standard virtual machine HD utilization (2 Gb). */
-    private final long BASE_HD = 2048l * (1024*1024);
-
     @Override
     public int computeRanking(final Machine machine)
     {
         int rank;
-        double pHd, pRam, pCpu;
-
-        // log.info("cpu[{}]\tused[{}]", machine.getCpu(), machine.getCpuUsed());
-        // log.info("ram [{}]\tused[{}]", machine.getRam(), machine.getRamUsed());
-        // log.info("hd [{}]\tused[{}]", machine.getHd(), machine.getHdUsed());
+        double pRam, pCpu;
 
         pCpu = (machine.getVirtualCpuCores() - machine.getVirtualCpusUsed()) / BASE_CPU;
         pRam = (machine.getVirtualRamInMb() - machine.getVirtualRamUsedInMb()) / BASE_RAM;
-        pHd = (machine.getVirtualHardDiskInBytes() - machine.getVirtualHardDiskUsedInBytes()) / BASE_HD;
 
-        rank = -((int) ((pCpu + pRam + pHd) * 100 / 3));
+        rank = -((int) ((pCpu + pRam) * 100 / 2));
 
         // log.debug("RANK for machine [" + machine.getName() + "] is \t[" + rank
         // + "] \t (pCpu[{}] pRam[{}] pHd[" + pHd + "])", pCpu, pRam);
@@ -68,4 +60,23 @@ public class AllocationFitMax implements IAllocationFit
         return rank;
     }
 
+    public static void main(String[] args)
+    {
+        double pCpu = (4 - 2) / 1;
+        double pRam = (4085 - 512) / 512;
+        double rank = -((int) ((pCpu + pRam) * 100 / 2));
+
+        System.err.println(String.format("cpu %s\t ram %s \t : %s",
+            Double.valueOf(pCpu).toString(), Double.valueOf(pRam).toString(), Double.valueOf(rank)
+                .toString()));
+
+        pCpu = (4 - 3) / 1;
+        pRam = (4085 - 384) / 512;
+
+        rank = -((int) ((pCpu + pRam) * 100 / 2));
+
+        System.err.println(String.format("cpu %s\t ram %s \t : %s",
+            Double.valueOf(pCpu).toString(), Double.valueOf(pRam).toString(), Double.valueOf(rank)
+                .toString()));
+    }
 }
