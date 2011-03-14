@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.Datastore;
         	import net.undf.abicloud.events.InfrastructureEvent;
             import net.undf.abicloud.utils.AbicloudUtils;
             import net.undf.abicloud.vo.infrastructure.HyperVisorType;
@@ -51,6 +52,9 @@
             
             [Bindable]
             private var _hypervisorName:String;
+            
+            [Bindable]
+            private var _physicalMachineHD:String;
 
             public function set editMode(value:Boolean):void
             {
@@ -64,8 +68,6 @@
                     ramInput.value = this._physicalMachine.ram / ramUnitsSelector.selectedItem.conversion;
                     hdUnitsSelector.selectedIndex = 3;
                     hdInput.value = this._physicalMachine.hd / hdUnitsSelector.selectedItem.conversion;
-
-                    //setHypervisorInformationOnEdition();
                 }
             }
 
@@ -81,10 +83,12 @@
             public function set physicalMachine(value:PhysicalMachine):void
             {
                 this._physicalMachine = value;
+                
+                var size:Object = returnDataStoresSizes();
+                this._physicalMachineHD = size.total+' GB ('+size.used+' GB '+resourceManager.getString('Infrastructure','LABEL_USED').toLowerCase()+')'; 
 
                 if (this._physicalMachine)
                     retrieveHypervisor();
-                    //this._hypervisors = new ArrayCollection(AbiCloudModel.getInstance().infrastructureManager.getHyperVisorsByPhysicalMachine(this._physicalMachine));
                 else
                     this._hypervisors = new ArrayCollection();
 
@@ -163,36 +167,40 @@
                 return hypervisors;
             }
 
-           /*  private function setHypervisorInformationOnEdition():void
-            {
-                if (this._hypervisors.length > 0)
-                {
-                    var hypervisor:HyperVisor = this._hypervisors[0] as HyperVisor;
-
-                    //Filling Hypervisor related fields
-                    ipInput.text = hypervisor.ip;
-                    hypervisorPortInput.text = hypervisor.port.toString();
-                    var hypervisorTypes:ArrayCollection = hypervisorTypeInput.dataProvider as ArrayCollection;
-                    hypervisorTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(hypervisorTypes.toArray(),
-                                                                                              "id",
-                                                                                              hypervisor.type);
-                }
-                else
-                {
-                    //For this Physical Machine there is any Hypervisor, and they are required
-                    ipInput.text = "";
-                    hypervisorTypeInput.selectedIndex = -1;
-                    hypervisorPortInput.text = "";
-                }
-
-            } */
-
+           
             private function onChangeHypervisorTypeInput():void
             {
                 if (hypervisorTypeInput.selectedIndex > -1)
                 {
                     hypervisorPortInput.text = HyperVisorType(hypervisorTypeInput.selectedItem).defaultPort.toString();
                 }
+            }
+            
+            /**
+             * Function that returns the used and free size of datastore
+             */
+            private function returnDataStoresSizes():Object{
+            	var sizeObject:Object = new Object();
+            	sizeObject.total = 0;
+            	sizeObject.free = 0;
+            	sizeObject.used = 0;
+            	
+            	var datastore:Datastore;
+            	
+            	for(var i:int = 0 ; i < this._physicalMachine.datastores.length; i++){
+            		datastore = this._physicalMachine.datastores.getItemAt(i) as Datastore;
+            		if(datastore.enabled){
+            			sizeObject.total += datastore.size;
+            			sizeObject.free += datastore.size - datastore.usedSize;
+            			sizeObject.used += datastore.usedSize;
+            		}
+            	}  
+            	
+            	sizeObject.total = Number(sizeObject.total / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString();
+            	sizeObject.free = Number(sizeObject.free / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString();
+            	sizeObject.used = Number(sizeObject.used / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString();          	
+            	
+            	return sizeObject;
             }
         ]]>
     </mx:Script>
@@ -251,7 +259,7 @@
         direction="horizontal">
 
         <mx:Label id="hdLabel"
-            text="{Number(_physicalMachine.hd / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + ' GB'}"
+            text="{this._physicalMachineHD}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 
