@@ -74,7 +74,7 @@
             {
                 //Listening for changes in model
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                     onVirtualDatacenterCRUD);
+                                                                                     onVirtualDatacenterCRUD);				                                                                                    
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_DELETED,
                                                                                      onVirtualDatacenterCRUD);
             }
@@ -299,12 +299,8 @@
             {
                 if (this._selectedVirtualDataCenter)
                 {
-                   /* PopUpManager.addPopUp(this._virtualDatacenterFormEdit, Application.application as DisplayObject,
-                                          true);
-                    PopUpManager.centerPopUp(this._virtualDatacenterFormEdit);
-
-                    this._virtualDatacenterFormEdit.init(this._selectedVirtualDataCenter); 
- */                    openVirtualDataCenterFormManagement(this._selectedVirtualDataCenter);
+                	this._selectedVirtualDataCenter = virtualDataCenterList.selectedItem as VirtualDataCenter;
+                   openVirtualDataCenterFormManagement(this._selectedVirtualDataCenter);
                 }
             }
 
