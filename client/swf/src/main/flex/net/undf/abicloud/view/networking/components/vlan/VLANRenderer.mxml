@@ -37,6 +37,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.Enterprise;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.resources.ResourceManager;
             import mx.utils.StringUtil;
@@ -52,6 +53,15 @@
             {
                 _vlanNetwork = value;
             }
+            
+            [Bindable]
+            private var _enterprise:Enterprise;
+
+            public function set enterprise(value:Enterprise):void
+            {
+                _enterprise = value;
+            }
+
         ]]>
     </mx:Script>
 
@@ -106,6 +116,12 @@
                 styleName="VLANRendererForm1"
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
+                 <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
+                 	includeInLayout="{_enterprise}"
+                 	visible="{_enterprise}">
+                    <mx:Label text="{_enterprise.name}"/>
+                </mx:FormItem>
+                
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">
                     <mx:Label text="{_vlanNetwork.configuration.primaryDNS}"/>
                 </mx:FormItem>
