@@ -850,8 +850,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         VirtualAppliance virtualappOld = null;
         // The VirtualAppliance's state that user sent
         State originalVirtualApplianceState = virtualAppliance.getState();
+        State originalVirtualApplianceSubState = virtualAppliance.getSubState();
+        
         DAOFactory factory = HibernateDAOFactory.instance();
-
+        
+        UserHB userHB = null;
+        
         // Before start editing a VirtualAppliance, we must check that it is not
         // already being edited by another user
         DataResult<VirtualAppliance> currentStateAndAllow;
@@ -864,6 +868,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             currentStateAndAllow =
                 dao.checkVirtualApplianceState(virtualAppliance, StateEnum.IN_PROGRESS);
 
+            userHB = factory.getUserDAO().getUserByUserName(userSession.getUser());
+            
             factory.endConnection();
         }
         catch (Exception e)
@@ -1020,6 +1026,39 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 dataResult.setSuccess(Boolean.FALSE);
                 dataResult.setMessage(e.getMessage());
 
+            }
+            catch (HardLimitExceededException hl)
+            {
+                // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+                return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, originalVirtualApplianceState,
+                    originalVirtualApplianceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
+                    "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
+            }
+            catch (SoftLimitExceededException sl)
+            {
+                // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+                return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, originalVirtualApplianceState,
+                    originalVirtualApplianceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
+                    "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
+            }
+            catch (NotEnoughResourcesException nl)
+            {
+                // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+                final String cause =
+                    String.format("There is not enough resources in datacenter "
+                        + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
+
+                dataResult =
+                    traceErrorStartingVirtualAppliance(userSession, virtualAppliance, originalVirtualApplianceState,
+                        originalVirtualApplianceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, cause,
+                        "startVirtualAppliance", nl); // , BasicResult..CLOUD_LIMT_EXCEEDED
+
+                String message =
+                    String.format("%s\n%s", "The virtual appliance can not be deployed. "
+                        + "Please contact your Cloud Administrator.", cause);
+
+                dataResult.setMessage(message);
+                return dataResult;
             }
             catch (Exception e)
             {
