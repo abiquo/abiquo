@@ -109,6 +109,12 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
+/*!40000 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` DISABLE KEYS */;
+-- LOCK TABLES `kinton`.`node_virtual_image_stateful_conversions` WRITE;
+-- UNLOCK TABLES;
+/*!40000 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ENABLE KEYS */;
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idTier` int(10) unsigned NOT NULL;
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`);
 
 -- STATISTICS TRIGGERS 
 
@@ -124,6 +130,7 @@ DROP TRIGGER if exists `kinton`.`dclimit_updated`;
 DROP TRIGGER if exists `kinton`.`dclimit_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
+
 
 DELIMITER |
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
@@ -592,14 +599,4 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
 |
 DELIMITER ;
 
---
--- Stateful
---
-
-/*!40000 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` DISABLE KEYS */;
-LOCK TABLES `kinton`.`node_virtual_image_stateful_conversions` WRITE;
-ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idTier` int(10) unsigned NOT NULL;
-ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`);
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ENABLE KEYS */;
 
