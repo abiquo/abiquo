@@ -1815,6 +1815,7 @@ DROP  TABLE IF EXISTS `kinton`.`vapp_enterprise_stats`;
 CREATE  TABLE IF NOT EXISTS `kinton`.`vapp_enterprise_stats` (
   `idVirtualApp` INT NOT NULL AUTO_INCREMENT,
   `idEnterprise` INT NOT NULL ,
+  `idVirtualDataCenter` INT NOT NULL,
   `vappName` VARCHAR(45) NULL COMMENT 'Name for this virtual appliance',
   `vdcName` VARCHAR(45) NULL COMMENT 'Name for the virtualdatacenter',
   `vmCreated` MEDIUMINT UNSIGNED NULL DEFAULT 0 COMMENT 'Number of virtual machines created in this virtual appliance',
@@ -1919,7 +1920,7 @@ CREATE TRIGGER `kinton`.`virtualapp_created` AFTER INSERT ON `kinton`.`virtualap
       SELECT vdc.name INTO vdcNameObj
       FROM virtualdatacenter vdc
       WHERE NEW.idVirtualDataCenter = vdc.idVirtualDataCenter;
-      INSERT IGNORE INTO vapp_enterprise_stats (idVirtualApp, idEnterprise, vappName, vdcName) VALUES(NEW.idVirtualApp, NEW.idEnterprise, NEW.name, vdcNameObj);
+      INSERT IGNORE INTO vapp_enterprise_stats (idVirtualApp, idEnterprise, idVirtualDataCenter, vappName, vdcName) VALUES(NEW.idVirtualApp, NEW.idEnterprise, NEW.idVirtualDataCenter, NEW.name, vdcNameObj);
     END IF;
   END;
 --
@@ -3743,6 +3744,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
    BEGIN
   DECLARE idVirtualAppObj INTEGER;
   DECLARE idEnterprise INTEGER;
+  DECLARE idVirtualDataCenter INTEGER;
   DECLARE vappName VARCHAR(45);
   DECLARE vdcName VARCHAR(45);
   DECLARE vmCreated MEDIUMINT UNSIGNED;
@@ -3752,7 +3754,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
 
   DECLARE no_more_vapps INTEGER;
 
-  DECLARE curDC CURSOR FOR SELECT vapp.idVirtualApp, vapp.idEnterprise, vapp.name, vdc.name FROM virtualapp vapp, virtualdatacenter vdc WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter;
+  DECLARE curDC CURSOR FOR SELECT vapp.idVirtualApp, vapp.idEnterprise, vapp.idVirtualDataCenter, vapp.name, vdc.name FROM virtualapp vapp, virtualdatacenter vdc WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_vapps = 1;
 
   SET no_more_vapps = 0;
@@ -3763,7 +3765,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
   TRUNCATE vapp_enterprise_stats;
 
   dept_loop:WHILE(no_more_vapps = 0) DO
-    FETCH curDC INTO idVirtualAppObj, idEnterprise, vappName, vdcName;
+    FETCH curDC INTO idVirtualAppObj, idEnterprise, idVirtualDataCenter, vappName, vdcName;
     IF no_more_vapps=1 THEN
         LEAVE dept_loop;
     END IF;
@@ -3800,8 +3802,8 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     AND state = 2;
 
     -- Inserts stats row
-    INSERT INTO vapp_enterprise_stats (idVirtualApp,idEnterprise,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached)
-    VALUES (idVirtualAppObj, idEnterprise,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached);
+    INSERT INTO vapp_enterprise_stats (idVirtualApp,idEnterprise,idVirtualDataCenter,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached)
+    VALUES (idVirtualAppObj, idEnterprise,idVirtualDataCenter,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached);
 
 
   END WHILE dept_loop;

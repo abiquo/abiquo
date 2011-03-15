@@ -37,7 +37,8 @@ public enum APIError
         "GEN-3", "Invalid xml document"),
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-5", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-6", "Unexpected error"),
+        "GEN-6", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-7",
+        "Not enough privileges to perform this operation"),
 
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
