@@ -30,6 +30,8 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -93,34 +95,26 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
     public DataResult<Enterprise> editEnterprise(Enterprise enterprise)
     {
+        DataResult<Enterprise> result;
+        ErrorsDto errors = modifyDatacenterLimits(enterprise);
+
+        if (errors != null)
+        {
+            result = new DataResult<Enterprise>();
+            result.setSuccess(false);
+            result.setMessage("Can't edit the datacenter limits :\n" + errors.toString());
+        }
+
         String uri = createEnterpriseLink(enterprise.getId());
 
         EnterpriseDto dto = fromEnterpriseToDto(enterprise);
 
-        DataResult<Enterprise> result = new DataResult<Enterprise>();
+        result = new DataResult<Enterprise>();
 
         ClientResponse response = put(uri, dto);
         if (response.getStatusCode() == 200)
         {
             Enterprise data = getEnterprise(response);
-
-            // TODO modify datacenter limits ErrorsDto errorsDcLimits =
-            // createDatacenterLimits(enterprise, data);
-            // ErrorsDto errorsMachines = assignMachines(enterprise, data);
-            //
-            // boolean success = errorsDcLimits == null && errorsMachines == null;
-            // if (!success)
-            // {
-            // String message = "";
-            // if (errorsDcLimits != null)
-            // {
-            // message += errorsDcLimits.toString();
-            // }
-            // if (errorsMachines != null)
-            // {
-            // message += errorsMachines.toString();
-            // }
-            // }
 
             result.setSuccess(true);
             result.setData(data);
@@ -131,7 +125,6 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         }
 
         return result;
-
     }
 
     protected EnterpriseDto fromEnterpriseToDto(Enterprise enterprise)
@@ -143,7 +136,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return (EnterpriseDto) fillLimits(dto, limits);
     }
 
-    private SingleResourceWithLimitsDto fillLimits(SingleResourceWithLimitsDto dto,
+    protected SingleResourceWithLimitsDto fillLimits(SingleResourceWithLimitsDto dto,
         ResourceAllocationLimit limits)
     {
         dto.setCpuCountLimits((int) limits.getCpu().getSoft(), (int) limits.getCpu().getHard());
@@ -155,7 +148,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return dto;
     }
 
-    private ErrorsDto createDatacenterLimits(Enterprise enterprise, Enterprise data)
+    protected ErrorsDto createDatacenterLimits(Enterprise enterprise, Enterprise data)
     {
         if (CollectionUtils.isEmpty(enterprise.getDcLimits()))
         {
@@ -186,42 +179,12 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         return null;
     }
-    
-    
 
-    private ErrorsDto modifyDatacenterLimits(List<DatacenterLimit> limits, Enterprise data)
+    protected ErrorsDto modifyDatacenterLimits(Enterprise ent)
     {
-        if (CollectionUtils.isEmpty(limits))
-        {
-            return null;
-        }
-
-        String uri = createDatacenterLimitsUri(data);
-        
-
-        for (DatacenterLimit limit : limits)
-        {
-            DatacenterLimitsDto dto = new DatacenterLimitsDto();
-            fillLimits(dto, limit.getLimits());
-
-            String datacenterUri = createDatacenterLink(limit.getDatacenter().getId());            
-            dto.addLink(new RESTLink("datacenter", datacenterUri));
-
-            ClientResponse response = post(uri, dto);
-            if (response.getStatusCode() == 201)
-            {
-                limit.setEnterprise(data);
-                data.addDatacenterLimit(limit);
-            }
-            else
-            {
-                return response.getEntity(ErrorsDto.class);
-            }
-        }
-
+        // community impl (no limit)
         return null;
     }
-
 
     private ErrorsDto assignMachines(Enterprise enterprise, Enterprise data)
     {

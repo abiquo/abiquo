@@ -55,9 +55,14 @@ public enum APIError
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
         "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
-        "Limits by enterprise and datacenter don't exist"), LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+        "Limits by enterprise and datacenter don't exist"), //
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
         "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), //
+    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "LIMIT-10",
+        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), 
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(

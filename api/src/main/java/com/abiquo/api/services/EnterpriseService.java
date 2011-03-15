@@ -42,6 +42,7 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -329,6 +330,8 @@ public class EnterpriseService extends DefaultApiService
             addValidationErrors(limit.getValidationErrors());
             flushErrors();
         }
+        
+        isValidDatacenterLimit(limit);
 
         repo.insertLimit(limit);
 
@@ -356,10 +359,20 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
+        isValidDatacenterLimit(old);
+        
         repo.updateLimit(old);
 
         return old;
     }
+    
+    
+    protected void isValidDatacenterLimit(DatacenterLimits dcLimits)
+    {
+        // community dummy impl (no limit check)
+    }
+    
+    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deleteDatacenterLimits(Integer enterpriseId, Integer limitId)
