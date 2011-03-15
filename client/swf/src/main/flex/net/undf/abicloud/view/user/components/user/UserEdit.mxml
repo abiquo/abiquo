@@ -25,7 +25,7 @@
 <AbiCloudPopUp 
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
-    titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" xmlns:combocheckbox="net.undf.abicloud.view.user.components.user.combocheckbox.*">
+    titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" xmlns:combocheckbox="net.undf.abicloud.view.user.components.user.combocheckbox.*" xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
     <mx:Metadata>
 		[Event(name="userEditClose", type="flash.events.Event")]		
@@ -34,6 +34,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.managers.PopUpManager;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import mx.binding.utils.ChangeWatcher;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import mx.binding.utils.BindingUtils;
@@ -64,6 +67,11 @@
             public var virtualDataCenterList:ArrayCollection;
             
             private var _firstRetrieve:Boolean;
+            
+            private var _virtualDatacenterWatcher:ChangeWatcher;
+            
+            [Bindable]
+            private var _restrict:Boolean;
 
             /**
              * Initializes this form to create a new user
@@ -92,10 +100,10 @@
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
                 labelOldPasswordInvalid.visible = true;
-                //acceptButton.enabled = true;
                 acceptButton.enabled = false;
                 
-                
+                virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
+                this._restrict = false;
 
                 //With roles with extra privilegies is not needed to check the current password
                 //of each user
@@ -112,9 +120,12 @@
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
-                BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
+                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
             }
             
+            /**
+             * Retrieves the list of available VirtualDatacenters
+             */
             private function createVirtualDataCenterList(value:ArrayCollection):void{
         		if(this._firstRetrieve){
             		var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
@@ -122,20 +133,31 @@
             		dispatchEvent(event);            		
             		this._firstRetrieve = false;           		
             	}else{
-            		
-            		virtualDataCenterList = new ArrayCollection();
-            		
-	            	var allowedVirtualDataCenter:Object;
-	            	           
-	            	for(var i:int = 0 ; i < value.length ; i++){           		
-	            		allowedVirtualDataCenter = new Object();
-	            		allowedVirtualDataCenter.label = VirtualDataCenter(value.getItemAt(i)).name;
-	            		allowedVirtualDataCenter.value = VirtualDataCenter(value.getItemAt(i)).id;
-	            		allowedVirtualDataCenter.checked = virtualDataCenterAlreadySelected(VirtualDataCenter(value.getItemAt(i)).id);
-	            		virtualDataCenterList.addItem(allowedVirtualDataCenter);         	
-	            	} 	
+            		_virtualDatacenterWatcher.unwatch();
+            		populateSelectedRestrictedVirtualDatacenters(value);
             	}
-            }            	
+            }  
+            
+            /**
+             * Populates the list of restricted VirtualDatacenters
+             */
+            private function populateSelectedRestrictedVirtualDatacenters(value:ArrayCollection):void{
+            	virtualDataCenterList = value;
+            		
+            	var allowedVirtualDataCenter:Object;
+            	           
+            	for(var i:int = 0 ; i < value.length ; i++){           		
+
+            		if(virtualDataCenterAlreadySelected(VirtualDataCenter(value.getItemAt(i)).id)){
+            			virtualDatacenterList.listOfSelectedVirtualDatacenter.addItem(VirtualDataCenter(value.getItemAt(i)).id);
+            		}     	
+            	}
+            	
+            	//if we add restricted VDC, we show the list
+            	if(virtualDatacenterList.listOfSelectedVirtualDatacenter.length > 0){
+            		this._restrict = true;
+            	}
+            }          	
             
             /**
              * To set the list of available virtual datacenters
@@ -181,7 +203,8 @@
                 userCopy.email = emailInput.text;
                 userCopy.description = descriptionInput.text;
                 userCopy.active = activeInput.selected;
-                userCopy.availableVirtualDatacenters = saveAvailableVirtualDataCenters();
+                //userCopy.availableVirtualDatacenters = saveAvailableVirtualDataCenters();
+                userCopy.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)
@@ -210,14 +233,14 @@
             /**
              * Save the list of allowed Virtual DataCenters
              **/
-            private function saveAvailableVirtualDataCenters():Array{
+            /* private function saveAvailableVirtualDataCenters():Array{
             	var availableVirtualDatacenters:Array = new Array();
             	for(var i:int = 0 ; i < comboCheckBox.selectedItems.length ; i++){
             		//availableVirtualDatacenters.addItem(comboCheckBox.selectedItems.getItemAt(i).value);
             		availableVirtualDatacenters.push(comboCheckBox.selectedItems.getItemAt(i).value);
             	}
             	return availableVirtualDatacenters;
-            }
+            } */
 
 
             /**
@@ -351,6 +374,23 @@
                         onAccept();
                 }
             }
+            
+            /**
+             * Show/hide the list of virtualdatacenter
+             */
+            private function showHideRestrict():void{
+            	
+            	this._restrict = ! this._restrict;
+            	//We remove all selected VDC
+            	if(!this._restrict){
+            		virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
+            	}else{
+            		//we display again the restricted virtual datacenter
+            		populateSelectedRestrictedVirtualDatacenters(AbiCloudModel.getInstance().virtualApplianceManager.virtualDataCenters);            		
+            		virtualDatacenterList.refreshCheckbox();
+            	}
+            	PopUpManager.centerPopUp(this);
+            }
         ]]>
     </mx:Script>
     
@@ -362,7 +402,7 @@
     	invalid="invalidEmail.visible = true ; acceptButton.enabled = false"
     	valid="invalidEmail.visible = false"/>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" width="100%">
 
         <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')">
             <mx:TextInput id="enterpriseInput"
@@ -399,14 +439,34 @@
 
 		 <mx:FormItem 
         	id="vdcFormItem"
+        	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
             visible="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}"
             includeInLayout="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}">
-            <combocheckbox:ComboCheck id="comboCheckBox"
-            	height="18"
-            	dataProvider="{virtualDataCenterList}"
-            	labelField="label"
-            	prompt="@Resource(bundle='Configuration',key='LABEL_VIRTUAL_DATACENTERS')"/>
+            <mx:VBox verticalAlign="middle"
+            	visible="{this._restrict}"
+            	includeInLayout="{this._restrict}">
+            	<mx:HBox verticalAlign="middle">
+	            	<mx:Image
+			    		id="alertIcon"
+			    		toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
+			    		creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
+	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')" color="red" fontWeight="bold"/>            		
+            	</mx:HBox>
+	            <virtualdatacenter:AvailableVirtualDatacenterList 
+	            	toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
+	            	id="virtualDatacenterList" 
+	            	rowCount="4"
+	            	dataProvider="{virtualDataCenterList}"
+	            	visible="{this._restrict}"
+	            	includeInLayout="{this._restrict}"
+	            	width="100%"/> 	
+            </mx:VBox>
+        	<mx:Button 
+        		id="hideButton"
+        		height="18"
+        		label="{this._restrict ? resourceManager.getString('User','BUTTON_DONT_RESTRICT_ACCESS'):resourceManager.getString('User','BUTTON_RESTRICT_ACCESS')}"
+        		click="showHideRestrict()"/>
         </mx:FormItem>
         
         <mx:FormItem 

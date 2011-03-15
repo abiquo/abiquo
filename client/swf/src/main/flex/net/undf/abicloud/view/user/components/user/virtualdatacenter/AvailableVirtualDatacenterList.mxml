@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" 
+	selectionColor="white"
+	show="refreshCheckbox()">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+			
+			public var listOfSelectedVirtualDatacenter:ArrayCollection;
+						
+			override protected function createChildren():void
+            {
+                super.createChildren();     
+                
+                listOfSelectedVirtualDatacenter = new ArrayCollection();           
+            }
+            
+            /**
+             * Function called to refresh each combobox
+             */
+            public function refreshCheckbox():void{
+            	dispatchEvent(new Event("refreshCheck"));
+            }
+            
+			/**
+             * Function called to add/remove a virtual datacenter from the list of restricted
+             */
+			public function selectVirtualDatacenter(virtualDatacenter:VirtualDataCenter , status:Boolean):void{
+            	if(status){
+            		listOfSelectedVirtualDatacenter.addItem(virtualDatacenter.id);
+            	}else{
+            		listOfSelectedVirtualDatacenter.removeItemAt(listOfSelectedVirtualDatacenter.getItemIndex(virtualDatacenter.id));
+            	}            	
+            }
+            
+            /**
+             * Check if the virtualdatacenter is already used
+             */
+             public function virtualDatacenterIsUsed(virtualDatacenter:VirtualDataCenter):Boolean{
+             	for(var i:int = 0 ; i < listOfSelectedVirtualDatacenter.length ; i++){
+             		if(listOfSelectedVirtualDatacenter.getItemAt(i) == virtualDatacenter.id){
+             			return true;
+             		}             		
+             	}
+             	return false;
+             } 
+		]]>
+	</mx:Script>
+	<mx:columns>
+		<mx:DataGridColumn headerText="@Resource(bundle='User',key='LABEL_SELECTED')" width="60">
+			<mx:itemRenderer>
+				<mx:Component>
+					<mx:HBox width="100%" 
+						show="refreshValue()"						
+						creationComplete="onCreationComplete()" 
+						horizontalAlign="center" 
+						verticalAlign="middle">
+						<mx:Script>
+							<![CDATA[
+								import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;							
+								import mx.controls.CheckBox;
+								
+								private function refreshValue(event:Event = null):void{
+									virtualDatacenterSelected.selected = outerDocument.virtualDatacenterIsUsed(VirtualDataCenter(data));								
+								}
+								
+								private function selectVirtualDatacenter(event:Event):void{
+									outerDocument.selectVirtualDatacenter(VirtualDataCenter(data),CheckBox(event.currentTarget).selected);
+								}
+								
+								private function onCreationComplete():void{
+									refreshValue();
+									outerDocument.addEventListener("refreshCheck",refreshValue);
+								}
+							]]>
+						</mx:Script>
+						<mx:CheckBox id="virtualDatacenterSelected" selected="false" change="selectVirtualDatacenter(event)"/>
+					</mx:HBox>
+				</mx:Component>
+			</mx:itemRenderer>
+		</mx:DataGridColumn>
+		<mx:DataGridColumn width="150" headerText="@Resource(bundle='VirtualAppliance',key='LABEL_VIRTUALDATACENTER')" dataField="name"/>
+    </mx:columns>	
+</mx:DataGrid>
