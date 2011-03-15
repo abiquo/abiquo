@@ -237,6 +237,14 @@ public class UserService extends DefaultApiService
         }
 
         checkUserCredentials(user.getEnterprise());
+     
+        // Cloud Admins should only be editable by other Cloud Admins
+        if (user.getRole().getType() == Role.Type.SYS_ADMIN
+            && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        {
+            errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
+            flushErrors();
+        }
 
         repo.removeUser(user);
     }
