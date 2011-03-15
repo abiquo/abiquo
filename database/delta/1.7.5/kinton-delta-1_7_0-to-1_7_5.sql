@@ -130,6 +130,7 @@ DROP TRIGGER if exists `kinton`.`dclimit_updated`;
 DROP TRIGGER if exists `kinton`.`dclimit_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 
 
 DELIMITER |
@@ -594,6 +595,93 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
             CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, NEW.ram, NEW.cpu, NEW.hd);
         END IF;              
+    END IF;
+    END;
+-- ******************************************************************************************
+-- * Updatess Storage Total / Reserved / Used for cloud
+-- * Updates volCreated, volAttached
+-- * Updates storageUsed for enterprise, dc, vdc
+-- * Register Updated Storage Event for statistics
+
+--  State defined at com.abiquo.abiserver.storage.StorageState
+--      NOT_MOUNTED_NOT_RESERVED(0),
+--      NOT_MOUNTED_RESERVED(1),
+--      MOUNTED_RESERVED(2);
+--
+-- Fires: On an UPDATE for the volume_management table
+--
+-- ******************************************************************************************
+|
+CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON `kinton`.`volume_management`
+    FOR EACH ROW BEGIN
+        DECLARE idDataCenterObj INTEGER;
+        DECLARE idVirtualAppObj INTEGER;
+        DECLARE idVirtualDataCenterObj INTEGER;
+        DECLARE idEnterpriseObj INTEGER;
+        DECLARE reservedSize BIGINT;
+        DECLARE incr INTEGER;
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
+        SET incr = NEW.usedSize-OLD.usedSize;
+        SELECT sd.idDataCenter INTO idDataCenterObj
+        FROM storage_pool sp, storage_device sd
+        WHERE OLD.idStorage = sp.idStorage
+        AND sp.idStorageDevice = sd.id;
+        --      
+        SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
+        FROM rasd_management rasd, virtualapp vapp
+        WHERE OLD.idManagement = rasd.idManagement
+        AND rasd.idVirtualApp = vapp.idVirtualApp;
+        --
+        SELECT vdc.idEnterprise INTO idEnterpriseObj
+        FROM virtualdatacenter vdc
+        WHERE vdc.idVirtualDataCenter = idVirtualDataCenterObj;
+        --
+        SELECT r.limitResource INTO reservedSize
+        FROM rasd_management rm, rasd r
+        WHERE rm.idManagement = NEW.idManagement
+        AND r.instanceID = rm.idResource;
+        --
+        IF NEW.state != OLD.state THEN
+            IF NEW.state = 1 THEN 
+                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE enterprise_resources_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE dc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE vdc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+            ELSEIF NEW.state = 2 THEN
+                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE enterprise_resources_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE dc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE vdc_enterprise_stats 
+                    SET     volAttached = volAttached + 1, extStorageUsed = extStorageUsed +  reservedSize
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+            END IF;     
+            IF OLD.state = 1 THEN 
+                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
+            ELSEIF OLD.state = 2 THEN
+                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE enterprise_resources_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE dc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE vdc_enterprise_stats 
+                    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed +  reservedSize
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+            END IF;
+        END IF;
     END IF;
     END;
 |
