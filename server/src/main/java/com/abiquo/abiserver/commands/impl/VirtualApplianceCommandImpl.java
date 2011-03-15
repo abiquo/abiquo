@@ -493,10 +493,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             session = null;
             transaction = null;
             
+
             if (needToShutdown)
             {
                 basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
             }
+
             
             if (basicResult.getSuccess())
             {
@@ -1286,6 +1288,29 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     public BasicResult editVirtualDataCenter(final UserSession userSession,
         final VirtualDataCenter virtualDataCenter)
     {
+
+        Session session = HibernateUtil.getSession();
+        Transaction tx = session.beginTransaction();
+
+        try
+        {
+            VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
+            checkLimits(vdcHb);
+        }
+        catch (HardLimitExceededException e)
+        {
+            BasicResult basicResult = new BasicResult();
+            basicResult.setSuccess(false);
+            basicResult.setMessage(resourceManager
+                .getMessage("editVirtualDataCenter.limitExceeded"));
+
+            return basicResult;
+        }
+        finally
+        {
+            tx.commit();
+        }
+
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
                 VirtualDatacenterResourceStub.class);
@@ -1309,6 +1334,11 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
 
         return result;
+    }
+
+    protected void checkLimits(VirtualDataCenterHB vdc) throws HardLimitExceededException
+    {
+        // community impl (no limits at all)
     }
 
     /*
@@ -2052,21 +2082,21 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (HardLimitExceededException hl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
         }
         catch (SoftLimitExceededException sl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
                 "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
         }
         catch (NotEnoughResourcesException nl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
                 String.format("There is not enough resources in datacenter "
                     + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());

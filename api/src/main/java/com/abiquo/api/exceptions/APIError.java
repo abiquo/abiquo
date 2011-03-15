@@ -49,13 +49,21 @@ public enum APIError
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
-        "ENTERPRISE-6", "Cannot delete the current user enterprise"),
+        "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
+        "ENTERPRISE-7", "Enterprise name can't be empty"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
         "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
-        "Limits by enterprise and datacenter don't exist"),
+        "Limits by enterprise and datacenter don't exist"), //
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), //
+    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "LIMIT-10",
+        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
@@ -64,7 +72,10 @@ public enum APIError
         "This datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
         "VDC-3",
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
-        "VDC-4", "This datacenter has networks without IPs!"),
+        "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "VDC-5",
+        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -223,7 +234,7 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.message = cause;// String.format("%s.\ncaused by:%s", this.message, cause);
+        this.message = String.format("%s\nCaused by:\n", message, cause);
         return this;
     }
 
@@ -243,8 +254,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 }
