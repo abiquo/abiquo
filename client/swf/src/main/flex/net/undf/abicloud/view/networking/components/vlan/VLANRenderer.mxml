@@ -55,12 +55,8 @@
             }
             
             [Bindable]
-            private var _enterprise:Enterprise;
+            public var enterprise:Enterprise;
 
-            public function set enterprise(value:Enterprise):void
-            {
-                _enterprise = value;
-            }
 
         ]]>
     </mx:Script>
@@ -117,9 +113,9 @@
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
                  <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
-                 	includeInLayout="{_enterprise}"
-                 	visible="{_enterprise}">
-                    <mx:Label text="{_enterprise.name}"/>
+                 	includeInLayout="{enterprise}"
+                 	visible="{enterprise}">
+                    <mx:Label text="{enterprise.name}"/>
                 </mx:FormItem>
                 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">

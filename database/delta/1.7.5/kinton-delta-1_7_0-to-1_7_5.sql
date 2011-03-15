@@ -487,6 +487,7 @@ CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_l
                     vlanReserved = vlanReserved + NEW.vlanHard
                 WHERE idDataCenter = NEW.idDataCenter;
         END IF;
+    END;
 |
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
     FOR EACH ROW BEGIN
