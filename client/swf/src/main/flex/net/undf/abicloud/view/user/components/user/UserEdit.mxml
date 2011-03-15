@@ -25,7 +25,8 @@
 <AbiCloudPopUp 
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
-    titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" xmlns:combocheckbox="net.undf.abicloud.view.user.components.user.combocheckbox.*" xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
+    titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" 
+    xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
     <mx:Metadata>
 		[Event(name="userEditClose", type="flash.events.Event")]		
@@ -230,18 +231,6 @@
                 onCancel();
             }
             
-            /**
-             * Save the list of allowed Virtual DataCenters
-             **/
-            /* private function saveAvailableVirtualDataCenters():Array{
-            	var availableVirtualDatacenters:Array = new Array();
-            	for(var i:int = 0 ; i < comboCheckBox.selectedItems.length ; i++){
-            		//availableVirtualDatacenters.addItem(comboCheckBox.selectedItems.getItemAt(i).value);
-            		availableVirtualDatacenters.push(comboCheckBox.selectedItems.getItemAt(i).value);
-            	}
-            	return availableVirtualDatacenters;
-            } */
-
 
             /**
              * Cancels the User Creation
@@ -451,7 +440,8 @@
 			    		id="alertIcon"
 			    		toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
 			    		creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
-	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')" color="red" fontWeight="bold"/>            		
+	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')"  
+	            		styleName="DataCenterCreationWarning"/>            		
             	</mx:HBox>
 	            <virtualdatacenter:AvailableVirtualDatacenterList 
 	            	toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"

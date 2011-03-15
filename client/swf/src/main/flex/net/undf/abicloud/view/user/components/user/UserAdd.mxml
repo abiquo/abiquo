@@ -26,7 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='User', key='POPUP_TITLE_USERADD')" 
-    xmlns:combocheckbox="net.undf.abicloud.view.user.components.user.combocheckbox.*" xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
+    xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
     <mx:Metadata>
 		[Event(name="userAddClose", type="flash.events.Event")]		
@@ -38,7 +38,6 @@
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.managers.PopUpManager;
         	import mx.controls.Alert;
-        	import net.undf.abicloud.view.user.components.user.combocheckbox.ComboCheck;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import mx.collections.ArrayCollection;
@@ -326,7 +325,8 @@
 			    		id="alertIcon"
 			    		toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
 			    		creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
-	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')" color="red" fontWeight="bold"/>            		
+	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')" 
+	            		styleName="DataCenterCreationWarning"/>            		
             	</mx:HBox>
 	            <virtualdatacenter:AvailableVirtualDatacenterList 
 	            	toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
