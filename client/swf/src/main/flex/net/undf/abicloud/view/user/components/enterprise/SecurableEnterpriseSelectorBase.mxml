@@ -121,6 +121,9 @@
                                         "enterprises");
                 AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.ENTERPRISE_DELETED,
                                                                          onEnterpriseDeleted);
+				
+				AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.ENTERPRISE_EDITED,
+                                                                         requestEnterprises);                                                                         
             }
 
             public function init():void
@@ -158,7 +161,7 @@
             /**
              * Request the list of users, building the appropriate options
              **/
-            private function requestEnterprises():void
+            private function requestEnterprises(userEvent:Event = null):void
             {
                 var listRequest:ListRequest = new ListRequest();
                 listRequest.offset = this._enterprisesCurrentPage * ENTERPRISES_RESULTS_PER_PAGE;
