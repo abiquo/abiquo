@@ -188,7 +188,7 @@ public class OVFPackageInstanceDto extends SingleResourceTransportDto implements
 
     public MemorySizeUnit getRamSizeUnit()
     {
-        return ramSizeUnit;
+        return ramSizeUnit != null ? ramSizeUnit : MemorySizeUnit.MEGABYTE;
     }
 
     public void setRamSizeUnit(MemorySizeUnit ramSizeUnit)
@@ -198,7 +198,7 @@ public class OVFPackageInstanceDto extends SingleResourceTransportDto implements
 
     public MemorySizeUnit getHdSizeUnit()
     {
-        return hdSizeUnit;
+        return hdSizeUnit != null ? hdSizeUnit : MemorySizeUnit.MEGABYTE;
     }
 
     public void setHdSizeUnit(MemorySizeUnit hdSizeUnit)
