@@ -186,7 +186,9 @@
                 userCopy.email = emailInput.text;
                 userCopy.description = descriptionInput.text;
                 userCopy.active = activeInput.selected;
-                userCopy.availableVirtualDatacenters = saveAvailableVirtualDataCenters();
+                if(!this._isUserEditing){
+	                userCopy.availableVirtualDatacenters = saveAvailableVirtualDataCenters();                	
+                }
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)

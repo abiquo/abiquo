@@ -97,6 +97,8 @@
 			
 			private function onInitialize():void
 			{
+				this._isUserEditing = true;
+				
 				defineSecurableResources();
 				checkSecurableResources();
 				
@@ -106,7 +108,6 @@
 				_userEdit.activeEditable = false;
 				_userEdit.addEventListener("userEditClose", closeUserEdit);
 				
-				this._isUserEditing = true;
 			}
 			
 			/**
