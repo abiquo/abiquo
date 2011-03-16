@@ -152,10 +152,6 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 					.getVirtualSystemMonitorFromVA(virtualAppliance);
 
 			if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED) {
-				// Subscribing to the virtual appliance states
-				// Decomment this to test subscribing to all the events
-				EventingSupport.subscribeToAllVA(virtualAppliance,
-						virtualSystemMonitor);
 
 				String destination = RemoteServiceUtils
 						.getVirtualFactoryFromVA(virtualAppliance);
@@ -169,6 +165,11 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 			}
 
 			if (resource != null) {
+	             // Subscribing to the virtual appliance states
+                // Decomment this to test subscribing to all the events
+                EventingSupport.subscribeToAllVA(virtualAppliance,
+                        virtualSystemMonitor);
+                
 				// Starting the virtual Appliance Changing the virtualSystems to
 				// running
 				result = changeState(resource, envelope,
