@@ -342,7 +342,7 @@
                 PopUpManager.addPopUp(this._userEdit, this, true);
                 PopUpManager.centerPopUp(this._userEdit);
 
-                this._userEdit.init(usersDataGrid.selectedItem as User);
+                this._userEdit.init(usersDataGrid.selectedItem as User, false);
             }
 
 

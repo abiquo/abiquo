@@ -77,6 +77,8 @@
 			
 			private var usingDefaultInError : Boolean = false;
 			
+			private var _isUserEditing:Boolean;
+			
 			public function set headerLogo(value:String):void
 			{
 				var path:String = "themes/logos/" + AbiCloudModel.getInstance().loginManager.user.enterprise.id + "/" + value;
@@ -95,6 +97,8 @@
 			
 			private function onInitialize():void
 			{
+				this._isUserEditing = true;
+				
 				defineSecurableResources();
 				checkSecurableResources();
 				
@@ -103,6 +107,7 @@
 				_userEdit.roleEditable = false;
 				_userEdit.activeEditable = false;
 				_userEdit.addEventListener("userEditClose", closeUserEdit);
+				
 			}
 			
 			/**
@@ -135,8 +140,8 @@
 				PopUpManager.addPopUp(this._userEdit, Application.application.document,
 					true);
 				PopUpManager.centerPopUp(this._userEdit);
-				
-				this._userEdit.init(AbiCloudModel.getInstance().loginManager.user);
+								
+				this._userEdit.init(AbiCloudModel.getInstance().loginManager.user, this._isUserEditing);
 			}
 			
 			private function closeUserEdit(event:Event):void
@@ -286,11 +291,13 @@
 						menuOption.styleName = "MainHeaderUsersButton";
 						menuOptions.addItem(menuOption);
 						
+						this._isUserEditing = false;
+						
 						//we replace the user name button by the user name text
-						userLoggedInfo.includeInLayout = true;
+						/* userLoggedInfo.includeInLayout = true;
 						userLoggedInfo.visible = true;
 						userLoggedInfoText.includeInLayout = false;
-						userLoggedInfoText.visible = false;
+						userLoggedInfoText.visible = false; */
 					}
 				}
 				
@@ -452,8 +459,8 @@
         minWidth="140" horizontalScrollPolicy="off" verticalScrollPolicy="off"
         id="verticalVbox" >
         <mx:Label id="userLoggedInfo"
-        	visible="false"
-        	includeInLayout="false" 
+        	visible="true"
+        	includeInLayout="true" 
             fontSize="11"
             fontWeight="bold"
             textAlign="right"
@@ -465,13 +472,13 @@
             rollOver="userLoggedInfo.setStyle('textDecoration', 'underline')"
             rollOut="userLoggedInfo.setStyle('textDecoration', 'none')"
             click="onClickUserLoggedInfo()"/>
-        <mx:Label id="userLoggedInfoText"
+        <!--<mx:Label id="userLoggedInfoText"
             fontSize="11"
             fontWeight="bold"
             textAlign="right"
             truncateToFit="true"
             text="{AbiCloudModel.getInstance().loginManager.user.name + ' ' + AbiCloudModel.getInstance().loginManager.user.surname}"
-            mouseChildren="false"/>
+            mouseChildren="false"/>-->
 
         <!--IMPERSONATE_CHANGE_ENTERPRISE-->
         <mx:Label id="enterpriseLabel" 

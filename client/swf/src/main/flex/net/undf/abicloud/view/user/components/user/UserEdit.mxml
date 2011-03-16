@@ -73,13 +73,18 @@
             
             [Bindable]
             private var _restrict:Boolean;
+            
+            //Need to know if it's a user who edits is own data
+            [Bindable]
+            private var _isUserEditing:Boolean;
 
             /**
              * Initializes this form to create a new user
              **/
-            public function init(user:User):void
+            public function init(user:User, role:Boolean):void
             {
                 this._userToEdit = user;
+                this._isUserEditing = role;
 
                 enterpriseInput.text = this._userToEdit.enterprise.name;
                 nameInput.text = this._userToEdit.name;
@@ -204,8 +209,9 @@
                 userCopy.email = emailInput.text;
                 userCopy.description = descriptionInput.text;
                 userCopy.active = activeInput.selected;
-                //userCopy.availableVirtualDatacenters = saveAvailableVirtualDataCenters();
-                userCopy.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
+                if(!this._isUserEditing){
+                	userCopy.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
+                }
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)
@@ -393,7 +399,9 @@
 
     <mx:Form paddingTop="3" width="100%">
 
-        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')">
+        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextInput id="enterpriseInput"
                 height="20"
                 editable="false"/>
@@ -419,7 +427,9 @@
 
         <mx:FormItem 
             label="@Resource(bundle='User', key='LABEL_ROLE')"
-            required="true">
+            required="true"
+            visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:ComboBox id="roleInput"
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
@@ -430,8 +440,8 @@
         	id="vdcFormItem"
         	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            includeInLayout="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}">
+            visible="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}"
+            includeInLayout="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">
@@ -462,7 +472,9 @@
         <mx:FormItem 
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_USER')"
             direction="horizontal"
-            required="true">
+            required="true"
+            visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextInput id="userInput"
                 height="20"
                 maxChars="19"
@@ -527,12 +539,16 @@
             	visible="false"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='User', key='TEXTINPUT_LABEL_DESCRIPTION')">
+        <mx:FormItem label="@Resource(bundle='User', key='TEXTINPUT_LABEL_DESCRIPTION')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextArea id="descriptionInput"
                 maxChars="99"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ACTIVATED')">
+        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ACTIVATED')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:CheckBox id="activeInput"
                 enabled="{this._activeEditable}"/>
         </mx:FormItem>
