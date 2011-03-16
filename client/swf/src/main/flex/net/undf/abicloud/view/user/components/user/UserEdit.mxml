@@ -64,13 +64,18 @@
             public var virtualDataCenterList:ArrayCollection;
             
             private var _firstRetrieve:Boolean;
+            
+            //Need to know if it's a user who edits is own data
+            [Bindable]
+            private var _isUserEditing:Boolean;
 
             /**
              * Initializes this form to create a new user
              **/
-            public function init(user:User):void
+            public function init(user:User, role:Boolean):void
             {
                 this._userToEdit = user;
+                this._isUserEditing = role;
 
                 enterpriseInput.text = this._userToEdit.enterprise.name;
                 nameInput.text = this._userToEdit.name;
@@ -364,7 +369,9 @@
 
     <mx:Form paddingTop="3">
 
-        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')">
+        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextInput id="enterpriseInput"
                 height="20"
                 editable="false"/>
@@ -390,7 +397,9 @@
 
         <mx:FormItem 
             label="@Resource(bundle='User', key='LABEL_ROLE')"
-            required="true">
+            required="true"
+            visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:ComboBox id="roleInput"
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
@@ -400,8 +409,8 @@
 		 <mx:FormItem 
         	id="vdcFormItem"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            includeInLayout="{this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE}">
+            visible="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}"
+            includeInLayout="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}">
             <combocheckbox:ComboCheck id="comboCheckBox"
             	height="18"
             	dataProvider="{virtualDataCenterList}"
@@ -412,7 +421,9 @@
         <mx:FormItem 
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_USER')"
             direction="horizontal"
-            required="true">
+            required="true"
+            visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextInput id="userInput"
                 height="20"
                 maxChars="19"
@@ -477,12 +488,16 @@
             	visible="false"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='User', key='TEXTINPUT_LABEL_DESCRIPTION')">
+        <mx:FormItem label="@Resource(bundle='User', key='TEXTINPUT_LABEL_DESCRIPTION')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:TextArea id="descriptionInput"
                 maxChars="99"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ACTIVATED')">
+        <mx:FormItem label="@Resource(bundle='User', key='LABEL_ACTIVATED')"
+        	visible="{!this._isUserEditing}"
+        	includeInLayout="{!this._isUserEditing}">
             <mx:CheckBox id="activeInput"
                 enabled="{this._activeEditable}"/>
         </mx:FormItem>
