@@ -3,7 +3,7 @@ Copyright © 2006-2011 Abiquo Holdings S.L.  All rights reserved.
 
 This software is licensed to you under the terms of the Lesser General Public License version 3 set out below. 
 
-ALL IMPLIED WARRANTIES AND CONDITIONS IN THIS SOFTWARE ARE HEREBY DISCAIMED, INCLUDING WITHOUT LIMITATION WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ALL IMPLIED WARRANTIES AND CONDITIONS IN THIS SOFTWARE ARE HEREBY DISCLAIMED, INCLUDING WITHOUT LIMITATION WARRANTIES AND CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 Abiquo Holdings S.L. and its authorized distributors (including Abiquo, Inc. and Abiquo Limited) do not represent that the software will satisfy your requirements, that the software is without defect or error, that the software will operate with any hardware or software not specified in the documentation, or that copies of the software not provided by Abiquo will possess functional integrity or be free from computer viruses.
 
