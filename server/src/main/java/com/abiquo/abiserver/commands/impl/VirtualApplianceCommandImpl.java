@@ -1934,6 +1934,35 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         State sourceState = vApp.getState();
         State sourceSubState = vApp.getSubState();
 
+        // check the vapp state on database 
+        try
+        {
+            daoFactory.beginConnection();
+            VirtualappHB vapp = daoFactory.getVirtualApplianceDAO().findByIdNamedExtended(vApp.getId());
+
+            StateEnum sourceStateHb = vapp.getState();
+            StateEnum sourceSubStateHb = vapp.getSubState();
+
+            if (!sourceState.getDescription().equalsIgnoreCase(sourceStateHb.name()))
+            {
+                logger.warn("Virtual applinace client state [{}] is not the same as DDBB [{}]",
+                    sourceState.getDescription(), sourceStateHb.name());
+
+                sourceState = new State(sourceStateHb);
+            }
+            if (!sourceSubState.getDescription().equalsIgnoreCase(sourceSubStateHb.name()))
+            {
+                logger.warn("Virtual applinace client sub state [{}] is not the same as DDBB [{}]",
+                    sourceSubState.getDescription(), sourceSubStateHb.name());
+
+                sourceSubState = new State(sourceSubStateHb);
+            }
+        }
+        finally
+        {
+            daoFactory.endConnection();
+        }
+
         try
         {
             if (!blockVirtualAppliance(vApp, StateEnum.CHECKING))
@@ -2154,14 +2183,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (VirtualImageException e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
                 "createVirtualMachines", e);
         }
         catch (Exception e1)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
@@ -2175,8 +2204,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-        	
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e.getMessage(),
                 "createVirtualMachines", e);
@@ -2189,7 +2218,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (EventingException e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
@@ -2198,7 +2227,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
@@ -2230,7 +2259,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     .getName(), dataResult.getMessage(), virtualAppliance, null, null, null, null);
 
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            
+
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             virtualAppliance = updateStateInDB(virtualAppliance, sourceState.toEnum()).getData();
             dataResult.setData(virtualAppliance);
@@ -3224,7 +3253,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return updatenodesList;
 
     }
- 
+
     /*
      * (non-Javadoc)
      * @see
