@@ -116,6 +116,10 @@ UNLOCK TABLES;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idTier` int(10) unsigned NOT NULL;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`);
 
+-- STATISTICS TABLES 
+ALTER TABLE `kinton`.`vapp_enterprise_stats` ADD COLUMN `idVirtualDataCenter` INTEGER NOT NULL DEFAULT 0; 
+
+
 -- STATISTICS TRIGGERS 
 
 -- Fixes PublicIPs Total, Reserved for Infrastructure View
@@ -132,6 +136,10 @@ DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 
+DROP TRIGGER IF EXISTS `kinton`.`virtualapp_created`;
+
+DROP PROCEDURE IF EXISTS `kinton`.`CalculateVappEnterpriseStats`;
+DROP PROCEDURE IF EXISTS  `kinton`.`UpdateVappEnterpriseStatsWithVDCIds`;
 
 DELIMITER |
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
@@ -685,6 +693,111 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
     END IF;
     END;
 |
+CREATE TRIGGER `kinton`.`virtualapp_created` AFTER INSERT ON `kinton`.`virtualapp`
+  FOR EACH ROW BEGIN
+    DECLARE vdcNameObj VARCHAR(50);
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+      SELECT vdc.name INTO vdcNameObj
+      FROM virtualdatacenter vdc
+      WHERE NEW.idVirtualDataCenter = vdc.idVirtualDataCenter;
+      INSERT IGNORE INTO vapp_enterprise_stats (idVirtualApp, idEnterprise, idVirtualDataCenter, vappName, vdcName) VALUES(NEW.idVirtualApp, NEW.idEnterprise, NEW.idVirtualDataCenter, NEW.name, vdcNameObj);
+    END IF;
+  END;
+|
+CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
+   BEGIN
+  DECLARE idVirtualAppObj INTEGER;
+  DECLARE idEnterprise INTEGER;
+  DECLARE idVirtualDataCenter INTEGER;
+  DECLARE vappName VARCHAR(45);
+  DECLARE vdcName VARCHAR(45);
+  DECLARE vmCreated MEDIUMINT UNSIGNED;
+  DECLARE vmActive MEDIUMINT UNSIGNED;
+  DECLARE volAssociated MEDIUMINT UNSIGNED;
+  DECLARE volAttached MEDIUMINT UNSIGNED;
+
+  DECLARE no_more_vapps INTEGER;
+
+  DECLARE curDC CURSOR FOR SELECT vapp.idVirtualApp, vapp.idEnterprise, vapp.idVirtualDataCenter, vapp.name, vdc.name FROM virtualapp vapp, virtualdatacenter vdc WHERE vdc.idVirtualDataCenter = vapp.idVirtualDataCenter;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_vapps = 1;
+
+  SET no_more_vapps = 0;
+  SET idVirtualAppObj = -1;
+
+  OPEN curDC;
+
+  TRUNCATE vapp_enterprise_stats;
+
+  dept_loop:WHILE(no_more_vapps = 0) DO
+    FETCH curDC INTO idVirtualAppObj, idEnterprise, idVirtualDataCenter, vappName, vdcName;
+    IF no_more_vapps=1 THEN
+        LEAVE dept_loop;
+    END IF;
+    --
+    SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmCreated
+    FROM nodevirtualimage nvi, virtualmachine v, node n, virtualapp vapp
+    WHERE nvi.idNode IS NOT NULL
+    AND v.idVM = nvi.idVM
+    AND n.idNode = nvi.idNode
+    AND n.idVirtualApp = vapp.idVirtualApp
+    AND vapp.idVirtualApp = idVirtualAppObj
+    AND v.state != "NOT_DEPLOYED" AND v.state != "UNKNOWN" AND v.state != "CRASHED"
+    and v.idType = 1;
+    --
+    SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmActive
+    FROM nodevirtualimage nvi, virtualmachine v, node n, virtualapp vapp
+    WHERE nvi.idNode IS NOT NULL
+    AND v.idVM = nvi.idVM
+    AND n.idNode = nvi.idNode
+    AND n.idVirtualApp = vapp.idVirtualApp
+    AND vapp.idVirtualApp = idVirtualAppObj
+    AND v.state = "RUNNING"
+    and v.idType = 1;
+    --
+    SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volAssociated
+    FROM rasd_management rm
+    WHERE rm.idVirtualApp = idVirtualAppObj
+    AND rm.idResourceType=8;
+    --
+    SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volAttached
+    FROM volume_management vm, rasd_management rm
+    WHERE rm.idManagement = vm.idManagement
+    AND rm.idVirtualApp = idVirtualAppObj
+    AND state = 2;
+
+    -- Inserts stats row
+    INSERT INTO vapp_enterprise_stats (idVirtualApp,idEnterprise,idVirtualDataCenter,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached)
+    VALUES (idVirtualAppObj, idEnterprise,idVirtualDataCenter,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached);
+
+
+  END WHILE dept_loop;
+  CLOSE curDC;
+
+END;
+|
+CREATE PROCEDURE `kinton`.`UpdateVappEnterpriseStatsWithVDCIds`()
+BEGIN
+    DECLARE currentIdVirtualApp INTEGER;
+    DECLARE idVirtualDatacenterObj INTEGER;
+    DECLARE no_more_vappst INTEGER;
+    DECLARE curVappSt CURSOR FOR SELECT vappst.idVirtualApp FROM vapp_enterprise_stats vappst;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_vappst=1;
+    SET no_more_vappst = 0;
+    SET currentIdVirtualApp = -1;
+    OPEN curVappSt;  
+    my_loop:WHILE(no_more_vappst = 0) DO
+	FETCH curVappSt INTO currentIdVirtualApp;
+	SELECT idVirtualDataCenter INTO idVirtualDatacenterObj FROM virtualapp WHERE idVirtualApp = currentIdVirtualApp;
+	INSERT INTO debug_msg (msg) VALUES (CONCAT('Iteracion vapp_enterprise_stats: ',currentIdVirtualApp));
+	UPDATE vapp_enterprise_stats SET idVirtualDataCenter = idVirtualDatacenterObj WHERE idVirtualApp=currentIdVirtualApp;
+    END WHILE my_loop;
+    CLOSE curVappSt;
+END;
+|
 DELIMITER ;
+
+-- We need to update Vapp Enterprise Stats with the right idVirtualDatacenter Values
+CALL `kinton`.`UpdateVappEnterpriseStatsWithVDCIds`();
+
 
 
