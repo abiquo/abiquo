@@ -46,6 +46,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.BindingUtils;
         	import mx.core.Application;
         	import mx.managers.PopUpManager;
         	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualBundlesImages;
@@ -109,6 +110,7 @@
                 _virtualBundlesImages = new VirtualBundlesImages()
                 _virtualBundlesImages.addEventListener("popupClose",onClose);
                 _virtualBundlesImages.addEventListener("virtualImagesAdded",onAddVirtualImages);
+
             }
             
             private function onClose(event:Event):void{
@@ -688,20 +690,7 @@
         verticalScrollPolicy="off"
         enabled="{this._virtualAppliance.subState.id != State.UNKNOWN ? true:false}"
         styleName="GeneralDataPanelTopFullSkin">
-
-        <!-- DISABLED!
-
-             mx:Button id="newButton"
-             styleName="VirtualApplianceNewButton"
-             click="onClickNewButton()"
-             toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"/>
-
-             <mx:Button id="openButton"
-             styleName="VirtualApplianceOpenButton"
-             click="onClickOpenButton()"
-             toolTip="@Resource(bundle='Common', key='BUTTON_OPEN_TOOLTIP')"/-->
-
-
+        
         <mx:Button id="saveButton"
             width="21" height="21"
             styleName="VirtualApplianceSaveButton"
@@ -726,25 +715,6 @@
             toolTip="@Resource(bundle='Common', key='BUTTON_LINE_TOOLTIP')"
             click="onClickRelationButton()"/>
 
-        <!--
-             <mx:Button styleName="VirtualAppliancePrintButton" enabled="false"
-             toolTip="@Resource(bundle='Common', key='BUTTON_PRINT_TOOLTIP')"/>
-
-             <mx:Image source="{CommonAssets.separator}"/>
-
-             <mx:Button styleName="VirtualApplianceUndoButton" enabled="false"
-             toolTip="@Resource(bundle='Common', key='BUTTON_UNDO_TOOLTIP')"/>
-
-             <mx:Button styleName="VirtualApplianceRedoButton" enabled="false"
-             toolTip="@Resource(bundle='Common', key='BUTTON_REDO_TOOLTIP')"/>
-
-             <mx:Image source="{CommonAssets.separator}"/>
-
-             <mx:Button styleName="VirtualApplianceZoominButton" enabled="false"
-             toolTip="@Resource(bundle='Common', key='BUTTON_ZOOMIN_TOOLTIP')"/>
-
-             <mx:Button styleName="VirtualApplianceZoomoutButton" enabled="false"
-             toolTip="@Resource(bundle='Common', key='BUTTON_ZOOMOUT_TOOLTIP')"/> -->
 
         <mx:Button id="listButton"
             styleName="ListViewButton"
@@ -767,19 +737,6 @@
         <mx:Spacer 
             width="100%" height="10"/>
 
-        <!--mx:Button id="deleteButton"
-             label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_DELETE')"
-             click="onClickDeleteButton()"
-             enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.id != State.IN_PROGRESS}"
-             styleName="VirtualApplianceEraseButton" height="16"/>
-
-
-             <mx:Spacer width="3" height="3"/>
-
-             <mx:Image source="{CommonAssets.separator}"/>
-
-             <mx:Spacer width="3" height="3"/-->
-
         <mx:Button id="createBundleButton"
             height="16"
             label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_CREATE_BUNDLE')"
@@ -791,8 +748,6 @@
 
         <mx:Spacer 
             width="3" height="3"/>
-
-        <!--mx:Image source="{CommonAssets.separator}"/-->
 
         <mx:Spacer 
             width="3" height="3"/>
@@ -808,10 +763,6 @@
         <mx:Spacer 
             width="3" height="3"/>
 
-<!--        <mx:Image         	id="virtualApplianceDrawToolSeparator"
-        	creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceDrawToolSeparator', virtualApplianceDrawToolSeparator)"
-/>
--->
         <mx:Button id="powerOnOffButton"
             width="32" height="32"
             right="1"

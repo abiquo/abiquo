@@ -122,30 +122,7 @@
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.FORCE_REFRESH_VIRTUAL_APPLIANCE_STATE);
                 virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
                 dispatchEvent(virtualApplianceEvent);
-            }
-
-            // This button in not used anymore -> 	ABICLOUDPREMIUM-547
-            
-            /* private function onClickCancelButton():void
-            {
-                //Announcing that user wants to cancel virtual appliance deployment
-                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CANCEL_VIRTUAL_APPLIANCE_DEPLOYMENT);
-                virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
-                dispatchEvent(virtualApplianceEvent);
-            }
-
-            
-            private function setCancelButtonAvailability(vaSubstate:State):Boolean
-            {
-                var available:Boolean = false;
-
-                if (_virtualAppliance)
-                {
-                    available = vaSubstate.id != State.RUNNING && vaSubstate.id != State.IN_PROGRESS && vaSubstate.id != State.COPYING && vaSubstate.id != State.MOVING && vaSubstate.id != State.CHECKING && vaSubstate.id != State.BUNDLING && vaSubstate.id != State.STATEFUL;
-                }
-
-                return available;
-            } */
+            }        
         ]]>
     </mx:Script>
 

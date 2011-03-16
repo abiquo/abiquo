@@ -128,18 +128,6 @@
                 this._virtualApplianceBundleForm = new VirtualApplianceBundleForm();
                 this._virtualApplianceBundleForm.addEventListener("VirtualApplianceBundleFormClose",
                                                                   closeVirtualApplianceBundleForm);
-
-                //Creating the VirtualImagesAccordion, and adding it to VirtualResources container
-                //Deprecated
-                /* this._virtualImageAccordion = new VirtualImageAccordion();
-                this._virtualImageAccordion.percentWidth = 100;
-                this._virtualImageAccordion.percentHeight = 100;
-                this._virtualImageAccordion.setStyle("paddingTop", 10);
-                this._virtualImageAccordion.setStyle("backgroundAlpha", 0);
-                this._virtualImageAccordion.editable = false;
-                virtualResourcesToggledContainer.addContent(this._virtualImageAccordion,
-                                                            ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                                    "LABEL_VIRTUAL_IMAGES")); */
                                                                                                     
                 this._virtualImageList = new VirtualImageListManagement();
                 this._virtualImageList.percentWidth = 100;
@@ -151,12 +139,7 @@
                 virtualResourcesToggledContainer.addContent(this._virtualImageList,
                                                             ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                                     "LABEL_VIRTUAL_IMAGES"));                                                                                    
-            	                                                                                                    
-                if (_currentVirtualDataCenter)
-                {
-                    //Deprecated
-                    //_virtualImageAccordion.hypervisorType = _currentVirtualDataCenter.hyperType;
-                }
+            
 
                 //Creating other components
                 this._moveEffect = new Move();
@@ -241,11 +224,6 @@
                 if (this._virtualAppliance)
                 {
                     _currentVirtualDataCenter = virtualAppliance.virtualDataCenter;
-                    //Deprecated
-                    /* if (_virtualImageAccordion)
-                    {
-                        _virtualImageAccordion.hypervisorType = _currentVirtualDataCenter.hyperType;
-                    } */
 
                     //Starting BackgroundUpdates. Time interval depends on the state of VirtualAppliance
                     if (this._virtualAppliance.state.id == State.IN_PROGRESS)
@@ -256,8 +234,6 @@
                 else
                 {
                     this._currentVirtualDataCenter = null;
-                    //Deprecated
-                    //_virtualImageAccordion.hypervisorType = null;
                 }
 
 
