@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.core.UIComponent;
@@ -386,9 +387,17 @@
             /**
              * Label function for Role column in usersDataGrid
              **/
-            private function usersDataGridRoleColumnLabel(item:Object, column:DataGridColumn):String
+            private function usersDataGridRoleColumnLabel(item:User, column:DataGridColumn):String
             {
-                return User(item).role.shortDescription;
+                var label:String = item.role.shortDescription;
+                if(item.role.id == Role.USER_ROLE){
+                	if(item.availableVirtualDatacenters){
+                		if(item.availableVirtualDatacenters.length > 0){
+                			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
+                		}
+                	}
+                }
+                return label;
             }
 
             /**
