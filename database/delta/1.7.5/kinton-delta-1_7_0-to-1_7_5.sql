@@ -64,7 +64,7 @@ CREATE TABLE `kinton`.`storage_device` (
 
 -- Update `storage_device` table with previous `storage_pool` table
 INSERT INTO `kinton`.`storage_device` (name, idDataCenter, management_ip, management_port, iscsi_ip, iscsi_port, storage_technology)
-SELECT CONCAT('cabin_', s.name) , 
+SELECT CONCAT(s.name, '_device') , 
        r.idDatacenter,substring_index(substring_index(s.url_management,':',2),'//',-1), 
        substring_index(substring_index(s.url_management,':',-1),'/',1), 
        s.host_ip, 
@@ -83,7 +83,7 @@ ALTER TABLE `kinton`.`storage_pool` ADD COLUMN `availableSizeInMb` BIGINT(20) UN
 
 /*!40000 ALTER TABLE `storage_pool` DISABLE KEYS */;
 UPDATE `storage_pool` s, `remote_service` r, `storage_device` c
-SET s.idStorageDevice = c.id, s.idTier = 1, s.isEnabled = 1
+SET s.idStorageDevice = c.id, s.idTier = 1, s.isEnabled = 1, s.name = 'abiquo'
 WHERE r.idRemoteService = s.idRemoteService 
   AND r.idDatacenter = r.idDatacenter;
 /*!40000 ALTER TABLE `storage_pool` ENABLE KEYS */;
