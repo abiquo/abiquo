@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.Datastore;
         	import mx.charts.series.items.PieSeriesItem;
         	import mx.charts.HitData;
             import mx.collections.ArrayCollection;
@@ -75,10 +76,11 @@
                 
                 var ramUsed:int =  _physicalMachine.ramUsed;
                 var cpuUsed:int =  _physicalMachine.cpuUsed;
+                var hdObject:Object = returnDataStoresSizes();
 
                 var ramFree:int = (_physicalMachine.ram - _physicalMachine.ramUsed) > 0 ? (_physicalMachine.ram - _physicalMachine.ramUsed) : 0;
                 var cpuFree:int = ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) > 0 ? ((_physicalMachine.cpu * _physicalMachine.cpuRatio) - _physicalMachine.cpuUsed) : 0;
-                var hdFree:String = (_physicalMachine.hd - _physicalMachine.hdUsed) > 0 ? Number((_physicalMachine.hd - _physicalMachine.hdUsed) / AbiCloudModel.GB_TO_BYTES).toFixed(1) : "0";
+                var hdFree:String = (hdObject.free) > 0 ? Number((hdObject.free) / AbiCloudModel.GB_TO_BYTES).toFixed(1) : "0";
 				
 				var ramOversubscrived:int = 0;
 				var cpuOversubscrived:int = 0;
@@ -110,9 +112,9 @@
                                                   ]);
 
                 _hdChartDP = new ArrayCollection([ { id: 'hdUsed', label: ResourceManager.getInstance().getString("Infrastructure",
-                                                                                                                  "LABEL_USED"), data: Number(_physicalMachine.hdUsed / AbiCloudModel.GB_TO_BYTES).toFixed(1) },
+                                                                                                                  "LABEL_USED"), data: Number(hdObject.used / AbiCloudModel.GB_TO_BYTES).toFixed(1) },
                                                    { id: 'hdFree', label: ResourceManager.getInstance().getString("Infrastructure",
-                                                                                                                  "LABEL_FREE"), data: hdFree },
+                                                                                                                  "LABEL_FREE"), data: Number(hdObject.free / AbiCloudModel.GB_TO_BYTES).toFixed(1) },
                                                    { id: 'hdOver', label: "", data: hdOversubscrived }
                                                  ]);
             }
@@ -135,6 +137,7 @@
                 var itemChart:PieSeriesItem = item.chartItem as PieSeriesItem;
                 var percentage:Number = itemChart.percentValue ;
                 var total:int;
+                var hdObject:Object = returnDataStoresSizes();
                 switch(itemChart.item.id){
                 	case "ramOver":
                 		total = _physicalMachine.ram;	
@@ -161,12 +164,35 @@
                 		total = _physicalMachine.cpu * _physicalMachine.cpuRatio;
                 		break;
                 	default:
-                		total = int(Number(_physicalMachine.hd / AbiCloudModel.GB_TO_BYTES).toFixed(1)); 
+                		total = int(Number(hdObject.total / AbiCloudModel.GB_TO_BYTES).toFixed(1)); 
                 		break;
                 }
                 
                 return "<b>" + itemChart.item.label + ": "+ Number(percentage).toFixed(2) +"%</b><br />" +
                         itemChart.item.data + " of " + total.toString(); 
+            }
+            
+            
+            /**
+             * Function that returns the used and free size of datastore
+             */
+            private function returnDataStoresSizes():Object{
+            	var sizeObject:Object = new Object();
+            	sizeObject.total = 0;
+            	sizeObject.free = 0;
+            	sizeObject.used = 0;
+            	
+            	var datastore:Datastore;
+            	
+            	for(var i:int = 0 ; i < this._physicalMachine.datastores.length; i++){
+            		datastore = this._physicalMachine.datastores.getItemAt(i) as Datastore;
+            		if(datastore.enabled){
+            			sizeObject.total += datastore.size;
+            			sizeObject.free += datastore.size - datastore.usedSize;
+            			sizeObject.used += datastore.usedSize;
+            		}
+            	}            	
+            	return sizeObject;
             }
 
         ]]>
