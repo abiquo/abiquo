@@ -79,6 +79,9 @@
                 this._virtualDataCenterAdd.virtualDatacenter = this._virtualDataCenter;
                 this._virtualDataCenterAdd.init();
                 
+                //Registering Keyboard events, for standard application behaivor
+                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+                
                 //Registering when a VirtualDatacenter has been created
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
                                                                                      onVirtualDataCenterAdded);
@@ -227,6 +230,20 @@
             private function onResizeEffectEnd():void
             {
                 toggledContainer.visible = true;
+            }
+            
+             /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+       			if (keyboardEvent.keyCode == 13){
+       				if(saveButton.enabled){
+                        onClickButtonSave();       					
+       				}
+                }
             }
         ]]>
     </mx:Script>
