@@ -23,10 +23,16 @@ package com.abiquo.abiserver.pojo.infrastructure;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 
 public class State implements Serializable
 {
+    /** The logger object */
+    private final static Logger logger = LoggerFactory.getLogger(State.class);
+    
     private static final long serialVersionUID = 1L;
 
     private int id;
@@ -77,6 +83,13 @@ public class State implements Serializable
 
     public StateEnum toEnum()
     {
-        return StateEnum.valueOf(description);
+        StateEnum result = null;
+        try {
+            result =  StateEnum.valueOf(description);    
+        } catch (IllegalArgumentException e) {
+            logger.error("State description not recognized : " + description, e);
+            result = StateEnum.UNKNOWN;
+        }
+        return result;
     }
 }
