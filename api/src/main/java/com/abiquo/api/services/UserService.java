@@ -130,8 +130,8 @@ public class UserService extends DefaultApiService
         checkUserCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
-                .getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
+                dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
@@ -146,10 +146,10 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
-        if(!emailIsValid(user.getEmail()))
+        if (!emailIsValid(user.getEmail()))
         {
-        	errors.add(APIError.EMAIL_IS_INVALID);
-        	flushErrors();
+            errors.add(APIError.EMAIL_IS_INVALID);
+            flushErrors();
         }
         
 
@@ -172,7 +172,8 @@ public class UserService extends DefaultApiService
             throw new NotFoundException(APIError.USER_NON_EXISTENT);
         }
 
-        checkUserCredentials(old.getEnterprise());
+        checkUserCredentialsForSelfEdit(old, old.getEnterprise());
+
         
         // Cloud Admins should only be editable by other Cloud Admins
         if (old.getRole().getType() == Role.Type.SYS_ADMIN
@@ -190,12 +191,16 @@ public class UserService extends DefaultApiService
         old.setSurname(user.getSurname());
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());
-        old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
-        
-        if(!emailIsValid(user.getEmail()))
+
+        if (user.getAvailableVirtualDatacenters() != null)
         {
-        	errors.add(APIError.EMAIL_IS_INVALID);
-        	flushErrors();
+            old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+        }
+
+        if (!emailIsValid(user.getEmail()))
+        {
+            errors.add(APIError.EMAIL_IS_INVALID);
+            flushErrors();
         }
         if (user.searchLink(RoleResource.ROLE) != null)
         {
@@ -221,7 +226,8 @@ public class UserService extends DefaultApiService
         return updateUser(old);
     }
 
-    public User updateUser(User user) {
+    public User updateUser(User user)
+    {
         repo.updateUser(user);
 
         return user;
@@ -330,15 +336,29 @@ public class UserService extends DefaultApiService
             throw new AccessDeniedException("");
         }
     }
+
+    private void checkUserCredentialsForSelfEdit(User userToEdit, Enterprise enterprise)
+    {
+        User currentUser = getCurrentUser();
+
+        if ((currentUser.getRole().getType() == Role.Type.ENTERPRISE_ADMIN && //
+            !enterprise.equals(currentUser.getEnterprise()))
+            || (currentUser.getRole().getType() == Role.Type.USER && //
+            currentUser.getId() != userToEdit.getId()))
+        {
+            throw new AccessDeniedException("");
+        }
+    }
+
     private Boolean emailIsValid(String email)
     {
-    	final Pattern pattern;
-    	final Matcher matchers;
-    	final String EMAIL_PATTERN = 
-            "[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@" +
-    		"(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
-    	pattern = Pattern.compile(EMAIL_PATTERN);
-    	matchers = pattern.matcher(email);
-    	return matchers.matches();
+        final Pattern pattern;
+        final Matcher matchers;
+        final String EMAIL_PATTERN =
+            "[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@"
+                + "(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
+        pattern = Pattern.compile(EMAIL_PATTERN);
+        matchers = pattern.matcher(email);
+        return matchers.matches();
     }
 }
