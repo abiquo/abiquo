@@ -88,7 +88,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -98,7 +98,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         return idVirtualDataCenter;
     }
 
-    public void setIdVirtualDataCenter(Integer idVirtualDataCenter)
+    public void setIdVirtualDataCenter(final Integer idVirtualDataCenter)
     {
         this.idVirtualDataCenter = idVirtualDataCenter;
     }
@@ -108,7 +108,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         return enterpriseHB;
     }
 
-    public void setEnterpriseHB(EnterpriseHB enterpriseHB)
+    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
     {
         this.enterpriseHB = enterpriseHB;
     }
@@ -118,7 +118,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         return idDataCenter;
     }
 
-    public void setIdDataCenter(int idDataCenter)
+    public void setIdDataCenter(final int idDataCenter)
     {
         this.idDataCenter = idDataCenter;
     }
@@ -126,7 +126,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
     /**
      * @param network the network to set
      */
-    public void setNetwork(NetworkHB network)
+    public void setNetwork(final NetworkHB network)
     {
         this.network = network;
     }
@@ -160,14 +160,11 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         VirtualDataCenter virtualDataCenter = new VirtualDataCenter();
         virtualDataCenter.setId(idVirtualDataCenter);
         virtualDataCenter.setName(name);
-        virtualDataCenter.setEnterprise(enterpriseHB.toPojo());
+        virtualDataCenter.setEnterprise(enterpriseHB != null ? enterpriseHB.toPojo() : null);
         virtualDataCenter.setIdDataCenter(idDataCenter);
         virtualDataCenter.setHyperType(new HyperVisorType(hypervisorType));
-        virtualDataCenter.setNetwork(network.toPojo());
-        if (limits != null)
-        {
-            virtualDataCenter.setLimits(limits.toPojo());
-        }
+        virtualDataCenter.setNetwork(network != null ? network.toPojo() : null);
+        virtualDataCenter.setLimits(limits != null ? limits.toPojo() : null);
 
         return virtualDataCenter;
     }
@@ -177,7 +174,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
         return hypervisorType;
     }
 
-    public void setHypervisorType(HypervisorType hypervisorType)
+    public void setHypervisorType(final HypervisorType hypervisorType)
     {
         this.hypervisorType = hypervisorType;
     }
