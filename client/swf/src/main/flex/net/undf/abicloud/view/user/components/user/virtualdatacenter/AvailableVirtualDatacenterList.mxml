@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" 
+	selectionColor="white"
+	show="refreshCheckbox()">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+			
+			public var listOfSelectedVirtualDatacenter:ArrayCollection;
+						
+			override protected function createChildren():void
+            {
+                super.createChildren();     
+                
+                listOfSelectedVirtualDatacenter = new ArrayCollection();           
+            }
+            
+            /**
+             * Function called to refresh each combobox
+             */
+            public function refreshCheckbox():void{
+            	dispatchEvent(new Event("refreshCheck"));
+            }
+            
+			/**
+             * Function called to add/remove a virtual datacenter from the list of restricted
+             */
+			public function selectVirtualDatacenter(virtualDatacenter:VirtualDataCenter , status:Boolean):void{
+            	if(status){
+            		listOfSelectedVirtualDatacenter.addItem(virtualDatacenter.id);
+            	}else{
+            		listOfSelectedVirtualDatacenter.removeItemAt(listOfSelectedVirtualDatacenter.getItemIndex(virtualDatacenter.id));
+            	}            	
+            }
+            
+            /**
+             * Check if the virtualdatacenter is already used
+             */
+             public function virtualDatacenterIsUsed(virtualDatacenter:VirtualDataCenter):Boolean{
+             	for(var i:int = 0 ; i < listOfSelectedVirtualDatacenter.length ; i++){
+             		if(listOfSelectedVirtualDatacenter.getItemAt(i) == virtualDatacenter.id){
+             			return true;
+             		}             		
+             	}
+             	return false;
+             } 
+		]]>
+	</mx:Script>
+	<mx:columns>
+		<mx:DataGridColumn headerText="@Resource(bundle='User',key='LABEL_SELECTED')" width="60">
+			<mx:itemRenderer>
+				<mx:Component>
+					<mx:HBox width="100%" 
+						show="refreshValue()"						
+						creationComplete="onCreationComplete()" 
+						horizontalAlign="center" 
+						verticalAlign="middle">
+						<mx:Script>
+							<![CDATA[
+								import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;							
+								import mx.controls.CheckBox;
+								
+								private function refreshValue(event:Event = null):void{
+									virtualDatacenterSelected.selected = outerDocument.virtualDatacenterIsUsed(VirtualDataCenter(data));								
+								}
+								
+								private function selectVirtualDatacenter(event:Event):void{
+									outerDocument.selectVirtualDatacenter(VirtualDataCenter(data),CheckBox(event.currentTarget).selected);
+								}
+								
+								private function onCreationComplete():void{
+									refreshValue();
+									outerDocument.addEventListener("refreshCheck",refreshValue);
+								}
+							]]>
+						</mx:Script>
+						<mx:CheckBox id="virtualDatacenterSelected" selected="false" change="selectVirtualDatacenter(event)"/>
+					</mx:HBox>
+				</mx:Component>
+			</mx:itemRenderer>
+		</mx:DataGridColumn>
+		<mx:DataGridColumn width="150" headerText="@Resource(bundle='VirtualAppliance',key='LABEL_VIRTUALDATACENTER')" dataField="name"/>
+    </mx:columns>	
+</mx:DataGrid>
