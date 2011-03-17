@@ -69,7 +69,7 @@
             
             private var _firstRetrieve:Boolean;
             
-            //Need to know if it's a user who edits is own data
+             //Need to know if it's a user who edits is own data
             [Bindable]
             private var _isUserEditing:Boolean;
             
@@ -82,6 +82,7 @@
             //Need to know if it's a user who edits is own data
             [Bindable]
             private var _isUserEditing:Boolean;
+
 
             /**
              * Initializes this form to create a new user
