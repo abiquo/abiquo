@@ -26,7 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='User', key='POPUP_TITLE_USERADD')" 
-    xmlns:combocheckbox="net.undf.abicloud.view.user.components.user.combocheckbox.*">
+    xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
     <mx:Metadata>
 		[Event(name="userAddClose", type="flash.events.Event")]		
@@ -35,8 +35,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import mx.managers.PopUpManager;
         	import mx.controls.Alert;
-        	import net.undf.abicloud.view.user.components.user.combocheckbox.ComboCheck;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import mx.collections.ArrayCollection;
@@ -61,6 +62,9 @@
             public var virtualDataCenterList:ArrayCollection;
             
             private var _firstRetrieve:Boolean;
+            
+            [Bindable]
+            private var _restrict:Boolean;
 
             /**
              * Initializes this form to create a new user
@@ -91,6 +95,9 @@
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
+                virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
+                this._restrict = false;
+                
                 BindingUtils.bindSetter(updateVirtualDataCenter,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
             }
             
@@ -103,19 +110,8 @@
             		event.enterprise = this._enterprise;
             		dispatchEvent(event);            		
             		this._firstRetrieve = false;
-           		}else{
-            		
-            		virtualDataCenterList = new ArrayCollection();
-            		
-	            	var allowedVirtualDataCenter:Object;
-	            	           
-	            	for(var i:int = 0 ; i < value.length ; i++){           		
-	            		allowedVirtualDataCenter = new Object();
-	            		allowedVirtualDataCenter.label = VirtualDataCenter(value.getItemAt(i)).name;
-	            		allowedVirtualDataCenter.value = VirtualDataCenter(value.getItemAt(i)).id;
-	            		allowedVirtualDataCenter.checked = false;
-	            		virtualDataCenterList.addItem(allowedVirtualDataCenter);         	
-	            	} 	
+           		}else{            		
+            		virtualDataCenterList = value;
             	}            	 
             }
             
@@ -130,7 +126,6 @@
                 newUser.surname = surnameInput.text;
                 newUser.role = roleInput.selectedItem as Role;
                 newUser.user = userInput.text;
-                //newUser.pass = passwordInput.text;
                 newUser.pass = MD5.hash(passwordInput.text);
                 newUser.email = emailInput.text;
                 newUser.description = descriptionInput.text;
@@ -138,7 +133,7 @@
                 newUser.locale = ResourceManager.getInstance().localeChain[0];
                 newUser.enterprise = this._enterprise;
                 
-                newUser.availableVirtualDatacenters = saveAvailableVirtualDataCenters();
+                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)
@@ -152,19 +147,7 @@
                 var userEvent:UserEvent = new UserEvent(UserEvent.CREATE_USER);
                 userEvent.user = newUser;
                 dispatchEvent(userEvent);
-            }
-            
-            /**
-             * Save the list of allowed Virtual DataCenters
-             **/
-            private function saveAvailableVirtualDataCenters():Array{
-            	var availableVirtualDatacenters:Array = new Array();
-            	for(var i:int = 0 ; i < comboCheckBox.selectedItems.length ; i++){
-            		//availableVirtualDatacenters.addItem(comboCheckBox.selectedItems.getItemAt(i).value);
-            		availableVirtualDatacenters.push(comboCheckBox.selectedItems.getItemAt(i).value);
-            	}
-            	return availableVirtualDatacenters;
-            }
+            }            
 
 
             /**
@@ -229,8 +212,57 @@
                 }
             }
             
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                userAddForm.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                userAddForm.visible = true;
+               
+            }
+            
+            /**
+             * Show/hide the list of virtualdatacenter
+             */
+            private function showHideRestrict():void{
+            	
+            	this._restrict = ! this._restrict;
+            	//We remove all selected VDC
+            	if(!this._restrict){
+            		virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
+            	}else{
+            		virtualDatacenterList.refreshCheckbox();
+            	}
+            	PopUpManager.centerPopUp(this);
+            	
+            }
+            
         ]]>
     </mx:Script>
+    
+    <mx:Resize id="myResize"
+        duration="800"
+        heightTo="{explicitHeight}"
+        widthTo="{explicitWidth}"
+        tweenStart="onResizeEffectStart()"
+        tweenUpdate="onResizeEffectUpdate()"
+        tweenEnd="onResizeEffectEnd()"/>
     
      <mx:EmailValidator id="emailValidator"
     	source="{emailInput}" 
@@ -240,7 +272,9 @@
     	invalid="invalidEmail.visible = true ; acceptButton.enabled = false"
     	valid="invalidEmail.visible = false"/>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" 
+    	width="100%" 
+    	id="userAddForm">
 
         <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')">
             <mx:TextInput id="enterpriseInput"
@@ -279,15 +313,35 @@
         
         <mx:FormItem 
         	id="vdcFormItem"
+        	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
             visible="{Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            includeInLayout="{Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            >
-            <combocheckbox:ComboCheck id="comboCheckBox"
-            	height="18"
-            	dataProvider="{virtualDataCenterList}"
-            	labelField="label"
-            	prompt="@Resource(bundle='Configuration',key='LABEL_VIRTUAL_DATACENTERS')"/>
+            includeInLayout="{Role(roleInput.selectedItem).id == Role.USER_ROLE}">
+            <mx:VBox verticalAlign="middle"
+            	visible="{this._restrict}"
+            	includeInLayout="{this._restrict}">
+            	<mx:HBox verticalAlign="middle">
+	            	<mx:Image
+			    		id="alertIcon"
+			    		toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
+			    		creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
+	            	<mx:Label text="@Resource(bundle='User',key='LABEL_ALLOWED_VDC')" 
+	            		styleName="DataCenterCreationWarning"/>            		
+            	</mx:HBox>
+	            <virtualdatacenter:AvailableVirtualDatacenterList 
+	            	toolTip="@Resource(bundle='User',key='TOOLTIP_RESTRICT_ACCESS')"
+	            	id="virtualDatacenterList" 
+	            	rowCount="4"
+	            	dataProvider="{virtualDataCenterList}"
+	            	visible="{this._restrict}"
+	            	includeInLayout="{this._restrict}"
+	            	width="100%"/> 	
+            </mx:VBox>
+        	<mx:Button 
+        		id="hideButton"
+        		height="18"
+        		label="{this._restrict ? resourceManager.getString('User','BUTTON_DONT_RESTRICT_ACCESS'):resourceManager.getString('User','BUTTON_RESTRICT_ACCESS')}"
+        		click="showHideRestrict()"/>
         </mx:FormItem>
 
         <mx:FormItem 
