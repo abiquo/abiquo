@@ -78,10 +78,6 @@
             
             [Bindable]
             private var _restrict:Boolean;
-            
-            //Need to know if it's a user who edits is own data
-            [Bindable]
-            private var _isUserEditing:Boolean;
 
 
             /**
