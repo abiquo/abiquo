@@ -104,8 +104,8 @@ import com.abiquo.server.core.enumerator.HypervisorType;
 public class OVFModelFromVirtualAppliance
 {
 
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFModelFromVirtualAppliance.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFModelFromVirtualAppliance.class);
 
     // /////////// InfrastructureWS
 
@@ -169,10 +169,21 @@ public class OVFModelFromVirtualAppliance
             ReferencesType diskReferences =
                 createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
 
+            
+            final String virtualImageId = String.valueOf(virtualImage.getId());
+            String diskId = virtualImageId;
+            CIMResourceAllocationSettingDataType cimDisk =
+                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
+                    "Harddisk" + virtualImageId + "'", virtualImageId,
+                    CIMResourceTypeEnum.Disk_Drive);
+            CIMResourceAllocationSettingDataUtils.addHostResourceToRASD(cimDisk,
+                OVFVirtualHadwareSectionUtils.OVF_DISK_URI + diskId);
+            
+            
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
-                createAnnotationMachineStateAndRDPPort(machineState, String.valueOf(virtualMachine
-                    .getVdrpPort()));
+                createAnnotationMachineStateAndRDPPort(machineState,
+                    String.valueOf(virtualMachine.getVdrpPort()));
 
             // creating Virtual hardware section (containing hypervisor information)
             VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
@@ -180,6 +191,9 @@ public class OVFModelFromVirtualAppliance
             // Setting the RAM and CPU from machine
             hardwareSection.getItem().add(createCPU(virtualMachine));
             hardwareSection.getItem().add(createMemory(virtualMachine));
+            hardwareSection.getItem().add(
+                CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(cimDisk));
+            
 
             // adding virtual system sections
             // OVFEnvelopeUtils.addSection(virtualSystem, diskSectionSystem);
@@ -560,8 +574,8 @@ public class OVFModelFromVirtualAppliance
                 // Adding the virtual disks to references
                 try
                 {
-                    OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage, bundling));
+                    OVFReferenceUtils.addFile(references,
+                        createFileFromVirtualImage(nodeVirtualImage, bundling));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -651,7 +665,8 @@ public class OVFModelFromVirtualAppliance
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
             for (IpPoolManagementHB man : service.getIpPoolManagement())
             {
-                if (man.getVirtualMachine() != null && man.getVirtualApp().getIdVirtualApp() == virtualAppliance.getId())
+                if (man.getVirtualMachine() != null
+                    && man.getVirtualApp().getIdVirtualApp() == virtualAppliance.getId())
                 {
                     IpPoolType rule = new IpPoolType();
                     rule.setConfigureGateway(man.getConfigureGateway());
@@ -931,16 +946,16 @@ public class OVFModelFromVirtualAppliance
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
         String virtualImageId = String.valueOf(node.getId());
         String diskId = "disk_" + virtualImageId;

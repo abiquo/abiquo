@@ -66,7 +66,7 @@ public class VirtualMachineConfiguration
     protected String name;
 
     /** The virtual disk base information */
-    protected VirtualDisk virtualDiskBase;
+    //protected VirtualDisk virtualDiskBase;
 
     /** The virtual disk base list */
     protected List<VirtualDisk> virtualDiskBaseList;
@@ -204,10 +204,10 @@ public class VirtualMachineConfiguration
      * 
      * @param virtualDiskBase the virtual Disk base
      */
-    public void setVirtualDiskBase(VirtualDisk virtualDiskBase)
-    {
-        this.virtualDiskBase = virtualDiskBase;
-    }
+    // public void setVirtualDiskBase(VirtualDisk virtualDiskBase)
+    // {
+    // this.virtualDiskBase = virtualDiskBase;
+    // }
 
     /**
      * Gets the remote desktop port
