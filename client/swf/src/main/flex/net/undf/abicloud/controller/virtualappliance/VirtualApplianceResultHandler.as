@@ -264,7 +264,7 @@ package net.undf.abicloud.controller.virtualappliance
             if (result.success)
             {
                 //Announcing that a virtual appliance has been edited
-                AbiCloudModel.getInstance().virtualApplianceManager.editVirtualAppliance(this._virtualApplianceReturnedByServer);
+                //AbiCloudModel.getInstance().virtualApplianceManager.editVirtualAppliance(this._virtualApplianceReturnedByServer);
             }
             else
             {

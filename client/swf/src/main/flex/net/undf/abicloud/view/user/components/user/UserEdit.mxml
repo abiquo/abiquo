@@ -69,7 +69,12 @@
             
             private var _firstRetrieve:Boolean;
             
-            private var _virtualDatacenterWatcher:ChangeWatcher;
+            //Need to know if it's a user who edits is own data
+            [Bindable]
+            private var _isUserEditing:Boolean;
+            
+			[Bindable]
+			private var _virtualDatacenterWatcher:ChangeWatcher;
             
             [Bindable]
             private var _restrict:Boolean;
