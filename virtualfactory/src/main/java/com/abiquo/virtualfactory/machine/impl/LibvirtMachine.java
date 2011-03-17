@@ -591,9 +591,10 @@ public class LibvirtMachine extends AbsVirtualMachine
 
             // Removes the domain
             conn = connect(conn);
+            
             dom = conn.domainLookupByName(getMachineName());
             dom.undefine();
-
+            
             //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
             //{
                 removeImage();
@@ -611,6 +612,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             disconnectAndThrowError(conn, dom);
         }
     }
+    
 
     /**
      * Reconfig the virtual machine.
@@ -1328,7 +1330,10 @@ public class LibvirtMachine extends AbsVirtualMachine
      */
     protected void removeImage() throws VirtualMachineException
     {
-        if(targetDatstore != null)
+        VirtualDisk diskBase = config.getVirtualDiskBase();
+        targetDatstore = getDatastore(diskBase);
+        
+        if(targetDatstore != null) 
         {
             String hypervisorLocation = libvirtHyper.getAddress().getHost();
             
