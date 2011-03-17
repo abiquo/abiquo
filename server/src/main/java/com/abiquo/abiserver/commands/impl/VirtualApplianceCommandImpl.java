@@ -2004,13 +2004,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     {
 
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
-        BasicResult basicResult = null;
-
         State inProgress = new State(StateEnum.IN_PROGRESS);
         State notDeployed = new State(StateEnum.NOT_DEPLOYED);
-
-        updateStateAndSubStateInDB(virtualAppliance, inProgress, notDeployed);
-
         // Get the user POJO from the DB
         UserHB userHB = null;
         DAOFactory factory = HibernateDAOFactory.instance();
@@ -2018,6 +2013,27 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         userHB = factory.getUserDAO().findById(idUser);
         factory.endConnection();
+        
+        // if the virtual appliance doesn't have nodes, return back the message
+        if (virtualAppliance.getNodes().size() == 0)
+        {
+            updateStateAndSubStateInDB(virtualAppliance, notDeployed, notDeployed);
+            traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState, sourceSubState,
+                userHB, ComponentType.VIRTUAL_APPLIANCE, "The Virtual Appliance doesn't have virtual machines to deploy",
+                "startVirtualAppliance", null, BasicResult.ZERO_NODES);
+                
+            dataResult.setSuccess(Boolean.FALSE);
+            dataResult.setResultCode(BasicResult.ZERO_NODES);
+            dataResult.setMessage("The Virtual Appliance doesn't have virtual machines to deploy");
+            return dataResult;
+        }
+        
+        BasicResult basicResult = null;
+
+
+
+        updateStateAndSubStateInDB(virtualAppliance, inProgress, notDeployed);
+
         // Check the remote services
         try
         {
