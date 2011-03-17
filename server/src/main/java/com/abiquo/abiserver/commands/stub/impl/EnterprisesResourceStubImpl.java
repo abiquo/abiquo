@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -165,7 +166,11 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             String datacenterUri = createDatacenterLink(limit.getDatacenter().getId());
             dto.addLink(new RESTLink("datacenter", datacenterUri));
 
-            ClientResponse response = post(uri, dto);
+            Resource resource = resource(uri);
+            resource = resource.queryParam("datacenter", limit.getDatacenter().getId());
+            ClientResponse response = resource.post(dto);
+            // ClientResponse response = post(uri, dto);
+
             if (response.getStatusCode() == 201)
             {
                 limit.setEnterprise(data);
