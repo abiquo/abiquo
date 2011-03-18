@@ -492,12 +492,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             transaction.commit();
             session = null;
             transaction = null;
-            
+
             if (needToShutdown)
             {
                 basicResult = shutdownVirtualAppliance(userSession, virtualAppliance);
             }
-            
+
             if (basicResult.getSuccess())
             {
                 session = HibernateUtil.getSession();
@@ -1904,6 +1904,35 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         State sourceState = vApp.getState();
         State sourceSubState = vApp.getSubState();
 
+        // check the vapp state on database 
+        try
+        {
+            daoFactory.beginConnection();
+            VirtualappHB vapp = daoFactory.getVirtualApplianceDAO().findByIdNamedExtended(vApp.getId());
+
+            StateEnum sourceStateHb = vapp.getState();
+            StateEnum sourceSubStateHb = vapp.getSubState();
+
+            if (!sourceState.getDescription().equalsIgnoreCase(sourceStateHb.name()))
+            {
+                logger.warn("Virtual applinace client state [{}] is not the same as DDBB [{}]",
+                    sourceState.getDescription(), sourceStateHb.name());
+
+                sourceState = new State(sourceStateHb);
+            }
+            if (!sourceSubState.getDescription().equalsIgnoreCase(sourceSubStateHb.name()))
+            {
+                logger.warn("Virtual applinace client sub state [{}] is not the same as DDBB [{}]",
+                    sourceSubState.getDescription(), sourceSubStateHb.name());
+
+                sourceSubState = new State(sourceSubStateHb);
+            }
+        }
+        finally
+        {
+            daoFactory.endConnection();
+        }
+
         try
         {
             if (!blockVirtualAppliance(vApp, StateEnum.CHECKING))
@@ -2091,21 +2120,21 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (HardLimitExceededException hl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
         }
         catch (SoftLimitExceededException sl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
                 "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
         }
         catch (NotEnoughResourcesException nl)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
                 String.format("There is not enough resources in datacenter "
                     + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
@@ -2124,14 +2153,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (VirtualImageException e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
                 "createVirtualMachines", e);
         }
         catch (Exception e1)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
@@ -2145,8 +2174,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-        	
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e.getMessage(),
                 "createVirtualMachines", e);
@@ -2159,7 +2188,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (EventingException e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
@@ -2168,7 +2197,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-        	undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
 
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
@@ -2200,7 +2229,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     .getName(), dataResult.getMessage(), virtualAppliance, null, null, null, null);
 
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            
+
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             virtualAppliance = updateStateInDB(virtualAppliance, sourceState.toEnum()).getData();
             dataResult.setData(virtualAppliance);
@@ -2758,24 +2787,24 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     if (virtualMachine != null)
                     {
                         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-                        
-                        if(hypervisor != null)
+
+                        if (hypervisor != null)
                         {
                             logger.debug("Undeploy all the virtual machines");
-                            
+
                             session = HibernateUtil.getSession();
                             transaction = session.beginTransaction();
                             HypervisorHB hypervisorHB =
                                 (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
                             transaction.commit();
-                            
+
                             PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
                             PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
                             logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
                                 + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
-                            
+
                             // scheduler.rollback(virtualMachine, physicalMachine);
-                            
+
                             try
                             {
                                 vmachineResource.deallocate(userSession, virtualDatacenterId,
@@ -2786,7 +2815,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 throw new VirtualApplianceCommandException(e);
                             }
                         } // vm is allocated
-                        
 
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
@@ -3194,7 +3222,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return updatenodesList;
 
     }
- 
+
     /*
      * (non-Javadoc)
      * @see
