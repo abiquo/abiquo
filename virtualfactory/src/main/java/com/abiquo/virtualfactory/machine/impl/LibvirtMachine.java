@@ -1154,6 +1154,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             // TODO Attaching other STANDARD extended disks
             if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)
             {
+                vdisk.setFormat("raw");
                 attachIscsiDisk(vdisk, doc, null, "ide");
             }
         }
