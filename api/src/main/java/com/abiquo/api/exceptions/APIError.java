@@ -200,6 +200,11 @@ public enum APIError
      * Description message
      */
     String message;
+    
+    /**
+     * Additional description
+     * */
+    String cause;
 
     public String getCode()
     {
@@ -211,6 +216,11 @@ public enum APIError
         return this.message;
     }
 
+    public String getCause()
+    {
+        return cause;
+    }
+    
     APIError(final String code, final String message)
     {
         this.code = code;
@@ -219,9 +229,11 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.message = cause;//String.format("%s.\ncaused by:%s", this.message, cause);
+        this.cause = cause;        
         return this;
     }
+    
+    
 
     public static void main(final String[] args)
     {
