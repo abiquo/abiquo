@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.User;
 
 @Repository
 public class StatisticsRep extends DefaultRepBase
@@ -108,18 +109,18 @@ public class StatisticsRep extends DefaultRepBase
         return this.enterpriseResourcesDAO.findById(idEnterprise);
     }
 
-    public Collection<VirtualAppResources> findVappResourcesByEnterprise(Integer idEnterprise)
+    public Collection<VirtualAppResources> findVappResourcesByEnterprise(Integer idEnterprise, User user)
     {
         assert idEnterprise != null;
 
-        return this.vappResourcesDAO.findByIdEnterprise(idEnterprise);
+        return this.vappResourcesDAO.findByIdEnterprise(idEnterprise, user);
     }
 
-    public Collection<VirtualDatacenterResources> findVDCResourcesByEnterprise(Integer idEnterprise)
+    public Collection<VirtualDatacenterResources> findVDCResourcesByEnterprise(Integer idEnterprise, User user)
     {
         assert idEnterprise != null;
 
-        return this.vdcResourcesDAO.findByIdEnterprise(idEnterprise);
+        return this.vdcResourcesDAO.findByIdEnterprise(idEnterprise, user);
     }
 
     public VirtualDatacenterResources findVDCResourcesById(Integer idVirtualDatacenter)

@@ -222,5 +222,27 @@ public class VirtualAppResources extends DefaultEntityBase
     {
         this.idEnterprise = idEnterprise;
     }
+    
+    public final static String ID_VDC_PROPERTY = "idVirtualDataCenter";
+
+    private final static String ID_VDC_COLUMN = "idVirtualDataCenter";
+
+    private final static int ID_VDC_MIN = Integer.MIN_VALUE;
+
+    private final static int ID_VDC_MAX = Integer.MAX_VALUE;
+
+    @Column(name = ID_VDC_COLUMN, nullable = true)
+    @Range(min = ID_VDC_MIN, max = ID_VDC_MAX)
+    private int idVirtualDataCenter;
+
+    public int getIdVirtualDataCenter()
+    {
+        return this.idVirtualDataCenter;
+    }
+
+    public void setIdVirtualDataCenter(int idVirtualDataCenter)
+    {
+        this.idVirtualDataCenter = idVirtualDataCenter;
+    }
 
 }
