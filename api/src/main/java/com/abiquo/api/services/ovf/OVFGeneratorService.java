@@ -511,12 +511,6 @@ public class OVFGeneratorService
 
             State vmState = nodeVirtualImage.getVirtualMachine().getState();
 
-            // Ignore the the crashed virtual machines
-            if (vmState == State.CRASHED)
-            {
-                continue;
-            }
-
             // Creates the virtual system inside the virtual system collection
             VirtualSystemType virtualSystem =
                 createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
