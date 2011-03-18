@@ -416,42 +416,27 @@ CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON
     END;
 |
 CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_limits_by_datacenter`
-    FOR EACH ROW BEGIN      
-    -- Creation : idEnterprise and idDatacenter are NOT NULL: update with NEW.stat
-    -- Deletion: idEnterprise is NULL -> update with  - NEW.stat
-    -- INSERT or DELETE Triggers are used when deleting Enterprises or inserting new Enterprises
-        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
-            IF OLD.idEnterprise IS NOT NULL AND NEW.idEnterprise IS NULL THEN
+FOR EACH ROW BEGIN     
+	 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
                 -- Limit is not used anymore. Statistics are removed
                 DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;                
-                UPDATE IGNORE cloud_usage_stats 
-                SET vCpuReserved = vCpuReserved - OLD.cpuHard,
-                    vMemoryReserved = vMemoryReserved - OLD.ramHard,
-                    vStorageReserved = vStorageReserved - OLD.hdHard,
-                    storageReserved = storageReserved - OLD.storageHard,
-                    publicIPsReserved = publicIPsReserved - OLD.publicIPHard,
-                    vlanReserved = vlanReserved - OLD.vlanHard
-                WHERE idDataCenter = OLD.idDataCenter;                
-            ELSEIF  OLD.idEnterprise IS NULL AND NEW.idEnterprise IS NOT NULL THEN
-                -- We got a new limit defined (or updated)
-            	INSERT IGNORE INTO dc_enterprise_stats 
+                INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             	VALUES 
                 (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
-                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);                                
-                -- Update cloud usage
+                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);       
+		-- 
                 UPDATE IGNORE cloud_usage_stats 
-                SET vCpuReserved = vCpuReserved  + NEW.cpuHard,
-                    vMemoryReserved = vMemoryReserved + NEW.ramHard,
-                    vStorageReserved = vStorageReserved  + NEW.hdHard,
-                    storageReserved = storageReserved  + NEW.storageHard,
-                    publicIPsReserved = publicIPsReserved  + NEW.publicIPHard,
-                    vlanReserved = vlanReserved  + NEW.vlanHard
-                WHERE idDataCenter = NEW.idDataCenter;
-            END IF;             
+                SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
+                    vMemoryReserved = vMemoryReserved - OLD.ramHard + NEW.ramHard,
+                    vStorageReserved = vStorageReserved - OLD.hdHard + NEW.hdHard,
+                    storageReserved = storageReserved - OLD.storageHard + NEW.storageHard,
+                    publicIPsReserved = publicIPsReserved - OLD.publicIPHard + NEW.publicIPHard,
+                    vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
+                WHERE idDataCenter = NEW.idDataCenter;                            
         END IF;
-    END;
+END;
 |    
 CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN

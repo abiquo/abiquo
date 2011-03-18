@@ -352,6 +352,9 @@ public class EnterpriseService extends DefaultApiService
         old.setHdLimitsInMb(new Limit(dto.getHdSoftLimitInMb(), dto.getHdHardLimitInMb()));
         old.setRepositoryLimits(new Limit(dto.getRepositorySoftLimitsInMb(), dto
             .getRepositoryHardLimitsInMb()));
+        old.setStorageLimits(new Limit(dto.getStorageSoft(), dto.getStorageHard()));
+        old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
+        old.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
 
         if (!old.isValid())
         {
