@@ -235,6 +235,13 @@
              	var tmpResult:int = ObjectUtil.stringCompare(obj1.name as String , obj2.name as String, true);
              	return tmpResult;
              }
+             
+             private function compareVirtualImageState(virtualImg1:VirtualAppliance, virtualImg2:VirtualAppliance):int{
+            	var virtualMachineState1:Number = virtualImg1.state.id;
+            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	
+            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            }
         ]]>
     </mx:Script>
 
@@ -352,7 +359,7 @@
 
                     <mx:DataGridColumn 
                         width="24"
-                        dataField="state"
+                        sortCompareFunction="compareVirtualImageState"
                         sortable="true"
                         resizable="false"
                         headerText="">
@@ -411,7 +418,7 @@
                     <mx:DataGridColumn 
                         width="24"
                         sortable="true"
-                        dataField="error"
+						dataField="error"
                         resizable="false"
                         headerText="">
                         <mx:itemRenderer>

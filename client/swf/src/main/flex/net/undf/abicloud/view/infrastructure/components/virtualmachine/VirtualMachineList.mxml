@@ -321,6 +321,13 @@
                     
             	return ObjectUtil.stringCompare(virtImg1,virtImg2);
             }
+            
+            private function compareVirtualImageState(virtualImg1:VirtualMachine, virtualImg2:VirtualMachine):int{
+            	var virtualMachineState1:Number = virtualImg1.state.id;
+            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	
+            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            }
         ]]>
     </mx:Script>
 
@@ -431,6 +438,7 @@
                         headerText="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_HD') + ' (GB)'}"/>
 
                     <mx:DataGridColumn 
+                    	sortCompareFunction="compareVirtualImageState"
                         width="36"
                         headerText=""
                         itemRenderer="net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineListStateItemRenderer"
