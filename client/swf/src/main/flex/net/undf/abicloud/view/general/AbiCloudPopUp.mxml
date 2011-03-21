@@ -42,6 +42,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import flash.net.navigateToURL;
+        	import mx.effects.Fade;
+        	import net.undf.abicloud.view.main.CommonAssets;
             import mx.core.Application;
             import mx.controls.Label;
             import mx.controls.Image;
@@ -54,6 +57,10 @@
             private var _titleText:String = "The title for this Pop Up has not been set!";
 
             private var _iconSource:String = ""; //TODO: Set default icon source
+            
+            private var _iconInfo:Image;
+            
+            private var _fadeEffect:Fade;
 
             /**
              * When a Pop Up preinitializes, we add the common information that will be present
@@ -68,7 +75,21 @@
                 //Creating Title
                 _title = new Label();
                 _title.text = _titleText;
+                _title.percentWidth = 100;
                 _title.styleName = "AbiCloudPopUpTitle";
+                
+                //Create the Fade effect
+                _fadeEffect = new Fade();
+                //Creating the Info icon
+                _iconInfo = new Image();
+                _iconInfo.source = CommonAssets.info;
+                _iconInfo.visible = false;
+                _iconInfo.buttonMode = true;
+                _iconInfo.toolTip = resourceManager.getString('Common','TOOLTIP_INFO');
+                _iconInfo.addEventListener(MouseEvent.CLICK, openMoreInfo);
+                _iconInfo.setStyle("showEffect", _fadeEffect);
+                _iconInfo.setStyle("hideEffect", _fadeEffect);
+
 
                 //Adding it to the view
                 var header:HBox = new HBox();
@@ -76,9 +97,12 @@
                 header.setStyle("horizontalAlign", "left");
                 header.addChild(_popUpIcon);
                 header.addChild(_title);
+                header.addChild(_iconInfo);
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
+                addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
+                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo);
                 this.addChildAt(header, 0);
 
                 //Registering Keyboard events, for standard application behaivor
@@ -99,6 +123,39 @@
             private function headerMouseUp_hanlder(mouseEvent:MouseEvent):void
             {
                 stopDrag();
+            }
+            
+            /**
+             * Show the info icon if user presses the CTRL key
+             */
+            private function showIconInfo(keyboardEvent:KeyboardEvent):void
+            {
+                if(keyboardEvent.ctrlKey){
+                	this._iconInfo.visible = true;
+                	this._iconInfo.buttonMode = true;
+                }else{
+                	this._iconInfo.visible = false;
+                	this._iconInfo.buttonMode = false;
+                }
+            }
+
+            /**
+             * Hide the info icon
+             */
+            private function hideIconInfo(keyboardEvent:KeyboardEvent):void
+            {
+                this._iconInfo.visible = false;
+                this._iconInfo.buttonMode = false;
+            }
+            
+            /**
+             * Display the specific Wiki page
+             */
+            private function openMoreInfo(mouseEvent:MouseEvent):void{
+            	if(this._iconInfo.visible){
+            		this._iconInfo.visible = false;
+            		navigateToURL(new URLRequest("http://community.abiquo.com/display/Abiquo/Home"),"_blank");
+            	}
             }
 
             public function set titleText(text:String):void
