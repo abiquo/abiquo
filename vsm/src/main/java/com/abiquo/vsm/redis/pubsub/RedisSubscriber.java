@@ -70,7 +70,7 @@ public class RedisSubscriber implements Runnable
     {
         try
         {
-            Jedis redis = new Jedis(host, port);
+            Jedis redis = new Jedis(host, port, 0);
             redis.connect();
 
             running = true;
