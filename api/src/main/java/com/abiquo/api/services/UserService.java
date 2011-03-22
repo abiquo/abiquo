@@ -173,7 +173,6 @@ public class UserService extends DefaultApiService
         }
 
         checkUserCredentialsForSelfEdit(old, old.getEnterprise());
-
         
         // Cloud Admins should only be editable by other Cloud Admins
         if (old.getRole().getType() == Role.Type.SYS_ADMIN

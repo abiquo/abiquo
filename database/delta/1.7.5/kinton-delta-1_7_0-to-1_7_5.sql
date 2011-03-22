@@ -600,7 +600,6 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
 --      NOT_MOUNTED_NOT_RESERVED(0),
 --      NOT_MOUNTED_RESERVED(1),
 --      MOUNTED_RESERVED(2);
---
 -- Fires: On an UPDATE for the volume_management table
 --
 -- ******************************************************************************************
@@ -783,6 +782,4 @@ DELIMITER ;
 
 -- We need to update Vapp Enterprise Stats with the right idVirtualDatacenter Values
 CALL `kinton`.`UpdateVappEnterpriseStatsWithVDCIds`();
-
-
 

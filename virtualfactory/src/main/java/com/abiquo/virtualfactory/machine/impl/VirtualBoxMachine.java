@@ -48,7 +48,6 @@ import org.virtualbox_4_0.MachineState;
 import org.virtualbox_4_0.NetworkAdapterType;
 import org.virtualbox_4_0.SessionState;
 import org.virtualbox_4_0.StorageBus;
-import org.virtualbox_4_0.VBoxException;
 
 import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.RimpException;

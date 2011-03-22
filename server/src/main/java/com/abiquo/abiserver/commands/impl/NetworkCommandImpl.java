@@ -1372,7 +1372,10 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 while (ipPoolDAO.existingMACAddress(nextRandomMacAddress));
 
                 nextIpPool.setMac(nextRandomMacAddress);
-                nextIpPool.setName(nextIpPool.getMac() + "_host");
+                
+                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
+                // leases with the ':' char in the lease name)
+                nextIpPool.setName(nextIpPool.getMac().replace(":", "") + "_host");
             }
 
             nextIpPool.setIp(currentIP.toString());
