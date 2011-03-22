@@ -25,6 +25,7 @@ import javax.jms.ResourceAllocationException;
 
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 /**
  * Selects the target machine to allocate a virtual machines.
@@ -82,4 +83,11 @@ public interface IAllocator
      */
     // Void deallocateVirtualMachine(VirtualMachine vmachien) throws AllocatorException;
 
+    /**
+     * if resources are increased check the limits and the workload rules applied to the already
+     * selected machine
+     */
+    void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId,
+        VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
+        throws AllocatorException, ResourceAllocationException;
 }

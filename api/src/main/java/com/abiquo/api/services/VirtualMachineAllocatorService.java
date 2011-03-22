@@ -37,6 +37,7 @@ import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 @Service
 @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -51,6 +52,31 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     @Autowired
     IAllocator allocator;
 
+    
+    public void checkAllocate(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
+        boolean foreceEnterpriseSoftLimits)
+    {
+        try
+        {
+            allocator.checkEditVirtualMachineResources(idVirtualApp, virtualMachineId, newVmRequirements, foreceEnterpriseSoftLimits);
+        }
+        catch (AllocatorException e)
+        {
+
+        }
+        catch (ResourceAllocationException e)
+        {
+
+        }
+        
+       
+        
+        upgradeUse.updateUsagePhysicalMachine(machine, used, false);
+        
+        
+    }
+    
+    
     public VirtualMachine allocateVirtualMachine(Integer virtualMachineId, Integer idVirtualApp,
         Boolean foreceEnterpriseSoftLimits)
     {

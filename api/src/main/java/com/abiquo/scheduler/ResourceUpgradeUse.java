@@ -302,7 +302,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @param isAdd, true if reducing the amount of resources on the PhysicalMachine. Else it adds
      *            capacity (as a rollback on VirtualImage deploy Exception).
      */
-    protected void updateUsagePhysicalMachine(final Machine machine, final VirtualMachine used,
+    public void updateUsagePhysicalMachine(final Machine machine, final VirtualMachine used,
         final boolean isRollback)
     {
 

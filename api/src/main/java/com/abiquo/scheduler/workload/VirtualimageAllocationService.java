@@ -22,6 +22,7 @@
 package com.abiquo.scheduler.workload;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -320,8 +321,8 @@ public class VirtualimageAllocationService
         }
     }
 
-    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();
-
+    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();    
+    
     /**
      * TODO TBD
      * 
@@ -427,5 +428,48 @@ public class VirtualimageAllocationService
         // TODO never is good enough
         return false;
     }
+    
+    
+    
+    /**
+     * When editing a virtual machine this method checks if the increases resources (setted at vimage) are allowed by the workload rules.
+     * */
+    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage, Integer virtualApplianceId)
+    {
+        // get all the rules of the candiate machines
+        Map<Machine, List<MachineLoadRule>> machineRulesMap =
+            ruleFinder.initializeMachineLoadRuleCache(Collections.singletonList(machine));
+        
+        boolean pass = false;
+        
+        if (machineRulesMap != null) // community impl --> rules == null (so always pass)
+        {
+            List<MachineLoadRule> rules = machineRulesMap.get(machine);
+
+            if (rules == null || rules.isEmpty())
+            {
+                pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+            }
+            else
+            {
+                for (final MachineLoadRule rule : rules)
+                {
+                    if (!rule.pass(vimage, machine, virtualApplianceId))
+                    {
+                        pass = false;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        // default rule is to check the actual resource utilization (load = 100%)
+        {
+            pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+        }
+        
+        return pass;
+    }
+    
 
 }
