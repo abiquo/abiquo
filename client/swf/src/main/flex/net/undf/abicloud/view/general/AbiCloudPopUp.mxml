@@ -42,6 +42,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.view.general.components.info.InfoIcon;
         	import flash.net.navigateToURL;
         	import mx.effects.Fade;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -58,10 +59,8 @@
 
             private var _iconSource:String = ""; //TODO: Set default icon source
             
-            private var _iconInfo:Image;
+            private var _iconInfo:InfoIcon;
             
-            private var _fadeEffect:Fade;
-
             /**
              * When a Pop Up preinitializes, we add the common information that will be present
              * in all Pop Ups: an Icon and a Title
@@ -77,20 +76,12 @@
                 _title.text = _titleText;
                 _title.percentWidth = 100;
                 _title.styleName = "AbiCloudPopUpTitle";
+
+                //Adding the info icon
+                _iconInfo = new InfoIcon();
+                _iconInfo.wikiUrl = "http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter";
                 
-                //Create the Fade effect
-                _fadeEffect = new Fade();
-                //Creating the Info icon
-                _iconInfo = new Image();
-                _iconInfo.source = CommonAssets.info;
-                _iconInfo.visible = false;
-                _iconInfo.buttonMode = true;
-                _iconInfo.toolTip = resourceManager.getString('Common','TOOLTIP_INFO');
-                _iconInfo.addEventListener(MouseEvent.CLICK, openMoreInfo);
-                _iconInfo.setStyle("showEffect", _fadeEffect);
-                _iconInfo.setStyle("hideEffect", _fadeEffect);
-
-
+                
                 //Adding it to the view
                 var header:HBox = new HBox();
                 header.percentWidth = 100;
@@ -130,13 +121,7 @@
              */
             private function showIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                if(keyboardEvent.ctrlKey){
-                	this._iconInfo.visible = true;
-                	this._iconInfo.buttonMode = true;
-                }else{
-                	this._iconInfo.visible = false;
-                	this._iconInfo.buttonMode = false;
-                }
+                this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
             }
 
             /**
@@ -144,20 +129,10 @@
              */
             private function hideIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                this._iconInfo.visible = false;
-                this._iconInfo.buttonMode = false;
+                this._iconInfo.hideIconInfo();
             }
             
-            /**
-             * Display the specific Wiki page
-             */
-            private function openMoreInfo(mouseEvent:MouseEvent):void{
-            	if(this._iconInfo.visible){
-            		this._iconInfo.visible = false;
-            		navigateToURL(new URLRequest("http://community.abiquo.com/display/Abiquo/Home"),"_blank");
-            	}
-            }
-
+            
             public function set titleText(text:String):void
             {
                 this._titleText = text;
