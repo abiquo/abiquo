@@ -31,7 +31,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
     
     private static final long serialVersionUID = 1L;
     public static final String MEDIA_TYPE = "application/storagepooldto+xml";
-    private String idStorage;
+    protected String idStorage;
 
     public String getIdStorage()
     {
@@ -43,7 +43,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.idStorage = idStorage;
     }
     
-    private String name;
+    protected String name;
 
     public String getName()
     {
@@ -55,7 +55,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private long totalSizeInMb;
+    protected long totalSizeInMb;
 
     public long getTotalSizeInMb()
     {
@@ -67,7 +67,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.totalSizeInMb = totalSizeInMb;
     }
 
-    private long usedSizeInMb;
+    protected long usedSizeInMb;
 
     public long getUsedSizeInMb()
     {
@@ -79,7 +79,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.usedSizeInMb = usedSizeInMb;
     }
 
-    private long availableSizeInMb;
+    protected long availableSizeInMb;
 
     public long getAvailableSizeInMb()
     {
@@ -91,7 +91,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
         this.availableSizeInMb = availableSizeInMb;
     }
 
-    private boolean enabled;
+    protected boolean enabled;
 
     public boolean getEnabled()
     {
