@@ -29,6 +29,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+
 import org.apache.wink.common.internal.providers.entity.csv.CsvReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,8 +129,22 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             virtualMachine.setState(State.IN_PROGRESS);
             vmachineDao.flush();
         }
-        catch (final Exception e) // HibernateException NotEnoughResourcesException
-        // NoSuchObjectException
+        catch (final ConstraintViolationException cve)
+        {
+
+            final StringBuilder msg = new StringBuilder("Invalid database mapping, caused by:");
+            for (ConstraintViolation< ? > cv : cve.getConstraintViolations())
+            {
+                msg.append(String.format("\nEnitity :%s Property :%s InvalidValue :%s\n%s", cv
+                    .getRootBeanClass().getName(), cv.getPropertyPath().toString(), cv
+                    .getInvalidValue(), cv.getMessage()));
+            }
+
+            cve.printStackTrace(); // FIXME
+            throw new ResourceUpgradeUseException(msg.toString());
+        }
+        catch (final Exception e) 
+        // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException(e);
@@ -198,8 +215,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
 
                     vlanNetworkDao.flush();
@@ -218,8 +235,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
         else
         {
-            log
-                .debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
+            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
             for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
             {
                 VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
@@ -232,8 +248,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
 
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
                     final NetworkAssignment nb =
                         new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -308,13 +324,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed()
-                + used.getCpu());
+                .getVirtualCpusUsed() + used.getCpu());
 
         final int newRam =
             (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb()
-                + used.getRam());
+                .getVirtualRamUsedInMb() + used.getRam());
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -323,8 +337,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes()
-                + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
@@ -427,15 +440,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     public Collection<Integer> getVlansIdAvoidAsCollection(Rack rack)
     {
-        
+
         Collection<Integer> vlans_avoided_collection = new HashSet();
         String avoidedVLANs = rack.getVlansIdAvoided();
-        
+
         if (avoidedVLANs == null || avoidedVLANs.isEmpty())
         {
-        	return vlans_avoided_collection;
+            return vlans_avoided_collection;
         }
-        
+
         CsvReader reader = new CsvReader(new StringReader(avoidedVLANs));
         String[] line = reader.readLine();
 
