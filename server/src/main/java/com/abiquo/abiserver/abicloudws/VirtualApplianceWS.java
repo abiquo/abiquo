@@ -698,6 +698,9 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 
 				if (resource != null) {
 					result.setSuccess(true);
+					
+					Thread.sleep(bugTimeout);
+					
 					resource.invoke(AbiCloudConstants.BUNDLE_VIRTUALAPPLIANCE,
 							docEnvelope);
 				} else {
