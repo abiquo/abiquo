@@ -43,6 +43,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
@@ -100,6 +101,58 @@ public class Allocator implements IAllocator
     /** If the check machine fails, how many times the allocator try a new target machine. */
     protected final static Integer RETRIES_AFTER_CHECK = 5;
 
+
+    
+    
+    public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
+        boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException
+    {
+
+        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
+        final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+        final Machine machine = vmachine.getHypervisor().getMachine();
+
+        
+        final VirtualMachineRequirements increaseRequirements = getVirtualMachineRequirements(vmachine, newVmRequirements);
+
+        
+        checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
+
+        final VirtualImage increaseVirtualImage = getVirtualImage(increaseRequirements);
+        
+        boolean check =
+            allocationService.checkVirtualMachineResourceIncrease(machine, increaseVirtualImage,
+                idVirtualApp);
+        
+        if(!check)
+        {
+            final String cause = String.format("Current workload rules (RAM and CPU oversubscription) " +
+            		"on the target machine: %s disallow the required resources increment.", machine.getName());
+            throw new AllocatorException(cause);             
+        }        
+    }
+    
+    
+    
+    private VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine vmachine, VirtualMachineDto newVmRequirements)
+    {
+        Integer cpu = newVmRequirements.getCpu() - vmachine.getCpu();
+        Integer ram = newVmRequirements.getRam() - vmachine.getRam();
+        
+        cpu = cpu > 0 ? cpu : 0;
+        ram = ram > 0 ? ram : 0;
+        
+        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);       
+    }
+    
+    private VirtualImage getVirtualImage(VirtualMachineRequirements increaseRequirements)
+    {
+        VirtualImage vimage = new VirtualImage(null); // doesn't care about the enterprise
+        vimage.setCpuRequired(increaseRequirements.getCpu().intValue());
+        vimage.setRamRequired(increaseRequirements.getRam().intValue());        
+        return vimage;
+    }
+
     @Override
     public VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer virtualMachineId,
         Boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException
@@ -156,15 +209,19 @@ public class Allocator implements IAllocator
                 {
                     log.error("Discarded machine [{}] : Not Enough Resources [{}]",
                         targetMachine.getName(), e);
-                    
-                    errorCause = String.format("Machine : %s error: %s", targetMachine.getName(), e.getMessage());
+
+                    errorCause =
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
                     targetMachine = null;
                 }
             }
             else
             {
                 log.error("Machine [{}] is not MANAGED", targetMachine.getName());
-                errorCause = String.format("Machine : %s error: %s", targetMachine.getName(), "is not MANAGED");
+                errorCause =
+                    String.format("Machine : %s error: %s", targetMachine.getName(),
+                        "is not MANAGED");
                 targetMachine = null;
 
             }
@@ -173,8 +230,11 @@ public class Allocator implements IAllocator
         // SOME CANDIDATE ?
         if (targetMachine == null)
         {
-            final String cause = String.format("Allocator can not select a machine on the current virtual datacenter. " +
-            		"Last candidate error : %s.",  errorCause != null ? errorCause : "can not be confirmed as MANAGED.");            
+            final String cause =
+                String.format(
+                    "Allocator can not select a machine on the current virtual datacenter. "
+                        + "Last candidate error : %s.", errorCause != null ? errorCause
+                        : "can not be confirmed as MANAGED.");
             throw new NotEnoughResourcesException(cause);
         }
 

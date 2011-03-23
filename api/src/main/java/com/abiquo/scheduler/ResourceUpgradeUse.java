@@ -318,7 +318,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @param isAdd, true if reducing the amount of resources on the PhysicalMachine. Else it adds
      *            capacity (as a rollback on VirtualImage deploy Exception).
      */
-    protected void updateUsagePhysicalMachine(final Machine machine, final VirtualMachine used,
+    public void updateUsagePhysicalMachine(final Machine machine, final VirtualMachine used,
         final boolean isRollback)
     {
 
@@ -343,10 +343,19 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
         machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
+        
         machine.setRealCpuCores(machine.getVirtualCpuCores());
         machine.setRealHardDiskInBytes(machine.getVirtualHardDiskInBytes());
         machine.setRealRamInMb(machine.getVirtualRamInMb());
 
+        datacenterRepo.updateMachine(machine);
+    }
+    
+    public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
+    {       
+        machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);
+        machine.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb() + ramIncrease);
+        
         datacenterRepo.updateMachine(machine);
     }
 
