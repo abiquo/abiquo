@@ -150,26 +150,22 @@ public class VirtualMachineResource extends AbstractResource
         return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
     }
 
+
+    
+    // TODO forceEnterpriseLimits = true
     
     @PUT
-    @Path("action/checkAllocate")
-    public synchronized VirtualMachineDto checkEditAllocate(
+    @Path("action/checkedit")
+    public synchronized void checkEditAllocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId, 
         VirtualMachineDto vmachine, @Context IRESTBuilder restBuilder) throws Exception
     {
-
         // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
         // get user form the authentication layer
         // User user = userService.getCurrentUser();
-
-        VirtualMachine vmachine =
-            service.allocateVirtualMachine(virtualMachineId, virtualApplianceId,
-                forceEnterpriseLimits);
         
-        service.updateVirtualMachineUse(virtualApplianceId, vmachine);
-
-        return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
+        service.checkAllocate(virtualApplianceId, virtualMachineId, vmachine, true);        
     }
 
     

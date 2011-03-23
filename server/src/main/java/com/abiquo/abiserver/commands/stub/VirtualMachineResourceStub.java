@@ -38,5 +38,10 @@ public interface VirtualMachineResourceStub
     void deallocate(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
-
+    
+    
+    void checkEdit(UserSession userSession, Integer virtualDatacenterId, Integer virtualApplianceId,
+        Integer virtualMachineId, final int newcpu, final int newram) throws HardLimitExceededException,
+        SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
+    
 }

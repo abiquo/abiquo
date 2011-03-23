@@ -160,6 +160,8 @@ public enum APIError
         "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
+    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01", "This method require the virtual machine being deployed on some target hypervisor"),
+    
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error was occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(

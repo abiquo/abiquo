@@ -85,7 +85,7 @@ public interface IAllocator
 
     /**
      * if resources are increased check the limits and the workload rules applied to the already
-     * selected machine
+     * selected machine. PRE: the virtualMachine is already deployed to some target hypervisor.
      */
     void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId,
         VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)

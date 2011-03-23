@@ -22,6 +22,7 @@
 package com.abiquo.scheduler;
 
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.Machine;
 
 /**
  * Updates the physical machine resource utilization when a new virtual machine is instantiated.
@@ -47,5 +48,10 @@ public interface IResourceUpgradeUse
      *            image and additional resource configuration).
      */
     public void rollbackUse(VirtualMachine virtual);
+
+    /**
+     * Increase the ram and cpu resources on the provided machine.
+     */
+    public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease);
 
 }

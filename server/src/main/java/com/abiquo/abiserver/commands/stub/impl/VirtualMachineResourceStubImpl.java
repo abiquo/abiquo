@@ -66,6 +66,36 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
+    public void checkEdit(UserSession userSession, Integer virtualDatacenterId,
+        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
+        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
+        NotEnoughResourcesException
+    {
+
+        VirtualMachineDto newRequirements = new VirtualMachineDto();
+        newRequirements.setCpu(newcpu);
+        newRequirements.setRam(newram);
+
+        String vmachineUrl =
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
+
+        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/checkedit");
+
+        Resource vmachineResource = resource(vmachineUrl);
+
+        ClientResponse response =
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .put(newRequirements);
+
+        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
+
+        if (response.getStatusCode() / 200 != 1)
+        {
+            onError(userSession, response);
+        }
+    }
+
+    @Override
     public void allocate(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId, boolean forceEnterpirseLimits)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
@@ -76,7 +106,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 
         vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/allocate");
-        
+
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
@@ -107,7 +137,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 
         vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/deallocate");
-        
+
         ClientResponse response = resource(vmachineUrl).delete();
 
         if (response.getStatusCode() / 200 != 1)

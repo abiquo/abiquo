@@ -101,6 +101,8 @@ public class Allocator implements IAllocator
     /** If the check machine fails, how many times the allocator try a new target machine. */
     protected final static Integer RETRIES_AFTER_CHECK = 5;
 
+
+    
     
     public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
         boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException
@@ -108,18 +110,7 @@ public class Allocator implements IAllocator
 
         final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
-        final Machine machine;
-
-        if (vmachine == null || vmachine.getHypervisor() == null
-            || vmachine.getHypervisor().getMachine() == null)
-        {
-            machine = vmachine.getHypervisor().getMachine();
-        }
-        else
-        {
-            throw new AllocatorException("The virtual machine haven't target machine, "
-                + "this check only required for already deployed machines.");
-        }
+        final Machine machine = vmachine.getHypervisor().getMachine();
 
         
         final VirtualMachineRequirements increaseRequirements = getVirtualMachineRequirements(vmachine, newVmRequirements);
