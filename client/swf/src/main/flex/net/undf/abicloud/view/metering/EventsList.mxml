@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.utils.ObjectUtil;
             import com.adobe.utils.DateUtil;
 
             import mx.collections.ArrayCollection;
@@ -147,6 +148,13 @@
             {
                 PopUpManager.removePopUp(this._eventForm);
             }
+            
+            private function sortBySeverity(object1:Object , object2:Object):int{
+            	var severity1:String = Meter(object1).severity;
+            	var severity2:String = Meter(object2).severity;
+            	
+            	return ObjectUtil.stringCompare(severity1, severity2);
+            }
         ]]>
     </mx:Script>
 
@@ -229,6 +237,7 @@
 
             <mx:DataGridColumn id="severityColumn"
                 width="150"
+                sortCompareFunction="sortBySeverity"
                 headerText="@Resource(bundle='Metering', key='LABEL_SEVERITY')">
                 <mx:itemRenderer>
                     <mx:Component>
