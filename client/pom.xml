@@ -37,6 +37,7 @@
         <module>swf</module>
         <module>theme</module>
         <module>war</module>
+        <module>xsapplet</module>
     </modules>
 
     <!--                                      -->
