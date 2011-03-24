@@ -340,12 +340,15 @@ package net.undf.abicloud.business.managers
          */
         public function setVirtualApplianceInProgress(virtualAppliance:VirtualAppliance):void
         {
-            var vaToUpdate:VirtualAppliance = getVirtualApplianceById(virtualAppliance.id);
-
-            if (vaToUpdate)
-            {
-                vaToUpdate.state = new State(State.IN_PROGRESS);
-                vaToUpdate.subState = new State(State.IN_PROGRESS);
+            //To avoid the application crashes when the virtual appliance is null
+            if(virtualAppliance){
+	            var vaToUpdate:VirtualAppliance = getVirtualApplianceById(virtualAppliance.id);
+	
+	            if (vaToUpdate)
+	            {
+	                vaToUpdate.state = new State(State.IN_PROGRESS);
+	                vaToUpdate.subState = new State(State.IN_PROGRESS);
+	            }            	
             }
         }
 
