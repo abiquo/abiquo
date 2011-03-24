@@ -377,6 +377,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newUsed = isRollback ? actualSize - required : actualSize + required;
 
+        if (newUsed > datastore.getSize())
+        {
+            log.error("Target datastore usage is over capacity !!!!! machine : %s datastore : %s",
+                virtual.getHypervisor().getMachine().getName(), virtual.getDatastore().getName());
+        }
+
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
         datastoreDao.flush();
     }

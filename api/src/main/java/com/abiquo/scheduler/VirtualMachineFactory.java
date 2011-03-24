@@ -160,7 +160,7 @@ public class VirtualMachineFactory
             }
         }
 
-        if (betterDatastore == null)
+        if (betterDatastore == null || freeLargerSize < hdImageRequired)
         {
             final String cause =
                 "The target physical machine has no datastores enabled with the required free size.";
