@@ -23,7 +23,8 @@ package net.undf.abicloud.view.general.components.info
 			super();
 			_fadeEffect = new Fade();
 			source = CommonAssets.info;
-			visible = false;
+			buttonMode = true;
+			//visible = false;
 			toolTip = resourceManager.getString('Common','TOOLTIP_INFO');
 			addEventListener(MouseEvent.CLICK, openMoreInfo);
 			setStyle("showEffect", _fadeEffect);
@@ -50,7 +51,7 @@ package net.undf.abicloud.view.general.components.info
          */
         private function openMoreInfo(mouseEvent:MouseEvent):void{
         	if(visible){
-        		visible = false;
+        		//visible = false;
         		navigateToURL(new URLRequest(wikiUrl),"_blank");
         	}
         }

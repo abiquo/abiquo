@@ -42,6 +42,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.view.general.components.info.InfoIcon;
         	import flash.net.navigateToURL;
         	import mx.effects.Fade;
@@ -61,6 +62,8 @@
             
             private var _iconInfo:InfoIcon;
             
+            private var _wikiUrl:String = "http://community.abiquo.com/display/ABI17/Abiquo+Documentation+Home";
+            
             /**
              * When a Pop Up preinitializes, we add the common information that will be present
              * in all Pop Ups: an Icon and a Title
@@ -79,8 +82,7 @@
 
                 //Adding the info icon
                 _iconInfo = new InfoIcon();
-                _iconInfo.wikiUrl = "http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter";
-                
+                _iconInfo.wikiUrl = this._wikiUrl;
                 
                 //Adding it to the view
                 var header:HBox = new HBox();
@@ -121,7 +123,7 @@
              */
             private function showIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
+                //this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
             }
 
             /**
@@ -129,7 +131,7 @@
              */
             private function hideIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                this._iconInfo.hideIconInfo();
+                //this._iconInfo.hideIconInfo();
             }
             
             
@@ -138,6 +140,13 @@
                 this._titleText = text;
                 if (this._title)
                     this._title.text = this._titleText;
+            }
+            
+            public function set wikiUrl(text:String):void
+            {
+                this._wikiUrl = text;
+                if (this._iconInfo)
+                    this._iconInfo.wikiUrl = this._wikiUrl;
             }
 
             public function set iconSource(source:String):void

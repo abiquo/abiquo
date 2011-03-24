@@ -78,6 +78,10 @@ package net.undf.abicloud.vo.configuration
 		public var client_infra_useVirtualBox:SystemProperty;
 		public var client_virtual_virtualImagesRefreshConversionsInterval:SystemProperty; 
 		public var client_main_enterpriseLogoURL:SystemProperty;
+		
+		//wiki links
+		public var client_wiki_infra_createDatacenter:SystemProperty;
+		public var client_wiki_infra_createPhysicalMachine:SystemProperty;
 
 		private var propertiesIndex:Array;
 
