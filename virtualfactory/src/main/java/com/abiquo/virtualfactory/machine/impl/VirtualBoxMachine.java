@@ -49,10 +49,10 @@ import org.virtualbox_4_0.NetworkAdapterType;
 import org.virtualbox_4_0.SessionState;
 import org.virtualbox_4_0.StorageBus;
 
+import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.RimpException;
 import com.abiquo.aimstub.TTransportProxy;
-import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.VirtualBoxHypervisor;
@@ -373,11 +373,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
-                        .getFile());
+                    new URL(phymach_ip.getProtocol(),
+                        phymach_ip.getHost(),
+                        8889,
+                        phymach_ip.getFile());
 
-                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                    .getVSwitchName(), bridgeName);
+                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
+                    virtualNIC.getVSwitchName(), bridgeName);
 
                 attachNetworkAdapter(machine, virtualNIC.getMacAddress(), abiquoPrefix + "_"
                     + virtualNIC.getVlanTag(), vnicList.indexOf(virtualNIC));
@@ -417,13 +419,15 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
-                        .getFile());
+                    new URL(phymach_ip.getProtocol(),
+                        phymach_ip.getHost(),
+                        8889,
+                        phymach_ip.getFile());
 
                 if (mustDeleteVLAN(bridgeName))
                 {
-                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                        .getVSwitchName(), bridgeName);
+                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
+                        virtualNIC.getVSwitchName(), bridgeName);
 
                 }
             }
@@ -627,6 +631,12 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             return null;
         }
+
+        if (repo.endsWith("/"))
+        {
+            repo = repo.substring(0, repo.length() - 1);
+        }
+
         return repo.equalsIgnoreCase("null") ? null : repo;
     }
 
@@ -680,7 +690,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                     "Can not open of find on media registry the HardDisk [" + imageRemotePath + "]";
                 throw new VirtualMachineException(msg2, wse2);
             }
-        }       
+        }
 
         newVDI = vBoxHyper.getVirtualBox().createHardDisk(diskVDI.getFormat(), clonedImagePath);
         IProgress progress = diskVDI.cloneTo(newVDI, diskVDI.getVariant(), null);
@@ -817,8 +827,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             {
                 throw new VirtualMachineException(e);
             }
-            logger.debug("Vbox op %s at %d", progress.getOperationDescription(), progress
-                .getOperationPercent());
+            logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
+                progress.getOperationPercent());
         }
 
         throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
@@ -1140,8 +1150,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             aimclient.copyFromDatastoreToRepository(machineName, snapshotName, destinationPath,
                 sourceFolder);
 
-            logger.info("Creating an instance of the virtual machine: {} DONE", config
-                .getMachineName());
+            logger.info("Creating an instance of the virtual machine: {} DONE",
+                config.getMachineName());
         }
         catch (Exception e)
         {
