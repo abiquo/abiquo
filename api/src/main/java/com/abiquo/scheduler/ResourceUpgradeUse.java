@@ -198,8 +198,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
 
                     vlanNetworkDao.flush();
@@ -218,8 +218,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
         else
         {
-            log
-                .debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
+            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
             for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
             {
                 VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
@@ -232,8 +231,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
 
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
                     final NetworkAssignment nb =
                         new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -308,13 +307,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed()
-                + used.getCpu());
+                .getVirtualCpusUsed() + used.getCpu());
 
         final int newRam =
             (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb()
-                + used.getRam());
+                .getVirtualRamUsedInMb() + used.getRam());
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -323,8 +320,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes()
-                + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
@@ -354,6 +350,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         // stateful virtual images doesn't use the datastores
 
         final Long newUsed = isRollback ? actualSize - required : actualSize + required;
+
+        if (newUsed > datastore.getSize())
+        {
+            log.error("Target datastore usage is over capacity !!!!! machine : %s datastore : %s",
+                virtual.getHypervisor().getMachine().getName(), virtual.getDatastore().getName());
+        }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
         datastoreDao.flush();
@@ -427,15 +429,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     public Collection<Integer> getVlansIdAvoidAsCollection(Rack rack)
     {
-        
+
         Collection<Integer> vlans_avoided_collection = new HashSet();
         String avoidedVLANs = rack.getVlansIdAvoided();
-        
+
         if (avoidedVLANs == null || avoidedVLANs.isEmpty())
         {
-        	return vlans_avoided_collection;
+            return vlans_avoided_collection;
         }
-        
+
         CsvReader reader = new CsvReader(new StringReader(avoidedVLANs));
         String[] line = reader.readLine();
 
