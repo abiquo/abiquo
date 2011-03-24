@@ -278,7 +278,8 @@ public class VirtualimageAllocationService
             }
             catch (PersistenceException e)
             {
-                log.error(String.format("Rack id [%d] can't be used : %s", idRackCandidate, e.getMessage()));
+                log.error(String.format("Rack id [%d] can't be used : %s", idRackCandidate,
+                    e.getMessage()));
 
                 continue;
             }
@@ -300,21 +301,22 @@ public class VirtualimageAllocationService
         {
 
             final boolean passCPU =
-                pass(machine.getVirtualCpusUsed(), image.getCpuRequired(),
-                    machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore(), 100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()),
+                    Long.valueOf(image.getCpuRequired()),
+                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
+                    100);
 
             final boolean passRAM =
-                pass(machine.getVirtualRamUsedInMb(), image.getRamRequired(),
-                    machine.getVirtualRamInMb(), 100);
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
+                    Long.valueOf(image.getRamRequired()),
+                    Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
             Long machineAllowedMb = machine.getVirtualHardDiskInBytes() / (1024 * 1024);
             Long machineUsedMb = machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
 
-            final boolean passHD =
-                pass(machineUsedMb.intValue(), imageRequiredMb.intValue(),
-                    machineAllowedMb.intValue(), 100);
+            final boolean passHD = pass(machineUsedMb, imageRequiredMb, machineAllowedMb, 100);
 
             return passCPU && passRAM && passHD;
         }
@@ -399,8 +401,13 @@ public class VirtualimageAllocationService
         {
             final String cause =
                 String.format("There are %d candidate machines but all are discarded by the "
-                    + "current workload rules (RAM and CPU oversubscription). \n %s",
-                    firstPassCandidates.size(), candidateNames(firstPassCandidates));
+                    + "current workload rules (RAM and CPU oversubscription).\n"
+                    + "Please check the workload rules or the physical machine resources "
+                    + "available on the datacenter from the infrastructure view.\n"
+                    + "Virtual machine [%s] requires %d Cpu -- %d Ram \n"
+                    + "Candidate machines : %s", firstPassCandidates.size(), vimage.getName(),
+                    vimage.getCpuRequired(), vimage.getRamRequired(),
+                    candidateNames(firstPassCandidates));
 
             throw new NotEnoughResourcesException(cause);
         }

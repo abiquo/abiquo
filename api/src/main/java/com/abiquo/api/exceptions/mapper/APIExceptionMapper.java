@@ -48,7 +48,11 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
             ExtendedAPIException ext = (ExtendedAPIException) exception;
             for (APIError error : ext.getErrors())
             {
-                errors.add(createError(error.getCode(), error.getMessage()));
+                String message =
+                    error.getCause() != null ? String.format("%s\nCaused by:%s",
+                        error.getMessage(), error.getCause()) : error.getMessage();
+
+                errors.add(createError(error.getCode(), message));
             }
 
             for (ConstraintViolation< ? > error : ext.getValidationErrors())

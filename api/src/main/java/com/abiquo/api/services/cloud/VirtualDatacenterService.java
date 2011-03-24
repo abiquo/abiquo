@@ -157,23 +157,25 @@ public class VirtualDatacenterService extends DefaultApiService
         Collection<IPAddress> addressRange = calculateIPRange(config);
 
         createDhcp(datacenter, vdc, vlan, networkConfiguration, addressRange);
-        
+
         assignVirtualDatacenterToUser(vdc);
 
         return vdc;
     }
-    
+
     private void assignVirtualDatacenterToUser(VirtualDatacenter vdc)
     {
-    	User currentUser = userService.getCurrentUser();
-    	
-    	if (currentUser.getRole().getType() == Role.Type.USER && currentUser.getAvailableVirtualDatacenters() != null)
-    	{
-    		String availableVirtualDatacenters = currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
-    		currentUser.setAvailableVirtualDatacenters(availableVirtualDatacenters);
-    		
-    		userService.updateUser(currentUser);
-    	}
+        User currentUser = userService.getCurrentUser();
+
+        if (currentUser.getRole().getType() == Role.Type.USER
+            && currentUser.getAvailableVirtualDatacenters() != null)
+        {
+            String availableVirtualDatacenters =
+                currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
+            currentUser.setAvailableVirtualDatacenters(availableVirtualDatacenters);
+
+            userService.updateUser(currentUser);
+        }
     }
 
     protected boolean isValidEnterpriseDatacenter(Enterprise enterprise, Datacenter datacenter)
@@ -251,8 +253,11 @@ public class VirtualDatacenterService extends DefaultApiService
         Datacenter datacenter, Enterprise enterprise, Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getNetworkConfiguration(), datacenter);
@@ -315,8 +320,9 @@ public class VirtualDatacenterService extends DefaultApiService
     private Collection<IPAddress> calculateIPRange(NetworkConfigurationDto networkConfiguration)
     {
         Collection<IPAddress> range =
-            IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(networkConfiguration
-                .getAddress()), networkConfiguration.getMask());
+            IPNetworkRang.calculateWholeRange(
+                IPAddress.newIPAddress(networkConfiguration.getAddress()),
+                networkConfiguration.getMask());
 
         if (!IPAddress.isIntoRange(range, networkConfiguration.getGateway()))
         {
@@ -375,11 +381,17 @@ public class VirtualDatacenterService extends DefaultApiService
             while (allMacAddresses.contains(macAddress));
             allMacAddresses.add(macAddress);
 
-            String name = macAddress + "_host";
+            // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
+            // leases with the ':' char in the lease name)
+            String name = macAddress.replace(":", "") + "_host";
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
-                    .getName());
+                new IpPoolManagement(dhcp,
+                    vlan,
+                    macAddress,
+                    name,
+                    address.toString(),
+                    vlan.getName());
 
             ipManagement.setVirtualDatacenter(vdc);
 

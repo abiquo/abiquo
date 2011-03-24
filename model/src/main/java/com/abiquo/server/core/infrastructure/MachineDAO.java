@@ -100,13 +100,14 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
      * @return the list of physical machines of the infrastructure without virtual machines in the
      *         allocator.
      */
-    public List<Machine> findMachineWithoutVMsInAllocator()
+    public Machine isMachineInAllocator(final Integer machineId)
     {
         // The way to define the virtual machines in the allocator is:
         // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
-        Query query = getSession().createQuery(QUERY_MACHINES_WITHOUT_VMS_IN_ALLOCATOR);
+        Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
+        query.setParameter("machineId", machineId);
 
-        return query.list();
+        return (Machine) query.uniqueResult();
 
     }
 
@@ -381,21 +382,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND datastore.size > datastore.usedSize " + //
             ") ";
 
-    private static final String QUERY_MACHINES_WITHOUT_VMS_IN_ALLOCATOR =
-    // Physical Machines with virtual machines deployed with state different
-    // of RUNNING and POWERED_OFF
+    private static final String QUERY_IS_MACHINE_IN_ALLOCATOR = 
         "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' " + ")";
-
-    // "WHERE vm.state = 'RUNNING' OR vm.state = 'POWERED_OFF' " +
-    // "UNION " +
-    // //union with physical machines without virtual machines deployed
-    // "SELECT m FROM " +
-    // "com.abiquo.server.core.cloud.VirtualMachine vm " +
-    // "right join vm.hypervisor.machine m " +
-    // "WHERE vm.hypervisor is null";
-    //
+        + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
+        + "join vm.hypervisor h " + "join h.machine mac "
+        + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' " + ") AND m.id = :machineId";
 
 }

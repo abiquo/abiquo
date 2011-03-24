@@ -787,7 +787,7 @@ BEGIN
     my_loop:WHILE(no_more_vappst = 0) DO
 	FETCH curVappSt INTO currentIdVirtualApp;
 	SELECT idVirtualDataCenter INTO idVirtualDatacenterObj FROM virtualapp WHERE idVirtualApp = currentIdVirtualApp;
-	INSERT INTO debug_msg (msg) VALUES (CONCAT('Iteracion vapp_enterprise_stats: ',currentIdVirtualApp));
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Iteracion vapp_enterprise_stats: ',currentIdVirtualApp));
 	UPDATE vapp_enterprise_stats SET idVirtualDataCenter = idVirtualDatacenterObj WHERE idVirtualApp=currentIdVirtualApp;
     END WHILE my_loop;
     CLOSE curVappSt;
