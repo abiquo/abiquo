@@ -114,10 +114,10 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 	    
 	    try
 	    {	        
-	        bugTimeout = Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "5000"));
+	        bugTimeout = Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "10000"));
 	    }
 	    catch (Exception e) {
-            bugTimeout = 5000;
+            bugTimeout = 10000;
         }
 	    
 		System.setProperty("wink.client.connectTimeout", String.valueOf(0));
