@@ -401,7 +401,8 @@ public class VirtualimageAllocationService
         {
             final String cause =
                 String.format("There are %d candidate machines but all are discarded by the "
-                    + "current workload rules (RAM and CPU oversubscription).\n"
+                    + "current workload rules (RAM and CPU oversubscription "
+                    + "or suitable Datastore with enought free size).\n"
                     + "Please check the workload rules or the physical machine resources "
                     + "available on the datacenter from the infrastructure view.\n"
                     + "Virtual machine [%s] requires %d Cpu -- %d Ram \n"
