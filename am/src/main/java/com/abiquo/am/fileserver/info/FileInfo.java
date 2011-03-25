@@ -42,6 +42,8 @@ import com.ning.http.client.HttpResponseStatus;
  */
 public class FileInfo implements AsyncHandler<Boolean>
 {
+    boolean berror = false;
+    
     @Override
     public STATE onStatusReceived(HttpResponseStatus status) throws Exception
     {
@@ -77,7 +79,7 @@ public class FileInfo implements AsyncHandler<Boolean>
             }
 
             getPackage().onError(error);
-
+            berror = true;
             return STATE.ABORT;
         }
         else
@@ -118,18 +120,24 @@ public class FileInfo implements AsyncHandler<Boolean>
         catch (IOException e)
         {
             getPackage().onError(e.getMessage());
+            berror = true;
             return STATE.ABORT;
             // throw e;
         }
     }
 
+    
+    
     @Override
     public Boolean onCompleted() throws Exception
     {
-
-        onDownload();
         // Will be invoked once the response has been fully read or a ResponseComplete exception
         // has been thrown.
+
+        if(!berror)
+        {
+            onDownload();    
+        }
 
         return true;
     }
@@ -137,6 +145,7 @@ public class FileInfo implements AsyncHandler<Boolean>
     @Override
     public void onThrowable(Throwable t)
     {
+        berror = true;
         getPackage().onError(t.getMessage());
     }
 
