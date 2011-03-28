@@ -82,6 +82,11 @@ package net.undf.abicloud.vo.configuration
 		//wiki links
 		public var client_wiki_infra_createDatacenter:SystemProperty;
 		public var client_wiki_infra_createPhysicalMachine:SystemProperty;
+		public var client_wiki_infra_createMultiplePhysicalMachine:SystemProperty;
+		public var client_wiki_infra_createRack:SystemProperty;
+		public var client_wiki_network_publicVlan:SystemProperty;
+		public var client_wiki_storage_storageDevice:SystemProperty;
+		public var client_wiki_storage_storagePool:SystemProperty;
 
 		private var propertiesIndex:Array;
 
