@@ -172,7 +172,21 @@ package net.undf.abicloud.controller.infrastructure
             }
         }
         
-        
+        public function handleGetRelatedVirtualMachineHypervisor(result:BasicResult,
+                                                             callback:Function):void
+        {
+            if (result.success)
+            {
+                //Hypervisor retrieved successfully
+                var hypervisor:HyperVisor = DataResult(result).data as HyperVisor;
+                callback(hypervisor);    
+            }
+            else
+            {
+                //There was a problem retrieving the hypervisors
+                super.handleResult(result);
+            }
+        }
 
         public function handleGetInfrastructureByDataCenter(result:BasicResult):void
         {

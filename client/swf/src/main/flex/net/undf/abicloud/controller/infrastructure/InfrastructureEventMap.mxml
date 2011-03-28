@@ -282,6 +282,39 @@
 
     </EventHandlers>
     
+            <!-- InfrastructureEvent.GET_RELATED_VM_HYPERVISOR _____________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_RELATED_VM_HYPERVISOR}">
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
+            method="getRelatedVirtualMachineHypervisor"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetRelatedVirtualMachineHypervisor"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>   
+    
+    
     <!-- InfrastructureEvent.GET_INFRASTRUCTURE ________________________________________________________________________ -->
     <EventHandlers type="{InfrastructureEvent.GET_INFRASTRUCTURE_BY_DATACENTER}">
         <!-- Blocking screen -->
