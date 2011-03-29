@@ -22,6 +22,7 @@
 package com.abiquo.scheduler.workload;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -217,9 +218,16 @@ public class VirtualimageAllocationService
 
             final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
 
-            candidateMachines =
-                datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
-                    hdRequiredOnDatastore, enterprise);
+            try
+            {                
+                candidateMachines =
+                    datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
+                        hdRequiredOnDatastore, enterprise);
+            }
+            catch (PersistenceException e)
+            {
+                throw new NotEnoughResourcesException(e.getMessage());
+            }
         }
 
         return candidateMachines;
@@ -261,6 +269,8 @@ public class VirtualimageAllocationService
             throw new NotEnoughResourcesException(msg);
         }
 
+        StringBuilder sbErrorRacks = new StringBuilder("Caused by:");
+
         for (final Integer idRackCandidate : candidateRackList)
         {
 
@@ -278,15 +288,22 @@ public class VirtualimageAllocationService
             }
             catch (PersistenceException e)
             {
-                log.error(String.format("Rack id [%d] can't be used : %s", idRackCandidate,
-                    e.getMessage()));
+                final String error =
+                    String.format("Rack id [%d] can't be used : %s", idRackCandidate,
+                        e.getMessage());
+
+                sbErrorRacks.append("\n").append(error);
+
+                log.error(error);
 
                 continue;
             }
         }
 
         final String msg =
-            "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance.";
+            "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance."
+                + sbErrorRacks.toString();
+        
         throw new NotEnoughResourcesException(msg);
     }
 
@@ -322,8 +339,8 @@ public class VirtualimageAllocationService
         }
     }
 
-    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();
-
+    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();    
+    
     /**
      * TODO TBD
      * 
@@ -401,7 +418,8 @@ public class VirtualimageAllocationService
         {
             final String cause =
                 String.format("There are %d candidate machines but all are discarded by the "
-                    + "current workload rules (RAM and CPU oversubscription).\n"
+                    + "current workload rules (RAM and CPU oversubscription "
+                    + "or suitable Datastore with enought free size).\n"
                     + "Please check the workload rules or the physical machine resources "
                     + "available on the datacenter from the infrastructure view.\n"
                     + "Virtual machine [%s] requires %d Cpu -- %d Ram \n"
@@ -434,5 +452,48 @@ public class VirtualimageAllocationService
         // TODO never is good enough
         return false;
     }
+    
+    
+    
+    /**
+     * When editing a virtual machine this method checks if the increases resources (setted at vimage) are allowed by the workload rules.
+     * */
+    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage, Integer virtualApplianceId)
+    {
+        // get all the rules of the candiate machines
+        Map<Machine, List<MachineLoadRule>> machineRulesMap =
+            ruleFinder.initializeMachineLoadRuleCache(Collections.singletonList(machine));
+        
+        boolean pass = false;
+        
+        if (machineRulesMap != null) // community impl --> rules == null (so always pass)
+        {
+            List<MachineLoadRule> rules = machineRulesMap.get(machine);
+
+            if (rules == null || rules.isEmpty())
+            {
+                pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+            }
+            else
+            {
+                for (final MachineLoadRule rule : rules)
+                {
+                    if (!rule.pass(vimage, machine, virtualApplianceId))
+                    {
+                        pass = false;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        // default rule is to check the actual resource utilization (load = 100%)
+        {
+            pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
+        }
+        
+        return pass;
+    }
+    
 
 }

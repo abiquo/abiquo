@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.formatters.DateFormatter;
+        	import mx.utils.ObjectUtil;
             import com.adobe.utils.DateUtil;
 
             import mx.collections.ArrayCollection;
@@ -147,6 +149,58 @@
             {
                 PopUpManager.removePopUp(this._eventForm);
             }
+            
+            private function sortBySeverity(object1:Object , object2:Object):int{
+            	var severity1:String = Meter(object1).severity;
+            	var severity2:String = Meter(object2).severity;
+            	
+            	return ObjectUtil.stringCompare(severity1, severity2);
+            }
+            
+            private function sortBySource(object1:Object , object2:Object):int{
+            	var meter:Meter = object1 as Meter;
+            	var meter2:Meter = object2 as Meter;
+            	
+            	var source:String;
+            	var source2:String;
+
+                //Building the source
+                var path:String = meter.enterprise + ' / ' + meter.user + ' / ' + meter.datacenter + ' / ' + meter.rack + ' / ' + meter.physicalMachine + ' / ' + meter.storageSystem + ' / ' + meter.storagePool + ' / ' + meter.volume + ' / ' + meter.virtualDataCenter + ' / ' + meter.virtualApp + ' / ' + meter.virtualmachine + ' / ' + meter.network + ' / ' + meter.subnet + " ";
+
+                //Replacing two consecutive slashes or null ocurrences
+                var pattern:RegExp = / null /g;
+                path = path.replace(pattern, "");
+                pattern = /\/\//g;
+                source = path.replace(pattern, "");
+                
+                //Building the source
+                path = meter2.enterprise + ' / ' + meter2.user + ' / ' + meter2.datacenter + ' / ' + meter2.rack + ' / ' + meter2.physicalMachine + ' / ' + meter2.storageSystem + ' / ' + meter2.storagePool + ' / ' + meter2.volume + ' / ' + meter2.virtualDataCenter + ' / ' + meter2.virtualApp + ' / ' + meter2.virtualmachine + ' / ' + meter2.network + ' / ' + meter2.subnet + " ";
+
+                //Replacing two consecutive slashes or null ocurrences
+                pattern = / null /g;
+                path = path.replace(pattern, "");
+                pattern = /\/\//g;
+                source2 = path.replace(pattern, "");
+                
+                return ObjectUtil.stringCompare(source, source2);
+     		}
+     		
+     		 private function sortByTrace(object1:Object , object2:Object):int{
+            	var trace1:String = Meter(object1).stacktrace;
+            	var trace2:String = Meter(object2).stacktrace;
+            	
+            	return ObjectUtil.stringCompare(trace1, trace2);
+            }
+            
+            private function sortByDate(itemA:Object, itemB:Object):int {
+            	
+            	var dateA:Date = DateFormatter.parseDateString(Meter(itemA).timestamp.split(".")[0]);
+            	var dateB:Date = DateFormatter.parseDateString(Meter(itemB).timestamp.split(".")[0]);
+                
+                return ObjectUtil.dateCompare(dateA, dateB);
+            }
+
+
         ]]>
     </mx:Script>
 
@@ -174,10 +228,12 @@
         <mx:columns>
             <mx:DataGridColumn id="sourceColumn"
                 minWidth="250" labelFunction="sourceColumnLabelFunction"
+                sortCompareFunction="sortBySource"
                 headerText="@Resource(bundle='Metering', key='LABEL_SOURCE')"/>
 
             <mx:DataGridColumn id="dateColumn"
                 width="150"
+                sortCompareFunction="sortByDate"
                 labelFunction="dateColumnLabelFunction"
                 headerText="@Resource(bundle='Metering', key='LABEL_DATE')"/>
 
@@ -191,6 +247,7 @@
                 dataField="performedby"/>
 
             <mx:DataGridColumn id="traceColumn"
+            	sortCompareFunction="sortByTrace"
                 headerText="@Resource(bundle='Metering', key='LABEL_TRACE')">
                 <mx:itemRenderer>
                     <mx:Component>
@@ -229,6 +286,7 @@
 
             <mx:DataGridColumn id="severityColumn"
                 width="150"
+                sortCompareFunction="sortBySeverity"
                 headerText="@Resource(bundle='Metering', key='LABEL_SEVERITY')">
                 <mx:itemRenderer>
                     <mx:Component>

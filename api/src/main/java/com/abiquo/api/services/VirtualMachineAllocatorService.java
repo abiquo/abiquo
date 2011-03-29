@@ -37,6 +37,7 @@ import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 @Service
 @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -50,6 +51,71 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     @Autowired
     IAllocator allocator;
+
+    /**
+     * Only perform checks if the resources are increased. Checks the resource limits, check the
+     * target machine can hold the new resource requirements and update the target machine usage.
+     */
+    public void checkAllocate(Integer idVirtualApp, Integer virtualMachineId,
+        VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
+    {
+        
+        VirtualMachine vmachine = vmachineDao.findById(virtualMachineId);
+        
+        if(vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
+        {
+            errors.add(APIError.CHECK_EDIT_NO_TARGET_MACHINE);
+            flushErrors();
+        }
+        
+        try
+        {
+            allocator.checkEditVirtualMachineResources(idVirtualApp, virtualMachineId,
+                newVmRequirements, foreceEnterpriseSoftLimits);
+        }
+        catch (NotEnoughResourcesException e)
+        {
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
+        }
+        catch (LimitExceededException limite)
+        {
+            limitExceptions.add(limite);
+        }
+        catch (ResourceAllocationException e)
+        {
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
+        }
+        catch (AllocatorException e)
+        {
+            APIError error = APIError.ALLOCATOR_ERROR;
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // FIXME delete
+
+            APIError error = APIError.ALLOCATOR_ERROR;
+            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage())));
+        }
+        finally
+        {
+            flushErrors();
+        }
+        
+        
+        final int cpuIncrease = newVmRequirements.getCpu() - vmachine.getCpu();
+        final int ramIncrease = newVmRequirements.getRam() - vmachine.getRam();
+        
+
+        upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), cpuIncrease, ramIncrease);
+
+    }
 
     public VirtualMachine allocateVirtualMachine(Integer virtualMachineId, Integer idVirtualApp,
         Boolean foreceEnterpriseSoftLimits)

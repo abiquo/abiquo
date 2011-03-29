@@ -107,7 +107,19 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 	final static Logger logger = LoggerFactory
 			.getLogger(VirtualApplianceWS.class);
 
+	private static Integer bugTimeout;
+
+	   
 	static {
+	    
+	    try
+	    {	        
+	        bugTimeout = Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "10000"));
+	    }
+	    catch (Exception e) {
+            bugTimeout = 10000;
+        }
+	    
 		System.setProperty("wink.client.connectTimeout", String.valueOf(0));
 		System.setProperty("wink.client.readTimeout", String.valueOf(0));
 	}
@@ -157,6 +169,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 						.getVirtualFactoryFromVA(virtualAppliance);
 				long timeout = abiConfig.getTimeout();
 
+				Thread.sleep(bugTimeout);
+				
 				resource = ResourceFactory.create(destination,
 						AbiCloudConstants.RESOURCE_URI, timeout, docEnvelope,
 						ResourceFactory.LATEST);
@@ -684,6 +698,9 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 
 				if (resource != null) {
 					result.setSuccess(true);
+					
+					Thread.sleep(bugTimeout);
+					
 					resource.invoke(AbiCloudConstants.BUNDLE_VIRTUALAPPLIANCE,
 							docEnvelope);
 				} else {

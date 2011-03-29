@@ -20,9 +20,19 @@
  */
 package com.abiquo.api.tracer;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import com.abiquo.api.tracer.hierarchy.HierarchyProcessor;
+import com.abiquo.commons.amqp.impl.tracer.TracerProducer;
+import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -32,27 +42,18 @@ import com.abiquo.tracer.SeverityType;
  * 
  * @author ibarrera
  */
+@Service
 public class TracerLogger
 {
     /** The log system logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(TracerLogger.class);
 
-    /** The tracer logger. */
-    private static TracerLogger tracerLogger;
+    /** The processor factory used to get the hierarchy processors. */
+    @Resource(name = "hierarchyProcessorFactory")
+    private HierarchyProcessor hierarchyProcessor;
 
-    /**
-     * Gets the singleton instance of the logger.
-     * 
-     * @return The singleton instance of the logger.
-     */
-    public static TracerLogger getInstance()
-    {
-        if (tracerLogger == null)
-        {
-            tracerLogger = new TracerLogger();
-        }
-        return tracerLogger;
-    }
+    /** The RabbitMQ producer */
+    private TracerProducer producer = new TracerProducer();
 
     /**
      * Log the message to the event system.
@@ -68,25 +69,58 @@ public class TracerLogger
         try
         {
             TracerContext tracerContext = TracerContextHolder.getContext();
+            Trace trace = new Trace();
 
-            String log =
-                String.format("[%s|%s|%s|%s] (%s) %s", severity.name(), component.name(), event
-                    .name(), tracerContext.getHierarchy(), tracerContext.getUsername(), message);
+            trace.setSeverity(severity.name());
+            trace.setComponent(component.name());
+            trace.setEvent(event.name());
+            trace.setHierarchy(tracerContext.getHierarchy());
+            trace.setEnterpriseId(tracerContext.getEnterpriseId());
+            trace.setEnterpriseName(tracerContext.getEnterpriseName());
+            trace.setUserId(tracerContext.getUserId());
+            trace.setUsername(tracerContext.getUsername());
 
-            LOGGER.info(log);
+            LOGGER.info(trace.toString());
+
+            processHierarchy(trace);
+            publishTrace(trace);
         }
         catch (IllegalStateException ex)
         {
             // Just ignore this error for the moment; it appears if the method is invoked outside
             // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
+            LOGGER.warn("Could not send the trace.");
         }
     }
 
     /**
-     * Private constructor to ensure singleton access.
+     * Process the hierarchy to extract resource data.
+     * 
+     * @param trace The trace with the hierarchy to process.
      */
-    private TracerLogger()
+    private void processHierarchy(final Trace trace)
     {
+        Map<String, String> hierarchyData = new HashMap<String, String>();
+        hierarchyProcessor.process(trace.getHierarchy(), hierarchyData);
+        trace.setHierarchyData(hierarchyData);
+    }
 
+    /**
+     * Publish the trace to the tracing broker.
+     * 
+     * @param trace The trace to publish.
+     */
+    private void publishTrace(final Trace trace)
+    {
+        try
+        {
+            producer.openChannel();
+            producer.publish(trace);
+            producer.closeChannel();
+        }
+        catch (IOException e)
+        {
+            LOGGER.error("Could not publish the trace.", e);
+        }
     }
 }
