@@ -2,14 +2,21 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<parent>
-		<artifactId>client</artifactId>
+		<artifactId>platform</artifactId>
 		<groupId>com.abiquo.abicloud</groupId>
-		<version>1.7.5-RC1</version>
+		<version>1.7.6-SNAPSHOT</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>xsapplet</artifactId>
 	<name>XenServer VNC Applet</name>
+	
+	<properties>
+		<xenserver.version>5.6.0-1</xenserver.version>
+		<wscommon.version>1.0.2</wscommon.version>
+		<xmlrpccommon.version>3.1</xmlrpccommon.version>
+		<xmlrpcclient.version>3.1</xmlrpcclient.version>
+	</properties>
 
 
 	<!-- Project information -->
@@ -27,29 +34,57 @@
 		<dependency>
 			<groupId>org.apache.xmlrpc</groupId>
 			<artifactId>xmlrpc-common</artifactId>
-			<version>3.1</version>
+			<version>${xmlrpccommon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlrpc</groupId>
 			<artifactId>xmlrpc-client</artifactId>
-			<version>3.1</version>
+			<version>${xmlrpcclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.ws.commons.util</groupId>
 			<artifactId>ws-commons-util</artifactId>
-			<version>1.0.2</version>
+			<version>${wscommon.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.xensource</groupId>
 			<artifactId>xenserver</artifactId>
-			<version>5.6.0-1</version>
+			<version>${xenserver.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.citrix.xenserver</groupId>
 			<artifactId>console</artifactId>
-			<version>5.6.0-1</version>
+			<version>${xenserver.version}</version>
 		</dependency>
 
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>maven-assembly-descriptor.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>attached</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+	</build>
 
 </project>

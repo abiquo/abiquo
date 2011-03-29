@@ -81,16 +81,20 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
 
     private Long serverVMDom;
 
+    private int appletWidth;
+
+    private int appletHeight;
+
     @Override
     public void init()
     {
         try
         {
-            // Set size off the applet
-            setSize(800, 600);
-
             // Get the console parameters from the client
             getConnexionParameters();
+
+            // Set size off the applet
+            setSize(getAppletWidth(), getAppletHeight());
 
             // Connect to the VM
             System.out.println("Connecting to " + getServerIP() + "...");
@@ -204,11 +208,9 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
         if (main != null)
         {
             writeline("Connection failed: ".concat(reason));
-            // if(!connecting)
-            // {
+
             connecting = true;
             ConnectionClosed();
-            // }
         }
     }
 
@@ -233,11 +235,12 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
      */
     private void getConnexionParameters()
     {
-        setServerIP("http://10.60.1.77");
-        setServerUser("root");
-        setServerPass("temporal");
-        setServerVMname("ABQ_5eb71617-e33e-4225-b7df-44dee80c0f99");
-        setServerVMDom(1L);
+        setServerIP(getParameter("IP"));
+        setServerUser(getParameter("USER"));
+        setServerPass(getParameter("PASS"));
+        setServerVMname(getParameter("NAME"));
+        setAppletWidth(Integer.parseInt(getParameter("WIDTH")));
+        setAppletHeight(Integer.parseInt(getParameter("HEIGHT")));
     }
 
     /**
@@ -387,6 +390,26 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     public Long getServerVMDom()
     {
         return serverVMDom;
+    }
+
+    public void setAppletWidth(final int appletWidth)
+    {
+        this.appletWidth = appletWidth;
+    }
+
+    public int getAppletWidth()
+    {
+        return appletWidth;
+    }
+
+    public void setAppletHeight(final int appletHeight)
+    {
+        this.appletHeight = appletHeight;
+    }
+
+    public int getAppletHeight()
+    {
+        return appletHeight;
     }
 
     static class VMEntry

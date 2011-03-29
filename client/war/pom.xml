@@ -43,6 +43,13 @@
             <type>zip</type>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.abiquo.abicloud</groupId>
+            <artifactId>xsapplet</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <!--                                      -->
@@ -71,6 +78,11 @@
                         <overlay>
                             <groupId>com.abiquo.abicloud</groupId>
                             <artifactId>client-theme</artifactId>
+                            <type>zip</type>
+                        </overlay>
+                        <overlay>
+                            <groupId>com.abiquo.abicloud</groupId>
+                            <artifactId>xsapplet</artifactId>
                             <type>zip</type>
                         </overlay>
                     </overlays>

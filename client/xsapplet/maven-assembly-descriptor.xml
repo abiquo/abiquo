@@ -1,0 +1,28 @@
+<assembly>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>target/classes</directory>
+                <outputDirectory>/xsapplet</outputDirectory>
+                <includes>
+                    <include>xsapplet.html</include>
+                </includes>
+            </fileSet>
+    </fileSets>
+    <dependencySets>
+		<dependencySet>
+			<outputDirectory>/xsapplet</outputDirectory>
+			<includes>
+				<include>com.abiquo.abicloud:xsapplet</include>
+				<include>org.apache.xmlrpc:xmlrpc-common</include>
+				<include>org.apache.xmlrpc:xmlrpc-client</include>
+				<include>org.apache.ws.commons.util:ws-commons-util</include>
+				<include>com.xensource:xenserver</include>
+				<include>com.citrix.xenserver:console</include>								 
+			</includes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
