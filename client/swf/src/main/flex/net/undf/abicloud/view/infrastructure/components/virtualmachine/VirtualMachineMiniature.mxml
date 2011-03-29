@@ -66,9 +66,6 @@
             //The Virtual Machine that this VirtualMachineIcon represents
             [Bindable]
             private var _virtualMachine:VirtualMachine;
-            
-            //Use to open a specific applet for xenServer
-            private var _hypervisor:HyperVisor;
 
 
             override public function set data(value:Object):void
@@ -77,8 +74,6 @@
 
                 if (value && value is VirtualMachine){
                     virtualMachine = data as VirtualMachine;
-                     //Check the XenServer hypervisor
-                	retrieveRelatedHypervisor();
                 }
             }
 
@@ -90,25 +85,6 @@
             public function get virtualMachine():VirtualMachine
             {
                 return this._virtualMachine;
-            }
-            
-            /**
-             * Retrieve the XenServer related Hypervisor
-             **/
-            private function retrieveRelatedHypervisor():void{
-            	if(AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1
-            	   && HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER 
-            	   && accessRemoteButton.enabled){       		
-            		
-            		var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RELATED_VM_HYPERVISOR);
-            		event.infrastructureElement = this._virtualMachine;
-            		event.callback = updateRelatedHypervisor;
-            		dispatchEvent(event); 
-            	}
-            }
-            
-            private function updateRelatedHypervisor(hypervisor:HyperVisor):void{
-            	this._hypervisor = hypervisor;
             }
 
             /**
@@ -327,7 +303,7 @@
                     if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX)
                         appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" + this._virtualMachine.vdrpIP + "&vrdpPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
                      else if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
-                    	appletURL = "vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight+this._hypervisor.ip+this._hypervisor.name+this._hypervisor.password;
+                    	appletURL = "vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight+HyperVisor(this._virtualMachine.assignedTo).ip+HyperVisor(this._virtualMachine.assignedTo).name+HyperVisor(this._virtualMachine.assignedTo).password;
                     else
                         appletURL = "tightvnc/tightvnc.html?vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
 

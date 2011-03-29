@@ -61,8 +61,6 @@ package net.undf.abicloud.events
         
         public static const GET_PHYSICALMACHINE_BY_RACK:String = "gePhysicalMachineByRack";
         
-        public static const GET_RELATED_VM_HYPERVISOR:String = "getRelatedVMHypervisorInfrastructureEvent";
-        
         public static const GET_AVAILABLE_PHYSICAL_MACHINE_BY_RACK:String = "getAvailablePhysicalMachineByRack";
         
         public static const PHYSICALMACHINE_BY_RACK_RETRIEVED:String = "physicalMachineByRackRetrieved";
