@@ -26,10 +26,15 @@ package com.abiquo.api.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -44,22 +49,35 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 @Transactional(readOnly = true)
 public class IpAddressService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IpAddressService.class);
+    
     @Autowired
     VirtualDatacenterRep repo;
 
-    public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vlanId, final Integer page, final Integer numElem)
+    public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vlanId,
+        final Integer page, final Integer numElem)
     {
         return repo.findIpsByVLAN(vlanId, page, numElem);
     }
 
-    public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId, final Integer page, final Integer numElem)
+    public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
+        final Integer page, final Integer numElem)
     {
         return repo.findIpsByVdc(vdcId, page, numElem);
     }
 
-    public List<IpPoolManagement> getListIpPoolManagementByEnterprise(final Integer entId, final Integer page, final Integer numElem)
+    public List<IpPoolManagement> getListIpPoolManagementByEnterprise(final Integer entId,
+        final Integer firstElem, final Integer numElem, String has, String orderBy, Boolean asc)
     {
-        return repo.findIpsByEnterprise(entId, page, numElem);
+
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER.info("Bad parameter 'by' in request to get the private ips by enterprise.");
+            throw new BadRequestException(APIError.QUERY_INVALID_PARAMETER);
+        }
+        return repo.findIpsByEnterprise(entId, firstElem, numElem, has, orderByEnum, asc);
     }
 
     public List<IpPoolManagement> getListIpPoolManagementByVirtualApp(final VirtualAppliance vapp)

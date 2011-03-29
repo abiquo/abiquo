@@ -210,6 +210,12 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
+    
+    protected String createEnterpriseIPsLink(final int enterpriseId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/ips",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+    }
 
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
     {

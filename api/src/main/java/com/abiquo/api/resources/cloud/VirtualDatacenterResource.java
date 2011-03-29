@@ -103,12 +103,13 @@ public class VirtualDatacenterResource extends AbstractResource
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
-        @PathParam(VIRTUAL_DATACENTER) Integer id, @QueryParam(PAGE) Integer page,
+        @PathParam(VIRTUAL_DATACENTER) Integer id, @QueryParam(START_WITH) Integer startWith,
         @Context IRESTBuilder restBuilder) throws Exception
     {
+        // Set query Params by default if they are not informed
+        Integer firstElem = (startWith == null)? 0 : startWith;
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByVdc(id, (page == null) ? 0 : page,
-                DEFAULT_PAGE_LENGTH);
+            ipService.getListIpPoolManagementByVdc(id, firstElem, DEFAULT_PAGE_LENGTH);
 
         if (all == null || all.isEmpty())
         {

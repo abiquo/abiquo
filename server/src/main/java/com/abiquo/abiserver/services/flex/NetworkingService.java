@@ -398,48 +398,9 @@ public class NetworkingService
     public BasicResult getNetworkPoolInfoByEnterprise(UserSession userSession,
         Integer enterpriseId, ListRequest listRequest)
     {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            String orderBy =
-                (listRequest.getOrderBy() != null) ? listRequest.getOrderBy() : new String();
-
-            // Get the responses from the command (proxy var)
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolByEnterprise(userSession, enterpriseId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike(), orderBy, listRequest.getAsc());
-            Integer netmanValues =
-                proxy.getNumberNetworkPoolByEnterprise(userSession, enterpriseId,
-                    listRequest.getFilterLike());
-
-            // Build the response
-            List<IpPoolManagement> listResp = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB currentNetman : listPoolAvailable)
-            {
-                listResp.add(currentNetman.toPojo());
-            }
-
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            listResult.setList(listResp);
-            listResult.setTotalNumEntities(netmanValues);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getListNetworkPoolByEnterprise(enterpriseId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc());
     }
 
     /**
@@ -798,6 +759,7 @@ public class NetworkingService
 
     /**
      * Return the list of virtual networks from a virtual datacenter
+     * 
      * @param userSession user who performs the action
      * @param vdcId identifier of the virtual datacenter
      * @return a BasicResult

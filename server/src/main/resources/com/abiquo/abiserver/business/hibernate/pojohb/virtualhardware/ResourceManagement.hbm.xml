@@ -77,21 +77,6 @@
 		com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB
 		where mac = :mac
   </query>
-    <query name="IP_POOL_GET_NETWORK_POOL_BY_ENTERPRISE">
-  		Select ip
-  		from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip
-		inner join ip.virtualDataCenter.enterpriseHB ent
-		left join ip.virtualMachine vm
-		left join ip.virtualApp vapp
-		where ent.idEnterprise = :enterpriseId
-		and
-		( ip.ip like :filterLike or
-		  ip.mac like :filterLike or
-		  ip.vlanNetworkName like :filterLike or
-		  vapp.name like :filterLike or
-		  vm.name like :filterLike
-		)
-  </query>
   <query name="IP_POOL_GET_NETWORK_POOL_BY_VDC">
   	    Select ip
   	    from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vdc

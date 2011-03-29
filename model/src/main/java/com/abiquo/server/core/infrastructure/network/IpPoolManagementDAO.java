@@ -37,6 +37,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.util.PagedList;
 
@@ -61,15 +62,34 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
         "SELECT * " //
-            + "FROM ip_pool_management ip, " // 
+            + "FROM ip_pool_management ip, " //
             + "rasd_management rasd " //
             + "JOIN virtualmachine vm " //
-            + "ON vm.idVM = rasd.idVM "
-            + "WHERE rasd.idManagement = ip.idManagement " //
+            + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
             + "AND rasd.idVM != :idVM " //
             + "AND ip.vlan_network_id = :idVlanNetwork " //
             + "AND vm.state != 'NOT_DEPLOYED'"; //
 
+    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip " +
+        " left join ip.virtualMachine vm " +
+        " left join ip.virtualAppliance vapp, " +
+        " NetworkConfiguration nc, " +
+        " VirtualDatacenter vdc, " +
+        " VLANNetwork vn, " +
+        " Enterprise ent " +
+         " WHERE ip.dhcp.id = nc.dhcp.id " +
+        " AND nc.id = vn.configuration.id " +
+        " AND vn.network.id = vdc.network.id" +
+        " AND vdc.enterprise.id = ent.id" +
+        " AND ent.id = :ent_id " +
+        " AND " +
+        "( ip.ip like :filterLike " + 
+        " OR ip.mac like :filterLike " +
+        " OR ip.vlanNetwork.name like :filterLike " +
+        " OR vapp.name like :filterLike " +
+        " OR vm.name like :filterLike " +
+        ")";
+    
     private static Criterion equalMac(String mac)
     {
         assert !StringUtils.isEmpty(mac);
@@ -94,11 +114,11 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return this.existsAnyByCriterions(equalMac(mac));
     }
 
-    public List<IpPoolManagement> findByVirtualMachine(final Integer virtualMachineId)
+    public List<IpPoolManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
     {
         Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
 
-        Criterion onVM = Restrictions.eq(IpPoolManagement.ID_VM_PROPERTY, virtualMachineId);
+        Criterion onVM = Restrictions.eq(IpPoolManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
 
         criteria.add(onVM);
 
@@ -114,7 +134,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
      * @param vlanId
      * @return
      */
-    public List<IpPoolManagement> findByVLAN(final Integer vlanId, Integer page,
+    public List<IpPoolManagement> findByVLAN(final Integer vlanId, Integer firstElement,
         final Integer numElem)
     {
         int totalResults = 0;
@@ -127,10 +147,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
             // Check if the page requested is bigger than the last one
             totalResults = queryCount.getResultList().size();
-            if ((totalResults / numElem) < page)
-            {
-                page = totalResults / numElem;
-            }
         }
 
         TypedQuery<IpPoolManagement> query =
@@ -140,7 +156,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
         if (numElem != -1)
         {
-            query.setFirstResult(page * numElem);
+            query.setFirstResult(firstElement);
             query.setMaxResults(numElem);
         }
 
@@ -153,12 +169,12 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(result);
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        ipList.setCurrentElement(firstElement);
 
         return ipList;
     }
 
-    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer page, final Integer numElem)
+    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer firstElem, final Integer numElem)
     {
         // Get the query that counts the total results.
         TypedQuery<IpPoolManagement> queryCount =
@@ -168,55 +184,42 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = queryCount.getResultList().size();
-        if ((totalResults / numElem) < page)
-        {
-            page = totalResults / numElem;
-        }
-
         // Get the list of elements
         TypedQuery<IpPoolManagement> query =
             getEntityManager()
                 .createNamedQuery("IP_POOL_MANAGEMENT.BY_VDC", IpPoolManagement.class);
         query.setParameter("vdc_id", vdcId);
-        query.setFirstResult(page * numElem);
+        query.setFirstResult(firstElem);
         query.setMaxResults(numElem);
 
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(query.getResultList());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        ipList.setCurrentElement(firstElem);
 
         return ipList;
     }
 
-    public List<IpPoolManagement> findByEnterprise(Integer entId, Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findByEnterprise(Integer entId, Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
     {
         // Get the query that counts the total results.
-        TypedQuery<IpPoolManagement> queryCount =
-            getEntityManager()
-                .createNamedQuery("IP_POOL_MANAGEMENT.BY_ENT", IpPoolManagement.class);
-        queryCount.setParameter("ent_id", entId);
+        Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("ent_id", entId);
+        finalQuery.setParameter("filterLike", (has.isEmpty())? "%" : "%" + has + "%");
 
         // Check if the page requested is bigger than the last one
-        Integer totalResults = queryCount.getResultList().size();
-        if ((totalResults / numElem) < page)
-        {
-            page = totalResults / numElem;
-        }
-
+        Integer totalResults = finalQuery.list().size();
+        
         // Get the list of elements
-        TypedQuery<IpPoolManagement> query =
-            getEntityManager()
-                .createNamedQuery("IP_POOL_MANAGEMENT.BY_ENT", IpPoolManagement.class);
-        query.setParameter("ent_id", entId);
-        query.setFirstResult(page * numElem);
-        query.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(query.getResultList());
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+        
+        PagedList<IpPoolManagement> ipList =
+            new PagedList<IpPoolManagement>(finalQuery.list());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        ipList.setCurrentElement(firstElem);
 
         return ipList;
     }
@@ -265,6 +268,69 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         List<IpPoolManagement> result = getResultList(criteria);
 
         return result;
+    }
+
+    private String defineOrderBy(IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
+    {
+
+        StringBuilder queryString = new StringBuilder();
+        
+        queryString.append(" order by ");
+        switch(orderBy)
+        {
+            case IP:
+            {
+                queryString
+                .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) ");
+                break;
+
+            }
+            case QUARANTINE:
+            {
+                queryString.append("ip.quarantine ");
+                break;
+            }
+            case MAC:
+            {
+                queryString.append("ip.mac ");
+                break;
+            }
+            case VLAN:
+            {
+                queryString.append("ip.vlanNetwork.name ");
+                break;
+            }
+            case VIRTUALDATACENTER:
+            {
+                queryString.append("ip.virtualDatacenter.name ");
+                break;
+            }
+            case VIRTUALMACHINE:
+            {
+                queryString.append("vm.name ");
+                break;
+            }
+            case VIRTUALAPPLIANCE:
+            {
+                queryString.append("vapp.name ");
+                break;
+            }
+            case LEASE:
+            {
+                queryString.append("ip.name " );
+            }
+        }
+        
+        if (asc)
+        {
+            queryString.append("asc");
+        }
+        else
+        {
+            queryString.append("desc");
+        }
+        
+        return queryString.toString();
     }
 
 }

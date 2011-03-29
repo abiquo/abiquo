@@ -63,9 +63,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
 
     private static final String IP_POOL_GET_PRIVATE_IP_BY_VLAN = "IP_POOL_GET_PRIVATE_IP_BY_VLAN";
 
-    private static final String IP_POOL_GET_NETWORK_POOL_BY_ENTERPRISE =
-        "IP_POOL_GET_NETWORK_POOL_BY_ENTERPRISE";
-
     private static final String IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER =
         "IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER";
 
@@ -76,6 +73,8 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
 
     private static final String IP_POOL_GET_BY_VIRTUAL_MACHIE = "IP_POOL.GET_BY_VIRTUAL_MACHIE";
 
+
+    
     @Override
     public List<IpPoolManagementHB> findByVirtualMachine(Integer idVm)
     {
@@ -204,37 +203,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<IpPoolManagementHB> getNetworkPoolByEnterprise(Integer enterpriseId,
-        Integer offset, Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_BY_ENTERPRISE);
-            if (orderBy != null)
-            {
-                String newQuery = createOrderByQuery(query.getQueryString(), orderBy, asc);
-                query = session.createQuery(newQuery);
-            }
-            query.setInteger("enterpriseId", enterpriseId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-            query.setFirstResult(offset);
-            if (numElem != null)
-            {
-                query.setMaxResults(numElem);
-            }
-
-            return query.list();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
     public List<IpPoolManagementHB> getNetworkPoolByVDC(Integer vdcId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws PersistenceException
@@ -333,25 +301,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
             Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
             Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN);
             query.setInteger("vlanId", vlanId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            return query.list().size();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByEnterprise(Integer enterpriseId, String filterLike)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_BY_ENTERPRISE);
-            query.setInteger("enterpriseId", enterpriseId);
             query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
 
             return query.list().size();

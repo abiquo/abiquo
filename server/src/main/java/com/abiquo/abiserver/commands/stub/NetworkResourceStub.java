@@ -24,13 +24,17 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 
 /**
  * @author jdevesa
- *
  */
 public interface NetworkResourceStub
 {
     public BasicResult getPrivateNetworks(final Integer vdcId);
+
+    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
 }

@@ -41,8 +41,11 @@ import org.apache.wink.server.handlers.MessageContext;
 
 public abstract class AbstractResource
 {
-    public static final String PAGE = "p";
-
+    public static final String START_WITH = "startwith";
+    public static final String BY = "by";
+    public static final String FILTER = "has";
+    public static final String LIMIT = "limit";
+    public static final String ASC = "asc";
     public static final Integer DEFAULT_PAGE_LENGTH = 25;
 
     private static Collection<Class> REST = new ArrayList<Class>()

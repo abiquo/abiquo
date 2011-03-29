@@ -160,25 +160,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * Return the list of network resources of a given Enterprise.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param enterpriseId identifier of the enterprise.
-     * @param offset first element to return.
-     * @param numElem number of elements to return.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @param orderBy the order preferences of the query.
-     * @param asc tell him if we want to order ascendant or descendant
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolByEnterprise(UserSession userSession,
-        Integer enterpriseId, Integer offset, Integer numElem, String filterLike, String orderBy,
-        Boolean asc) throws NetworkCommandException;
-
-    /**
      * Return the list of network resources of a given Virtual DataCenter.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -243,20 +224,6 @@ public interface NetworkCommand
      * @throws NetworkCommandException for encapsulate any non-runtime exception.
      */
     public Integer getNumberNetworkPoolAvailableByVLAN(UserSession userSession, Integer vlanId,
-        String filterLike) throws NetworkCommandException;
-
-    /**
-     * Return the number of network resources of a given Enterprise. Used by paging purposes.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param enterprise identifier of the enterprise.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @return a number of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolByEnterprise(UserSession userSession, Integer enterprise,
         String filterLike) throws NetworkCommandException;
 
     /**

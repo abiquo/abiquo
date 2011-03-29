@@ -43,8 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 @DiscriminatorValue("10")
 @NamedQueries({
 @NamedQuery(name="IP_POOL_MANAGEMENT.BY_VLAN", query= IpPoolManagement.BY_VLAN ),
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)
+@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC)
 })
 public class IpPoolManagement extends RasdManagement
 {
@@ -65,16 +64,6 @@ public class IpPoolManagement extends RasdManagement
                                           " AND nc.id = vn.configuration.id " +
                                           " AND vn.network.id = vdc.network.id" +
                                           " AND vdc.id = :vdc_id";
-    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip, " +
-                                          " NetworkConfiguration nc, " +
-                                          " VirtualDatacenter vdc, " +
-                                          " VLANNetwork vn, " +
-                                          " Enterprise ent " +
-                                          " WHERE ip.dhcp.id = nc.dhcp.id " +
-                                          " AND nc.id = vn.configuration.id " +
-                                          " AND vn.network.id = vdc.network.id" +
-                                          " AND vdc.enterprise.id = ent.id" +
-                                          " AND ent.id = :ent_id";
     
     protected IpPoolManagement()
     {
@@ -186,7 +175,7 @@ public class IpPoolManagement extends RasdManagement
         return this.configurareGateway;
     }
 
-    private void setConfigureGateway(boolean configurareGateway)
+    public void setConfigureGateway(boolean configurareGateway)
     {
         this.configurareGateway = configurareGateway;
     }
@@ -206,7 +195,7 @@ public class IpPoolManagement extends RasdManagement
         return this.quarantine;
     }
 
-    private void setQuarantine(boolean quarantine)
+    public void setQuarantine(boolean quarantine)
     {
         this.quarantine = quarantine;
     }
@@ -287,5 +276,33 @@ public class IpPoolManagement extends RasdManagement
     private void setNetworkName(String networkName)
     {
         this.networkName = networkName;
+    }
+    
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        IP, 
+        QUARANTINE, 
+        MAC, 
+        LEASE, 
+        VLAN, 
+        VIRTUALDATACENTER, 
+        VIRTUALMACHINE, 
+        VIRTUALAPPLIANCE;
+
+        public static OrderByEnum fromValue(String orderBy)
+        {
+            for(OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+            
+            return null;
+        }        
     }
 }

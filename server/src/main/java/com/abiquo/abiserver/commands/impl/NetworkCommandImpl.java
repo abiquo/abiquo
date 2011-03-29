@@ -635,31 +635,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<IpPoolManagementHB> getListNetworkPoolByEnterprise(UserSession userSession,
-        Integer enterpriseId, Integer offset, Integer numElem, String ipLike, String orderBy,
-        Boolean asc) throws NetworkCommandException
-    {
-        List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            ipList =
-                netManDAO.getNetworkPoolByEnterprise(enterpriseId, offset, numElem, ipLike,
-                    orderBy, asc);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return ipList;
-    }
-
-    @Override
     public List<IpPoolManagementHB> getListNetworkPoolByVDC(UserSession userSession, Integer vdcId,
         Integer offset, Integer numElem, String stringLike, String orderBy, Boolean asc)
         throws NetworkCommandException
@@ -736,26 +711,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             factory.beginConnection();
             IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
             Integer numberOfIPs = netManDAO.getNumberNetworkPoolAvailableByVLAN(vlanId, ipLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByEnterprise(UserSession userSession, Integer enterpriseId,
-        String ipLike) throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs = netManDAO.getNumberNetworkPoolByEnterprise(enterpriseId, ipLike);
             factory.endConnection();
 
             return numberOfIPs;
