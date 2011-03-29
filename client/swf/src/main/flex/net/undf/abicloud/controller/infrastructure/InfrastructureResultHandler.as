@@ -171,8 +171,6 @@ package net.undf.abicloud.controller.infrastructure
                 super.handleResult(result);
             }
         }
-        
-        
 
         public function handleGetInfrastructureByDataCenter(result:BasicResult):void
         {
