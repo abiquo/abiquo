@@ -225,7 +225,7 @@
             {
                 event.stopImmediatePropagation();
 
-                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV)
                 {
                     //This hypervisor type does not support graphical remote access
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
@@ -253,12 +253,27 @@
                     }
 
                     var appletURL:String;
-                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX)
-                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" + this._virtualMachine.vdrpIP + "&vrdpPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
-                    else if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
-                    	appletURL = "vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight+HyperVisor(this._virtualMachine.assignedTo).ip+HyperVisor(this._virtualMachine.assignedTo).name+HyperVisor(this._virtualMachine.assignedTo).password;
-                    else
-                        appletURL = "tightvnc/tightvnc.html?vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX){
+                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" 
+                        + this._virtualMachine.vdrpIP 
+                        + "&vrdpPort=" + this._virtualMachine.vdrpPort 
+                        + "&width=" + appletWidth 
+                        + "&height=" + appletHeight;
+                    }else if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
+                    	appletURL = "xsapplet/xsapplet.html?vncIP=" 
+                    	+ HyperVisor(this._virtualMachine.assignedTo).ip 
+                    	+ "&vncUser=" + HyperVisor(this._virtualMachine.assignedTo).user 
+                    	+ "&vncPass=" + HyperVisor(this._virtualMachine.assignedTo).password 
+                    	+ "&vncName=" + this._virtualMachine.name 
+                    	+ "&width=" + appletWidth 
+                    	+ "&height=" + appletHeight;                        
+                    }else{
+                        appletURL = "tightvnc/tightvnc.html?vncIP=" 
+                        + this._virtualMachine.vdrpIP 
+                        + "&vncPort=" + this._virtualMachine.vdrpPort 
+                        + "&width=" + appletWidth 
+                        + "&height=" + appletHeight;
+                    }
 
                     if (event.shiftKey)
                     {
