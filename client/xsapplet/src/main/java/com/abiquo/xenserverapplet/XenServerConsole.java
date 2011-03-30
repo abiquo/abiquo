@@ -71,6 +71,8 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
 
     private Connection conn = null;
 
+    private boolean connectError = false;
+
     private String serverIP;
 
     private String serverUser;
@@ -97,7 +99,7 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
             setSize(getAppletWidth(), getAppletHeight());
 
             // Connect to the VM
-            System.out.println("Connecting to " + getServerIP() + "...");
+            System.out.println("Connecting to http://" + getServerIP() + "...");
             connect();
             System.out.println("Connected to " + getServerIP() + " with success !");
 
@@ -106,16 +108,21 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
         }
         catch (Exception e)
         {
+            connectError = true;
             e.printStackTrace();
             writeline(e.getMessage());
+            throw new RuntimeException("The applet could not be initialized.", e);
         }
     }
 
     @Override
     public void start()
     {
-        writeline("Starting...");
-        main.connect();
+        if (connectError != true)
+        {
+            writeline("Starting...");
+            main.connect();
+        }
     }
 
     @Override
@@ -256,10 +263,18 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     {
         if (conn != null)
             disconnect();
-        Connection tmpConn = new Connection(new URL(getServerIP()));
-        Session.loginWithPassword(tmpConn, getServerUser(), new String(getServerPass()), APIVersion
-            .latest().toString());
-        conn = tmpConn;
+
+        try
+        {
+            Connection tmpConn = new Connection(new URL("http://" + getServerIP()));
+            Session.loginWithPassword(tmpConn, getServerUser(), new String(getServerPass()),
+                APIVersion.latest().toString());
+            conn = tmpConn;
+        }
+        catch (SecurityException e)
+        {
+            connectError = true;
+        }
     }
 
     /**

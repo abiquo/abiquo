@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>xsapplet</artifactId>
 	<name>XenServer VNC Applet</name>
-	
+
 	<properties>
 		<xenserver.version>5.6.0-1</xenserver.version>
 		<wscommon.version>1.0.2</wscommon.version>
@@ -62,6 +62,69 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.xmlrpc</groupId>
+									<artifactId>xmlrpc-common</artifactId>
+									<version>${xmlrpccommon.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.xmlrpc</groupId>
+									<artifactId>xmlrpc-client</artifactId>
+									<version>${xmlrpcclient.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.apache.ws.commons.util</groupId>
+									<artifactId>ws-commons-util</artifactId>
+									<version>${wscommon.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.xensource</groupId>
+									<artifactId>xenserver</artifactId>
+									<version>${xenserver.version}</version>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.citrix.xenserver</groupId>
+									<artifactId>console</artifactId>
+									<version>${xenserver.version}</version>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.2</version>
+				<configuration>
+					<archiveDirectory>${project.build.directory}</archiveDirectory>
+					<keystore>src/cert/keystore</keystore>
+					<alias>mykey</alias>
+					<storepass>abiquo</storepass>
+					<keypass>abiquo</keypass>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<descriptors>
@@ -80,11 +143,11 @@
 			</plugin>
 		</plugins>
 		<resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
 </project>
