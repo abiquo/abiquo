@@ -51,6 +51,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
             import com.google.maps.LatLng;
             import com.google.maps.Map;
@@ -164,6 +165,9 @@
              **/
             protected function onCreationComplete():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess('addDatacenterBis','visible',addButton);
+                
                 //Creating Pop Ups				
                 this._datacenterFormAdd = new DatacenterFormAdd();
                 this._datacenterFormAdd.addEventListener("DatacenterFormAddClose",

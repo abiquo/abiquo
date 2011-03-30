@@ -45,6 +45,8 @@ package net.undf.abicloud.business.managers
         public static const ROLES_UPDATED:String = "rolesUpdated_UserManager";
 
         public static const ENTERPRISES_UPDATED:String = "enterprisesUpdated_UserManager";
+        
+        public static const PRIVILEGES_UPDATED:String = "privilegesUpdated_UserManager";
 
         /* ------------- Constructor ------------- */
         public function UserManager()
@@ -56,6 +58,8 @@ package net.undf.abicloud.business.managers
             this._totalUsers = 0;
 
             this._roles = new ArrayCollection();
+            
+            this._privileges = new ArrayCollection();
         }
 
 
@@ -222,6 +226,36 @@ package net.undf.abicloud.business.managers
         {
             this._roles = array;
             dispatchEvent(new Event(ROLES_UPDATED, true));
+        }
+        
+        ///////////////////////////////////
+        //RELATED TO PRIVILEGES
+
+
+        /**
+         * ArrayCollection containing all user privileges
+         **/
+        private var _privileges:ArrayCollection;
+
+        [Bindable(event="privilegesUpdated_UserManager")]
+        public function get privileges():ArrayCollection
+        {
+            return this._privileges;
+        }
+
+        public function set privileges(array:ArrayCollection):void
+        {
+            this._privileges = array;
+            dispatchEvent(new Event(PRIVILEGES_UPDATED, true));
+        }
+        
+        public function userHasPrivilege(privilege:String):Boolean{
+        	for(var i:int = 0 ; i < this._privileges.length ; i++){
+        		if(this._privileges.getItemAt(i) == privilege){
+        			return true;
+        		}
+        	}
+        	return false;
         }
 
         ///////////////////////////////////

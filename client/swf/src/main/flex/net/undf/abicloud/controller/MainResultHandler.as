@@ -23,7 +23,7 @@ package net.undf.abicloud.controller
 {
     import mx.collections.ArrayCollection;
     import mx.resources.ResourceBundle;
-
+    
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.main.MainResult;
     import net.undf.abicloud.vo.result.BasicResult;
@@ -54,6 +54,12 @@ package net.undf.abicloud.controller
                 //Setting the common information
                 AbiCloudModel.getInstance().userManager.roles = mainResult.roles;
                 AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes = mainResult.hypervisorTypes;
+                
+                //Set the list of privileges
+                var privileges:ArrayCollection = new ArrayCollection();
+                privileges.addItem("addDatacenter");
+                
+                AbiCloudModel.getInstance().userManager.privileges = privileges;
 
             }
             else
