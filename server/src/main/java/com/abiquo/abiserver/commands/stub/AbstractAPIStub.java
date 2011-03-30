@@ -292,7 +292,16 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters",
             new HashMap<String, String>(), queryParams);
     }
-
+    
+    protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips",
+            params);
+    }
+    
     protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;

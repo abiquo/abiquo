@@ -103,13 +103,22 @@ public class VirtualDatacenterResource extends AbstractResource
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
-        @PathParam(VIRTUAL_DATACENTER) Integer id, @QueryParam(START_WITH) Integer startWith,
+        @PathParam(VIRTUAL_DATACENTER) Integer id, 
+        @QueryParam(START_WITH) Integer startwith, @QueryParam(BY) String orderBy,
+        @QueryParam(FILTER) String filter, @QueryParam(LIMIT) Integer limit,
+        @QueryParam(ASC) Boolean desc_or_asc,
         @Context IRESTBuilder restBuilder) throws Exception
     {
         // Set query Params by default if they are not informed
-        Integer firstElem = (startWith == null)? 0 : startWith;
+        Integer firstElem = (startwith == null) ? 0 : startwith;
+        String by = (orderBy == null || orderBy.isEmpty()) ? "ip" : orderBy;
+        String has = (filter == null) ? "" : filter;
+        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        Boolean asc = (desc_or_asc == null)? true : desc_or_asc;
+        
+        
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByVdc(id, firstElem, DEFAULT_PAGE_LENGTH);
+            ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
 
         if (all == null || all.isEmpty())
         {
@@ -122,7 +131,8 @@ public class VirtualDatacenterResource extends AbstractResource
         {
             ips.add(IpAddressesResource.createTransferObject(ip, restBuilder));
         }
-
+        
+        ips.setTotalSize(((PagedList) all).getTotalResults());
         ips.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
             (PagedList) all));
 

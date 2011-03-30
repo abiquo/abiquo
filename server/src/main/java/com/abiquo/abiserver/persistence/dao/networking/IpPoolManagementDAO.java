@@ -95,21 +95,6 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
         Integer numElem, String filterLike) throws PersistenceException;
 
     /**
-     * Return the list of IP pools by virtualdatacenter
-     * 
-     * @param vdcId identifier of a {@link VirtualDatacenter}.
-     * @param offset first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param filterLike filter the search.
-     * @param orderBy the order criteria.
-     * @param asc related to orderBy filter: ascendant or descendant?
-     * @return the list of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    List<IpPoolManagementHB> getNetworkPoolByVDC(Integer vdcId, Integer offset, Integer numElem,
-        String ipLike, String orderBy, Boolean asc) throws PersistenceException;
-
-    /**
      * Return the list of {@link IpPoolManagement} objects into a VLAN.
      * 
      * @param vlanId identifier of the VLAN.
@@ -146,16 +131,6 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      */
     Integer getNumberNetworkPoolAvailableByVLAN(Integer vlanId, String filterLike)
         throws PersistenceException;
-
-    /**
-     * Return the number of IP pools by virtualdatacenter
-     * 
-     * @param vdcId identifier of a {@link VirtualDatacenter}.
-     * @param ipLike filter the search.
-     * @return the number of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    Integer getNumberNetworkPoolByVDC(Integer vdcId, String ipLike) throws PersistenceException;
 
     /**
      * Return the number of {@link IpPoolManagement} objects into a VLAN.

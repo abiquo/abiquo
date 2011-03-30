@@ -37,4 +37,8 @@ public interface NetworkResourceStub
     public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
+    
+    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
 }

@@ -70,26 +70,29 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "AND ip.vlan_network_id = :idVlanNetwork " //
             + "AND vm.state != 'NOT_DEPLOYED'"; //
 
-    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip " +
-        " left join ip.virtualMachine vm " +
-        " left join ip.virtualAppliance vapp, " +
-        " NetworkConfiguration nc, " +
-        " VirtualDatacenter vdc, " +
-        " VLANNetwork vn, " +
-        " Enterprise ent " +
-         " WHERE ip.dhcp.id = nc.dhcp.id " +
-        " AND nc.id = vn.configuration.id " +
-        " AND vn.network.id = vdc.network.id" +
-        " AND vdc.enterprise.id = ent.id" +
-        " AND ent.id = :ent_id " +
-        " AND " +
-        "( ip.ip like :filterLike " + 
-        " OR ip.mac like :filterLike " +
-        " OR ip.vlanNetwork.name like :filterLike " +
-        " OR vapp.name like :filterLike " +
-        " OR vm.name like :filterLike " +
-        ")";
+    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
+        + " Enterprise ent " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+        + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id " + " AND "
+        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
     
+    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip " 
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, " 
+        + " NetworkConfiguration nc, " 
+        + " VirtualDatacenter vdc, " 
+        + " VLANNetwork vn " 
+        + " WHERE ip.dhcp.id = nc.dhcp.id " 
+        + " AND nc.id = vn.configuration.id " 
+        + " AND vn.network.id = vdc.network.id" 
+        + " AND vdc.id = :vdc_id AND" 
+        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
+
     private static Criterion equalMac(String mac)
     {
         assert !StringUtils.isEmpty(mac);
@@ -174,25 +177,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return ipList;
     }
 
-    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer firstElem, final Integer numElem)
+    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+        final Boolean asc)
     {
         // Get the query that counts the total results.
-        TypedQuery<IpPoolManagement> queryCount =
-            getEntityManager()
-                .createNamedQuery("IP_POOL_MANAGEMENT.BY_VDC", IpPoolManagement.class);
-        queryCount.setParameter("vdc_id", vdcId);
+        Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("filterLike", (has.isEmpty()) ? "%" : "%" + has + "%");
 
         // Check if the page requested is bigger than the last one
-        Integer totalResults = queryCount.getResultList().size();
-        // Get the list of elements
-        TypedQuery<IpPoolManagement> query =
-            getEntityManager()
-                .createNamedQuery("IP_POOL_MANAGEMENT.BY_VDC", IpPoolManagement.class);
-        query.setParameter("vdc_id", vdcId);
-        query.setFirstResult(firstElem);
-        query.setMaxResults(numElem);
+        Integer totalResults = finalQuery.list().size();
+        
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
 
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(query.getResultList());
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
         ipList.setCurrentElement(firstElem);
@@ -201,22 +201,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findByEnterprise(Integer entId, Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+        final Boolean asc)
     {
         // Get the query that counts the total results.
         Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
         finalQuery.setParameter("ent_id", entId);
-        finalQuery.setParameter("filterLike", (has.isEmpty())? "%" : "%" + has + "%");
+        finalQuery.setParameter("filterLike", (has.isEmpty()) ? "%" : "%" + has + "%");
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
-        
+
         // Get the list of elements
         finalQuery.setFirstResult(firstElem);
         finalQuery.setMaxResults(numElem);
-        
-        PagedList<IpPoolManagement> ipList =
-            new PagedList<IpPoolManagement>(finalQuery.list());
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
         ipList.setCurrentElement(firstElem);
@@ -274,14 +274,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     {
 
         StringBuilder queryString = new StringBuilder();
-        
+
         queryString.append(" order by ");
-        switch(orderBy)
+        switch (orderBy)
         {
             case IP:
             {
                 queryString
-                .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) ");
+                    .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) ");
                 break;
 
             }
@@ -317,10 +317,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             }
             case LEASE:
             {
-                queryString.append("ip.name " );
+                queryString.append("ip.name ");
             }
         }
-        
+
         if (asc)
         {
             queryString.append("asc");
@@ -329,7 +329,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         {
             queryString.append("desc");
         }
-        
+
         return queryString.toString();
     }
 

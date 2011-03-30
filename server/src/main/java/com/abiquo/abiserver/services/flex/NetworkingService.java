@@ -416,49 +416,9 @@ public class NetworkingService
     public BasicResult getNetworkPoolInfoByVDC(UserSession userSession,
         Integer virtualDataCenterId, ListRequest listRequest)
     {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            String orderBy =
-                (listRequest.getOrderBy() != null) ? listRequest.getOrderBy() : new String();
-
-            // Get the responses from the command (proxy var)
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolByVDC(userSession, virtualDataCenterId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike(), orderBy, listRequest.getAsc());
-            Integer netmanValues =
-                proxy.getNumberNetworkPoolByVDC(userSession, virtualDataCenterId,
-                    listRequest.getFilterLike());
-
-            // Build the response
-            List<IpPoolManagement> listResp = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB currentNetman : listPoolAvailable)
-            {
-                listResp.add(currentNetman.toPojo());
-            }
-
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            listResult.setList(listResp);
-            listResult.setTotalNumEntities(netmanValues);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getListNetworkPoolByVirtualDatacenter(virtualDataCenterId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc());
     }
 
     /**

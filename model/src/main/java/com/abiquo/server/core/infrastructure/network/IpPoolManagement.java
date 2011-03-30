@@ -42,8 +42,7 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
 @NamedQueries({
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VLAN", query= IpPoolManagement.BY_VLAN ),
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC)
+@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VLAN", query= IpPoolManagement.BY_VLAN )
 })
 public class IpPoolManagement extends RasdManagement
 {
@@ -56,14 +55,6 @@ public class IpPoolManagement extends RasdManagement
     		                               " WHERE ip.dhcp.id = nc.dhcp.id " +
     		                               " AND nc.id = vn.configuration.id " +
       		                               " AND vn.id = :vlan_id";
-    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip, " +
-                                          " NetworkConfiguration nc, " +
-                                          " VirtualDatacenter vdc, " +
-                                          " VLANNetwork vn " +
-                                          " WHERE ip.dhcp.id = nc.dhcp.id " +
-                                          " AND nc.id = vn.configuration.id " +
-                                          " AND vn.network.id = vdc.network.id" +
-                                          " AND vdc.id = :vdc_id";
     
     protected IpPoolManagement()
     {

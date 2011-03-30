@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -56,14 +55,21 @@ public class IpAddressService
 
     public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vlanId,
         final Integer page, final Integer numElem)
-    {
+    {        
         return repo.findIpsByVLAN(vlanId, page, numElem);
     }
 
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
-        final Integer page, final Integer numElem)
+        final Integer firstElem, final Integer numElem, String has, String orderBy, Boolean asc)
     {
-        return repo.findIpsByVdc(vdcId, page, numElem);
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER.info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
+            throw new BadRequestException(APIError.QUERY_INVALID_PARAMETER);
+        }
+        return repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
     }
 
     public List<IpPoolManagement> getListIpPoolManagementByEnterprise(final Integer entId,

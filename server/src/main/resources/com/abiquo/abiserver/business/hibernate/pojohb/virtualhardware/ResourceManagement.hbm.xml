@@ -77,26 +77,6 @@
 		com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB
 		where mac = :mac
   </query>
-  <query name="IP_POOL_GET_NETWORK_POOL_BY_VDC">
-  	    Select ip
-  	    from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vdc
-  	         inner join vdc.network net,  	     
-  	         com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan
-  	         inner join vlan.configuration conf,
-  	         com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB dhcp
-  	         inner join dhcp.ipPoolManagement ip
-  	         left join ip.virtualMachine vm
-		     left join ip.virtualApp vapp
-		where vdc.idVirtualDataCenter = :vdcId
-		  and net.networkId = vlan.networkId
-		  and conf.dhcpService.dhcpServiceId = dhcp.dhcpServiceId
-		and ( ip.ip like :filterLike or
-		  ip.mac like :filterLike or
-		  ip.vlanNetworkName like :filterLike or
-		  vapp.name like :filterLike or
-		  vm.name like :filterLike
-		)
-  </query>
   <query name="IP_POOL_GET_NETWORK_POOL_BY_VLAN">
   	    Select ip
   	    from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan

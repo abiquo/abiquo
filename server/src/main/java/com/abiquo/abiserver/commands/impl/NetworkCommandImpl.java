@@ -524,8 +524,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
             VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
 
-            List<IpPoolManagementHB> ipPools =
-                ipPoolDAO.getNetworkPoolByVDC(vdcId, 0, null, "", null, null);
+            List<IpPoolManagementHB> ipPools = new ArrayList<IpPoolManagementHB>();
             VirtualDataCenterHB vdc = vdcDAO.findById(vdcId);
 
             formattedData.append("## AbiCloud DHCP configuration for network "
@@ -635,30 +634,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<IpPoolManagementHB> getListNetworkPoolByVDC(UserSession userSession, Integer vdcId,
-        Integer offset, Integer numElem, String stringLike, String orderBy, Boolean asc)
-        throws NetworkCommandException
-    {
-        List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            ipList =
-                netManDAO.getNetworkPoolByVDC(vdcId, offset, numElem, stringLike, orderBy, asc);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return ipList;
-    }
-
-    @Override
     public List<IpPoolManagementHB> getListNetworkPoolByVLAN(UserSession userSession,
         Integer vlanId, Integer offset, Integer numElem, String ipLike, String orderBy, Boolean asc)
         throws NetworkCommandException
@@ -711,26 +686,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             factory.beginConnection();
             IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
             Integer numberOfIPs = netManDAO.getNumberNetworkPoolAvailableByVLAN(vlanId, ipLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByVDC(UserSession userSession, Integer vdcId, String ipLike)
-        throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs = netManDAO.getNumberNetworkPoolByVDC(vdcId, ipLike);
             factory.endConnection();
 
             return numberOfIPs;

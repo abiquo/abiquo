@@ -23,7 +23,6 @@ package com.abiquo.abiserver.commands;
 
 import java.util.List;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
@@ -160,25 +159,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * Return the list of network resources of a given Virtual DataCenter.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vdcId virtualDataCenterId identifier of the Virtual DataCenter.
-     * @param offset first element to return.
-     * @param numElem number of elements to return
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @param orderBy the order preferences of the query.
-     * @param asc tell him if we want to order ascendant or descendant
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolByVDC(UserSession userSession, Integer vdcId,
-        Integer offset, Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
-
-    /**
      * Return the list of network resources of a given VLAN.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -225,20 +205,6 @@ public interface NetworkCommand
      */
     public Integer getNumberNetworkPoolAvailableByVLAN(UserSession userSession, Integer vlanId,
         String filterLike) throws NetworkCommandException;
-
-    /**
-     * Return the number of network resources of a given Virtual DataCenter.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vdcId virtualDataCenterId identifier of the Virtual DataCenter.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @return a number of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolByVDC(UserSession userSession, Integer vdcId, String filter)
-        throws NetworkCommandException;
 
     /**
      * Return the number of network resources of a given VLAN.
