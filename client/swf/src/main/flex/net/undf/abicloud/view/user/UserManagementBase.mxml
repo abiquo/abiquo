@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    initialize="onInitialize()"
+    implements="net.undf.abicloud.view.main.IBodyComponentChildren"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    xmlns:componentsVA="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*"
+    xmlns:virtualdatacenter="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.*"
+    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*" xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.view.user.components.user.UserList;
+            import mx.collections.ArrayCollection;
+            import mx.containers.Canvas;
+            import mx.controls.Alert;
+            import mx.effects.Resize;
+            import mx.events.CloseEvent;
+            import mx.events.EffectEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceBundle;
+            import mx.resources.ResourceManager;
+            import mx.utils.ObjectUtil;
+
+            import net.undf.abicloud.business.managers.CountdownManager;
+            import net.undf.abicloud.events.VirtualApplianceEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.view.networking.virtualdatacenter.NetworkManagement;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceForm;
+            import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceList;
+            import net.undf.abicloud.vo.infrastructure.State;
+            import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+
+
+            [ResourceBundle("Common")]
+            private var rb:ResourceBundle;
+
+            [ResourceBundle("VirtualAppliance")]
+            private var rb2:ResourceBundle;
+
+            //Pop Ups
+           // private var _virtualApplianceForm:VirtualApplianceForm;
+
+            private var _resizeEffect:Resize;
+
+            [Bindable]
+            private var userList:UserList;
+
+            /////////////////////////////////////
+            //IBodyComponentChildren implementation (in progress...)
+
+            public function cleanView():void
+            {
+                //Cleaning this component everytime it is shown
+                hideMoreInfoContainer();
+                userToggledContainer.selectedIndex = 0;
+
+                userList.init();
+
+            }
+            
+             public function willShow():void
+            {
+                //Cleaning the view everytime this component is shown
+                hideMoreInfoContainer();
+
+                userList.init();
+
+                enterpriseSelector.init();
+            }
+
+
+
+            public function willHide():void
+            {
+                //Stop background updates
+                stopBackgroundUpdates();
+            }
+
+            /////////// END IBodyComponentChildren implementation ////////////////
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+
+                //Resize effect used to show or hide the More info container
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 160;
+
+
+                //CREATING VIRTUAL INFRASTRUCTURE SECTIONS
+
+                //VirtualApplianceList, for VirtualAppliances management
+                userList = new UserList();
+                /* userList.addEventListener("addVirtualAppliance",
+                                                      addVirtualAppliance);
+ */
+              
+
+                //ADDING VIRTUAL INFRASTRUCTURE SECTIONS
+                userToggledContainer.addContent(userList,
+                                                                 ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                                         "LABEL_VIRTUAL_APPLIANCES"));
+              }
+
+            private function onInitialize():void
+            {
+                //Listening for changes in model related to VirtualAppliances
+               	userToggledContainer.selectedIndex = 0;
+            }
+
+            /**
+             * Shows a the moreInfoContainer component
+             */
+            protected function showMoreInfoContainer(selectedIndex:int = 0):void
+            {
+               if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._resizeEffect.play([ moreInfoContainer ]);
+                }
+
+                userRenderer.init(user);
+            }
+
+            /**
+             * Hides the MoreInfoContainer component
+             */
+            protected function hideMoreInfoContainer():void
+            {
+                 if (moreInfoContainer.visible)
+                {
+                    this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                    this._resizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onEndResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideButton():void
+            {
+                hideMoreInfoContainer();
+            }
+            
+            private function onEndUserResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideUserButton():void
+            {
+                hideMoreInfoContainer();
+            }
+
+
+            private function onUserSelected():void
+            {
+                if (userList.selectedUser)
+                    showUser(userList.selectedUser);
+                else
+                    hideMoreInfoContainer();
+            }
+            
+            /////////////////////////////////////
+            //Enterprises
+            /**
+             * When users clicks in enterprises list
+             */
+            private function onSelectedEnterpriseChange():void
+            {
+                hideMoreInfoContainer();
+
+                //Filter the user list by enterprise
+                userList.enterprise = enterpriseSelector.selectedEnterprise;
+            }
+            
+        ]]>
+    </mx:Script>
+
+    <!-- Enterprises list -->
+    <general:GeneralPanel 
+        width="200" height="100%"
+        title="@Resource(bundle='User', key='LABEL_ENTERPRISES')">
+
+        <enterprise:SecurableEnterpriseSelector id="enterpriseSelector"
+            width="100%" height="100%"
+            selectedEnterpriseChange="onSelectedEnterpriseChange()"/>
+    </general:GeneralPanel>
+
+    <!-- Users container -->        
+
+    <general:GeneralPanel id="usersContainer"
+        width="100%" height="100%"
+        creationPolicy="all"
+        title="{enterpriseSelector.selectedEnterprise ? enterpriseSelector.selectedEnterprise.name.toUpperCase() :
+						  															ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_ALL').toUpperCase()}">
+
+        <mx:Canvas 
+            width="100%" height="100%"
+            styleName="VirtualDataCenterManagementBaseCanvas1">
+            <general:GeneralToggledContainer id="userToggledContainer"
+                x="0" y="0"
+                left="5" right="5" top="5" bottom="5"/>
+        </mx:Canvas>
+
+
+        <!-- More info -->
+        <mx:VBox id="moreInfoContainer"
+            width="100%" height="0"
+            horizontalAlign="center"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalGap="0"
+            visible="false">
+
+            <mx:Button id="hideUserButton"
+                width="49" height="10"
+                styleName="UpDownButton"
+                click="onClickHideUserButton()"/>
+
+            <user:UserRenderer id="userRenderer"
+                width="100%" height="100%"/>
+        </mx:VBox>
+
+
+    </general:GeneralPanel>
+
+</mx:HDividedBox>
