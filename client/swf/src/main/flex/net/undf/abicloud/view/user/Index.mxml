@@ -24,20 +24,15 @@
 
 <mx:Canvas 
     width="100%" height="100%"
-    horizontalGap="10"
-    paddingBottom="0"
-    paddingLeft="0"
-    paddingRight="0"
-    paddingTop="0"
-    verticalGap="0"
-    creationComplete="onCreationComplete()"
+    verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     implements="net.undf.abicloud.view.main.IBodyComponent"
     xmlns:components="net.undf.abicloud.view.user.components.*"
     xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
-    xmlns:user="net.undf.abicloud.view.user.components.user.*"
     xmlns:utils="net.undf.abicloud.utils.*"
-    xmlns:general="net.undf.abicloud.view.general.*" xmlns:user1="net.undf.abicloud.view.user.*">
+    xmlns:general="net.undf.abicloud.view.general.*" 
+    xmlns:user="net.undf.abicloud.view.user.*">
+
 
     <mx:Script>
         <![CDATA[
@@ -75,6 +70,6 @@
         ]]>
     </mx:Script>
 
-   <user1:UserManagement id="userManagement" width="100%" height="100%"/>
+   <user:UserManagement id="userManagement" width="100%" height="100%"/>
 
 </mx:Canvas>

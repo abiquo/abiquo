@@ -35,12 +35,11 @@
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
     xmlns:general="net.undf.abicloud.view.general.*"
-    xmlns:componentsVA="net.undf.abicloud.view.virtualappliance.components.virtualappliance.*"
-    xmlns:virtualdatacenter="net.undf.abicloud.view.virtualappliance.components.virtualdatacenter.*"
-    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*" xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*">
+    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*" xmlns:user="net.undf.abicloud.view.user.components.user.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.User;
         	import net.undf.abicloud.view.user.components.user.UserList;
             import mx.collections.ArrayCollection;
             import mx.containers.Canvas;
@@ -91,6 +90,11 @@
 
             }
             
+             public function willHide():void
+            {
+
+            }
+            
              public function willShow():void
             {
                 //Cleaning the view everytime this component is shown
@@ -99,14 +103,6 @@
                 userList.init();
 
                 enterpriseSelector.init();
-            }
-
-
-
-            public function willHide():void
-            {
-                //Stop background updates
-                stopBackgroundUpdates();
             }
 
             /////////// END IBodyComponentChildren implementation ////////////////
@@ -126,15 +122,10 @@
 
                 //VirtualApplianceList, for VirtualAppliances management
                 userList = new UserList();
-                /* userList.addEventListener("addVirtualAppliance",
-                                                      addVirtualAppliance);
- */
-              
+                userList.addEventListener("selectedUserChange",onUserSelected);             
 
                 //ADDING VIRTUAL INFRASTRUCTURE SECTIONS
-                userToggledContainer.addContent(userList,
-                                                                 ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                                         "LABEL_VIRTUAL_APPLIANCES"));
+                userToggledContainer.addContent(userList, ResourceManager.getInstance().getString("Main", "HEADER_MENU_USER"));
               }
 
             private function onInitialize():void
@@ -144,11 +135,11 @@
             }
 
             /**
-             * Shows a the moreInfoContainer component
-             */
-            protected function showMoreInfoContainer(selectedIndex:int = 0):void
+             * Shows a User, using an UserRenderer component
+             **/
+            private function showUser(user:User):void
             {
-               if (!moreInfoContainer.visible)
+                if (!moreInfoContainer.visible)
                 {
                     moreInfoContainer.visible = true;
                     this._resizeEffect.play([ moreInfoContainer ]);
@@ -192,7 +183,7 @@
             }
 
 
-            private function onUserSelected():void
+            private function onUserSelected(event:Event = null):void
             {
                 if (userList.selectedUser)
                     showUser(userList.selectedUser);

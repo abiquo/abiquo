@@ -22,8 +22,13 @@
 
 -->
 
-<mx:Canvas 
+<mx:VBox 
     width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="10"
+    verticalGap="0"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -590,7 +595,6 @@
     <!-- Search & More actions Bar -->
     <mx:HBox 
         width="100%" height="32"
-        top="0"
         paddingLeft="6"
         paddingRight="6"
         verticalAlign="middle"
@@ -642,8 +646,7 @@
 
     <!-- Data Grid -->
     <mx:DataGrid id="usersDataGrid"
-        width="100%"
-        top="31" bottom="31"
+        width="100%" height="100%"
         dataProvider="{this._users}" allowMultipleSelection="true"
         click="onClickUsersDataGrid()"
         mouseDown="onMouseDownUsersDataGrid()"
@@ -710,7 +713,6 @@
 
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
-        bottom="0"
         styleName="GeneralDataPanelBottomSkin">
         <mx:Button id="addButton"
             styleName="AddButton" enabled="{this._enterprise != null}"
@@ -753,4 +755,4 @@
             click="editUser()"
             visible="{! loggedUsersCheckbox.selected}"/>
     </general:GeneralPanelToolBox>
-</mx:Canvas>
+</mx:VBox>
