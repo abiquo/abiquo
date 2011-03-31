@@ -5,6 +5,9 @@ alter table virtualapp modify nodeconnections text;
 
 alter table hypervisor drop column description;
 
+-- Update the leases name
+update ip_pool_management set name=replace(name,':','');
+
 -- DELETE THE OBSOLETE PUBLIC IP TABLE --
 DROP TABLE IF EXISTS `kinton`.`publicip`;
 
