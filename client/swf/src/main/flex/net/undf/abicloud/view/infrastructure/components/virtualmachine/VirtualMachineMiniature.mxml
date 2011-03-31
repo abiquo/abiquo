@@ -452,7 +452,8 @@
 
             <mx:Button id="accessRemoteButton"
                 styleName="RemoteAccessButtonTransparent"
-                enabled="{this._virtualMachine.vdrpIP != null &amp;&amp; (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
+                enabled="{(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER || this._virtualMachine.vdrpIP != null) &amp;&amp;
+                (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
                 click="onClickAccessRemoteButton(event)"/>
         </mx:HBox>
 
