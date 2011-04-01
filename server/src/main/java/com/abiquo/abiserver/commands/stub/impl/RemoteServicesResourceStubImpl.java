@@ -39,7 +39,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
 {
 
     @Override
-    public DataResult<RemoteService> addRemoteService(RemoteService remoteService)
+    public DataResult<RemoteService> addRemoteService(final RemoteService remoteService)
     {
         DataResult<RemoteService> result = new DataResult<RemoteService>();
         RemoteServiceDto dto = getApiResource(remoteService);
@@ -64,8 +64,9 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private RemoteService getReponseService(RemoteService remoteService,
-        DataResult<RemoteService> result, ClientResponse response, EventType eventType)
+    private RemoteService getReponseService(final RemoteService remoteService,
+        final DataResult<RemoteService> result, final ClientResponse response,
+        final EventType eventType)
     {
         RemoteServiceDto responseDto = response.getEntity(RemoteServiceDto.class);
 
@@ -75,6 +76,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         if (responseDto.getConfigurationErrors() != null
             && !responseDto.getConfigurationErrors().isEmpty())
         {
+            result.setSuccess(false);
             result.setMessage(responseDto.getConfigurationErrors().toString());
 
             BasicCommand.traceLog(SeverityType.MAJOR, ComponentType.DATACENTER, eventType,
@@ -85,7 +87,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<Boolean> deleteRemoteService(RemoteService remoteService)
+    public DataResult<Boolean> deleteRemoteService(final RemoteService remoteService)
     {
         DataResult<Boolean> result = new DataResult<Boolean>();
 
@@ -109,7 +111,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<RemoteService> modifyRemoteService(RemoteService remoteService)
+    public DataResult<RemoteService> modifyRemoteService(final RemoteService remoteService)
     {
         DataResult<RemoteService> result = new DataResult<RemoteService>();
         RemoteServiceDto dto = getApiResource(remoteService);
@@ -136,7 +138,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private RemoteServiceDto getApiResource(RemoteService remoteService)
+    private RemoteServiceDto getApiResource(final RemoteService remoteService)
     {
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setUri(remoteService.getUri());
