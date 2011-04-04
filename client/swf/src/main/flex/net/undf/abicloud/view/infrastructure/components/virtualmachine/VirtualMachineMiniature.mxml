@@ -66,6 +66,9 @@
             //The Virtual Machine that this VirtualMachineIcon represents
             [Bindable]
             private var _virtualMachine:VirtualMachine;
+            
+            [Bindable]
+            private var _vncIconEnable:Boolean;
 
 
             override public function set data(value:Object):void
@@ -80,11 +83,33 @@
             public function set virtualMachine(vM:VirtualMachine):void
             {
                 this._virtualMachine = vM;
+                setVNCIconEnable();
             }
 
             public function get virtualMachine():VirtualMachine
             {
                 return this._virtualMachine;
+            }
+            
+            private function setVNCIconEnable():void{
+            	_vncIconEnable = false;
+            	
+            	if(this._virtualMachine){
+	            	//Must be running or paused in a first step
+	            	if(this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED){
+	            		//Then must have a valid VNC IP
+	            		if(this._virtualMachine.vdrpIP){
+	            			_vncIconEnable = true;
+	            		}else{
+	            			//Finally, must be a XenServer Image
+	            			if(this._virtualMachine.assignedTo){
+	            				if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
+	            					_vncIconEnable = true;
+	            				}
+	            			}
+	            		}
+	            	}            		
+            	}
             }
 
             /**
@@ -451,9 +476,10 @@
             <mx:Spacer width="100%"/>
 
             <mx:Button id="accessRemoteButton"
-                styleName="RemoteAccessButtonTransparent"
-                enabled="{(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER || this._virtualMachine.vdrpIP != null) &amp;&amp;
-                (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
+                styleName="RemoteAccessButtonTransparent"                
+                enabled="{this._vncIconEnable}"
+                includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
+                visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
                 click="onClickAccessRemoteButton(event)"/>
         </mx:HBox>
 
