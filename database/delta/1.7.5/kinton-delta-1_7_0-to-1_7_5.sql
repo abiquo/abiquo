@@ -5,6 +5,9 @@ alter table virtualapp modify nodeconnections text;
 
 alter table hypervisor drop column description;
 
+-- Update the leases name
+update ip_pool_management set name=replace(name,':','');
+
 -- DELETE THE OBSOLETE PUBLIC IP TABLE --
 DROP TABLE IF EXISTS `kinton`.`publicip`;
 
@@ -321,8 +324,8 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 END IF;
             END IF;
             -- From old `autoDetachVolume`
-            UPDATE IGNORE volume_management v set v.state = 0
-            WHERE v.idManagement = OLD.idManagement;
+            -- UPDATE IGNORE volume_management v set v.state = 0
+            -- WHERE v.idManagement = OLD.idManagement;
             -- Checks for used IPs
             IF OLD.idVM IS NULL AND NEW.idVM IS NOT NULL THEN
                 -- Query for datacenter

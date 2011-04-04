@@ -25,11 +25,8 @@ import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -37,6 +34,8 @@ import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -47,7 +46,6 @@ import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
-import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -363,11 +361,20 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         finally
         {
             transaction.commit();
+            enterpriseHB = null;
         }
 
-        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
-
-        BasicResult result = proxy.editEnterprise(enterprise);
+//        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
+//
+//        BasicResult result = proxy.editEnterprise(enterprise);
+        
+        session = HibernateUtil.getSession();
+        transaction = session.beginTransaction();
+        session.saveOrUpdate(enterprise.toPojoHB());
+        transaction.commit();
+        DataResult<Enterprise> result = new DataResult<Enterprise>();
+        result.setData(enterprise);
+        result.setSuccess(Boolean.TRUE);
 
         if (result.getSuccess())
         {
@@ -377,9 +384,9 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
             // Log the event
             traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                userSession, null, null, "Enterprise '" + enterpriseHB.getName()
+                userSession, null, null, "Enterprise '" + enterprise.getName()
                     + "' has been modified [Name: " + enterprise.getName() + "]", null, null, null,
-                null, enterpriseHB.getName());
+                null, enterprise.getName());
         }
         else
         {
@@ -437,7 +444,15 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     {
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
 
-        DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection();
+
+        // DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+        Enterprise ent = factory.getEnterpriseDAO().findById(enterpriseId).toPojo();
+        DataResult<Enterprise> dataResult = new DataResult<Enterprise>();
+        dataResult.setData(ent);
+        dataResult.setSuccess(Boolean.TRUE);
+        factory.endConnection();
 
         return dataResult;
     }
