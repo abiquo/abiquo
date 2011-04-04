@@ -131,6 +131,7 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(enterprise);
+        
 
         repo.insert(enterprise);
         return enterprise;
@@ -183,6 +184,7 @@ public class EnterpriseService extends DefaultApiService
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(old);
+        isValidEnterpriseLimit(old);
 
         repo.update(old);
         return old;
@@ -419,5 +421,11 @@ public class EnterpriseService extends DefaultApiService
         }
 
         flushErrors();
+    }
+    
+    protected void isValidEnterpriseLimit(Enterprise old)
+    {
+        // community dummy impl (no limit check)
+        
     }
 }
