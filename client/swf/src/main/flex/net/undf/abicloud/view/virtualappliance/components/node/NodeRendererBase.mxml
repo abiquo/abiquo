@@ -181,8 +181,13 @@
 
                 this._infoToolTip += "CPU: " + nodeVirtualImage.virtualImage.cpuRequired + "\n";
                 this._infoToolTip += "RAM: " + nodeVirtualImage.virtualImage.ramRequired + " MB\n";
-                this._infoToolTip += "HD: " + Number(nodeVirtualImage.virtualImage.hdRequired / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + " GB";
-
+                
+                if(Number(nodeVirtualImage.virtualImage.hdRequired / AbiCloudModel.GB_TO_BYTES) < 1){
+                	this._infoToolTip += "HD: " + Number(nodeVirtualImage.virtualImage.hdRequired / AbiCloudModel.MB_TO_BYTES).toFixed(0).toString() + " MB";
+                }else{
+                    this._infoToolTip += "HD: " + Number(nodeVirtualImage.virtualImage.hdRequired / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + " GB";                    	
+                }
+                
                 //Building name to display
                 this._nodeNameSource = nodeVirtualImage.name;
                 if (nodeVirtualImage.virtualMachine)
