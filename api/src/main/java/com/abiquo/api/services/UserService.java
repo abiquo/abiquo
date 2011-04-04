@@ -151,6 +151,7 @@ public class UserService extends DefaultApiService
             errors.add(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
+        
 
         repo.insertUser(user);
 
@@ -219,6 +220,7 @@ public class UserService extends DefaultApiService
             errors.add(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
+        
 
         return updateUser(old);
     }

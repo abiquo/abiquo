@@ -693,7 +693,7 @@
                 toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
                 dataProvider="{addButtonDataProvider}"
                 enabled="{selectedDatacenter != null}"
-                itemClick="onItemClickAddButton(event)"
+                itemClick="{selectedDatacenter != null ? onItemClickAddButton(event):null}"
                 closeDuration="0"/>
         </general:GeneralPanelToolBox>
     </general:GeneralPanel>
