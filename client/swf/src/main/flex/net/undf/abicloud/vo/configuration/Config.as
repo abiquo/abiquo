@@ -105,7 +105,13 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_vdc_createVolume:SystemProperty;
 		
 		public var client_wiki_vm_editVirtualMachine:SystemProperty;
-		public var client_wiki_vm_createNetworkInterface:SystemProperty;	
+		public var client_wiki_vm_createNetworkInterface:SystemProperty;
+		public var client_wiki_vm_createInstance:SystemProperty;
+		public var client_wiki_vm_createStateful:SystemProperty;
+		
+		public var client_wiki_apps_uploadVM:SystemProperty;
+		
+			
 		
 		
 		
