@@ -469,7 +469,7 @@
         <mx:Button id="editEnterpriseButton"
             styleName="ConfigurationButton"
             label=""
-            enabled="{this._selectedEnterprise != null}"
+            enabled="{enterprisesList.selectedIndex != -1}"
             click="onClickEditEnterpriseButton(event)"/>
     </general:GeneralPanelToolBox>
 
