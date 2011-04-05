@@ -26,30 +26,23 @@ package net.undf.abicloud.view.general.components.info
 	import flash.net.navigateToURL;
 	
 	import mx.controls.Image;
-	import mx.effects.Fade;
 	
+	import net.undf.abicloud.model.AbiCloudModel;
 	import net.undf.abicloud.view.main.CommonAssets;
 
 	[Bindable]
 	public class InfoIcon extends Image
 	{		
-		//show/hide effect
-		private var _fadeEffect:Fade;
-		
 		//Wiki's URL opens when user clicks
 		private var _wikiUrl:String;
 		
 		public function InfoIcon()
 		{
 			super();
-			_fadeEffect = new Fade();
 			source = CommonAssets.info;
 			buttonMode = true;
-			//visible = false;
 			toolTip = resourceManager.getString('Common','TOOLTIP_INFO');
 			addEventListener(MouseEvent.CLICK, openMoreInfo);
-			setStyle("showEffect", _fadeEffect);
-            setStyle("hideEffect", _fadeEffect);
 		}
 		
 		/******************
@@ -60,6 +53,7 @@ package net.undf.abicloud.view.general.components.info
 		
 		public function set wikiUrl(url:String):void{
 			this._wikiUrl = url;
+			displayIcon();
 		}
 		
 		public function get wikiUrl():String{
@@ -78,23 +72,16 @@ package net.undf.abicloud.view.general.components.info
         }
         
         /**
-         * Show the info icon if user presses the CTRL key
+         * Display the icon if required
          */
-        public function showIconInfo(keyPressed:Boolean):void
-        {
-           visible = keyPressed;
-           buttonMode = keyPressed;
+        private function displayIcon():void{
+    		visible = true;
+        	if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showDefaultHelp.value == 0){
+        		if(this._wikiUrl == AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value){
+	        		visible = false;        			
+        		}
+        	}
         }
-
-        /**
-         * Hide the info icon
-         */
-        public function hideIconInfo():void
-        {
-            visible = false;
-            buttonMode = false;
-        }		
-		
 		
 	}
 }

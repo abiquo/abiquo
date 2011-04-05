@@ -62,7 +62,7 @@
             
             private var _iconInfo:InfoIcon;
             
-            private var _wikiUrl:String = "http://community.abiquo.com/display/ABI17/Abiquo+Documentation+Home";
+            private var _wikiUrl:String = AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value;
             
             /**
              * When a Pop Up preinitializes, we add the common information that will be present
@@ -90,7 +90,11 @@
                 header.setStyle("horizontalAlign", "left");
                 header.addChild(_popUpIcon);
                 header.addChild(_title);
-                header.addChild(_iconInfo);
+                
+                //Show only if required
+                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 1){
+	                header.addChild(_iconInfo);                	
+                }
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
