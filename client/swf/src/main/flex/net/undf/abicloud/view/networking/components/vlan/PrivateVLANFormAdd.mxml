@@ -26,7 +26,8 @@
     xmlns:general="net.undf.abicloud.view.general.*"
     xmlns:privatenetwork="net.undf.abicloud.view.networking.components.privatenetwork.*"
     titleText="@Resource(bundle='Networking', key='POPUP_TITLE_VLAN_ADD')"
-    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*">
+    xmlns:vlan="net.undf.abicloud.view.networking.components.vlan.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createPrivateNetwork.value}">
 
     <mx:Script>
         <![CDATA[

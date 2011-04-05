@@ -96,7 +96,18 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_storage_tier:SystemProperty;
 		
 		public var client_wiki_allocation_global:SystemProperty;
-		public var client_wiki_allocation_datacenter:SystemProperty;		
+		public var client_wiki_allocation_datacenter:SystemProperty;	
+		
+		public var client_wiki_vdc_createVdc:SystemProperty;
+		public var client_wiki_vdc_createVapp:SystemProperty;
+		public var client_wiki_vdc_createPrivateNetwork:SystemProperty;
+		public var client_wiki_vdc_createPublicNetwork:SystemProperty;
+		public var client_wiki_vdc_createVolume:SystemProperty;
+		
+		public var client_wiki_vm_editVirtualMachine:SystemProperty;
+		public var client_wiki_vm_createNetworkInterface:SystemProperty;	
+		
+		
 		
 
 		private var propertiesIndex:Array;
