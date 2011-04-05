@@ -21,6 +21,7 @@
 
 package com.abiquo.model.transport.error;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -37,6 +38,10 @@ public class ErrorsDto extends WrapperDto<ErrorDto>
     @XmlElement(name = "error")
     public List<ErrorDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<ErrorDto>();
+        }
         return collection;
     }
 
