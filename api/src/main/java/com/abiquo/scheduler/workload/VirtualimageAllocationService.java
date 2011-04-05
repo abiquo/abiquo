@@ -218,9 +218,16 @@ public class VirtualimageAllocationService
 
             final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
 
-            candidateMachines =
-                datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
-                    hdRequiredOnDatastore, enterprise);
+            try
+            {                
+                candidateMachines =
+                    datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
+                        hdRequiredOnDatastore, enterprise);
+            }
+            catch (PersistenceException e)
+            {
+                throw new NotEnoughResourcesException(e.getMessage());
+            }
         }
 
         return candidateMachines;
@@ -262,6 +269,8 @@ public class VirtualimageAllocationService
             throw new NotEnoughResourcesException(msg);
         }
 
+        StringBuilder sbErrorRacks = new StringBuilder("Caused by:");
+
         for (final Integer idRackCandidate : candidateRackList)
         {
 
@@ -279,15 +288,22 @@ public class VirtualimageAllocationService
             }
             catch (PersistenceException e)
             {
-                log.error(String.format("Rack id [%d] can't be used : %s", idRackCandidate,
-                    e.getMessage()));
+                final String error =
+                    String.format("Rack id [%d] can't be used : %s", idRackCandidate,
+                        e.getMessage());
+
+                sbErrorRacks.append("\n").append(error);
+
+                log.error(error);
 
                 continue;
             }
         }
 
         final String msg =
-            "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance.";
+            "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance."
+                + sbErrorRacks.toString();
+        
         throw new NotEnoughResourcesException(msg);
     }
 

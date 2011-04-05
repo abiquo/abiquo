@@ -249,11 +249,9 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.cause = cause;
+        this.cause = cause;        
         return this;
-    }
-    
-    
+    }   
 
     public static void main(final String[] args)
     {

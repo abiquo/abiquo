@@ -24,6 +24,7 @@ package com.abiquo.api.exceptions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response.Status;
@@ -34,14 +35,17 @@ public class ExtendedAPIException extends APIException
 {
     private static final long serialVersionUID = -6140840253539726342L;
 
-    Collection<APIError> errors;
+    Collection<APIError> errors = new LinkedHashSet<APIError>();
 
     Collection<ConstraintViolation< ? >> validationErrors =
         new LinkedHashSet<ConstraintViolation< ? >>();
 
     Collection<LimitExceededException> limitExceptions =
         new LinkedHashSet<LimitExceededException>();
-
+    
+    private Collection<InvalidParameterConstraint> paramConstraints = 
+        new LinkedHashSet<InvalidParameterConstraint>();
+    
     public Collection<LimitExceededException> getLimitExceededExceptions()
     {
         return limitExceptions;
@@ -55,6 +59,12 @@ public class ExtendedAPIException extends APIException
     public Collection<ConstraintViolation< ? >> getValidationErrors()
     {
         return validationErrors;
+    }
+    
+
+    public Collection<InvalidParameterConstraint> getParamConstraints()
+    {
+        return paramConstraints;
     }
 
     public Collection<APIError> getErrors()
@@ -86,5 +96,11 @@ public class ExtendedAPIException extends APIException
         this.validationErrors = validationErrors;
         this.limitExceptions = limitExceptions;
 
+    }
+
+    public ExtendedAPIException(Status httpStatus, Set<InvalidParameterConstraint> paramErrors)
+    {
+        super(httpStatus);
+        this.paramConstraints = paramErrors;
     }
 }

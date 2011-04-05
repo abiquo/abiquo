@@ -282,6 +282,7 @@
 
     </EventHandlers>
     
+    
     <!-- InfrastructureEvent.GET_INFRASTRUCTURE ________________________________________________________________________ -->
     <EventHandlers type="{InfrastructureEvent.GET_INFRASTRUCTURE_BY_DATACENTER}">
         <!-- Blocking screen -->

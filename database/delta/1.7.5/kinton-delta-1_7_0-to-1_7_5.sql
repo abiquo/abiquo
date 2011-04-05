@@ -5,6 +5,9 @@ alter table virtualapp modify nodeconnections text;
 
 alter table hypervisor drop column description;
 
+-- Update the leases name
+update ip_pool_management set name=replace(name,':','');
+
 -- DELETE THE OBSOLETE PUBLIC IP TABLE --
 DROP TABLE IF EXISTS `kinton`.`publicip`;
 
@@ -135,6 +138,7 @@ DROP TRIGGER if exists `kinton`.`dclimit_deleted`;
 DROP TRIGGER IF EXISTS `kinton`.`create_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`datacenter_deleted`;
 
 DROP TRIGGER IF EXISTS `kinton`.`virtualapp_created`;
 
@@ -435,13 +439,15 @@ CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_l
 FOR EACH ROW BEGIN     
 	 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
                 -- Limit is not used anymore. Statistics are removed
-                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;                
+                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;
+                IF (NEW.idEnterprise != 0 AND NEW.idDataCenter != 0) THEN
                 INSERT IGNORE INTO dc_enterprise_stats 
-                (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
-                extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
-            	VALUES 
-                (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
-                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);       
+	                (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
+	                extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
+	            	VALUES 
+	                (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
+	                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);       
+                END IF;
 		-- 
                 UPDATE IGNORE cloud_usage_stats 
                 SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,
@@ -470,14 +476,15 @@ CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_l
 |
 CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN      
-        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
-            --  Creates a New row in dc_enterprise_stats to store this enterprise's statistics
-            INSERT IGNORE INTO dc_enterprise_stats 
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                   
+        		 IF (NEW.idEnterprise != 0 AND NEW.idDataCenter != 0) THEN
+        INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             VALUES 
                 (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
                 NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);
+                END IF;
             -- cloud_usage_stats
             UPDATE IGNORE cloud_usage_stats 
                 SET vCpuReserved = vCpuReserved + NEW.cpuHard,
@@ -489,6 +496,14 @@ CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_l
                 WHERE idDataCenter = NEW.idDataCenter;
         END IF;
     END;
+|
+CREATE TRIGGER `kinton`.`datacenter_deleted` AFTER DELETE ON `kinton`.`datacenter`
+  FOR EACH ROW BEGIN
+    IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+	DELETE FROM dc_enterprise_stats WHERE idDataCenter = OLD.idDataCenter;
+      	DELETE FROM cloud_usage_stats WHERE idDataCenter = OLD.idDataCenter;
+    END IF;
+  END;
 |
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
     FOR EACH ROW BEGIN
@@ -782,8 +797,4 @@ DELIMITER ;
 
 -- We need to update Vapp Enterprise Stats with the right idVirtualDatacenter Values
 CALL `kinton`.`UpdateVappEnterpriseStatsWithVDCIds`();
-
---
-
-
 

@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
         	import net.undf.abicloud.view.main.CommonAssets;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -62,6 +63,10 @@
             //Use in case of stateful with a custom name
             [Bindable]
             public var nodeName:String;
+            
+            [Bindable]
+            private var _vncIconEnable:Boolean;
+            
 
             [Bindable(event="virtualMachineChange")]
             public function get virtualMachine():VirtualMachine
@@ -78,6 +83,28 @@
                 this._virtualMachine = value;
                 nodeName = null;
                 dispatchEvent(new Event("virtualMachineChange"));
+                setVNCIconEnable();
+            }
+            
+            private function setVNCIconEnable():void{
+            	_vncIconEnable = false;
+            	
+            	if(this._virtualMachine){
+	            	//Must be running or paused in a first step
+	            	if(this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED){
+	            		//Then must have a valid VNC IP
+	            		if(this._virtualMachine.vdrpIP){
+	            			_vncIconEnable = true;
+	            		}else{
+	            			//Finally, must be a XenServer Image
+	            			if(this._virtualMachine.assignedTo){
+	            				if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
+	            					_vncIconEnable = true;
+	            				}
+	            			}
+	            		}
+	            	}            		
+            	}
             }
 
             //Depending on where this component is placed, some options will not be visible
@@ -223,7 +250,7 @@
             {
                 event.stopImmediatePropagation();
 
-                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
+                if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV)
                 {
                     //This hypervisor type does not support graphical remote access
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
@@ -251,10 +278,27 @@
                     }
 
                     var appletURL:String;
-                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX)
-                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" + this._virtualMachine.vdrpIP + "&vrdpPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
-                    else
-                        appletURL = "tightvnc/tightvnc.html?vncIP=" + this._virtualMachine.vdrpIP + "&vncPort=" + this._virtualMachine.vdrpPort + "&width=" + appletWidth + "&height=" + appletHeight;
+                    if (HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.VIRTUAL_BOX){
+                        appletURL = "properJavaRDP/properJavaRDP.html?vrdpIP=" 
+                        + this._virtualMachine.vdrpIP 
+                        + "&vrdpPort=" + this._virtualMachine.vdrpPort 
+                        + "&width=" + appletWidth 
+                        + "&height=" + appletHeight;
+                    }else if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
+                    	appletURL = "xsapplet/xsapplet.html?vncIP=" 
+                    	+ HyperVisor(this._virtualMachine.assignedTo).ip 
+                    	+ "&vncUser=" + HyperVisor(this._virtualMachine.assignedTo).user 
+                    	+ "&vncPass=" + HyperVisor(this._virtualMachine.assignedTo).password 
+                    	+ "&vncName=" + this._virtualMachine.name 
+                    	+ "&width=" + appletWidth 
+                    	+ "&height=" + appletHeight;                        
+                    }else{
+                        appletURL = "tightvnc/tightvnc.html?vncIP=" 
+                        + this._virtualMachine.vdrpIP 
+                        + "&vncPort=" + this._virtualMachine.vdrpPort 
+                        + "&width=" + appletWidth 
+                        + "&height=" + appletHeight;
+                    }
 
                     if (event.shiftKey)
                     {
@@ -399,8 +443,8 @@
             <mx:Button id="accessRemoteButton"
                 styleName="RemoteAccessButton"
                 toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REMOTE_ACCESS')"
-                enabled="{(this._virtualMachine.vdrpIP != null) &amp;&amp; (this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED)}"
                 click="onClickAccessRemoteButton(event)"
+                enabled="{this._vncIconEnable}"
                 includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
                 visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"/>
         </mx:VBox>
