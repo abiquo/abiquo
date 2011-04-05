@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.7.5-HF1-SNAPSHOT</version>
+        <version>1.7.5-HF1</version>
     </parent>
     <dependencies>
         <dependency>
