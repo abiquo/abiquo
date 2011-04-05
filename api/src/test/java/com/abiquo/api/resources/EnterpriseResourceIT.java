@@ -28,12 +28,14 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseActionGetVi
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveMachineURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
@@ -197,12 +199,14 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool);
+            ips.add(ippool);
             ip = ip.nextIPAddress();
         }
+        setup(ips.toArray());
 
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
         Resource resource = client.resource(validURI);
