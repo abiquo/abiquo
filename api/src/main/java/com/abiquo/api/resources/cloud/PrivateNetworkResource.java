@@ -22,6 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -64,6 +65,8 @@ public class PrivateNetworkResource extends AbstractResource
 
         return createTransferObject(network, virtualDatacenterId, restBuilder);
     }
+    
+       
 
     private static VLANNetworkDto addLinks(IRESTBuilder restBuilder, VLANNetworkDto network,
         Integer virtualDatacenterId)

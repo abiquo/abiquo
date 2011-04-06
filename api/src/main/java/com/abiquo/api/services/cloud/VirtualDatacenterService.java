@@ -22,7 +22,6 @@
 package com.abiquo.api.services.cloud;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -36,29 +35,21 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
-import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
-import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
-import com.abiquo.server.core.infrastructure.network.VLANNetwork;
-import com.abiquo.server.core.util.network.IPAddress;
-import com.abiquo.server.core.util.network.IPNetworkRang;
 
 @Service
 @Transactional(readOnly = true)
@@ -67,17 +58,24 @@ public class VirtualDatacenterService extends DefaultApiService
 
     public static final String FENCE_MODE = "bridge";
 
+    // Used services
+    @Autowired
+    UserService userService;
+    
+    @Autowired
+    PrivateNetworkService networkService;
+
+    // New repos and DAOs
     @Autowired
     VirtualDatacenterRep repo;
 
     @Autowired
     DatacenterRep datacenterRepo;
-
-    @Autowired
-    UserService userService;
-
+    
     @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
+    
+
 
     public VirtualDatacenterService()
     {
@@ -92,6 +90,7 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
+        networkService = new PrivateNetworkService(em);
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
@@ -145,19 +144,12 @@ public class VirtualDatacenterService extends DefaultApiService
         }
 
         Network network = createNetwork();
-
-        NetworkConfigurationDto config = dto.getNetworkConfiguration();
-
         VirtualDatacenter vdc = createVirtualDatacenter(dto, datacenter, enterprise, network);
-
-        NetworkConfiguration networkConfiguration = createNetworkConfiguration(config);
-
-        VLANNetwork vlan = createVlan(network, config, networkConfiguration);
-
-        Collection<IPAddress> addressRange = calculateIPRange(config);
-
-        createDhcp(datacenter, vdc, vlan, networkConfiguration, addressRange);
-
+        
+        //set as default vlan (as it is the first one) and create it.
+        dto.getVlan().setDefaultNetwork(Boolean.TRUE);
+        networkService.createPrivateNetwork(vdc.getId(), dto.getVlan());
+        
         assignVirtualDatacenterToUser(vdc);
 
         return vdc;
@@ -240,15 +232,6 @@ public class VirtualDatacenterService extends DefaultApiService
         return network;
     }
 
-    private VLANNetwork createVlan(Network network, NetworkConfigurationDto config,
-        NetworkConfiguration networkConfiguration)
-    {
-        VLANNetwork vlan =
-            new VLANNetwork(config.getNetworkName(), network, 1, networkConfiguration);
-        repo.insertVlan(vlan);
-        return vlan;
-    }
-
     private VirtualDatacenter createVirtualDatacenter(VirtualDatacenterDto dto,
         Datacenter datacenter, Enterprise enterprise, Network network)
     {
@@ -260,7 +243,7 @@ public class VirtualDatacenterService extends DefaultApiService
                 dto.getName());
 
         setLimits(dto, vdc);
-        validateVirtualDatacenter(vdc, dto.getNetworkConfiguration(), datacenter);
+        validateVirtualDatacenter(vdc, dto.getVlan().getNetworkConfiguration(), datacenter);
 
         repo.insert(vdc);
         return vdc;
@@ -317,89 +300,4 @@ public class VirtualDatacenterService extends DefaultApiService
         return datacenterRepo.findHypervisors(datacenter).contains(type);
     }
 
-    private Collection<IPAddress> calculateIPRange(NetworkConfigurationDto networkConfiguration)
-    {
-        Collection<IPAddress> range =
-            IPNetworkRang.calculateWholeRange(
-                IPAddress.newIPAddress(networkConfiguration.getAddress()),
-                networkConfiguration.getMask());
-
-        if (!IPAddress.isIntoRange(range, networkConfiguration.getGateway()))
-        {
-            errors.add(APIError.NETWORK_GATEWAY_OUT_OF_RANGE);
-            flushErrors();
-        }
-
-        return range;
-    }
-
-    private NetworkConfiguration createNetworkConfiguration(NetworkConfigurationDto dto)
-    {
-        NetworkConfiguration config =
-            new NetworkConfiguration(dto.getAddress(), dto.getMask(), dto.getNetMask(), FENCE_MODE);
-        config.setGateway(dto.getGateway());
-        config.setPrimaryDNS(dto.getPrimaryDNS());
-        config.setSecondaryDNS(dto.getSecondaryDNS());
-        config.setSufixDNS(dto.getSufixDNS());
-
-        if (!config.isValid())
-        {
-            validationErrors.addAll(config.getValidationErrors());
-            flushErrors();
-        }
-
-        repo.insertNetworkConfig(config);
-
-        return config;
-    }
-
-    private Dhcp createDhcp(Datacenter datacenter, VirtualDatacenter vdc, VLANNetwork vlan,
-        NetworkConfiguration networkConfiguration, Collection<IPAddress> range)
-    {
-        List<RemoteService> dhcpServiceList =
-            datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
-                RemoteServiceType.DHCP_SERVICE);
-        Dhcp dhcp = new Dhcp();
-
-        if (!dhcpServiceList.isEmpty())
-        {
-            RemoteService dhcpService = dhcpServiceList.get(0);
-            dhcp = new Dhcp(dhcpService);
-        }
-
-        repo.insertDhcp(dhcp);
-
-        Collection<String> allMacAddresses = repo.getAllMacs();
-
-        for (IPAddress address : range)
-        {
-            String macAddress = null;
-            do
-            {
-                macAddress = IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType());
-            }
-            while (allMacAddresses.contains(macAddress));
-            allMacAddresses.add(macAddress);
-
-            // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
-            // leases with the ':' char in the lease name)
-            String name = macAddress.replace(":", "") + "_host";
-
-            IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp,
-                    vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName());
-
-            ipManagement.setVirtualDatacenter(vdc);
-
-            repo.insertIpManagement(ipManagement);
-        }
-
-        networkConfiguration.setDhcp(dhcp);
-
-        return dhcp;
-    }
 }

@@ -37,8 +37,13 @@ import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 
 /**
@@ -53,17 +58,20 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     private String badURI = resolvePrivateNetworksURI(3);
 
     VirtualDatacenter vdc;
-
     RemoteService rs;
-
     VLANNetwork vlan;
+    Enterprise sysEnterprise;
 
     @BeforeMethod
     public void setUp()
     {
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         vdc = vdcGenerator.createInstance(rs.getDatacenter());
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        sysEnterprise = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+
+        User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
+        setup(sysEnterprise, r, u, vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
 
     }
 
@@ -101,5 +109,39 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(404, response.getStatusCode());
+    }
+    
+    @Test
+    public void createPrivateNetwork()
+    {        
+        VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        VLANNetworkDto dto = createValidNetworkDto();
+        
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        
+        assertEquals(201, response.getStatusCode());
+        
+    }
+
+    private VLANNetworkDto createValidNetworkDto()
+    {
+       
+        NetworkConfigurationDto configDto = new NetworkConfigurationDto();
+        configDto.setAddress("192.168.0.0");
+        configDto.setDefaultNetwork(true);
+        configDto.setFenceMode("bridge");
+        configDto.setGateway("192.168.0.1");
+        configDto.setMask(24);
+        configDto.setNetMask("255.255.255.248");
+        configDto.setNetworkName("KVM VLAN");
+        configDto.setPrimaryDNS("10.0.0.1");
+        configDto.setSecondaryDNS("10.0.0.1");
+
+        VLANNetworkDto networkDto = new VLANNetworkDto();
+        networkDto.setName("Default Network");
+        networkDto.setDefaultNetwork(Boolean.TRUE);
+        networkDto.setNetworkConfiguration(configDto);
+        
+        return networkDto;
     }
 }

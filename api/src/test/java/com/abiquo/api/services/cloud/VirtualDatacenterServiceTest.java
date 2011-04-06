@@ -45,6 +45,7 @@ import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 {
@@ -141,6 +142,10 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
     	Datacenter datacenter = datacenterService.getDatacenter(d.getId());
     	
     	VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
+    	VLANNetworkDto networkDto = new VLANNetworkDto();
+    	networkDto.setName("DefaultNetwork");
+    	networkDto.setDefaultNetwork(Boolean.TRUE);
+    	
     	NetworkConfigurationDto configDto = new NetworkConfigurationDto();
         configDto.setAddress("192.168.0.0");
         configDto.setDefaultNetwork(true);
@@ -151,8 +156,9 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
         configDto.setNetworkName("KVM VLAN");
         configDto.setPrimaryDNS("10.0.0.1");
         configDto.setSecondaryDNS("10.0.0.1");
-
-        dto.setNetworkConfiguration(configDto);
+        
+        networkDto.setNetworkConfiguration(configDto);
+        dto.setVlan(networkDto);
     	
     	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);
     	
