@@ -85,7 +85,11 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_defaultURL:SystemProperty;
 		
 		public var client_wiki_infra_createDatacenter:SystemProperty;
+		public var client_wiki_infra_editDatacenter:SystemProperty;
+		public var client_wiki_infra_editRemoteService:SystemProperty;
 		public var client_wiki_infra_createPhysicalMachine:SystemProperty;
+		public var client_wiki_infra_mailNotification:SystemProperty;
+		public var client_wiki_infra_addDatastore:SystemProperty;
 		public var client_wiki_infra_createMultiplePhysicalMachine:SystemProperty;
 		public var client_wiki_infra_createRack:SystemProperty;
 		
@@ -105,15 +109,22 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_vdc_createVolume:SystemProperty;
 		
 		public var client_wiki_vm_editVirtualMachine:SystemProperty;
+		public var client_wiki_vm_bundleVirtualMachine:SystemProperty;		
 		public var client_wiki_vm_createNetworkInterface:SystemProperty;
 		public var client_wiki_vm_createInstance:SystemProperty;
 		public var client_wiki_vm_createStateful:SystemProperty;
+		public var client_wiki_vm_captureVirtualMachine:SystemProperty;
 		
 		public var client_wiki_apps_uploadVM:SystemProperty;
 		
-			
+		public var client_wiki_user_createEnterprise:SystemProperty;
+		public var client_wiki_user_dataCenterLimits:SystemProperty;
+		public var client_wiki_user_createUser:SystemProperty;
 		
-		
+		public var client_wiki_config_general:SystemProperty;
+		public var client_wiki_config_heartbeat:SystemProperty;
+		public var client_wiki_config_registration:SystemProperty;	
+		public var client_wiki_config_licence:SystemProperty;		
 		
 
 		private var propertiesIndex:Array;

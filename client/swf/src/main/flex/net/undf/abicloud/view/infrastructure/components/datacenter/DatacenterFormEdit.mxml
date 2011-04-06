@@ -26,6 +26,7 @@
     resizeEffect="{myResize}"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_infra_editDatacenter.value}"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_DATACENTEREDIT')">
 
     <mx:Metadata>
@@ -34,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
             import mx.managers.PopUpManager;
             import mx.resources.ResourceManager;
 
