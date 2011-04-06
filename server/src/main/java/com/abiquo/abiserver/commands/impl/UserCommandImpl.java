@@ -361,21 +361,19 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             basicResult.setMessage(resourceManager.getMessage("editEnterprise.limitExceeded"));
 
             return basicResult;
+                        
         }
         finally
         {
             transaction.commit();
-            enterpriseHB = null;
         }
 
-        session = HibernateUtil.getSession();
-        transaction = session.beginTransaction();
-        session.saveOrUpdate(enterprise.toPojoHB());
-        transaction.commit();
+        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
+        
         DataResult<Enterprise> result = new DataResult<Enterprise>();
-        result.setData(enterprise);
-        result.setSuccess(Boolean.TRUE);
-
+        
+        result = proxy.editEnterprise(enterprise);
+        
         if (result.getSuccess())
         {
             // Building result
@@ -443,16 +441,9 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         final Integer enterpriseId)
     {
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
-        DAOFactory factory = HibernateDAOFactory.instance();
-        factory.beginConnection();
 
-        // DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
-        Enterprise ent = factory.getEnterpriseDAO().findById(enterpriseId).toPojo();
-        DataResult<Enterprise> dataResult = new DataResult<Enterprise>();
-        dataResult.setData(ent);
-        dataResult.setSuccess(Boolean.TRUE);
-        factory.endConnection();
-
+        DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+        
         return dataResult;
     }
 }
