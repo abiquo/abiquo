@@ -24,7 +24,9 @@ package com.abiquo.api.resources;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -113,21 +115,19 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
-    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) Integer id,
-        @QueryParam(START_WITH) Integer startwith, @QueryParam(BY) String orderBy,
-        @QueryParam(FILTER) String filter, @QueryParam(LIMIT) Integer limit,
-        @QueryParam(ASC) Boolean desc_or_asc, @Context IRESTBuilder restBuilder) throws Exception
+    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) Integer id,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) Integer startwith, 
+        @QueryParam(BY) @DefaultValue("ip") String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") String filter, 
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") Boolean desc_or_asc, 
+        @Context IRESTBuilder restBuilder) throws Exception
     {
 
         // Set query Params by default if they are not informed
-        Integer firstElem = (startwith == null) ? 0 : startwith;
-        String by = (orderBy == null || orderBy.isEmpty()) ? "ip" : orderBy;
-        String has = (filter == null) ? "" : filter;
-        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
-        Boolean asc = (desc_or_asc == null)? true : desc_or_asc;
 
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, firstElem, numElem, has, by, asc);
+            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
 
         if (all == null)
         {

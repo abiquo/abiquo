@@ -31,10 +31,21 @@ import java.util.Comparator;
  */
 public enum APIError
 {
+    // STATUSCODES
+    STATUS_BAD_REQUEST("400-BAD REQUEST", "Request not valid"),
+    STATUS_UNAUTHORIZED("401-UNAUTHORIZED", "This requests requires user authentication"),
+    STATUS_FORBIDDEN("403-FORBIDDEN", "Access is denied"),
+    STATUS_NOT_FOUND("404-NOT FOUND", "The Resource requested does not exist"), 
+    STATUS_METHOD_NOT_ALLOWED("405-METHOD NOT ALLOWED", "The resource doesn't expose this method"),
+    STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE", "Abiquo API currently only supports application/xml Media Type"),
+    STATUS_INTERNAL_SERVER_ERROR("500-INTERNAL SERVER ERROR", "Unexpected exception"),
+    
+    
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"),
+        
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-5", "Invalid private network type"), INTERNAL_SERVER_ERROR(
         "GEN-6", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-7",
@@ -249,11 +260,9 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.cause = cause;
+        this.cause = cause;        
         return this;
-    }
-    
-    
+    }   
 
     public static void main(final String[] args)
     {
