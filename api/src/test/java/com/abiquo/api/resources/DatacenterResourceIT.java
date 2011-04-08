@@ -49,12 +49,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("hypervisor", "physicalmachine", "rack", "datacenter");
-    }
-
     @Test
     public void getDatacenterDoesntExist() throws ClientWebException
     {

@@ -40,12 +40,6 @@ import com.abiquo.server.core.enterprise.RoleDto;
 public class RoleResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("role");
-    }
-
     @Test
     public void getRoleDoesntExist() throws ClientWebException
     {

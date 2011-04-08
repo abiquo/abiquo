@@ -31,6 +31,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.testng.annotations.AfterMethod;
 
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
@@ -109,6 +110,23 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             em.persist(entity);
         }
         em.getTransaction().commit();
+    }
+    
+    @AfterMethod
+    public void tearDown()
+    {
+        String[] entities = { "ip_pool_management", "volume_management", "diskstateful_conversions", "initiator_mapping", "rasd_management", 
+            "rasd", "nodevirtualimage", "nodenetwork", "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage", 
+            "virtualimage_conversions", "node_virtual_image_stateful_conversions", "virtual_appliance_conversions", "virtualapp", 
+            "vappstateful_conversions", "virtualdatacenter", "vlan_network", "vlan_network_assignment", "network_configuration", "dhcp_service",
+            "storage_pool", "tier", "storage_device", "remote_service", "datastore_assignment", "datastore", "hypervisor", 
+            "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository", "workload_fit_policy_rule", "network",
+            "session", "user", "role", "enterprise", "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule", 
+            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library", "license", 
+            "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats", "enterprise_resources_stats", 
+            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog", "icon", "register" };
+        
+        tearDown(entities);
     }
 
     protected void tearDown(String... entities)

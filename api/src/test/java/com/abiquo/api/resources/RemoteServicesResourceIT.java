@@ -44,12 +44,6 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("remote_service", "datacenter");
-    }
-
     @Test
     public void getRemoteServicesList() throws Exception
     {
