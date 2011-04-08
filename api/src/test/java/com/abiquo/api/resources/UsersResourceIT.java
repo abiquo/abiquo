@@ -56,12 +56,6 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         setup(e, r, u);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("session", "user", "enterprise", "role");
-    }
-
     @Test
     public void getUsersList() throws Exception
     {

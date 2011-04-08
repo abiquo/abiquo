@@ -66,13 +66,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 
 public class DatastoresResourceIT extends AbstractJpaGeneratorIT
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("datastore_assignment", "remote_service", "datastore", "physicalmachine", "rack",
-            "datacenter");
-    }
-
     @DataProvider(name = "createDatastoreProvider")
     @SuppressWarnings("unused")
     private Iterator<Object[]> createDatastoreProvider()

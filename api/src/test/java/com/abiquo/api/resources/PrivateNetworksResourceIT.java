@@ -75,14 +75,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "datacenter", "network", "user", "role", "enterprise");
-    }
-
     @Test
     public void getPrivateNetworks()
     {

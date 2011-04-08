@@ -65,13 +65,6 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 
 public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "datacenter", "network", "enterprise");
-    }
 
     @Test
     public void getVirtualDatacenterDoesntExist() throws ClientWebException
