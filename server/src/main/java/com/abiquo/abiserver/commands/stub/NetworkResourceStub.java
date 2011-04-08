@@ -24,7 +24,11 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.List;
+
+import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 
 /**
@@ -41,4 +45,9 @@ public interface NetworkResourceStub
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
+    
+    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
+        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
+        throws NetworkCommandException;
+    
 }

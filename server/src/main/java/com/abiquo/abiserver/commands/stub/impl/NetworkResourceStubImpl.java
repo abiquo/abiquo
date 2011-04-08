@@ -25,20 +25,32 @@
 package com.abiquo.abiserver.commands.stub.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wink.client.ClientResponse;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListResponse;
+import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -92,12 +104,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("?startwith=" + offset);
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
-        buildRequest.append("&asc=" + ((asc)? "true" : "false"));
+        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
         }
-        
 
         ClientResponse response = get(buildRequest.toString());
 
@@ -111,10 +122,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 IpPoolManagement flexIp = createFlexObject(ip);
                 flexIp.setEnterpriseId(enterpriseId);
                 flexIps.add(flexIp);
-            }            
+            }
             listResponse.setList(flexIps);
             listResponse.setTotalNumEntities(ips.getTotalSize());
-            
+
             dataResult.setData(listResponse);
             dataResult.setSuccess(Boolean.TRUE);
         }
@@ -125,7 +136,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return dataResult;
     }
-    
+
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
@@ -135,16 +146,16 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             new DataResult<ListResponse<IpPoolManagement>>();
         ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
 
-        StringBuilder buildRequest = new StringBuilder(createVirtualDatacenterPrivateIPsLink(vdcId));
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacenterPrivateIPsLink(vdcId));
         buildRequest.append("?startwith=" + offset);
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
-        buildRequest.append("&asc=" + ((asc)? "true" : "false"));
+        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
         }
-        
 
         ClientResponse response = get(buildRequest.toString());
 
@@ -157,10 +168,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             {
                 IpPoolManagement flexIp = createFlexObject(ip);
                 flexIps.add(flexIp);
-            }            
+            }
             listResponse.setList(flexIps);
             listResponse.setTotalNumEntities(ips.getTotalSize());
-            
+
             dataResult.setData(listResponse);
             dataResult.setSuccess(Boolean.TRUE);
         }
@@ -170,6 +181,48 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         return dataResult;
+    }
+
+    @Override
+    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
+        Integer datacenterId, Integer offset, Integer numElem, String ipLike)
+        throws NetworkCommandException
+    {
+        DataResult<ListResponse<Enterprise>> dataResult =
+            new DataResult<ListResponse<Enterprise>>();
+
+        List<Enterprise> listEnt = new ArrayList<Enterprise>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createDatacenterLink(datacenterId));
+        buildRequest.append("/action/enterprises");
+        buildRequest.append("?network=true");
+        buildRequest.append("&startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+        
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            EnterprisesDto enterprises = response.getEntity(EnterprisesDto.class);
+            for(EnterpriseDto entdto : enterprises.getCollection()){
+                
+               Enterprise e = Enterprise.create(entdto);
+               listEnt.add(e);
+            }
+            ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
+            listResponse.setList(listEnt);
+            listResponse.setTotalNumEntities(listEnt.size());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");    
+        }
+        return dataResult;
+
     }
 
     private String transformOrderBy(String orderBy)
@@ -190,20 +243,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         {
             return "virtualmachine";
         }
-        else return orderBy;
+        else
+            return orderBy;
     }
 
     private IpPoolManagement createFlexObject(IpPoolManagementDto ip)
     {
         IpPoolManagement flexIp = new IpPoolManagement();
-        
+
         flexIp.setIdManagement(ip.getId());
         flexIp.setIp(ip.getIp());
         flexIp.setMac(ip.getMac());
         flexIp.setQuarantine(ip.getQuarantine());
         flexIp.setConfigureGateway(ip.getConfigurationGateway());
         flexIp.setName(ip.getName());
-        
+
         for (RESTLink currentLink : ip.getLinks())
         {
             if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
@@ -213,21 +267,23 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
             {
                 flexIp.setVirtualDatacenterName(currentLink.getTitle());
-                flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(currentLink.getHref().lastIndexOf("/") + 1)));
+                flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
             }
             else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
             {
                 flexIp.setVirtualApplianceName(currentLink.getTitle());
-                flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(currentLink.getHref().lastIndexOf("/") + 1)));
+                flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
             }
             else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
             {
                 flexIp.setVirtualMachineName(currentLink.getTitle());
-                flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(currentLink.getHref().lastIndexOf("/") + 1)));
+                flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
             }
         }
-                
-        
+
         return flexIp;
     }
 

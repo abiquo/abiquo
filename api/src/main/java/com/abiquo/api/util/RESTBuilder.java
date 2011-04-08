@@ -133,6 +133,8 @@ public class RESTBuilder implements IRESTBuilder
             RemoteServicesResource.REMOTE_SERVICES_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_PATH, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));

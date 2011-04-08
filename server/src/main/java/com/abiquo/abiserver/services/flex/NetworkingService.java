@@ -117,8 +117,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -216,12 +216,11 @@ public class NetworkingService
                     .getInstance(userSession, networkCommand, NetworkCommand.class);
             ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
             List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike());
+                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
+                    .getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike());
             Integer listPoolNumberAvailable =
-                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId,
-                    listRequest.getFilterLike());
+                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
+                    .getFilterLike());
 
             List<IpPoolManagement> listOfAddress = new ArrayList<IpPoolManagement>();
             for (IpPoolManagementHB ipPool : listPoolAvailable)
@@ -282,47 +281,10 @@ public class NetworkingService
     public BasicResult getEnterprisesWithNetworkInDataCenter(UserSession userSession,
         Integer datacenterId, ListRequest listRequest)
     {
-        DataResult<ListResponse<Enterprise>> dataResult =
-            new DataResult<ListResponse<Enterprise>>();
 
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            // Execute the commands
-            List<EnterpriseHB> response =
-                proxy.getEnterprisesWithNetworksByDatacenter(userSession, datacenterId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike());
-            Integer responseNumber =
-                proxy.getNumberEnterprisesWithNetworksByDatacenter(userSession, datacenterId,
-                    listRequest.getFilterLike());
-
-            // Prepare the transfer objects
-            List<Enterprise> listEnt = new ArrayList<Enterprise>();
-            for (EnterpriseHB ent : response)
-            {
-                listEnt.add(ent.toPojo());
-            }
-
-            // Prepare the data
-            ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
-            listResponse.setList(listEnt);
-            listResponse.setTotalNumEntities(responseNumber);
-
-            dataResult.setData(listResponse);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getEnterprisesWithNetworksByDatacenter(userSession,
+            datacenterId, listRequest.getOffset(), listRequest.getNumberOfNodes(),
+            listRequest.getFilterLike());
     }
 
     /**
