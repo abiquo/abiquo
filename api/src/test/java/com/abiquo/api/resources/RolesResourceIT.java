@@ -39,12 +39,6 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
 {
     private String rolesURI = resolveRolesURI();
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("role");
-    }
-
     @Test
     public void getRolesList() throws Exception
     {
