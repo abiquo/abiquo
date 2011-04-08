@@ -78,12 +78,6 @@ public class VlanScenariosTestIT extends TestPopulate
         conf.readTimeout(CLIENT_TIMEOUT);
         client = new RestClient(conf);
     }
-
-    @AfterMethod
-    public void tearDownModel()
-    {
-        tearDownModelTables();
-    }
     
     @BeforeMethod
     public void setupModel()
