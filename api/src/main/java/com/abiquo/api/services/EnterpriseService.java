@@ -144,7 +144,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(enterprise);
+        userService.checkEnterpriseAdminCredentials(enterprise);
         return enterprise;
     }
 
@@ -157,7 +157,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(old);
+        userService.checkEnterpriseAdminCredentials(old);
 
         if (dto.getName().isEmpty())
         {
