@@ -43,7 +43,7 @@ public class ResourceUpgradeUseTest extends AbstractGeneratorTest
     }
 
     @AfterTest
-    public void tearDown() throws Exception
+    public void tearDown()
     {
         resourceUpgrade = null;
     }

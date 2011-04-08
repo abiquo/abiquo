@@ -119,8 +119,6 @@ public class TestPopulate extends AbstractJpaGeneratorIT
     // /
     public PopulateTestCase setUpModel(List<String> model)
     {
-        tearDownModelTables(); // XXX be aware of other tests
-
         setup();
         
         return populateReader.readModel(model);
@@ -135,16 +133,5 @@ public class TestPopulate extends AbstractJpaGeneratorIT
     {
         populateReader.runningVirtualMachine(virtualMachineId);
     }
-    
 
-    public void tearDownModelTables()
-    {
-        tearDown("workload_machine_load_rule", "workload_enterprise_exclusion_rule",
-            "workload_fit_policy_rule", "datastore_assignment", "ip_pool_management",
-            "rasd_management", "nodevirtualimage", "virtualapp", "vlan_network_assignment",
-            "virtualdatacenter", "vlan_network", "network_configuration", "dhcp_service",
-            "remote_service", "virtualmachine", "datastore", "hypervisor", "physicalmachine",
-            "rack", "repository", "datacenter", "network", "virtualimage", "user", "role",
-            "enterprise");
-    }
 }

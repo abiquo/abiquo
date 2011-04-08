@@ -68,13 +68,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("hypervisor", "physicalmachine", "rack", "datacenter", "remote_service", "user",
-            "role", "enterprise");
-    }
-
     @Test
     public void getMachinesList() throws Exception
     {

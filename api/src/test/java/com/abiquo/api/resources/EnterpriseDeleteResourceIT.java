@@ -50,12 +50,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         setup(e, r, u);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise");
-    }
-
     @Test
     public void shouldDeleteEnterpriseWhenDoesNotContainVirtualDatacenters()
     {
