@@ -105,9 +105,8 @@ public class DatacenterResource extends AbstractResource
     {
         Integer firstElem = (startwith == null) ? 0 : startwith;
         Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
-        if (network == null)
-            network = false;
-        // todo el proceso de querys
+        if (network == null) network = false;
+        
         Datacenter datacenter = service.getDatacenter(datacenterId);
         List<Enterprise> enterprises =
             service

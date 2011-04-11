@@ -104,17 +104,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
-     * 
-     * @param userSession user who performs the action.
-     * @param vdcId virtual datacenter identifier.
-     * @return the DHCP info into a parsed String.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public String getInfoDHCPServer(UserSession userSession, Integer vdcId)
-        throws NetworkCommandException;
-
-    /**
      * Return the list of gateways you can choose by a virtual machine.
      * 
      * @param userSession user who performs the action.

@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 
-
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
@@ -186,22 +185,22 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         List<Enterprise> listEnt = new ArrayList<Enterprise>();
 
-        StringBuilder buildRequest =
-            new StringBuilder(createDatacenterLink(datacenterId));
+        StringBuilder buildRequest = new StringBuilder(createDatacenterLink(datacenterId));
         buildRequest.append("/action/enterprises");
         buildRequest.append("?network=true");
         buildRequest.append("&startwith=" + offset);
         buildRequest.append("&limit=" + numElem);
-        
+
         ClientResponse response = get(buildRequest.toString());
 
         if (response.getStatusCode() == 200)
         {
             EnterprisesDto enterprises = response.getEntity(EnterprisesDto.class);
-            for(EnterpriseDto entdto : enterprises.getCollection()){
-                
-               Enterprise e = Enterprise.create(entdto);
-               listEnt.add(e);
+            for (EnterpriseDto entdto : enterprises.getCollection())
+            {
+
+                Enterprise e = Enterprise.create(entdto);
+                listEnt.add(e);
             }
             ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
             listResponse.setList(listEnt);
@@ -212,10 +211,32 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");    
+            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");
         }
         return dataResult;
 
+    }
+
+    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
+        throws NetworkCommandException
+    {
+        DataResult<String> dataResult = new DataResult<String>();
+        StringBuilder buildRequest = new StringBuilder(createVirtualDatacentersLink());
+        buildRequest.append("/" + vdcId.toString());
+        buildRequest.append("/action/dhcpinfo");
+
+        ClientResponse response = get(buildRequest.toString());
+        if (response.getStatusCode() == 200)
+        {
+            String dhcpinfo = response.getEntity(String.class);
+            dataResult.setData(dhcpinfo);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");
+        }
+        return dataResult;
     }
 
     private String transformOrderBy(String orderBy)

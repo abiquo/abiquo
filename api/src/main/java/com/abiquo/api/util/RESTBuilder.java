@@ -380,6 +380,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
+        links.add(builder.buildActionLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO,"dhcpinfo", params));
 
         return links;
     }

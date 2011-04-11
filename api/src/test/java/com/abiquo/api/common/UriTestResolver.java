@@ -635,6 +635,12 @@ public class UriTestResolver
         return resolveVirtualDatacenterURI(virtualDatacenterId)
             + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
     }
+    
+    public static String resolveVirtualDatacenterActionGetDHCPInfoURI(final Integer virtualDatacenterId)
+    {
+        return resolveVirtualDatacenterURI(virtualDatacenterId)
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
+    }
 
     public static String resolveVirtualDatacentersURI()
     {
