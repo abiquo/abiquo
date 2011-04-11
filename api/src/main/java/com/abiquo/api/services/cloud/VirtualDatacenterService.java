@@ -49,7 +49,7 @@ import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.network.Network;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 @Service
 @Transactional(readOnly = true)
@@ -243,7 +243,7 @@ public class VirtualDatacenterService extends DefaultApiService
                 dto.getName());
 
         setLimits(dto, vdc);
-        validateVirtualDatacenter(vdc, dto.getVlan().getNetworkConfiguration(), datacenter);
+        validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
 
         repo.insert(vdc);
         return vdc;
@@ -261,10 +261,10 @@ public class VirtualDatacenterService extends DefaultApiService
         vdc.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
     }
 
-    private void validateVirtualDatacenter(VirtualDatacenter vdc, NetworkConfigurationDto config,
+    private void validateVirtualDatacenter(VirtualDatacenter vdc, VLANNetworkDto vlan,
         Datacenter datacenter)
     {
-        if (config == null)
+        if (vlan == null)
         {
             errors.add(APIError.NETWORK_INVALID_CONFIGURATION);
         }

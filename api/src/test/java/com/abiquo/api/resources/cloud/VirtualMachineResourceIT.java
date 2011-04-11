@@ -119,12 +119,6 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     }
 
-    @AfterMethod
-    public void tearDownModel()
-    {
-        tearDownModelTables();
-    }
-
     @Test(enabled = false, dataProvider = TestPopulate.DATA_PROVIDER)
     public void allocator(List<String> model)
     {

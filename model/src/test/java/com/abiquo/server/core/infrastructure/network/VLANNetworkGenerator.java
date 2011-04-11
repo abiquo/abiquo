@@ -62,7 +62,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
     
     public VLANNetwork createInstance(Network network, RemoteService rsDHCP)
@@ -73,7 +73,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
     
     public VLANNetwork createInstance(Network network, RemoteService rsDHCP, String netmask)
@@ -84,14 +84,14 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
     
     public VLANNetwork createInstance(Network network, String name)
     {
         NetworkConfiguration configuration = this.configuratorGenerator.createUniqueInstance();
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
     
     

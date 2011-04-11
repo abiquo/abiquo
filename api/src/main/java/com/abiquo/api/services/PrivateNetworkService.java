@@ -23,7 +23,6 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -37,15 +36,12 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.util.network.IPAddress;
@@ -57,23 +53,23 @@ public class PrivateNetworkService extends DefaultApiService
 {
     @Autowired
     VirtualDatacenterRep repo;
-    
+
     @Autowired
     DatacenterRep datacenterRepo;
 
     public static final String FENCE_MODE = "bridge";
-    
+
     public PrivateNetworkService()
     {
-        
+
     }
-    
+
     public PrivateNetworkService(EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new DatacenterRep(em);
     }
-    
+
     public Collection<VLANNetwork> getNetworks()
     {
         return repo.findAllVlans();
@@ -100,34 +96,42 @@ public class PrivateNetworkService extends DefaultApiService
         {
             throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
         }
+
+        // check if we have reached the maximum number of VLANs for this virtualdatacenter
+        checkNumberOfCurrentVLANs(virtualDatacenterId);
         
         // Create the NetworkConfiguration object
-        NetworkConfigurationDto configDto = networkdto.getNetworkConfiguration();
         NetworkConfiguration config =
-            new NetworkConfiguration(configDto.getAddress(), configDto.getMask(), configDto.getNetMask(), FENCE_MODE);
-        config.setGateway(configDto.getGateway());
-        config.setPrimaryDNS(configDto.getPrimaryDNS());
-        config.setSecondaryDNS(configDto.getSecondaryDNS());
-        config.setSufixDNS(configDto.getSufixDNS());
+            new NetworkConfiguration(networkdto.getAddress(), networkdto.getMask(), IPNetworkRang
+                .transformIntegerMaskToIPMask(networkdto.getMask()).toString(), networkdto.getGateway(), FENCE_MODE);
+        config.setPrimaryDNS(networkdto.getPrimaryDNS());
+        config.setSecondaryDNS(networkdto.getSecondaryDNS());
+        config.setSufixDNS(networkdto.getSufixDNS());
         if (!config.isValid())
         {
             validationErrors.addAll(config.getValidationErrors());
             flushErrors();
         }
         repo.insertNetworkConfig(config);
-        
+
         // Create the VLANObject inside the VirtualDatacenter network
         VLANNetwork vlan =
-            new VLANNetwork(networkdto.getName(), virtualDatacenter.getNetwork(), 1, config);
+            new VLANNetwork(networkdto.getName(), virtualDatacenter.getNetwork(), networkdto.getDefaultNetwork(), config);
+        if (!vlan.isValid())
+        {
+            validationErrors.addAll(vlan.getValidationErrors());
+            flushErrors();
+        }
+
         repo.insertVlan(vlan);
-        
+
         // Calculate all the IPs of the VLAN and generate the DHCP entity that stores these IPs
-        Collection<IPAddress> addressRange = calculateIPRange(configDto);
+        Collection<IPAddress> addressRange = calculateIPRange(networkdto);
         createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, vlan, config, addressRange);
-         
+
         return vlan;
     }
-    
+
     public VLANNetwork getNetwork(Integer id)
     {
         return repo.findVlanById(id);
@@ -141,15 +145,15 @@ public class PrivateNetworkService extends DefaultApiService
         return nw != null && vdc != null
             && nw.getNetwork().getId().equals(vdc.getNetwork().getId());
     }
-    
-    private Collection<IPAddress> calculateIPRange(NetworkConfigurationDto networkConfiguration)
+
+    private Collection<IPAddress> calculateIPRange(VLANNetworkDto vlan)
     {
         Collection<IPAddress> range =
             IPNetworkRang.calculateWholeRange(
-                IPAddress.newIPAddress(networkConfiguration.getAddress()),
-                networkConfiguration.getMask());
+                IPAddress.newIPAddress(vlan.getAddress()),
+                vlan.getMask());
 
-        if (!IPAddress.isIntoRange(range, networkConfiguration.getGateway()))
+        if (!IPAddress.isIntoRange(range, vlan.getGateway()))
         {
             errors.add(APIError.NETWORK_GATEWAY_OUT_OF_RANGE);
             flushErrors();
@@ -157,7 +161,7 @@ public class PrivateNetworkService extends DefaultApiService
 
         return range;
     }
-    
+
     private Dhcp createDhcp(Datacenter datacenter, VirtualDatacenter vdc, VLANNetwork vlan,
         NetworkConfiguration networkConfiguration, Collection<IPAddress> range)
     {
@@ -208,4 +212,9 @@ public class PrivateNetworkService extends DefaultApiService
         return dhcp;
     }
 
+    protected void checkNumberOfCurrentVLANs(Integer virtualDatacenterId)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

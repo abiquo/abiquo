@@ -34,7 +34,6 @@ import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,9 +55,9 @@ import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
+@Test
 public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 {
     Enterprise sysEnterprise;
@@ -400,11 +399,10 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 400);
     }
 
-    @Test
     public void createVirtualDatacenterFailsWithInvalidIps()
     {
         VirtualDatacenterDto dto = getValidVdc();
-        dto.getVlan().getNetworkConfiguration().setAddress("foo");
+        dto.getVlan().setAddress("foo");
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 400);
@@ -412,12 +410,11 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, "address");
     }
 
-    @Test
     public void createVirtualDatacenterPassWithOptionalDns()
     {
         VirtualDatacenterDto dto = getValidVdc();
-        dto.getVlan().getNetworkConfiguration().setPrimaryDNS(null);
-        dto.getVlan().getNetworkConfiguration().setSecondaryDNS(null);
+        dto.getVlan().setPrimaryDNS(null);
+        dto.getVlan().setSecondaryDNS(null);
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 201);
@@ -448,20 +445,13 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("Default Network");
         networkDto.setDefaultNetwork(Boolean.TRUE);
-        
-        NetworkConfigurationDto configDto = new NetworkConfigurationDto();
-        configDto.setAddress("192.168.0.0");
-        configDto.setDefaultNetwork(true);
-        configDto.setFenceMode("bridge");
-        configDto.setGateway("192.168.0.1");
-        configDto.setMask(24);
-        configDto.setNetMask("255.255.255.248");
-        configDto.setNetworkName("KVM VLAN");
-        configDto.setPrimaryDNS("10.0.0.1");
-        configDto.setSecondaryDNS("10.0.0.1");
+        networkDto.setAddress("192.168.0.0");
+        networkDto.setGateway("192.168.0.1");
+        networkDto.setMask(24);
+        networkDto.setPrimaryDNS("10.0.0.1");
+        networkDto.setSecondaryDNS("10.0.0.1");
 
         dto.setVlan(networkDto);
-        dto.getVlan().setNetworkConfiguration(configDto);
 
         return dto;
     }

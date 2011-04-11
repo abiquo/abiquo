@@ -21,9 +21,11 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -35,13 +37,15 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
@@ -53,9 +57,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
  */
 public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 {
-
-
-    private String badURI = resolvePrivateNetworksURI(3);
 
     VirtualDatacenter vdc;
     RemoteService rs;
@@ -106,34 +107,130 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createPrivateNetwork()
     {        
-        VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         VLANNetworkDto dto = createValidNetworkDto();
         
         ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
         
         assertEquals(201, response.getStatusCode());
+        VLANNetworkDto dtoResponse = response.getEntity(VLANNetworkDto.class);
+        
+        assertEquals(dto.getName(), dtoResponse.getName());
+        assertEquals(dto.getDefaultNetwork(), dtoResponse.getDefaultNetwork());        
+        assertEquals(dto.getAddress(), dtoResponse.getAddress());
+        assertEquals(dto.getGateway(), dtoResponse.getGateway());
+        assertTrue(dto.getMask() == dtoResponse.getMask());
+        assertEquals(dto.getPrimaryDNS(), dtoResponse.getPrimaryDNS());
+        assertEquals(dto.getSecondaryDNS(), dtoResponse.getSecondaryDNS());
+        assertEquals(dto.getSufixDNS(), dtoResponse.getSufixDNS());
+                       
+    }
+    
+    /**
+     * Checks it return a 404 NotFound when trying to access a VirtualDatacenter invalid 
+     */
+    @Test
+    void createPrivateNetworkRaises404WhenVDCDoesNotExist()
+    {
+        VLANNetworkDto dto = createValidNetworkDto(); 
+        Integer integer = new Random().nextInt();
+        integer = (integer < 0)? integer*(-1) : integer;
+        ClientResponse response = post(resolvePrivateNetworksURI(integer), dto, "sysadmin", "sysadmin");    
+        assertErrors(response, 404, APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+    }
+    
+    /**
+     * Checks it return a 400 BadRequest when the VirtualDatacenter param is a negative number
+     */
+    @Test
+    void createPrivateNetworkRaises400WhenVDCIdentifierNegative()
+    {
+        VLANNetworkDto dto = createValidNetworkDto();        
+        ClientResponse response = post(resolvePrivateNetworksURI(-1), dto, "sysadmin", "sysadmin");        
+        assertEquals(response.getStatusCode(), 400);
+        ErrorsDto errors = response.getEntity(ErrorsDto.class);
+        assertEquals(errors.getCollection().size(), 1);
+        ErrorDto error = errors.getCollection().get(0);
+        assertEquals(error.getCode(), "CONSTR-MIN");
+    }
+    
+    /**
+     * Launch a several test to check 400-Bad Request. Since it never creates any VLAN, I put all tests in the same method
+     * to avoid 'setUp' and 'tearDown' rutines and improve the performance of the tests. Check the constraints
+     */
+    @Test
+    void createPrivateNetworkRaises400ManyCases()
+    {
+        Resource res = client.resource(resolvePrivateNetworksURI(vdc.getId())).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth("sysadmin", "sysadmin"));
+            
+        // Name null
+        VLANNetworkDto dto = createValidNetworkDto();   
+        dto.setName(null);
+        ClientResponse response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+
+        // Default network null
+        dto = createValidNetworkDto();   
+        dto.setDefaultNetwork(null);
+        response = res.post(dto);
+        assertEquals(response.getStatusCode(), 400);
+
+        // Address null
+        dto = createValidNetworkDto();   
+        dto.setAddress(null);
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+    
+        // Address invalid (not IP)
+        dto = createValidNetworkDto();   
+        dto.setAddress("192.168");
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+        
+        // Gateway null
+        dto = createValidNetworkDto();   
+        dto.setGateway(null);
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+    
+        // Address invalid (not IP)
+        dto = createValidNetworkDto();   
+        dto.setGateway("192.168");
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+        
+        // Mask null
+        dto = createValidNetworkDto();
+        dto.setMask(null);
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+        
+        // Mask less than 1
+        dto = createValidNetworkDto();
+        dto.setMask(-1);
+        response = res.post(dto);        
+        assertEquals(response.getStatusCode(), 400);
+        
+        //Mask more than 32
+        dto = createValidNetworkDto();
+        dto.setMask(33);
+        response = res.post(dto);
+        assertEquals(response.getStatusCode(), 400);
+        
         
     }
-
+    
     private VLANNetworkDto createValidNetworkDto()
-    {
-       
-        NetworkConfigurationDto configDto = new NetworkConfigurationDto();
-        configDto.setAddress("192.168.0.0");
-        configDto.setDefaultNetwork(true);
-        configDto.setFenceMode("bridge");
-        configDto.setGateway("192.168.0.1");
-        configDto.setMask(24);
-        configDto.setNetMask("255.255.255.248");
-        configDto.setNetworkName("KVM VLAN");
-        configDto.setPrimaryDNS("10.0.0.1");
-        configDto.setSecondaryDNS("10.0.0.1");
-
+    {       
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("Default Network");
         networkDto.setDefaultNetwork(Boolean.TRUE);
-        networkDto.setNetworkConfiguration(configDto);
-        
+        networkDto.setAddress("192.168.0.0");
+        networkDto.setGateway("192.168.0.1");
+        networkDto.setMask(24);
+        networkDto.setPrimaryDNS("10.0.0.1");
+        networkDto.setSecondaryDNS("10.0.0.1");
+        networkDto.setSufixDNS("bcn.abiquo.com");        
         return networkDto;
     }
 }

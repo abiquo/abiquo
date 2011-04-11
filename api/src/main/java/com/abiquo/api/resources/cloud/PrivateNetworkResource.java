@@ -22,7 +22,6 @@
 package com.abiquo.api.resources.cloud;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -37,7 +36,6 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
@@ -81,9 +79,13 @@ public class PrivateNetworkResource extends AbstractResource
         VLANNetworkDto dto =
             ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
 
-        dto.setNetworkConfiguration(ModelTransformer.transportFromPersistence(
-            NetworkConfigurationDto.class, network.getConfiguration()));
-
+        dto.setAddress(network.getConfiguration().getAddress());
+        dto.setGateway(network.getConfiguration().getGateway());
+        dto.setMask(network.getConfiguration().getMask());
+        dto.setPrimaryDNS(network.getConfiguration().getPrimaryDNS());
+        dto.setSecondaryDNS(network.getConfiguration().getSecondaryDNS());
+        dto.setSufixDNS(network.getConfiguration().getSufixDNS());
+        
         dto = addLinks(restBuilder, dto, virtualDatacenterId);
 
         return dto;

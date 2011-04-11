@@ -109,7 +109,7 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).delete();
     }
 
-    private String basicAuth(String username, String password)
+    protected String basicAuth(String username, String password)
     {
         return new String(Base64.encodeBase64((username + ":" + password).getBytes()));
     }

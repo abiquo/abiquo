@@ -44,7 +44,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
@@ -145,19 +144,12 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
     	VLANNetworkDto networkDto = new VLANNetworkDto();
     	networkDto.setName("DefaultNetwork");
     	networkDto.setDefaultNetwork(Boolean.TRUE);
-    	
-    	NetworkConfigurationDto configDto = new NetworkConfigurationDto();
-        configDto.setAddress("192.168.0.0");
-        configDto.setDefaultNetwork(true);
-        configDto.setFenceMode("bridge");
-        configDto.setGateway("192.168.0.1");
-        configDto.setMask(24);
-        configDto.setNetMask("255.255.255.248");
-        configDto.setNetworkName("KVM VLAN");
-        configDto.setPrimaryDNS("10.0.0.1");
-        configDto.setSecondaryDNS("10.0.0.1");
+    	networkDto.setAddress("192.168.0.0");
+    	networkDto.setGateway("192.168.0.1");
+    	networkDto.setMask(24);
+    	networkDto.setPrimaryDNS("10.0.0.1");
+    	networkDto.setSecondaryDNS("10.0.0.1");
         
-        networkDto.setNetworkConfiguration(configDto);
         dto.setVlan(networkDto);
     	
     	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);

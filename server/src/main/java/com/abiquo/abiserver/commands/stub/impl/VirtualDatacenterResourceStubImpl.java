@@ -43,6 +43,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -81,11 +82,14 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         networkDto.setGateway(netConfig.getGateway());
         networkDto.setMask(netConfig.getMask());
         networkDto.setNetMask(netConfig.getNetmask());
-        networkDto.setNetworkName(networkName);
         networkDto.setPrimaryDNS(netConfig.getPrimaryDNS());
         networkDto.setSecondaryDNS(netConfig.getSecondaryDNS());
         networkDto.setSufixDNS(netConfig.getSufixDNS());
         networkDto.setFenceMode(netConfig.getFenceMode());
+        
+        VLANNetworkDto vlanDto = new VLANNetworkDto();
+        vlanDto.setName(networkName);
+        vlanDto.setNetworkConfiguration(networkDto);
 
         String datacenterLink =
             URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
@@ -96,7 +100,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         dto.addLink(new RESTLink("datacenter", datacenterLink));
         dto.addLink(new RESTLink("enterprise", enterpriseLink));
 
-        dto.setNetworkConfiguration(networkDto);
+        dto.setVlan(vlanDto);
 
         String uri = createVirtualDatacentersLink();
 
