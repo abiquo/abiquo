@@ -47,7 +47,8 @@ public class VolumeManagement extends RasdManagement
 
     public static final String TABLE_NAME = "volume_management";
 
-    public VolumeManagement(StoragePool storagePool, VirtualImage virtualImage, String idScsi)
+    public VolumeManagement(final StoragePool storagePool, final VirtualImage virtualImage,
+        final String idScsi)
     {
         super(DISCRIMINATOR); // TODO use RASD enumerated type
         setStoragePool(storagePool);
@@ -77,7 +78,7 @@ public class VolumeManagement extends RasdManagement
         return this.storagePool;
     }
 
-    public void setStoragePool(StoragePool storagePool)
+    public void setStoragePool(final StoragePool storagePool)
     {
         this.storagePool = storagePool;
     }
@@ -99,7 +100,7 @@ public class VolumeManagement extends RasdManagement
         return this.virtualImage;
     }
 
-    public void setVirtualImage(VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
     }
@@ -127,7 +128,7 @@ public class VolumeManagement extends RasdManagement
         return this.idScsi;
     }
 
-    private void setIdScsi(String idScsi)
+    private void setIdScsi(final String idScsi)
     {
         this.idScsi = idScsi;
     }
@@ -149,7 +150,7 @@ public class VolumeManagement extends RasdManagement
         return this.state;
     }
 
-    private void setState(int state)
+    private void setState(final int state)
     {
         this.state = state;
     }
@@ -171,7 +172,7 @@ public class VolumeManagement extends RasdManagement
         return this.usedSize;
     }
 
-    private void setUsedSize(long usedSize)
+    private void setUsedSize(final long usedSize)
     {
         this.usedSize = usedSize;
     }

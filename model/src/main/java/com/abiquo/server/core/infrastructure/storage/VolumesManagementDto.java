@@ -38,11 +38,13 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
  * 
  * @author jdevesa@abiquo.com
  */
-@XmlRootElement(name = "ips")
+@XmlRootElement(name = "volumes")
 public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
 {
+    private static final long serialVersionUID = 1L;
+
     @Override
-    @XmlElement(name = "ip")
+    @XmlElement(name = "volume")
     public List<VolumeManagementDto> getCollection()
     {
         if (collection == null)
