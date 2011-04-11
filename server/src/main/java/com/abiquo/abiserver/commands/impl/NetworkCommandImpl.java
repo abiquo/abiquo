@@ -486,31 +486,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String ipLike)
-        throws NetworkCommandException
-    {
-        List<EnterpriseHB> enterpriseList = new ArrayList<EnterpriseHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            enterpriseList =
-                netManDAO.getEnterprisesWithNetworksByDatacenter(datacenterId, offset, numElem,
-                    ipLike);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return enterpriseList;
-    }
-
-    @Override
     public String getInfoDHCPServer(UserSession userSession, Integer vdcId)
         throws NetworkCommandException
     {
@@ -654,27 +629,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         }
 
         return ipList;
-    }
-
-    @Override
-    public Integer getNumberEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, String filterLike) throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs =
-                netManDAO.getNumberEnterprisesWithNetworkPoolByDatacenter(datacenterId, filterLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
     }
 
     @Override

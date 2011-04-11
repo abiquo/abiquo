@@ -24,9 +24,7 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
-import java.util.List;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;

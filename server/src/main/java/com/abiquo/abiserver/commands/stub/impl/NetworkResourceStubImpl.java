@@ -25,28 +25,21 @@
 package com.abiquo.abiserver.commands.stub.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wink.client.ClientResponse;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
+
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListResponse;
-import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;

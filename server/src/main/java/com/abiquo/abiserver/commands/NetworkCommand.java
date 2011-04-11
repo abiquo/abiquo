@@ -104,22 +104,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * For any DataCenter, lists all the enterprises that are using its networks.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param datacenterId identifier of the DataCenter.
-     * @param offset first element to return.
-     * @param numElem number of elements to return.
-     * @param filterLike filter the search by....
-     * @return list of {@link EnterpriseHB} object that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
-        throws NetworkCommandException;
-
-    /**
      * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
      * 
      * @param userSession user who performs the action.
@@ -176,21 +160,6 @@ public interface NetworkCommand
     public List<IpPoolManagementHB> getListNetworkPoolByVLAN(UserSession userSession,
         Integer vlanId, Integer offset, Integer numElem, String filterLike, String orderBy,
         Boolean asc) throws NetworkCommandException;
-
-    /**
-     * For any DataCenter, calculate how many enterprises are that using its networks. Used by
-     * paging purposes.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param datacenterId identifier of the Datacenter
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar...
-     * @return the Number of enterprises that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, String filterLike) throws NetworkCommandException;
 
     /**
      * Return the number of available network resources of a given VLAN. Used by paging purposes.
