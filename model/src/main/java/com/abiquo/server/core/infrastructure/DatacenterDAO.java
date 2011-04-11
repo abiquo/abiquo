@@ -24,7 +24,6 @@ package com.abiquo.server.core.infrastructure;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -38,7 +37,6 @@ import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enumerator.VirtualMachineState;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaDatacenterDAO")
@@ -120,17 +118,13 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         return used;
     }
 
-    public List<Enterprise> findEnterprisesByDatacenters(Datacenter datacenter,
-        Integer firstElem, Integer numElem)
+    public List<Enterprise> findEnterprisesByDatacenters(Datacenter datacenter, Integer firstElem,
+        Integer numElem)
     {
 
         // Get the query that counts the total results.
         Query finalQuery = getSession().createQuery(BY_ENT);
         finalQuery.setParameter("datacenter_id", datacenter.getId());
-        
-        //finalQuery.setParameter("filterLike", (has.isEmpty()) ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
 
         // Get the list of elements
@@ -146,12 +140,11 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
     }
 
     public static final String BY_ENT =
-        " SELECT ent FROM  VirtualDatacenter vdc, " + " VLANNetwork vn, " 
+        " SELECT ent FROM  VirtualDatacenter vdc, " + " VLANNetwork vn, "
             + " DatacenterLimits dcl join dcl.enterprise ent join dcl.datacenter dc"
             + " WHERE vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND dc.id = :datacenter_id " ;
+            + " AND dc.id = :datacenter_id ";
 
- 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "

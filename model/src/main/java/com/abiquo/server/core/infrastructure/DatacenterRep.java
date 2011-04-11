@@ -43,8 +43,6 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
@@ -233,20 +231,17 @@ public class DatacenterRep extends DefaultRepBase
     public List<Enterprise> findEnterprisesByDataCenter(Datacenter datacenter, Boolean network,
         Integer firstElem, Integer numElem)
     {
-        
-        if(network) {
-            int i = 0;
-        }
-        
         PagedList<Enterprise> enterprises = new PagedList<Enterprise>();
         if (network)
         {
             enterprises =
-                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter, firstElem, numElem);
+                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter,
+                    firstElem, numElem);
         }
         else
         {
-            Collection<DatacenterLimits> dlimits = this.datacenterLimitDao.findByDatacenter(datacenter);
+            Collection<DatacenterLimits> dlimits =
+                this.datacenterLimitDao.findByDatacenter(datacenter);
             for (DatacenterLimits d : dlimits)
             {
                 Enterprise e = d.getEnterprise();
@@ -254,7 +249,7 @@ public class DatacenterRep extends DefaultRepBase
             }
             enterprises.setTotalResults(enterprises.size());
         }
-        
+
         return enterprises;
     }
 
