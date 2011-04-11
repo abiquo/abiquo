@@ -58,8 +58,8 @@ public class DatacenterResource extends AbstractResource
     DatacenterService service;
 
     @GET
-    public DatacenterDto getDatacenter(@PathParam(DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Datacenter datacenter = service.getDatacenter(datacenterId);
 
@@ -67,8 +67,8 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    public DatacenterDto modifyDatacenter(DatacenterDto datacenter,
-        @PathParam(DATACENTER) Integer datacenterId, @Context IRESTBuilder restBuilder)
+    public DatacenterDto modifyDatacenter(final DatacenterDto datacenter,
+        @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         Datacenter d = service.getDatacenter(datacenterId);
@@ -80,8 +80,9 @@ public class DatacenterResource extends AbstractResource
 
     @GET
     @Path(HYPERVISORS_PATH)
-    public HypervisorTypesDto getAvailableHypervisors(@PathParam(DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public HypervisorTypesDto getAvailableHypervisors(
+        @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Datacenter datacenter = service.getDatacenter(datacenterId);
 
@@ -100,15 +101,15 @@ public class DatacenterResource extends AbstractResource
     // service.removeDatacenter(datacenterId);
     // }
 
-    public static DatacenterDto addLinks(IRESTBuilder builder, DatacenterDto datacenter)
+    public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
         datacenter.setLinks(builder.buildDatacenterLinks(datacenter));
 
         return datacenter;
     }
 
-    public static DatacenterDto createTransferObject(Datacenter datacenter, IRESTBuilder builder)
-        throws Exception
+    public static DatacenterDto createTransferObject(final Datacenter datacenter,
+        final IRESTBuilder builder) throws Exception
     {
         DatacenterDto dto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
@@ -116,7 +117,8 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
-    public static Datacenter createPersistenceObject(DatacenterDto datacenter) throws Exception
+    public static Datacenter createPersistenceObject(final DatacenterDto datacenter)
+        throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Datacenter.class, datacenter);
     }
