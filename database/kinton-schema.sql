@@ -587,7 +587,9 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 1 - NOT PROVISIONED
 2 - NOT MANAGED
 3 - MANAGED
-4 - HALTED',
+4 - HALTED
+5 - HA_IN_PROGRESS
+5 - DISABLED_FOR_HA',
   `vswitchName` VARCHAR(30)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
@@ -628,6 +630,7 @@ CREATE TABLE  `kinton`.`rack` (
   `vlans_id_avoided` varchar(255) default '',
   `vlan_per_vdc_expected` int(15) unsigned default 8,
   `nrsq` int(15) unsigned default 10,
+  `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRack`),
   KEY `Rack_FK1` (`idDataCenter`),
