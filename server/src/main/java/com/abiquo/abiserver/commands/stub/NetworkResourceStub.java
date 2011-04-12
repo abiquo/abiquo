@@ -25,6 +25,7 @@
 package com.abiquo.abiserver.commands.stub;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 
 /**
@@ -37,8 +38,23 @@ public interface NetworkResourceStub
     public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
-    
+
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
+        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
+        throws NetworkCommandException;
+    
+    /**
+     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
+     * 
+     * @param userSession user who performs the action.
+     * @param vdcId virtual datacenter identifier.
+     * @return the DHCP info into a parsed String.
+     * @throws NetworkCommandException for encapsulate any non-runtime exception.
+     */
+    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
         throws NetworkCommandException;
 }

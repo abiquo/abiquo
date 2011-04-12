@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.DAO;
@@ -55,19 +54,6 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      * @throws PersistenceException if any problem occurs
      */
     boolean existingMACAddress(String MACaddress) throws PersistenceException;
-
-    /**
-     * Return the list of enterprises that have private networks in the Datacenter.
-     * 
-     * @param datacenterId identifier of the Datacenter.
-     * @param offset first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param filterLike filter the search.
-     * @return the list of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(Integer datacenterId, Integer offset,
-        Integer numElem, String filterLike) throws PersistenceException;
 
     /**
      * Identifies the {@link IpPoolManagement} object for its VLAN and IP Address.
@@ -108,17 +94,6 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      */
     List<IpPoolManagementHB> getNetworkPoolByVLAN(Integer vlanId, Integer offset, Integer numElem,
         String ipLike, String orderBy, Boolean asc) throws PersistenceException;
-
-    /**
-     * Return the number of enterprises that have private networks in the Datacenter.
-     * 
-     * @param datacenterId identifier of the Datacenter.
-     * @param filterLike filter the search.
-     * @return the number of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    Integer getNumberEnterprisesWithNetworkPoolByDatacenter(Integer datacenterId, String filterLike)
-        throws PersistenceException;
 
     /**
      * Return the number of {@link IpPoolManagement} objects with no virtual machine assigned

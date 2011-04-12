@@ -486,92 +486,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String ipLike)
-        throws NetworkCommandException
-    {
-        List<EnterpriseHB> enterpriseList = new ArrayList<EnterpriseHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            enterpriseList =
-                netManDAO.getEnterprisesWithNetworksByDatacenter(datacenterId, offset, numElem,
-                    ipLike);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return enterpriseList;
-    }
-
-    @Override
-    public String getInfoDHCPServer(UserSession userSession, Integer vdcId)
-        throws NetworkCommandException
-    {
-
-        StringBuilder formattedData = new StringBuilder();
-
-        try
-        {
-            factory.beginConnection();
-
-            IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
-            VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-
-            List<IpPoolManagementHB> ipPools = new ArrayList<IpPoolManagementHB>();
-            VirtualDataCenterHB vdc = vdcDAO.findById(vdcId);
-
-            formattedData.append("## AbiCloud DHCP configuration for network "
-                + vdc.getNetwork().getUuid() + "\n");
-            formattedData
-                .append("## Please copy and paste the following lines into your DHCP server\n");
-
-            for (IpPoolManagementHB ipPool : ipPools)
-            {
-
-                formattedData.append("host " + ipPool.getName() + " {\n");
-
-                // VirtualBox mac format
-                if (!ipPool.getMac().contains(":"))
-                {
-                    String unformattedMA = ipPool.getMac();
-                    StringBuilder formattedMA =
-                        new StringBuilder(unformattedMA.substring(0, 2) + ":");
-                    formattedMA.append(unformattedMA.substring(2, 4) + ":");
-                    formattedMA.append(unformattedMA.substring(4, 6) + ":");
-                    formattedMA.append(unformattedMA.substring(6, 8) + ":");
-                    formattedMA.append(unformattedMA.substring(8, 10) + ":");
-                    formattedMA.append(unformattedMA.substring(10, 12));
-                    formattedData.append("\thardware ethernet " + formattedMA + ";\n");
-
-                }
-                else
-                {
-                    formattedData.append("\thardware ethernet " + ipPool.getMac() + ";\n");
-                }
-                formattedData.append("\tfixed-address " + ipPool.getIp() + ";\n");
-                formattedData.append("}\n\n");
-
-            }
-
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return formattedData.toString();
-    }
-
-    @Override
     public List<IPAddress> getListGatewaysByVirtualMachine(UserSession userSession, Integer vmId)
         throws NetworkCommandException
     {
@@ -654,27 +568,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         }
 
         return ipList;
-    }
-
-    @Override
-    public Integer getNumberEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, String filterLike) throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs =
-                netManDAO.getNumberEnterprisesWithNetworkPoolByDatacenter(datacenterId, filterLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
     }
 
     @Override
@@ -1282,8 +1175,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 while (ipPoolDAO.existingMACAddress(nextRandomMacAddress));
 
                 nextIpPool.setMac(nextRandomMacAddress);
-                
-                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
+
+                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when
+                // reload
                 // leases with the ':' char in the lease name)
                 nextIpPool.setName(nextIpPool.getMac().replace(":", "") + "_host");
             }

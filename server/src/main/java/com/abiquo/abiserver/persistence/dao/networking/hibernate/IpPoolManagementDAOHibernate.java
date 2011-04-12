@@ -29,7 +29,6 @@ import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
@@ -60,9 +59,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
         "IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN";
 
     private static final String IP_POOL_GET_PRIVATE_IP_BY_VLAN = "IP_POOL_GET_PRIVATE_IP_BY_VLAN";
-
-    private static final String IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER =
-        "IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER";
 
     private static final String IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT =
         "IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT";
@@ -117,32 +113,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
             {
                 return true;
             }
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(Integer datacenterId,
-        Integer offset, Integer numElem, String filterLike) throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER);
-
-            query.setInteger("datacenterId", datacenterId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-            query.setFirstResult(offset);
-            if (numElem != null)
-            {
-                query.setMaxResults(numElem);
-            }
-
-            return query.list();
         }
         catch (HibernateException e)
         {
@@ -233,25 +203,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
         }
 
         return listOfPools;
-    }
-
-    @Override
-    public Integer getNumberEnterprisesWithNetworkPoolByDatacenter(Integer datacenterId,
-        String filterLike) throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER);
-            query.setInteger("datacenterId", datacenterId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            return query.list().size();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
     }
 
     @Override

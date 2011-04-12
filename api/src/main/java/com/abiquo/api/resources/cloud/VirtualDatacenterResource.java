@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -60,6 +61,8 @@ public class VirtualDatacenterResource extends AbstractResource
     public static final String VIRTUAL_DATACENTER_PARAM = "{" + VIRTUAL_DATACENTER + "}";
 
     public static final String VIRTUAL_DATACENTER_ACTION_GET_IPS = "/action/ips";
+
+    public static final String VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO = "/action/dhcpinfo";
 
     // @Autowired
     @Resource(name = "virtualDatacenterService")
@@ -103,10 +106,9 @@ public class VirtualDatacenterResource extends AbstractResource
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
-        @PathParam(VIRTUAL_DATACENTER) Integer id, 
-        @QueryParam(START_WITH) Integer startwith, @QueryParam(BY) String orderBy,
-        @QueryParam(FILTER) String filter, @QueryParam(LIMIT) Integer limit,
-        @QueryParam(ASC) Boolean desc_or_asc,
+        @PathParam(VIRTUAL_DATACENTER) Integer id, @QueryParam(START_WITH) Integer startwith,
+        @QueryParam(BY) String orderBy, @QueryParam(FILTER) String filter,
+        @QueryParam(LIMIT) Integer limit, @QueryParam(ASC) Boolean desc_or_asc,
         @Context IRESTBuilder restBuilder) throws Exception
     {
         // Set query Params by default if they are not informed
@@ -114,9 +116,8 @@ public class VirtualDatacenterResource extends AbstractResource
         String by = (orderBy == null || orderBy.isEmpty()) ? "ip" : orderBy;
         String has = (filter == null) ? "" : filter;
         Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
-        Boolean asc = (desc_or_asc == null)? true : desc_or_asc;
-        
-        
+        Boolean asc = (desc_or_asc == null) ? true : desc_or_asc;
+
         List<IpPoolManagement> all =
             ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
 
@@ -131,12 +132,55 @@ public class VirtualDatacenterResource extends AbstractResource
         {
             ips.add(IpAddressesResource.createTransferObject(ip, restBuilder));
         }
-        
+
         ips.setTotalSize(((PagedList) all).getTotalResults());
         ips.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
             (PagedList) all));
 
         return ips;
+    }
+
+    @GET
+    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO)
+    public String getDHCPInfoByVirtualDatacenter(
+        @PathParam(VIRTUAL_DATACENTER) Integer id, @Context IRESTBuilder restBuilder)
+        throws Exception
+    {
+        List<IpPoolManagement> all =
+            ipService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
+        StringBuilder formattedData = new StringBuilder();
+        formattedData.append("## AbiCloud DHCP configuration for network "
+            + service.getVirtualDatacenter(id).getNetwork().getUuid() + "\n");
+        formattedData
+            .append("## Please copy and paste the following lines into your DHCP server\n");
+        for (IpPoolManagement ipPool : all)
+        {
+
+            formattedData.append("host " + ipPool.getName() + " {\n");
+
+            // VirtualBox mac format
+            if (!ipPool.getMac().contains(":"))
+            {
+                String unformattedMA = ipPool.getMac();
+                StringBuilder formattedMA =
+                    new StringBuilder(unformattedMA.substring(0, 2) + ":");
+                formattedMA.append(unformattedMA.substring(2, 4) + ":");
+                formattedMA.append(unformattedMA.substring(4, 6) + ":");
+                formattedMA.append(unformattedMA.substring(6, 8) + ":");
+                formattedMA.append(unformattedMA.substring(8, 10) + ":");
+                formattedMA.append(unformattedMA.substring(10, 12));
+                formattedData.append("\thardware ethernet " + formattedMA + ";\n");
+
+            }
+            else
+            {
+                formattedData.append("\thardware ethernet " + ipPool.getMac() + ";\n");
+            }
+            formattedData.append("\tfixed-address " + ipPool.getIp() + ";\n");
+            formattedData.append("}\n\n");
+
+        }
+        return formattedData.toString();
     }
 
     private static VirtualDatacenterDto addLinks(IRESTBuilder builder, VirtualDatacenterDto vdc,
@@ -157,9 +201,9 @@ public class VirtualDatacenterResource extends AbstractResource
         return response;
     }
 
-	public static VirtualDatacenterDto createTransferObject(
-			VirtualDatacenter vdc) {
-		VirtualDatacenterDto response = new VirtualDatacenterDto();
+    public static VirtualDatacenterDto createTransferObject(VirtualDatacenter vdc)
+    {
+        VirtualDatacenterDto response = new VirtualDatacenterDto();
         response.setId(vdc.getId());
         response.setHypervisorType(vdc.getHypervisorType());
         response.setName(vdc.getName());
@@ -171,7 +215,7 @@ public class VirtualDatacenterResource extends AbstractResource
         response.setStorageLimits(vdc.getStorageSoft(), vdc.getStorageHard());
         response.setVlansLimits(vdc.getVlanSoft(), vdc.getVlanHard());
         response.setPublicIPLimits(vdc.getPublicIpsSoft(), vdc.getPublicIpsHard());
-		return response;
-	}
+        return response;
+    }
 
 }
