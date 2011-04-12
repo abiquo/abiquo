@@ -58,11 +58,8 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
             newString(seed, NetworkConfiguration.FENCE_MODE_LENGTH_MIN,
                 NetworkConfiguration.FENCE_MODE_LENGTH_MAX);
 
-        String netmask =
-            newString(seed, NetworkConfiguration.NETMASK_LENGTH_MIN,
-                NetworkConfiguration.NETMASK_LENGTH_MAX);
-
-        Integer mask = nextSeed();
+        Integer mask = 24;
+        String netmask = "255.255.255.0";
 
         NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createUniqueInstance());

@@ -220,9 +220,6 @@ public enum APIError
         
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
-
-    // QUERY PAGGING STANDARD ERRORS
-    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
     
     ;
 

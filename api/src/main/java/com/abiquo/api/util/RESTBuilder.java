@@ -581,7 +581,6 @@ public class RESTBuilder implements IRESTBuilder
             }
         }
 
->>>>>>> vlanapi
         return links;
     }
 
