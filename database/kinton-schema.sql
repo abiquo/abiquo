@@ -658,6 +658,7 @@ CREATE TABLE  `kinton`.`datastore` (
   `enabled` boolean NOT NULL default 0,
   `size` bigint(40) unsigned NOT NULL,
   `usedSize` bigint(40) unsigned NOT NULL,
+  `device` VARCHAR(255) default NULL COMMENT 'Device name',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

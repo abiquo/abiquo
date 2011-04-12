@@ -11,3 +11,7 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT 
 5 - HA_IN_PROGRESS
 5 - DISABLED_FOR_HA';
 
+
+-- Racks can be HA enabled
+ALTER TABLE `kinton`.`datastore` ADD COLUMN `device` VARCHAR(255) default NULL COMMENT 'Device name';
+

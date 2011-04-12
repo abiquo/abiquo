@@ -45,6 +45,9 @@
 		<property name="NRSQ" type="java.lang.Integer">
 			<column name="nrsq" />
 		</property>
+		<property name="haEnabled" type="boolean">
+			<column name="haEnabled" />
+		</property>
 	</class>
 
 	<sql-query name="RACKS.FIND_BY_MIN_VLANS">
