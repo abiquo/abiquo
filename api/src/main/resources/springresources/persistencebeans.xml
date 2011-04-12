@@ -60,7 +60,8 @@
 	      <ref bean="virtualAppliancesResource"/>	      	      
 	      <ref bean="virtualApplianceResource"/>	      	      
 	      <ref bean="virtualMachinesResource"/>	
-	      <ref bean="virtualMachineResource"/>	      	      
+	      <ref bean="virtualMachineResource"/>	
+	          	      
 	      
 	      <!-- AM as REST Resource -->
 	      <ref bean="AMResource"/>

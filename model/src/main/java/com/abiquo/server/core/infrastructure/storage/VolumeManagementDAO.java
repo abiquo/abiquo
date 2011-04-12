@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @SuppressWarnings("unchecked")
@@ -44,7 +45,7 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
         super(VolumeManagement.class);
     }
 
-    public VolumeManagementDAO(EntityManager entityManager)
+    public VolumeManagementDAO(final EntityManager entityManager)
     {
         super(VolumeManagement.class, entityManager);
     }
@@ -108,16 +109,21 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
 
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
-        
-    public List<VolumeManagement> getVolumesByPool(StoragePool sp)
+
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
     {
-        Criteria criteria = createCriteria(Restrictions.eq("storagePool",
-            sp));
+        Criteria criteria = createCriteria(Restrictions.eq("storagePool", sp));
         return criteria.list();
     }
 
-    private <T> List<T> getSQLQueryResults(Session session, Query query, Class<T> objectClass,
-        int idFieldPosition)
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
+        return criteria.list();
+    }
+
+    private <T> List<T> getSQLQueryResults(final Session session, final Query query,
+        final Class<T> objectClass, final int idFieldPosition)
     {
         List<T> result = new ArrayList<T>();
         List<Object[]> sqlResult = query.list();
