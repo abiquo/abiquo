@@ -34,6 +34,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -67,6 +69,8 @@ public class EnterpriseResource extends AbstractResource
     public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    
+    protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
     EnterpriseService service;

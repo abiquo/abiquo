@@ -19,60 +19,61 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class VolumeManagementDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private String idScsi;
-
-public String getIdSCSI()
+@XmlRootElement(name = "")
+public class VolumeManagementDto extends SingleResourceTransportDto
 {
-    return idScsi;
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private String idScsi;
+
+    public String getIdSCSI()
+    {
+        return idScsi;
+    }
+
+    public void setIdSCSI(String idScsi)
+    {
+        this.idScsi = idScsi;
+    }
+
+    private int state;
+
+    public int getState()
+    {
+        return state;
+    }
+
+    public void setState(int state)
+    {
+        this.state = state;
+    }
+
+    private long usedSize;
+
+    public long getUsedSize()
+    {
+        return usedSize;
+    }
+
+    public void setUsedSize(long usedSize)
+    {
+        this.usedSize = usedSize;
+    }
+
 }
-
-public void setIdSCSI(String idScsi)
-{
-    this.idScsi = idScsi;
-}
-
-private int state;
-
-public int getState()
-{
-    return state;
-}
-
-public void setState(int state)
-{
-    this.state = state;
-}
-
-private long usedSize;
-
-public long getUsedSize()
-{
-    return usedSize;
-}
-
-public void setUsedSize(long usedSize)
-{
-    this.usedSize = usedSize;
-}
-
-  }
