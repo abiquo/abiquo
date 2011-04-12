@@ -64,9 +64,8 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
 
         Integer mask = nextSeed();
 
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, fenceMode);
+        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createUniqueInstance());
-        config.setGateway(gateway);
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
 
@@ -91,15 +90,10 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
             newString(seed, NetworkConfiguration.FENCE_MODE_LENGTH_MIN,
                 NetworkConfiguration.FENCE_MODE_LENGTH_MAX);
 
-        String netmask =
-            newString(seed, NetworkConfiguration.NETMASK_LENGTH_MIN,
-                NetworkConfiguration.NETMASK_LENGTH_MAX);
+        Integer mask = 24;
 
-        Integer mask = nextSeed();
-
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, fenceMode);
+        NetworkConfiguration config = new NetworkConfiguration(address, mask, "255.255.255.0" , gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createInstance(dhcpService));
-        config.setGateway(gateway);
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
         
@@ -130,9 +124,8 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
         
         Integer mask = IPNetworkRang.transformIPMaskToIntegerMask(IPAddress.newIPAddress(netmask));
 
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, fenceMode);
+        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createInstance(dhcpService));
-        config.setGateway(gateway);
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
         

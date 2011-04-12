@@ -64,6 +64,11 @@ public class IPNetworkRang
      */
     public static IPAddress transformIntegerMaskToIPMask(Integer mask)
     {
+        if (mask == null)
+        {
+            return IPAddress.newIPAddress("255.255.255.255");
+        }
+        
         switch (mask)
         {
             case 0:

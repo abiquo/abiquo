@@ -49,7 +49,8 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
     public void assertAllPropertiesEqual(RasdManagement obj1, RasdManagement obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.RASDRAW_PROPERTY,
-            RasdManagement.ID_VM_PROPERTY, RasdManagement.ID_RESOURCE_TYPE_PROPERTY, RasdManagement.VIRTUAL_APPLIANCE_PROPERTY);
+            RasdManagement.ID_RESOURCE_TYPE_PROPERTY, RasdManagement.VIRTUAL_APPLIANCE_PROPERTY,
+            RasdManagement.VIRTUAL_MACHINE_PROPERTY);
     }
 
     @Override

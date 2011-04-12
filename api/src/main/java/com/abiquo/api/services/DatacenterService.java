@@ -22,6 +22,7 @@
 package com.abiquo.api.services;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,6 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -93,12 +98,13 @@ public class DatacenterService extends DefaultApiService
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
 
         // Add the default tiers
-        for (int i=1; i<=4; i++)
+        for (int i = 1; i <= 4; i++)
         {
-        	Tier tier = new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
-        	repo.insertTier(tier);
+            Tier tier =
+                new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
+            repo.insertTier(tier);
         }
-        
+
         // Add the Remote Services in database in case are informed in the request
         if (dto.getRemoteServices() != null)
         {
@@ -150,6 +156,13 @@ public class DatacenterService extends DefaultApiService
     public Set<HypervisorType> getHypervisorTypes(Datacenter datacenter)
     {
         return repo.findHypervisors(datacenter);
+    }
+
+    public List<Enterprise> findEnterprisesByDatacenterWithNetworks(Datacenter datacenter, Boolean network,
+        Integer firstElem, Integer numElem)
+    {
+        return repo.findEnterprisesByDataCenter(datacenter, network, firstElem, numElem);
+        
     }
 
     private void isValidDatacenter(Datacenter datacenter)

@@ -21,26 +21,37 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.resources.EnterpriseResource.createTransferObject;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.hibernate.annotations.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
 @Path(DatacenterResource.DATACENTER_PARAM)
@@ -54,8 +65,15 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES_PATH = "action/enterprises";
+
+    public static final String NETWORK = "network";
+
     @Autowired
     DatacenterService service;
+
+    @Autowired
+    IpAddressService ipService;
 
     @GET
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
@@ -76,6 +94,31 @@ public class DatacenterResource extends AbstractResource
         d = service.modifyDatacenter(datacenterId, datacenter);
 
         return createTransferObject(d, restBuilder);
+    }
+
+    @GET
+    @Path(ENTERPRISES_PATH)
+    public EnterprisesDto getEnterprises(@PathParam(DATACENTER) Integer datacenterId,
+        @QueryParam(START_WITH) Integer startwith, @QueryParam(NETWORK) Boolean network,
+        @QueryParam(LIMIT) Integer limit, @Context IRESTBuilder restBuilder) throws Exception
+
+    {
+        Integer firstElem = (startwith == null) ? 0 : startwith;
+        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        if (network == null) network = false;
+        
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Enterprise> enterprises =
+            service
+                .findEnterprisesByDatacenterWithNetworks(datacenter, network, firstElem, numElem);
+        EnterprisesDto enterprisesDto = new EnterprisesDto();
+        for (Enterprise e : enterprises)
+        {
+            enterprisesDto.add(EnterpriseResource.createTransferObject(e, restBuilder));
+        }
+        enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
+        return enterprisesDto;
+
     }
 
     @GET

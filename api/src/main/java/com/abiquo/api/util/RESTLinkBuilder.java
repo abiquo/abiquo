@@ -41,6 +41,7 @@ public class RESTLinkBuilder extends SingleLinkBuilderImpl
 
     public RESTLink buildRestLink(Class< ? > resource, String rel, Map<String, String> params)
     {
+        
         List<SyndLink> links = setResource(resource).rel(rel).pathParams(params).build(null);
         SyndLink first = links.get(0);
         return new RESTLink(first);

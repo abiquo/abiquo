@@ -25,28 +25,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 @XmlRootElement(name = "virtualDatacenter")
 public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2165018992377526633L;
+
     private Integer id;
 
     private String name;
 
     private HypervisorType hypervisorType;
 
-    private NetworkConfigurationDto networkConfiguration;
-
-    public NetworkConfigurationDto getNetworkConfiguration()
-    {
-        return networkConfiguration;
-    }
-
-    public void setNetworkConfiguration(NetworkConfigurationDto networkConfiguration)
-    {
-        this.networkConfiguration = networkConfiguration;
-    }
+    private VLANNetworkDto vlan;
 
     public Integer getId()
     {
@@ -76,5 +71,15 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
     public void setHypervisorType(HypervisorType hypervisorType)
     {
         this.hypervisorType = hypervisorType;
+    }
+
+    public void setVlan(VLANNetworkDto vlan)
+    {
+        this.vlan = vlan;
+    }
+
+    public VLANNetworkDto getVlan()
+    {
+        return vlan;
     }
 }

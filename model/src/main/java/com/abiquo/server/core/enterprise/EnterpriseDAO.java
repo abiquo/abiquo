@@ -88,7 +88,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentPage(offset);
+        page.setCurrentElement(offset);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 

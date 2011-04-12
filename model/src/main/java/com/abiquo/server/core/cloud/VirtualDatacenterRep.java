@@ -283,10 +283,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param vdcId identifier of the virtual datacenter
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
     {
-        return ipManagementDAO.findByVdc(vdcId, page, numElem);
+        return ipManagementDAO.findByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -295,10 +295,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param entId enterprise identifier
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, final Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, final Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
     {
-        return ipManagementDAO.findByEnterprise(entId, page, numElem);
+        return ipManagementDAO.findByEnterprise(entId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -314,7 +314,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public List<IpPoolManagement> findIpsByVirtualMachine(VirtualMachine vm)
     {
-        return ipManagementDAO.findByVirtualMachine(vm.getId());
+        return ipManagementDAO.findByVirtualMachine(vm);
     }
 
     /**
