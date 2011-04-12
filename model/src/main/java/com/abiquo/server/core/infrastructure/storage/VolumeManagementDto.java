@@ -25,9 +25,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "volume")
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,7 +37,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,7 +49,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         return idScsi;
     }
 
-    public void setIdSCSI(String idScsi)
+    public void setIdSCSI(final String idScsi)
     {
         this.idScsi = idScsi;
     }
@@ -59,7 +61,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         return state;
     }
 
-    public void setState(int state)
+    public void setState(final int state)
     {
         this.state = state;
     }
@@ -71,7 +73,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         return usedSize;
     }
 
-    public void setUsedSize(long usedSize)
+    public void setUsedSize(final long usedSize)
     {
         this.usedSize = usedSize;
     }

@@ -507,19 +507,33 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-        Integer lastPage = list.getTotalResults() / list.getPageSize();
+
+        // Add FIRST element
         links.add(new RESTLink(FIRST, absolutePath));
-        if (list.getCurrentPage() != 0 && lastPage != 0)
+
+        if (list.getCurrentElement() != 0)
         {
-            links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.PAGE + "="
-                + (list.getCurrentPage() - 1)));
+            // Previous using the page size avoiding to be less than 0.
+            Integer previous = list.getCurrentElement() - list.getPageSize();
+            previous = (previous < 0) ? 0 : previous;
+
+            links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
+                + previous));
         }
-        if (list.getCurrentPage() != lastPage && lastPage != 0)
+        Integer next = list.getCurrentElement() + list.getPageSize();
+        if (next < list.getTotalResults())
         {
-            links.add(new RESTLink(NEXT, absolutePath + "?" + AbstractResource.PAGE + "="
-                + (list.getCurrentPage() + 1)));
+            links.add(new RESTLink(NEXT, absolutePath + "?" + AbstractResource.START_WITH + "="
+                + next));
         }
-        links.add(new RESTLink(LAST, absolutePath + "?" + AbstractResource.PAGE + "=" + lastPage));
+        
+        Integer last = list.getTotalResults() - list.getPageSize();
+        if (last < 0)
+        {
+            last = 0;
+        }
+        links
+            .add(new RESTLink(LAST, absolutePath + "?" + AbstractResource.START_WITH + "=" + last));
         return links;
     }
 

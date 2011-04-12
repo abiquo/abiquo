@@ -153,7 +153,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(result);
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        //ipList.setCurrentPage(page);
 
         return ipList;
     }
@@ -184,7 +184,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(query.getResultList());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        //ipList.setCurrentPage(page);
 
         return ipList;
     }
@@ -216,7 +216,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(query.getResultList());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
-        ipList.setCurrentPage(page);
+        //ipList.setCurrentPage(page);
 
         return ipList;
     }

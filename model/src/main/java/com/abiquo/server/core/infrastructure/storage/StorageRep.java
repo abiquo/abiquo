@@ -116,6 +116,13 @@ public class StorageRep extends DefaultRepBase
 	{
 		return tierDAO.getTiersByDatacenter(datacenterId);
 	}
+    
+
+    public List<VolumeManagement> findVolumesByEnterprise(Integer id, Integer startwith,
+        Integer limit, String filter, VolumeManagement.OrderByEnum orderBy, Boolean desc_or_asc)
+    {
+        return volumeDAO.getVolumesByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
+    }
 
     public StorageDevice insertDevice(StorageDevice sd)
     {

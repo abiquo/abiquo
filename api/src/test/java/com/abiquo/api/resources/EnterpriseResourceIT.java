@@ -65,14 +65,6 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 
 public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "virtualmachine",
-            "hypervisor", "physicalmachine", "rack", "datacenter", "virtualimage", "user",
-            "enterprise", "role");
-    }
 
     @BeforeMethod
     public void setupSysadmin()

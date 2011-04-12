@@ -217,6 +217,9 @@ public enum APIError
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
         "STATS-3", "Non existent statistical data found for the requested enterprise"),
 
+    // QUERY PAGGING STANDARD ERRORS
+    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
+    
     ;
 
     /**

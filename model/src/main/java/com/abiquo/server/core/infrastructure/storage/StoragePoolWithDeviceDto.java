@@ -23,18 +23,17 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
 @XmlRootElement(name = "storagePoolWithDevice")
 public class StoragePoolWithDeviceDto extends StoragePoolDto
 {
-    
+
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/storagepoolwithdevicedto+xml";
-    
+
     private StorageDeviceDto device;
-    
-    public void setDevice(StorageDeviceDto device)
+
+    public void setDevice(final StorageDeviceDto device)
     {
         this.device = device;
     }
