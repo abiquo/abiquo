@@ -588,8 +588,9 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 2 - NOT MANAGED
 3 - MANAGED
 4 - HALTED
-5 - HA_IN_PROGRESS
-5 - DISABLED_FOR_HA',
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA',
   `vswitchName` VARCHAR(30)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,

@@ -8,8 +8,9 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT 
 2 - NOT MANAGED
 3 - MANAGED
 4 - HALTED
-5 - HA_IN_PROGRESS
-5 - DISABLED_FOR_HA';
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA';
 
 
 -- Racks can be HA enabled

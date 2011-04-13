@@ -82,6 +82,10 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     public static final int STATE_HALTED = 4;
 
     public static final int STATE_UNLICENSED = 5;
+    
+    public static final int STATE_HA_IN_PROGRESS = 6;
+    
+    public static final int STATE_DISABLED_FOR_HA = 7;
 
     /**
      * How many virtual CPU are supported for each physical core, so ''cpuUsed'' always below
