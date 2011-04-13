@@ -57,10 +57,10 @@ import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.enumerator.DiskFormatType;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 @Controller
 public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryCommand

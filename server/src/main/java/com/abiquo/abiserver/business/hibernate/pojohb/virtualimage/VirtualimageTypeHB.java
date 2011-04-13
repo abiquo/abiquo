@@ -24,7 +24,7 @@ package com.abiquo.abiserver.business.hibernate.pojohb.virtualimage;
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageType;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 public class VirtualimageTypeHB implements java.io.Serializable, IPojoHB<VirtualImageType>
 {
