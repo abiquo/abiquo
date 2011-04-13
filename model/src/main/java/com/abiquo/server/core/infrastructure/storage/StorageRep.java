@@ -108,9 +108,17 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.getPoolsByStorageDevice(deviceId);
     }
 
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer firstElem, final Integer numElem, final String has, final String orderBy,
+        final Boolean asc)
     {
-        return volumeDAO.getVolumesByVirtualDatacenter(vdc);
+        return volumeDAO.getVolumesByVirtualDatacenter(vdc, firstElem, numElem, has, orderBy, asc);
+    }
+
+    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer volumeId)
+    {
+        return volumeDAO.getVolumeByVirtualDatacenter(vdc, volumeId);
     }
 
     public List<VolumeManagement> getVolumesByPool(final StoragePool pool)
@@ -119,13 +127,13 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
-	{
-		return tierDAO.getTiersByDatacenter(datacenterId);
-	}
-    
+    {
+        return tierDAO.getTiersByDatacenter(datacenterId);
+    }
 
-    public List<VolumeManagement> findVolumesByEnterprise(Integer id, Integer startwith,
-        Integer limit, String filter, VolumeManagement.OrderByEnum orderBy, Boolean desc_or_asc)
+    public List<VolumeManagement> findVolumesByEnterprise(final Integer id,
+        final Integer startwith, final Integer limit, final String filter,
+        final VolumeManagement.OrderByEnum orderBy, final Boolean desc_or_asc)
     {
         return volumeDAO.getVolumesByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
     }
