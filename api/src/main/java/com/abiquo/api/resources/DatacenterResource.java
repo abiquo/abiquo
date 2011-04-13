@@ -37,8 +37,8 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 

@@ -65,6 +65,7 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 
 public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 {
+    @Override
     @AfterMethod
     public void tearDown()
     {
@@ -192,10 +193,11 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool);
+            setup(ippool.getRasd(), ippool);
             ip = ip.nextIPAddress();
         }
 
@@ -209,7 +211,6 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 25);
-
     }
 
     /**
@@ -226,7 +227,6 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(ips);
         assertTrue(ips.getCollection().isEmpty());
-
     }
 
     @Test

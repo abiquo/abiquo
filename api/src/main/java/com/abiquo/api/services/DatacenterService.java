@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.transformer.ModelTransformer;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacenterRep;

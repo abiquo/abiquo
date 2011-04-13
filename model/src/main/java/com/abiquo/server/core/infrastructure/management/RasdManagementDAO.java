@@ -32,7 +32,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaRasdDAO")
+@Repository("jpaRasdManagementDAO")
 public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
 {
     public RasdManagementDAO()

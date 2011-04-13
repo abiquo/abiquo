@@ -37,17 +37,16 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
-import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -57,6 +56,7 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
@@ -85,7 +85,7 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     // use this to initialize it for tests
-    public VirtualDatacenterService(EntityManager em)
+    public VirtualDatacenterService(final EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new DatacenterRep(em);
@@ -94,15 +94,15 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
     }
 
-    public Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
-        Datacenter datacenter)
+    public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         User user = userService.getCurrentUser();
         return getVirtualDatacenters(enterprise, datacenter, user);
     }
 
     Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
-        Datacenter datacenter, User user)
+        final Datacenter datacenter, final User user)
     {
         boolean findByUser =
             user != null
@@ -124,7 +124,7 @@ public class VirtualDatacenterService extends DefaultApiService
         }
     }
 
-    public VirtualDatacenter getVirtualDatacenter(Integer id)
+    public VirtualDatacenter getVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = repo.findById(id);
         if (vdc == null)
@@ -135,8 +135,8 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualDatacenter createVirtualDatacenter(VirtualDatacenterDto dto,
-        Datacenter datacenter, Enterprise enterprise)
+    public VirtualDatacenter createVirtualDatacenter(final VirtualDatacenterDto dto,
+        final Datacenter datacenter, final Enterprise enterprise)
     {
         if (!isValidEnterpriseDatacenter(enterprise, datacenter))
         {
@@ -163,7 +163,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return vdc;
     }
 
-    private void assignVirtualDatacenterToUser(VirtualDatacenter vdc)
+    private void assignVirtualDatacenterToUser(final VirtualDatacenter vdc)
     {
         User currentUser = userService.getCurrentUser();
 
@@ -178,21 +178,23 @@ public class VirtualDatacenterService extends DefaultApiService
         }
     }
 
-    protected boolean isValidEnterpriseDatacenter(Enterprise enterprise, Datacenter datacenter)
+    protected boolean isValidEnterpriseDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         return true;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualDatacenter updateVirtualDatacenter(Integer id, VirtualDatacenterDto dto)
+    public VirtualDatacenter updateVirtualDatacenter(final Integer id,
+        final VirtualDatacenterDto dto)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
 
         return updateVirtualDatacenter(vdc, dto);
     }
 
-    protected VirtualDatacenter updateVirtualDatacenter(VirtualDatacenter vdc,
-        VirtualDatacenterDto dto)
+    protected VirtualDatacenter updateVirtualDatacenter(final VirtualDatacenter vdc,
+        final VirtualDatacenterDto dto)
     {
         vdc.setName(dto.getName());
         setLimits(dto, vdc);
@@ -214,7 +216,7 @@ public class VirtualDatacenterService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteVirtualDatacenter(Integer id)
+    public void deleteVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
 
@@ -223,7 +225,7 @@ public class VirtualDatacenterService extends DefaultApiService
             errors.add(APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
         }
 
-        if (repo.containsResources(vdc, "8")) // id 8 -> Volumes. FIXME: add enumeration
+        if (repo.containsResources(vdc, VolumeManagement.DISCRIMINATOR))
         {
             errors.add(APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
         }
@@ -240,8 +242,8 @@ public class VirtualDatacenterService extends DefaultApiService
         return network;
     }
 
-    private VLANNetwork createVlan(Network network, NetworkConfigurationDto config,
-        NetworkConfiguration networkConfiguration)
+    private VLANNetwork createVlan(final Network network, final NetworkConfigurationDto config,
+        final NetworkConfiguration networkConfiguration)
     {
         VLANNetwork vlan =
             new VLANNetwork(config.getNetworkName(), network, 1, networkConfiguration);
@@ -249,15 +251,12 @@ public class VirtualDatacenterService extends DefaultApiService
         return vlan;
     }
 
-    private VirtualDatacenter createVirtualDatacenter(VirtualDatacenterDto dto,
-        Datacenter datacenter, Enterprise enterprise, Network network)
+    private VirtualDatacenter createVirtualDatacenter(final VirtualDatacenterDto dto,
+        final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise,
-                datacenter,
-                network,
-                dto.getHypervisorType(),
-                dto.getName());
+            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
+                .getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getNetworkConfiguration(), datacenter);
@@ -266,7 +265,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return vdc;
     }
 
-    private void setLimits(VirtualDatacenterDto dto, VirtualDatacenter vdc)
+    private void setLimits(final VirtualDatacenterDto dto, final VirtualDatacenter vdc)
     {
         vdc.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
             .getCpuCountHardLimit()));
@@ -278,8 +277,8 @@ public class VirtualDatacenterService extends DefaultApiService
         vdc.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
     }
 
-    private void validateVirtualDatacenter(VirtualDatacenter vdc, NetworkConfigurationDto config,
-        Datacenter datacenter)
+    private void validateVirtualDatacenter(final VirtualDatacenter vdc,
+        final NetworkConfigurationDto config, final Datacenter datacenter)
     {
         if (config == null)
         {
@@ -304,7 +303,7 @@ public class VirtualDatacenterService extends DefaultApiService
         flushErrors();
     }
 
-    private boolean isValidVlanHardLimitPerVdc(long vlansHard)
+    private boolean isValidVlanHardLimitPerVdc(final long vlansHard)
     {
         String limitS = System.getProperty("abiquo.server.networking.vlanPerVdc", "0");
         int limit = Integer.valueOf(limitS);
@@ -312,17 +311,18 @@ public class VirtualDatacenterService extends DefaultApiService
         return limit == 0 || limit >= vlansHard;
     }
 
-    private boolean isValidHypervisorForDatacenter(HypervisorType type, Datacenter datacenter)
+    private boolean isValidHypervisorForDatacenter(final HypervisorType type,
+        final Datacenter datacenter)
     {
         return datacenterRepo.findHypervisors(datacenter).contains(type);
     }
 
-    private Collection<IPAddress> calculateIPRange(NetworkConfigurationDto networkConfiguration)
+    private Collection<IPAddress> calculateIPRange(
+        final NetworkConfigurationDto networkConfiguration)
     {
         Collection<IPAddress> range =
-            IPNetworkRang.calculateWholeRange(
-                IPAddress.newIPAddress(networkConfiguration.getAddress()),
-                networkConfiguration.getMask());
+            IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(networkConfiguration
+                .getAddress()), networkConfiguration.getMask());
 
         if (!IPAddress.isIntoRange(range, networkConfiguration.getGateway()))
         {
@@ -333,7 +333,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return range;
     }
 
-    private NetworkConfiguration createNetworkConfiguration(NetworkConfigurationDto dto)
+    private NetworkConfiguration createNetworkConfiguration(final NetworkConfigurationDto dto)
     {
         NetworkConfiguration config =
             new NetworkConfiguration(dto.getAddress(), dto.getMask(), dto.getNetMask(), FENCE_MODE);
@@ -353,8 +353,9 @@ public class VirtualDatacenterService extends DefaultApiService
         return config;
     }
 
-    private Dhcp createDhcp(Datacenter datacenter, VirtualDatacenter vdc, VLANNetwork vlan,
-        NetworkConfiguration networkConfiguration, Collection<IPAddress> range)
+    private Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
+        final VLANNetwork vlan, final NetworkConfiguration networkConfiguration,
+        final Collection<IPAddress> range)
     {
         List<RemoteService> dhcpServiceList =
             datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
@@ -386,12 +387,8 @@ public class VirtualDatacenterService extends DefaultApiService
             String name = macAddress.replace(":", "") + "_host";
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp,
-                    vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName());
+                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
+                    .getName(), IpPoolManagement.Type.PRIVATE);
 
             ipManagement.setVirtualDatacenter(vdc);
 

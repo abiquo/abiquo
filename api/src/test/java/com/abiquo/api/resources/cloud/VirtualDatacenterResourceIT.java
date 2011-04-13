@@ -33,13 +33,15 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -50,10 +52,10 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
@@ -83,13 +85,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, resolveDatacenterURI(vdc.getDatacenter().getId()), "datacenter");
         assertLinkExist(dto, resolveEnterpriseURI(vdc.getEnterprise().getId()), "enterprise");
-        assertLinkExist(dto, resolvePrivateNetworksURI(vdc.getId()), PrivateNetworksResource.PRIVATE_NETWORKS_PATH);
+        assertLinkExist(dto, resolvePrivateNetworksURI(vdc.getId()),
+            PrivateNetworksResource.PRIVATE_NETWORKS_PATH);
         assertLinkExist(dto, resolveVirtualDatacenterURI(vdc.getId()), "edit");
-        assertLinkExist(dto, resolveVirtualAppliancesURI(vdc.getId()), VirtualApplianceResource.VIRTUAL_APPLIANCE);
-        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()), "action", IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(dto, resolveVirtualAppliancesURI(vdc.getId()),
+            VirtualApplianceResource.VIRTUAL_APPLIANCE);
+        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
     }
 
-    private VirtualDatacenterDto getValidVdc(VirtualDatacenter vdc)
+    private VirtualDatacenterDto getValidVdc(final VirtualDatacenter vdc)
     {
         ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()));
 
@@ -157,9 +162,14 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void deleteVirtualDatacenterFailsWhenHasVolumesAttached()
     {
-        RasdManagement rasd = rasdGenerator.createInstance("8");
-        VirtualDatacenter vdc = rasd.getVirtualDatacenter();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, rasd);
+        VolumeManagement volume = volumeManagementGenerator.createUniqueInstance();
+        VirtualDatacenter vdc = volume.getVirtualDatacenter();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        entitiesToPersist.add(volume);
+
+        setup(entitiesToPersist.toArray());
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
         assertErrors(response, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
@@ -175,16 +185,19 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
                 .getDatacenter());
         ip.getDhcp().setRemoteService(rs);
 
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, rs, ip.getDhcp(), ip
-            .getVlanNetwork().getConfiguration(), ip.getVlanNetwork(), ip);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        ipGenerator.addAuxiliaryEntitiesToPersist(ip, entitiesToPersist);
+        entitiesToPersist.add(ip);
+
+        setup(entitiesToPersist.toArray());
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
         assertEquals(response.getStatusCode(), 204);
     }
-    
+
     // TESTS refered to the action of GET IPs by VDC
     /**
-     * Check if the link of the action when GET a VDC exists 
+     * Check if the link of the action when GET a VDC exists
      */
     @Test
     public void getPrivateNetworkIPsByVirtualDatacenter()
@@ -197,30 +210,33 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool);
+            setup(ippool.getRasd(), ippool);
             ip = ip.nextIPAddress();
         }
-        
-        
+
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
 
-        IPAddress ip2 = IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress ip2 =
+            IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP2 =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan2.getConfiguration()
+                .getAddress()), IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration()
+                .getMask()));
+
         while (!ip2.equals(lastIP2))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan2, ip2.toString());
-            setup(ippool);
+            setup(ippool.getRasd(), ippool);
             ip2 = ip2.nextIPAddress();
         }
-        
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         Resource resource = client.resource(validURI);
@@ -234,7 +250,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertEquals(entity.getCollection().size(), 25);
 
     }
-    
+
     /**
      * Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
      */
@@ -253,5 +269,5 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
     }
-    
+
 }
