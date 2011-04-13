@@ -40,28 +40,29 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
         super(RasdManagement.class);
     }
 
-    public RasdManagementDAO(EntityManager entityManager)
+    public RasdManagementDAO(final EntityManager entityManager)
     {
         super(RasdManagement.class, entityManager);
     }
 
-    private static Criterion sameResourceType(String idResourceType)
+    private static Criterion sameResourceType(final String idResourceType)
     {
         return Restrictions.eq(RasdManagement.ID_RESOURCE_TYPE_PROPERTY, idResourceType);
     }
 
-    private static Criterion sameVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    private static Criterion sameVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         return Restrictions.eq(RasdManagement.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
     }
 
-    private static Criterion sameVirtualMachine(Integer virtualMachineId)
+    private static Criterion sameVirtualMachine(final Integer virtualMachineId)
     {
         return Restrictions.eq(RasdManagement.ID_VM_PROPERTY, virtualMachineId);
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<RasdManagement> findByVirtualDatacenterAndResourceType(
-        VirtualDatacenter virtualDatacenter, String resourceType)
+        final VirtualDatacenter virtualDatacenter, final String resourceType)
     {
         return createCriteria(sameVirtualDatacenter(virtualDatacenter),
             sameResourceType(resourceType)).list();

@@ -31,9 +31,9 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.enumerator.VirtualMachineState;
 
 @Repository("jpaDatacenterDAO")
 public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>

@@ -18,10 +18,39 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.model.enumerator;
 
-package com.abiquo.server.core.enumerator;
-
-public enum VirtualMachineState
+/**
+ * Sets the States of a Volume Storage can live in AbiCloud
+ * 
+ * @author abiquo
+ */
+public enum VolumeState
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
+    /**
+     * When a volume storage is created but not already associated to any Virtual Machine
+     */
+    NOT_MOUNTED_NOT_RESERVED(0),
+
+    /**
+     * When a volume storage is reserved but we don't want to mount to any Virtual Machine
+     */
+    NOT_MOUNTED_RESERVED(1),
+
+    /**
+     * When a volume is reserved and ready to mount to a given Virtual Machine
+     */
+    MOUNTED_RESERVED(2);
+
+    private int state;
+
+    private VolumeState(final int state)
+    {
+        this.state = state;
+    }
+
+    public int getNumericState()
+    {
+        return state;
+    }
 }

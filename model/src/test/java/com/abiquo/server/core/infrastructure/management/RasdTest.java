@@ -25,7 +25,6 @@ import com.abiquo.server.core.common.GenericEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
 public class RasdTest extends GenericEntityTestBase<String, Rasd>
-// DefaultEntityTestBase<RasdRaw>
 {
 
     @Override

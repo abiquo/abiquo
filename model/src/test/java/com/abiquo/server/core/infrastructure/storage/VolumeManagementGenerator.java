@@ -22,73 +22,81 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeManagement>
 {
+    private StoragePoolGenerator poolGenerator;
 
-    // TODO extends RasdGenerator and use the 'super'
+    private RasdManagementGenerator rasdmGenerator;
 
-    VirtualImageGenerator vImageGen;
+    private VirtualDatacenterGenerator vdcGenerator;
 
-    StoragePoolGenerator storagePoolGen;
-
-    // VirtualApplianceGenerator vAppGen;
-
-    public VolumeManagementGenerator(SeedGenerator seed)
+    public VolumeManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
-
-        vImageGen = new VirtualImageGenerator(seed);
-        storagePoolGen = new StoragePoolGenerator(seed);
-        // vAppGen = new VirtualApplianceGenerator(seed);
+        poolGenerator = new StoragePoolGenerator(seed);
+        rasdmGenerator = new RasdManagementGenerator(seed);
+        vdcGenerator = new VirtualDatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(VolumeManagement obj1, VolumeManagement obj2)
+    public void assertAllPropertiesEqual(final VolumeManagement obj1, final VolumeManagement obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VolumeManagement.ID_SCSI_PROPERTY,
-            VolumeManagement.STATE_PROPERTY, VolumeManagement.USED_SIZE_PROPERTY); // TODO add assoc
-        // properitess
+            VolumeManagement.STATE_PROPERTY, VolumeManagement.USED_SIZE_PROPERTY);
+
+        poolGenerator.assertAllPropertiesEqual(obj1.getStoragePool(), obj2.getStoragePool());
+        rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
     }
 
     @Override
     public VolumeManagement createUniqueInstance()
     {
-        StoragePool storagePool = storagePoolGen.createUniqueInstance();
-        VirtualImage vimage = vImageGen.createUniqueInstance();
+        String name =
+            newString(nextSeed(), Rasd.ELEMENT_NAME_LENGTH_MIN, Rasd.ELEMENT_NAME_LENGTH_MAX);
 
-        // VirtualAppliance virtualAppliance = vAppGen.createUniqueInstance();
+        return createInstance(name);
+    }
 
-        VolumeManagement volumeManagement = new VolumeManagement(storagePool, vimage, "" + new Random().nextInt());
+    public VolumeManagement createInstance(final String name)
+    {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        return createInstance(name, vdc);
+    }
 
-        return volumeManagement;
+    public VolumeManagement createInstance(final String name, final VirtualDatacenter vdc)
+    {
+        String uuid = UUID.randomUUID().toString();
+        long sizeInMB = nextSeed();
+        String idSCSI =
+            newString(nextSeed(), VolumeManagement.ID_SCSI_LENGTH_MIN,
+                VolumeManagement.ID_SCSI_LENGTH_MAX);
+
+        StoragePool pool = poolGenerator.createUniqueInstance();
+
+        return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VolumeManagement entity,
-        List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final VolumeManagement entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualImage vimage = entity.getVirtualImage();
-        // VirtualAppliance virtualApp = entity.getVirtualAppliance();
         StoragePool storagePool = entity.getStoragePool();
-
-        vImageGen.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
-        entitiesToPersist.add(vimage);
-
-        // vAppGen.addAuxiliaryEntitiesToPersist(virtualApp, entitiesToPersist);
-        // entitiesToPersist.add(virtualApp);
-
-        storagePoolGen.addAuxiliaryEntitiesToPersist(storagePool, entitiesToPersist);
+        poolGenerator.addAuxiliaryEntitiesToPersist(storagePool, entitiesToPersist);
         entitiesToPersist.add(storagePool);
+
+        rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
 }
