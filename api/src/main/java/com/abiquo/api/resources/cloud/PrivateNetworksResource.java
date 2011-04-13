@@ -25,7 +25,9 @@ import static com.abiquo.api.resources.cloud.PrivateNetworkResource.createTransf
 
 import java.util.Collection;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -40,6 +42,7 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 
 @Parent(VirtualDatacenterResource.class)
@@ -73,4 +76,14 @@ public class PrivateNetworksResource extends AbstractResource
 
         return networks;
     }
+
+    @POST
+    public VLANNetworkDto createNetwork(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(0) Integer virtualDatacenterId,
+        VLANNetworkDto network, @Context IRESTBuilder restBuilder) throws Exception
+    {
+        VLANNetwork vlan = service.createPrivateNetwork(virtualDatacenterId, network);
+        return PrivateNetworkResource.createTransferObject(vlan, virtualDatacenterId, restBuilder);
+    }
+
 }

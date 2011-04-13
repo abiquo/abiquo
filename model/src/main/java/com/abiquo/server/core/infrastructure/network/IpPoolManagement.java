@@ -346,4 +346,25 @@ public class IpPoolManagement extends RasdManagement
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
+
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        IP, QUARANTINE, MAC, LEASE, VLAN, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE;
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
+    }
 }

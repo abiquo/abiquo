@@ -28,6 +28,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualAppliancesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetDHCPInfoURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
 import static org.testng.Assert.assertEquals;
@@ -35,6 +36,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -46,6 +48,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -196,8 +199,31 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     }
 
     // TESTS refered to the action of GET IPs by VDC
+
     /**
-     * Check if the link of the action when GET a VDC exists
+     * <<<<<<<
+     * HEAD:api/src/test/java/com/abiquo/api/resources/cloud/VirtualDatacenterResourceIT.java
+     * ======= Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
+     */
+    @Test
+    public void getVirtualDatacenterRaises409ErrorWhenHasVLANsWithoutIPs()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
+    }
+
+    /**
+     * >>>>>>>7efd52ea668ee69e345aeb964a7a2b3cf18f45d7:api/src/test/java/com/abiquo/api/resources/cloud/VirtualDatacenterResourceIT.jav
+     * a Check if the link of the action when GET a VDC exists
      */
     @Test
     public void getPrivateNetworkIPsByVirtualDatacenter()
@@ -244,30 +270,396 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
 
-        IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
-        assertNotNull(entity);
-        assertNotNull(entity.getCollection());
-        assertEquals(entity.getCollection().size(), 25);
-
     }
 
     /**
-     * Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=ip' query
+     * param
      */
     @Test
-    public void getVirtualDatacenterRaisesErrorWhenHasVLANsWithoutIPs()
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByIp()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
-        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
-        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
 
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=ip";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
+        assertEquals(200, response.getStatusCode());
     }
 
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the
+     * 'by=quarantine' query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByQuarantine()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=quarantine";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=mac' query
+     * param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByMAC()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=mac";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=lease'
+     * query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByLease()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=lease";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=vlan'
+     * query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByVlan()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=vlan";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the
+     * 'by=virtualdatacenter' query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualDatacenter()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=virtualdatacenter";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the
+     * 'by=virtualmachine' query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualMachine()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=virtualmachine";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the
+     * 'by=virtualappliance' query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualAppliance()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=virtualappliance";
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource allows the
+     * 'by=virtualappliance' query param
+     */
+    @Test(enabled = false)
+    public void getPrivateNetworkIPsByVirtualDatacenterTestLimit()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        // Test Default
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        Resource resource = client.resource(validURI);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
+        assertEquals(200, response.getStatusCode());
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(Integer.valueOf(entity.getCollection().size()),
+            AbstractResource.DEFAULT_PAGE_LENGTH);
+
+        // Test 30
+        validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?limit=30";
+        resource = client.resource(validURI);
+        response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 30);
+
+        // Test 120
+        validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?limit=120";
+        resource = client.resource(validURI);
+        response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 120);
+
+    }
+
+    /**
+     * Check if the request 'action/ips' of the virtualdatacenter resource doesnt allow a
+     * 'by={randomvalue}' query param
+     */
+    @Test
+    public void getPrivateNetworkIPsByVirtualDatacenterRaises400WhenOrderByRandomParameter()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+
+        IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            ips.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(ips.toArray());
+
+        String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
+        validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
+        Resource resource = client.resource(validURI);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(400, response.getStatusCode());
+    }
+
+    // TESTS refered to the action of GET dhcpinfo by VDC
+
+    @Test
+    public void getdhcpInfoByVirtualDatacenter()
+    {
+        RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        String URI = resolveVirtualDatacenterActionGetDHCPInfoURI(vdc.getId());
+        Resource resource = client.resource(URI);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+        String entity = response.getEntity(String.class);
+        assertNotNull(entity);
+    }
 }

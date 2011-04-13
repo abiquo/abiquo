@@ -30,6 +30,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -74,7 +76,7 @@ public class NetworkConfiguration extends DefaultEntityBase
     // ******************************* Properties *******************************
     public final static String GATEWAY_PROPERTY = "gateway";
 
-    private final static boolean GATEWAY_REQUIRED = false;
+    private final static boolean GATEWAY_REQUIRED = true;
 
     private final static int GATEWAY_LENGTH_MIN = 1;
 
@@ -135,11 +137,16 @@ public class NetworkConfiguration extends DefaultEntityBase
     private final static boolean MASK_REQUIRED = true;
 
     private final static String MASK_COLUMN = "mask";
+    
+    private final static long MASK_MIN_VALUE = 0L;
+    private final static long MASK_MAX_VALUE = 31L;
 
     @Column(name = MASK_COLUMN, nullable = !MASK_REQUIRED)
     private Integer mask;
 
     @Required(value = MASK_REQUIRED)
+    @Min(MASK_MIN_VALUE)
+    @Max(MASK_MAX_VALUE)
     public Integer getMask()
     {
         return this.mask;
@@ -318,12 +325,13 @@ public class NetworkConfiguration extends DefaultEntityBase
     }
 
     // *************************** Mandatory constructors ***********************
-    public NetworkConfiguration(String address, Integer mask, String netmask, String fenceMode)
+    public NetworkConfiguration(String address, Integer mask, String netmask, String gateway, String fenceMode)
     {
         setAddress(address);
         setMask(mask);
         setFenceMode(fenceMode);
         setNetMask(netmask);
+        setGateway(gateway);
     }
 
     // *************************** Business methods ***********************

@@ -577,7 +577,7 @@ public class OVFGeneratorService
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
             for (IpPoolManagement ip : ips)
             {
-                if (ip.getIdVm() != null)
+                if (ip.getVirtualMachine() != null)
                 {
                     IpPoolType rule = new IpPoolType();
                     rule.setConfigureGateway(ip.getConfigureGateway());
@@ -894,7 +894,7 @@ public class OVFGeneratorService
         throws RequiredAttributeException
     {
         Collection<RasdManagement> management =
-            vmRepo.findRasdManagementByVirtualMachine(virtualMachine.getId());
+            vmRepo.findRasdManagementByVirtualMachine(virtualMachine);
 
         Collection<Rasd> rasd = new LinkedHashSet<Rasd>();
         if (management != null && !management.isEmpty())

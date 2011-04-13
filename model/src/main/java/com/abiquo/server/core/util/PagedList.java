@@ -52,7 +52,7 @@ public class PagedList<T> extends ArrayList<T>
     /**
      * Current page
      */
-    private Integer currentPage;
+    private Integer currentElement;
 
     public PagedList()
     {
@@ -99,16 +99,16 @@ public class PagedList<T> extends ArrayList<T>
     /**
      * @param currentPage the currentPage to set
      */
-    public void setCurrentPage(Integer currentPage)
+    public void setCurrentElement(Integer currentElement)
     {
-        this.currentPage = currentPage;
+        this.currentElement = currentElement;
     }
 
     /**
      * @return the currentPage
      */
-    public Integer getCurrentPage()
+    public Integer getCurrentElement()
     {
-        return currentPage;
+        return currentElement;
     }
 }

@@ -41,11 +41,14 @@ import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.TierDAO;
+import com.abiquo.server.core.util.PagedList;
 
 @Repository
 public class DatacenterRep extends DefaultRepBase
@@ -89,15 +92,18 @@ public class DatacenterRep extends DefaultRepBase
 
     @Autowired
     private NetworkDAO networkDao;
-    
+
     @Autowired
     private RepositoryDAO repositoryDao;
 
     @Autowired
     private VirtualMachineDAO virtualMachineDao;
-    
+
     @Autowired
     private TierDAO tierDao;
+
+    @Autowired
+    private DatacenterLimitsDAO datacenterLimitDao;
 
     public DatacenterRep()
     {
@@ -119,6 +125,7 @@ public class DatacenterRep extends DefaultRepBase
         this.remoteServiceDao = new RemoteServiceDAO(entityManager);
         this.repositoryDao = new RepositoryDAO(entityManager);
         this.networkDao = new NetworkDAO(entityManager);
+        this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
     }
 
     public Datacenter findById(Integer id)
@@ -219,6 +226,31 @@ public class DatacenterRep extends DefaultRepBase
         }
 
         return types;
+    }
+
+    public List<Enterprise> findEnterprisesByDataCenter(Datacenter datacenter, Boolean network,
+        Integer firstElem, Integer numElem)
+    {
+        PagedList<Enterprise> enterprises = new PagedList<Enterprise>();
+        if (network)
+        {
+            enterprises =
+                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter,
+                    firstElem, numElem);
+        }
+        else
+        {
+            Collection<DatacenterLimits> dlimits =
+                this.datacenterLimitDao.findByDatacenter(datacenter);
+            for (DatacenterLimits d : dlimits)
+            {
+                Enterprise e = d.getEnterprise();
+                enterprises.add(e);
+            }
+            enterprises.setTotalResults(enterprises.size());
+        }
+
+        return enterprises;
     }
 
     public boolean existsAnyRackWithName(Datacenter datacenter, String name)
@@ -326,12 +358,13 @@ public class DatacenterRep extends DefaultRepBase
         this.machineDao.flush();
     }
 
-	public void insertTier(Tier tier) {
-		
-		this.tierDao.persist(tier);
-		this.tierDao.flush();
-	}
-	
+    public void insertTier(Tier tier)
+    {
+
+        this.tierDao.persist(tier);
+        this.tierDao.flush();
+    }
+
     public void insertHypervisor(Hypervisor hypervisor)
     {
         assert hypervisor != null;
@@ -426,7 +459,7 @@ public class DatacenterRep extends DefaultRepBase
         this.remoteServiceDao.persist(remoteService);
         this.remoteServiceDao.flush();
     }
-    
+
     public void insertNetwork(Network network)
     {
         this.networkDao.persist(network);

@@ -36,10 +36,10 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -121,29 +121,26 @@ public class RasdManagement extends DefaultEntityBase
         this.virtualDatacenter = virtualDatacenter;
     }
 
-    public final static String ID_VM_PROPERTY = "idVm";
+    public final static String VIRTUAL_MACHINE_PROPERTY = "virtualMachine";
 
-    private final static boolean ID_VM_REQUIRED = false;
+    private final static boolean VIRTUAL_MACHINE_REQUIRED = false;
 
-    private final static String ID_VM_COLUMN = "idVM";
+    private final static String VIRTUAL_MACHINE_ID_COLUMN = "idVM";
 
-    private final static int ID_VM_MIN = Integer.MIN_VALUE;
+    @JoinColumn(name = VIRTUAL_MACHINE_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualMAchine")
+    private VirtualMachine virtualMachine;
 
-    private final static int ID_VM_MAX = Integer.MAX_VALUE;
-
-    @Column(name = ID_VM_COLUMN, nullable = !ID_VM_REQUIRED)
-    @Range(min = ID_VM_MIN, max = ID_VM_MAX)
-    private Integer idVm;
-
-    @Required(value = ID_VM_REQUIRED)
-    public Integer getIdVm()
+    public void setVirtualMachine(final VirtualMachine virtualMachine)
     {
-        return this.idVm;
+        this.virtualMachine = virtualMachine;
     }
 
-    protected void setIdVm(final Integer idVm)
+    @Required(value = VIRTUAL_MACHINE_REQUIRED)
+    public VirtualMachine getVirtualMachine()
     {
-        this.idVm = idVm;
+        return virtualMachine;
     }
 
     public final static String ID_RESOURCE_TYPE_PROPERTY = "idResourceType";

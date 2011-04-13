@@ -30,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaRasdManagementDAO")
@@ -55,9 +56,9 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
         return Restrictions.eq(RasdManagement.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
     }
 
-    private static Criterion sameVirtualMachine(final Integer virtualMachineId)
+    private static Criterion sameVirtualMachine(final VirtualMachine virtualMachine)
     {
-        return Restrictions.eq(RasdManagement.ID_VM_PROPERTY, virtualMachineId);
+        return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,9 +69,9 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
             sameResourceType(resourceType)).list();
     }
 
-    public Collection<RasdManagement> findByVirtualMachine(final Integer virtualMachineId)
+    public Collection<RasdManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
     {
-        return getResultList(createCriteria(sameVirtualMachine(virtualMachineId)));
+        return getResultList(createCriteria(sameVirtualMachine(virtualMachine)));
     }
 
 }

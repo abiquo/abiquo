@@ -24,7 +24,9 @@ package com.abiquo.api.resources;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -34,6 +36,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -46,6 +50,7 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.api.web.filters.TraceFilter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -67,6 +72,8 @@ public class EnterpriseResource extends AbstractResource
     public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    
+    protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
     EnterpriseService service;
@@ -108,15 +115,23 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
-    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) Integer id,
-        @QueryParam(PAGE) Integer page, @Context IRESTBuilder restBuilder) throws Exception
+    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) Integer id,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) Integer startwith, 
+        @QueryParam(BY) @DefaultValue("ip") String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") String filter, 
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") Boolean desc_or_asc, 
+        @Context IRESTBuilder restBuilder) throws Exception
     {
+
+        // Set query Params by default if they are not informed
+
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, (page == null) ? 0 : page,
-                DEFAULT_PAGE_LENGTH);
+            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
 
         if (all == null)
         {
+            LOGGER.error("Unexpected null value getting the list of ip pools by enterprise.");
             throw new InternalServerErrorException(APIError.INTERNAL_SERVER_ERROR);
         }
 
@@ -126,8 +141,8 @@ public class EnterpriseResource extends AbstractResource
         {
             ips.add(IpAddressesResource.createTransferObject(ip, restBuilder));
         }
-
-        ips.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+        ips.setTotalSize(((PagedList) all).getTotalResults());
+        ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
             (PagedList) all));
 
         return ips;

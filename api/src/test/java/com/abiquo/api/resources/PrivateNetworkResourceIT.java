@@ -66,6 +66,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
+        vlan.setEnterprise(vdc.getEnterprise());
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, dclimit);
         
         validURI = resolvePrivateNetworkURI(vdc.getId(), vlan.getId());

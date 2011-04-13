@@ -27,6 +27,8 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -39,19 +41,21 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
 
     private VirtualApplianceGenerator vappGenerator;
 
+    private VirtualMachineGenerator vmGenerator;
+
     public RasdManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         rasdGenerator = new RasdGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
         vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
     public void assertAllPropertiesEqual(final RasdManagement obj1, final RasdManagement obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.ID_VM_PROPERTY,
-            RasdManagement.ID_RESOURCE_TYPE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.ID_RESOURCE_TYPE_PROPERTY);
 
         rasdGenerator.assertAllPropertiesEqual(obj1.getRasd(), obj2.getRasd());
 
@@ -65,6 +69,12 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
         {
             vappGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
                 .getVirtualAppliance());
+        }
+
+        if (obj1.getVirtualMachine() != null || obj2.getVirtualMachine() != null)
+        {
+            vmGenerator
+                .assertAllPropertiesEqual(obj1.getVirtualMachine(), obj2.getVirtualMachine());
         }
     }
 
@@ -114,6 +124,13 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
         {
             vappGenerator.addAuxiliaryEntitiesToPersist(vapp, entitiesToPersist);
             entitiesToPersist.add(vapp);
+        }
+
+        VirtualMachine vm = entity.getVirtualMachine();
+        if (vm != null)
+        {
+            vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
+            entitiesToPersist.add(vm);
         }
     }
 }

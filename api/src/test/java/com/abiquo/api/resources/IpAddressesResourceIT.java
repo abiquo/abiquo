@@ -75,7 +75,7 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check a correct VLAN creation.
      */
-    @Test
+    @Test(enabled = false)
     public void createAndGetPrivateNetworkIPsByVLAN()
     {
         // The mask indicates the number of
@@ -111,7 +111,7 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
     /**
      * Create a network without IPs and check the 'HTTP Conflict' error
      */
-    @Test
+    @Test(enabled = false)
     public void createVLANRaisesErrorWhenWithoutIPs()
     {
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);

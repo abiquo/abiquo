@@ -197,7 +197,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             netAssignDao.findByVirtualDatacenter(virtualDatacenter);
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine.getId());
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
 
         if (networksAssignedList.isEmpty())
         {
@@ -281,7 +281,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine.getId());
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {

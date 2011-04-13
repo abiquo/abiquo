@@ -76,6 +76,8 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.StoragePoolDto;
@@ -131,6 +133,8 @@ public class RESTBuilder implements IRESTBuilder
             RemoteServicesResource.REMOTE_SERVICES_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_PATH, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -376,6 +380,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
+        links.add(builder.buildActionLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO,"dhcpinfo", params));
 
         return links;
     }
@@ -507,19 +513,74 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-        Integer lastPage = list.getTotalResults() / list.getPageSize();
+
+        // Add FIRST element
         links.add(new RESTLink(FIRST, absolutePath));
-        if (list.getCurrentPage() != 0 && lastPage != 0)
+
+        if (list.getCurrentElement() != 0)
         {
-            links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.PAGE + "="
-                + (list.getCurrentPage() - 1)));
+            // Previous using the page size avoiding to be less than 0.
+            Integer previous = list.getCurrentElement() - list.getPageSize();
+            previous = (previous < 0) ? 0 : previous;
+
+            links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
+                + previous));
         }
-        if (list.getCurrentPage() != lastPage && lastPage != 0)
+        Integer next = list.getCurrentElement() + list.getPageSize();
+        if (next < list.getTotalResults())
         {
-            links.add(new RESTLink(NEXT, absolutePath + "?" + AbstractResource.PAGE + "="
-                + (list.getCurrentPage() + 1)));
+            links.add(new RESTLink(NEXT, absolutePath + "?" + AbstractResource.START_WITH + "="
+                + next));
         }
-        links.add(new RESTLink(LAST, absolutePath + "?" + AbstractResource.PAGE + "=" + lastPage));
+        
+        Integer last = list.getTotalResults() - list.getPageSize();
+        if (last < 0)
+        {
+            last = 0;
+        }
+        links
+            .add(new RESTLink(LAST, absolutePath + "?" + AbstractResource.START_WITH + "=" + last));
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildRasdLinks(RasdManagement resource)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        Map<String, String> params = new HashMap<String, String>();
+        if (resource.getVirtualDatacenter() != null)
+        {
+            params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, resource
+                .getVirtualDatacenter().getId().toString());
+            RESTLink vdcLink =
+                builder.buildRestLink(VirtualDatacenterResource.class,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER, params);
+            vdcLink.setTitle(resource.getVirtualDatacenter().getName());
+            links.add(vdcLink);
+            if (resource.getVirtualAppliance() != null)
+            {
+                params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, resource
+                    .getVirtualAppliance().getId().toString());
+                RESTLink vappLink =
+                    builder.buildRestLink(VirtualApplianceResource.class,
+                        VirtualApplianceResource.VIRTUAL_APPLIANCE, params);
+                vappLink.setTitle(resource.getVirtualAppliance().getName());
+                links.add(vappLink);
+
+                if (resource.getVirtualMachine() != null)
+                {
+                    params.put(VirtualMachineResource.VIRTUAL_MACHINE, resource.getVirtualMachine()
+                        .getId().toString());
+                    RESTLink vmLink =
+                        builder.buildRestLink(VirtualMachineResource.class,
+                            VirtualMachineResource.VIRTUAL_MACHINE, params);
+                    vmLink.setTitle(resource.getVirtualMachine().getName());
+                    links.add(vmLink);
+                }
+            }
+        }
+
         return links;
     }
 
@@ -536,6 +597,27 @@ public class RESTBuilder implements IRESTBuilder
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
         return builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params);
+    }
+
+    @Override
+    public List<RESTLink> buildIpRasdLinks(IpPoolManagement ip)
+    {
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, ip.getVirtualDatacenter().getId()
+            .toString());
+        params.put(PrivateNetworkResource.PRIVATE_NETWORK, ip.getVlanNetwork().getId().toString());
+
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        RESTLink link =
+            builder.buildRestLink(PrivateNetworkResource.class,
+                PrivateNetworkResource.PRIVATE_NETWORK, params);
+        link.setTitle(ip.getVlanNetwork().getName());
+
+        links.add(link);
+
+        return links;
     }
 
     @Override
@@ -563,4 +645,5 @@ public class RESTBuilder implements IRESTBuilder
         // TODO Auto-generated method stub
         return null;
     }
+
 }

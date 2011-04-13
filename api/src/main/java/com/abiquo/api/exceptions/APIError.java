@@ -87,6 +87,7 @@ public enum APIError
         "VDC-5",
         "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
+            VIRTUAL_DATACENTER_MUST_HAVE_NETWORK("VDC-6", "Virtual Datacenter must be created with a private network"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -216,7 +217,10 @@ public enum APIError
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
         "STATS-3", "Non existent statistical data found for the requested enterprise"),
-
+        
+    // QUERY PAGGING STANDARD ERRORS
+    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
+    
     ;
 
     /**

@@ -44,6 +44,7 @@ import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
+import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
@@ -68,6 +69,9 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected VirtualApplianceGenerator vappGenerator = new VirtualApplianceGenerator(seed);
 
     protected DatacenterGenerator datacenterGenerator = new DatacenterGenerator(seed);
+
+    protected DatacenterLimitsGenerator datacenterLimitsGenerator =
+        new DatacenterLimitsGenerator(seed);
 
     protected RackGenerator rackGenerator = new RackGenerator(seed);
 
