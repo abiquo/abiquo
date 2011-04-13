@@ -164,7 +164,8 @@ public class VirtualMachineService
     }
 
     /**
-     * @param vm
+     * Block the virtual by changing its state to IN_PROGRESS
+     * @param vm VirtualMachine to be blocked
      */
     public void blockVirtualMachine(VirtualMachine vm)
     {
@@ -177,6 +178,13 @@ public class VirtualMachineService
         updateVirtualMachine(vm);
     }
 
+    /**
+     * Changes the state of the VirtualMachine to the state passed
+     * @param vappId Virtual Appliance Id
+     * @param vdcId VirtualDatacenter Id
+     * @param state The state to which change 
+     * @throws Exception
+     */
     public void changeVirtualMachineState(Integer vappId, Integer vdcId, State state)
         throws Exception
     {
@@ -199,11 +207,18 @@ public class VirtualMachineService
         changeState(resource, envelop, state.toResourceState());
 
     }
-    
+
+    /**
+     * Compare the state of vm with the state passed through parameter
+     * 
+     * @param vm VirtualMachine to which compare the state
+     * @param state a valid VirtualMachine state
+     * @return true if its the same state, false otherwise
+     */
     public Boolean sameState(VirtualMachine vm, State state)
     {
         String actual = OVFGeneratorService.getActualState(vm);
-        return state.toOVF().equalsIgnoreCase(actual); 
+        return state.toOVF().equalsIgnoreCase(actual);
     }
 
     private void changeState(final Resource resource, final EnvelopeType envelope,
