@@ -53,12 +53,14 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
 
     private static Criterion sameVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
-        return Restrictions.eq(RasdManagement.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
+        return Restrictions.eq(RasdManagement.VIRTUAL_DATACENTER_PROPERTY + ".id",
+            virtualDatacenter.getId());
     }
 
     private static Criterion sameVirtualMachine(final VirtualMachine virtualMachine)
     {
-        return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
+        return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY + ".id", virtualMachine
+            .getId());
     }
 
     @SuppressWarnings("unchecked")
