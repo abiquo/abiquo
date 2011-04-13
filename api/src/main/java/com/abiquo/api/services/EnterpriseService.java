@@ -42,8 +42,6 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -183,9 +181,9 @@ public class EnterpriseService extends DefaultApiService
         old.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
-        isValidEnterprise(old);        
+        isValidEnterprise(old);
         isValidEnterpriseLimit(old);
-               
+
         repo.update(old);
         return old;
     }
