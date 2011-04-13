@@ -37,23 +37,17 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
-import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.transformer.ModelTransformer;
-import com.abiquo.api.util.EventingSupport;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
-import com.sun.ws.management.client.Resource;
-import com.sun.ws.management.client.ResourceFactory;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
@@ -179,7 +173,14 @@ public class VirtualMachineResource extends AbstractResource
 
         service.deallocateVirtualMachine(virtualMachineId);
     }
-
+    /**
+     *  Power on the VirtualMachine
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
     @POST
     @Path("action/poweron")
     public void powerOnVirtualMachine(
@@ -196,7 +197,14 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.RUNNING);
         }
     }
-
+    /**
+     * Power off the virtual machine
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
     @POST
     @Path("action/poweroff")
     public void powerOffVirtualMachine(
@@ -213,7 +221,14 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.POWERED_OFF);
         }
     }
-
+    /**
+     * Resume the Virtual Machine
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
     @POST
     @Path("action/resume")
     public void resumeVirtualMachine(
@@ -228,6 +243,30 @@ public class VirtualMachineResource extends AbstractResource
             vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vappId, vdcId, State.REBOOTED);
+        }
+    }
+    /**
+     *  Pause the VirtualMachine
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @POST
+    @Path("action/pause")
+    public void pauseVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
+        @Context IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        if (!vmService.sameState(vm, State.PAUSED))
+        {
+            vmService.blockVirtualMachine(vm);
+
+            vmService.changeVirtualMachineState(vappId, vdcId, State.PAUSED);
         }
     }
 }
