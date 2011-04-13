@@ -258,6 +258,34 @@ public class Datastore extends DefaultEntityBase
     {
         this.enabled = enabled;
     }
+    
+    public final static String DEVICE_PROPERTY = "device";
+
+    private final static boolean DEVICE_REQUIRED = false;
+
+    private final static int DEVICE_LENGTH_MIN = 0;
+
+    private final static int DEVICE_LENGTH_MAX = 255;
+
+    private final static boolean DEVICE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DEVICE_COLUMN = "device";
+
+    @Column(name = DEVICE_COLUMN, nullable = !DEVICE_REQUIRED, length = DEVICE_LENGTH_MAX)
+    private String device;
+
+    @Required(value = DEVICE_REQUIRED)
+    @Length(min = DEVICE_LENGTH_MIN, max = DEVICE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DEVICE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDevice()
+    {
+        return this.device;
+    }
+
+    public void setDevice(String device)
+    {
+        this.device = device;
+    }
 
     // code in Datastore
     public static final String MACHINES_PROPERTY = "machines";

@@ -63,9 +63,12 @@ public class Datastore implements IPojo<DatastoreHB>
 
     private String directory;
 
+    private String device;
+    
     private Long size;
     
     private Long usedSize;
+        
 
     public Datastore()
     {
@@ -229,6 +232,16 @@ public class Datastore implements IPojo<DatastoreHB>
         return usedSize;
     }
     
+    public void setDevice(String device)
+    {
+        this.device = device;
+    }
+
+    public String getDevice()
+    {
+        return device;
+    }
+    
     @Override
     public DatastoreHB toPojoHB()
     {
@@ -242,8 +255,11 @@ public class Datastore implements IPojo<DatastoreHB>
         datastore.setRootPath(this.getUUID());
         datastore.setSize(size);
         datastore.setUsedSize(usedSize);
+        datastore.setDevice(device);
 
         return datastore;
     }
+
+  
 
 }

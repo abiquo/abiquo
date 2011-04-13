@@ -146,5 +146,17 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
     {
         this.enabled = enabled;
     }
+    
+    public void setDevice(String device)
+    {
+        this.device = device;
+    }
+
+    public String getDevice()
+    {
+        return device;
+    }
+
+    private String device;
 
 }
