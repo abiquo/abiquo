@@ -108,6 +108,7 @@
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
                 labelOldPasswordInvalid.visible = true;
+                currentPassword.enabled = true;
                 acceptButton.enabled = false;
                 
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
