@@ -210,6 +210,12 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
+    
+    protected String createEnterpriseIPsLink(final int enterpriseId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/ips",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+    }
 
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
     {
@@ -298,7 +304,16 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters",
             new HashMap<String, String>(), queryParams);
     }
-
+    
+    protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips",
+            params);
+    }
+    
     protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;

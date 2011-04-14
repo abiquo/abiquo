@@ -42,7 +42,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -67,8 +67,9 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
      */
     @Override
     @SuppressWarnings("unchecked")
-    public DataResult<VirtualDataCenter> createVirtualDatacenter(VirtualDataCenter vdc,
-        String networkName, NetworkConfigurationHB netConfig, ResourceManager resourceManager)
+    public DataResult<VirtualDataCenter> createVirtualDatacenter(final VirtualDataCenter vdc,
+        final String networkName, final NetworkConfigurationHB netConfig,
+        final ResourceManager resourceManager)
     {
         VirtualDatacenterDto dto = new VirtualDatacenterDto();
         dto.setName(vdc.getName());
@@ -76,16 +77,18 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         addLimits(vdc, dto);
 
-        NetworkConfigurationDto networkDto = new NetworkConfigurationDto();
-        networkDto.setAddress(netConfig.getNetworkAddress());
-        networkDto.setGateway(netConfig.getGateway());
-        networkDto.setMask(netConfig.getMask());
-        networkDto.setNetMask(netConfig.getNetmask());
-        networkDto.setNetworkName(networkName);
-        networkDto.setPrimaryDNS(netConfig.getPrimaryDNS());
-        networkDto.setSecondaryDNS(netConfig.getSecondaryDNS());
-        networkDto.setSufixDNS(netConfig.getSufixDNS());
-        networkDto.setFenceMode(netConfig.getFenceMode());
+        // TODO: Review these values!
+
+        VLANNetworkDto vlanDto = new VLANNetworkDto();
+        vlanDto.setName(networkName);
+        vlanDto.setDefaultNetwork(Boolean.TRUE);
+        vlanDto.setName(networkName);
+        vlanDto.setAddress(netConfig.getNetworkAddress());
+        vlanDto.setGateway(netConfig.getGateway());
+        vlanDto.setMask(netConfig.getMask());
+        vlanDto.setPrimaryDNS(netConfig.getPrimaryDNS());
+        vlanDto.setSecondaryDNS(netConfig.getSecondaryDNS());
+        vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
             URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
@@ -96,7 +99,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         dto.addLink(new RESTLink("datacenter", datacenterLink));
         dto.addLink(new RESTLink("enterprise", enterpriseLink));
 
-        dto.setNetworkConfiguration(networkDto);
+        dto.setVlan(vlanDto);
 
         String uri = createVirtualDatacentersLink();
 
@@ -132,7 +135,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         return dataResult;
     }
 
-    private void addLimits(VirtualDataCenter vdc, VirtualDatacenterDto dto)
+    private void addLimits(final VirtualDataCenter vdc, final VirtualDatacenterDto dto)
     {
         if (vdc.getLimits() != null)
         {
@@ -161,8 +164,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
      */
     @Override
     @SuppressWarnings("unchecked")
-    public BasicResult updateVirtualDatacenter(VirtualDataCenter vdc,
-        ResourceManager resourceManager)
+    public BasicResult updateVirtualDatacenter(final VirtualDataCenter vdc,
+        final ResourceManager resourceManager)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -201,8 +204,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
      */
     @Override
     @SuppressWarnings("unchecked")
-    public BasicResult deleteVirtualDatacenter(VirtualDataCenter vdc,
-        ResourceManager resourceManager)
+    public BasicResult deleteVirtualDatacenter(final VirtualDataCenter vdc,
+        final ResourceManager resourceManager)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -226,8 +229,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
     }
 
     @Override
-    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(Enterprise enterprise,
-        DataCenter datacenter)
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
+        final Enterprise enterprise, final DataCenter datacenter)
     {
         DataResult<Collection<VirtualDataCenter>> result =
             new DataResult<Collection<VirtualDataCenter>>();
