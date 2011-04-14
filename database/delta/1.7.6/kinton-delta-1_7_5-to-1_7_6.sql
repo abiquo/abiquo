@@ -1,3 +1,11 @@
+-- [ABICLOUDPREMIUM-1173]. Avoid pre-1.7.0 errors.
+UPDATE vlan_network v, network_configuration nc, virtualdatacenter vdc, ip_pool_management ip 
+SET ip.vlan_network_id = v.vlan_network_id 
+WHERE v.network_configuration_id = nc.network_configuration_id 
+AND vdc.networktypeID = v.network_id 
+AND ip.dhcp_service_id = nc.dhcp_service_id;
+
+
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 
@@ -58,7 +66,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
 		            memoryUsed = memoryUsed + NEW.ram,
 		            localStorageUsed = localStorageUsed + NEW.hd
 		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
-		END IF;
+        END IF;
 	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
