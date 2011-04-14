@@ -209,6 +209,8 @@ public class MachineService extends DefaultApiService
 
         isValidMachine(old);
 
+        // [ABICLOUDPREMIUM-1516] If ip service changes, must change the vrdp ip of the
+        // virtual machines deployed in that hypervisor
         if (StringUtils.hasText(machineDto.getIpService())
             && !machineDto.getIpService().equals(old.getHypervisor().getIpService()))
         {
