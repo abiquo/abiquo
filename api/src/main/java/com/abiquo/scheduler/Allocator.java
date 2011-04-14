@@ -249,12 +249,12 @@ public class Allocator implements IAllocator
     private VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
         VirtualMachine vmachine)
     {
-        VirtualImage vimage = vmachine.getVirtualImage();
+        VirtualImage vimage = new VirtualImage(null); // doesn't care about enterprise
 
         vimage.setCpuRequired(vmachine.getCpu());
         vimage.setRamRequired(vmachine.getRam());
 
-        if (vimage.getStateful() == 0)
+        if (vmachine.getVirtualImage().getStateful() == 0)
         {
             vimage.setHdRequiredInBytes(vmachine.getHdInBytes());
         }
