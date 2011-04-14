@@ -65,6 +65,7 @@ public class StorageRep extends DefaultRepBase
         this.tierDAO = new TierDAO(entityManager);
         this.deviceDAO = new StorageDeviceDAO(entityManager);
         this.poolDAO = new StoragePoolDAO(entityManager);
+        this.volumeDAO = new VolumeManagementDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
