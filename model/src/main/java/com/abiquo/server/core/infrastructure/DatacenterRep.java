@@ -89,13 +89,13 @@ public class DatacenterRep extends DefaultRepBase
 
     @Autowired
     private NetworkDAO networkDao;
-    
+
     @Autowired
     private RepositoryDAO repositoryDao;
 
     @Autowired
     private VirtualMachineDAO virtualMachineDao;
-    
+
     @Autowired
     private TierDAO tierDao;
 
@@ -191,6 +191,11 @@ public class DatacenterRep extends DefaultRepBase
         assert this.dao.isManaged(datacenter);
 
         return this.rackDao.findRacks(datacenter);
+    }
+
+    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    {
+        return this.rackDao.findRacksWithHAEnabled(datacenter);
     }
 
     public List<Machine> findMachines(Datacenter datacenter)
@@ -326,12 +331,13 @@ public class DatacenterRep extends DefaultRepBase
         this.machineDao.flush();
     }
 
-	public void insertTier(Tier tier) {
-		
-		this.tierDao.persist(tier);
-		this.tierDao.flush();
-	}
-	
+    public void insertTier(Tier tier)
+    {
+
+        this.tierDao.persist(tier);
+        this.tierDao.flush();
+    }
+
     public void insertHypervisor(Hypervisor hypervisor)
     {
         assert hypervisor != null;
@@ -426,7 +432,7 @@ public class DatacenterRep extends DefaultRepBase
         this.remoteServiceDao.persist(remoteService);
         this.remoteServiceDao.flush();
     }
-    
+
     public void insertNetwork(Network network)
     {
         this.networkDao.persist(network);

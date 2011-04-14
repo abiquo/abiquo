@@ -75,6 +75,17 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return result;
     }
 
+    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    {
+        Criteria criteria = createCriteria(sameDatacenter(datacenter));
+        criteria.add(Restrictions.eq(Rack.HAENABLED_PROPERTY, true));
+        criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
+
+        List<Rack> result = getResultList(criteria);
+
+        return result;
+    }
+
     public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
     {
         assert datacenter != null;
@@ -92,17 +103,17 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
             equalName(name));
     }
 
-     private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT = //
-     //
-     "SELECT rack_filtered_dc.idRack FROM "
-     + //
+    private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT = //
+        //
+        "SELECT rack_filtered_dc.idRack FROM "
+            + //
             "(SELECT r.idRack, r.idDatacenter, r.vlan_id_min, r.vlan_id_max, r.vlan_per_vdc_expected, r.nrsq, count(vn.id) as vlans_used "
-     + //
-     "FROM rack r LEFT JOIN vlan_network_assignment vn ON r.idRack = vn.idRack GROUP BY r.idRack ) as rack_filtered_dc "
-     + //
+            + //
+            "FROM rack r LEFT JOIN vlan_network_assignment vn ON r.idRack = vn.idRack GROUP BY r.idRack ) as rack_filtered_dc "
+            + //
             "WHERE rack_filtered_dc.idDataCenter = :idDatacenter AND rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected + (((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min +1 ) * (rack_filtered_dc.nrsq)) / 100) <= ((rack_filtered_dc.vlan_id_max - rack_filtered_dc.vlan_id_min) + 1) "
-     + //
-     "ORDER BY rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected ASC";
+            + //
+            "ORDER BY rack_filtered_dc.vlans_used + rack_filtered_dc.vlan_per_vdc_expected ASC";
 
     private final static String SQL_RACK_IDS_BY_MIN_VLAN_COUNT_LITE = //
         //
