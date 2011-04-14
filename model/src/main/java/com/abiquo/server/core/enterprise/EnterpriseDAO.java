@@ -43,23 +43,21 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagementDAO;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 {
-
-    // TODO at repo
     @Autowired
-    VolumeManagementDAO volumenManDAO;
+    private StorageRep storageRep;
 
     @Autowired
-    VLANNetworkDAO vlanNetDAO;
+    private VLANNetworkDAO vlanNetDAO;
 
     @Autowired
-    IpPoolManagementDAO ipPoolDao;
+    private IpPoolManagementDAO ipPoolDao;
 
     public EnterpriseDAO()
     {
@@ -69,6 +67,10 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     public EnterpriseDAO(final EntityManager entityManager)
     {
         super(Enterprise.class, entityManager);
+
+        this.storageRep = new StorageRep(entityManager);
+        this.vlanNetDAO = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
     @Override
@@ -190,7 +192,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
      */
     private Long getStorageUsage(final Integer idEnterprise)
     {
-        final List<VolumeManagement> volumes = volumenManDAO.getVolumesFromEnterprise(idEnterprise);
+        final List<VolumeManagement> volumes = storageRep.getVolumesByEnterprise(idEnterprise);
 
         long usedStorage = 0L;
         for (final VolumeManagement vol : volumes)
