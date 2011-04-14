@@ -37,7 +37,6 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@SuppressWarnings("unchecked")
 @Repository("jpaVolumeManagementDAO")
 public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
 {
@@ -104,12 +103,14 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
 
+    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
     {
         Criteria criteria = createCriteria(Restrictions.eq("storagePool", sp));
         return criteria.list();
     }
 
+    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
         final Boolean asc)
@@ -118,9 +119,13 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
 
         // Sort and select number of results
         if (asc == true)
+        {
             criteria.addOrder(Property.forName(orderBy).asc());
+        }
         else
+        {
             criteria.addOrder(Property.forName(orderBy).desc());
+        }
 
         criteria.setFirstResult(firstElem);
         criteria.setMaxResults(numElem);
@@ -137,6 +142,21 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
         return (VolumeManagement) criteria.uniqueResult();
     }
 
+    public List<VolumeManagement> getVolumesByEnterprise(final Integer id, final Integer startwith,
+        final Integer limit, final String filter, final VolumeManagement.OrderByEnum orderBy,
+        final Boolean desc_or_asc)
+    {
+        Query query =
+            getSession().createSQLQuery(
+                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + " "
+                    + defineOrderBySQL(orderBy, desc_or_asc));
+        query.setParameter("idEnterprise", id);
+        query.setParameter("filterLike", "%");
+
+        return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
+    }
+
+    @SuppressWarnings("unchecked")
     private <T> List<T> getSQLQueryResults(final Session session, final Query query,
         final Class<T> objectClass, final int idFieldPosition)
     {
@@ -155,20 +175,6 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
         return result;
     }
 
-    public List<VolumeManagement> getVolumesByEnterprise(final Integer id, final Integer startwith,
-        final Integer limit, final String filter, final VolumeManagement.OrderByEnum orderBy,
-        final Boolean desc_or_asc)
-    {
-        Query query =
-            getSession().createSQLQuery(
-                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + " "
-                    + defineOrderBySQL(orderBy, desc_or_asc));
-        query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", "%");
-
-        return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
-    }
-
     private String defineOrderBySQL(final VolumeManagement.OrderByEnum orderBy, final Boolean asc)
     {
 
@@ -181,7 +187,6 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
             {
                 queryString.append("elementname ");
                 break;
-
             }
             case ID:
             {
