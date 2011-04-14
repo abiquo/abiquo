@@ -42,7 +42,6 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enumerator.HypervisorType;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
@@ -77,19 +76,15 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         addLimits(vdc, dto);
 
-        NetworkConfigurationDto networkDto = new NetworkConfigurationDto();
-        networkDto.setAddress(netConfig.getNetworkAddress());
-        networkDto.setGateway(netConfig.getGateway());
-        networkDto.setMask(netConfig.getMask());
-        networkDto.setNetMask(netConfig.getNetmask());
-        networkDto.setPrimaryDNS(netConfig.getPrimaryDNS());
-        networkDto.setSecondaryDNS(netConfig.getSecondaryDNS());
-        networkDto.setSufixDNS(netConfig.getSufixDNS());
-        networkDto.setFenceMode(netConfig.getFenceMode());
-        
         VLANNetworkDto vlanDto = new VLANNetworkDto();
         vlanDto.setName(networkName);
-        vlanDto.setNetworkConfiguration(networkDto);
+        vlanDto.setAddress(netConfig.getNetworkAddress());
+        vlanDto.setGateway(netConfig.getGateway());
+        vlanDto.setMask(netConfig.getMask());
+        vlanDto.setPrimaryDNS(netConfig.getPrimaryDNS());
+        vlanDto.setSecondaryDNS(netConfig.getSecondaryDNS());
+        vlanDto.setSufixDNS(netConfig.getSufixDNS());
+        vlanDto.setDefaultNetwork(Boolean.TRUE);
 
         String datacenterLink =
             URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections

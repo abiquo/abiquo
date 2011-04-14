@@ -32,6 +32,7 @@ import org.apache.wink.client.ClientResponse;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
@@ -80,6 +81,27 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             populateErrors(response, result, "getRemoteStoragePoolsByDevice");
         }
 
+        return result;
+    }
+    
+    @Override
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto)
+    {
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+        String uri = createPrivateNetworksLink(vdcId);
+        ClientResponse response = post(uri, dto);
+        
+        if (response.getStatusCode() == 201)
+        {
+            VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
+            result.setData(createFlexObject(networkDto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "createPrivateVLANNetwork");
+        }       
+        
         return result;
     }
 
@@ -304,14 +326,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     private VlanNetwork createFlexObject(VLANNetworkDto dto)
     {
         NetworkConfiguration netconf = new NetworkConfiguration();
-        netconf.setFenceMode(dto.getNetworkConfiguration().getFenceMode());
-        netconf.setGateway(dto.getNetworkConfiguration().getGateway());
-        netconf.setMask(dto.getNetworkConfiguration().getMask());
-        netconf.setNetmask(dto.getNetworkConfiguration().getNetMask());
-        netconf.setNetworkAddress(dto.getNetworkConfiguration().getAddress());
-        netconf.setPrimaryDNS(dto.getNetworkConfiguration().getPrimaryDNS());
-        netconf.setSecondaryDNS(dto.getNetworkConfiguration().getSecondaryDNS());
-        netconf.setSufixDNS(dto.getNetworkConfiguration().getSufixDNS());
+        netconf.setFenceMode("bridge");
+        netconf.setGateway(dto.getGateway());
+        netconf.setMask(dto.getMask());
+        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
+        netconf.setNetworkAddress(dto.getAddress());
+        netconf.setPrimaryDNS(dto.getPrimaryDNS());
+        netconf.setSecondaryDNS(dto.getSecondaryDNS());
+        netconf.setSufixDNS(dto.getSufixDNS());
 
         VlanNetwork newNet = new VlanNetwork();
         newNet.setConfiguration(netconf);

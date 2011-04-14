@@ -40,6 +40,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.result.ListResponse;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
  * This class defines all services related to Networking
@@ -73,6 +74,7 @@ public class NetworkingService
         return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
 
+   
     /**
      * Create a new VLAN.
      * 
@@ -92,13 +94,16 @@ public class NetworkingService
 
         try
         {
-
-            NetworkCommand proxy =
-                BusinessDelegateProxy.getInstance(userSession, instantiateNetworkCommand(),
-                    NetworkCommand.class);
-            dataResult.setData(proxy.createPrivateVlanNetwork(userSession, vlanName, networkId,
-                configuration.toPojoHB(), defaultNetwork).toPojo());
-            dataResult.setSuccess(Boolean.TRUE);
+            VLANNetworkDto vlandto = new VLANNetworkDto();
+            vlandto.setName(vlanName);
+            vlandto.setDefaultNetwork(defaultNetwork);
+            vlandto.setAddress(configuration.getNetworkAddress());
+            vlandto.setGateway(configuration.getGateway());
+            vlandto.setMask(configuration.getMask());
+            vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
+            vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+            vlandto.setSufixDNS(configuration.getSufixDNS());
+            return proxyStub(userSession).createPrivateVLANNetwork(userSession, 1, vlandto);
         }
         catch (Exception e)
         {

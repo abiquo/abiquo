@@ -78,6 +78,12 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return existsAnyByCriterions(sameNetwork(network), nameEqual(name));
     }
 
+    public VLANNetwork findByDefault(VirtualDatacenter virtualDatacenter)
+    {
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
+    }
+
     private Criterion nameEqual(String name)
     {
         assert name != null;
@@ -136,7 +142,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     private final String GET_VLAN_DATACENTER =
         "SELECT dc " //
-            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " // 
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
             + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
             + "WHERE net.id = vlan.network.id AND vlan.id = :id";
 
@@ -147,4 +153,5 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
         return query.uniqueResult() != null;
     }
+
 }

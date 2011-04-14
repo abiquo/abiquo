@@ -35,7 +35,7 @@ public class NetworkResolver
     /**
      * Specify all the masks user can choose
      */
-    private String[] allMasks =
+    private static String[] allMasks =
         {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0", "255.240.0.0", "255.248.0.0",
         "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0", "255.255.192.0",
         "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0", "255.255.254.0",
@@ -45,19 +45,10 @@ public class NetworkResolver
     /**
      * List of values from 0 to 255
      */
-    private List<String> possibleValues;
+    private static List<String> possibleValues;
 
-    /**
-     * Error messages
-     */
-    private static String CLASSTYPE_CANNOT_BE_NULL = "Network class type can not be null.";
-
-    private static String INVALID_CLASSTYPE = "Invalid private network ClassType.";
-
-    private static String INVALID_NETWORK_MASK = "Network mask is invalid.";
-
-    public NetworkResolver()
-    {
+    
+    static {
         possibleValues = new ArrayList<String>();
 
         for (int i = 0; i < 256; i++)
@@ -66,56 +57,32 @@ public class NetworkResolver
         }
     }
 
-    /**
-     * Retrieve the list of enabled masks.
-     * 
-     * @param privateNetworkClassType class type of the subnet.
-     * @return a list of available masks.
-     * @throws InvalidPrivateNetworkClassTypeException if the privateNetworkClassType is not
-     *             supported.
-     */
-    public List<String> resolveMask(String privateNetworkClassType)
-        throws InvalidPrivateNetworkClassTypeException
-    {
-
-        List<String> masks = new ArrayList<String>();
-
-        if (privateNetworkClassType == null)
-        {
-            throw new InvalidPrivateNetworkClassTypeException(CLASSTYPE_CANNOT_BE_NULL);
-        }
-
-        if (privateNetworkClassType.equalsIgnoreCase("A"))
-        {
-            // masks = Arrays.asList(allMasks);
-            masks = Arrays.asList(allMasks).subList(14, allMasks.length);
-        }
-        else if (privateNetworkClassType.equalsIgnoreCase("B"))
-        {
-            // masks = Arrays.asList(allMasks).subList(8, allMasks.length);
-            masks = Arrays.asList(allMasks).subList(14, allMasks.length);
-        }
-        else if (privateNetworkClassType.equalsIgnoreCase("C"))
-        {
-            masks = Arrays.asList(allMasks).subList(16, allMasks.length);
-        }
-        else
-        {
-            throw new InvalidPrivateNetworkClassTypeException(INVALID_CLASSTYPE);
-        }
-
-        return masks;
-    }
-
-    /**
+   public static boolean isValidNetworkMask(IPAddress address, Integer mask)
+   {
+       String firstOctet = address.getFirstOctet();
+       String secondOctet = address.getSecondOctet();
+       String thirdOctet = address.getThirdOctet();
+       String fouthOctet = address.getFourthOctet();
+       
+       List<List<String>> listPossibleNetworks = resolvePossibleNetworks(Integer.parseInt(firstOctet), IPNetworkRang.transformIntegerMaskToIPMask(mask));
+       if (listPossibleNetworks.get(0).contains(firstOctet) 
+           && listPossibleNetworks.get(1).contains(secondOctet) 
+           && listPossibleNetworks.get(2).contains(thirdOctet)
+           && listPossibleNetworks.get(3).contains(fouthOctet))
+       {
+           return true;
+       }
+       return false;
+   }
+   
+   /**
      * @param privateNetworkClassType
      * @param mask
      * @return
      * @throws InvalidPrivateNetworkClassTypeException
      * @throws InvalidMaskException
      */
-    public List<List<String>> resolvePossibleNetworks(String privateNetworkClassType, IPAddress mask)
-        throws InvalidPrivateNetworkClassTypeException, InvalidMaskException
+    private static List<List<String>> resolvePossibleNetworks(Integer firstOctet, IPAddress mask)
     {
         List<List<String>> networks = new ArrayList<List<String>>();
         List<String> firstElement = new ArrayList<String>();
@@ -124,26 +91,16 @@ public class NetworkResolver
         List<String> fourthElement = new ArrayList<String>();
         String maskString = mask.toString();
 
-        // check correct values
-
-        // First check if the class type is defined according with the standard network private
-        // class types
-        if ((privateNetworkClassType == null) || !privateNetworkClassType.equalsIgnoreCase("A")
-            && !privateNetworkClassType.equalsIgnoreCase("B")
-            && !privateNetworkClassType.equalsIgnoreCase("C"))
-        {
-            throw new InvalidPrivateNetworkClassTypeException(INVALID_CLASSTYPE);
-        }
 
         // After check if the mask is inside the array of the accepted masks
-        if ((privateNetworkClassType.equalsIgnoreCase("A") && !Arrays.asList(allMasks).subList(14,
+        if ((firstOctet == 10 && !Arrays.asList(allMasks).subList(14,
             allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("B") && !Arrays.asList(allMasks).subList(
+            || (firstOctet == 172 && !Arrays.asList(allMasks).subList(
                 14, allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("C") && !Arrays.asList(allMasks).subList(
+            || (firstOctet == 192 && !Arrays.asList(allMasks).subList(
                 16, allMasks.length).contains(maskString)))
         {
-            throw new InvalidMaskException(INVALID_NETWORK_MASK);
+            return null;
         }
 
         StringTokenizer tokenizer = new StringTokenizer(maskString, ".");
@@ -152,10 +109,10 @@ public class NetworkResolver
         // First element is always depending on the class mask.
         tokenizer.nextToken();
 
-        firstElement.add(defineFirstList(privateNetworkClassType));
+        firstElement.add(String.valueOf(firstOctet));
 
         // Second element of the list of lists
-        secondElement.addAll(defineSecondList(privateNetworkClassType, tokenizer.nextToken()));
+        secondElement.addAll(defineSecondList(firstOctet, tokenizer.nextToken()));
 
         // Third and fourth element of the list token depends on absolutly the mask
         thirdElement.addAll(defineListFromMask(tokenizer.nextToken()));
@@ -169,35 +126,15 @@ public class NetworkResolver
         return networks;
     }
 
-    /**
-     * @param privateNetworkClassType
-     * @return
-     */
-    private String defineFirstList(String privateNetworkClassType)
-    {
-        if (privateNetworkClassType.equalsIgnoreCase("A"))
-        {
-            return "10";
-        }
-        else if (privateNetworkClassType.equalsIgnoreCase("B"))
-        {
-            return "172";
-        }
-        else
-        {
-            return "192";
-        }
-    }
-
-    private List<String> defineSecondList(String privateNetworkClassType, String nextToken)
+    private static List<String> defineSecondList(Integer firstOctet, String nextToken)
     {
         List<String> secondList = new ArrayList<String>();
 
-        if (privateNetworkClassType.equalsIgnoreCase("C"))
+        if (firstOctet == 192)
         {
             secondList.add("168");
         }
-        else if (privateNetworkClassType.equalsIgnoreCase("B"))
+        else if (firstOctet == 172)
         {
             for (int i = 16; i < 32; i++)
             {
@@ -219,7 +156,7 @@ public class NetworkResolver
      * @param mask value from 0 to 255
      * @return
      */
-    private List<String> defineListFromMask(String mask)
+    private static List<String> defineListFromMask(String mask)
     {
         int token = Integer.parseInt(mask);
         int numberOfValues = 256;
@@ -253,7 +190,7 @@ public class NetworkResolver
      * @return List of 'possibleValues' variable where its values are equal to 0 applying the
      *         module.
      */
-    private List<String> mapModule(Integer mod)
+    private static List<String> mapModule(Integer mod)
     {
         List<String> moduleZero = new ArrayList<String>();
 
