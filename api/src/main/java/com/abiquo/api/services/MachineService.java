@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
@@ -79,7 +80,7 @@ public class MachineService extends DefaultApiService
 
     }
 
-    public MachineService(EntityManager em)
+    public MachineService(final EntityManager em)
     {
         repo = new DatacenterRep(em);
         dataService = new DatastoreService(em);
@@ -96,7 +97,7 @@ public class MachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Machine addMachine(MachineDto machineDto, Integer rackId)
+    public Machine addMachine(final MachineDto machineDto, final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
         Datacenter datacenter = rack.getDatacenter();
@@ -105,16 +106,16 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(), machineDto
-                .getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
+                machineDto.getVirtualRamUsedInMb(),
 
-            machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(), machineDto
-                .getVirtualHardDiskUsedInMb(),
+                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
+                machineDto.getVirtualHardDiskUsedInMb(),
 
-            machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(), machineDto
-                .getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
+                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
 
-            machineDto.getState(), machineDto.getVirtualSwitch());
+                machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
@@ -126,9 +127,9 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
-                .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
-                .getPassword());
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
+                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
+                machineDto.getPassword());
 
         vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
             .name(), hypervisor.getUser(), hypervisor.getPassword());
@@ -167,7 +168,7 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
-    public Machine getMachine(Integer id)
+    public Machine getMachine(final Integer id)
     {
         if (id == 0)
         {
@@ -185,7 +186,7 @@ public class MachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Machine modifyMachine(Integer machineId, MachineDto machineDto)
+    public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
     {
         Machine old = getMachine(machineId);
 
@@ -208,12 +209,35 @@ public class MachineService extends DefaultApiService
 
         isValidMachine(old);
 
+        if (StringUtils.hasText(machineDto.getIpService())
+            && !machineDto.getIpService().equals(old.getHypervisor().getIpService()))
+        {
+            old.getHypervisor().setIpService(machineDto.getIpService());
+            updateVirtualMachines(old.getHypervisor(), machineDto.getIpService());
+        }
+
         repo.updateMachine(old);
+
         return old;
     }
 
+    private void updateVirtualMachines(final Hypervisor hypervisor, final String ipService)
+    {
+        Collection<VirtualMachine> vms = virtualMachineService.findByHypervisor(hypervisor);
+        if (vms != null && !vms.isEmpty())
+        {
+            for (VirtualMachine vm : vms)
+            {
+                if (StringUtils.hasText(vm.getVdrpIP()))
+                {
+                    vm.setVdrpIP(ipService);
+                }
+            }
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    public void removeMachine(Integer id)
+    public void removeMachine(final Integer id)
     {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
@@ -273,7 +297,7 @@ public class MachineService extends DefaultApiService
             .equals(rackId));
     }
 
-    private void isValidMachine(Machine machine)
+    private void isValidMachine(final Machine machine)
     {
         if (!machine.isValid())
         {
