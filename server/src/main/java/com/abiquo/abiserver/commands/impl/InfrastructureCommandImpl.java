@@ -662,38 +662,57 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             DatacenterHB datacenterPojo = datacenterDAO.findById(dataCenter.getId());
 
             // only delete the datacenter if it doesn't have any virtual
-            // datacenter associated
+            // datacenter and any storage device associated
             if (datacenterDAO.getNumberVirtualDatacentersByDatacenter(datacenterPojo
                 .getIdDataCenter()) == 0)
             {
-                // Delete datacenter allocation rules
-                fitPolicyRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
-                machineLoadRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
-
-                for (RackHB currentRack : datacenterPojo.getRacks())
+                if (datacenterDAO.getNumberStorageDevicesByDatacenter(datacenterPojo
+                    .getIdDataCenter()) == 0)
                 {
-                    for (PhysicalmachineHB pmToDelete : currentRack.getPhysicalmachines())
-                    {
-                        deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
+                    // Delete datacenter allocation rules
+                    fitPolicyRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
+                    machineLoadRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
 
-                        pmDAO.makeTransient(pmToDelete);
+                    for (RackHB currentRack : datacenterPojo.getRacks())
+                    {
+                        for (PhysicalmachineHB pmToDelete : currentRack.getPhysicalmachines())
+                        {
+                            deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
+
+                            pmDAO.makeTransient(pmToDelete);
+                        }
+
+                        // Once all physical machines are deleted, delete the rack
+                        rackDAO.makeTransient(currentRack);
                     }
 
-                    // Once all physical machines are deleted, delete the rack
-                    rackDAO.makeTransient(currentRack);
+                    datacenterPojo.setEntLimits(new HashSet<DatacenterLimitHB>());
+
+                    datacenterDAO.makeTransient(datacenterPojo);
+
+                    // make the changes persistent
+                    factory.endConnection();
+
+                    traceLog(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
+                        userSession, dataCenter, null, null, null, null, null, null, null);
+
+                    basicResult.setSuccess(true);
+
                 }
+                else
+                {
+                    traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
+                        userSession, dataCenter, null, "there are storage devices associated",
+                        null, null, null, null, null);
 
-                datacenterPojo.setEntLimits(new HashSet<DatacenterLimitHB>());
+                    // This exception will be catch if you try to delete
+                    // PhysicalDatacenters with
+                    // AssociatedDatacenters
+                    factory.rollbackConnection();
 
-                datacenterDAO.makeTransient(datacenterPojo);
-
-                // make the changes persistent
-                factory.endConnection();
-
-                traceLog(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    userSession, dataCenter, null, null, null, null, null, null, null);
-
-                basicResult.setSuccess(true);
+                    errorManager.reportError(InfrastructureCommandImpl.resourceManager,
+                        basicResult, "deleteDataCenterConstraintSD");
+                }
             }
             else
             {
