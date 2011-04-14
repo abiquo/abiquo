@@ -41,6 +41,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -128,6 +130,12 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",addButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",deleteButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",editButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",moreActionsButton,userList);
+                
                 //Initializing variables
                 this._users = new ArrayCollection();
 
@@ -594,6 +602,7 @@
 
     <!-- Search & More actions Bar -->
     <mx:HBox 
+    	id="userList"
         width="100%" height="32"
         paddingLeft="6"
         paddingRight="6"
@@ -713,6 +722,7 @@
 
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
+    	id="userAction"
         styleName="GeneralDataPanelBottomSkin">
         <mx:Button id="addButton"
             styleName="AddButton" enabled="{this._enterprise != null}"

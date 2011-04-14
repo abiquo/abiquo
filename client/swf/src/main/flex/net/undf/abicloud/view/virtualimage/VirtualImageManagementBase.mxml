@@ -37,6 +37,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.security.SecurableResource;
         	import net.undf.abicloud.vo.user.Role;
         	import mx.effects.Resize;
@@ -151,6 +153,29 @@
 
             private function onInitialize():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",addButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",addCategoryButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",deleteCategoryButton);
+                
+                //Checking privilege for managing categories
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", addCategoryButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", deleteCategoryButton);
+                
+                //Checking privilege for uploading image
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)){
+                	delete XMLList(addButtonDataProvider)[1];
+                }
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_MANAGE_REPOSITORY)){
+                	delete XMLList(addButtonDataProvider)[0];
+                }
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_MANAGE_REPOSITORY)){
+                	SecuredPrivilegeAccess.checkElementAccess("removeVappAction","condition",addButton,vappAction);
+                }
+                
                 //Catching model
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -687,14 +712,17 @@
 	                visible="{datacenterList.selectedIndex == -1}"/>
         </mx:Canvas>
         <general:GeneralPanelToolBox styleName="GeneralDataPanelBottomSkin">
-            <mx:PopUpMenuButton id="addButton"
-                width="40" height="22"
-                styleName="AddButtonPlus" label="" labelField="@label"
-                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                dataProvider="{addButtonDataProvider}"
-                enabled="{selectedDatacenter != null}"
-                itemClick="onItemClickAddButton(event)"
-                closeDuration="0"/>
+        	<mx:HBox id="vappAction" width="100%" verticalAlign="middle">
+        		
+	            <mx:PopUpMenuButton id="addButton"
+	                width="40" height="22"
+	                styleName="AddButtonPlus" label="" labelField="@label"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	                dataProvider="{addButtonDataProvider}"
+	                enabled="{selectedDatacenter != null}"
+	                itemClick="onItemClickAddButton(event)"
+	                closeDuration="0"/>
+        	</mx:HBox>
         </general:GeneralPanelToolBox>
     </general:GeneralPanel>
 </mx:HDividedBox>

@@ -30,6 +30,7 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
+    import net.undf.abicloud.vo.user.Privilege;
     import net.undf.abicloud.vo.user.User;
 
     /**
@@ -251,7 +252,7 @@ package net.undf.abicloud.business.managers
         
         public function userHasPrivilege(privilege:String):Boolean{
         	for(var i:int = 0 ; i < this._privileges.length ; i++){
-        		if(this._privileges.getItemAt(i) == privilege){
+        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
         			return true;
         		}
         	}

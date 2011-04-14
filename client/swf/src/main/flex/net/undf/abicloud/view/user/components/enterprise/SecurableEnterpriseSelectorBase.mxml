@@ -26,7 +26,6 @@
     width="100%" height="100%"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
-    implements="net.undf.abicloud.security.ISecurableComponent"
     xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
     xmlns:general="net.undf.abicloud.view.general.*">
 
@@ -37,6 +36,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.binding.utils.BindingUtils;
@@ -60,41 +61,7 @@
             import net.undf.abicloud.vo.user.User;
 
 
-
-            ////////////////////////////////////////////////////
-            // SECURIZATION
-
-            //Securable Resources of this Securable Component
-            private var _securableResource:SecurableResource;
-
-            public function defineSecurableResources():void
-            {
-                _securableResource = new SecurableResource("CRUD_ENTERPRISE", "USER");
-            }
-
-            public function checkSecurableResources():void
-            {
-                if (!_securableResource || !_securableResource.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
-                {
-                    makeUnavailable();
-                }
-                else
-                {
-                    //User is authorized to perform CRUD operations over an Enterprise. Nothing to do...
-                }
-            }
-
-            public function makeUnavailable():void
-            {
-                //If user is not authorized, we hide buttons for creating, updating or deleting an enterprise
-                enterpriseToolBar.removeChild(addEnterpriseButton);
-                addEnterpriseButton = null;
-//                enterpriseToolBar.removeChild(editEnterpriseButton);
-//                editEnterpriseButton = null;
-                enterpriseToolBar.removeChild(deleteEnterpriseButton);
-                deleteEnterpriseButton = null;
-            }
-
+       
             ////////////////////////////////////////////////////
 
 
@@ -111,9 +78,10 @@
 
             private function onCreationComplete():void
             {
-                //Secure this component
-                defineSecurableResources();
-                checkSecurableResources();
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",addEnterpriseButton,enterpriseToolBar);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",editEnterpriseButton,enterpriseToolBar);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",deleteEnterpriseButton,enterpriseToolBar);
 
 
                 //Listening for changes in model related to enterprises

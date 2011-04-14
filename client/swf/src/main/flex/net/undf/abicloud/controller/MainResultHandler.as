@@ -54,13 +54,6 @@ package net.undf.abicloud.controller
                 //Setting the common information
                 AbiCloudModel.getInstance().userManager.roles = mainResult.roles;
                 AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes = mainResult.hypervisorTypes;
-                
-                //Set the list of privileges
-                var privileges:ArrayCollection = new ArrayCollection();
-                privileges.addItem("addDatacenter");
-                
-                AbiCloudModel.getInstance().userManager.privileges = privileges;
-
             }
             else
             {

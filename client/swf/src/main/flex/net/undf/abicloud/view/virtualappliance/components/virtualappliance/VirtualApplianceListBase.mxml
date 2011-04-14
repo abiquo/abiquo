@@ -29,6 +29,7 @@
     paddingRight="0"
     paddingTop="10"
     verticalGap="0"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -43,6 +44,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.utils.ObjectUtil;
             import mx.collections.ArrayCollection;
 
@@ -84,6 +87,12 @@
             {
                 this._virtualAppliances = value;
             }
+            
+            private function onCreationComplete():void{
+            	//Checking privilege
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
+            }
+            
 
             /**
              * Initializes this component
@@ -480,27 +489,29 @@
     <general:GeneralPanelToolBox 
         width="100%" height="32"
         styleName="GeneralDataPanelBottomSkin">
-        <mx:Button id="addVirtualApplianceButton"
-            styleName="AddButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-            click="addVirtualAppliance()"/>
-
-        <mx:Button id="deleteVirtualApplianceButton"
-            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-				   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
-				   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
-            styleName="RemoveButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-            click="deleteVirtualAppliance()"/>
-
-        <mx:Spacer width="100%"/>
-
-        <mx:Button id="editVirtualApplianceButton"
-            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-				   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
-            styleName="ConfigurationButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-            click="editVirtualAppliance()"/>
+        <mx:HBox id="vappTools" width="100%" verticalAlign="middle">        	
+	        <mx:Button id="addVirtualApplianceButton"
+	            styleName="AddButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	            click="addVirtualAppliance()"/>
+	
+	        <mx:Button id="deleteVirtualApplianceButton"
+	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
+					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
+					   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
+	            styleName="RemoveButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	            click="deleteVirtualAppliance()"/>
+	
+	        <mx:Spacer width="100%"/>
+	
+	        <mx:Button id="editVirtualApplianceButton"
+	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
+					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
+	            styleName="ConfigurationButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+	            click="editVirtualAppliance()"/>
+        </mx:HBox>
     </general:GeneralPanelToolBox>
 
 </mx:VBox>

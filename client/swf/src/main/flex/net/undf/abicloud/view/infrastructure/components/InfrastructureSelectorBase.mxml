@@ -51,6 +51,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
@@ -106,6 +108,8 @@
 
             private function onCreationComplete():void
             {
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_ALLOW_MODIFY_SERVERS,"visible",infrastructureTools);
+                
                 //Initializing variables that required only to initalize once
                 _infrastructureDataDescriptor = new InfrastructureDataDescriptor();
                 
@@ -279,32 +283,35 @@
 
     <!-- Tool Bar -->
     <general:GeneralSubPanelToolBox bottom="0">
-        <mx:PopUpMenuButton id="addButton"
-            width="40" height="22"
-            styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
-            label="" labelField="@label"
-            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-            itemClick="onClickAddInfrastructureElement(event)"
-            closeDuration="0"/>
-
-        <mx:Button id="deleteButton"
-            enabled="{this._selectedInfrastructureElement != null}"
-            styleName="RemoveButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-            click="askInfrastructureElementDeletion()"/>
-
-        <mx:Spacer width="100%"/>
-
-        <mx:Button id="refreshDatacenterResourcesButton"
-            styleName="RefreshButtonBig"
-            toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REFRESH_DATACENTER_RESOURCES')"
-            click="onClickRefreshDatacenterResourcesButton()"/>
-
-        <mx:Button id="editButton"
-            enabled="{this._selectedInfrastructureElement != null}"
-            styleName="ConfigurationButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-            click="onClickEditInfrastructureElement()"/>
+    	<mx:HBox id="infrastructureTools" 
+    		width="100%" verticalAlign="middle">    		
+	        <mx:PopUpMenuButton id="addButton"
+	            width="40" height="22"
+	            styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
+	            label="" labelField="@label"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	            itemClick="onClickAddInfrastructureElement(event)"
+	            closeDuration="0"/>
+	
+	        <mx:Button id="deleteButton"
+	            enabled="{this._selectedInfrastructureElement != null}"
+	            styleName="RemoveButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	            click="askInfrastructureElementDeletion()"/>
+	
+	        <mx:Spacer width="100%"/>
+	
+	        <mx:Button id="refreshDatacenterResourcesButton"
+	            styleName="RefreshButtonBig"
+	            toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REFRESH_DATACENTER_RESOURCES')"
+	            click="onClickRefreshDatacenterResourcesButton()"/>
+	
+	        <mx:Button id="editButton"
+	            enabled="{this._selectedInfrastructureElement != null}"
+	            styleName="ConfigurationButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+	            click="onClickEditInfrastructureElement()"/>
+    	</mx:HBox>
     </general:GeneralSubPanelToolBox>
 
 </mx:Canvas>

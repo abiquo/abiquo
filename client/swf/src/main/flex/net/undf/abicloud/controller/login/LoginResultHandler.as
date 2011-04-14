@@ -25,12 +25,16 @@ package net.undf.abicloud.controller.login
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.controller.ResultHandler;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.utils.ScreenBlocker;
     import net.undf.abicloud.vo.authentication.LoginResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
+    import net.undf.abicloud.vo.user.Privilege;
+    import net.undf.abicloud.vo.user.PrivilegeType;
 
     public class LoginResultHandler extends ResultHandler
     {
@@ -44,13 +48,7 @@ package net.undf.abicloud.controller.login
 
 
         public function loginHandler(result:BasicResult):void
-        {
-        	
-//        	result.data.user.enterprise.id;
-//        	result.data.user.enterprise.name;
-//			result.data.user.enterprise.id;
-//			result.data.user.enterprise.defaultTheme; //we must receive this from server, now it is hardcoded
-        	
+        {    	
         	
             if (result.success)
             {
@@ -66,9 +64,179 @@ package net.undf.abicloud.controller.login
                 //Saving user's authorized client resources
                 AbiCloudModel.getInstance().authorizationManager.authorizedResources = loginResult.clientResources;
 
-
                 //Notifying that a user has logged in
                 AbiCloudModel.getInstance().loginManager.userLogged = true;
+                
+                //Set the list of privileges
+                var privileges:ArrayCollection = new ArrayCollection();
+                
+                var privilege:Privilege = new Privilege();
+                privilege.id = 1 ;
+                privilege.name = PrivilegeType.ENTERPRISE_ENUMERATE;                
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.ENTERPRISE_ADMINISTER_ALL;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.ENTERPRISE_RESOURCE_SUMMARY_ENT;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_ENUMERATE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_MANAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_RETRIEVE_DETAILS;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_RETRIEVE_RESOURCE_USAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_ALLOW_MODIFY_SERVERS;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_ALLOW_MODIFY_NETWORK;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_ALLOW_MODIFY_STORAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.PHYS_DC_ALLOW_MODIFY_ALLOCATION;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VDC_ENUMERATE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VDC_MANAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VDC_MANAGE_VAPP;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VDC_MANAGE_NETWORK;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VDC_MANAGE_STORAGE;
+                privileges.addItem(privilege);
+                                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_CUSTOMISE_SETTINGS;
+                privileges.addItem(privilege);                
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_DEPLOY_UNDEPLOY;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_ASSIGN_NETWORK;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_ASSIGN_VOLUME;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_PERFORM_ACTIONS;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_CREATE_INSTANCE;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.VAPP_CREATE_STATEFUL;
+                privileges.addItem(privilege); 
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_VIEW;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_ALLOW_MODIFY;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_UPLOAD_IMAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_MANAGE_REPOSITORY;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_DOWNLOAD_IMAGE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.APPLIB_MANAGE_CATEGORIES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_VIEW;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_ENTERPRISE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_USERS;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES;
+                privileges.addItem(privilege);
+                
+                
+                AbiCloudModel.getInstance().userManager.privileges = privileges;
 
             }
             else

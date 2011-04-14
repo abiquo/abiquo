@@ -46,6 +46,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.security.SecurableResource;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.binding.utils.ChangeWatcher;
@@ -67,11 +69,11 @@
             
             private var  _virtualDatacenterAddFormManagement:VirtualDataCenterAddFormManagement;
             
-            private var _securableVDCActions:SecurableResource;
-            
-
             private function onInitialize():void
             {
+                //Checking for privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"visible",securableVDCAccionsBox);
+                
                 //Listening for changes in model
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
                                                                                      onVirtualDatacenterCRUD);				                                                                                    
@@ -88,19 +90,6 @@
                 _virtualDatacenterFormEdit = new VirtualDatacenterFormEdit();
                 _virtualDatacenterFormEdit.addEventListener("VirtualDatacenterFormEditClose",
                                                             closeVirtualDatacenterFormEdit);
-                                                            
-                _securableVDCActions = new SecurableResource("ALLOW_VDC_ACTIONS","GENERIC");
-                
-                var tmp:Boolean = AbiCloudModel.getInstance().authorizationManager.isAuthorized(_securableVDCActions);
-                
-                if (tmp)
-				{
-					securableVDCAccionsBox.visible = true;
-					securableVDCAccionsBox.includeInLayout = true;
-				}else{
-					securableVDCAccionsBox.visible = false;
-					securableVDCAccionsBox.includeInLayout = false;
-				}
                 
             }
 

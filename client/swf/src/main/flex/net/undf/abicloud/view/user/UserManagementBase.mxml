@@ -39,6 +39,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.User;
         	import net.undf.abicloud.view.user.components.user.UserList;
             import mx.collections.ArrayCollection;
@@ -130,6 +132,9 @@
 
             private function onInitialize():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES,"removeChild",enterprisePanel,this);
+                
                 //Listening for changes in model related to VirtualAppliances
                	userToggledContainer.selectedIndex = 0;
             }
@@ -208,7 +213,8 @@
     </mx:Script>
 
     <!-- Enterprises list -->
-    <general:GeneralPanel 
+    <general:GeneralPanel
+    	id="enterprisePanel" 
         width="200" height="100%"
         title="@Resource(bundle='User', key='LABEL_ENTERPRISES')">
 

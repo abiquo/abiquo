@@ -45,6 +45,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.controls.Alert;
             import mx.controls.Image;
             import mx.core.DragSource;
@@ -91,6 +93,10 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"removeChild",buttonsContainer,imageCanvas);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE,"removeChild",downloadButton,buttonsContainer);
+
                 //Changing the style of this component, depending on the multiplier
                 this.width = DEFAULT_WIDTH * this._sizeMultiplier;
                 this.height = DEFAULT_HEIGHT * this._sizeMultiplier;
