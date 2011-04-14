@@ -68,15 +68,11 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "
             + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
-            + "where "
-            + "vm.idManagement = rm.idManagement "
-            + "and rm.idResource = r.instanceID "
-            + "and vm.idStorage = sp.idStorage " 
-            + "and sp.idStorageDevice = sd.id "
+            + "where " + "vm.idManagement = rm.idManagement " + "and rm.idResource = r.instanceID "
+            + "and vm.idStorage = sp.idStorage " + "and sp.idStorageDevice = sd.id "
             + "and sd.idDataCenter = :datacenterId "
             + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
-            + "and vdc.idEnterprise = :enterpriseId"
-            ;
+            + "and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "
@@ -103,6 +99,22 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         numberOfVirtualDatacenters = (Long) pmQuery.uniqueResult();
 
         return numberOfVirtualDatacenters;
+    }
+
+    @Override
+    public Long getNumberStorageDevicesByDatacenter(final Integer idDatacenter)
+    {
+
+        Long numberOfStorageDevices;
+
+        final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+        final Query sdQuery =
+            session
+                .createSQLQuery("select count(sd.id) from storage_device sd where sd.idDataCenter = :idDataCenter");
+        sdQuery.setInteger("idDataCenter", idDatacenter);
+        numberOfStorageDevices = ((BigInteger) sdQuery.list().get(0)).longValue();
+
+        return numberOfStorageDevices;
     }
 
     @Override
@@ -225,7 +237,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
     private final static Long MB_TO_BYTES = 1024l * 1024l;
 
     @Override
-    public long getCurrentStorageAllocated(int idEnterprise, int idDatacenter)
+    public long getCurrentStorageAllocated(final int idEnterprise, final int idDatacenter)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -238,7 +250,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
     }
 
     @Override
-    public long getCurrentPublicIpAllocated(int idEnterprise, int idDatacenter)
+    public long getCurrentPublicIpAllocated(final int idEnterprise, final int idDatacenter)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
