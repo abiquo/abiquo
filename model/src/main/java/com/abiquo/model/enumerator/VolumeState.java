@@ -27,30 +27,12 @@ package com.abiquo.model.enumerator;
  */
 public enum VolumeState
 {
-    /**
-     * When a volume storage is created but not already associated to any Virtual Machine
-     */
-    NOT_MOUNTED_NOT_RESERVED(0),
+    /** When a volume storage is created but not already associated to any Virtual Machine. */
+    NOT_MOUNTED_NOT_RESERVED,
 
-    /**
-     * When a volume storage is reserved but we don't want to mount to any Virtual Machine
-     */
-    NOT_MOUNTED_RESERVED(1),
+    /** When a volume storage is reserved but we don't want to mount to any Virtual Machine. */
+    NOT_MOUNTED_RESERVED,
 
-    /**
-     * When a volume is reserved and ready to mount to a given Virtual Machine
-     */
-    MOUNTED_RESERVED(2);
-
-    private int state;
-
-    private VolumeState(final int state)
-    {
-        this.state = state;
-    }
-
-    public int getNumericState()
-    {
-        return state;
-    }
+    /** When a volume is reserved and ready to mount to a given Virtual Machine. */
+    MOUNTED_RESERVED
 }
