@@ -135,6 +135,7 @@
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",deleteButton,userAction);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",editButton,userAction);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",moreActionsButton,userList);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_ENUMERATE_CONNECTED,"removeChild",loggedUsersCheckbox,loggedUsers);
                 
                 //Initializing variables
                 this._users = new ArrayCollection();
@@ -622,6 +623,7 @@
             width="100%" height="10"/>
 
         <mx:HBox 
+        	id="loggedUsers"
             width="100%"
             horizontalAlign="right"
             horizontalGap="3"

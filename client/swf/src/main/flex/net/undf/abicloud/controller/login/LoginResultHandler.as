@@ -235,6 +235,25 @@ package net.undf.abicloud.controller.login
                 privilege.name = PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES;
                 privileges.addItem(privilege);
                 
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_VIEW_PRIVILEGES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_ENUMERATE_CONNECTED;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.SYSCONFIG_VIEW;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.SYSCONFIG_ALLOW_MODIFY;
+                privileges.addItem(privilege);
                 
                 AbiCloudModel.getInstance().userManager.privileges = privileges;
 
