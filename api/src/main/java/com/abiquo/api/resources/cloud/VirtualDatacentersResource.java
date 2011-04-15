@@ -179,6 +179,7 @@ public class VirtualDatacentersResource extends AbstractResource
 
         return enterprise;
     }
+    
 
     private Integer getLinkId(RESTLink link, String path, String param, String key, APIError error)
     {
