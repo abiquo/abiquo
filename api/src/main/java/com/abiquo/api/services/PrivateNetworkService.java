@@ -74,7 +74,7 @@ public class PrivateNetworkService extends DefaultApiService
 
     }
 
-    public PrivateNetworkService(EntityManager em)
+    public PrivateNetworkService(final EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new DatacenterRep(em);
@@ -99,7 +99,8 @@ public class PrivateNetworkService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VLANNetwork createPrivateNetwork(Integer virtualDatacenterId, VLANNetworkDto networkdto)
+    public VLANNetwork createPrivateNetwork(final Integer virtualDatacenterId,
+        final VLANNetworkDto networkdto)
     {
         VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
         if (virtualDatacenter == null)
@@ -123,6 +124,7 @@ public class PrivateNetworkService extends DefaultApiService
                 IPNetworkRang.transformIntegerMaskToIPMask(networkdto.getMask()).toString(),
                 networkdto.getGateway(),
                 FENCE_MODE);
+
         config.setPrimaryDNS(networkdto.getPrimaryDNS());
         config.setSecondaryDNS(networkdto.getSecondaryDNS());
         config.setSufixDNS(networkdto.getSufixDNS());
@@ -177,7 +179,7 @@ public class PrivateNetworkService extends DefaultApiService
         return vlan;
     }
 
-    public VLANNetwork getNetwork(Integer id)
+    public VLANNetwork getNetwork(final Integer id)
     {
         return repo.findVlanById(id);
     }
@@ -277,8 +279,9 @@ public class PrivateNetworkService extends DefaultApiService
         return range;
     }
 
-    private Dhcp createDhcp(Datacenter datacenter, VirtualDatacenter vdc, VLANNetwork vlan,
-        NetworkConfiguration networkConfiguration, Collection<IPAddress> range)
+    private Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
+        final VLANNetwork vlan, final NetworkConfiguration networkConfiguration,
+        final Collection<IPAddress> range)
     {
         List<RemoteService> dhcpServiceList =
             datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
@@ -310,12 +313,8 @@ public class PrivateNetworkService extends DefaultApiService
             String name = macAddress.replace(":", "") + "_host";
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp,
-                    vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName());
+                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
+                    .getName(), IpPoolManagement.Type.PRIVATE);
 
             ipManagement.setVirtualDatacenter(vdc);
 

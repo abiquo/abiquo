@@ -23,8 +23,8 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 @XmlRootElement(name = "virtualDatacenter")
@@ -48,7 +48,7 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -58,7 +58,7 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -68,12 +68,12 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
         return hypervisorType;
     }
 
-    public void setHypervisorType(HypervisorType hypervisorType)
+    public void setHypervisorType(final HypervisorType hypervisorType)
     {
         this.hypervisorType = hypervisorType;
     }
 
-    public void setVlan(VLANNetworkDto vlan)
+    public void setVlan(final VLANNetworkDto vlan)
     {
         this.vlan = vlan;
     }

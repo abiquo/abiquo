@@ -22,7 +22,7 @@
 package com.abiquo.abiserver.pojo.infrastructure;
 
 import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 public class HyperVisorType
 {

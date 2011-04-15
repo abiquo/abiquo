@@ -33,10 +33,10 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.VirtualMachineState;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaDatacenterDAO")
@@ -48,26 +48,26 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         super(Datacenter.class);
     }
 
-    public DatacenterDAO(EntityManager entityManager)
+    public DatacenterDAO(final EntityManager entityManager)
     {
         super(Datacenter.class, entityManager);
     }
 
-    private static Criterion equalName(String name)
+    private static Criterion equalName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return this.existsAnyByCriterions(equalName(name));
     }
 
-    public boolean existsAnyOtherWithName(Datacenter datacenter, String name)
+    public boolean existsAnyOtherWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert isManaged(datacenter);
@@ -118,8 +118,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         return used;
     }
 
-    public List<Enterprise> findEnterprisesByDatacenters(Datacenter datacenter, Integer firstElem,
-        Integer numElem)
+    public List<Enterprise> findEnterprisesByDatacenters(final Datacenter datacenter,
+        final Integer firstElem, final Integer numElem)
     {
 
         // Get the query that counts the total results.

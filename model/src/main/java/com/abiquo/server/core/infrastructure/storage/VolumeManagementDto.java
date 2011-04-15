@@ -32,6 +32,20 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private Integer id;
 
+    private String uuid;
+
+    private String name;
+
+    private int state;
+
+    private long sizeInMB;
+
+    private long availableSizeInMB;
+
+    private long usedSizeInMB;
+
+    private String idScsi;
+
     public Integer getId()
     {
         return id;
@@ -42,19 +56,15 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private String idScsi;
-
-    public String getIdSCSI()
+    public String getIdScsi()
     {
         return idScsi;
     }
 
-    public void setIdSCSI(final String idScsi)
+    public void setIdScsi(final String idScsi)
     {
         this.idScsi = idScsi;
     }
-
-    private int state;
 
     public int getState()
     {
@@ -66,16 +76,54 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.state = state;
     }
 
-    private long usedSize;
-
-    public long getUsedSize()
+    public long getUsedSizeInMB()
     {
-        return usedSize;
+        return usedSizeInMB;
     }
 
-    public void setUsedSize(final long usedSize)
+    public void setUsedSizeInMB(final long usedSizeInMB)
     {
-        this.usedSize = usedSize;
+        this.usedSizeInMB = usedSizeInMB;
+    }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    public long getSizeInMB()
+    {
+        return sizeInMB;
+    }
+
+    public void setSizeInMB(final long sizeInMB)
+    {
+        this.sizeInMB = sizeInMB;
+    }
+
+    public long getAvailableSizeInMB()
+    {
+        return availableSizeInMB;
+    }
+
+    public void setAvailableSizeInMB(final long availableSizeInMB)
+    {
+        this.availableSizeInMB = availableSizeInMB;
     }
 
 }

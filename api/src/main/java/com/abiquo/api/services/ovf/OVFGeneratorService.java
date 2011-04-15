@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
@@ -83,7 +84,6 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -155,7 +155,7 @@ public class OVFGeneratorService
      * @throws Exception, if the virtualMachine can not be represented as an OVF document.
      */
     public EnvelopeType constructEnvelopeType(final VirtualMachine virtualMachine,
-        String machineState) throws Exception
+        final String machineState) throws Exception
     {
         EnvelopeType envelope;
 
@@ -400,7 +400,7 @@ public class OVFGeneratorService
         VSSDType vssd;
 
         // from the hypervisor
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
         String hypervisorAddress =
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
         String vsystemType = hypervisor.getType().getValue();
@@ -445,7 +445,7 @@ public class OVFGeneratorService
     }
 
     private static AnnotationSectionType createAnnotationMachineStateAndRDPPort(
-        final String machineState, String rdpPort)
+        final String machineState, final String rdpPort)
     {
 
         // Creating the Annotation Type
@@ -507,7 +507,7 @@ public class OVFGeneratorService
         // Getting the all the virtual Machines
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
-            NodeVirtualImage nodeVirtualImage = (NodeVirtualImage) node;
+            NodeVirtualImage nodeVirtualImage = node;
 
             State vmState = nodeVirtualImage.getVirtualMachine().getState();
 
@@ -703,7 +703,7 @@ public class OVFGeneratorService
         virtualDiskImageFile.getOtherAttributes().put(DATASTORE_QNAME, dataStore);
     }
 
-    private static VirtualDiskDescType createDiskFromVirtualImage(String diskId,
+    private static VirtualDiskDescType createDiskFromVirtualImage(final String diskId,
         final VirtualImage virtualImage)
     {
         Long capacity = virtualImage.getHdRequiredInBytes();
@@ -785,7 +785,7 @@ public class OVFGeneratorService
         final VirtualMachine virtualMachine, final VirtualImage virtualImage,
         final String networkName, final NodeVirtualImage node) throws RequiredAttributeException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
         String hypervisorAddres = "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
         String vsystemType = hypervisor.getType().getValue();
         String instanceID = virtualMachine.getUuid();
@@ -860,8 +860,8 @@ public class OVFGeneratorService
     private String getPhysicalMachineIqn(final NodeVirtualImage nvi)
     {
         // Get Virtual Datacenter
-        Hypervisor hypervisor = (Hypervisor) nvi.getVirtualMachine().getHypervisor();
-        Machine pm = (Machine) hypervisor.getMachine();
+        Hypervisor hypervisor = nvi.getVirtualMachine().getHypervisor();
+        Machine pm = hypervisor.getMachine();
 
         return pm.getInitiatorIQN();
     }
@@ -901,7 +901,7 @@ public class OVFGeneratorService
         {
             for (RasdManagement r : management)
             {
-                rasd.add(r.getRasdRaw());
+                rasd.add(r.getRasd());
             }
         }
 
@@ -935,7 +935,7 @@ public class OVFGeneratorService
                 String virtualSystemState = null;
                 for (NodeVirtualImage node : virtualAppliance.getNodes())
                 {
-                    NodeVirtualImage nodeVi = (NodeVirtualImage) node;
+                    NodeVirtualImage nodeVi = node;
                     VirtualMachine vm = nodeVi.getVirtualMachine();
                     String uuid = vm.getUuid();
                     if (uuid.equals(subVirtualSystem.getId()))
@@ -1022,7 +1022,7 @@ public class OVFGeneratorService
     private String getRepositoryManagerAddress(final NodeVirtualImage nvi)
     {
         // Get Virtual Datacenter
-        Hypervisor hypervisor = (Hypervisor) nvi.getVirtualMachine().getHypervisor();
+        Hypervisor hypervisor = nvi.getVirtualMachine().getHypervisor();
         Machine pm = hypervisor.getMachine();
         Rack rack = pm.getRack();
         Integer idDatacenter = rack.getDatacenter().getId();
@@ -1040,7 +1040,7 @@ public class OVFGeneratorService
         return am.iterator().next().getUri();
     }
 
-    public static RASDType toCIM_RASDType(Rasd rasdIn)
+    public static RASDType toCIM_RASDType(final Rasd rasdIn)
     {
         RASDType rasdOut = new RASDType();
 

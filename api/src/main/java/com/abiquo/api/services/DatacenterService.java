@@ -36,11 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.transformer.ModelTransformer;
-import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.EnterprisesDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
@@ -64,7 +61,7 @@ public class DatacenterService extends DefaultApiService
 
     }
 
-    public DatacenterService(EntityManager em)
+    public DatacenterService(final EntityManager em)
     {
         repo = new DatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
@@ -76,7 +73,7 @@ public class DatacenterService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public DatacenterDto addDatacenter(DatacenterDto dto) throws Exception
+    public DatacenterDto addDatacenter(final DatacenterDto dto) throws Exception
     {
         if (repo.existsAnyDatacenterWithName(dto.getName()))
         {
@@ -121,7 +118,7 @@ public class DatacenterService extends DefaultApiService
         return responseDto;
     }
 
-    public Datacenter getDatacenter(Integer id)
+    public Datacenter getDatacenter(final Integer id)
     {
         Datacenter datacenter = repo.findById(id);
 
@@ -134,7 +131,7 @@ public class DatacenterService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Datacenter modifyDatacenter(Integer datacenterId, DatacenterDto dto)
+    public Datacenter modifyDatacenter(final Integer datacenterId, final DatacenterDto dto)
     {
         Datacenter old = getDatacenter(datacenterId);
 
@@ -153,19 +150,19 @@ public class DatacenterService extends DefaultApiService
         return old;
     }
 
-    public Set<HypervisorType> getHypervisorTypes(Datacenter datacenter)
+    public Set<HypervisorType> getHypervisorTypes(final Datacenter datacenter)
     {
         return repo.findHypervisors(datacenter);
     }
 
-    public List<Enterprise> findEnterprisesByDatacenterWithNetworks(Datacenter datacenter, Boolean network,
-        Integer firstElem, Integer numElem)
+    public List<Enterprise> findEnterprisesByDatacenterWithNetworks(final Datacenter datacenter,
+        final Boolean network, final Integer firstElem, final Integer numElem)
     {
         return repo.findEnterprisesByDataCenter(datacenter, network, firstElem, numElem);
-        
+
     }
 
-    private void isValidDatacenter(Datacenter datacenter)
+    private void isValidDatacenter(final Datacenter datacenter)
     {
         if (!datacenter.isValid())
         {

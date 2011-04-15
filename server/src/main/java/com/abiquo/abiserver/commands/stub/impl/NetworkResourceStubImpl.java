@@ -40,8 +40,8 @@ import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListResponse;
-import com.abiquo.model.rest.RESTLink;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
@@ -56,7 +56,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 {
 
     @Override
-    public BasicResult getPrivateNetworks(Integer vdcId)
+    public BasicResult getPrivateNetworks(final Integer vdcId)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
@@ -106,9 +106,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException
+    public BasicResult getListNetworkPoolByEnterprise(final Integer enterpriseId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -152,9 +152,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException
+    public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -198,8 +198,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String ipLike)
+    public BasicResult getEnterprisesWithNetworksByDatacenter(final UserSession userSession,
+        final Integer datacenterId, final Integer offset, final Integer numElem, final String ipLike)
         throws NetworkCommandException
     {
         DataResult<ListResponse<Enterprise>> dataResult =
@@ -239,7 +239,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     }
 
-    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
+    public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
         throws NetworkCommandException
     {
         DataResult<String> dataResult = new DataResult<String>();
@@ -261,7 +261,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return dataResult;
     }
 
-    private String transformOrderBy(String orderBy)
+    private String transformOrderBy(final String orderBy)
     {
         if (orderBy == null)
         {
@@ -283,7 +283,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             return orderBy;
     }
 
-    private IpPoolManagement createFlexObject(IpPoolManagementDto ip)
+    private IpPoolManagement createFlexObject(final IpPoolManagementDto ip)
     {
         IpPoolManagement flexIp = new IpPoolManagement();
 
@@ -323,17 +323,17 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return flexIp;
     }
 
-    private VlanNetwork createFlexObject(VLANNetworkDto dto)
+    private VlanNetwork createFlexObject(final VLANNetworkDto dto)
     {
         NetworkConfiguration netconf = new NetworkConfiguration();
-        netconf.setFenceMode("bridge");
         netconf.setGateway(dto.getGateway());
         netconf.setMask(dto.getMask());
-        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
         netconf.setNetworkAddress(dto.getAddress());
         netconf.setPrimaryDNS(dto.getPrimaryDNS());
         netconf.setSecondaryDNS(dto.getSecondaryDNS());
         netconf.setSufixDNS(dto.getSufixDNS());
+        netconf.setFenceMode("bridge");
+        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
 
         VlanNetwork newNet = new VlanNetwork();
         newNet.setConfiguration(netconf);

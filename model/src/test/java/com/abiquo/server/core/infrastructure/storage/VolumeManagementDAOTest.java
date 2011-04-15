@@ -33,7 +33,6 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class VolumeManagementDAOTest extends
     DefaultDAOTestBase<VolumeManagementDAO, VolumeManagement>
 {
-
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -42,7 +41,7 @@ public class VolumeManagementDAOTest extends
     }
 
     @Override
-    protected VolumeManagementDAO createDao(EntityManager entityManager)
+    protected VolumeManagementDAO createDao(final EntityManager entityManager)
     {
         return new VolumeManagementDAO(entityManager);
     }

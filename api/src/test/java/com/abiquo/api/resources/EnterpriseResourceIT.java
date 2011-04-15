@@ -34,8 +34,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
@@ -45,7 +43,6 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -191,14 +188,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
+
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
+            setup(ippool.getRasd(), ippool);
             ip = ip.nextIPAddress();
         }
-        setup(ips.toArray());
 
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
         Resource resource = client.resource(validURI);
@@ -210,14 +206,16 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 25);
-        
+
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan.getId()), PrivateNetworkResource.PRIVATE_NETWORK);
-        assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()), "virtualdatacenter");
+        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
+            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
+            "virtualdatacenter");
 
     }
-    
+
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=ip' query param
      */
@@ -227,17 +225,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=ip";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource allows the 'by=quarantine' query param
+     * Check if the request 'action/ips' of the enterprise resource allows the 'by=quarantine' query
+     * param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseOrderByQuarantine()
@@ -245,15 +243,14 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=quarantine";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=mac' query param
      */
@@ -263,17 +260,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=mac";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource allows the 'by=lease' query param
+     * Check if the request 'action/ips' of the enterprise resource allows the 'by=lease' query
+     * param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseOrderByLease()
@@ -281,15 +278,14 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=lease";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
      * Check if the request 'action/ips' of the enterprise resource allows the 'by=vlan' query param
      */
@@ -299,17 +295,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=vlan";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualdatacenter' query param
+     * Check if the request 'action/ips' of the enterprise resource allows the
+     * 'by=virtualdatacenter' query param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualDatacenter()
@@ -317,17 +313,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=virtualdatacenter";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource doesnt allow a 'by={randomvalue}' query param
+     * Check if the request 'action/ips' of the enterprise resource doesnt allow a
+     * 'by={randomvalue}' query param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseRaises400WhenOrderByRandomParameter()
@@ -335,17 +331,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(400, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualmachine' query param
+     * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualmachine'
+     * query param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualMachine()
@@ -353,17 +349,17 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=virtualmachine";
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());
     }
-    
+
     /**
-     * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualappliance' query param
+     * Check if the request 'action/ips' of the enterprise resource allows the 'by=virtualappliance'
+     * query param
      */
     @Test
     public void getPrivateNetworkIPsByEnterpriseOrderByVirtualAppliance()
@@ -371,8 +367,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
-        
-        
+
         validURI = validURI + "?by=virtualappliance";
         Resource resource = client.resource(validURI);
 
@@ -394,7 +389,6 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(ips);
         assertTrue(ips.getCollection().isEmpty());
-
     }
 
     @Test

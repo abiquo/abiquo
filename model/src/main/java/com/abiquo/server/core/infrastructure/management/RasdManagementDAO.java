@@ -33,7 +33,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaRasdDAO")
+@Repository("jpaRasdManagementDAO")
 public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
 {
     public RasdManagementDAO()
@@ -41,28 +41,29 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
         super(RasdManagement.class);
     }
 
-    public RasdManagementDAO(EntityManager entityManager)
+    public RasdManagementDAO(final EntityManager entityManager)
     {
         super(RasdManagement.class, entityManager);
     }
 
-    private static Criterion sameResourceType(String idResourceType)
+    private static Criterion sameResourceType(final String idResourceType)
     {
         return Restrictions.eq(RasdManagement.ID_RESOURCE_TYPE_PROPERTY, idResourceType);
     }
 
-    private static Criterion sameVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    private static Criterion sameVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         return Restrictions.eq(RasdManagement.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
     }
 
-    private static Criterion sameVirtualMachine(VirtualMachine virtualMachine)
+    private static Criterion sameVirtualMachine(final VirtualMachine virtualMachine)
     {
         return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<RasdManagement> findByVirtualDatacenterAndResourceType(
-        VirtualDatacenter virtualDatacenter, String resourceType)
+        final VirtualDatacenter virtualDatacenter, final String resourceType)
     {
         return createCriteria(sameVirtualDatacenter(virtualDatacenter),
             sameResourceType(resourceType)).list();

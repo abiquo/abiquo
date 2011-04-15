@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.management;
+package com.abiquo.server.core.infrastructure.management;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
-  {
+public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
+{
 
-      @Override
-      protected InstanceTester<RasdManagement> createEntityInstanceGenerator()
-      {
-          return new RasdManagementGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<RasdManagement> createEntityInstanceGenerator()
+    {
+        return new RasdManagementGenerator(getSeed());
+    }
+}

@@ -25,13 +25,12 @@ import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.Assert.assertNonEmptyErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
-import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualAppliancesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetDHCPInfoURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetDHCPInfoURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -45,7 +44,6 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -57,10 +55,10 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
@@ -99,7 +97,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IpAddressesResource.IP_ADDRESSES);
     }
 
-    private VirtualDatacenterDto getValidVdc(VirtualDatacenter vdc)
+    private VirtualDatacenterDto getValidVdc(final VirtualDatacenter vdc)
     {
         ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()));
 
@@ -167,9 +165,14 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void deleteVirtualDatacenterFailsWhenHasVolumesAttached()
     {
-        RasdManagement rasd = rasdGenerator.createInstance("8");
-        VirtualDatacenter vdc = rasd.getVirtualDatacenter();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, rasd);
+        VolumeManagement volume = volumeManagementGenerator.createUniqueInstance();
+        VirtualDatacenter vdc = volume.getVirtualDatacenter();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        entitiesToPersist.add(volume);
+
+        setup(entitiesToPersist.toArray());
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
         assertErrors(response, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
@@ -185,8 +188,11 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
                 .getDatacenter());
         ip.getDhcp().setRemoteService(rs);
 
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, rs, ip.getDhcp(), ip
-            .getVlanNetwork().getConfiguration(), ip.getVlanNetwork(), ip);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        ipGenerator.addAuxiliaryEntitiesToPersist(ip, entitiesToPersist);
+        entitiesToPersist.add(ip);
+
+        setup(entitiesToPersist.toArray());
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
         assertEquals(response.getStatusCode(), 204);
@@ -195,7 +201,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     // TESTS refered to the action of GET IPs by VDC
 
     /**
-     * Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
+     * <<<<<<<
+     * HEAD:api/src/test/java/com/abiquo/api/resources/cloud/VirtualDatacenterResourceIT.java
+     * ======= Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
      */
     @Test
     public void getVirtualDatacenterRaises409ErrorWhenHasVLANsWithoutIPs()
@@ -230,14 +238,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
@@ -248,12 +250,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan2.getConfiguration()
                 .getAddress()), IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration()
                 .getMask()));
-        while (!ip2.equals(lastIP2))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan2, ip2.toString());
-            setup(ippool);
-            ip2 = ip2.nextIPAddress();
-        }
+
+        persistIP(ip2, lastIP2, vdc, vlan2);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         Resource resource = client.resource(validURI);
@@ -281,14 +279,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=ip";
@@ -316,14 +308,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=quarantine";
@@ -351,14 +337,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=mac";
@@ -386,14 +366,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=lease";
@@ -421,14 +395,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=vlan";
@@ -456,14 +424,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualdatacenter";
@@ -491,14 +453,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualmachine";
@@ -526,14 +482,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualappliance";
@@ -561,14 +511,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         // Test Default
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
@@ -621,14 +565,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
             IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
                 .getAddress()), IPNetworkRang
                 .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
-        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
-        while (!ip.equals(lastIP))
-        {
-            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ips.add(ippool);
-            ip = ip.nextIPAddress();
-        }
-        setup(ips.toArray());
+
+        persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
@@ -652,6 +590,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertEquals(200, response.getStatusCode());
         String entity = response.getEntity(String.class);
         assertNotNull(entity);
+    }
 
+    private void persistIP(IPAddress ip, final IPAddress lastIP, final VirtualDatacenter vdc,
+        final VLANNetwork vlan)
+    {
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            setup(ippool.getRasd(), ippool);
+            ip = ip.nextIPAddress();
+        }
     }
 }
