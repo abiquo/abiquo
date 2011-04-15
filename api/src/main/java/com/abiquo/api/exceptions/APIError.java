@@ -98,6 +98,7 @@ public enum APIError
     VLANS_TOO_SMALL_NETWORK("VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"),
     VLANS_INVALID_NETWORK_AND_MASK("VLAN-6", "The network does not match with the mask. Check your request"),
     VLANS_GATEWAY_OUT_OF_RANGE("VLAN-7", "Gateway address out of range. It must be into the ip range address"),
+    VLANS_NON_EXISTENT_VIRTUAL_NETWORK("VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -116,11 +117,9 @@ public enum APIError
         "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
 
     // NETWORK
-    NOT_ASSIGNED_NETWORK_VIRTUAL_DATACENTER("NETWORK-0",
-        "The private network is not assigned to the datacenter"), NETWORK_INVALID_CONFIGURATION(
-        "NET-0", "Invalid network configuration for the virtual datacenter"), NON_EXISTENT_VIRTUAL_NETWORK(
-        "NET-7", "The requested virtual network does not exist"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network doesn't have IPs"),
+    NETWORK_INVALID_CONFIGURATION(
+        "NET-0", "Invalid network configuration for the virtual datacenter"),
+        NETWORK_WITHOUT_IPS("NET-8", "This network doesn't have IPs"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(

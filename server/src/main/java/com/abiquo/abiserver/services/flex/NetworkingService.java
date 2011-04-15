@@ -74,7 +74,6 @@ public class NetworkingService
         return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
 
-   
     /**
      * Create a new VLAN.
      * 
@@ -87,31 +86,23 @@ public class NetworkingService
      *            the previous default network.
      * @return a Data Result containing the created VLAN.
      */
-    public BasicResult createVLAN(UserSession userSession, Integer virtualdatacenterId, String vlanName,
-        NetworkConfiguration configuration, Boolean defaultNetwork)
+    public BasicResult createVLAN(UserSession userSession, Integer virtualdatacenterId,
+        String vlanName, NetworkConfiguration configuration, Boolean defaultNetwork)
     {
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
-        try
-        {
-            VLANNetworkDto vlandto = new VLANNetworkDto();
-            vlandto.setName(vlanName);
-            vlandto.setDefaultNetwork(defaultNetwork);
-            vlandto.setAddress(configuration.getNetworkAddress());
-            vlandto.setGateway(configuration.getGateway());
-            vlandto.setMask(configuration.getMask());
-            vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
-            vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
-            vlandto.setSufixDNS(configuration.getSufixDNS());
-            return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId, vlandto);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
+        VLANNetworkDto vlandto = new VLANNetworkDto();
+        vlandto.setName(vlanName);
+        vlandto.setDefaultNetwork(defaultNetwork);
+        vlandto.setAddress(configuration.getNetworkAddress());
+        vlandto.setGateway(configuration.getGateway());
+        vlandto.setMask(configuration.getMask());
+        vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
+        vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+        vlandto.setSufixDNS(configuration.getSufixDNS());
+        return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId,
+            vlandto);
 
-        return dataResult;
     }
 
     private NetworkCommand instantiateNetworkCommand()
@@ -120,8 +111,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -219,11 +210,12 @@ public class NetworkingService
                     .getInstance(userSession, networkCommand, NetworkCommand.class);
             ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
             List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
-                    .getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike());
+                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId,
+                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
+                    listRequest.getFilterLike());
             Integer listPoolNumberAvailable =
-                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
-                    .getFilterLike());
+                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId,
+                    listRequest.getFilterLike());
 
             List<IpPoolManagement> listOfAddress = new ArrayList<IpPoolManagement>();
             for (IpPoolManagementHB ipPool : listPoolAvailable)

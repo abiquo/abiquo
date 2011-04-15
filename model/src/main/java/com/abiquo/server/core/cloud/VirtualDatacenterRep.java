@@ -141,6 +141,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
         return vlanDAO.findById(id);
     }
+    
+    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualdatacenter, Integer vlanId)
+    {
+        return vlanDAO.findVlanByVirtualDatacenterId(virtualdatacenter, vlanId);
+    }
 
     public VLANNetwork findVlanByName(final String name)
     {
@@ -403,4 +408,5 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         virtualApplianceDAO.persist(vapp);
     }
+
 }

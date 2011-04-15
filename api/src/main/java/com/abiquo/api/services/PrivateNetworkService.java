@@ -179,9 +179,19 @@ public class PrivateNetworkService extends DefaultApiService
         return vlan;
     }
 
-    public VLANNetwork getNetwork(final Integer id)
+    public VLANNetwork getNetwork(final Integer virtualdatacenterId, final Integer vlanId)
     {
-        return repo.findVlanById(id);
+        VirtualDatacenter vdc = repo.findById(virtualdatacenterId);
+        if (vdc == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+        }
+        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
+        if (vlan == null)
+        {
+            throw new NotFoundException(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+        }
+        return vlan;
     }
 
     public boolean isAssignedTo(final Integer virtualDatacenterId, final Integer networkId)
