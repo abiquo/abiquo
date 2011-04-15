@@ -168,6 +168,14 @@ public class StorageRep extends DefaultRepBase
         return sp;
     }
 
+    public VolumeManagement insertVolume(final VolumeManagement volume)
+    {
+        volumeDAO.persist(volume);
+        volumeDAO.flush();
+
+        return volume;
+    }
+
     public void removeDevice(final StorageDevice sd)
     {
         deviceDAO.remove(sd);

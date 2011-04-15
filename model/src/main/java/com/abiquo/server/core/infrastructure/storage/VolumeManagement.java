@@ -200,7 +200,7 @@ public class VolumeManagement extends RasdManagement
         return this.usedSizeInMB;
     }
 
-    private void setUsedSizeInMB(final long usedSizeInMB)
+    public void setUsedSizeInMB(final long usedSizeInMB)
     {
         this.usedSizeInMB = usedSizeInMB;
     }

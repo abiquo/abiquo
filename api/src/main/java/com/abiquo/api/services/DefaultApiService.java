@@ -28,8 +28,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response.Status;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.server.core.common.GenericEnityBase;
 
@@ -42,6 +45,9 @@ public abstract class DefaultApiService
 
     protected Collection<ConstraintViolation< ? >> validationErrors =
         new LinkedHashSet<ConstraintViolation< ? >>();
+
+    @Autowired
+    protected TracerLogger tracer;
 
     protected void flushErrors()
     {

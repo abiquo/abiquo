@@ -32,20 +32,20 @@ import java.util.Comparator;
 public enum APIError
 {
     // STATUSCODES
-    STATUS_BAD_REQUEST("400-BAD REQUEST", "Request not valid"),
-    STATUS_UNAUTHORIZED("401-UNAUTHORIZED", "This requests requires user authentication"),
-    STATUS_FORBIDDEN("403-FORBIDDEN", "Access is denied"),
-    STATUS_NOT_FOUND("404-NOT FOUND", "The Resource requested does not exist"), 
-    STATUS_METHOD_NOT_ALLOWED("405-METHOD NOT ALLOWED", "The resource doesn't expose this method"),
-    STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE", "Abiquo API currently only supports application/xml Media Type"),
-    STATUS_INTERNAL_SERVER_ERROR("500-INTERNAL SERVER ERROR", "Unexpected exception"),
-    
-    
+    STATUS_BAD_REQUEST("400-BAD REQUEST", "Request not valid"), STATUS_UNAUTHORIZED(
+        "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
+        "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
+        "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
+        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE",
+        "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
+        "500-INTERNAL SERVER ERROR", "Unexpected exception"),
+
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"),
-        
+
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-5", "Invalid private network type"), INTERNAL_SERVER_ERROR(
         "GEN-6", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-7",
@@ -86,8 +86,8 @@ public enum APIError
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
         "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
-            VIRTUAL_DATACENTER_MUST_HAVE_NETWORK("VDC-6", "Virtual Datacenter must be created with a private network"),
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "VDC-6", "Virtual Datacenter must be created with a private network"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -183,8 +183,9 @@ public enum APIError
         "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
-    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01", "This method require the virtual machine being deployed on some target hypervisor"),
-    
+    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",
+        "This method require the virtual machine being deployed on some target hypervisor"),
+
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error was occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(
@@ -217,10 +218,13 @@ public enum APIError
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
         "STATS-3", "Non existent statistical data found for the requested enterprise"),
-        
+
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
-    
+
+    VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
+        "VOL-1", "There are not enough resources in the selected tier to create the volume")
+
     ;
 
     /**
@@ -232,10 +236,10 @@ public enum APIError
      * Description message
      */
     String message;
-    
+
     /**
      * Additional description
-     * */
+     */
     String cause;
 
     public String getCode()
@@ -252,7 +256,7 @@ public enum APIError
     {
         return cause;
     }
-    
+
     APIError(final String code, final String message)
     {
         this.code = code;
@@ -261,9 +265,9 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.cause = cause;        
+        this.cause = cause;
         return this;
-    }   
+    }
 
     public static void main(final String[] args)
     {
@@ -281,8 +285,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 }
