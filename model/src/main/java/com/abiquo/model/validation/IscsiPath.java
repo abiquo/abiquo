@@ -37,46 +37,47 @@ import javax.validation.Payload;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.abiquo.server.core.util.network.IPAddress;
+import com.abiquo.model.util.AddressingUtils;
 
 @Documented
-@Constraint(validatedBy = Ip.Validator.class)
+@Constraint(validatedBy = IscsiPath.Validator.class)
 @Target( {METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Ip
+public @interface IscsiPath
 {
     boolean required() default true;
 
-    String message() default "must be an IP address";
+    String message() default "must be a valid iSCSI path";
 
     Class< ? >[] groups() default {};
 
     Class< ? extends Payload>[] payload() default {};
 
-    static class Validator implements ConstraintValidator<Ip, String>
+    static class Validator implements ConstraintValidator<IscsiPath, String>
     {
-        Ip ip;
+        IscsiPath iscsiPath;
 
         @Override
-        public void initialize(final Ip constraintAnnotation)
+        public void initialize(final IscsiPath constraintAnnotation)
         {
-            this.ip = constraintAnnotation;
+            this.iscsiPath = constraintAnnotation;
         }
 
         @Override
         public boolean isValid(final String value, final ConstraintValidatorContext context)
         {
-            if (!ip.required() && StringUtils.isEmpty(value))
+            if (!iscsiPath.required() && StringUtils.isEmpty(value))
             {
                 return true;
             }
 
-            boolean valid = !StringUtils.isEmpty(value) && IPAddress.isValidIpAddress(value);
+            boolean valid = !StringUtils.isEmpty(value) && AddressingUtils.isValidPath(value);
 
             if (!valid)
             {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(ip.message()).addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(iscsiPath.message())
+                    .addConstraintViolation();
             }
 
             return valid;

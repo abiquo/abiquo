@@ -37,6 +37,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.model.validation.IscsiPath;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -151,6 +152,7 @@ public class VolumeManagement extends RasdManagement
     @Required(value = ID_SCSI_REQUIRED)
     @Length(min = ID_SCSI_LENGTH_MIN, max = ID_SCSI_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = ID_SCSI_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @IscsiPath
     public String getIdScsi()
     {
         return this.idScsi;

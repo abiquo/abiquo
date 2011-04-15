@@ -77,10 +77,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
     {
         String uuid = UUID.randomUUID().toString();
         long sizeInMB = nextSeed();
-        String idSCSI =
-            newString(nextSeed(), VolumeManagement.ID_SCSI_LENGTH_MIN,
-                VolumeManagement.ID_SCSI_LENGTH_MAX);
-
+        String idSCSI = "ip-10.60.1.26:3260-iscsi-iqn.2001-04.com.acme-lun-" + nextSeed();
         StoragePool pool = poolGenerator.createUniqueInstance();
 
         return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
