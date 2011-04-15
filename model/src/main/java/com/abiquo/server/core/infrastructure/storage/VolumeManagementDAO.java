@@ -38,7 +38,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVolumeManagementDAO")
-public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
+/* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
 {
     public VolumeManagementDAO()
     {

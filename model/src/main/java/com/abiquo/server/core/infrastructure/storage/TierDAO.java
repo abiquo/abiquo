@@ -32,14 +32,14 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaTierDAO")
-public class TierDAO extends DefaultDAOBase<Integer, Tier>
+/* package */class TierDAO extends DefaultDAOBase<Integer, Tier>
 {
     public TierDAO()
     {
         super(Tier.class);
     }
 
-    public TierDAO(EntityManager entityManager)
+    public TierDAO(final EntityManager entityManager)
     {
         super(Tier.class, entityManager);
     }
@@ -51,7 +51,7 @@ public class TierDAO extends DefaultDAOBase<Integer, Tier>
         return criteria.list();
     }
 
-    public Tier getTierById(Integer datacenterId, Integer tierId)
+    public Tier getTierById(final Integer datacenterId, final Integer tierId)
     {
 
         Criteria criteria =

@@ -65,6 +65,7 @@ public class StorageRep extends DefaultRepBase
         this.tierDAO = new TierDAO(entityManager);
         this.deviceDAO = new StorageDeviceDAO(entityManager);
         this.poolDAO = new StoragePoolDAO(entityManager);
+        this.volumeDAO = new VolumeManagementDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -126,6 +127,11 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByPool(pool);
     }
 
+    public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
+    {
+        return volumeDAO.getVolumesFromEnterprise(idEnterprise);
+    }
+
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);
@@ -136,6 +142,14 @@ public class StorageRep extends DefaultRepBase
         final VolumeManagement.OrderByEnum orderBy, final Boolean desc_or_asc)
     {
         return volumeDAO.getVolumesByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
+    }
+
+    public Tier insertTier(final Tier tier)
+    {
+        tierDAO.persist(tier);
+        tierDAO.flush();
+
+        return tier;
     }
 
     public StorageDevice insertDevice(final StorageDevice sd)
