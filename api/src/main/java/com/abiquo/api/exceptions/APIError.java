@@ -223,7 +223,8 @@ public enum APIError
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
 
     VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
-        "VOL-1", "There are not enough resources in the selected tier to create the volume")
+        "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
+        "VOL-2", "The name of the volume is required")
 
     ;
 
