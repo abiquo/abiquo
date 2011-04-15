@@ -53,7 +53,7 @@ public enum APIError
 
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
-        "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWD("DC-4",
+        "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
         "The current enterprise can't use this datacenter"),
 
     // ENTERPRISE

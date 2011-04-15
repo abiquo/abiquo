@@ -36,6 +36,8 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private String name;
 
+    private String description;
+
     private int state;
 
     private long sizeInMB;
@@ -124,6 +126,16 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     public void setAvailableSizeInMB(final long availableSizeInMB)
     {
         this.availableSizeInMB = availableSizeInMB;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(final String description)
+    {
+        this.description = description;
     }
 
 }

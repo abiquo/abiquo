@@ -254,6 +254,12 @@ public class DatacenterRep extends DefaultRepBase
         return enterprises;
     }
 
+    public DatacenterLimits findDatacenterLimits(final Enterprise enterprise,
+        final Datacenter datacenter)
+    {
+        return datacenterLimitDao.findByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
     public boolean existsAnyRackWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;

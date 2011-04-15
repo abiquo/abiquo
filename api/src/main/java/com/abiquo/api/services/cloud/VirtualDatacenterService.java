@@ -138,7 +138,7 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         if (!isValidEnterpriseDatacenter(enterprise, datacenter))
         {
-            errors.add(APIError.DATACENTER_NOT_ALLOWD);
+            errors.add(APIError.DATACENTER_NOT_ALLOWED);
             flushErrors();
         }
 
