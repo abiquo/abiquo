@@ -381,7 +381,7 @@ public class UserService extends DefaultApiService
         }
     }
 
-    private void checkCurrentEnterprise(final Enterprise enterprise)
+    public void checkCurrentEnterprise(final Enterprise enterprise)
     {
         User user = getCurrentUser();
         Role.Type role = user.getRole().getType();
