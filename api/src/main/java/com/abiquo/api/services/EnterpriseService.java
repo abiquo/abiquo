@@ -42,7 +42,6 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -144,7 +143,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(enterprise);
+        userService.checkEnterpriseAdminCredentials(enterprise);
         return enterprise;
     }
 
@@ -157,7 +156,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(old);
+        userService.checkEnterpriseAdminCredentials(old);
 
         if (dto.getName().isEmpty())
         {
@@ -183,10 +182,13 @@ public class EnterpriseService extends DefaultApiService
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(old);
+        isValidEnterpriseLimit(old);
 
         repo.update(old);
         return old;
     }
+
+    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEnterprise(Integer id)
@@ -419,5 +421,11 @@ public class EnterpriseService extends DefaultApiService
         }
 
         flushErrors();
+    }
+    
+    protected void isValidEnterpriseLimit(Enterprise old)
+    {
+        // community dummy impl (no limit check)
+        
     }
 }
