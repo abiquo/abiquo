@@ -19,6 +19,7 @@ DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_deleted`;
 
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 
+
 DELIMITER |
 -- [ABICLOUDPREMIUM-1464]. `update_rasd_management_update_stats` FIX From 1.7.5. HotFix HF1
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
