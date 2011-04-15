@@ -199,7 +199,7 @@ public class PrivateNetworkService extends DefaultApiService
         Integer maxVLANs =
             Integer.valueOf(System.getProperty("abiquo.server.networking.vlanPerVdc"));
         Integer currentVLANs = repo.findVlansByVirtualDatacener(vdc).size();
-        if (currentVLANs == maxVLANs)
+        if (currentVLANs >= maxVLANs)
         {
             throw new ConflictException(APIError.VLANS_PRIVATE_MAXIMUM_REACHED);
         }

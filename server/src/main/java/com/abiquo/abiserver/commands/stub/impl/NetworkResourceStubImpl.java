@@ -78,7 +78,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, result, "getRemoteStoragePoolsByDevice");
+            populateErrors(response, result, "getPrivateNetworks");
         }
 
         return result;
@@ -341,6 +341,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setNetworkName(dto.getName());
         newNet.setVlanNetworkId(dto.getId());
         newNet.setVlanTag(dto.getTag());
+        newNet.setNetworkId(dto.getId());
 
         return newNet;
     }

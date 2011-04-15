@@ -80,14 +80,14 @@ public class NetworkingService
      * 
      * @param userSession UserSession object with the information of the user that called this
      *            method
-     * @param networkId identifer of the network that the VLAN will belong to.
+     * @param virtualdatacenterId identifer of the virtualdatacenter where the VLAN will belong to.
      * @param vlanName name of the Vlan. It should be unique by network.
      * @param configuration configuration of the network
      * @param defaultNetwork if the network is default or not. If its set to 'true' it will replace
      *            the previous default network.
      * @return a Data Result containing the created VLAN.
      */
-    public BasicResult createVLAN(UserSession userSession, Integer networkId, String vlanName,
+    public BasicResult createVLAN(UserSession userSession, Integer virtualdatacenterId, String vlanName,
         NetworkConfiguration configuration, Boolean defaultNetwork)
     {
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
@@ -103,7 +103,7 @@ public class NetworkingService
             vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
             vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
             vlandto.setSufixDNS(configuration.getSufixDNS());
-            return proxyStub(userSession).createPrivateVLANNetwork(userSession, 1, vlandto);
+            return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId, vlandto);
         }
         catch (Exception e)
         {
