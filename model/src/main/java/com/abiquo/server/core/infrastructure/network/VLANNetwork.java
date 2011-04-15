@@ -140,7 +140,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.defaultNetwork;
     }
 
-    private void setDefaultNetwork(Boolean defaultNetwork)
+    public void setDefaultNetwork(Boolean defaultNetwork)
     {
         this.defaultNetwork = defaultNetwork;
     }

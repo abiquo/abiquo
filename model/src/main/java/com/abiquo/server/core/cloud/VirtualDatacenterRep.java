@@ -141,12 +141,17 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
         return vlanDAO.findById(id);
     }
+    
+    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualdatacenter, Integer vlanId)
+    {
+        return vlanDAO.findVlanByVirtualDatacenterId(virtualdatacenter, vlanId);
+    }
 
     public VLANNetwork findVlanByName(final String name)
     {
         return vlanDAO.findUniqueByProperty(VLANNetwork.NAME_PROPERTY, name);
     }
-
+    
     public Collection<VLANNetwork> findAllVlans()
     {
         return this.vlanDAO.findAll();
@@ -160,6 +165,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findVLANNetworks(virtualDatacenter);
     }
 
+
+    public VLANNetwork findVlanByDefault(VirtualDatacenter virtualDatacenter)
+    {
+        return vlanDAO.findByDefault(virtualDatacenter);
+    }
+    
     public void insertNetwork(final Network network)
     {
         networkDAO.persist(network);
@@ -194,6 +205,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void insertVlan(final VLANNetwork vlan)
     {
         vlanDAO.persist(vlan);
+    }
+    
+    public void updateVlan(VLANNetwork vlan)
+    {
+        vlanDAO.flush();
     }
 
     public void inserVirtualAppliance(final VirtualAppliance virtualAppliance)
@@ -392,4 +408,5 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         virtualApplianceDAO.persist(vapp);
     }
+
 }

@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -53,13 +55,11 @@ public class PrivateNetworkResource extends AbstractResource
 
     @GET
     public VLANNetworkDto getPrivateNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer virtualDatacenterId,
-        @PathParam(PRIVATE_NETWORK) Integer networkId, @Context IRESTBuilder restBuilder)
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(0) Integer virtualDatacenterId,
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(0) Integer vlanId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
-        validatePathParameters(virtualDatacenterId, networkId);
-
-        VLANNetwork network = service.getNetwork(networkId);
+        VLANNetwork network = service.getNetwork(virtualDatacenterId, vlanId);
 
         return createTransferObject(network, virtualDatacenterId, restBuilder);
     }
@@ -91,14 +91,4 @@ public class PrivateNetworkResource extends AbstractResource
         return dto;
     }
 
-    // TODO createPersistenceObject
-
-    private void validatePathParameters(final Integer virtualDatacenterId, final Integer networkId)
-        throws NotFoundException
-    {
-        if (!service.isAssignedTo(virtualDatacenterId, networkId))
-        {
-            throw new NotFoundException(APIError.NOT_ASSIGNED_NETWORK_VIRTUAL_DATACENTER);
-        }
-    }
 }

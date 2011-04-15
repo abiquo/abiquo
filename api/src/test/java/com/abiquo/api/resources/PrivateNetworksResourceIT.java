@@ -33,7 +33,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -217,6 +216,183 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         response = res.post(dto);
         assertEquals(response.getStatusCode(), 400);
         
+        
+    }
+    
+    /**
+     * Create the maximum of private networks available per virtualdatacenter. After that,
+     * checkt it returns a 409 when trying to add another vlan. 
+     */
+    @Test
+    public void createPrivateNetworkRaises409WhenMaximumIsReached()
+    {        
+        VLANNetworkDto dto;
+        ClientResponse response;
+        
+        // Get the max from system property
+        Integer maxVlans = Integer.valueOf(System.getProperty("abiquo.server.networking.vlanPerVdc"));
+
+        // Create the n-1 first vlans
+        for (int i = 0; i < maxVlans; i++)
+        {
+            dto = createValidNetworkDto();
+            dto.setName(dto.getName() + i);
+            response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+            assertEquals(201, response.getStatusCode());
+        }
+        
+        // Assert it doesn't allow you to create more
+        dto = createValidNetworkDto();
+        dto.setName(dto.getName() + "nonono");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.VLANS_PRIVATE_MAXIMUM_REACHED);
+                             
+    }
+    
+    /**
+     * Check we can not create two vlans with the same name in a virtualdatacenter.
+     */
+    @Test
+    public void createPrivateNetworkRaises409WhenDuplicatedVlanNameInTheSameVDC()
+    {        
+        VLANNetworkDto dto = createValidNetworkDto();
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(201, response.getStatusCode());
+    
+        // Check we can not create the dto again caused by the network name.
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");       
+        assertErrors(response, 409, APIError.VLANS_DUPLICATED_VLAN_NAME);
+        
+        // Ensure we can create it with the same name into another vdc.
+        VirtualDatacenter vdc2 = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc2.getEnterprise(), vdc2.getNetwork(), vdc2);
+        response = post(resolvePrivateNetworksURI(vdc2.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(201, response.getStatusCode());
+        
+    }
+    
+    /**
+     * Ensure we can not use any other rangs than the private ones
+     */
+    @Test
+    public void createPrivateNetworkRaises400WhenNetworkAddressIsNotPrivate()
+    {   
+        // Loopback address
+        VLANNetworkDto dto = createValidNetworkDto();
+        dto.setAddress("127.0.0.0");
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+        
+        // Multicast address
+        dto = createValidNetworkDto();
+        dto.setAddress("224.12.1.0");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+        
+        // Wrong private address
+        dto = createValidNetworkDto();
+        dto.setAddress("172.32.111.0");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+
+        dto = createValidNetworkDto();
+        dto.setAddress("172.15.111.0");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+        
+        // Random address
+        dto = createValidNetworkDto();
+        dto.setAddress("34.123.4.56");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_PRIVATE_ADDRESS_WRONG);
+    }
+    
+    /**
+     * Ensure the network address and the mask are coherent in terms of network range.
+     */
+    @Test
+    public void createPrivateNetworkRaises409WhenInvalidMasksRelatedToNetworkAddress()
+    {   
+        // Loopback address
+        VLANNetworkDto dto = createValidNetworkDto();
+        dto.setAddress("10.60.1.0");
+        dto.setMask(20);
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.VLANS_TOO_BIG_NETWORK);
+        
+        // Multicast address
+        dto = createValidNetworkDto();
+        dto.setAddress("192.168.1.0");
+        dto.setMask(22);
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.VLANS_TOO_BIG_NETWORK_II);
+        
+        // Wrong private address
+        dto = createValidNetworkDto();
+        dto.setAddress("10.40.1.23");
+        dto.setMask(31);
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.VLANS_TOO_SMALL_NETWORK);
+    }
+    
+    /**
+     * Ensure the network address and the mask are coherent in terms of network adrress.
+     */
+    @Test
+    public void createPrivateNetworkRaises400WhenInvalidNetworkRelatedToNetworkMask()
+    {   
+        // 192.168.1.128 is not vaild in terms of mask range
+        VLANNetworkDto dto = createValidNetworkDto();
+        dto.setAddress("192.168.1.128");
+        dto.setMask(24);
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_INVALID_NETWORK_AND_MASK);
+        
+        // but is valid for the 25 mask...
+        dto.setMask(25);
+        dto.setGateway("192.168.1.130");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(201, response.getStatusCode());
+        
+    }
+    
+    /**
+     * Check if the gateway is inside the range of the network with a couple examples.
+     */
+    @Test
+    public void createPrivateNetworkRaises400WhenGatewayOutOfRange()
+    {   
+        // 192.168.1.128 is not vaild in terms of mask range
+        VLANNetworkDto dto = createValidNetworkDto();
+        dto.setAddress("192.168.1.0");
+        dto.setMask(24);
+        dto.setGateway("192.168.3.0");
+        ClientResponse response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+        
+        // another non-so-obvious example
+        dto = createValidNetworkDto();
+        dto.setAddress("192.168.1.0");
+        dto.setMask(25);
+        dto.setGateway("192.168.1.200");
+        response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
+        assertErrors(response, 400, APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+        
+    }
+    
+    /**
+     * Steps: create VLAN (vlan1) inside the virtual datacenter.
+     *  * vlan1 is the default one.
+     *  * create vlan2 and put it as default.
+     *  * ensure vlan2 is the default.
+     *  * ensure vlan1 is not the default any more. 
+     *  
+     *  TODO: do it after the GET method is developed
+     *  
+     */
+    @Test
+    public void createPrivateNewtorkSwapBetweenDefaultNetwork()
+    {
         
     }
     

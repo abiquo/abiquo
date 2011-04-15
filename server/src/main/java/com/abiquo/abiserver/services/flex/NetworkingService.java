@@ -40,6 +40,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.result.ListResponse;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
  * This class defines all services related to Networking
@@ -78,35 +79,30 @@ public class NetworkingService
      * 
      * @param userSession UserSession object with the information of the user that called this
      *            method
-     * @param networkId identifer of the network that the VLAN will belong to.
+     * @param virtualdatacenterId identifer of the virtualdatacenter where the VLAN will belong to.
      * @param vlanName name of the Vlan. It should be unique by network.
      * @param configuration configuration of the network
      * @param defaultNetwork if the network is default or not. If its set to 'true' it will replace
      *            the previous default network.
      * @return a Data Result containing the created VLAN.
      */
-    public BasicResult createVLAN(UserSession userSession, Integer networkId, String vlanName,
-        NetworkConfiguration configuration, Boolean defaultNetwork)
+    public BasicResult createVLAN(UserSession userSession, Integer virtualdatacenterId,
+        String vlanName, NetworkConfiguration configuration, Boolean defaultNetwork)
     {
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
-        try
-        {
+        VLANNetworkDto vlandto = new VLANNetworkDto();
+        vlandto.setName(vlanName);
+        vlandto.setDefaultNetwork(defaultNetwork);
+        vlandto.setAddress(configuration.getNetworkAddress());
+        vlandto.setGateway(configuration.getGateway());
+        vlandto.setMask(configuration.getMask());
+        vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
+        vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+        vlandto.setSufixDNS(configuration.getSufixDNS());
+        return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId,
+            vlandto);
 
-            NetworkCommand proxy =
-                BusinessDelegateProxy.getInstance(userSession, instantiateNetworkCommand(),
-                    NetworkCommand.class);
-            dataResult.setData(proxy.createPrivateVlanNetwork(userSession, vlanName, networkId,
-                configuration.toPojoHB(), defaultNetwork).toPojo());
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
     }
 
     private NetworkCommand instantiateNetworkCommand()
@@ -115,8 +111,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -214,11 +210,12 @@ public class NetworkingService
                     .getInstance(userSession, networkCommand, NetworkCommand.class);
             ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
             List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
-                    .getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike());
+                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId,
+                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
+                    listRequest.getFilterLike());
             Integer listPoolNumberAvailable =
-                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId, listRequest
-                    .getFilterLike());
+                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId,
+                    listRequest.getFilterLike());
 
             List<IpPoolManagement> listOfAddress = new ArrayList<IpPoolManagement>();
             for (IpPoolManagementHB ipPool : listPoolAvailable)

@@ -32,6 +32,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
@@ -119,7 +120,16 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-
+    
+    @BeforeMethod
+    public void setup()
+    {
+        // Set system properties for tests
+        // WARINING!!! This value should be the same than the used in the POM.xml to define the
+        // system property in the jetty runtime!!!
+        System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
+    }
+    
     @AfterMethod
     public void tearDown()
     {

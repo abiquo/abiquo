@@ -32,6 +32,7 @@ import org.apache.wink.client.ClientResponse;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
@@ -47,7 +48,6 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
-import com.abiquo.server.core.util.network.IPNetworkRang;
 
 /**
  * @author jdevesa
@@ -78,9 +78,30 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, result, "getRemoteStoragePoolsByDevice");
+            populateErrors(response, result, "getPrivateNetworks");
         }
 
+        return result;
+    }
+    
+    @Override
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto)
+    {
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+        String uri = createPrivateNetworksLink(vdcId);
+        ClientResponse response = post(uri, dto);
+        
+        if (response.getStatusCode() == 201)
+        {
+            VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
+            result.setData(createFlexObject(networkDto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "createPrivateVLANNetwork");
+        }       
+        
         return result;
     }
 
@@ -311,8 +332,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         netconf.setPrimaryDNS(dto.getPrimaryDNS());
         netconf.setSecondaryDNS(dto.getSecondaryDNS());
         netconf.setSufixDNS(dto.getSufixDNS());
-
-        // TODO: Review these values
         netconf.setFenceMode("bridge");
         netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
 
@@ -322,6 +341,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setNetworkName(dto.getName());
         newNet.setVlanNetworkId(dto.getId());
         newNet.setVlanTag(dto.getTag());
+        newNet.setNetworkId(dto.getId());
 
         return newNet;
     }
