@@ -773,8 +773,20 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         Session session = null;
         Transaction transaction = null;
+ 
+		
         try
         {
+        	if (rack.getName()!=null && rack.getName().trim().length()==0) {
+				
+				dataResult.setSuccess(false);
+				errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,"createRack");
+				// Log the event
+				traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+	                null, null, "Rack without name", null,rack, null, null, null);
+				return dataResult;
+			}
+
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
@@ -810,7 +822,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_CREATE, userSession,
                 rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
 
-        }
+        }catch (Exception e) {
+			errorManager.reportError(InfrastructureCommandImpl.resourceManager,dataResult, "createRack", e);
+			// Log the event
+			traceLog(SeverityType.MINOR, ComponentType.RACK,EventType.RACK_CREATE, userSession,
+					null, null, e.getMessage(),null,rack, null, null, null);
+		}
+        
         return dataResult;
     }
 
