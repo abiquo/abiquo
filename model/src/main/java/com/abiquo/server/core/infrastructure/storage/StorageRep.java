@@ -94,6 +94,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolByName(deviceId, name);
     }
 
+    public VolumeManagement findVolumeById(final Integer volumeId)
+    {
+        return volumeDAO.findById(volumeId);
+    }
+
     public List<StoragePool> findPoolsByTier(final Tier tier)
     {
         return poolDAO.findPoolsByTier(tier);
