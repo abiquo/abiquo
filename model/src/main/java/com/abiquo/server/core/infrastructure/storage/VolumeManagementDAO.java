@@ -145,9 +145,8 @@ import com.abiquo.server.core.util.PagedList;
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
     {
-
         Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
-        return criteria.list();
+        return getResultList(criteria);
     }
 
     public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
