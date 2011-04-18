@@ -1,3 +1,7 @@
+--
+-- Definition of table `kinton`.`role`
+--
+
 ALTER TABLE `kinton`.`role` DROP COLUMN `securityLevel` , 
 DROP COLUMN `largeDescription` , DROP COLUMN `shortDescription` , 
 DROP COLUMN `type` , ADD COLUMN `name` VARCHAR(20) NOT NULL  AFTER `version_c` , 
@@ -13,3 +17,16 @@ ADD COLUMN `blocked` TINYINT(1)  NOT NULL DEFAULT 0  AFTER `idEnterprise` ,
 UPDATE  `kinton`.`role`  Set name ='SYS_ADMIN', blocked=1 where idRole=1;
 UPDATE  `kinton`.`role`  Set name ='USER' where idRole=2;
 UPDATE  `kinton`.`role`  Set name ='ENTERPRISE_ADMIN'where idRole=3;
+
+--
+-- Definition of table `kinton`.`role`
+--
+
+CREATE TABLE `privilege` (
+  `idPrivilege` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  PRIMARY KEY (`idPrivilege`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
