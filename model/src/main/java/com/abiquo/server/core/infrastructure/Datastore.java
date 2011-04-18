@@ -259,32 +259,32 @@ public class Datastore extends DefaultEntityBase
         this.enabled = enabled;
     }
     
-    public final static String DEVICE_PROPERTY = "device";
+    public final static String DATASTORE_UUID_PROPERTY = "datastoreUUID";
 
-    private final static boolean DEVICE_REQUIRED = false;
+    private final static boolean DATASTORE_UUID_REQUIRED = false;
 
-    private final static int DEVICE_LENGTH_MIN = 0;
+    private final static int DATASTORE_UUID_LENGTH_MIN = 0;
 
-    private final static int DEVICE_LENGTH_MAX = 255;
+    private final static int DATASTORE_UUID_LENGTH_MAX = 255;
 
-    private final static boolean DEVICE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String DEVICE_COLUMN = "device";
+    private final static String DATASTORE_UUID_COLUMN = "datastoreUuid";
 
-    @Column(name = DEVICE_COLUMN, nullable = !DEVICE_REQUIRED, length = DEVICE_LENGTH_MAX)
-    private String device;
+    @Column(name = DATASTORE_UUID_COLUMN, nullable = !DATASTORE_UUID_REQUIRED, length = DATASTORE_UUID_LENGTH_MAX)
+    private String datastoreUUID;
 
-    @Required(value = DEVICE_REQUIRED)
-    @Length(min = DEVICE_LENGTH_MIN, max = DEVICE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = DEVICE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getDevice()
+    @Required(value = DATASTORE_UUID_REQUIRED)
+    @Length(min = DATASTORE_UUID_LENGTH_MIN, max = DATASTORE_UUID_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDatastoreUUID()
     {
-        return this.device;
+        return this.datastoreUUID;
     }
 
-    public void setDevice(String device)
+    public void setDatastoreUUID(String datastoreUUID)
     {
-        this.device = device;
+        this.datastoreUUID = datastoreUUID;
     }
 
     // code in Datastore

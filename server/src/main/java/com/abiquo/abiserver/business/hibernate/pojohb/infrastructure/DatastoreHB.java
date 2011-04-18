@@ -50,7 +50,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
 
     private Long usedSize;
     
-    private String device;
+    private String datastoreUUID;
     
     private Set<PhysicalmachineHB> pmList;
     
@@ -221,16 +221,16 @@ public class DatastoreHB implements IPojoHB<Datastore>
         return pmList;
     }
     
-    public void setDevice(String device)
+    public void setDatastoreUUID(String datastoreUUID)
     {
-        this.device = device;
+        this.datastoreUUID = datastoreUUID;
     }
 
-    public String getDevice()
+    public String getDatastoreUUID()
     {
-        return device;
+        return datastoreUUID;
     }
-    
+        
     @Override
     public Datastore toPojo()
     {
@@ -243,10 +243,12 @@ public class DatastoreHB implements IPojoHB<Datastore>
         ds.setUUID(getRootPath());
         ds.setSize(size);
         ds.setUsedSize(usedSize);
-        ds.setDevice(device);
+        ds.setDatastoreUUID(datastoreUUID);
         return ds;
 
     }
-   
 
+    
+
+   
 }

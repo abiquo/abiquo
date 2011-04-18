@@ -30,8 +30,8 @@
 		<property name="usedSize" type="java.lang.Long">
 			<column name="usedSize" not-null="true" />
 		</property>
-		<property name="device" type="string">
-			<column length="255" name="device" />
+		<property name="datastoreUUID" type="string">
+			<column length="255" name="datastoreUuid" />
 		</property>
 		<set name="pmList" table="datastore_assignment" lazy="false" cascade="all">
 			<key>

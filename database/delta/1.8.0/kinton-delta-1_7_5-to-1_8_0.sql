@@ -14,5 +14,5 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT 
 
 
 -- Racks can be HA enabled
-ALTER TABLE `kinton`.`datastore` ADD COLUMN `device` VARCHAR(255) default NULL COMMENT 'Device name';
+ALTER TABLE `kinton`.`datastore` ADD COLUMN `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.';
 

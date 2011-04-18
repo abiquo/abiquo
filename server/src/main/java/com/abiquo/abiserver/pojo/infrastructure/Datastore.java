@@ -63,7 +63,7 @@ public class Datastore implements IPojo<DatastoreHB>
 
     private String directory;
 
-    private String device;
+    private String datastoreUUID;
     
     private Long size;
     
@@ -232,14 +232,24 @@ public class Datastore implements IPojo<DatastoreHB>
         return usedSize;
     }
     
-    public void setDevice(String device)
+    /**
+     * Sets UUID used to identify this Datastore in Abiquo
+     * 
+     * @param datastoreUUID
+     */
+    public void setDatastoreUUID(String datastoreUUID)
     {
-        this.device = device;
+        this.datastoreUUID = datastoreUUID;
     }
 
-    public String getDevice()
+    /**
+     * Gets UUID used to identify this Datastore in Abiquo
+     * 
+     * @return
+     */
+    public String getDatastoreUUID()
     {
-        return device;
+        return datastoreUUID;
     }
     
     @Override
@@ -255,10 +265,12 @@ public class Datastore implements IPojo<DatastoreHB>
         datastore.setRootPath(this.getUUID());
         datastore.setSize(size);
         datastore.setUsedSize(usedSize);
-        datastore.setDevice(device);
+        datastore.setDatastoreUUID(datastoreUUID);
 
         return datastore;
     }
+
+    
 
   
 
