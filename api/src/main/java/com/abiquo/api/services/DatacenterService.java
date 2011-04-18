@@ -22,6 +22,7 @@
 package com.abiquo.api.services;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +40,8 @@ import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -93,12 +96,13 @@ public class DatacenterService extends DefaultApiService
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
 
         // Add the default tiers
-        for (int i=1; i<=4; i++)
+        for (int i = 1; i <= 4; i++)
         {
-        	Tier tier = new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
-        	repo.insertTier(tier);
+            Tier tier =
+                new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
+            repo.insertTier(tier);
         }
-        
+
         // Add the Remote Services in database in case are informed in the request
         if (dto.getRemoteServices() != null)
         {
@@ -159,6 +163,21 @@ public class DatacenterService extends DefaultApiService
             validationErrors.addAll(datacenter.getValidationErrors());
         }
         flushErrors();
+    }
+
+    public List<Rack> getRacks(Datacenter datacenter)
+    {
+        return repo.findRacks(datacenter);
+    }
+
+    public List<Rack> getRacksWithHAEnabled(Datacenter datacenter)
+    {
+        return repo.findRacksWithHAEnabled(datacenter);
+    }
+
+    public List<Machine> getMachines(Rack rack)
+    {
+        return repo.findRackMachines(rack);
     }
 
     // FIXME: Delete is now allowed right now
