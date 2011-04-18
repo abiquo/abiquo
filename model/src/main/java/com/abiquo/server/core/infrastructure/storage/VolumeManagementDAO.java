@@ -61,8 +61,8 @@ import com.abiquo.server.core.util.PagedList;
      **/
     private final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
         "       select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
-            + "virtualmachine.name as vmname, rasd.limitResource as limitresource, "
-            + "rasd.reservation as reservation, volman.usedSize as used, "
+            + "virtualmachine.name as vmname, rasd.limitResource as size, "
+            + "rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
             + "from (volume_management volman, virtualdatacenter vdc, rasd, rasd_management rasdm) "
             + "left join virtualmachine on rasdm.idVM = virtualmachine.idVM "
@@ -83,7 +83,7 @@ import com.abiquo.server.core.util.PagedList;
             + ") "
             + "union "
             + "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "
-            + "rasd.limitResource as limitresource, rasd.reservation as reservation, volman.usedSize as used, "
+            + "rasd.limitResource as size, rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
             + "from (volume_management volman, virtualimage vi, rasd, rasd_management rasdm) "
             + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
@@ -92,7 +92,7 @@ import com.abiquo.server.core.util.PagedList;
             + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
             + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
             + "and vi.idEnterprise = :idEnterprise " + "and ( "
-            + "rasd.elementName like :filterLike " + "or tier.name like :filterLike " + ")";//
+            + "rasd.elementName like :filterLike " + "or tier.name like :filterLike " + ")";
 
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
@@ -105,11 +105,10 @@ import com.abiquo.server.core.util.PagedList;
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
 
-    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
     {
         Criteria criteria = createCriteria(Restrictions.eq("storagePool", sp));
-        return criteria.list();
+        return getResultList(criteria);
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
@@ -193,55 +192,10 @@ import com.abiquo.server.core.util.PagedList;
 
     private String defineOrderBySQL(final VolumeManagement.OrderByEnum orderBy, final Boolean asc)
     {
-
         StringBuilder queryString = new StringBuilder();
-
         queryString.append(" order by ");
-        switch (orderBy)
-        {
-            case NAME:
-            {
-                queryString.append("elementname ");
-                break;
-            }
-            case ID:
-            {
-                queryString.append("idman ");
-                break;
-            }
-            case TIER:
-            {
-                queryString.append("tier ");
-                break;
-            }
-            case VIRTUALDATACENTER:
-            {
-                queryString.append("vdcname ");
-                break;
-            }
-            case VIRTUALMACHINE:
-            {
-                queryString.append("vmname ");
-                break;
-            }
-            case VIRTUALAPPLIANCE:
-            {
-                queryString.append("vaname ");
-                break;
-            }
-            case TOTALSIZE:
-            {
-                queryString.append("limitresource ");
-            }
-            case AVAILABLESIZE:
-            {
-                queryString.append("limitresource-used ");
-            }
-            case USEDSIZE:
-            {
-                queryString.append("used ");
-            }
-        }
+        queryString.append(orderBy.getColumn());
+        queryString.append(" ");
 
         if (asc)
         {
