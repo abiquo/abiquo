@@ -40,6 +40,33 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     }
 
     @Test
+    public void testSizeValues()
+    {
+        VolumeManagement volume = createUniqueEntity();
+
+        volume.setSizeInMB(-1L);
+        assertEquals(volume.getSizeInMB(), 0L);
+        volume.setSizeInMB(0L);
+        assertEquals(volume.getSizeInMB(), 0L);
+        volume.setSizeInMB(1L);
+        assertEquals(volume.getSizeInMB(), 1L);
+
+        volume.setUsedSizeInMB(-1L);
+        assertEquals(volume.getUsedSizeInMB(), 0L);
+        volume.setUsedSizeInMB(0L);
+        assertEquals(volume.getUsedSizeInMB(), 0L);
+        volume.setUsedSizeInMB(1L);
+        assertEquals(volume.getUsedSizeInMB(), 1L);
+
+        volume.setAvailableSizeInMB(-1L);
+        assertEquals(volume.getAvailableSizeInMB(), 0L);
+        volume.setAvailableSizeInMB(0L);
+        assertEquals(volume.getAvailableSizeInMB(), 0L);
+        volume.setAvailableSizeInMB(1L);
+        assertEquals(volume.getAvailableSizeInMB(), 1L);
+    }
+
+    @Test
     public void testStateTransitions()
     {
         VolumeManagement volume = createUniqueEntity();

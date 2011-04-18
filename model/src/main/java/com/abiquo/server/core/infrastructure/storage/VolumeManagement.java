@@ -202,7 +202,7 @@ public class VolumeManagement extends RasdManagement
 
     public void setUsedSizeInMB(final long usedSizeInMB)
     {
-        this.usedSizeInMB = usedSizeInMB;
+        this.usedSizeInMB = usedSizeInMB < 0 ? 0L : usedSizeInMB;
     }
 
     // **************************** Rasd delegating methods ***************************
@@ -229,7 +229,7 @@ public class VolumeManagement extends RasdManagement
 
     public void setSizeInMB(final long sizeInMB)
     {
-        getRasd().setLimit(sizeInMB);
+        getRasd().setLimit(sizeInMB < 0 ? 0L : sizeInMB);
     }
 
     public long getAvailableSizeInMB()
@@ -239,7 +239,7 @@ public class VolumeManagement extends RasdManagement
 
     public void setAvailableSizeInMB(final long availableSizeInMB)
     {
-        getRasd().setReservation(availableSizeInMB);
+        getRasd().setReservation(availableSizeInMB < 0 ? 0L : availableSizeInMB);
     }
 
     // ********************************** Volume state transitions ********************************
