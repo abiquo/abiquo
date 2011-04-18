@@ -837,6 +837,7 @@ DROP TABLE IF EXISTS `kinton`.`role_ldap`;
 CREATE  TABLE `kinton`.`role_ldap` (
   `idRole` INT(10) UNSIGNED NOT NULL ,
   `role_ldap` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
   INDEX `fk_role_ldap_role` (`idRole` ASC) ,
   PRIMARY KEY (`idRole`, `role_ldap`) ,
   CONSTRAINT `fk_role_ldap_role`
@@ -3874,6 +3875,7 @@ CREATE TABLE `tasks` (
 CREATE TABLE `privilege` (
   `idPrivilege` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(20) NOT NULL,
+  `version_c` int(11) default 0,
   PRIMARY KEY (`idPrivilege`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -3884,6 +3886,7 @@ CREATE TABLE `privilege` (
 CREATE  TABLE `kinton`.`roles_privileges` (
   `idRole` INT(10) UNSIGNED NOT NULL ,
   `idPrivilege` INT(10) UNSIGNED NOT NULL ,
+  `version_c` INT(11) default 0,
   INDEX `fk_roles_privileges_role` (`idRole` ASC) ,
   INDEX `fk_roles_privileges_privileges` (`idPrivilege` ASC) ,
   CONSTRAINT `fk_roles_privileges_role`
