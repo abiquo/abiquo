@@ -315,6 +315,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         // }
 
     }
+    
+    
 
     /**
      * @see com.abiquo.virtualfactory.model.AbsVirtualMachine#deployMachine()
@@ -332,7 +334,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 {
                     // Just clones the image if the virtual disk is standard
                     // Cloning the virtual disk
-                    cloneVirtualDisk();
+                    cloneVirtualDisk(); 
                 }
 
                 createVirtualMachine();

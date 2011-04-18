@@ -233,6 +233,16 @@ public abstract class AbsVirtualMachine
      */
     public abstract void deployMachine() throws VirtualMachineException;
 
+    
+    /**
+     * Deploys a virtual machine without cloning its primary virtual disk.
+     * Method used for HA process deployments
+     * 
+     * @throws Exception
+     */
+    public abstract void deployMachineExistingDisk() throws VirtualMachineException;
+
+    
     /**
      * Starts the virtual machine execution
      * 
