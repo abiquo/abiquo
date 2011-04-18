@@ -33,6 +33,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.util.FilterOptions;
 
 /**
  * @author jdevesa
@@ -115,10 +116,14 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc)
+        final FilterOptions filterOptions)
     {
-        return volumeDAO.getVolumesByVirtualDatacenter(vdc, firstElem, numElem, has, orderBy, asc);
+        return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getVolumesByVirtualDatacenter(vdc);
     }
 
     public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,

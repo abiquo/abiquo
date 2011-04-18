@@ -50,7 +50,6 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.api.web.filters.TraceFilter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -72,7 +71,7 @@ public class EnterpriseResource extends AbstractResource
     public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
-    
+
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
@@ -88,8 +87,8 @@ public class EnterpriseResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) Integer enterpriseId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
@@ -97,8 +96,8 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @PUT
-    public EnterpriseDto modifyEnterprise(EnterpriseDto enterprise,
-        @PathParam(ENTERPRISE) Integer enterpriseId, @Context IRESTBuilder restBuilder)
+    public EnterpriseDto modifyEnterprise(final EnterpriseDto enterprise,
+        @PathParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         Enterprise e = service.modifyEnterprise(enterpriseId, enterprise);
@@ -107,7 +106,7 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteEnterprise(@PathParam(ENTERPRISE) Integer enterpriseId)
+    public void deleteEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId)
     {
         service.removeEnterprise(enterpriseId);
     }
@@ -115,19 +114,20 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
-    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) Integer id,
-        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) Integer startwith, 
-        @QueryParam(BY) @DefaultValue("ip") String orderBy,
-        @QueryParam(FILTER) @DefaultValue("") String filter, 
-        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) Integer limit,
-        @QueryParam(ASC) @DefaultValue("true") Boolean desc_or_asc, 
-        @Context IRESTBuilder restBuilder) throws Exception
+    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("ip") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         // Set query Params by default if they are not informed
 
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
+            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy,
+                desc_or_asc);
 
         if (all == null)
         {
@@ -159,8 +159,8 @@ public class EnterpriseResource extends AbstractResource
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES)
     public VirtualMachinesDto getVirtualMachines(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer enterpriseId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
@@ -176,15 +176,16 @@ public class EnterpriseResource extends AbstractResource
 
     }
 
-    private static EnterpriseDto addLinks(IRESTBuilder restBuilder, EnterpriseDto enterprise)
+    private static EnterpriseDto addLinks(final IRESTBuilder restBuilder,
+        final EnterpriseDto enterprise)
     {
         enterprise.setLinks(restBuilder.buildEnterpriseLinks(enterprise));
 
         return enterprise;
     }
 
-    public static EnterpriseDto createTransferObject(Enterprise e, IRESTBuilder restBuilder)
-        throws Exception
+    public static EnterpriseDto createTransferObject(final Enterprise e,
+        final IRESTBuilder restBuilder) throws Exception
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setId(e.getId());

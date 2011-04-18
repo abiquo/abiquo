@@ -36,6 +36,8 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaVolumeManagementDAO")
 /* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
@@ -110,26 +112,41 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return criteria.list();
     }
 
-    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc)
+        final FilterOptions filterOptions)
     {
         Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
 
-        // Sort and select number of results
-        if (asc == true)
+        if (filterOptions.getAsc() == true)
         {
-            criteria.addOrder(Property.forName(orderBy).asc());
+            criteria.addOrder(Property.forName(filterOptions.getOrderBy()).asc());
         }
         else
         {
-            criteria.addOrder(Property.forName(orderBy).desc());
+            criteria.addOrder(Property.forName(filterOptions.getOrderBy()).desc());
         }
 
-        criteria.setFirstResult(firstElem);
-        criteria.setMaxResults(numElem);
+        // Get the total number of entries before filtering the query
+        int total = criteria.list().size();
 
+        // Set a rank of results
+        criteria.setFirstResult(filterOptions.getStartwith() * filterOptions.getLimit());
+        criteria.setMaxResults(filterOptions.getLimit());
+
+        List<VolumeManagement> result = getResultList(criteria);
+
+        PagedList<VolumeManagement> volumeList = new PagedList<VolumeManagement>(result);
+        volumeList.setCurrentElement(filterOptions.getStartwith());
+        volumeList.setPageSize(filterOptions.getLimit());
+        volumeList.setTotalResults(total);
+
+        return volumeList;
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+
+        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
         return criteria.list();
     }
 
