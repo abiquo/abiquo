@@ -805,15 +805,17 @@ CREATE TABLE  `kinton`.`repository` (
 --
 
 DROP TABLE IF EXISTS `kinton`.`role`;
+
 CREATE TABLE  `kinton`.`role` (
-  `idRole` int(3) unsigned NOT NULL auto_increment,
-  `type` varchar(20) NOT NULL,
-  `shortDescription` varchar(20) NOT NULL,
-  `largeDescription` varchar(100) default NULL,
-  `securityLevel` float(10,1) unsigned NOT NULL default '0.0',
-  `version_c` int(11) default 0,
-  PRIMARY KEY  (`idRole`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+  `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
+  `block` tinyint(1) NOT NULL DEFAULT '0',
+  `version_c` int(11) DEFAULT '0',
+  PRIMARY KEY (`idRole`),
+  KEY `fk_role_1` (`idEnterprise`),
+  CONSTRAINT `fk_role_1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8; 
 
 --
 -- Dumping data for table `kinton`.`role`
@@ -821,10 +823,9 @@ CREATE TABLE  `kinton`.`role` (
 
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
-INSERT INTO `kinton`.`role` VALUES
- (1,'SYS_ADMIN', 'Cloud Admin','IT Cloud Administrator','1.0', 0),
- (2,'USER', 'User','Generic Registered User','2.0', 0),
- (3,'ENTERPRISE_ADMIN', 'Enterprise Admin','Generic Registered User plus limited grants to access to User Management','1.9', 0);
+INSERT INTO `table_name` (idRole,name, blocked, version_c) VALUES (1,'SYS_ADMIN',1,0);
+INSERT INTO `table_name` (idRole,name,version_c) VALUES (2,'USER',0);
+INSERT INTO `table_name` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
