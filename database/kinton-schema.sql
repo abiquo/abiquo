@@ -830,6 +830,22 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
 --
+-- Definition of table `kinton`.`role_ldap`
+--
+DROP TABLE IF EXISTS `kinton`.`role_ldap`;
+
+CREATE  TABLE `kinton`.`role_ldap` (
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `role_ldap` VARCHAR(128) NOT NULL ,
+  INDEX `fk_role_ldap_role` (`idRole` ASC) ,
+  PRIMARY KEY (`idRole`, `role_ldap`) ,
+  CONSTRAINT `fk_role_ldap_role`
+    FOREIGN KEY (`idRole` )
+    REFERENCES `kinton`.`role` (`idRole` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+--
 -- Definition of table `kinton`.`user`
 --
 
@@ -3860,5 +3876,25 @@ CREATE TABLE `privilege` (
   `name` varchar(20) NOT NULL,
   PRIMARY KEY (`idPrivilege`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`roles_privileges`
+--
+
+CREATE  TABLE `kinton`.`roles_privileges` (
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `idPrivilege` INT(10) UNSIGNED NOT NULL ,
+  INDEX `fk_roles_privileges_role` (`idRole` ASC) ,
+  INDEX `fk_roles_privileges_privileges` (`idPrivilege` ASC) ,
+  CONSTRAINT `fk_roles_privileges_role`
+    FOREIGN KEY (`idRole` )
+    REFERENCES `kinton`.`role` (`idRole` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_roles_privileges_privileges`
+    FOREIGN KEY (`idPrivilege` )
+    REFERENCES `kinton`.`privilege` (`idPrivilege` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
 
 CALL `kinton`.`add_version_column_to_all`();
