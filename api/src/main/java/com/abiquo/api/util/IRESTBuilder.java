@@ -117,4 +117,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildRasdLinks(RasdManagement ip);
 
     public List<RESTLink> buildIpRasdLinks(IpPoolManagement ip);
+
+    public List<RESTLink> buildVolumeLinks(final Integer volumeId, final Integer datacenterId,
+        final Integer virtualDatacenterId, final Integer tierId);
 }
