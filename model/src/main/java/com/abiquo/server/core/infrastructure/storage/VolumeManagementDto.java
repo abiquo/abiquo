@@ -38,7 +38,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private String description;
 
-    private int state;
+    private String state;
 
     private long sizeInMB;
 
@@ -68,12 +68,12 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.idScsi = idScsi;
     }
 
-    public int getState()
+    public String getState()
     {
         return state;
     }
 
-    public void setState(final int state)
+    public void setState(final String state)
     {
         this.state = state;
     }

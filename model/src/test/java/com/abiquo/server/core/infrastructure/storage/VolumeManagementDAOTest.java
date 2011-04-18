@@ -21,9 +21,13 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -64,4 +68,39 @@ public class VolumeManagementDAOTest extends
         return (VolumeManagementGenerator) super.eg();
     }
 
+    @Test
+    public void testGetVolumesByPool()
+    {
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getVolumesByPool(volume.getStoragePool());
+
+        assertEquals(results.size(), 1);
+        eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+    }
+
+    @Test
+    public void testGetVolumesByVirtualDatacenter()
+    {
+        // Test without filtering
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results =
+            dao.getVolumesByVirtualDatacenter(volume.getVirtualDatacenter());
+
+        assertEquals(results.size(), 1);
+        eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+    }
 }

@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to encapsulate a common arrayList and set its max result for pagging purposes.
+ * Class to encapsulate a common arrayList and set its max result for paging purposes.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -59,7 +59,7 @@ public class PagedList<T> extends ArrayList<T>
         super();
     }
 
-    public PagedList(List<T> resultList)
+    public PagedList(final List<T> resultList)
     {
         super(resultList);
     }
@@ -67,7 +67,7 @@ public class PagedList<T> extends ArrayList<T>
     /**
      * @param totalResults the totalResults to set
      */
-    public void setTotalResults(Integer totalResults)
+    public void setTotalResults(final Integer totalResults)
     {
         this.totalResults = totalResults;
     }
@@ -83,7 +83,7 @@ public class PagedList<T> extends ArrayList<T>
     /**
      * @param pageSize the pageSize to set
      */
-    public void setPageSize(Integer pageSize)
+    public void setPageSize(final Integer pageSize)
     {
         this.pageSize = pageSize;
     }
@@ -99,7 +99,7 @@ public class PagedList<T> extends ArrayList<T>
     /**
      * @param currentPage the currentPage to set
      */
-    public void setCurrentElement(Integer currentElement)
+    public void setCurrentElement(final Integer currentElement)
     {
         this.currentElement = currentElement;
     }
