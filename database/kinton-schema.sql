@@ -2607,7 +2607,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
         IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
         -- Remove VlanUsed
             SELECT DISTINCT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
-		    FROM vlan_network vn, datacenter dc
+		    FROM vlan_network vn
 		    WHERE vn.network_id = OLD.networktypeID;
             -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
             IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
