@@ -316,13 +316,20 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
     }
     
+    @Override
+    public void deployMachineExistingDisk() throws VirtualMachineException
+    {
+        deployMachine(false);        
+    }
     
-
-    /**
-     * @see com.abiquo.virtualfactory.model.AbsVirtualMachine#deployMachine()
-     */
     @Override
     public void deployMachine() throws VirtualMachineException
+    {
+        deployMachine(true);
+    }
+ 
+//    @Override
+    public void deployMachine(boolean vhdCopyNeeded) throws VirtualMachineException
     {
         try
         {
