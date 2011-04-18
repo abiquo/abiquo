@@ -3855,4 +3855,10 @@ CREATE TABLE `tasks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `privilege` (
+  `idPrivilege` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  PRIMARY KEY (`idPrivilege`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CALL `kinton`.`add_version_column_to_all`();
