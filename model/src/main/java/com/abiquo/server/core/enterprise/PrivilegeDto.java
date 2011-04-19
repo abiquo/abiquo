@@ -19,33 +19,37 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.utils
+package com.abiquo.server.core.enterprise;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "privilege")
+public class PrivilegeDto extends SingleResourceTransportDto
 {
-	import mx.core.UIComponent;
-	
-	import net.undf.abicloud.model.AbiCloudModel;
-	
-	public class SecuredPrivilegeAccess
-	{	
-		public static function checkElementAccess(privilege:String, property:String, element:UIComponent, parent:UIComponent = null):void{
-			
-			switch(property){
-				case "removeChild":
-					if(!SecuredPrivilegeAccess.userHasPrivilege(privilege)){
-						parent.removeChild(element);
-					}
-					break;
-				case "condition":
-					parent.removeChild(element);
-					break;
-				default:
-					element[property] = SecuredPrivilegeAccess.userHasPrivilege(privilege);
-					break;
-			}
-		}
-		
-		public static function userHasPrivilege(privilege:String):Boolean{
-			return AbiCloudModel.getInstance().userManager.userHasPrivilege(privilege);
-		}
-	}
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
 }
