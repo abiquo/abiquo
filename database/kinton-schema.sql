@@ -804,13 +804,30 @@ CREATE TABLE  `kinton`.`repository` (
 -- Definition of table `kinton`.`role`
 --
 
+-- ######################################### CORRECT SCRIPT !!! #########################################
+--  CREATE TABLE  `kinton`.`role` (
+--  `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
+--  `name` varchar(20) NOT NULL,
+--  `idEnterprise` int(10) unsigned DEFAULT NULL,
+--  `blocked` tinyint(1) NOT NULL DEFAULT '0',
+--  `version_c` int(11) DEFAULT '0',
+--  PRIMARY KEY (`idRole`),
+--  KEY `fk_role_1` (`idEnterprise`),
+--  CONSTRAINT `fk_role_1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
+-- ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8; 
+-- ######################################### CORRECT SCRIPT !!! #########################################
+
 DROP TABLE IF EXISTS `kinton`.`role`;
 
 CREATE TABLE  `kinton`.`role` (
   `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(20) NOT NULL,
+  `name` varchar(20) NOT NULL DEFAULT 'auto_name',
   `idEnterprise` int(10) unsigned DEFAULT NULL,
   `blocked` tinyint(1) NOT NULL DEFAULT '0',
+  `type` varchar(20) NOT NULL,
+  `shortDescription` varchar(20) NOT NULL,
+  `largeDescription` varchar(100) default NULL,
+  `securityLevel` float(10,1) unsigned NOT NULL default '0.0',
   `version_c` int(11) DEFAULT '0',
   PRIMARY KEY (`idRole`),
   KEY `fk_role_1` (`idEnterprise`),
@@ -821,11 +838,17 @@ CREATE TABLE  `kinton`.`role` (
 -- Dumping data for table `kinton`.`role`
 --
 
+-- ######################################### CORRECT SCRIPT !!! #########################################
+--	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'SYS_ADMIN',1,0);
+--	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
+--	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
+-- ######################################### CORRECT SCRIPT !!! #########################################
+
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
-INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'SYS_ADMIN',1,0);
-INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
-INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
+INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c,type) VALUES (1,'SYS_ADMIN',1,0,'SYS_ADMIN');
+INSERT INTO `kinton`.`role` (idRole,name,version_c,type) VALUES (2,'USER',0,'USER');
+INSERT INTO `kinton`.`role` (idRole,name,version_c,type) VALUES (3,'ENTERPRISE_ADMIN',0,'ENTERPRISE_ADMIN');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 
