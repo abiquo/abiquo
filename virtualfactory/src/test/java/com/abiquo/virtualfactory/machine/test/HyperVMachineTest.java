@@ -94,7 +94,7 @@ public class HyperVMachineTest extends AbsMachineTest
         // HYPERVISOR configuration properties
 //        hvURL = "http://10.60.1.152";
         hvURL = "http://10.60.1.122";
-        hvUser = "Administrador";
+        hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
 
         // MACHINE configuration properties
@@ -195,14 +195,16 @@ public class HyperVMachineTest extends AbsMachineTest
     }
     
     /**
-     * Gets the the file to execute operations
+     * Tests if a file/folder exists
      * 
      *
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
-    public void detectFile() throws Exception
+    public boolean detectFile(String file) throws Exception
     {
+        boolean fileExists = false;
+        
         hypervisor = instantiateHypervisor();
 
         hypervisor.init(new URL(hvURL), hvUser, hvPassword);
@@ -213,7 +215,6 @@ public class HyperVMachineTest extends AbsMachineTest
 //            "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
         
         SWbemServices cimService = hyperV.getCIMService();
-        String file = "C:\\file.uuid";
         
         
         // Preparing the query
@@ -221,12 +222,6 @@ public class HyperVMachineTest extends AbsMachineTest
             "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
                 + "'";
 
-        SWbemObjectSet<CIMDataFile> fileSetOld = cimService.execQuery(query, CIMDataFile.class);
-        fileSetOld.iterator().next().delete();
- 
-        // Object[] inParams =
-        // new Object[] {new JIString(query), JIVariant.OPTIONAL_PARAM(),
-        // JIVariant.OPTIONAL_PARAM(), JIVariant.OPTIONAL_PARAM(),};
 
         JIVariant[] res =
             cimService.getObjectDispatcher().callMethodA("ExecQuery",
@@ -236,20 +231,58 @@ public class HyperVMachineTest extends AbsMachineTest
 
         if (fileSet.length != 1)
         {
-            throw new Exception("Cannot identify the vhd to delete: " + file);
+            fileExists =  true;
+//            throw new Exception("Cannot identify the vhd to delete: " + file);
+        } else {
+            fileExists = false;
         }
-        IJIDispatch fileDispatch =
-            (IJIDispatch) JIObjectFactory.narrowObject(fileSet[0][0].getObjectAsComObject()
-                .queryInterface(IJIDispatch.IID));
-        res = fileDispatch.callMethodA("Delete", null);
-        int result = res[0].getObjectAsInt();
+        
+        hypervisor.disconnect();        
+        hypervisor.logout();
+        
+        return fileExists;
 
-        // IJIDispatch objectDispatcher = hyperVHypervisor.getCIMService().getObjectDispatcher();
-        //
-        // JIVariant[] results = objectDispatcher.callMethodA("ExecQuery", inParams);
-        // IJIComObject co = results[0].getObjectAsComObject();
-        // IJIDispatch dispatch = (IJIDispatch) JIObjectFactory.narrowObject(co);
-        // return new CIMDataFile(dispatch, service);
+    }
+    
+    /**
+     * Creates a folder in datastore to 
+     * 
+     *
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public void createFolder(String folder) throws Exception
+    {
+        if (detectFile(folder)) {
+            log.info("Folder " + folder + " already exists. ");
+            return;
+        }
+        
+        
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;        
+//        deleteFile(hyperV.getCIMService(),
+//            "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
+        
+        SWbemServices cimService = hyperV.getCIMService();
+        
+//        
+//        // Preparing the query
+//        String query =
+//            "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
+//                + "'";
+//
+//
+//        JIVariant[] res =
+//            cimService.getObjectDispatcher().callMethodA("ExecQuery",
+//                new Object[] {new JIString(query)});
+//
+        hypervisor.disconnect();        
+        hypervisor.logout();
 
     }
 
@@ -262,9 +295,11 @@ public class HyperVMachineTest extends AbsMachineTest
         // test.testInitiator();
         // test.testDeleteFile();
         // test.testAddRemoveISCSI();
-        test.detectFile();
-        
-        
+        System.out.println("test.detectFile(): " + test.detectFile("C:\\folder"));
+        test.createFolder("C:\\folder2");
     }
+    
+    
+    
 
 }

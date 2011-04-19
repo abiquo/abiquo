@@ -48,7 +48,7 @@ import com.abiquo.virtualfactory.network.VirtualNIC;
 public abstract class AbsMachineTest extends TestCase
 {
 
-    private final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
+    protected final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
 
     protected IHypervisor hypervisor;
 
