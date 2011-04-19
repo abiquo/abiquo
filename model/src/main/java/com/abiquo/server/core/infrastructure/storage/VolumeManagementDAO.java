@@ -98,7 +98,8 @@ import com.abiquo.server.core.util.PagedList;
         throws PersistenceException
     {
         Query query =
-            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE);
+            getSession().createSQLQuery(
+                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE);
         query.setParameter("idEnterprise", idEnterprise);
         query.setParameter("filterLike", "%");
 
@@ -143,6 +144,7 @@ import com.abiquo.server.core.util.PagedList;
         return volumeList;
     }
 
+    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
     {
 
@@ -159,18 +161,32 @@ import com.abiquo.server.core.util.PagedList;
         return (VolumeManagement) criteria.uniqueResult();
     }
 
-    public List<VolumeManagement> getVolumesByEnterprise(final Integer id, final Integer startwith,
-        final Integer limit, final String filter, final VolumeManagement.OrderByEnum orderBy,
-        final Boolean desc_or_asc)
+    public List<VolumeManagement> getVolumesByEnterprise(final Integer id, final FilterOptions filters)
     {
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum =
+            VolumeManagement.OrderByEnum.fromValue(filters.getOrderBy());
+        if (orderByEnum == null)
+        {
+            return null;
+        }
+        
         Query query =
-            getSession().createSQLQuery(
-                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + " "
-                    + defineOrderBySQL(orderBy, desc_or_asc));
+            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + defineOrderBySQL(orderByEnum, filters.getAsc()));
         query.setParameter("idEnterprise", id);
         query.setParameter("filterLike", "%");
 
-        return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
+        Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
+        
+        query.setFirstResult(filters.getStartwith());
+        query.setMaxResults(filters.getLimit());
+        PagedList<VolumeManagement> volumes = new PagedList<VolumeManagement>(getSQLQueryResults(getSession(), query, VolumeManagement.class, 0));
+        volumes.setTotalResults(size);
+        volumes.setPageSize(filters.getLimit());
+        volumes.setCurrentElement(filters.getStartwith());
+        
+        return volumes;
+        
     }
 
     @SuppressWarnings("unchecked")
@@ -233,14 +249,17 @@ import com.abiquo.server.core.util.PagedList;
             case TOTALSIZE:
             {
                 queryString.append("limitresource ");
+                break;
             }
             case AVAILABLESIZE:
             {
                 queryString.append("limitresource-used ");
+                break;
             }
             case USEDSIZE:
             {
                 queryString.append("used ");
+                break;
             }
         }
 

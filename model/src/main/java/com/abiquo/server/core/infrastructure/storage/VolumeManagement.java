@@ -42,6 +42,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -298,5 +299,18 @@ public class VolumeManagement extends RasdManagement
     public static enum OrderByEnum
     {
         NAME, ID, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE, TIER, TOTALSIZE, AVAILABLESIZE, USEDSIZE;
+        
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
     }
 }

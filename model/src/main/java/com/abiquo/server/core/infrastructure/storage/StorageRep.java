@@ -148,10 +148,9 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> findVolumesByEnterprise(final Integer id,
-        final Integer startwith, final Integer limit, final String filter,
-        final VolumeManagement.OrderByEnum orderBy, final Boolean desc_or_asc)
+        final FilterOptions filters)
     {
-        return volumeDAO.getVolumesByEnterprise(id, startwith, limit, filter, orderBy, desc_or_asc);
+        return volumeDAO.getVolumesByEnterprise(id, filters);
     }
 
     public Tier insertTier(final Tier tier)

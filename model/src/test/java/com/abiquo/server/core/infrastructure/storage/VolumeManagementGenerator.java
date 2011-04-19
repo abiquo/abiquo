@@ -70,7 +70,8 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
     public VolumeManagement createInstance(final String name)
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        return createInstance(name, vdc);
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        return createInstance(name, vdc, pool);
     }
 
     public VolumeManagement createInstance(final StoragePool pool)
@@ -80,16 +81,6 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
 
         return createInstance(name, vdc, pool);
-    }
-
-    public VolumeManagement createInstance(final String name, final VirtualDatacenter vdc)
-    {
-        String uuid = UUID.randomUUID().toString();
-        long sizeInMB = nextSeed();
-        String idSCSI = "ip-10.60.1.26:3260-iscsi-iqn.2001-04.com.acme-lun-" + nextSeed();
-        StoragePool pool = poolGenerator.createUniqueInstance();
-
-        return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
     }
 
     public VolumeManagement createInstance(final String name, final VirtualDatacenter vdc,
