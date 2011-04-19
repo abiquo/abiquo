@@ -259,9 +259,26 @@ package net.undf.abicloud.business.managers
         	return false;
         }
         
+         /**
+         * ArrayCollection containing role privileges
+         **/
+        private var _rolePrivileges:ArrayCollection;
+
+        [Bindable(event="rolePrivilegesUpdated_UserManager")]
+        public function get rolePrivileges():ArrayCollection
+        {
+            return this._rolePrivileges;
+        }
+
+        public function set rolePrivileges(array:ArrayCollection):void
+        {
+            this._rolePrivileges = array;
+            dispatchEvent(new Event(PRIVILEGES_UPDATED, true));
+        }
+        
         public function roleHasPrivilege(privilege:String):Boolean{
-        	for(var i:int = 0 ; i < this._privileges.length ; i++){
-        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
+        	for(var i:int = 0 ; i < this._rolePrivileges.length ; i++){
+        		if(Privilege(this._rolePrivileges.getItemAt(i)).name == privilege){
         			return true;
         		}
         	}

@@ -238,7 +238,32 @@ package net.undf.abicloud.controller.login
                 
                 privilege = new Privilege();
                 privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
                 privilege.name = PrivilegeType.USERS_VIEW_PRIVILEGES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_ROLES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_ROLES_OTHER_ENTERPRISES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_SYSTEM_ROLES;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.USERS_MANAGE_LDAP_GROUP;
                 privileges.addItem(privilege);
                 
                 privilege = new Privilege();
@@ -254,6 +279,16 @@ package net.undf.abicloud.controller.login
                 privilege = new Privilege();
                 privilege.id = 2 ;
                 privilege.name = PrivilegeType.SYSCONFIG_ALLOW_MODIFY;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.EVENTLOG_VIEW_ENTERPRISE;
+                privileges.addItem(privilege);
+                
+                privilege = new Privilege();
+                privilege.id = 2 ;
+                privilege.name = PrivilegeType.EVENTLOG_VIEW_ALL;
                 privileges.addItem(privilege);
                 
                 AbiCloudModel.getInstance().userManager.privileges = privileges;
