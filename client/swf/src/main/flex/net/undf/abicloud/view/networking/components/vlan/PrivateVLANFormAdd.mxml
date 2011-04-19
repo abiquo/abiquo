@@ -79,6 +79,7 @@
                 
                 var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.CREATE_VLAN);
                 networkingEvent.virtualDatacenter = _virtualDatacenter;
+                networkingEvent.network = _virtualDatacenter.network;
                 networkingEvent.networkName = privateNetworkForm.networkName;
                 networkingEvent.networkConfiguration = privateNetworkForm.networkConfiguration;
                 networkingEvent.defaultNetwork = privateNetworkForm.isDefaultNetwork;
