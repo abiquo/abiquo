@@ -33,6 +33,7 @@ package net.undf.abicloud.controller.login
     import net.undf.abicloud.vo.authentication.LoginResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
+    import net.undf.abicloud.vo.user.NewRole;
     import net.undf.abicloud.vo.user.Privilege;
     import net.undf.abicloud.vo.user.PrivilegeType;
 
@@ -256,7 +257,6 @@ package net.undf.abicloud.controller.login
                 privileges.addItem(privilege);
                 
                 AbiCloudModel.getInstance().userManager.privileges = privileges;
-
             }
             else
             {

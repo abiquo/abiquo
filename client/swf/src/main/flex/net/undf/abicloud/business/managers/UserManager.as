@@ -258,6 +258,25 @@ package net.undf.abicloud.business.managers
         	}
         	return false;
         }
+        
+        public function roleHasPrivilege(privilege:String):Boolean{
+        	for(var i:int = 0 ; i < this._privileges.length ; i++){
+        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
+        			return true;
+        		}
+        	}
+        	return false;
+        }        
+        
+        
+        public function getPrivilege(privilege:String):Privilege{
+        	for(var i:int = 0 ; i < this._privileges.length ; i++){
+        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
+        			return Privilege(this._privileges.getItemAt(i));
+        		}
+        	}
+        	return null;
+        }
 
         ///////////////////////////////////
         //RELATED TO ENTERPRISES

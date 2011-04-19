@@ -21,19 +21,32 @@
 
 package net.undf.abicloud.vo.user
 {
-	//[RemoteClass(alias="com.abiquo.abiserver.pojo.virtualstorage.InitiatorMapping")]
-    [Bindable]
-	public class Privilege
-	{
-			
-		public var id:int;
-		public var name:String;
-				
-		public function Privilege()
-		{
-			id = 0;
-			name = "";
-		}
 
-	}
+    [Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.user.Role")]
+    public class NewRole
+    {
+
+        /* ------------- Public atributes ------------- */
+        public var id:int;
+
+        public var name:String;
+        
+        public var idEnterprise:int;
+
+        public var ldap:String;
+
+        public var blocked:Boolean;
+
+        /* ------------- Constructor ------------- */
+        public function NewRole()
+        {
+            id = 0;
+            name = '';
+            idEnterprise = 0;
+            ldap = '';
+            blocked = false;
+        }
+
+    }
 }

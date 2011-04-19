@@ -41,6 +41,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.effects.Resize;
+        	import mx.events.EffectEvent;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
@@ -115,6 +117,8 @@
             private var _userAdd:UserAdd;
 
             private var _userEdit:UserEdit;
+            
+            private var _resizeEffect:Resize;
 
 
             //Needed variables for user's pagination
@@ -156,6 +160,12 @@
                                                                          onUsersSessionClosed);
                 AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.USER_DELETED,
                                                                          onUserDeleted);
+                                                                         
+				//Resize effect used to show or hide the More info container
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 160;                                                                         
             }
 
             public function init():void
@@ -598,6 +608,55 @@
                 DragManager.doDrag(UIComponent(Application.application), dragSource,
                                    mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
             }
+            
+             /**
+             * Shows a User, using an UserRenderer component
+             **/
+            public function showUser(user:User):void 
+            {
+                if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._resizeEffect.play([ moreInfoContainer ]);
+                }
+
+                userRenderer.init(user);
+            }
+
+            /**
+             * Hides the MoreInfoContainer component
+             */
+            public function hideMoreInfoContainer():void
+            {
+                 if (moreInfoContainer.visible)
+                {
+                    this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                    this._resizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onEndResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideButton():void
+            {
+                hideMoreInfoContainer();
+            }
+            
+            private function onEndUserResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideUserButton():void
+            {
+                hideMoreInfoContainer();
+            }
+
         ]]>
     </mx:Script>
 
@@ -767,4 +826,24 @@
             click="editUser()"
             visible="{! loggedUsersCheckbox.selected}"/>
     </general:GeneralPanelToolBox>
+    
+    <!-- More info -->
+    <mx:VBox id="moreInfoContainer"
+        width="100%" height="0"
+        horizontalAlign="center"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalGap="0"
+        visible="false">
+
+        <mx:Button id="hideUserButton"
+            width="49" height="10"
+            styleName="UpDownButton"
+            click="onClickHideUserButton()"/>
+
+        <user:UserRenderer id="userRenderer"
+            width="100%" height="100%"/>
+    </mx:VBox>
 </mx:VBox>

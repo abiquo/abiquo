@@ -73,9 +73,12 @@ package net.undf.abicloud.vo.user
 		public static const USERS_MANAGE_SYSTEM_ROLES:String = "USERS_MANAGE_SYSTEM_ROLES";
 		public static const USERS_MANAGE_LDAP_GROUP:String = "USERS_MANAGE_LDAP_GROUP";
 		public static const USERS_ENUMERATE_CONNECTED:String = "USERS_ENUMERATE_CONNECTED";
-		//HOME
+		//SYSTEM CONFIG
 		public static const SYSCONFIG_VIEW:String = "SYSCONFIG_VIEW";
 		public static const SYSCONFIG_ALLOW_MODIFY:String = "SYSCONFIG_ALLOW_MODIFY";
+		//SYSTEM CONFIG
+		public static const EVENTLOG_VIEW_ENTERPRISE:String = "EVENTLOG_VIEW_ENTERPRISE";
+		public static const EVENTLOG_VIEW_ALL:String = "EVENTLOG_VIEW_ALL";
 		/* public static const MANAGE_USER:String = "MANAGE_USER";
 		public static const MANAGE_USER:String = "MANAGE_USER";
 		public static const MANAGE_USER:String = "MANAGE_USER";

@@ -28,6 +28,7 @@ package net.undf.abicloud.controller
     import net.undf.abicloud.vo.main.MainResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
+    import net.undf.abicloud.vo.user.NewRole;
 
     /**
      * Class to handle server responses when calling infrastructure remote services defined in InfrastructureEventMap
@@ -52,8 +53,28 @@ package net.undf.abicloud.controller
                 var mainResult:MainResult = DataResult(result).data as MainResult;
 
                 //Setting the common information
-                AbiCloudModel.getInstance().userManager.roles = mainResult.roles;
+                //AbiCloudModel.getInstance().userManager.roles = mainResult.roles;
                 AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes = mainResult.hypervisorTypes;
+                
+                //Roles
+                var roles:ArrayCollection = new ArrayCollection();
+                
+                var role:NewRole = new NewRole();
+                role.id = 1;
+                role.name = "Cloud Admin";                
+                roles.addItem(role);
+                
+                role = new NewRole();
+                role.id = 2;
+                role.name = "Enterprise Admin";
+                roles.addItem(role);
+                
+                role = new NewRole();
+                role.id = 3;
+                role.name = "User";
+                roles.addItem(role);
+                
+                AbiCloudModel.getInstance().userManager.roles = roles;
             }
             else
             {
