@@ -393,7 +393,7 @@ public class Machine extends DefaultEntityBase
 
     public enum State
     {
-        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED;
+        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA;
     }
 
     public final static String STATE_PROPERTY = "state";
