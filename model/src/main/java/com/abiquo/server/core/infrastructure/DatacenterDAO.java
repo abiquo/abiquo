@@ -140,10 +140,11 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
     }
 
     public static final String BY_ENT =
-        " SELECT ent FROM  VirtualDatacenter vdc, " + " VLANNetwork vn, "
+        " select distinct ent from  VirtualDatacenter vdc, " + " VLANNetwork vn, "
             + " DatacenterLimits dcl join dcl.enterprise ent join dcl.datacenter dc"
-            + " WHERE vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND dc.id = :datacenter_id ";
+            + " WHERE vn.network.id = vdc.network.id" + " and vdc.enterprise.id = ent.id"
+            + " and vdc.datacenter.id = dc.id " 
+            + " and dc.id = :datacenter_id ";
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
