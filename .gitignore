@@ -13,8 +13,8 @@ bin-debug
 client/swf/src/main/resources/config/client-config.xml
 client/swf/src/main/resources/themes
 *~
+*.swp
 api/test-output/
 server/test-output/
 virtualfactory/test-output/
-
-
+model/test-output/

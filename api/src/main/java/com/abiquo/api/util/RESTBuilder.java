@@ -57,7 +57,6 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -78,7 +77,12 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
-import com.abiquo.server.core.infrastructure.storage.StoragePoolDto;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
@@ -96,6 +100,7 @@ public class RESTBuilder implements IRESTBuilder
 
     protected LinkBuilders linkProcessor;
 
+    @Override
     public RESTBuilder injectProcessor(LinkBuilders linkProcessor)
     {
         this.linkProcessor = linkProcessor;
@@ -117,6 +122,7 @@ public class RESTBuilder implements IRESTBuilder
             params);
     }
 
+    @Override
     public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -140,6 +146,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRackLinks(Integer datacenterId, RackDto rack)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -160,6 +167,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, MachineDto machine)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -181,6 +189,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService)
     {
@@ -208,6 +217,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRoleLinks(RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -221,6 +231,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildEnterpriseLinks(EnterpriseDto enterprise)
     {
         Map<String, String> params =
@@ -258,6 +269,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildUserLinks(Integer enterpriseId, Integer roleId, UserDto user)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -292,6 +304,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildOVFPackageListLinks(final Integer enterpriseId,
         OVFPackageListDto ovfPackageList)
     {
@@ -311,6 +324,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildOVFPackageLinks(final Integer enterpriseId, OVFPackageDto ovfPackage)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -351,6 +365,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenterDto vdc,
         Integer datacenterId, Integer enterpriseId)
     {
@@ -380,6 +395,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualApplianceLinks(VirtualApplianceDto dto, Integer vdcId,
         Integer enterpriseId)
     {
@@ -458,6 +474,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -563,4 +580,28 @@ public class RESTBuilder implements IRESTBuilder
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

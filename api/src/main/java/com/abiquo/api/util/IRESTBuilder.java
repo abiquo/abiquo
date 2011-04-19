@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.apache.wink.server.utils.LinkBuilders;
 
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -46,7 +45,12 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
-import com.abiquo.server.core.infrastructure.storage.StoragePoolDto;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 public interface IRESTBuilder
@@ -113,4 +117,13 @@ public interface IRESTBuilder
     public List<RESTLink> buildTierLinks(final Integer datacenterId, final Integer tierId);
 
     public List<RESTLink> buildStorageDeviceLinks(final Integer datacenterId, final Integer deviceId);
+
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion);
+
+    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
+        final MachineLoadRule mlr);
+
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
 }

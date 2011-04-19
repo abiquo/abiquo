@@ -44,7 +44,7 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = MachineLoadRule.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = MachineLoadRule.TABLE_NAME)
 public class MachineLoadRule extends DefaultEntityBase implements
-    Rule<VirtualImage, Machine, Integer>
+    Rule<VirtualImage, Machine, Integer>, PersistentRule
 
 {
     public static final MachineLoadRule DEFAULT_RULE = new MachineLoadRuleWithNoLocation();
@@ -188,7 +188,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.cpuLoadPercentage;
     }
 
-    protected void setCpuLoadPercentage(int cpuLoadPercentage)
+    public void setCpuLoadPercentage(int cpuLoadPercentage)
     {
         this.cpuLoadPercentage = cpuLoadPercentage;
     }
@@ -210,7 +210,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.ramLoadPercentage;
     }
 
-    protected void setRamLoadPercentage(int ramLoadPercentage)
+    public void setRamLoadPercentage(int ramLoadPercentage)
     {
         this.ramLoadPercentage = ramLoadPercentage;
     }

@@ -68,6 +68,10 @@ public class EnterpriseResource extends AbstractResource
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
 
+    public static final String ENTERPRISE1 = "enterprise1";
+
+    public static final String ENTERPRISE2 = "enterprise2";
+
     @Autowired
     EnterpriseService service;
 
