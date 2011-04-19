@@ -92,7 +92,7 @@ import com.abiquo.server.core.util.PagedList;
             + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
             + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
             + "and vi.idEnterprise = :idEnterprise " + "and (rasd.elementName like :filterLike "
-            + "or tier.name like :filterLike " + ") " + "order by :order :direction";
+            + "or tier.name like :filterLike )";
 
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
