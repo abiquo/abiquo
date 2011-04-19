@@ -270,6 +270,7 @@ public class HyperVMachineTest extends AbsMachineTest
         
         SWbemServices cimService = hyperV.getCIMService();
         
+        cimService.getObjectDispatcher().callMethod(arg0)
 //        
 //        // Preparing the query
 //        String query =
