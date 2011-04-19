@@ -21,6 +21,9 @@
 
 package com.abiquo.commons.amqp.impl.ha;
 
+import com.abiquo.commons.amqp.impl.ha.domain.HATask;
+
 public interface HACallback
 {
+    public void executeHighAvailabilityTask(HATask task);
 }

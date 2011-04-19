@@ -31,6 +31,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -262,4 +263,49 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Assert.assertTrue(ds().canFind(machine3));
     }
 
+    @Test
+    public void test_findRackEnabledMachines()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+
+        Rack rack = datacenter.createRack("Rack", 2, 4094, 2, 10);
+
+        Machine machine1 = machineGenerator.createMachine(datacenter);
+        Machine machine2 = machineGenerator.createMachine(datacenter);
+        Machine machine3 = machineGenerator.createMachine(datacenter);
+        Machine machine4 = machineGenerator.createMachine(datacenter);
+        Machine machine5 = machineGenerator.createMachine(datacenter);
+        Machine machine6 = machineGenerator.createMachine(datacenter);
+        Machine machine7 = machineGenerator.createMachine(datacenter);
+        Machine machine8 = machineGenerator.createMachine(datacenter);
+
+        machine1.setState(State.DISABLED_FOR_HA);
+        machine2.setState(State.HA_IN_PROGRESS);
+        machine3.setState(State.HALTED);
+        machine4.setState(State.MANAGED);
+        machine5.setState(State.NOT_MANAGED);
+        machine6.setState(State.PROVISIONED);
+        machine7.setState(State.STOPPED);
+        machine8.setState(State.UNLICENSED);
+
+        machine1.setRack(rack);
+        machine2.setRack(rack);
+        machine2.setRack(rack);
+        machine4.setRack(rack);
+        machine5.setRack(rack);
+        machine6.setRack(rack);
+        machine7.setRack(rack);
+        machine8.setRack(rack);
+
+        ds().persistAll(datacenter, rack, machine1, machine2, machine3, machine4, machine5,
+            machine6, machine7, machine8);
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+
+        Assert.assertEquals(State.values().length, 8);
+        Assert.assertEquals(dao.findRackEnabledMachines(reload(dao, rack)).size(), 2);
+    }
 }

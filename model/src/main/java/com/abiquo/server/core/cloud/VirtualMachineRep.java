@@ -102,5 +102,4 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return rasdDao.findByVirtualMachine(virtualMachineId);
     }
-
 }
