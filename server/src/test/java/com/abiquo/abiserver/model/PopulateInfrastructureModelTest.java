@@ -44,7 +44,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 public class PopulateInfrastructureModelTest
 {

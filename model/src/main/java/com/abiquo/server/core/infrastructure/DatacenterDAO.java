@@ -23,17 +23,21 @@ package com.abiquo.server.core.infrastructure;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.enumerator.VirtualMachineState;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaDatacenterDAO")
 public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
@@ -44,26 +48,26 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         super(Datacenter.class);
     }
 
-    public DatacenterDAO(EntityManager entityManager)
+    public DatacenterDAO(final EntityManager entityManager)
     {
         super(Datacenter.class, entityManager);
     }
 
-    private static Criterion equalName(String name)
+    private static Criterion equalName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return this.existsAnyByCriterions(equalName(name));
     }
 
-    public boolean existsAnyOtherWithName(Datacenter datacenter, String name)
+    public boolean existsAnyOtherWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert isManaged(datacenter);
@@ -83,30 +87,28 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
-                .uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("datacenterId",
+                datacenterId).setParameter("enterpriseId", enterpriseId).setParameter(
+                "not_deployed", VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
         BigInteger vlan =
-            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES)
-                .setParameter("datacenterId", datacenterId)
-                .setParameter("enterpriseId", enterpriseId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES).setParameter(
+                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
+                .uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
@@ -116,6 +118,33 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         return used;
     }
 
+    public List<Enterprise> findEnterprisesByDatacenters(final Datacenter datacenter,
+        final Integer firstElem, final Integer numElem)
+    {
+
+        // Get the query that counts the total results.
+        Query finalQuery = getSession().createQuery(BY_ENT);
+        finalQuery.setParameter("datacenter_id", datacenter.getId());
+        Integer totalResults = finalQuery.list().size();
+
+        // Get the list of elements
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+
+        PagedList<Enterprise> entList = new PagedList<Enterprise>(finalQuery.list());
+        entList.setTotalResults(totalResults);
+        entList.setPageSize(numElem);
+        entList.setCurrentElement(firstElem);
+
+        return entList;
+    }
+
+    public static final String BY_ENT =
+        " SELECT ent FROM  VirtualDatacenter vdc, " + " VLANNetwork vn, "
+            + " DatacenterLimits dcl join dcl.enterprise ent join dcl.datacenter dc"
+            + " WHERE vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
+            + " AND dc.id = :datacenter_id ";
+
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
             + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
@@ -123,15 +152,12 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
     private static final String SUM_STORAGE_RESOURCES =
         "select sum(r.limitResource) "
-        + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
-        + "where "
-        + "vm.idManagement = rm.idManagement "
-        + "and rm.idResource = r.instanceID "
-        + "and vm.idStorage = sp.idStorage " 
-        + "and sp.idStorageDevice = sd.id "
-        + "and sd.idDataCenter = :datacenterId "
-        + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
-        + "and vdc.idEnterprise = :enterpriseId";
+            + "from volume_management vm, storage_pool sp, storage_device sd, rasd_management rm, virtualdatacenter vdc, rasd r "
+            + "where " + "vm.idManagement = rm.idManagement " + "and rm.idResource = r.instanceID "
+            + "and vm.idStorage = sp.idStorage " + "and sp.idStorageDevice = sd.id "
+            + "and sd.idDataCenter = :datacenterId "
+            + "and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+            + "and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_IP_RESOURCES =
         "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "

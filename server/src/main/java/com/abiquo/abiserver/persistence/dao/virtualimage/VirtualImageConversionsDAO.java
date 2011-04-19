@@ -27,7 +27,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageC
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
-import com.abiquo.server.core.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.DiskFormatType;
 
 /**
  * Specific interface to work with the

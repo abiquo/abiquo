@@ -22,27 +22,35 @@
 /**
  * 
  */
-package com.abiquo.server.core.util.network;
+package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 
 /**
- * @author jdevesa
+ * Wrapper class anotation for class {@link IpPoolManagementDto} object
+ * 
+ * @author jdevesa@abiquo.com
  */
-public class InvalidMaskException extends RuntimeException
+@XmlRootElement(name = "volumes")
+public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
 {
-
-    /**
-     * Serial version.
-     */
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Initialize the exception with a message. (Throwing a new exception)
-     * 
-     * @param message Indication
-     */
-    public InvalidMaskException(String message)
+    @Override
+    @XmlElement(name = "volume")
+    public List<VolumeManagementDto> getCollection()
     {
-        super(message);
+        if (collection == null)
+        {
+            collection = new ArrayList<VolumeManagementDto>();
+        }
+        return collection;
     }
 }

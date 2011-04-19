@@ -19,9 +19,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.enumerator;
+package com.abiquo.model.enumerator;
 
-public enum DiskFormatTypeAlias
+public enum VirtualMachineState
 {
-    UNKNOWN, RAW, INCOMPATIBLE, VMDK_STREAM_OPTIMIZED, VMDK_FLAT, VMDK_SPARSE, VHD, VDI, QCOW2;
+    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
 }

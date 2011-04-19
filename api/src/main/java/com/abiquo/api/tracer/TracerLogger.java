@@ -89,7 +89,6 @@ public class TracerLogger
         {
             // Just ignore this error for the moment; it appears if the method is invoked outside
             // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
-            LOGGER.warn("Could not send the trace.");
         }
     }
 
