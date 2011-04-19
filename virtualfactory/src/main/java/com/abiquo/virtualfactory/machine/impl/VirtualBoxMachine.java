@@ -1161,4 +1161,11 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
 
     }
+
+    @Override
+    public void deployMachineExistingDisk() throws VirtualMachineException
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

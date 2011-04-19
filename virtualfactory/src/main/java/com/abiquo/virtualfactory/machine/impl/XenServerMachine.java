@@ -1011,4 +1011,11 @@ public class XenServerMachine extends AbsVirtualMachine
                 + config.getMachineName(), ex);
         }
     }
+
+    @Override
+    public void deployMachineExistingDisk() throws VirtualMachineException
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

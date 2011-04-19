@@ -104,4 +104,11 @@ public class VmwareMachine extends AbsVmwareMachine
         return vmConfigSpec;
     }
 
+    @Override
+    public void deployMachineExistingDisk() throws VirtualMachineException
+    {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

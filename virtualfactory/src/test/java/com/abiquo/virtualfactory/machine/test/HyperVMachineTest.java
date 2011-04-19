@@ -92,7 +92,8 @@ public class HyperVMachineTest extends AbsMachineTest
     public HyperVMachineTest()
     {
         // HYPERVISOR configuration properties
-        hvURL = "http://10.60.1.152";
+//        hvURL = "http://10.60.1.152";
+        hvURL = "http://10.60.1.122";
         hvUser = "Administrador";
         hvPassword = "Windowssucks0!";
 
@@ -192,16 +193,78 @@ public class HyperVMachineTest extends AbsMachineTest
         // return new CIMDataFile(dispatch, service);
 
     }
+    
+    /**
+     * Gets the the file to execute operations
+     * 
+     *
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public void detectFile() throws Exception
+    {
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;        
+//        deleteFile(hyperV.getCIMService(),
+//            "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
+        
+        SWbemServices cimService = hyperV.getCIMService();
+        String file = "C:\\file.uuid";
+        
+        
+        // Preparing the query
+        String query =
+            "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
+                + "'";
+
+        SWbemObjectSet<CIMDataFile> fileSetOld = cimService.execQuery(query, CIMDataFile.class);
+        fileSetOld.iterator().next().delete();
+ 
+        // Object[] inParams =
+        // new Object[] {new JIString(query), JIVariant.OPTIONAL_PARAM(),
+        // JIVariant.OPTIONAL_PARAM(), JIVariant.OPTIONAL_PARAM(),};
+
+        JIVariant[] res =
+            cimService.getObjectDispatcher().callMethodA("ExecQuery",
+                new Object[] {new JIString(query)});
+
+        JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+
+        if (fileSet.length != 1)
+        {
+            throw new Exception("Cannot identify the vhd to delete: " + file);
+        }
+        IJIDispatch fileDispatch =
+            (IJIDispatch) JIObjectFactory.narrowObject(fileSet[0][0].getObjectAsComObject()
+                .queryInterface(IJIDispatch.IID));
+        res = fileDispatch.callMethodA("Delete", null);
+        int result = res[0].getObjectAsInt();
+
+        // IJIDispatch objectDispatcher = hyperVHypervisor.getCIMService().getObjectDispatcher();
+        //
+        // JIVariant[] results = objectDispatcher.callMethodA("ExecQuery", inParams);
+        // IJIComObject co = results[0].getObjectAsComObject();
+        // IJIDispatch dispatch = (IJIDispatch) JIObjectFactory.narrowObject(co);
+        // return new CIMDataFile(dispatch, service);
+
+    }
 
     public static void main(String[] args) throws Exception
     {
         HyperVMachineTest test = new HyperVMachineTest();
         // test.testExecuteRemoteProcess();
-        test.setUp();
+//        test.setUp();
         // test.tearDown();
         // test.testInitiator();
         // test.testDeleteFile();
         // test.testAddRemoveISCSI();
+        test.detectFile();
+        
+        
     }
 
 }
