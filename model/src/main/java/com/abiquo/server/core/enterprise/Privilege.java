@@ -38,7 +38,7 @@ import com.softwarementors.validation.constraints.Required;
 @org.hibernate.annotations.Table(appliesTo = Privilege.TABLE_NAME)
 public class Privilege extends DefaultEntityBase
 {
-    public static final String TABLE_NAME = "kinton.privilege";
+    public static final String TABLE_NAME = "privilege";
 
     protected Privilege()
     {

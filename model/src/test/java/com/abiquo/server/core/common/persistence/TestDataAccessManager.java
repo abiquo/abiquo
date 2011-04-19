@@ -139,8 +139,8 @@ public class TestDataAccessManager
             Session.class, User.class, EnterpriseResources.class, Enterprise.class,
             Hypervisor.class, Datastore.class, Machine.class, Rack.class, StoragePool.class,
             Tier.class, StorageDevice.class, RemoteService.class, Repository.class,
-            CloudUsage.class, Datacenter.class, Network.class, Role.class, Privilege.class,
-            SystemProperty.class, Rasd.class, License.class, Task.class);
+            CloudUsage.class, Datacenter.class, Network.class, Role.class, SystemProperty.class,
+            Rasd.class, License.class, Task.class, Privilege.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,
