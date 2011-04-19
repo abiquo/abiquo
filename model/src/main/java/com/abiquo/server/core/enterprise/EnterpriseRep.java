@@ -238,11 +238,6 @@ public class EnterpriseRep extends DefaultRepBase
         return privilegeDAO.findAll();
     }
 
-    public Collection<Privilege> findPrivilegesByRole(final Role role)
-    {
-        return privilegeDAO.findByRole(role.getId());
-    }
-
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         return enterpriseDAO.getEnterpriseResourceUsage(enterpriseId);

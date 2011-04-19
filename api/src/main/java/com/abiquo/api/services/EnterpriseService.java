@@ -423,10 +423,4 @@ public class EnterpriseService extends DefaultApiService
         return repo.findAllPrivileges();
     }
 
-    public Collection<Privilege> findPrivilegesByRole(final Integer idRole)
-    {
-        Role role = repo.findRoleById(idRole);
-
-        return repo.findPrivilegesByRole(role);
-    }
 }

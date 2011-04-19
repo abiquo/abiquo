@@ -21,11 +21,8 @@
 
 package com.abiquo.server.core.enterprise;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
-import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -42,26 +39,4 @@ public class PrivilegeDAO extends DefaultDAOBase<Integer, Privilege>
     {
         super(Privilege.class, entityManager);
     }
-
-    @Override
-    public List<Privilege> findAll()
-    {
-        return createCriteria().list();
-    }
-
-    public List<Privilege> findByRole(final Integer idRole)
-    {
-        // TODO Use criteria when role has got priveleges list property
-
-        Query query =
-            getSession().createQuery(
-                "select p from roles_privileges rp left outer join privileges p"
-                    + "on rp.idPrivilege = p.idPrivilege where rp.idRole = :idRole");
-
-        query.setInteger("idRole", idRole);
-        List<Privilege> privileges = query.list();
-        return privileges;
-    }
-
-    // TODO create function to modify privileges for a role when exist priveleges list property
 }
