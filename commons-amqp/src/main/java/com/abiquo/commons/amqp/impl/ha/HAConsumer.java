@@ -47,13 +47,13 @@ public class HAConsumer extends BasicConsumer<HAConfiguration, HACallback>
     @Override
     public void consume(Envelope envelope, byte[] body) throws IOException
     {
-        HATask event = HATask.fromByteArray(body);
+        HATask task = HATask.fromByteArray(body);
 
-        if (event != null)
+        if (task != null)
         {
             for (HACallback callback : callbacks)
             {
-
+                callback.executeHighAvailabilityTask(task);
             }
 
             ackMessage(channel, envelope.getDeliveryTag());

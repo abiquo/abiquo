@@ -180,6 +180,11 @@ public class DatacenterService extends DefaultApiService
         return repo.findRackMachines(rack);
     }
 
+    public List<Machine> getEnabledMachines(Rack rack)
+    {
+        return repo.findRackEnabledMachines(rack);
+    }
+
     // FIXME: Delete is now allowed right now
     // public void removeDatacenter(Integer id)
     // {

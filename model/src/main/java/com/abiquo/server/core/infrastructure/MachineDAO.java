@@ -38,6 +38,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Machine.State;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -85,6 +86,21 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
+    private static Criterion enabledMachine()
+    {
+        return Restrictions.or(managedMachine(), provisionedMachine());
+    }
+
+    private static Criterion managedMachine()
+    {
+        return Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED);
+    }
+
+    private static Criterion provisionedMachine()
+    {
+        return Restrictions.eq(Machine.STATE_PROPERTY, State.PROVISIONED);
+    }
+
     public List<Machine> findMachines(Datacenter datacenter)
     {
         assert datacenter != null;
@@ -113,11 +129,18 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findRackMachines(Rack rack)
     {
-        assert rack != null;
-        assert isManaged2(rack);
-
         Criteria criteria = createCriteria(sameRack(rack));
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+        List<Machine> result = getResultList(criteria);
+        return result;
+    }
+
+    public List<Machine> findRackEnabledMachines(Rack rack)
+    {
+        Criteria criteria = createCriteria(sameRack(rack));
+        criteria.add(enabledMachine());
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
         List<Machine> result = getResultList(criteria);
         return result;
     }
@@ -161,7 +184,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
         query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
         query.setInteger("idRack", idRack);
-        //query.setLong("hdRequiredOnRepository", hdRequiredOnDatastore);
+        // query.setLong("hdRequiredOnRepository", hdRequiredOnDatastore);
         query.setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         query.setParameter("enterpriseId", enterprise.getId());
 
@@ -171,30 +194,28 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         {
             whyNotCandidateMachines(idRack, idVirtualDatacenter, hdRequiredOnDatastore, enterprise);
         }
-        
-        //StringBuilder sbcandidates = new StringBuilder();
+
+        // StringBuilder sbcandidates = new StringBuilder();
         List<Integer> candidatesids = new LinkedList<Integer>();
-        for(Machine m : machines)
+        for (Machine m : machines)
         {
-            candidatesids.add(m.getId());                   
+            candidatesids.add(m.getId());
         }
-        
+
         // with datastore
         Query datastoreQuery = getSession().createQuery(QUERY_CANDIDATE_DATASTORE);
         datastoreQuery.setLong("hdRequiredOnRepository", hdRequiredOnDatastore);
         datastoreQuery.setParameterList("candidates", candidatesids);
-        
+
         List<Integer> includedIds = datastoreQuery.list();
 
-        if(includedIds.size() == 0)
+        if (includedIds.size() == 0)
         {
             throw new PersistenceException(String.format(
                 "There isn't any machine with the required datastore capacity [%d]",
                 hdRequiredOnDatastore));
         }
-        
-        
-        
+
         // execute the enterprise exclusion rule
         Query excludedQuery = getSession().createQuery(QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED);
         excludedQuery.setParameter("enterpriseId", enterprise.getId());
@@ -206,7 +227,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         {
             Integer machineId = m.getId();
 
-            if (!excludedMachineIds.contains(machineId)  && includedIds.contains(machineId))
+            if (!excludedMachineIds.contains(machineId) && includedIds.contains(machineId))
             {
                 notExcludedMachines.add(m);
             }
@@ -395,22 +416,25 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
-         
-    private final static String QUERY_CANDIDATE_DATASTORE = // 
-        "  SELECT py.id FROM " + //
-        "  com.abiquo.server.core.infrastructure.Datastore datastore, " + //
-        "  com.abiquo.server.core.infrastructure.Machine py " + //
-        "    WHERE py.id in (:candidates)" +
-        "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
-        "    AND py in elements(datastore.machines) " + //
-        "    AND datastore.size > datastore.usedSize " + //
-        "    AND datastore.enabled = true";
-    
 
-    private static final String QUERY_IS_MACHINE_IN_ALLOCATOR = 
+    private final static String QUERY_CANDIDATE_DATASTORE = //
+        "  SELECT py.id FROM "
+            + //
+            "  com.abiquo.server.core.infrastructure.Datastore datastore, "
+            + //
+            "  com.abiquo.server.core.infrastructure.Machine py "
+            + //
+            "    WHERE py.id in (:candidates)"
+            + "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
+            "    AND py in elements(datastore.machines) " + //
+            "    AND datastore.size > datastore.usedSize " + //
+            "    AND datastore.enabled = true";
+
+    private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
         "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-        + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-        + "join vm.hypervisor h " + "join h.machine mac "
-        + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' " + ") AND m.id = :machineId";
+            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h " + "join h.machine mac "
+            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + ") AND m.id = :machineId";
 
 }

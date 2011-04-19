@@ -214,6 +214,11 @@ public class DatacenterRep extends DefaultRepBase
         return this.machineDao.findRackMachines(rack);
     }
 
+    public List<Machine> findRackEnabledMachines(Rack rack)
+    {
+        return this.machineDao.findRackEnabledMachines(rack);
+    }
+
     public Set<HypervisorType> findHypervisors(Datacenter datacenter)
     {
         Set<HypervisorType> types = new HashSet<HypervisorType>();

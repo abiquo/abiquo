@@ -50,9 +50,11 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
@@ -85,17 +87,21 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
-    
+
+    @Autowired
+    VirtualApplianceRep virtualApplianceRepo;
+
     public VirtualApplianceService()
     {
-    	
+
     }
-    
+
     public VirtualApplianceService(EntityManager em)
     {
-    	this.repo = new VirtualDatacenterRep(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.remoteService = new RemoteServiceService(em);
+        this.repo = new VirtualDatacenterRep(em);
+        this.virtualApplianceRepo = new VirtualApplianceRep(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.remoteService = new RemoteServiceService(em);
     }
 
     /**
@@ -108,6 +114,11 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
+    }
+
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    {
+        return virtualApplianceRepo.findByVirtualApplianceByVirtualMachine(virtualMachine);
     }
 
     /**
@@ -229,16 +240,17 @@ public class VirtualApplianceService extends DefaultApiService
 
         return vapp;
     }
-    
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualAppliance updateVirtualAppliance(Integer vdcId, Integer vappId, VirtualApplianceDto dto)
+    public VirtualAppliance updateVirtualAppliance(Integer vdcId, Integer vappId,
+        VirtualApplianceDto dto)
     {
-    	VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-    	
-    	vapp.setName(dto.getName());
-    	
-    	repo.updateVirtualAppliance(vapp);
-    	
-    	return vapp;
+        VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+
+        vapp.setName(dto.getName());
+
+        repo.updateVirtualAppliance(vapp);
+
+        return vapp;
     }
 }
