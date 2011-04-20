@@ -98,8 +98,7 @@ import com.abiquo.server.core.util.PagedList;
         throws PersistenceException
     {
         Query query =
-            getSession().createSQLQuery(
-                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE);
+            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE);
         query.setParameter("idEnterprise", idEnterprise);
         query.setParameter("filterLike", "%");
 
@@ -143,7 +142,6 @@ import com.abiquo.server.core.util.PagedList;
         return volumeList;
     }
 
-    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
     {
         Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
@@ -159,32 +157,38 @@ import com.abiquo.server.core.util.PagedList;
         return (VolumeManagement) criteria.uniqueResult();
     }
 
-    public List<VolumeManagement> getVolumesByEnterprise(final Integer id, final FilterOptions filters)
+    public List<VolumeManagement> getVolumesByEnterprise(final Integer id,
+        final FilterOptions filters)
     {
         // Check if the orderBy element is actually one of the available ones
         VolumeManagement.OrderByEnum orderByEnum =
-            VolumeManagement.OrderByEnum.fromValue(filters.getOrderBy());
+            VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
         if (orderByEnum == null)
         {
             return null;
         }
-        
+
         Query query =
-            getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + defineOrderBySQL(orderByEnum, filters.getAsc()));
+            getSession().createSQLQuery(
+                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
+                    + defineOrderBySQL(orderByEnum, filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", (filters.getFilter().isEmpty())? "%" : "%" + filters.getFilter() + "%");
+        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
-        
+
         query.setFirstResult(filters.getStartwith());
         query.setMaxResults(filters.getLimit());
-        PagedList<VolumeManagement> volumes = new PagedList<VolumeManagement>(getSQLQueryResults(getSession(), query, VolumeManagement.class, 0));
+        PagedList<VolumeManagement> volumes =
+            new PagedList<VolumeManagement>(getSQLQueryResults(getSession(), query,
+                VolumeManagement.class, 0));
         volumes.setTotalResults(size);
-        volumes.setPageSize((filters.getLimit() > size)? size: filters.getLimit());
+        volumes.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
         volumes.setCurrentElement(filters.getStartwith());
-        
+
         return volumes;
-        
+
     }
 
     @SuppressWarnings("unchecked")
@@ -210,54 +214,8 @@ import com.abiquo.server.core.util.PagedList;
     {
         StringBuilder queryString = new StringBuilder();
         queryString.append(" order by ");
-        switch (orderBy)
-        {
-            case NAME:
-            {
-                queryString.append("elementname ");
-                break;
-            }
-            case ID:
-            {
-                queryString.append("idman ");
-                break;
-            }
-            case TIER:
-            {
-                queryString.append("tier ");
-                break;
-            }
-            case VIRTUALDATACENTER:
-            {
-                queryString.append("vdcname ");
-                break;
-            }
-            case VIRTUALMACHINE:
-            {
-                queryString.append("vmname ");
-                break;
-            }
-            case VIRTUALAPPLIANCE:
-            {
-                queryString.append("vaname ");
-                break;
-            }
-            case TOTALSIZE:
-            {
-                queryString.append("size ");
-                break;
-            }
-            case AVAILABLESIZE:
-            {
-                queryString.append("size-used ");
-                break;
-            }
-            case USEDSIZE:
-            {
-                queryString.append("used ");
-                break;
-            }
-        }
+        queryString.append(orderBy.getColumn());
+        queryString.append(" ");
 
         if (asc)
         {
