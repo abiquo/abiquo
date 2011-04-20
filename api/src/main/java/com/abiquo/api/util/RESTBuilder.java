@@ -79,23 +79,27 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.storage.StoragePool;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
 public class RESTBuilder implements IRESTBuilder
 {
-    protected static final String REL_EDIT = "edit";
+    public static final String REL_EDIT = "edit";
 
-    protected static final String FIRST = "first";
+    public static final String FIRST = "first";
 
-    protected static final String NEXT = "next";
+    public static final String NEXT = "next";
 
-    protected static final String PREV = "previous";
+    public static final String PREV = "previous";
 
-    protected static final String LAST = "last";
+    public static final String LAST = "last";
 
     protected LinkBuilders linkProcessor;
 
+    @Override
     public RESTBuilder injectProcessor(final LinkBuilders linkProcessor)
     {
         this.linkProcessor = linkProcessor;
@@ -117,6 +121,7 @@ public class RESTBuilder implements IRESTBuilder
             params);
     }
 
+    @Override
     public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -142,6 +147,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -162,6 +168,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final MachineDto machine)
     {
@@ -184,6 +191,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRemoteServiceLinks(final Integer datacenterId,
         final RemoteServiceDto remoteService)
     {
@@ -211,6 +219,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildRoleLinks(final RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -224,6 +233,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildEnterpriseLinks(final EnterpriseDto enterprise)
     {
         Map<String, String> params =
@@ -261,6 +271,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildUserLinks(final Integer enterpriseId, final Integer roleId,
         final UserDto user)
     {
@@ -296,6 +307,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildOVFPackageListLinks(final Integer enterpriseId,
         final OVFPackageListDto ovfPackageList)
     {
@@ -315,6 +327,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildOVFPackageLinks(final Integer enterpriseId,
         final OVFPackageDto ovfPackage)
     {
@@ -356,6 +369,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
         final Integer datacenterId, final Integer enterpriseId)
     {
@@ -387,6 +401,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualApplianceLinks(final VirtualApplianceDto dto,
         final Integer vdcId, final Integer enterpriseId)
     {
@@ -466,6 +481,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildSystemPropertyLinks(final SystemPropertyDto systemProperty)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -646,6 +662,12 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildStorageDeviceLinks(final Integer datacenterId, final Integer deviceId)
     {
         // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildVolumeLinks(final VolumeManagement volume)
+    {
         return null;
     }
 

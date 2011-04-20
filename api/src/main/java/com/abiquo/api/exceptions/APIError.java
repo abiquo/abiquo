@@ -86,19 +86,20 @@ public enum APIError
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
         "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
-            VIRTUAL_DATACENTER_MUST_HAVE_NETWORK("VDC-6", "Virtual Datacenter must be created with a private network"),
-            
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "VDC-6", "Virtual Datacenter must be created with a private network"),
+
     // VLANS
-    VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0", "You have reached the maximum VLANs you can create in this VirtualDatacenter"),
-    VLANS_DUPLICATED_VLAN_NAME("VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"),
-    VLANS_PRIVATE_ADDRESS_WRONG("VLAN-2", "Can not use any other address than the private range"),
-    VLANS_TOO_BIG_NETWORK("VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"),
-    VLANS_TOO_BIG_NETWORK_II("VLAN-4", "This Networks allow a netmask up to 24. Try a value between 30 and 24"),
-    VLANS_TOO_SMALL_NETWORK("VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"),
-    VLANS_INVALID_NETWORK_AND_MASK("VLAN-6", "The network does not match with the mask. Check your request"),
-    VLANS_GATEWAY_OUT_OF_RANGE("VLAN-7", "Gateway address out of range. It must be into the ip range address"),
-    VLANS_NON_EXISTENT_VIRTUAL_NETWORK("VLAN-8", "The requested virtual network does not exist"),
+    VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
+        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME(
+        "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
+        "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
+        "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
+        "VLAN-4", "This Networks allow a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
+        "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
+        "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
+        "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
+        "VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -117,9 +118,9 @@ public enum APIError
         "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
 
     // NETWORK
-    NETWORK_INVALID_CONFIGURATION(
-        "NET-0", "Invalid network configuration for the virtual datacenter"),
-        NETWORK_WITHOUT_IPS("NET-8", "This network doesn't have IPs"),
+    NETWORK_INVALID_CONFIGURATION("NET-0",
+        "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
+        "This network doesn't have IPs"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
@@ -232,7 +233,8 @@ public enum APIError
 
     VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
-        "VOL-2", "The name of the volume is required")
+        "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
+        "The volume does not exist")
 
     ;
 
@@ -294,8 +296,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 }

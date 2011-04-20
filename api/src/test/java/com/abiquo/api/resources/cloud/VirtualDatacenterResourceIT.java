@@ -55,6 +55,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -595,11 +596,14 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     private void persistIP(IPAddress ip, final IPAddress lastIP, final VirtualDatacenter vdc,
         final VLANNetwork vlan)
     {
+        List<Object> lists = new ArrayList<Object>();
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool.getRasd(), ippool);
+            lists.add(ippool.getRasd());
+            lists.add(ippool);
             ip = ip.nextIPAddress();
         }
+        setup(lists.toArray());
     }
 }

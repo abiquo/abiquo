@@ -47,6 +47,9 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.storage.StoragePool;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.PagedList;
 
 public interface IRESTBuilder
@@ -117,4 +120,6 @@ public interface IRESTBuilder
     public List<RESTLink> buildRasdLinks(RasdManagement ip);
 
     public List<RESTLink> buildIpRasdLinks(IpPoolManagement ip);
+
+    public List<RESTLink> buildVolumeLinks(final VolumeManagement volume);
 }

@@ -33,6 +33,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.util.FilterOptions;
 
 /**
@@ -52,6 +53,9 @@ public class StorageRep extends DefaultRepBase
 
     @Autowired
     private VolumeManagementDAO volumeDAO;
+
+    @Autowired
+    private RasdDAO rasdDAO;
 
     public StorageRep()
     {
@@ -179,6 +183,7 @@ public class StorageRep extends DefaultRepBase
 
     public VolumeManagement insertVolume(final VolumeManagement volume)
     {
+        rasdDAO.persist(volume.getRasd());
         volumeDAO.persist(volume);
         volumeDAO.flush();
 

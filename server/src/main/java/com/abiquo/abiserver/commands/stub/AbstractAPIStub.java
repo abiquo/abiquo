@@ -216,6 +216,12 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/ips",
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
+    
+    protected String createEnterpriseVolumesLink(final int enterpriseId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/volumes",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+    }
 
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
     {

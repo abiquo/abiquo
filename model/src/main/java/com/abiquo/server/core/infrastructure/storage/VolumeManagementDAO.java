@@ -61,8 +61,8 @@ import com.abiquo.server.core.util.PagedList;
      **/
     private final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
         "       select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
-            + "virtualmachine.name as vmname, rasd.limitResource as limitresource, "
-            + "rasd.reservation as reservation, volman.usedSize as used, "
+            + "virtualmachine.name as vmname, rasd.limitResource as size, "
+            + "rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
             + "from (volume_management volman, virtualdatacenter vdc, rasd, rasd_management rasdm) "
             + "left join virtualmachine on rasdm.idVM = virtualmachine.idVM "
@@ -83,7 +83,7 @@ import com.abiquo.server.core.util.PagedList;
             + ") "
             + "union "
             + "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "
-            + "rasd.limitResource as limitresource, rasd.reservation as reservation, volman.usedSize as used, "
+            + "rasd.limitResource as size, rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
             + "from (volume_management volman, virtualimage vi, rasd, rasd_management rasdm) "
             + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
@@ -92,7 +92,7 @@ import com.abiquo.server.core.util.PagedList;
             + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
             + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
             + "and vi.idEnterprise = :idEnterprise " + "and ( "
-            + "rasd.elementName like :filterLike " + "or tier.name like :filterLike " + ")";//
+            + "rasd.elementName like :filterLike " + "or tier.name like :filterLike " + ")";
 
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
@@ -106,11 +106,10 @@ import com.abiquo.server.core.util.PagedList;
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
 
-    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
     {
         Criteria criteria = createCriteria(Restrictions.eq("storagePool", sp));
-        return criteria.list();
+        return getResultList(criteria);
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
@@ -147,9 +146,8 @@ import com.abiquo.server.core.util.PagedList;
     @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
     {
-
         Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
-        return criteria.list();
+        return getResultList(criteria);
     }
 
     public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
@@ -174,7 +172,7 @@ import com.abiquo.server.core.util.PagedList;
         Query query =
             getSession().createSQLQuery(SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE + defineOrderBySQL(orderByEnum, filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", "%");
+        query.setParameter("filterLike", (filters.getFilter().isEmpty())? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
         
@@ -182,7 +180,7 @@ import com.abiquo.server.core.util.PagedList;
         query.setMaxResults(filters.getLimit());
         PagedList<VolumeManagement> volumes = new PagedList<VolumeManagement>(getSQLQueryResults(getSession(), query, VolumeManagement.class, 0));
         volumes.setTotalResults(size);
-        volumes.setPageSize(filters.getLimit());
+        volumes.setPageSize((filters.getLimit() > size)? size: filters.getLimit());
         volumes.setCurrentElement(filters.getStartwith());
         
         return volumes;
@@ -210,9 +208,7 @@ import com.abiquo.server.core.util.PagedList;
 
     private String defineOrderBySQL(final VolumeManagement.OrderByEnum orderBy, final Boolean asc)
     {
-
         StringBuilder queryString = new StringBuilder();
-
         queryString.append(" order by ");
         switch (orderBy)
         {
@@ -248,12 +244,12 @@ import com.abiquo.server.core.util.PagedList;
             }
             case TOTALSIZE:
             {
-                queryString.append("limitresource ");
+                queryString.append("size ");
                 break;
             }
             case AVAILABLESIZE:
             {
-                queryString.append("limitresource-used ");
+                queryString.append("size-used ");
                 break;
             }
             case USEDSIZE:

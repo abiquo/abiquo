@@ -298,8 +298,10 @@ public class VolumeManagement extends RasdManagement
 
     public static enum OrderByEnum
     {
-        NAME, ID, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE, TIER, TOTALSIZE, AVAILABLESIZE, USEDSIZE;
         
+        NAME("elementname"), ID("idman"), VIRTUALDATACENTER("vdcname"), VIRTUALMACHINE("vmname"), VIRTUALAPPLIANCE(
+            "vaname"), TIER("tier"), TOTALSIZE("size"), AVAILABLESIZE("available"), USEDSIZE("used");
+
         public static OrderByEnum fromValue(final String orderBy)
         {
             for (OrderByEnum currentOrder : OrderByEnum.values())
@@ -311,6 +313,18 @@ public class VolumeManagement extends RasdManagement
             }
 
             return null;
+        }
+
+        private String column;
+
+        private OrderByEnum(String column)
+        {
+            this.column = column;
+        }
+
+        public String getColumn()
+        {
+            return column;
         }
     }
 }
