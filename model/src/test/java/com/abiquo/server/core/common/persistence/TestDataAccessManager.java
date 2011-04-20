@@ -136,11 +136,11 @@ public class TestDataAccessManager
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
-            Session.class, User.class, EnterpriseResources.class, Enterprise.class,
+            Session.class, User.class, Role.class, EnterpriseResources.class, Enterprise.class,
             Hypervisor.class, Datastore.class, Machine.class, Rack.class, StoragePool.class,
             Tier.class, StorageDevice.class, RemoteService.class, Repository.class,
-            CloudUsage.class, Datacenter.class, Network.class, Role.class, SystemProperty.class,
-            Rasd.class, License.class, Task.class, Privilege.class);
+            CloudUsage.class, Datacenter.class, Network.class, SystemProperty.class, Rasd.class,
+            License.class, Task.class, Privilege.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

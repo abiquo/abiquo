@@ -30,14 +30,14 @@ import com.softwarementors.commons.testng.AssertEx;
 public class RoleGenerator extends DefaultEntityGenerator<Role>
 {
 
-    public RoleGenerator(SeedGenerator seed)
+    public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
 
     }
 
     @Override
-    public void assertAllPropertiesEqual(Role obj1, Role obj2)
+    public void assertAllPropertiesEqual(final Role obj1, final Role obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Role.SHORT_DESCRIPTION_PROPERTY,
             Role.LARGE_DESCRIPTION_PROPERTY, Role.SECURITY_LEVEL_PROPERTY);
@@ -49,19 +49,25 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return createInstance(Role.Type.SYS_ADMIN);
     }
 
-    public Role createInstance(Role.Type type)
+    public Role createInstance(final Role.Type type)
     {
+        String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
+        boolean blocked = false;
+
         Role role =
             new Role(type,
                 newString(nextSeed(), 0, 20),
                 newString(nextSeed(), 0, 255),
-                newBigDecimal(nextSeed()).floatValue());
+                newBigDecimal(nextSeed()).floatValue(),
+                name,
+                blocked);
 
         return role;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Role entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Role entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

@@ -21,13 +21,22 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -42,6 +51,8 @@ public class Role extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "role";
 
+    // TODO Alessia quittar campos y cambiar name, enterprise nullable
+
     protected Role()
     {
     }
@@ -53,9 +64,80 @@ public class Role extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
+    }
+
+    public final static String NAME_PROPERTY = "name";
+
+    private final static boolean NAME_REQUIRED = true;
+
+    public final static int NAME_LENGTH_MIN = 0;
+
+    public final static int NAME_LENGTH_MAX = 255;
+
+    private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String NAME_COLUMN = "name";
+
+    @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
+    private String name;
+
+    @Required(value = NAME_REQUIRED)
+    @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    public final static String ENTERPRISE_PROPERTY = "enterprise";
+
+    private final static boolean ENTERPRISE_REQUIRED = false;
+
+    private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
+
+    @JoinColumn(name = ENTERPRISE_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
+    private Enterprise enterprise;
+
+    @Required(value = ENTERPRISE_REQUIRED)
+    public Enterprise getEnterprise()
+    {
+        return this.enterprise;
+    }
+
+    public void setEnterprise(final Enterprise enterprise)
+    {
+        this.enterprise = enterprise;
+    }
+
+    public final static String BLOCKED_PROPERTY = "blocked";
+
+    private final static String BLOCKED_COLUMN = "blocked";
+
+    private final static boolean BLOCKED_REQUIRED = true;
+
+    @Column(name = BLOCKED_COLUMN, nullable = !BLOCKED_REQUIRED)
+    private boolean blocked;
+
+    @Required(value = BLOCKED_REQUIRED)
+    public boolean isBlocked()
+    {
+        return blocked;
+    }
+
+    public void setBlocked(final boolean blocked)
+    {
+        this.blocked = blocked;
     }
 
     public final static String SHORT_DESCRIPTION_PROPERTY = "shortDescription";
@@ -81,7 +163,7 @@ public class Role extends DefaultEntityBase
         return this.shortDescription;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setShortDescription(final String shortDescription)
     {
         this.shortDescription = shortDescription;
     }
@@ -109,7 +191,7 @@ public class Role extends DefaultEntityBase
         return this.largeDescription;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setLargeDescription(final String largeDescription)
     {
         this.largeDescription = largeDescription;
     }
@@ -131,17 +213,20 @@ public class Role extends DefaultEntityBase
         return this.securityLevel;
     }
 
-    public void setSecurityLevel(float securityLevel)
+    public void setSecurityLevel(final float securityLevel)
     {
         this.securityLevel = securityLevel;
     }
 
-    public Role(Type type, String shortDescription, String largeDescription, float securityLevel)
+    public Role(final Type type, final String shortDescription, final String largeDescription,
+        final float securityLevel, final String name, final boolean blocked)
     {
         setType(type);
         setShortDescription(shortDescription);
         setLargeDescription(largeDescription);
         setSecurityLevel(securityLevel);
+        setName(name);
+        setBlocked(blocked);
     }
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
@@ -154,7 +239,7 @@ public class Role extends DefaultEntityBase
         return type;
     }
 
-    private void setType(Type type)
+    private void setType(final Type type)
     {
         this.type = type;
     }
@@ -162,5 +247,21 @@ public class Role extends DefaultEntityBase
     public static enum Type
     {
         SYS_ADMIN, ENTERPRISE_ADMIN, USER;
+    }
+
+    public final static String ASSOCIATION_TABLE = "roles_privileges";
+
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idPrivilege"), inverseJoinColumns = @JoinColumn(name = "idRole"))
+    private List<Privilege> privileges;
+
+    public List<Privilege> getPrivileges()
+    {
+        return privileges;
+    }
+
+    public void setPrivileges(final List<Privilege> privileges)
+    {
+        this.privileges = privileges;
     }
 }
