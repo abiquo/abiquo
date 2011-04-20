@@ -124,7 +124,8 @@ public enum APIError
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
-        "VM-1", "The requested virtual machine does not exist"),
+        "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
+        "VM-2", "The virtual machine is already in progress"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
@@ -234,7 +235,8 @@ public enum APIError
     VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
-        "The volume does not exist")
+        "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
+        "An unexpected error occured while creating the volume")
 
     ;
 
@@ -296,8 +298,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 }

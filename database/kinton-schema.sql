@@ -2582,7 +2582,10 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_created` AFTER INSERT ON `kinton`.`vi
 |
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+    DECLARE vlanNetworkIdObj INTEGER;    
+        	  DECLARE networkNameObj VARCHAR(40);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'),'NEW.networktypeID ', IFNULL(NEW.networktypeID,'NULL')));
             -- Checks for changes
             IF OLD.name != NEW.name THEN
                 -- Name changed !!!
@@ -2601,6 +2604,26 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
                 vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
             WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;            
         END IF;
+        IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
+        -- Remove VlanUsed
+            SELECT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
+		    FROM vlan_network vn, datacenter dc
+		    WHERE vn.network_id = OLD.networktypeID;
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
+            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+                CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
+            END IF;
+            -- Statistics
+            UPDATE IGNORE cloud_usage_stats
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idDataCenter = -1;
+            UPDATE IGNORE enterprise_resources_stats 
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idEnterprise = OLD.idEnterprise;
+            UPDATE IGNORE vdc_enterprise_stats 
+                SET     vlanUsed = vlanUsed - 1
+            WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+        END IF;
     END;
 |
 -- ******************************************************************************************
@@ -2611,12 +2634,41 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
 -- Fires: On an DELETE for the virtualdatacenter table
 --
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` AFTER DELETE ON `kinton`.`virtualdatacenter`
+CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+	DECLARE currentIdManagement INTEGER DEFAULT -1;
+	DECLARE currentDataCenter INTEGER DEFAULT -1;
+	DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+	DECLARE no_more_ipsfreed INT;
+	DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement	
+           FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
+           WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+           AND vn.network_configuration_id = nc.network_configuration_id
+           AND vn.network_id = dc.network_id
+           AND ra.idManagement = ipm.idManagement
+           AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
+	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
             UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated-1 WHERE idDataCenter = OLD.idDataCenter;  
             -- Remove Stats
-            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;	
+           -- 	
+	SET no_more_ipsfreed = 0;	    
+	    OPEN curIpFreed;  	    	
+   		my_loop:WHILE(no_more_ipsfreed=0) DO 
+   		FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
+		IF no_more_ipsfreed=1 THEN
+                	LEAVE my_loop;
+	         END IF;
+--		INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
+		IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+               		CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
+           	END IF;                    
+		UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise;	
+	    END WHILE my_loop;	       
+	    CLOSE curIpFreed;
         END IF;
     END;
 --

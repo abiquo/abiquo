@@ -317,7 +317,7 @@ public class VolumeManagement extends RasdManagement
 
         private String column;
 
-        private OrderByEnum(String column)
+        private OrderByEnum(final String column)
         {
             this.column = column;
         }

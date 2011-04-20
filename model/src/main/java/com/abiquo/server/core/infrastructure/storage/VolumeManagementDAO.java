@@ -60,7 +60,7 @@ import com.abiquo.server.core.util.PagedList;
      * enterprise of the stateful image.
      **/
     private final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
-        "       select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
+        "select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
             + "virtualmachine.name as vmname, rasd.limitResource as size, "
             + "rasd.reservation as available, volman.usedSize as used, "
             + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
@@ -91,8 +91,8 @@ import com.abiquo.server.core.util.PagedList;
             + "volman.idImage = vi.idImage " + "and volman.idManagement = rasdm.idManagement "
             + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
             + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
-            + "and vi.idEnterprise = :idEnterprise " + "and ( "
-            + "rasd.elementName like :filterLike " + "or tier.name like :filterLike " + ")";
+            + "and vi.idEnterprise = :idEnterprise " + "and (rasd.elementName like :filterLike "
+            + "or tier.name like :filterLike )";
 
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
