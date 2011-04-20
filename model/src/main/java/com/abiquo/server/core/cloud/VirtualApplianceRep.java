@@ -58,4 +58,9 @@ public class VirtualApplianceRep extends DefaultRepBase
     {
         return nodeVirtualImageDao.findVirtualAppliance(virtualMachine);
     }
+
+    public void updateVirtualAppliance(VirtualAppliance virtualAppliance)
+    {
+        this.virtualApplianceDao.flush();
+    }
 }
