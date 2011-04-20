@@ -44,7 +44,6 @@ import com.abiquo.server.core.infrastructure.Machine.State;
 @SuppressWarnings("unchecked")
 public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 {
-
     public MachineDAO()
     {
         super(Machine.class);

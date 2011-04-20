@@ -19,38 +19,16 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.api.exceptions;
+package com.abiquo.server.core.infrastructure;
 
-import java.lang.annotation.Annotation;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-/**
- * @author jdevesa
- *
- */
-public class InvalidParameterConstraint
+public class VirtualMachineForHATest extends DefaultEntityTestBase<VirtualMachineForHA>
 {
-    private Annotation annotation;
-    
-    private String messageError;
-    
-    public void setMessageError(String messageError)
+    @Override
+    protected InstanceTester<VirtualMachineForHA> createEntityInstanceGenerator()
     {
-        this.messageError = messageError;
-    }
-    public String getMessageError()
-    {
-        return messageError;
-    }
-    
-    public void setAnnotation(Annotation annotation)
-    {
-        this.annotation = annotation;
-    }
-    public Annotation getAnnotation()
-    {
-        return annotation;
+        return new VirtualMachineForHAGenerator(getSeed());
     }
 }
