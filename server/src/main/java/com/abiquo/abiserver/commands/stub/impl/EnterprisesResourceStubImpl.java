@@ -105,6 +105,15 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             result.setSuccess(false);
             result.setMessage("Can't edit the datacenter limits :\n" + errors.toString());
         }
+        
+        errors = modifyReservedMachines(enterprise);
+
+        if (errors != null)
+        {
+            result = new DataResult<Enterprise>();
+            result.setSuccess(false);
+            result.setMessage("Can't edit the physical machine reserved:\n" + errors.toString());
+        }
 
         String uri = createEnterpriseLink(enterprise.getId());
 
@@ -190,6 +199,14 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         // community impl (no limit)
         return null;
     }
+    
+    protected ErrorsDto modifyReservedMachines(Enterprise ent)
+    {
+        // community impl (no limit)
+        return null;
+    }
+    
+    
 
     private ErrorsDto assignMachines(Enterprise enterprise, Enterprise data)
     {

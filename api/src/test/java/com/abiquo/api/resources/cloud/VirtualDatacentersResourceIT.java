@@ -72,15 +72,6 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         setup(sysEnterprise, r, u);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ip_pool_management", "rasd_management", "virtualdatacenter", "vlan_network",
-            "network_configuration", "dhcp_service", "remote_service", "hypervisor",
-            "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise",
-            "enterprise_limits_by_datacenter");
-    }
-
     @Test
     public void getVirtualDatacentersFilteredByUser()
     {

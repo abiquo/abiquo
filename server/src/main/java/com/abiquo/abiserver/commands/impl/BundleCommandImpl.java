@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.commands.impl;
 
+import static com.abiquo.tracer.Enterprise.enterprise;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -70,7 +72,10 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.Platform;
+
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.UserInfo;
 import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -85,6 +90,10 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     private final static String OVF_BUNDLE_PATH_IDENTIFIER = "-snapshot-";
 
     protected HibernateDAOFactory factory;
+
+    private UserInfo user;
+
+    private Platform platform;
 
     public BundleCommandImpl()
     {
@@ -124,8 +133,20 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
 
         VirtualAppliance bundle = null;
 
+        user =
+            new UserInfo(userSession.getUser(), new Long(userSession.getId()), userSession
+                .getEnterpriseName());
+
+        platform =
+            Platform.platform("abicloud").enterprise(
+                enterprise(user.getEnterprise()).virtualDatacenter(
+                    com.abiquo.tracer.VirtualDatacenter.virtualDatacenter(
+                        va.getVirtualDataCenter().getName()).virtualAppliance(
+                        com.abiquo.tracer.VirtualAppliance.virtualAppliance(va.getName()))));
+
         try
         {
+
             bundle = bundleVirtualAppliance(va.getId(), nodeIds, userSession.getUser());
         }
         catch (BundleException e)
@@ -165,7 +186,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
         final Collection<Integer> nodeIds, final String userName) throws BundleException
     {
-        // Block the virtual appliance
+        //        
+        // // Block the virtual appliance
         factory.beginConnection();
 
         VirtualApplianceDAO virtualappDAO = factory.getVirtualApplianceDAO();
@@ -571,7 +593,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     private void traceBundleError(final String message)
     {
         TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-            EventType.VAPP_BUNDLE, message);
+            EventType.VAPP_BUNDLE, message, user, platform);
     }
 
     private void uploadNotManagedMachines(final VirtualappHB vapp,

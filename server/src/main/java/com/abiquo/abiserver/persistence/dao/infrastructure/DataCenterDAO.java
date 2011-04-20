@@ -49,6 +49,14 @@ public interface DataCenterDAO extends DAO<DatacenterHB, Integer>
     Long getNumberVirtualDatacentersByDatacenter(Integer idDatacenter);
 
     /**
+     * Return the number of storage devices associated to a physical one.
+     * 
+     * @param idDatacenter physical datacenter
+     * @return number of storage devices
+     */
+    Long getNumberStorageDevicesByDatacenter(Integer idDatacenter);
+
+    /**
      * Retrieves the Datacenter for the private network id.
      * 
      * @param networkId network identifier
@@ -106,7 +114,6 @@ public interface DataCenterDAO extends DAO<DatacenterHB, Integer>
      */
     ArrayList<RackHB> getRacks(Integer datacenterId, String filters);
 
-    
     long getCurrentStorageAllocated(int idEnterprise, int idDatacenter);
 
     long getCurrentPublicIpAllocated(int idEnterprise, int idDatacenter);
