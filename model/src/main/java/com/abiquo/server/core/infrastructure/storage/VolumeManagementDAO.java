@@ -161,10 +161,15 @@ import com.abiquo.server.core.util.PagedList;
         final FilterOptions filters)
     {
         // Check if the orderBy element is actually one of the available ones
-        VolumeManagement.OrderByEnum orderByEnum =
-            VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
-        if (orderByEnum == null)
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
         {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            // If order is invalid, return null;
             return null;
         }
 
