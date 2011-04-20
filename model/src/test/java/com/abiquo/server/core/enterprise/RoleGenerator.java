@@ -65,6 +65,16 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
+    public Role createInstance(final Privilege... privileges)
+    {
+        Role role = createUniqueInstance();
+        for (Privilege p : privileges)
+        {
+            role.addPrivilege(p);
+        }
+        return role;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final Role entity,
         final List<Object> entitiesToPersist)

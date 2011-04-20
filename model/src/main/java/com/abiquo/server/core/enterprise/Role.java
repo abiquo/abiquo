@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -252,7 +253,7 @@ public class Role extends DefaultEntityBase
     public final static String ASSOCIATION_TABLE = "roles_privileges";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idPrivilege"), inverseJoinColumns = @JoinColumn(name = "idRole"))
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idRole"), inverseJoinColumns = @JoinColumn(name = "idPrivilege"))
     private List<Privilege> privileges;
 
     public List<Privilege> getPrivileges()
@@ -263,5 +264,16 @@ public class Role extends DefaultEntityBase
     public void setPrivileges(final List<Privilege> privileges)
     {
         this.privileges = privileges;
+    }
+
+    // ************************* Helper methods ****************************
+
+    public void addPrivilege(final Privilege privilege)
+    {
+        if (privileges == null)
+        {
+            privileges = new ArrayList<Privilege>();
+        }
+        privileges.add(privilege);
     }
 }

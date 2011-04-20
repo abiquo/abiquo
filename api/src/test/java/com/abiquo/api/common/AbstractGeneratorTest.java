@@ -41,6 +41,7 @@ import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.enterprise.PrivilegeGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
@@ -53,7 +54,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -100,7 +101,9 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected SystemPropertyGenerator systemPropertyGenerator = new SystemPropertyGenerator(seed);
 
-    protected void setup(Object... entities)
+    protected PrivilegeGenerator privilegeGenerator = new PrivilegeGenerator(seed);
+
+    protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
         closeActiveTransaction(em);
@@ -111,25 +114,32 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-    
+
     @AfterMethod
     public void tearDown()
     {
-        String[] entities = { "ip_pool_management", "volume_management", "diskstateful_conversions", "initiator_mapping", "rasd_management", 
-            "rasd", "nodevirtualimage", "nodenetwork", "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage", 
-            "virtualimage_conversions", "node_virtual_image_stateful_conversions", "virtual_appliance_conversions", "virtualapp", 
-            "vappstateful_conversions", "virtualdatacenter", "vlan_network", "vlan_network_assignment", "network_configuration", "dhcp_service",
-            "storage_pool", "tier", "storage_device", "remote_service", "datastore_assignment", "datastore", "hypervisor", 
-            "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository", "workload_fit_policy_rule", "network",
-            "session", "user", "role", "enterprise", "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule", 
-            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library", "license", 
-            "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats", "enterprise_resources_stats", 
-            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog", "icon", "register" };
-        
+        String[] entities =
+            {"ip_pool_management", "volume_management", "diskstateful_conversions",
+            "initiator_mapping", "rasd_management", "rasd", "nodevirtualimage", "nodenetwork",
+            "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage",
+            "virtualimage_conversions", "node_virtual_image_stateful_conversions",
+            "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
+            "virtualdatacenter", "vlan_network", "vlan_network_assignment",
+            "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
+            "remote_service", "datastore_assignment", "datastore", "hypervisor",
+            "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
+            "workload_fit_policy_rule", "network", "session", "user", "roles_privileges", "role",
+            "privilege", "enterprise", "enterprise_limits_by_datacenter",
+            "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
+            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
+            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
+            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
+            "alerts", "heartbeatlog", "icon", "register"};
+
         tearDown(entities);
     }
 
-    protected void tearDown(String... entities)
+    protected void tearDown(final String... entities)
     {
         EntityManager em = getEntityManager();
         closeActiveTransaction(em);
@@ -179,12 +189,12 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         return em;
     }
 
-    private EntityManagerHolder unbind(EntityManagerFactory emf)
+    private EntityManagerHolder unbind(final EntityManagerFactory emf)
     {
         return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
     }
 
-    private void closeActiveTransaction(EntityManager em)
+    private void closeActiveTransaction(final EntityManager em)
     {
         if (em.getTransaction().isActive())
         {

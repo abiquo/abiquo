@@ -20,11 +20,13 @@
  */
 package com.abiquo.api.spring.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
@@ -37,8 +39,6 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.User;
 
-import java.util.ArrayList;
-import java.util.List;
 /**
  * User details service to load user information from database using the Abiquo persistende layer.
  * 
@@ -96,20 +96,27 @@ public class AbiquoUserDetailsService implements UserDetailsService
      * @param user The authenticated user.
      * @return An array with the granted authorities.
      */
-	protected GrantedAuthority[] loadUserAuthorities(final User user) {
-		// String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
-		// return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
-		
-		List<Privilege> privileges = user.getRole().getPrivileges();
-		
-		ArrayList<String> grantedAuthority = new ArrayList<String>();
-		
-		for (Privilege privilege : privileges) {
-			grantedAuthority.add(privilege.getName());
-		}
+    protected GrantedAuthority[] loadUserAuthorities(final User user)
+    {
+        // String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
+        // return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
 
-		return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority.toArray(new String[privileges.size()]));
-		
-	}
+        List<Privilege> privileges = user.getRole().getPrivileges();
+
+        ArrayList<String> grantedAuthority = new ArrayList<String>();
+
+        if (privileges == null)
+        {
+            return new GrantedAuthority[0];
+        }
+        for (Privilege privilege : privileges)
+        {
+            grantedAuthority.add(privilege.getName());
+        }
+
+        return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
+            .toArray(new String[privileges.size()]));
+
+    }
 
 }
