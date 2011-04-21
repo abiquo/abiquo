@@ -47,7 +47,7 @@ import com.abiquo.virtualfactory.model.config.Configuration;
 import com.abiquo.virtualfactory.model.config.HyperVHypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
-import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
+//import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVConstants;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVUtils;
 import com.abiquo.virtualfactory.utils.hyperv.MsvmImageManagementService;

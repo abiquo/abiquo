@@ -69,9 +69,9 @@ public class Win32Process extends SWbemObject
         // Get the IN parameters.
         SWbemObject inParams = this.create.getInParameters();
         inParams.getObjectDispatcher().put("CommandLine", new JIVariant(new JIString(command)));
-        inParams.getObjectDispatcher().put("CurrentDirectory", new JIVariant(new JIString("C:\\")));
-        // inParams.getObjectDispatcher().put("ProcessStartupInformation",
-        // JIVariant.OPTIONAL_PARAM());
+//        inParams.getObjectDispatcher().put("CurrentDirectory", new JIVariant(new JIString("C:\\")));
+        inParams.getObjectDispatcher().put("CurrentDirectory", JIVariant.NULL());
+         inParams.getObjectDispatcher().put("ProcessStartupInformation", JIVariant.NULL());
 
         Object[] methodParams =
             new Object[] {new JIString("Create"), new JIVariant(inParams.getObjectDispatcher()),

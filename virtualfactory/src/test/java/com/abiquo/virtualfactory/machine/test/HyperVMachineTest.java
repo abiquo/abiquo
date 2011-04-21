@@ -40,6 +40,7 @@ import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVUtils;
+import com.abiquo.virtualfactory.utils.hyperv.Win32Process;
 import com.hyper9.jwbem.SWbemObjectSet;
 import com.hyper9.jwbem.SWbemServices;
 
@@ -92,7 +93,7 @@ public class HyperVMachineTest extends AbsMachineTest
     public HyperVMachineTest()
     {
         // HYPERVISOR configuration properties
-//        hvURL = "http://10.60.1.152";
+        // hvURL = "http://10.60.1.152";
         hvURL = "http://10.60.1.122";
         hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
@@ -193,35 +194,32 @@ public class HyperVMachineTest extends AbsMachineTest
         // return new CIMDataFile(dispatch, service);
 
     }
-    
+
     /**
      * Tests if a file/folder exists
      * 
-     *
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
     public boolean detectFile(String file) throws Exception
     {
         boolean fileExists = false;
-        
+
         hypervisor = instantiateHypervisor();
 
         hypervisor.init(new URL(hvURL), hvUser, hvPassword);
         hypervisor.login(hvUser, hvPassword);
         hypervisor.connect(new URL(hvURL));
-        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;        
-//        deleteFile(hyperV.getCIMService(),
-//            "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
-        
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+        // deleteFile(hyperV.getCIMService(),
+        // "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
+
         SWbemServices cimService = hyperV.getCIMService();
-        
-        
+
         // Preparing the query
         String query =
             "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
                 + "'";
-
 
         JIVariant[] res =
             cimService.getObjectDispatcher().callMethodA("ExecQuery",
@@ -231,76 +229,199 @@ public class HyperVMachineTest extends AbsMachineTest
 
         if (fileSet.length != 1)
         {
-            fileExists =  true;
-//            throw new Exception("Cannot identify the vhd to delete: " + file);
-        } else {
+            fileExists = true;
+            // throw new Exception("Cannot identify the vhd to delete: " + file);
+        }
+        else
+        {
             fileExists = false;
         }
-        
-        hypervisor.disconnect();        
+
+        hypervisor.disconnect();
         hypervisor.logout();
-        
+
         return fileExists;
 
     }
-    
+
     /**
-     * Creates a folder in datastore to 
+     * Creates a folder in datastore to
      * 
-     *
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
     public void createFolder(String folder) throws Exception
     {
-        if (detectFile(folder)) {
-            log.info("Folder " + folder + " already exists. ");
-            return;
+        // if (detectFile(folder)) {
+        // log.info("Folder " + folder + " already exists. ");
+        // return;
+        // }
+
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+        // deleteFile(hyperV.getCIMService(),
+        // "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
+
+        try
+        {
+            // SWbemServices cimService = hyperV.getVirtualizationService();
+
+            SWbemServices cimService = hyperV.getCIMService();
+            // SWbemServices cimService = hyperV.getWMIService();
+
+            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
+            // "Win32_CreateFolderAction");
+            //            
+            // disp.put("DirectoryName", new JIVariant(new JIString("C:\\")));
+            // disp.put("Name", new JIVariant(new JIString("fistropecador")));
+
+            // FAILS with 'Provider is not capable of the attempted operation'
+            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
+            // "Win32_Directory");
+            //          
+            // disp.put("Drive", new JIVariant(new JIString("C:")));
+            // disp.put("Name", new JIVariant(new JIString("fistropecador")));
+
+            // disp.get
+            //          
+            // cimService.getObjectDispatcher().callMethod("Create_", disp)
+
+            // disp.callMethod("Put_", null);
+
+            //                        
+            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
+            // "Win32_Process");
+            //              
+            // // disp.put("CommandLine", new JIVariant(new JIString("mkdir cobarde")));
+            // // disp.put("Name", new JIVariant(new JIString("fistropecador")));
+            //              
+            // // cimService.getObjectDispatcher().callMethodA("Create", disp);
+            //                
+            // JIVariant[] var = disp.callMethodA("Create", new Object[] {new
+            // JIString("cmd.exe /c md c:\test452")});
+            //                
+            // System.out.println(var.length);
+
+            // 3. Sending a command
+            IJIDispatch disp =
+                HyperVUtils.createNewInstance(cimService.getObjectDispatcher(), "Win32_Process");
+            Win32Process proc = new Win32Process(disp, cimService);
+//            proc.create("cmd.exe /C mkdir C:\\test452");
+            
+            proc.create("C:\\command.cmd");
+            // Generic failure Exception occurred. [0x80020009]
+            
+            
+
         }
-        
+        catch (Exception e)
+        {
+            log.error("FAIL!!");
+            e.printStackTrace();
+        }
+   
+        //
+        hypervisor.disconnect();
+        hypervisor.logout();
+
+    }
+    
+    public void copyFolder() throws Exception{
         
         hypervisor = instantiateHypervisor();
 
         hypervisor.init(new URL(hvURL), hvUser, hvPassword);
         hypervisor.login(hvUser, hvPassword);
         hypervisor.connect(new URL(hvURL));
-        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;        
-//        deleteFile(hyperV.getCIMService(),
-//            "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
-        
-        SWbemServices cimService = hyperV.getCIMService();
-        
-        cimService.getObjectDispatcher().callMethod(arg0)
-//        
-//        // Preparing the query
-//        String query =
-//            "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
-//                + "'";
-//
-//
-//        JIVariant[] res =
-//            cimService.getObjectDispatcher().callMethodA("ExecQuery",
-//                new Object[] {new JIString(query)});
-//
-        hypervisor.disconnect();        
-        hypervisor.logout();
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
 
+        try
+        {
+            // SWbemServices cimService = hyperV.getVirtualizationService();
+
+            SWbemServices cimService = hyperV.getCIMService();
+            // SWbemServices cimService = hyperV.getWMIService();
+
+
+            // 3. Sending a command
+            IJIDispatch disp = getCIMDataFile(hyperV, "command.cmd");
+            CIMDataFile folder = new CIMDataFile(disp,cimService);
+            folder.copy("C:\\carpeta2");
+            // Generic failure Exception occurred. [0x80020009]
+            
+            
+
+        }
+        catch (Exception e)
+        {
+            log.error("FAIL!!");
+            e.printStackTrace();
+        }
+   
+        //
+        hypervisor.disconnect();
+        hypervisor.logout();
+        
     }
+    
+    
 
     public static void main(String[] args) throws Exception
     {
         HyperVMachineTest test = new HyperVMachineTest();
         // test.testExecuteRemoteProcess();
-//        test.setUp();
+        // test.setUp();
         // test.tearDown();
         // test.testInitiator();
         // test.testDeleteFile();
         // test.testAddRemoveISCSI();
-        System.out.println("test.detectFile(): " + test.detectFile("C:\\folder"));
-        test.createFolder("C:\\folder2");
+        // System.out.println("test.detectFile(): " + test.detectFile("C:\\folder"));
+        
+        
+//        test.createFolder("C:\\fistropecador");
+        
+        test.copyFolder();
     }
     
-    
-    
+    /**
+     * Gets the the file to execute operations
+     * 
+     * @param file the file to get
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public IJIDispatch getCIMDataFile(HyperVHypervisor hyperVHypervisor, final String file) throws Exception
+    {
+        // Preparing the query
+        String query = "SELECT * FROM CIM_DataFile WHERE Name='" + file + "'";
+
+        JIVariant[] res =
+            hyperVHypervisor.getCIMService().getObjectDispatcher().callMethodA("ExecQuery",
+                new Object[] {new JIString(query)});
+
+        JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+
+        if (fileSet.length != 1)
+        {
+            throw new Exception("Cannot identify the file to : " + file);
+        }
+        IJIDispatch fileDispatch =
+            (IJIDispatch) JIObjectFactory.narrowObject(fileSet[0][0].getObjectAsComObject()
+                .queryInterface(IJIDispatch.IID));
+
+        return fileDispatch;
+
+        // IJIDispatch objectDispatcher = hyperVHypervisor.getCIMService().getObjectDispatcher();
+        //
+        // JIVariant[] results = objectDispatcher.callMethodA("ExecQuery", inParams);
+        // IJIComObject co = results[0].getObjectAsComObject();
+        // IJIDispatch dispatch = (IJIDispatch) JIObjectFactory.narrowObject(co);
+        // return new CIMDataFile(dispatch, service);
+
+    }
 
 }
