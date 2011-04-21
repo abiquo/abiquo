@@ -120,7 +120,7 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final FilterOptions filterOptions)
+        final FilterOptions filterOptions) throws Exception
     {
         return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
     }
@@ -200,6 +200,12 @@ public class StorageRep extends DefaultRepBase
     {
         poolDAO.remove(sp);
         poolDAO.flush();
+    }
+
+    public void removeVolume(final VolumeManagement volume)
+    {
+        // volumeDAO.remove(volume);
+        // volumeDAO.flush();
     }
 
     public void updateDevice(final StorageDevice sd)

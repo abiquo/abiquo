@@ -30,7 +30,6 @@ import javax.persistence.PersistenceException;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Property;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -111,35 +110,44 @@ import com.abiquo.server.core.util.PagedList;
         return getResultList(criteria);
     }
 
+    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final FilterOptions filterOptions)
+        final FilterOptions filters) throws Exception
     {
-        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
 
-        if (filterOptions.getAsc() == true)
+        try
         {
-            criteria.addOrder(Property.forName(filterOptions.getOrderBy()).asc());
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
         }
-        else
+        catch (Exception ex)
         {
-            criteria.addOrder(Property.forName(filterOptions.getOrderBy()).desc());
+            throw new Exception(ex.getMessage());
         }
 
-        // Get the total number of entries before filtering the query
-        int total = criteria.list().size();
+        String orderBy = defineOrderBySQL(orderByEnum, filters.getAsc());
 
-        // Set a rank of results
-        criteria.setFirstResult(filterOptions.getStartwith() * filterOptions.getLimit());
-        criteria.setMaxResults(filterOptions.getLimit());
+        Query query = getSession().getNamedQuery("VOLUMES_BY_VDC");
 
-        List<VolumeManagement> result = getResultList(criteria);
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(query.getQueryString() + orderBy);
+        queryWithOrder.setInteger("vdcId", vdc.getId());
+        queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
 
-        PagedList<VolumeManagement> volumeList = new PagedList<VolumeManagement>(result);
-        volumeList.setCurrentElement(filterOptions.getStartwith());
-        volumeList.setPageSize(filterOptions.getLimit());
-        volumeList.setTotalResults(total);
+        Integer size = queryWithOrder.list().size();
 
-        return volumeList;
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)

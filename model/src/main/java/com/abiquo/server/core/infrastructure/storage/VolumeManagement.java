@@ -28,6 +28,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -48,6 +50,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
+@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -55,6 +58,15 @@ public class VolumeManagement extends RasdManagement
     public static final String ALLOCATION_UNITS = "MegaBytes";
 
     public static final String TABLE_NAME = "volume_management";
+
+    // Queries
+
+    public static final String BY_VDC =
+        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.virtualDatacenter.id = :vdcId "
+            + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
