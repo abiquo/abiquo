@@ -358,6 +358,7 @@ CREATE TABLE  `kinton`.`enterprise` (
   `repositoryHard` bigint(20)  NOT NULL default 0,
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
+  `isReservationRestricted` tinyint(1) default '0',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
