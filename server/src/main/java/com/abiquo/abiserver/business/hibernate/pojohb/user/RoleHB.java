@@ -21,8 +21,6 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.user;
 
-import java.math.BigDecimal;
-
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.user.Role;
 
@@ -38,77 +36,67 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
 
     private Integer idRole;
 
-    private String shortDescription;
+    private String name;
 
-    private String largeDescription;
+    private boolean blocked;
 
-    private BigDecimal securityLevel;
-
-    private com.abiquo.server.core.enterprise.Role.Type type;
-
-    public com.abiquo.server.core.enterprise.Role.Type getType()
-    {
-        return type;
-    }
-
-    public void setType(com.abiquo.server.core.enterprise.Role.Type type)
-    {
-        this.type = type;
-    }
-
-    public RoleHB()
-    {
-    }
+    private EnterpriseHB enterpriseHB;
 
     public Integer getIdRole()
     {
         return idRole;
     }
 
-    public void setIdRole(Integer idRole)
+    public void setIdRole(final Integer idRole)
     {
         this.idRole = idRole;
     }
 
-    public String getShortDescription()
+    public String getName()
     {
-        return shortDescription;
+        return name;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setName(final String name)
     {
-        this.shortDescription = shortDescription;
+        this.name = name;
     }
 
-    public String getLargeDescription()
+    public boolean isBlocked()
     {
-        return largeDescription;
+        return blocked;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setBlocked(final boolean blocked)
     {
-        this.largeDescription = largeDescription;
+        this.blocked = blocked;
     }
 
-    public BigDecimal getSecurityLevel()
+    public EnterpriseHB getEnterpriseHB()
     {
-        return securityLevel;
+        return enterpriseHB;
     }
 
-    public void setSecurityLevel(BigDecimal securityLevel)
+    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
     {
-        this.securityLevel = securityLevel;
+        this.enterpriseHB = enterpriseHB;
     }
 
+    @Override
     public Role toPojo()
     {
         Role role = new Role();
 
         role.setId(idRole);
-        role.setShortDescription(shortDescription);
-        role.setLargeDescription(largeDescription);
-        role.setSecurityLevel(securityLevel);
 
+        if (enterpriseHB != null)
+        {
+            role.setEnterprise(enterpriseHB.toPojo());
+        }
+        else
+        {
+            role.setEnterprise(null);
+        }
         return role;
     }
 }

@@ -28,12 +28,8 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,20 +42,20 @@ import com.abiquo.server.core.enterprise.UsersDto;
 
 public class UsersResourceIT extends AbstractJpaGeneratorIT
 {
+    private static final String SYSADMIN = "sysadmin";
+
+    private static final String ENTADMIN = "entadmin";
+
+    private static final String USER = "user";
+
     @BeforeMethod
     public void setupSysadmin()
     {
-        Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        Role role = roleGenerator.createInstance();
+        User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
 
-        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
-    }
-
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("session", "user", "enterprise", "role");
+        setup(ent, role, user);
     }
 
     @Test
@@ -67,9 +63,9 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     {
         User user = userGenerator.createUniqueInstance();
         setup(user.getRole(), user.getEnterprise(), user);
-        Resource resource = client.resource(resolveUsersURI(user.getEnterprise().getId()));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response =
+            get(resolveUsersURI(user.getEnterprise().getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -89,12 +85,10 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("desc", new String[] {"true"}), false);
 
-        Resource resource = client.resource(uri);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -106,6 +100,50 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void checkGetUserPermissions() throws Exception
+    {
+        // Create an enterprise with a user and an enterprise admin
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstance();
+        User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
+        User user = userGenerator.createInstance(ent, userRole, USER, USER);
+
+        setup(ent, userRole, entRole, entUser, user);
+
+        // Test the get response depending on the user who performs the request
+        String wildwardURI = resolveUsersURI("_");
+        assertUsersCount(get(wildwardURI, SYSADMIN, SYSADMIN), 3);
+        assertUsersCount(get(wildwardURI, ENTADMIN, ENTADMIN), 2);
+        assertUsersCount(get(wildwardURI, USER, USER), 1);
+
+        String uri = resolveUsersURI(ent.getId());
+        assertUsersCount(get(uri, SYSADMIN, SYSADMIN), 2);
+        assertUsersCount(get(uri, ENTADMIN, ENTADMIN), 2);
+        assertUsersCount(get(uri, USER, USER), 1);
+    }
+
+    @Test
+    public void checkGetUserPermissionsInvalidEnterprise() throws Exception
+    {
+        // Create an enterprise with a user and an enterprise admin
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstance();
+        User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
+        User user = userGenerator.createInstance(ent, userRole, USER, USER);
+
+        setup(ent, ent2, userRole, entRole, entUser, user);
+
+        // Test the get response depending on the user who performs the request
+        String uri = resolveUsersURI(ent2.getId());
+        assertUsersCount(get(uri, SYSADMIN, SYSADMIN), 0);
+        assertAccessDenied(get(uri, ENTADMIN, ENTADMIN));
+        assertAccessDenied(get(uri, USER, USER));
+    }
+
+    @Test
     public void createUsers()
     {
         User user = userGenerator.createUniqueInstance();
@@ -114,7 +152,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         UserDto dto = getValidUser(user);
 
         ClientResponse response =
-            post(resolveUsersURI(user.getEnterprise().getId()), dto, "sysadmin", "sysadmin");
+            post(resolveUsersURI(user.getEnterprise().getId()), dto, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -131,14 +169,14 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         dto.setAvailableVirtualDatacenters("1,2");
 
         ClientResponse response =
-            post(resolveUsersURI(user.getEnterprise().getId()), dto, "sysadmin", "sysadmin");
+            post(resolveUsersURI(user.getEnterprise().getId()), dto, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
         assertUserResponse(dto, response);
         UserDto entityPost = response.getEntity(UserDto.class);
-        assertEquals(entityPost.getAvailableVirtualDatacenters(), dto
-            .getAvailableVirtualDatacenters());
+        assertEquals(entityPost.getAvailableVirtualDatacenters(),
+            dto.getAvailableVirtualDatacenters());
     }
 
     @Test
@@ -151,17 +189,17 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("connected", new String[] {"true"}), false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
         UsersDto entity = response.getEntity(UsersDto.class);
         assertEquals(entity.getCollection().size(), 1);
     }
 
-    private UserDto getValidUser(User user)
+    private UserDto getValidUser(final User user)
     {
         UserDto dto = new UserDto();
 
@@ -177,7 +215,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         return dto;
     }
 
-    private void assertUserResponse(UserDto dto, ClientResponse response)
+    private void assertUserResponse(final UserDto dto, final ClientResponse response)
     {
         UserDto entityPost = response.getEntity(UserDto.class);
 
@@ -191,5 +229,21 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         assertEquals(dto.getSurname(), entityPost.getSurname());
         assertEquals(dto.getNick(), entityPost.getNick());
         assertEquals(entityPost.getDescription(), dto.getDescription());
+    }
+
+    private void assertUsersCount(final ClientResponse response, final int userCount)
+    {
+        assertEquals(response.getStatusCode(), 200);
+
+        UsersDto entity = response.getEntity(UsersDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), userCount);
+    }
+
+    private void assertAccessDenied(final ClientResponse response)
+    {
+        assertEquals(response.getStatusCode(), 403);
     }
 }

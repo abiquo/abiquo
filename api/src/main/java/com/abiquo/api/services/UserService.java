@@ -24,6 +24,7 @@ package com.abiquo.api.services;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,6 +45,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -60,13 +62,16 @@ public class UserService extends DefaultApiService
     @Autowired
     EnterpriseRep repo;
 
+    @Autowired
+    SecurityService securityService;
+
     public UserService()
     {
 
     }
 
     // use this to initialize it for tests
-    public UserService(EntityManager em)
+    public UserService(final EntityManager em)
     {
         repo = new EnterpriseRep(em);
     }
@@ -83,30 +88,60 @@ public class UserService extends DefaultApiService
         return repo.getUserByUserName(userName);
     }
 
-    public Collection<User> getUsers()
-    {
-        return repo.findAllUsers();
-    }
+    // TODO: Remove unused method
+    // public Collection<User> getUsers()
+    // {
+    // return repo.findAllUsers();
+    // }
 
-    public Collection<User> getUsersByEnterprise(final Integer enterpriseId)
-    {
-        return repo.findUsersByEnterprise(findEnterprise(enterpriseId));
-    }
+    // TODO: Remove Unused method
+    // public Collection<User> getUsersByEnterprise(final Integer enterpriseId)
+    // {
+    // return repo.findUsersByEnterprise(findEnterprise(enterpriseId));
+    // }
 
-    public Collection<User> getUsersByEnterprise(String enterpriseId, String filter, String order,
-        boolean desc)
+    public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
+        final String order, final boolean desc)
     {
         return getUsersByEnterprise(enterpriseId, filter, order, desc, false, 0, 25);
     }
 
-    public Collection<User> getUsersByEnterprise(String enterpriseId, String filter, String order,
-        boolean desc, boolean connected, Integer page, Integer numResults)
+    public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
+        String order, final boolean desc, final boolean connected, final Integer page,
+        final Integer numResults)
     {
         Enterprise enterprise = null;
+        User user = getCurrentUser();
+
         if (!enterpriseId.equals("_"))
         {
             enterprise = findEnterprise(Integer.valueOf(enterpriseId));
+
+            // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
+            // view their enterprise: check that the provided id corresponds to their enterprise,
+            // and fail if the id is invalid
+            checkCurrentEnterprise(enterprise);
         }
+        else
+        {
+            // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
+            // view their enterprise, so force it if necessary. Here we won't fail, because no id
+            // was provided in the request
+            // if (user.getRole().getType() != Role.Type.SYS_ADMIN)
+            if (securityService.canManageOtherUsers())
+            {
+                enterprise = user.getEnterprise();
+            }
+        }
+
+        // [ABICLOUDPREMIUM-1310] If all the checks are valid, we still need to restrict to the
+        // current user if the role of the requestes is a standard user
+        // if (user.getRole().getType() == Role.Type.USER)
+        if (!securityService.canManageOtherUsers() && !securityService.canManageOtherEnterprises())
+        {
+            return Collections.singletonList(user);
+        }
+
         if (StringUtils.isEmpty(order))
         {
             order = User.NAME_PROPERTY;
@@ -117,17 +152,17 @@ public class UserService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public User addUser(UserDto dto, Integer enterpriseId)
+    public User addUser(final UserDto dto, final Integer enterpriseId)
     {
         Role role = findRole(dto);
         return addUser(dto, enterpriseId, role);
     }
 
-    public User addUser(UserDto dto, Integer enterpriseId, Role role)
+    public User addUser(final UserDto dto, final Integer enterpriseId, final Role role)
     {
         Enterprise enterprise = findEnterprise(enterpriseId);
 
-        checkUserCredentials(enterprise);
+        checkEnterpriseAdminCredentials(enterprise);
 
         User user =
             enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
@@ -157,13 +192,22 @@ public class UserService extends DefaultApiService
         return user;
     }
 
-    public User getUser(Integer id)
+    public User getUser(final Integer id)
     {
-        return repo.findUserById(id);
+        User user = repo.findUserById(id);
+
+        if (user == null)
+        {
+            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+        }
+
+        checkUserCredentialsForSelfUser(user, user.getEnterprise());
+
+        return user;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public User modifyUser(Integer userId, UserDto user)
+    public User modifyUser(final Integer userId, final UserDto user)
     {
         User old = repo.findUserById(userId);
         if (old == null)
@@ -171,16 +215,17 @@ public class UserService extends DefaultApiService
             throw new NotFoundException(APIError.USER_NON_EXISTENT);
         }
 
-        checkUserCredentialsForSelfEdit(old, old.getEnterprise());
-        
+        checkUserCredentialsForSelfUser(old, old.getEnterprise());
+
         // Cloud Admins should only be editable by other Cloud Admins
-        if (old.getRole().getType() == Role.Type.SYS_ADMIN
-            && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        // if (old.getRole().getType() == Role.Type.SYS_ADMIN
+        // && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        if (old.getRole().isBlocked() && !securityService.canManageOtherEnterprises())
         {
             errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
         }
-        
+
         old.setActive(user.isActive() ? 1 : 0);
         old.setEmail(user.getEmail());
         old.setLocale(user.getLocale());
@@ -223,7 +268,7 @@ public class UserService extends DefaultApiService
         return updateUser(old);
     }
 
-    public User updateUser(User user)
+    public User updateUser(final User user)
     {
         repo.updateUser(user);
 
@@ -231,7 +276,7 @@ public class UserService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeUser(Integer id)
+    public void removeUser(final Integer id)
     {
         User user = getUser(id);
         if (user == null)
@@ -239,11 +284,12 @@ public class UserService extends DefaultApiService
             throw new NotFoundException(APIError.USER_NON_EXISTENT);
         }
 
-        checkUserCredentials(user.getEnterprise());
-     
+        checkEnterpriseAdminCredentials(user.getEnterprise());
+
         // Cloud Admins should only be editable by other Cloud Admins
-        if (user.getRole().getType() == Role.Type.SYS_ADMIN
-            && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        // if (user.getRole().getType() == Role.Type.SYS_ADMIN
+        // && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        if (user.getRole().isBlocked() && !securityService.canManageOtherEnterprises())
         {
             errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
@@ -259,7 +305,7 @@ public class UserService extends DefaultApiService
         return user != null && user.getEnterprise().getId().equals(enterpriseId);
     }
 
-    private Enterprise findEnterprise(Integer enterpriseId)
+    private Enterprise findEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = repo.findById(enterpriseId);
         if (enterprise == null)
@@ -269,7 +315,7 @@ public class UserService extends DefaultApiService
         return enterprise;
     }
 
-    public User findUserByEnterprise(Integer userId, Enterprise enterprise)
+    public User findUserByEnterprise(final Integer userId, final Enterprise enterprise)
     {
         User user = repo.findUserByEnterprise(userId, enterprise);
         if (user == null)
@@ -279,12 +325,12 @@ public class UserService extends DefaultApiService
         return user;
     }
 
-    private Role findRole(UserDto dto)
+    private Role findRole(final UserDto dto)
     {
         return repo.findRoleById(getRoleId(dto));
     }
 
-    private Integer getRoleId(UserDto user)
+    private Integer getRoleId(final UserDto user)
     {
         RESTLink role = user.searchLink(RoleResource.ROLE);
 
@@ -306,7 +352,7 @@ public class UserService extends DefaultApiService
         return roleId;
     }
 
-    private Integer getEnterpriseID(UserDto user)
+    private Integer getEnterpriseID(final UserDto user)
     {
         RESTLink ent = user.searchLink(EnterpriseResource.ENTERPRISE);
 
@@ -319,35 +365,57 @@ public class UserService extends DefaultApiService
         return entId;
     }
 
-    public void checkUserCredentials(Enterprise enterprise)
+    public void checkEnterpriseAdminCredentials(final Enterprise enterprise)
     {
         User user = getCurrentUser();
-        checkUserCredentials(user, enterprise);
-    }
+        // Role.Type role = user.getRole().getType();
+        //
+        // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+        // || role == Role.Type.USER)
 
-    private void checkUserCredentials(User user, Enterprise enterprise)
-    {
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN
-            && !enterprise.equals(user.getEnterprise()))
+        if (securityService.canManageOtherUsers()
+            && !enterprise.equals(user.getEnterprise())
+            || (!securityService.canManageOtherEnterprises() && !securityService
+                .canManageOtherUsers()))
+
         {
             throw new AccessDeniedException("");
         }
     }
 
-    private void checkUserCredentialsForSelfEdit(User userToEdit, Enterprise enterprise)
+    private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)
     {
-        User currentUser = getCurrentUser();
+        User user = getCurrentUser();
+        // Role.Type role = user.getRole().getType();
+        //
+        // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+        // || (role == Role.Type.USER && user.getId() != selfUser.getId()))
+        if (securityService.canManageOtherUsers()
+            && !enterprise.equals(user.getEnterprise())
+            || (!securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers() && user.getId() != selfUser.getId()))
 
-        if ((currentUser.getRole().getType() == Role.Type.ENTERPRISE_ADMIN && //
-            !enterprise.equals(currentUser.getEnterprise()))
-            || (currentUser.getRole().getType() == Role.Type.USER && //
-            currentUser.getId() != userToEdit.getId()))
         {
             throw new AccessDeniedException("");
         }
     }
 
-    private Boolean emailIsValid(String email)
+    public void checkCurrentEnterprise(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        // Role.Type role = user.getRole().getType();
+        boolean sameEnterprise = enterprise.equals(user.getEnterprise());
+
+        // if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
+        if (securityService.canManageOtherUsers()
+            || (!securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers() && !sameEnterprise))
+        {
+            throw new AccessDeniedException("");
+        }
+    }
+
+    private Boolean emailIsValid(final String email)
     {
         final Pattern pattern;
         final Matcher matchers;

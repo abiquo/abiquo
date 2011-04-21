@@ -20,6 +20,8 @@
  */
 package com.abiquo.api.resources.config;
 
+import static com.abiquo.api.resources.config.PrivilegeResource.createTransferObject;
+
 import java.util.Collection;
 
 import javax.ws.rs.GET;
@@ -34,7 +36,6 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 
 @Path(PrivilegesResource.PRIVILEGES_PATH)
@@ -59,16 +60,6 @@ public class PrivilegesResource extends AbstractResource
         }
 
         return privileges;
-    }
-
-    public PrivilegeDto createTransferObject(final Privilege systemProperty,
-        final IRESTBuilder builder) throws Exception
-    {
-        PrivilegeDto dto = new PrivilegeDto();
-        dto.setName(systemProperty.getName());
-        dto.setId(systemProperty.getId());
-
-        return dto;
     }
 
 }

@@ -565,7 +565,9 @@
             private function onDragEnterNodesArea(event:DragEvent):void
             {
                 //We only accept drop operations when we have a VirtualAppliance
-                if (this._virtualAppliance != null && this._virtualAppliance.subState.id != State.UNKNOWN)
+                if (this._virtualAppliance != null 
+                && this._virtualAppliance.subState.id != State.UNKNOWN
+                && this._virtualAppliance.state.id != State.IN_PROGRESS)
                 {
                     if (event.dragSource.hasFormat("VirtualImage"))
                     {

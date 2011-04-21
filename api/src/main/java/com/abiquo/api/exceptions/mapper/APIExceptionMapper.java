@@ -21,6 +21,8 @@
 
 package com.abiquo.api.exceptions.mapper;
 
+import java.security.InvalidParameterException;
+
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -32,6 +34,10 @@ import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.InvalidParameterConstraint;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.limit.LimitExceededException;
@@ -54,7 +60,7 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
 
                 errors.add(createError(error.getCode(), message));
             }
-
+            
             for (ConstraintViolation< ? > error : ext.getValidationErrors())
             {
                 errors.add(createError(error.getPropertyPath().toString(), error.getMessage()));
@@ -63,6 +69,11 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
             for (LimitExceededException limitex : ext.getLimitExceededExceptions())
             {
                 errors.add(createError(limitex));
+            }
+            
+            for (InvalidParameterConstraint paramEx : ext.getParamConstraints())
+            {
+                errors.add(createError(paramEx));
             }
         }
         else
@@ -90,6 +101,14 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         ErrorDto error = new ErrorDto();
         error.setCode(APIError.LIMIT_EXCEEDED.getCode());
         error.setMessage(limitException.toString());
+        return error;
+    }
+    
+    private ErrorDto createError(InvalidParameterConstraint paramEx)
+    {
+        ErrorDto error = new ErrorDto();
+        error.setCode("CONSTR-" + paramEx.getAnnotation().annotationType().getSimpleName().toUpperCase());
+        error.setMessage(paramEx.getMessageError());
         return error;
     }
 

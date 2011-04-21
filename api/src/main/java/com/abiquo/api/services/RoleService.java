@@ -47,11 +47,10 @@ public class RoleService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Role addRole(RoleDto dto)
+    public Role addRole(final RoleDto dto)
     {
-        Role role =
-            new Role(dto.getType(), dto.getShortDescription(), dto.getLargeDescription(), dto
-                .getSecurityLevel());
+
+        Role role = new Role(dto.getName(), dto.isBlocked());
 
         if (!role.isValid())
         {
@@ -63,13 +62,13 @@ public class RoleService extends DefaultApiService
         return role;
     }
 
-    public Role getRole(Integer id)
+    public Role getRole(final Integer id)
     {
         return enterpriseRep.findRoleById(id);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Role modifyRole(Integer roleId, RoleDto dto)
+    public Role modifyRole(final Integer roleId, final RoleDto dto)
     {
         Role old = getRole(roleId);
         if (old == null)
@@ -77,9 +76,8 @@ public class RoleService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
 
-        old.setShortDescription(dto.getShortDescription());
-        old.setLargeDescription(dto.getLargeDescription());
-        old.setSecurityLevel(dto.getSecurityLevel());
+        old.setName(dto.getName());
+        old.setBlocked(dto.isBlocked());
 
         if (!old.isValid())
         {
@@ -92,7 +90,7 @@ public class RoleService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeRole(Integer id)
+    public void removeRole(final Integer id)
     {
         Role role = getRole(id);
         if (role == null)

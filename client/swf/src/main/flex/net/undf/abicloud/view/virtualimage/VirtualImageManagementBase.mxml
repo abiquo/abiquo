@@ -709,14 +709,13 @@
         </mx:Canvas>
         <general:GeneralPanelToolBox styleName="GeneralDataPanelBottomSkin">
         	<mx:HBox id="vappAction" width="100%" verticalAlign="middle">
-        		
 	            <mx:PopUpMenuButton id="addButton"
 	                width="40" height="22"
 	                styleName="AddButtonPlus" label="" labelField="@label"
 	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
 	                dataProvider="{addButtonDataProvider}"
 	                enabled="{selectedDatacenter != null}"
-	                itemClick="onItemClickAddButton(event)"
+                	itemClick="{selectedDatacenter != null ? onItemClickAddButton(event):null}"
 	                closeDuration="0"/>
         	</mx:HBox>
         </general:GeneralPanelToolBox>

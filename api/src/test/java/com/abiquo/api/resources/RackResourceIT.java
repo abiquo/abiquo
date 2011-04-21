@@ -67,12 +67,6 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         invalidRack = resolveRackURI(rack.getDatacenter().getId(), 1234);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("rack", "datacenter");
-    }
-
     @Test
     public void getRack() throws Exception
     {

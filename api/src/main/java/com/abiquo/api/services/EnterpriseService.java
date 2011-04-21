@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -51,7 +53,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -76,6 +77,9 @@ public class EnterpriseService extends DefaultApiService
     @Autowired
     DatacenterService datacenterService;
 
+    @Autowired
+    SecurityService securityService;
+
     public EnterpriseService()
     {
 
@@ -90,11 +94,34 @@ public class EnterpriseService extends DefaultApiService
         datacenterService = new DatacenterService(em);
     }
 
+    /**
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
+
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (securityService.canManageOtherUsers())
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -144,7 +171,8 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(enterprise);
+        // userService.checkEnterpriseAdminCredentials(enterprise);
+        userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
 
@@ -157,7 +185,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(old);
+        userService.checkEnterpriseAdminCredentials(old);
 
         if (dto.getName().isEmpty())
         {
@@ -183,6 +211,7 @@ public class EnterpriseService extends DefaultApiService
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(old);
+        isValidEnterpriseLimit(old);
 
         repo.update(old);
         return old;
@@ -423,4 +452,22 @@ public class EnterpriseService extends DefaultApiService
         return repo.findAllPrivileges();
     }
 
+    public Privilege getPrivilege(final Integer id)
+    {
+        Privilege privilege = repo.findPrivilegeById(id);
+        if (privilege == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_PRIVILEGE);
+        }
+
+        // TODO scastro
+        // userService.checkCurrentPrivilege(privilege);
+        return privilege;
+    }
+
+    protected void isValidEnterpriseLimit(final Enterprise old)
+    {
+        // community dummy impl (no limit check)
+
+    }
 }

@@ -26,7 +26,6 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -44,16 +43,9 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
-
+        Role r = roleGenerator.createInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
-    }
-
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise");
     }
 
     @Test

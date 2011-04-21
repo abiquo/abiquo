@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.enterprise;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -36,59 +35,33 @@ public class RoleDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    private String shortDescription;
+    private String name;
 
-    @XmlElement(name = "name")
-    public String getShortDescription()
+    public String getName()
     {
-        return shortDescription;
+        return name;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setName(final String name)
     {
-        this.shortDescription = shortDescription;
+        this.name = name;
     }
 
-    private String largeDescription;
+    private boolean blocked;
 
-    @XmlElement(name = "description")
-    public String getLargeDescription()
+    public boolean isBlocked()
     {
-        return largeDescription;
+        return blocked;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setBlocked(final boolean blocked)
     {
-        this.largeDescription = largeDescription;
-    }
-
-    private float securityLevel;
-
-    public float getSecurityLevel()
-    {
-        return securityLevel;
-    }
-
-    public void setSecurityLevel(float securityLevel)
-    {
-        this.securityLevel = securityLevel;
-    }
-
-    private Role.Type type;
-
-    public Role.Type getType()
-    {
-        return type;
-    }
-
-    public void setType(Role.Type type)
-    {
-        this.type = type;
+        this.blocked = blocked;
     }
 
 }
