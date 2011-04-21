@@ -153,26 +153,22 @@
 
             private function onInitialize():void
             {
-                //Checking privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",addButton);
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",addCategoryButton);
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"visible",deleteCategoryButton);
                 
                 //Checking privilege for managing categories
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", addCategoryButton);
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", deleteCategoryButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_CATEGORIES, "visible", addCategoryButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_CATEGORIES, "visible", deleteCategoryButton);
                 
                 //Checking privilege for uploading image
                 if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)){
                 	delete XMLList(addButtonDataProvider)[1];
                 }
                 
-                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_MANAGE_REPOSITORY)){
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_ALLOW_MODIFY)){
                 	delete XMLList(addButtonDataProvider)[0];
                 }
                 
                 if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)
-                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_MANAGE_REPOSITORY)){
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_ALLOW_MODIFY)){
                 	SecuredPrivilegeAccess.checkElementAccess("removeVappAction","condition",addButton,vappAction);
                 }
                 

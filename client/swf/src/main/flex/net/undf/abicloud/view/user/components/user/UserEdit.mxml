@@ -435,15 +435,15 @@
             <mx:ComboBox id="roleInput"
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
-                labelField="shortDescription" enabled="{this._roleEditable}"/>
+                labelField="name" enabled="{this._roleEditable}"/>
         </mx:FormItem>
 
 		 <mx:FormItem 
         	id="vdcFormItem"
         	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}"
-            includeInLayout="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}">
+            visible="{!this._isUserEditing}"
+            includeInLayout="{!this._isUserEditing}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">

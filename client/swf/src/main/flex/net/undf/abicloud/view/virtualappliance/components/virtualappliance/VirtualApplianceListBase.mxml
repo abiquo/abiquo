@@ -301,6 +301,7 @@
                             <mx:Component>
                             	<!-- GaB do not change this styles, they are here to force rollover over the background-->
                                 <mx:Canvas width="100%" height="100%"
+                                	creationComplete="onCreationComplete()"
                                 	rollOver="onRollOver()"
                                     rollOut="onRollOut()"
                                     backgroundColor="#FFFFFF"
@@ -308,11 +309,17 @@
                                 	>
                                     <mx:Script>
                                         <![CDATA[
+                                        	import net.undf.abicloud.vo.user.PrivilegeType;
+                                        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
                                             import net.undf.abicloud.events.VirtualApplianceEvent;
                                             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
 
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
+                                            
+                                            private function onCreationComplete():void{
+                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",accessButton,vappBox);
+                                            }
 
                                             override public function set data(value:Object):void
                                             {
@@ -339,16 +346,14 @@
                                         ]]>
                                     </mx:Script>
                                     <mx:HBox
-									styleName="VirtualApplianceListBase"
-									
-									horizontalGap="0"
-
-									paddingBottom="0"
-									paddingLeft="5"
-									paddingRight="0"
-									paddingTop="0"
-									verticalAlign="middle"
-                                    >
+                                    	id="vappBox"
+										styleName="VirtualApplianceListBase"										
+										horizontalGap="0"	
+										paddingBottom="0"
+										paddingLeft="5"
+										paddingRight="0"
+										paddingTop="0"
+										verticalAlign="middle">
 	                                    <mx:Label 
 	                                        height="16"
 	                                        text="{this._virtualAppliance.name}"

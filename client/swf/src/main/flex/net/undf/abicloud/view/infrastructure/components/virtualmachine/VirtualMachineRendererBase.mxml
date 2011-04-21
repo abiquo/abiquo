@@ -70,7 +70,7 @@
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
-            	
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
             }
 
             [Bindable(event="virtualMachineChange")]
@@ -365,6 +365,7 @@
 
     <!-- Virtual Machine state -->
     <mx:HBox 
+    	id="vmActions"
         height="100%"
         left="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"

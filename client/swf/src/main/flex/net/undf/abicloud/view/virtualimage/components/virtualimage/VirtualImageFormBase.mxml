@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
         	import flash.net.navigateToURL;
@@ -106,6 +108,9 @@
 			
             private function onCreationComplete():void
             {
+                //Checking privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
+                
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -621,6 +626,7 @@
 
 
             <mx:FormItem 
+            	id="downloadItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_FILE_NAME')"
                 direction="horizontal"
                 includeInLayout="{this._virtualImage != null}"

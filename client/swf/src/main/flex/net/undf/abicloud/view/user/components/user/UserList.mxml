@@ -195,6 +195,10 @@
                 userListOptions.filter = usersFilter.text;
                 userListOptions.asc = this._usersAsc;
                 userListOptions.orderBy = this._usersOrderBy;
+                //If the user can manage only users from its enterprise
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)){
+                	this._enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                }
                 userListOptions.byEnterprise = this._enterprise;
                 userListOptions.loggedOnly = loggedUsersCheckbox.selected;
 
