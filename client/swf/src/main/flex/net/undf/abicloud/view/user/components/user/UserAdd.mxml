@@ -82,9 +82,7 @@
                 passwordRepeatInput.text = "";
                 emailInput.text = "";
                 descriptionInput.text = "";
-                activeInput.selected = true;
-                vdcFormItem.visible = false;
-                vdcFormItem.includeInLayout = false;
+                activeInput.selected = true;0
 
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
@@ -96,7 +94,7 @@
                 this._firstRetrieve = true;
                 
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
-                this._restrict = false;
+                //this._restrict = false;
                 
                 BindingUtils.bindSetter(updateVirtualDataCenter,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
             }
@@ -306,7 +304,7 @@
             <mx:ComboBox id="roleInput"
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
-                labelField="shortDescription"
+                labelField="name"
                 change="validateForm()"
                 prompt="@Resource(bundle='User', key='COMBOBOX_PROMPT_ROLE')"/>
         </mx:FormItem>
@@ -314,9 +312,7 @@
         <mx:FormItem 
         	id="vdcFormItem"
         	direction="horizontal"
-            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            includeInLayout="{Role(roleInput.selectedItem).id == Role.USER_ROLE}">
+            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">

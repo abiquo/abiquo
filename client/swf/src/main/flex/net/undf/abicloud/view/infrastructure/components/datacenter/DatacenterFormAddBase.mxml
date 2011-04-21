@@ -25,6 +25,7 @@
 <AbiCloudPopUp 
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    creationComplete="onCreationComplete()"
     xmlns:datacenter="net.undf.abicloud.view.infrastructure.components.datacenter.*"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_DATACENTERADD')">
 
@@ -34,6 +35,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.business.managers.InfrastructureManager;
         	import mx.resources.ResourceManager;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -79,6 +82,10 @@
 			//Check if we are deleting the replicate IP
 			protected var _isDeleting:Boolean;
 			
+			private function onCreationComplete():void{
+				SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS,"removeChild",automaticOpenCheck,automaticBox);
+			}
+			
             public function init():void
             {
                 nameInput.text = "";
@@ -105,7 +112,9 @@
                 }
                                 
                 //check or not the automatic open datacenter after creation depending on previous user choice
-                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenDatacenter");
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS)){
+	                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenDatacenter");                	
+                }
 
                 validateForm();
                 nameInput.setFocus();
@@ -360,6 +369,7 @@
     </mx:HBox>
    
     <mx:HBox 
+    	id="automaticBox"
     	verticalAlign="middle"
     	width="100%"
     	horizontalAlign="center">

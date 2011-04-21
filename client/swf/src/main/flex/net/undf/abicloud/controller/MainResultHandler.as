@@ -61,11 +61,13 @@ package net.undf.abicloud.controller
                 
                 var role:NewRole = new NewRole();
                 role.id = 1;
+                role.idEnterprise = 0;
                 role.name = "Cloud Admin";                
                 roles.addItem(role);
                 
                 role = new NewRole();
                 role.id = 2;
+                role.idEnterprise = 1;
                 role.name = "Enterprise Admin";
                 roles.addItem(role);
                 

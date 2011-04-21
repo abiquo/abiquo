@@ -147,7 +147,7 @@
             /**
              * When users clicks in enterprises list
              */
-            private function onSelectedEnterpriseChange():void
+            protected function onSelectedEnterpriseChange():void
             {
                 userList.hideMoreInfoContainer();
 
