@@ -75,6 +75,7 @@
 	      <ref bean="systemPropertiesResource"/>
 	      <ref bean="systemPropertyResource"/>
 	      <ref bean="privilegesResource"/>
+	      <ref bean="privilegeResource"/>
 	    </set>
 	  </property>
 	</bean>

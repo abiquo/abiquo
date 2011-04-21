@@ -57,7 +57,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.api.spring.security.AbiquoUserDetails;
 
 @Service
 @Transactional(readOnly = true)
@@ -91,27 +90,28 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
-    
+
     /**
-    * Based on the spring authentication context.
-    * 
-    * @see SecurityContextHolder
-    */
-//   public Enterprise getCurrentEnterprise()
-//   {
-//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
-//       
-//       User user = userService.getCurrentUser();
-//       
-//       return user.getEnterprise();
-//       
-////       Enterprise enterprise = repo.findById(id);
-////       if (enterprise == null)
-////       {
-////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-////       }
-//
-//   }
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
 
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)
@@ -167,7 +167,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-//        userService.checkEnterpriseAdminCredentials(enterprise);
+        // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
@@ -212,8 +212,6 @@ public class EnterpriseService extends DefaultApiService
         repo.update(old);
         return old;
     }
-
-    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEnterprise(final Integer id)
@@ -450,9 +448,22 @@ public class EnterpriseService extends DefaultApiService
         return repo.findAllPrivileges();
     }
 
-    protected void isValidEnterpriseLimit(Enterprise old)
+    public Privilege getPrivilege(final Integer id)
+    {
+        Privilege privilege = repo.findPrivilegeById(id);
+        if (privilege == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_PRIVILEGE);
+        }
+
+        // TODO scastro
+        // userService.checkCurrentPrivilege(privilege);
+        return privilege;
+    }
+
+    protected void isValidEnterpriseLimit(final Enterprise old)
     {
         // community dummy impl (no limit check)
-        
+
     }
 }

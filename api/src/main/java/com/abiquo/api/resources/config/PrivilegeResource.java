@@ -20,15 +20,12 @@
  */
 package com.abiquo.api.resources.config;
 
-import static com.abiquo.api.resources.config.PrivilegeResource.createTransferObject;
-
-import java.util.Collection;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
-import org.apache.wink.common.annotations.Workspace;
+import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -36,30 +33,37 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegesDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 
-@Path(PrivilegesResource.PRIVILEGES_PATH)
+@Parent(PrivilegesResource.class)
+@Path(PrivilegeResource.PRIVILEGE_PARAM)
 @Controller
-@Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Privileges")
-public class PrivilegesResource extends AbstractResource
+public class PrivilegeResource extends AbstractResource
 {
-    public static final String PRIVILEGES_PATH = "config/privileges";
+    public static final String PRIVILEGE = "privilege";
+
+    public static final String PRIVILEGE_PARAM = "{" + PRIVILEGE + "}";
 
     @Autowired
     private EnterpriseService service;
 
     @GET
-    public PrivilegesDto getPrivileges(@Context final IRESTBuilder restBuilder) throws Exception
+    public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer propertyId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Collection<Privilege> ps = service.findAllPrivileges();
+        Privilege privilege = service.getPrivilege(propertyId);
 
-        PrivilegesDto privileges = new PrivilegesDto();
-        for (Privilege p : ps)
-        {
-            privileges.add(createTransferObject(p, restBuilder));
-        }
+        return createTransferObject(privilege, restBuilder);
+    }
 
-        return privileges;
+    public static PrivilegeDto createTransferObject(final Privilege systemProperty,
+        final IRESTBuilder builder) throws Exception
+    {
+        PrivilegeDto dto = new PrivilegeDto();
+        dto.setName(systemProperty.getName());
+        dto.setId(systemProperty.getId());
+
+        return dto;
     }
 
 }

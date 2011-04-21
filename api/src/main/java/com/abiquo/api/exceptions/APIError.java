@@ -108,6 +108,9 @@ public enum APIError
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
 
+    // PRIVILEGE
+    NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
+
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
@@ -171,8 +174,9 @@ public enum APIError
         "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
-    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01", "This method require the virtual machine being deployed on some target hypervisor"),
-    
+    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",
+        "This method require the virtual machine being deployed on some target hypervisor"),
+
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error was occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(
@@ -217,10 +221,10 @@ public enum APIError
      * Description message
      */
     String message;
-    
+
     /**
      * Additional description
-     * */
+     */
     String cause;
 
     public String getCode()
@@ -237,7 +241,7 @@ public enum APIError
     {
         return cause;
     }
-    
+
     APIError(final String code, final String message)
     {
         this.code = code;
@@ -246,9 +250,9 @@ public enum APIError
 
     public APIError addCause(final String cause)
     {
-        this.cause = cause;        
+        this.cause = cause;
         return this;
-    }   
+    }
 
     public static void main(final String[] args)
     {
