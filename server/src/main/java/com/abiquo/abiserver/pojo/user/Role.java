@@ -21,37 +21,33 @@
 
 package com.abiquo.abiserver.pojo.user;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.RoleDto;
 
 public class Role implements IPojo<RoleHB>
 {
-    /* ------------- DB Values for Roles ------------- */
-    public final static int SYS_ADMIN = 1;
-
-    public final static int USER = 2;
-
-    public final static int ENTERPRISE_ADMIN = 3;
 
     /* ------------- Public atributes ------------- */
     private int id;
 
-    private String shortDescription;
+    private String name;
 
-    private String largeDescription;
+    private boolean blocked;
 
-    private BigDecimal securityLevel;
+    private Enterprise enterprise;
+
+    List<Privilege> privileges;
 
     /* ------------- Constructor ------------- */
     public Role()
     {
         id = 0;
-        shortDescription = "";
-        largeDescription = "";
-        securityLevel = new BigDecimal(0);
+        name = "";
+
     }
 
     public int getId()
@@ -59,59 +55,77 @@ public class Role implements IPojo<RoleHB>
         return id;
     }
 
-    public void setId(int id)
+    public void setId(final int id)
     {
         this.id = id;
     }
 
-    public String getShortDescription()
+    public String getName()
     {
-        return shortDescription;
+        return name;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setName(final String name)
     {
-        this.shortDescription = shortDescription;
+        this.name = name;
     }
 
-    public String getLargeDescription()
+    public boolean isBlocked()
     {
-        return largeDescription;
+        return blocked;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setBlocked(final boolean blocked)
     {
-        this.largeDescription = largeDescription;
+        this.blocked = blocked;
     }
 
-    public BigDecimal getSecurityLevel()
+    public Enterprise getEnterprise()
     {
-        return securityLevel;
+        return enterprise;
     }
 
-    public void setSecurityLevel(BigDecimal securityLevel)
+    public void setEnterprise(final Enterprise enterprise)
     {
-        this.securityLevel = securityLevel;
+        this.enterprise = enterprise;
     }
 
+    public List<Privilege> getPrivileges()
+    {
+        return privileges;
+    }
+
+    public void setPrivileges(final List<Privilege> privileges)
+    {
+        this.privileges = privileges;
+    }
+
+    @Override
     public RoleHB toPojoHB()
     {
         RoleHB roleHB = new RoleHB();
 
         roleHB.setIdRole(id);
-        roleHB.setShortDescription(shortDescription);
-        roleHB.setLargeDescription(largeDescription);
-        roleHB.setSecurityLevel(securityLevel);
+        roleHB.setName(name);
+        roleHB.isBlocked();
+        if (enterprise != null)
+        {
+            roleHB.setEnterpriseHB(enterprise.toPojoHB());
+        }
+        else
+        {
+            roleHB.setEnterpriseHB(null);
+        }
         return roleHB;
     }
 
-    public static Role create(RoleDto dto)
+    public static Role create(final RoleDto dto, final Enterprise enterprise)
     {
         Role role = new Role();
         role.setId(dto.getId());
-        role.setShortDescription(dto.getShortDescription());
-        role.setLargeDescription(dto.getLargeDescription());
-        role.setSecurityLevel(new BigDecimal(dto.getSecurityLevel()));
+        role.setName(dto.getName());
+        role.setBlocked(dto.isBlocked());
+        role.setEnterprise(enterprise);
 
         return role;
     }

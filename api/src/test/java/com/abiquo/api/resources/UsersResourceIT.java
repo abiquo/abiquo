@@ -30,7 +30,6 @@ import java.util.Collections;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -53,7 +52,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role role = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
 
         setup(ent, role, user);
@@ -86,8 +85,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("desc", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -105,8 +104,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     {
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role userRole = roleGenerator.createInstance(Role.Type.USER);
-        Role entRole = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstance();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
@@ -130,8 +129,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
-        Role userRole = roleGenerator.createInstance(Role.Type.USER);
-        Role entRole = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstance();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
@@ -176,8 +175,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         assertUserResponse(dto, response);
         UserDto entityPost = response.getEntity(UserDto.class);
-        assertEquals(entityPost.getAvailableVirtualDatacenters(), dto
-            .getAvailableVirtualDatacenters());
+        assertEquals(entityPost.getAvailableVirtualDatacenters(),
+            dto.getAvailableVirtualDatacenters());
     }
 
     @Test
@@ -190,8 +189,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("connected", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 

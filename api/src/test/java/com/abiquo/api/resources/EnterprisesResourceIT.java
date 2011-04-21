@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
@@ -50,16 +49,16 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
     private String enterprisesURI = resolveEnterprisesURI();
 
-    private Resource enterpriseResource =
-        client.resource(enterprisesURI).accept(MediaType.APPLICATION_XML);
+    private Resource enterpriseResource = client.resource(enterprisesURI).accept(
+        MediaType.APPLICATION_XML);
 
     @Test
     public void getEnterpriseList()
     {
         Enterprise e1 = enterpriseGenerator.createUniqueInstance();
         Enterprise e2 = enterpriseGenerator.createUniqueInstance();
-        Role r1 = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
-        Role r2 = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+        Role r1 = roleGenerator.createInstance();
+        Role r2 = roleGenerator.createInstance();
 
         User u1 = userGenerator.createInstance(e1, r1, "foo");
         User u2 = userGenerator.createInstance(e2, r2, "bar");
@@ -85,7 +84,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         Enterprise e1 = enterpriseGenerator.createInstance("enterprise_foo_enterprise");
         Enterprise e2 = enterpriseGenerator.createInstance("enterprise_bar_enterprise");
 
-        Role r1 = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role r1 = roleGenerator.createInstance();
         User u1 = userGenerator.createInstance(e1, r1, "foo");
 
         setup(e1, e2, r1, u1);
@@ -183,7 +182,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, "ramLimitsInMb");
     }
 
-    private ClientResponse postEnterprise(EnterpriseDto e)
+    private ClientResponse postEnterprise(final EnterpriseDto e)
     {
         return enterpriseResource.contentType(MediaType.APPLICATION_XML).post(e);
     }

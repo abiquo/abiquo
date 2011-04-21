@@ -53,13 +53,14 @@ public class UserServiceTest extends AbstractGeneratorTest
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        r = roleGenerator.createInstance();
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthenticationStub());
     }
 
+    @Override
     @AfterMethod
     public void tearDown()
     {

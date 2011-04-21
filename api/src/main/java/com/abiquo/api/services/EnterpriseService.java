@@ -41,6 +41,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -52,7 +53,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -76,6 +76,9 @@ public class EnterpriseService extends DefaultApiService
 
     @Autowired
     DatacenterService datacenterService;
+
+    @Autowired
+    SecurityService securityService;
 
     public EnterpriseService()
     {
@@ -117,7 +120,8 @@ public class EnterpriseService extends DefaultApiService
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (securityService.canManageOtherUsers())
         {
             return Collections.singletonList(user.getEnterprise());
         }

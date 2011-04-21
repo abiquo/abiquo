@@ -34,7 +34,6 @@ import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -66,7 +65,7 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         sysEnterprise = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role r = roleGenerator.createInstance();
 
         User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
         setup(sysEnterprise, r, u);
@@ -78,7 +77,7 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
 
-        Role role = roleGenerator.createInstance(Role.Type.USER);
+        Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(enterprise, role, "foo");
 
         VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, enterprise);
@@ -106,8 +105,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualDatacentersList() throws Exception
     {
         VirtualDatacenter vdc = vdcGenerator.createInstance(sysEnterprise);
-        setup(vdc.getDatacenter(), vdc.getNetwork(), vdc, new DatacenterLimits(sysEnterprise, vdc
-            .getDatacenter()));
+        setup(vdc.getDatacenter(), vdc.getNetwork(), vdc,
+            new DatacenterLimits(sysEnterprise, vdc.getDatacenter()));
 
         ClientResponse response = get(resolveVirtualDatacentersURI(), "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 200);
@@ -135,9 +134,10 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveVirtualDatacentersURI();
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap(
-                EnterpriseResource.ENTERPRISE,
-                new String[] {vdc.getEnterprise().getId().toString()}), false);
+            UriHelper.appendQueryParamsToPath(
+                uri,
+                Collections.singletonMap(EnterpriseResource.ENTERPRISE, new String[] {vdc
+                    .getEnterprise().getId().toString()}), false);
 
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
@@ -157,14 +157,15 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         DatacenterLimits dcl2 = new DatacenterLimits(vdc2.getEnterprise(), vdc2.getDatacenter());
         DatacenterLimits dcl3 = new DatacenterLimits(vdc3.getEnterprise(), vdc3.getDatacenter());
 
-        setup(vdc.getDatacenter(), vdc2.getDatacenter(), vdc.getNetwork(), vdc2.getNetwork(), vdc3
-            .getNetwork(), vdc, vdc2, vdc3, dcl1, dcl2, dcl3);
+        setup(vdc.getDatacenter(), vdc2.getDatacenter(), vdc.getNetwork(), vdc2.getNetwork(),
+            vdc3.getNetwork(), vdc, vdc2, vdc3, dcl1, dcl2, dcl3);
 
         String uri = resolveVirtualDatacentersURI();
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap(
-                DatacenterResource.DATACENTER,
-                new String[] {vdc.getDatacenter().getId().toString()}), false);
+            UriHelper.appendQueryParamsToPath(
+                uri,
+                Collections.singletonMap(DatacenterResource.DATACENTER, new String[] {vdc
+                    .getDatacenter().getId().toString()}), false);
 
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
         VirtualDatacentersDto entity = response.getEntity(VirtualDatacentersDto.class);
@@ -450,8 +451,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         Machine machine = machineGenerator.createMachine(rs.getDatacenter());
         Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
 
-        setup(rs.getDatacenter(), machine, hypervisor, e, rs, new DatacenterLimits(e, rs
-            .getDatacenter()));
+        setup(rs.getDatacenter(), machine, hypervisor, e, rs,
+            new DatacenterLimits(e, rs.getDatacenter()));
 
         VirtualDatacenterDto dto = new VirtualDatacenterDto();
         RESTLink datacenterLink =
