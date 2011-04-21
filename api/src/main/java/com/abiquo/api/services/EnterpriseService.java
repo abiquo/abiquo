@@ -41,6 +41,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -52,12 +53,10 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.api.spring.security.AbiquoUserDetails;
 
 @Service
 @Transactional(readOnly = true)
@@ -78,6 +77,9 @@ public class EnterpriseService extends DefaultApiService
     @Autowired
     DatacenterService datacenterService;
 
+    @Autowired
+    SecurityService securityService;
+
     public EnterpriseService()
     {
 
@@ -91,33 +93,35 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
-    
+
     /**
-    * Based on the spring authentication context.
-    * 
-    * @see SecurityContextHolder
-    */
-//   public Enterprise getCurrentEnterprise()
-//   {
-//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
-//       
-//       User user = userService.getCurrentUser();
-//       
-//       return user.getEnterprise();
-//       
-////       Enterprise enterprise = repo.findById(id);
-////       if (enterprise == null)
-////       {
-////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-////       }
-//
-//   }
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
 
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (securityService.canManageOtherUsers())
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -167,7 +171,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-//        userService.checkEnterpriseAdminCredentials(enterprise);
+        // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
@@ -212,8 +216,6 @@ public class EnterpriseService extends DefaultApiService
         repo.update(old);
         return old;
     }
-
-    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEnterprise(final Integer id)
@@ -450,9 +452,9 @@ public class EnterpriseService extends DefaultApiService
         return repo.findAllPrivileges();
     }
 
-    protected void isValidEnterpriseLimit(Enterprise old)
+    protected void isValidEnterpriseLimit(final Enterprise old)
     {
         // community dummy impl (no limit check)
-        
+
     }
 }

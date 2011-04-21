@@ -27,7 +27,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -39,7 +38,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -51,8 +49,6 @@ import com.softwarementors.validation.constraints.Required;
 public class Role extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "role";
-
-    // TODO Alessia quittar campos y cambiar name, enterprise nullable
 
     protected Role()
     {
@@ -141,113 +137,10 @@ public class Role extends DefaultEntityBase
         this.blocked = blocked;
     }
 
-    public final static String SHORT_DESCRIPTION_PROPERTY = "shortDescription";
-
-    private final static boolean SHORT_DESCRIPTION_REQUIRED = false;
-
-    private final static int SHORT_DESCRIPTION_LENGTH_MIN = 0;
-
-    private final static int SHORT_DESCRIPTION_LENGTH_MAX = 255;
-
-    private final static boolean SHORT_DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String SHORT_DESCRIPTION_COLUMN = "shortDescription";
-
-    @Column(name = SHORT_DESCRIPTION_COLUMN, nullable = !SHORT_DESCRIPTION_REQUIRED, length = SHORT_DESCRIPTION_LENGTH_MAX)
-    private String shortDescription;
-
-    @Required(value = SHORT_DESCRIPTION_REQUIRED)
-    @Length(min = SHORT_DESCRIPTION_LENGTH_MIN, max = SHORT_DESCRIPTION_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = SHORT_DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getShortDescription()
+    public Role(final String name, final boolean blocked)
     {
-        return this.shortDescription;
-    }
-
-    public void setShortDescription(final String shortDescription)
-    {
-        this.shortDescription = shortDescription;
-    }
-
-    public final static String LARGE_DESCRIPTION_PROPERTY = "largeDescription";
-
-    private final static boolean LARGE_DESCRIPTION_REQUIRED = false;
-
-    private final static int LARGE_DESCRIPTION_LENGTH_MIN = 0;
-
-    private final static int LARGE_DESCRIPTION_LENGTH_MAX = 255;
-
-    private final static boolean LARGE_DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String LARGE_DESCRIPTION_COLUMN = "largeDescription";
-
-    @Column(name = LARGE_DESCRIPTION_COLUMN, nullable = !LARGE_DESCRIPTION_REQUIRED, length = LARGE_DESCRIPTION_LENGTH_MAX)
-    private String largeDescription;
-
-    @Required(value = LARGE_DESCRIPTION_REQUIRED)
-    @Length(min = LARGE_DESCRIPTION_LENGTH_MIN, max = LARGE_DESCRIPTION_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = LARGE_DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getLargeDescription()
-    {
-        return this.largeDescription;
-    }
-
-    public void setLargeDescription(final String largeDescription)
-    {
-        this.largeDescription = largeDescription;
-    }
-
-    public final static String SECURITY_LEVEL_PROPERTY = "securityLevel";
-
-    private final static String SECURITY_LEVEL_COLUMN = "securityLevel";
-
-    private final static int SECURITY_LEVEL_MIN = 0;
-
-    private final static int SECURITY_LEVEL_MAX = Integer.MAX_VALUE;
-
-    @Column(name = SECURITY_LEVEL_COLUMN, nullable = true)
-    @Range(min = SECURITY_LEVEL_MIN, max = SECURITY_LEVEL_MAX)
-    private float securityLevel;
-
-    public float getSecurityLevel()
-    {
-        return this.securityLevel;
-    }
-
-    public void setSecurityLevel(final float securityLevel)
-    {
-        this.securityLevel = securityLevel;
-    }
-
-    public Role(final Type type, final String shortDescription, final String largeDescription,
-        final float securityLevel, final String name, final boolean blocked)
-    {
-        setType(type);
-        setShortDescription(shortDescription);
-        setLargeDescription(largeDescription);
-        setSecurityLevel(securityLevel);
         setName(name);
         setBlocked(blocked);
-    }
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private Type type;
-
-    @Required(value = true)
-    public Type getType()
-    {
-        return type;
-    }
-
-    private void setType(final Type type)
-    {
-        this.type = type;
-    }
-
-    public static enum Type
-    {
-        SYS_ADMIN, ENTERPRISE_ADMIN, USER;
     }
 
     public final static String ASSOCIATION_TABLE = "roles_privileges";
@@ -276,4 +169,5 @@ public class Role extends DefaultEntityBase
         }
         privileges.add(privilege);
     }
+
 }

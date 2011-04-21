@@ -49,15 +49,8 @@ public class RoleService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Role addRole(final RoleDto dto)
     {
-        // TODO: Alessia Review this constructor!
 
-        Role role =
-            new Role(dto.getType(),
-                dto.getShortDescription(),
-                dto.getLargeDescription(),
-                dto.getSecurityLevel(),
-                dto.getShortDescription(),
-                false);
+        Role role = new Role(dto.getName(), dto.isBlocked());
 
         if (!role.isValid())
         {
@@ -83,9 +76,8 @@ public class RoleService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
 
-        old.setShortDescription(dto.getShortDescription());
-        old.setLargeDescription(dto.getLargeDescription());
-        old.setSecurityLevel(dto.getSecurityLevel());
+        old.setName(dto.getName());
+        old.setBlocked(dto.isBlocked());
 
         if (!old.isValid())
         {

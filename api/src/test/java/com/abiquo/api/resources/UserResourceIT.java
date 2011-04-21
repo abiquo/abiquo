@@ -34,7 +34,6 @@ import static org.testng.Assert.assertNotNull;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,7 +56,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role r = roleGenerator.createInstance();
 
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
@@ -118,8 +117,9 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
-        assertLinkExist(dto, resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(),
-            user.getId()), "action", VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
+        assertLinkExist(dto,
+            resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(), user.getId()),
+            "action", VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
 
@@ -160,11 +160,11 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertEquals(404, response.getStatusCode());
     }
-    
+
     @Test
     public void modifyUserEmailIsNotValid() throws ClientWebException
     {
-    	User user = userGenerator.createUniqueInstance();
+        User user = userGenerator.createUniqueInstance();
         setup(user.getRole(), user.getEnterprise(), user);
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
@@ -273,15 +273,15 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         VirtualMachineDto vmDto = vms.getCollection().get(0);
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test
     public void shouldModifyRoleWhenUpdateUser()
     {
-        Role r1 = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
-        Role r2 = roleGenerator.createInstance(Role.Type.USER);
+        Role r1 = roleGenerator.createInstance();
+        Role r2 = roleGenerator.createInstance();
 
         User user = userGenerator.createInstance(r1);
         setup(r1, r2, user.getEnterprise(), user);

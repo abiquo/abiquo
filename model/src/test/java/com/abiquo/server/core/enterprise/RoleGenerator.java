@@ -39,28 +39,23 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     @Override
     public void assertAllPropertiesEqual(final Role obj1, final Role obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Role.SHORT_DESCRIPTION_PROPERTY,
-            Role.LARGE_DESCRIPTION_PROPERTY, Role.SECURITY_LEVEL_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Role.NAME_PROPERTY, Role.BLOCKED_PROPERTY,
+            Role.ENTERPRISE_PROPERTY);
     }
 
     @Override
     public Role createUniqueInstance()
     {
-        return createInstance(Role.Type.SYS_ADMIN);
+        return createInstance();
+        // return createInstance(Role.Type.SYS_ADMIN);
     }
 
-    public Role createInstance(final Role.Type type)
+    public Role createInstance()
     {
         String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
         boolean blocked = false;
 
-        Role role =
-            new Role(type,
-                newString(nextSeed(), 0, 20),
-                newString(nextSeed(), 0, 255),
-                newBigDecimal(nextSeed()).floatValue(),
-                name,
-                blocked);
+        Role role = new Role(name, blocked);
 
         return role;
     }
