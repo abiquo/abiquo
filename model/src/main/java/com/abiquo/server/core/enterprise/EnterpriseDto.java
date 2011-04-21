@@ -36,6 +36,8 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
 
     private long repositoryHard;
 
+    private boolean isReservationRestricted;
+
     public Integer getId()
     {
         return id;
@@ -80,5 +82,15 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     {
         this.repositorySoft = soft;
         this.repositoryHard = hard;
+    }
+
+    public boolean isReservationRestricted()
+    {
+        return isReservationRestricted;
+    }
+
+    public void setReservationRestricted(boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
     }
 }
