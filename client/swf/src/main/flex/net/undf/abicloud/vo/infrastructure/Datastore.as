@@ -43,6 +43,8 @@ package net.undf.abicloud.vo.infrastructure
         public var size:Number;
 
         public var usedSize:Number;
+        
+        public var datastoreUUID:String;
 
         /* ------------- Constructor ------------- */
         public function Datastore()
