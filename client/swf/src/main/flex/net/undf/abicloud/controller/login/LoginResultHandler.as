@@ -74,12 +74,12 @@ package net.undf.abicloud.controller.login
                 var privilege:Privilege = new Privilege();
                 privilege.id = 1 ;
                 privilege.name = PrivilegeType.ENTERPRISE_ENUMERATE;                
-               // privileges.addItem(privilege);
+                privileges.addItem(privilege);
                 
                 privilege = new Privilege();
                 privilege.id = 2 ;
                 privilege.name = PrivilegeType.ENTERPRISE_ADMINISTER_ALL;
-                //privileges.addItem(privilege);
+                privileges.addItem(privilege);
                 
                 privilege = new Privilege();
                 privilege.id = 2 ;
@@ -134,7 +134,7 @@ package net.undf.abicloud.controller.login
                 privilege = new Privilege();
                 privilege.id = 2 ;
                 privilege.name = PrivilegeType.VDC_MANAGE;
-                privileges.addItem(privilege);
+                //privileges.addItem(privilege);
                 
                 privilege = new Privilege();
                 privilege.id = 2 ;
