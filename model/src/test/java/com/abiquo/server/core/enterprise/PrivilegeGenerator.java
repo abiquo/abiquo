@@ -30,12 +30,14 @@ import com.softwarementors.commons.testng.AssertEx;
 public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
 {
 
+    public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
+
     private RoleGenerator roleGenerator;
 
     public PrivilegeGenerator(final SeedGenerator seed)
     {
         super(seed);
-        roleGenerator = new RoleGenerator(seed);
+        // roleGenerator = new RoleGenerator(seed);
     }
 
     @Override
@@ -50,6 +52,14 @@ public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
         String name = newString(nextSeed(), Privilege.NAME_LENGTH_MIN, Privilege.NAME_LENGTH_MAX);
 
         Privilege privilege = new Privilege(name);
+
+        return privilege;
+    }
+
+    public Privilege createInstance()
+    {
+
+        Privilege privilege = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
 
         return privilege;
     }

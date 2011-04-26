@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -29,11 +30,12 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class RoleGenerator extends DefaultEntityGenerator<Role>
 {
+    PrivilegeGenerator privilegeGenerator;
 
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
-
+        privilegeGenerator = new PrivilegeGenerator(seed);
     }
 
     @Override
@@ -46,8 +48,9 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     @Override
     public Role createUniqueInstance()
     {
-        return createInstance();
-        // return createInstance(Role.Type.SYS_ADMIN);
+        Privilege p = privilegeGenerator.createInstance();
+        return createInstance(p);
+
     }
 
     public Role createInstance()
@@ -62,7 +65,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public Role createInstance(final Privilege... privileges)
     {
-        Role role = createUniqueInstance();
+        Role role = createInstance();
         for (Privilege p : privileges)
         {
             role.addPrivilege(p);
@@ -76,6 +79,12 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-    }
+        Collection<Privilege> privileges = entity.getPrivileges();
+        for (Privilege privilege : privileges)
+        {
+            privilegeGenerator.addAuxiliaryEntitiesToPersist(privilege, entitiesToPersist);
+            entitiesToPersist.add(privilege);
+        }
 
+    }
 }
