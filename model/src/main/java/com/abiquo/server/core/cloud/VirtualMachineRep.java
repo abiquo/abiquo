@@ -32,6 +32,8 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.VirtualMachineForHA;
+import com.abiquo.server.core.infrastructure.VirtualMachineForHADAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 
@@ -44,6 +46,9 @@ public class VirtualMachineRep extends DefaultRepBase
 
     @Autowired
     private RasdManagementDAO rasdDao;
+
+    @Autowired
+    private VirtualMachineForHADAO vmHADao;
 
     public VirtualMachineRep()
     {
@@ -101,5 +106,11 @@ public class VirtualMachineRep extends DefaultRepBase
         final Integer virtualMachineId)
     {
         return rasdDao.findByVirtualMachine(virtualMachineId);
+    }
+
+    public void insert(VirtualMachineForHA vmForHA)
+    {
+        this.vmHADao.persist(vmForHA);
+        this.vmHADao.flush();
     }
 }

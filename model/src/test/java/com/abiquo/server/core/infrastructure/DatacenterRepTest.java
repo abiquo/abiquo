@@ -514,30 +514,6 @@ public class DatacenterRepTest extends DefaultJpaDataAccessTestBase
     }
 
     @Test
-    public void test_updateMachine_withDuplicatedName()
-    {
-        Datacenter datacenter1 = eg().createUniqueInstance();
-        Machine machine1_1 = this.machineGenerator.createMachine(datacenter1, "machine1");
-        Machine machine1_2 = this.machineGenerator.createMachine(datacenter1, "machine2");
-        ds().persistAll(datacenter1, machine1_1, machine1_2);
-
-        EntityManager em = ds().createEntityManagerAndBeginRollbackTransaction();
-        DatacenterRep rep = new DatacenterRep(em);
-        Machine machine1_1B = rep.findMachineById(machine1_1.getId());
-        machine1_1B.setName("machine2");
-        try
-        {
-            rep.updateMachine(machine1_1B);
-            fail();
-        }
-        catch (AssertionError e)
-        {
-            Assert.assertEquals(e.getMessage(),
-                DatacenterRep.BUG_UPDATE_MACHINE_NAME_MUST_BE_UNIQUE);
-        }
-    }
-
-    @Test
     public void createHypervisor()
     {
         Machine machine = persistMachine();

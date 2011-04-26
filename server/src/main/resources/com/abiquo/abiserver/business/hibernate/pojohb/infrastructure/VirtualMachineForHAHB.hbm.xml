@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class catalog="kinton"
+		name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.VirtualMachineForHAHB"
+		table="virtualmachine_for_ha">
+		
+		<id name="id" type="java.lang.Integer">
+			<column name="id" />
+			<generator class="identity" />
+		</id>
+		
+		<many-to-one
+			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB"
+			lazy="false" fetch="select" name="virtualMachine">
+			<column name="idVirtualMachine" not-null="true" />
+		</many-to-one>
+		
+		<many-to-one
+			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
+			lazy="false" fetch="select" name="machine">
+			<column name="idMachine" not-null="true" />
+		</many-to-one>
+	</class>
+</hibernate-mapping>

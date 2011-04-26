@@ -78,6 +78,10 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end : appliance manager -->
     
+    <!-- ha management -->
+    <orm:entity class="com.abiquo.server.core.infrastructure.VirtualMachineForHA"></orm:entity>
+    <!-- end : ha management -->
+    
     <!-- tasks -->
     <orm:entity class="com.abiquo.server.core.tasks.Task"/>
 

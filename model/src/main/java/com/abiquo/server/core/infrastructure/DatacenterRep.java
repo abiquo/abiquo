@@ -320,10 +320,6 @@ public class DatacenterRep extends DefaultRepBase
 
     public void updateMachine(Machine machine)
     {
-        assert machine != null;
-        assert this.machineDao.isManaged(machine);
-        assert !existsAnyOtherMachineWithName(machine, machine.getName()) : BUG_UPDATE_MACHINE_NAME_MUST_BE_UNIQUE;
-
         this.machineDao.flush();
     }
 

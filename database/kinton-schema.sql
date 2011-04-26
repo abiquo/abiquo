@@ -1681,6 +1681,21 @@ CREATE TABLE  `kinton`.`license` (
   PRIMARY KEY (`idLicense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Definition of table `kinton`.`virtualmachine_for_ha`
+--
+DROP TABLE IF EXISTS `kinton`.`virtualmachine_for_ha`;
+CREATE TABLE  `kinton`.`virtualmachine_for_ha` (
+    `id` int(10) unsigned NOT NULL auto_increment,
+    `idVirtualMachine` int(10) unsigned NOT NULL, 
+    `idMachine` int(20) unsigned NOT NULL,
+    `version_c` int(11) default 0,
+    PRIMARY KEY (`id`),
+    KEY `virtualmachine_for_ha_FK1` (`idVirtualMachine`),
+    KEY `virtualmachine_for_ha_FK2` (`idMachine`),
+    CONSTRAINT `virtualmachine_for_ha_FK1` FOREIGN KEY (`idVirtualMachine`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE,
+    CONSTRAINT `virtualmachine_for_ha_FK2` FOREIGN KEY (`idMachine`) REFERENCES `physicalmachine` (`idPhysicalMachine`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- THE WONDERFUL WORLD OF TRIGGERS

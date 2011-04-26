@@ -19,38 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.api.exceptions;
+package com.abiquo.server.core.infrastructure;
 
-import java.lang.annotation.Annotation;
+import javax.persistence.EntityManager;
 
-/**
- * @author jdevesa
- *
- */
-public class InvalidParameterConstraint
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+
+@Repository("jpaVirtualMachineForHADAO")
+public class VirtualMachineForHADAO extends DefaultDAOBase<Integer, VirtualMachineForHA>
 {
-    private Annotation annotation;
-    
-    private String messageError;
-    
-    public void setMessageError(String messageError)
+    public VirtualMachineForHADAO()
     {
-        this.messageError = messageError;
+        super(VirtualMachineForHA.class);
     }
-    public String getMessageError()
+
+    public VirtualMachineForHADAO(EntityManager entityManager)
     {
-        return messageError;
-    }
-    
-    public void setAnnotation(Annotation annotation)
-    {
-        this.annotation = annotation;
-    }
-    public Annotation getAnnotation()
-    {
-        return annotation;
+        super(VirtualMachineForHA.class, entityManager);
     }
 }
