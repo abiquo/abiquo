@@ -126,12 +126,13 @@ import com.abiquo.server.core.util.PagedList;
             throw new Exception(ex.getMessage());
         }
 
-        String orderBy = defineOrderBySQL(orderByEnum, filters.getAsc());
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
 
         Query query = getSession().getNamedQuery("VOLUMES_BY_VDC");
 
+        String req = query.getQueryString() + orderBy;
         // Add order filter to the query
-        Query queryWithOrder = getSession().createQuery(query.getQueryString() + orderBy);
+        Query queryWithOrder = getSession().createQuery(req);
         queryWithOrder.setInteger("vdcId", vdc.getId());
         queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
             + filters.getFilter() + "%");
@@ -184,7 +185,7 @@ import com.abiquo.server.core.util.PagedList;
         Query query =
             getSession().createSQLQuery(
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
-                    + defineOrderBySQL(orderByEnum, filters.getAsc()));
+                    + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
         query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
             + filters.getFilter() + "%");
@@ -223,11 +224,11 @@ import com.abiquo.server.core.util.PagedList;
         return result;
     }
 
-    private String defineOrderBySQL(final VolumeManagement.OrderByEnum orderBy, final Boolean asc)
+    private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
         queryString.append(" order by ");
-        queryString.append(orderBy.getColumn());
+        queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
@@ -241,5 +242,4 @@ import com.abiquo.server.core.util.PagedList;
 
         return queryString.toString();
     }
-
 }

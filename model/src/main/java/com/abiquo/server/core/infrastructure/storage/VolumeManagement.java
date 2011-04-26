@@ -309,20 +309,30 @@ public class VolumeManagement extends RasdManagement
 
     public static enum OrderByEnum
     {
+        NAME("elementname", "vol.rasd.elementName"), ID("idman", "vol.id"), VIRTUALDATACENTER(
+            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname",
+            "vol.virtualMachine.name"), VIRTUALAPPLIANCE("vaname", "vapp.name"), TIER("tier",
+            "vol.storagePool.tier.name"), TOTALSIZE("size", "vol.rasd.limit"), AVAILABLESIZE(
+            "available", "vol.rasd.reservation"), USEDSIZE("used", "vol.usedSizeInMB");
 
-        NAME("elementname"), ID("idman"), VIRTUALDATACENTER("vdcname"), VIRTUALMACHINE("vmname"), VIRTUALAPPLIANCE(
-            "vaname"), TIER("tier"), TOTALSIZE("size"), AVAILABLESIZE("available"), USEDSIZE("used");
+        private String columnSQL;
 
-        private String column;
+        private String columnHQL;
 
-        private OrderByEnum(final String column)
+        private OrderByEnum(final String columnSQL, final String columnHQL)
         {
-            this.column = column;
+            this.columnSQL = columnSQL;
+            this.columnHQL = columnHQL;
         }
 
-        public String getColumn()
+        public String getColumnSQL()
         {
-            return column;
+            return columnSQL;
+        }
+
+        public String getColumnHQL()
+        {
+            return columnHQL;
         }
     }
 }
