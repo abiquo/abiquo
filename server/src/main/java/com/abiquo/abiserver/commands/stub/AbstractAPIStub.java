@@ -71,6 +71,16 @@ public class AbstractAPIStub
         this.apiUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
     }
 
+    public UserSession getCurrentSession()
+    {
+        return currentSession;
+    }
+
+    public void setCurrentSession(final UserSession currentSession)
+    {
+        this.currentSession = currentSession;
+    }
+
     protected ClientResponse get(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).get();

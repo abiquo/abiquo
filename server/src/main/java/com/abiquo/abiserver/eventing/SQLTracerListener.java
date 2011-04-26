@@ -54,11 +54,14 @@ public class SQLTracerListener implements TracerCallback
         parameterMappings.put("volume", "volumes");
         parameterMappings.put("network", "");
         parameterMappings.put("subnet", "");
-        parameterMappings.put("enterprise", "admin/enterprises");
-        parameterMappings.put("user", "users");
         parameterMappings.put("virtualDatacenter", "cloud/virtualdatacenters");
         parameterMappings.put("virtualApp", "");
         parameterMappings.put("virtualMachine", "");
+
+        // TODO: Uncomment this. Currently the hierarchy shows the enterprise and user who performs
+        // the action. Not the enterprise/user resource where the action happens!
+        // parameterMappings.put("enterprise", "admin/enterprises");
+        // parameterMappings.put("user", "users");
     }
 
     @Override
@@ -87,6 +90,13 @@ public class SQLTracerListener implements TracerCallback
                     .setParameter("component", trace.getComponent()).setParameter("stacktrace",
                         trace.getMessage());
 
+            // TODO: Remove these parameters. Currently the hierarchy shows the enterprise and user
+            // who performs the action. Not the enterprise/user resource where the action happens!
+            query.setParameter("enterpriseId", trace.getEnterpriseId());
+            query.setParameter("enterprise", trace.getEnterpriseName());
+            query.setParameter("userId", trace.getUserId());
+            query.setParameter("user", trace.getUsername());
+
             addTraceParameters(trace, query);
 
             query.executeUpdate();
@@ -108,12 +118,13 @@ public class SQLTracerListener implements TracerCallback
                 String column = entry.getKey();
                 String traceKey = entry.getValue();
 
+                String parameterId = null;
+                String parameterName = null;
+
                 // Can eb empty if the processor still does not exist
                 if (!traceKey.equals(""))
                 {
                     String parameterData = trace.getHierarchyData().get(traceKey);
-                    String parameterId = null;
-                    String parameterName = null;
 
                     // If the parameter is present, parse the info; otherwise set it to null
                     if (parameterData != null)
@@ -122,10 +133,10 @@ public class SQLTracerListener implements TracerCallback
                         parameterId = parameterData.substring(0, separator);
                         parameterName = parameterData.substring(separator + 1);
                     }
-
-                    query.setParameter(column + "Id", parameterId);
-                    query.setParameter(column, parameterName);
                 }
+
+                query.setParameter(column + "Id", parameterId);
+                query.setParameter(column, parameterName);
             }
         }
     }
