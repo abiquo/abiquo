@@ -369,7 +369,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
