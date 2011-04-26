@@ -313,6 +313,7 @@ public class HyperVMachineTest extends AbsMachineTest
 //            proc.create("cmd.exe /C mkdir C:\\test452");
             
             proc.create("C:\\command.cmd");
+//            proc.create("powershell mkdir venga");
             // Generic failure Exception occurred. [0x80020009]
             
             
@@ -330,7 +331,14 @@ public class HyperVMachineTest extends AbsMachineTest
 
     }
     
+    /**
+     * Works OK
+     * 
+     * @throws Exception
+     */
     public void copyFolder() throws Exception{
+        
+//        detectFile("C:\\command.cmd");
         
         hypervisor = instantiateHypervisor();
 
@@ -344,11 +352,11 @@ public class HyperVMachineTest extends AbsMachineTest
             // SWbemServices cimService = hyperV.getVirtualizationService();
 
             SWbemServices cimService = hyperV.getCIMService();
-            // SWbemServices cimService = hyperV.getWMIService();
+//             SWbemServices cimService = hyperV.getWMIService();
 
 
-            // 3. Sending a command
-            IJIDispatch disp = getCIMDataFile(hyperV, "command.cmd");
+            // 3. Copying an existing file
+            IJIDispatch disp = getCIMDataFile(hyperV, "C:\\command.cmd".toLowerCase().replace("\\", "\\\\"));
             CIMDataFile folder = new CIMDataFile(disp,cimService);
             folder.copy("C:\\carpeta2");
             // Generic failure Exception occurred. [0x80020009]
@@ -382,9 +390,9 @@ public class HyperVMachineTest extends AbsMachineTest
         // System.out.println("test.detectFile(): " + test.detectFile("C:\\folder"));
         
         
-//        test.createFolder("C:\\fistropecador");
+        test.createFolder("C:\\fistropecador");
         
-        test.copyFolder();
+//        test.copyFolder();
     }
     
     /**
