@@ -105,6 +105,26 @@ public class Enterprise extends DefaultEntityWithLimits
         this.name = name;
     }
 
+    public final static String IS_RESTRICTED_RESERVATION_PROPERTY = "isReservationRestricted";
+
+    private final static boolean IS_RESTRICTED_RESERVATION_REQUIRED = false;
+
+    private final static String IS_RESTRICTED_RESERVATION_COLUMN = "isReservationRestricted";
+
+    @Column(name = IS_RESTRICTED_RESERVATION_COLUMN, nullable = !IS_RESTRICTED_RESERVATION_REQUIRED)
+    private boolean isReservationRestricted;
+
+    @Required(value = IS_RESTRICTED_RESERVATION_REQUIRED)
+    public boolean getIsReservationRestricted()
+    {
+        return this.isReservationRestricted;
+    }
+
+    public void setIsReservationRestricted(boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
+    }
+
     public final static String REPOSITORY_SOFT_PROPERTY = "repositorySoft";
 
     /* package */final static String REPOSITORY_SOFT_COLUMN = "repositorySoft";
@@ -172,6 +192,7 @@ public class Enterprise extends DefaultEntityWithLimits
         long hdSoftLimitInMb, int ramHardLimitInMb, int cpuCountHardLimit, long hdHardLimitInMb)
     {
         setName(name);
+        setIsReservationRestricted(Boolean.FALSE);
         setRamLimitsInMb(new Limit((long) ramSoftLimitInMb, (long) ramHardLimitInMb));
         setHdLimitsInMb(new Limit(hdSoftLimitInMb, hdHardLimitInMb));
         setCpuCountLimits(new Limit((long) cpuCountSoftLimit, (long) cpuCountHardLimit));
@@ -186,16 +207,16 @@ public class Enterprise extends DefaultEntityWithLimits
 
     // I don't want to access the users directly but I want to remove them in cascade
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private List<User> users = new ArrayList<User>();
+    private final List<User> users = new ArrayList<User>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private List<DatacenterLimits> datacenterLimits = new ArrayList<DatacenterLimits>();
+    private final List<DatacenterLimits> datacenterLimits = new ArrayList<DatacenterLimits>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private List<VirtualImage> virtualImages = new ArrayList<VirtualImage>();
+    private final List<VirtualImage> virtualImages = new ArrayList<VirtualImage>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();
+    private final List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();
 
     public User createUser(Role role, String name, String surname, String email, String nick,
         String password, String locale)
