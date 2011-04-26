@@ -133,6 +133,15 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         disks = new VmwareMachineDisk(utils, vmConfig, vmwareConfig);
     }
 
+    
+    @Override
+    public void deployMachineExistingDisk() throws VirtualMachineException
+    {
+        // TODO ABICLOUDPREMIUM-1533
+        
+    }
+    
+    
     @Override
     public void deployMachine() throws VirtualMachineException
     {
