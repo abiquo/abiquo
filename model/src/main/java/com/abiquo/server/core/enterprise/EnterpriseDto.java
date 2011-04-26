@@ -93,4 +93,5 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     {
         this.isReservationRestricted = isReservationRestricted;
     }
+
 }

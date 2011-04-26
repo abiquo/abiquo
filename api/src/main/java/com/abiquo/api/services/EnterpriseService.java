@@ -56,7 +56,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.api.spring.security.AbiquoUserDetails;
 
 @Service
 @Transactional(readOnly = true)
@@ -90,27 +89,28 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
-    
+
     /**
-    * Based on the spring authentication context.
-    * 
-    * @see SecurityContextHolder
-    */
-//   public Enterprise getCurrentEnterprise()
-//   {
-//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
-//       
-//       User user = userService.getCurrentUser();
-//       
-//       return user.getEnterprise();
-//       
-////       Enterprise enterprise = repo.findById(id);
-////       if (enterprise == null)
-////       {
-////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-////       }
-//
-//   }
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
 
     public Collection<Enterprise> getEnterprises(String filterName, Integer offset,
         Integer numResults)
@@ -140,13 +140,14 @@ public class EnterpriseService extends DefaultApiService
 
         Enterprise enterprise =
             new Enterprise(dto.getName(),
-                (int) dto.getRamSoftLimitInMb(),
-                (int) dto.getCpuCountSoftLimit(),
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
                 dto.getHdSoftLimitInMb(),
-                (int) dto.getRamHardLimitInMb(),
-                (int) dto.getCpuCountHardLimit(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
                 dto.getHdHardLimitInMb());
 
+        enterprise.setIsReservationRestricted(dto.isReservationRestricted());
         enterprise.setStorageLimits(new Limit(dto.getStorageSoft(), dto.getStorageHard()));
         enterprise.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
@@ -166,7 +167,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-//        userService.checkEnterpriseAdminCredentials(enterprise);
+        // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
@@ -211,8 +212,6 @@ public class EnterpriseService extends DefaultApiService
         repo.update(old);
         return old;
     }
-
-    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEnterprise(Integer id)
@@ -356,7 +355,7 @@ public class EnterpriseService extends DefaultApiService
             addValidationErrors(limit.getValidationErrors());
             flushErrors();
         }
-        
+
         isValidDatacenterLimit(limit);
 
         repo.insertLimit(limit);
@@ -370,7 +369,7 @@ public class EnterpriseService extends DefaultApiService
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
         DatacenterLimits old = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
-        
+
         old.setRamLimitsInMb(new Limit((long) dto.getRamSoftLimitInMb(), (long) dto
             .getRamHardLimitInMb()));
         old.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
@@ -389,19 +388,16 @@ public class EnterpriseService extends DefaultApiService
         }
 
         isValidDatacenterLimit(old);
-        
+
         repo.updateLimit(old);
 
         return old;
     }
-    
-    
+
     protected void isValidDatacenterLimit(DatacenterLimits dcLimits)
     {
         // community dummy impl (no limit check)
     }
-    
-    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deleteDatacenterLimits(Integer enterpriseId, Integer limitId)
@@ -446,10 +442,10 @@ public class EnterpriseService extends DefaultApiService
 
         flushErrors();
     }
-    
+
     protected void isValidEnterpriseLimit(Enterprise old)
     {
         // community dummy impl (no limit check)
-        
+
     }
 }
