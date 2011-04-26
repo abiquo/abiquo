@@ -118,7 +118,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
     {
-        return virtualApplianceRepo.findByVirtualApplianceByVirtualMachine(virtualMachine);
+        return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
 
     /**

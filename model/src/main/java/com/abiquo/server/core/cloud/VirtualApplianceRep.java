@@ -54,9 +54,14 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
     }
 
-    public VirtualAppliance findByVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance findVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
     {
         return nodeVirtualImageDao.findVirtualAppliance(virtualMachine);
+    }
+
+    public VirtualAppliance findById(Integer id)
+    {
+        return virtualApplianceDao.findById(id);
     }
 
     public void updateVirtualAppliance(VirtualAppliance virtualAppliance)
