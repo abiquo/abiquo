@@ -30,9 +30,7 @@ public class HATask implements Queuable
 
     protected int machineId;
 
-    protected int virtualMachineId;
-
-    protected int virtualApplianceId;
+    protected int rackId;
 
     public int getDatacenterId()
     {
@@ -54,24 +52,14 @@ public class HATask implements Queuable
         this.machineId = machineId;
     }
 
-    public int getVirtualMachineId()
+    public int getRackId()
     {
-        return virtualMachineId;
+        return rackId;
     }
 
-    public void setVirtualMachineId(int virtualMachineId)
+    public void setRackId(int rackId)
     {
-        this.virtualMachineId = virtualMachineId;
-    }
-
-    public int getVirtualApplianceId()
-    {
-        return virtualApplianceId;
-    }
-
-    public void setVirtualApplianceId(int virtualApplianceId)
-    {
-        this.virtualApplianceId = virtualApplianceId;
+        this.rackId = rackId;
     }
 
     @Override
