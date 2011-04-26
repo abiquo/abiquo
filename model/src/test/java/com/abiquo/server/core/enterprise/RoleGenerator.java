@@ -32,6 +32,10 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 {
     PrivilegeGenerator privilegeGenerator;
 
+    public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
+
+    public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
+
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -48,9 +52,23 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     @Override
     public Role createUniqueInstance()
     {
-        Privilege p = privilegeGenerator.createInstance();
-        return createInstance(p);
+        // Privilege p = privilegeGenerator.createInstance();
+        // return createInstance(p);
 
+        return createInstanceSysAdmin();
+    }
+
+    public Role createInstanceSysAdmin()
+    {
+        Privilege p1 = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
+        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        return createInstance(p1, p2);
+    }
+
+    public Role createInstanceEnterprisAdmin()
+    {
+        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        return createInstance(p2);
     }
 
     public Role createInstance()

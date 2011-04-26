@@ -26,12 +26,12 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 
 import org.springframework.security.context.SecurityContextHolder;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
-import com.abiquo.api.common.AuthenticationStub;
+import com.abiquo.api.common.BasicUserAuthentication;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.UserService;
@@ -48,14 +48,15 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 
 public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 {
-    @Override
-    @AfterMethod
-    public void tearDown()
+    @BeforeMethod
+    public void setupBasicUser()
     {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "hypervisor", "physicalmachine", "rack", "datacenter", "network", "user", "role",
-            "enterprise");
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance();
+        User u = userGenerator.createInstance(e, r, "basicUser", "basicUser");
+        setup(e, r, u);
+
+        SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
 
     @Test
@@ -132,8 +133,8 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 
         setup(role, user);
 
-        SecurityContextHolder.getContext()
-            .setAuthentication(new AuthenticationStub(user.getNick()));
+        SecurityContextHolder.getContext().setAuthentication(
+            new BasicUserAuthentication(user.getNick()));
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
 
@@ -162,6 +163,9 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
         UserService userService = new UserService(em);
 
         User currentUser = userService.getCurrentUser();
+
+        commitActiveTransaction(em);
+
         Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
             "," + virtualDatacenter.getId()));
     }

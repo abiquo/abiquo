@@ -106,7 +106,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
         for (Object entity : entities)
         {
@@ -142,7 +142,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected void tearDown(final String... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
 
         for (String entity : entities)
@@ -176,6 +176,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         {
             EntityManagerHolder emHolder = unbind(emf);
             em = emHolder.getEntityManager();
+
             if (!em.isOpen())
             {
                 em = emf.createEntityManager();
@@ -186,20 +187,29 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             em = emf.createEntityManager();
             TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
         }
+
         return em;
     }
 
-    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    protected void commitActiveTransaction(final EntityManager em)
     {
-        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+        if (em.getTransaction().isActive())
+        {
+            em.getTransaction().commit();
+        }
     }
 
-    private void closeActiveTransaction(final EntityManager em)
+    protected void rollbackActiveTransaction(final EntityManager em)
     {
         if (em.getTransaction().isActive())
         {
             em.getTransaction().rollback();
         }
+    }
+
+    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    {
+        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
     }
 
 }

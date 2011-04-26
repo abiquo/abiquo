@@ -102,7 +102,8 @@ CREATE  TABLE `kinton`.`roles_privileges` (
     FOREIGN KEY (`idPrivilege` )
     REFERENCES `kinton`.`privilege` (`idPrivilege` )
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `kinton`.`roles_privileges`

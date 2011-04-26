@@ -94,6 +94,7 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
+        securityService = new SecurityService();
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,

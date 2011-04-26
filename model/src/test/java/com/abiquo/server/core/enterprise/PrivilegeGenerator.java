@@ -30,6 +30,7 @@ import com.softwarementors.commons.testng.AssertEx;
 public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
 {
 
+    private static final String OTHER_ENTERPRISES_PRIVILEGE = "OTHER_ENTERPRISES_PRIVILEGE";
 
     public PrivilegeGenerator(final SeedGenerator seed)
     {
