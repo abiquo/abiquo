@@ -45,7 +45,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     }
 
     @Override
-    protected UserDAO createDao(EntityManager entityManager)
+    protected UserDAO createDao(final EntityManager entityManager)
     {
         return new UserDAO(entityManager);
     }
@@ -73,8 +73,13 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     {
         User user = eg().createUserWithSession();
         User userWithoutSession = eg().createInstance(user.getEnterprise(), user.getRole());
-        ds().persistAll(user.getEnterprise(), user.getRole(), user, userWithoutSession);
 
+        for (Privilege privilege : user.getRole().getPrivileges())
+        {
+            ds().persistAll(privilege);
+
+        }
+        ds().persistAll(user.getEnterprise(), user.getRole(), user, userWithoutSession);
         UserDAO dao = createDaoForRollbackTransaction();
 
         Collection<User> users = dao.find(user.getEnterprise(), null, null, false, true, 0, 25);
