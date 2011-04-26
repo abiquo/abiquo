@@ -57,7 +57,6 @@
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualImageConversionsHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualApplianceConversionsHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkAssignmentHB.hbm.xml"/>
-    <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/VirtualMachineForHAHB.hbm.xml"/>
     
  <!-- Workload Engine -->
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/workload/EnterpriseExclusionRuleHB.hbm.xml"/>
