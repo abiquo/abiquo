@@ -23,40 +23,40 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.List;
 
-import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
+import javax.persistence.EntityManager;
 
-public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+
+@Repository("jpaRoleLdapDAO")
+public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 {
-
-    public PrivilegeGenerator(final SeedGenerator seed)
+    public RoleLdapDAO()
     {
-        super(seed);
+        super(RoleLdap.class);
     }
 
-    @Override
-    public void assertAllPropertiesEqual(final Privilege obj1, final Privilege obj2)
+    public RoleLdapDAO(final EntityManager entityManager)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Privilege.NAME_PROPERTY);
+        super(RoleLdap.class, entityManager);
     }
 
-    @Override
-    public Privilege createUniqueInstance()
+    public RoleLdap findByRoleLdap(final String roleLdap)
     {
-        String name = newString(nextSeed(), Privilege.NAME_LENGTH_MIN, Privilege.NAME_LENGTH_MAX);
-
-        Privilege privilege = new Privilege(name);
-
-        return privilege;
+        List<RoleLdap> rls = findByCriterions(sameRoleLdap(roleLdap));
+        if (rls == null || rls.isEmpty() || rls.size() > 1)
+        {
+            // TODO: throw error (more than 1 results)
+        }
+        return rls.get(0);
     }
 
-    @Override
-    public void addAuxiliaryEntitiesToPersist(final Privilege entity,
-        final List<Object> entitiesToPersist)
+    private Criterion sameRoleLdap(final String roleLdap)
     {
-        super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
+        return Restrictions.eq(RoleLdap.ROLE_LDAP_PROPERTY, roleLdap);
     }
 
 }

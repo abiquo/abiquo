@@ -74,6 +74,7 @@ public class UserService extends DefaultApiService
     public UserService(final EntityManager em)
     {
         repo = new EnterpriseRep(em);
+        securityService = new SecurityService();
     }
 
     /**

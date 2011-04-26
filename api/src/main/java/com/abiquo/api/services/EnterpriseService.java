@@ -53,6 +53,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -463,6 +464,22 @@ public class EnterpriseService extends DefaultApiService
         // TODO scastro
         // userService.checkCurrentPrivilege(privilege);
         return privilege;
+    }
+
+    public Collection<Privilege> getAllPrivileges()
+    {
+        return repo.findAllPrivileges();
+    }
+
+    public RoleLdap getRoleLdap(final String role_ldap)
+    {
+        RoleLdap roleLdap = repo.findRoleLdapByRoleLdap(role_ldap);
+        if (roleLdap == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_ROLELDAP);
+        }
+
+        return roleLdap;
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)

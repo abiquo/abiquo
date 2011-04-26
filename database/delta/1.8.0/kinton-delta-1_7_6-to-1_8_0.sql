@@ -124,11 +124,12 @@ UNLOCK TABLES;
 --
 
 CREATE  TABLE `kinton`.`role_ldap` (
+  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
   `idRole` INT(10) UNSIGNED NOT NULL ,
   `role_ldap` VARCHAR(128) NOT NULL ,
   `version_c` int(11) default 0,
+  PRIMARY KEY (`idRole_ldap`) ,
   INDEX `fk_role_ldap_role` (`idRole` ASC) ,
-  PRIMARY KEY (`idRole`, `role_ldap`) ,
   CONSTRAINT `fk_role_ldap_role`
     FOREIGN KEY (`idRole` )
     REFERENCES `kinton`.`role` (`idRole` )

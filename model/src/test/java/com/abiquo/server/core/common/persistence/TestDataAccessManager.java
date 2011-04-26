@@ -37,6 +37,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.Session;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -140,7 +141,7 @@ public class TestDataAccessManager
             Hypervisor.class, Datastore.class, Machine.class, Rack.class, StoragePool.class,
             Tier.class, StorageDevice.class, RemoteService.class, Repository.class,
             CloudUsage.class, Datacenter.class, Network.class, SystemProperty.class, Rasd.class,
-            License.class, Task.class, Privilege.class);
+            License.class, Task.class, Privilege.class, RoleLdap.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

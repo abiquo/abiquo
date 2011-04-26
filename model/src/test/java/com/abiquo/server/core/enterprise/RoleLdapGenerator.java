@@ -27,35 +27,43 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
+public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
 {
 
-    public PrivilegeGenerator(final SeedGenerator seed)
+    RoleGenerator roleGenerator;
+
+    public RoleLdapGenerator(final SeedGenerator seed)
     {
         super(seed);
+        roleGenerator = new RoleGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(final Privilege obj1, final Privilege obj2)
+    public void assertAllPropertiesEqual(final RoleLdap obj1, final RoleLdap obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Privilege.NAME_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RoleLdap.ROLE_LDAP_PROPERTY);
     }
 
     @Override
-    public Privilege createUniqueInstance()
+    public RoleLdap createUniqueInstance()
     {
-        String name = newString(nextSeed(), Privilege.NAME_LENGTH_MIN, Privilege.NAME_LENGTH_MAX);
+        String role_ldap =
+            newString(nextSeed(), RoleLdap.ROLE_LDAP_LENGTH_MIN, RoleLdap.ROLE_LDAP_LENGTH_MAX);
 
-        Privilege privilege = new Privilege(name);
+        RoleLdap roleLdap = new RoleLdap(role_ldap, roleGenerator.createUniqueInstance());
 
-        return privilege;
+        return roleLdap;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(final Privilege entity,
+    public void addAuxiliaryEntitiesToPersist(final RoleLdap entity,
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        Role role = entity.getRole();
+        roleGenerator.addAuxiliaryEntitiesToPersist(role, entitiesToPersist);
+        entitiesToPersist.add(role);
 
     }
 

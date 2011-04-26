@@ -34,8 +34,10 @@ import com.abiquo.api.common.SysadminAuthenticationStub;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.ExtendedAPIException;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
@@ -53,7 +55,11 @@ public class UserServiceTest extends AbstractGeneratorTest
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        r = roleGenerator.createInstance();
+        r =
+            roleGenerator.createInstance(
+                new Privilege(SecurityService.OTHER_ENTERPRISES_PRIVILEGE),
+                new Privilege(SecurityService.OTHER_USERS_PRIVILEGE));
+
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
 
