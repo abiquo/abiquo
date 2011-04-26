@@ -84,12 +84,12 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         this.repositoryHard = hard;
     }
 
-    public boolean isReservationRestricted()
+    public boolean getIsReservationRestricted()
     {
         return isReservationRestricted;
     }
 
-    public void setReservationRestricted(boolean isReservationRestricted)
+    public void setIsReservationRestricted(boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }

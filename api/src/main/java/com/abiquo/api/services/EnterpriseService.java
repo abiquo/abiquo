@@ -147,7 +147,11 @@ public class EnterpriseService extends DefaultApiService
                 dto.getCpuCountHardLimit(),
                 dto.getHdHardLimitInMb());
 
+<<<<<<< HEAD
         enterprise.setIsReservationRestricted(dto.isReservationRestricted());
+=======
+        enterprise.setIsReservationRestricted(dto.getIsReservationRestricted());
+>>>>>>> ABICLOUDPREMIUM-1598
         enterprise.setStorageLimits(new Limit(dto.getStorageSoft(), dto.getStorageHard()));
         enterprise.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));

@@ -188,6 +188,7 @@ public class EnterpriseResource extends AbstractResource
         dto.setStorageSoft(e.getStorageSoft());
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
+        dto.setIsReservationRestricted(e.getIsReservationRestricted());
 
         dto = addLinks(restBuilder, dto);
         return dto;
