@@ -912,6 +912,19 @@
 		selected-up-skin:		Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png");
 		selected-disabled-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/selected_over_skin.png");
 	}
+
+	.StandardDisabledByHAButton
+	{
+		up-skin:				Embed("/assets/customcomponents/buttons/standardhadisable/up_skin.png");
+		over-skin:				Embed("/assets/customcomponents/buttons/standardhadisable/over_skin.png");
+		down-skin:				Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png");
+		disabled-skin:			Embed("/assets/customcomponents/buttons/standardhadisable/disabled_skin.png");
+		
+		selected-over-skin:     Embed("/assets/customcomponents/buttons/standardhadisable/selected_over_skin.png");
+		selected-down-skin:		Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png");
+		selected-up-skin:		Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png");
+		selected-disabled-skin: Embed("/assets/customcomponents/buttons/standardhadisable/selected_over_skin.png");
+	}
 	
 	.StandardPauseButton
 	{
