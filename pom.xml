@@ -37,6 +37,7 @@
 
     <!-- Aggregations. Common modules -->
     <modules>
+<!--
         <module>vsm</module>
         <module>database</module>
         <module>model</module>
@@ -46,6 +47,7 @@
         <module>virtualfactory</module>
         <module>api</module>
         <module>commons-amqp</module>
+-->
     </modules>
 
     <!--                                      -->

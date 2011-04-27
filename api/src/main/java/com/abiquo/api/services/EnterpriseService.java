@@ -196,6 +196,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         old.setName(dto.getName());
+        old.setIsReservationRestricted(dto.getIsReservationRestricted());
         old.setRamLimitsInMb(new Limit((long) dto.getRamSoftLimitInMb(), (long) dto
             .getRamHardLimitInMb()));
         old.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
