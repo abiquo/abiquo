@@ -38,12 +38,11 @@ public class SecurityService
 
     public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
 
-    public static final String ROLES_PRIVILEGE = "USERS_MANAGE_ROLES";
-
-    public static final String OTHER_ENTERPRISES_ROLES_PRIVILEGE =
-        "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
-
-    public static final String SYSTEM_ROLES_PRIVILEGE = "USERS_MANAGE_SYSTEM_ROLES";
+    /*
+     * public static final String ROLES_PRIVILEGE = "USERS_MANAGE_ROLES"; public static final String
+     * OTHER_ENTERPRISES_ROLES_PRIVILEGE = "USERS_MANAGE_ROLES_OTHER_ENTERPRISES"; public static
+     * final String SYSTEM_ROLES_PRIVILEGE = "USERS_MANAGE_SYSTEM_ROLES";
+     */
 
     public boolean hasPrivilege(final String privilege)
     {

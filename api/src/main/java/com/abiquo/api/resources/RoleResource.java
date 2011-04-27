@@ -51,8 +51,8 @@ public class RoleResource extends AbstractResource
     RoleService service;
 
     @GET
-    public RoleDto getRole(@PathParam(ROLE) Integer roleId, @Context IRESTBuilder restBuilder)
-        throws Exception
+    public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Role role = service.getRole(roleId);
 
@@ -66,8 +66,8 @@ public class RoleResource extends AbstractResource
 
     // @PUT
     // Not supported yet
-    public RoleDto modifyRole(RoleDto role, @PathParam(ROLE) Integer roleId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public RoleDto modifyRole(final RoleDto role, @PathParam(ROLE) final Integer roleId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Role r = service.modifyRole(roleId, role);
 
@@ -76,28 +76,35 @@ public class RoleResource extends AbstractResource
 
     // @DELETE
     // Not supported yet
-    public void deleteRole(@PathParam(ROLE) Integer roleId)
+    public void deleteRole(@PathParam(ROLE) final Integer roleId)
     {
         service.removeRole(roleId);
     }
 
-    private static RoleDto addLinks(IRESTBuilder restBuilder, RoleDto role)
-    {
-        role.setLinks(restBuilder.buildRoleLinks(role));
+    // private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role)
+    // {
+    // role.setLinks(restBuilder.buildRoleLinks(role));
+    //
+    // return role;
+    // }
 
+    private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role,
+        final Integer enterpriseId)
+    {
+        role.setLinks(restBuilder.buildRoleLinks(enterpriseId, role));
         return role;
     }
 
-    public static RoleDto createTransferObject(Role role, IRESTBuilder restBuilder)
+    public static RoleDto createTransferObject(final Role role, final IRESTBuilder restBuilder)
         throws Exception
     {
         RoleDto dto = ModelTransformer.transportFromPersistence(RoleDto.class, role);
-
-        dto = addLinks(restBuilder, dto);
+        dto = addLinks(restBuilder, dto, role.getEnterprise().getId());
+        // dto = addLinks(restBuilder, dto);
         return dto;
     }
 
-    public static Role createPersistenceObject(RoleDto role) throws Exception
+    public static Role createPersistenceObject(final RoleDto role) throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Role.class, role);
     }

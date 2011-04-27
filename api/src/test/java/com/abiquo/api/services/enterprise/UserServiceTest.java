@@ -67,7 +67,7 @@ public class UserServiceTest extends AbstractGeneratorTest
         tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
             "vlan_network", "network_configuration", "dhcp_service", "virtualmachine",
             "hypervisor", "physicalmachine", "rack", "datacenter", "virtualimage", "user",
-            "enterprise", "role");
+            "enterprise", "role", "privilege");
     }
 
     @Test

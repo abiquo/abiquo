@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
@@ -98,5 +99,28 @@ public class RoleService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
         enterpriseRep.deleteRole(role);
+    }
+
+    private Enterprise findEnterprise(final Integer enterpriseId)
+    {
+        Enterprise enterprise = enterpriseRep.findById(enterpriseId);
+        if (enterprise == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+        }
+        return enterprise;
+    }
+
+    public Collection<Role> getRolesByEnterprise(final int enterpriseId, final String filter,
+        final String order, final boolean desc, final boolean connected, final Integer page,
+        final Integer numResults)
+    {
+
+        Enterprise enterprise = null;
+        if (enterpriseId != 0)
+        {
+            enterprise = findEnterprise(Integer.valueOf(enterpriseId));
+        }
+        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, false, 0, 25);
     }
 }

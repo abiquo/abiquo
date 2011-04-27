@@ -27,7 +27,10 @@ import java.util.Collection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RolesDto;
+import com.abiquo.server.core.util.PagedList;
 
 @Path(RolesResource.ROLES_PATH)
 @Controller
@@ -49,8 +53,11 @@ public class RolesResource extends AbstractResource
     @Autowired
     private RoleService service;
 
+    @Context
+    UriInfo uriInfo;
+
     @GET
-    public RolesDto getRoles(@Context IRESTBuilder restBuilder) throws Exception
+    public RolesDto getRoles(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Role> all = service.getRoles();
         RolesDto roles = new RolesDto();
@@ -66,9 +73,51 @@ public class RolesResource extends AbstractResource
         return roles;
     }
 
+    @GET
+    public RolesDto getRoles(@PathParam(EnterpriseResource.ENTERPRISE) final int enterpriseId,
+        @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
+        @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
+        @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        if (page == null)
+        {
+            page = 0;
+        }
+
+        if (numResults == null)
+        {
+            numResults = DEFAULT_PAGE_LENGTH;
+        }
+
+        Collection<Role> all =
+            service.getRolesByEnterprise(enterpriseId, filter, orderBy, desc, connected, page,
+                numResults);
+        RolesDto roles = new RolesDto();
+
+        if (all != null && !all.isEmpty())
+        {
+            for (Role r : all)
+            {
+                roles.add(createTransferObject(r, restBuilder));
+            }
+
+            if (all instanceof PagedList< ? >)
+            {
+                PagedList<Role> list = (PagedList<Role>) all;
+                roles.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                    list));
+                roles.setTotalSize(list.getTotalResults());
+            }
+        }
+
+        return roles;
+    }
+
     // @POST
     // Not supported yet
-    public RoleDto postRole(RoleDto role, @Context IRESTBuilder restBuilder) throws Exception
+    public RoleDto postRole(final RoleDto role, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Role r = service.addRole(role);
 
