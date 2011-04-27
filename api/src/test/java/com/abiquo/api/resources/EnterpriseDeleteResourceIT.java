@@ -36,6 +36,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
@@ -46,7 +47,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance();
+        Role r = roleGenerator.createUniqueInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -54,8 +55,12 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(e);
         entitiesToSetup.add(r);
         entitiesToSetup.add(u);
-
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
         setup(entitiesToSetup.toArray());
+
     }
 
     @Test
@@ -109,7 +114,19 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void shouldDeleteEnterpriseWhenContainsUsers()
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getEnterprise(), user.getRole(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user.getRole());
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveEnterpriseURI(user.getEnterprise().getId());
 
