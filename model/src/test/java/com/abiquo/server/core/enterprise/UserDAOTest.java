@@ -21,7 +21,9 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -74,12 +76,18 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         User user = eg().createUserWithSession();
         User userWithoutSession = eg().createInstance(user.getEnterprise(), user.getRole());
 
+        List<Object> entitiesToPersist = new ArrayList<Object>();
         for (Privilege privilege : user.getRole().getPrivileges())
         {
-            ds().persistAll(privilege);
-
+            entitiesToPersist.add(privilege);
         }
-        ds().persistAll(user.getEnterprise(), user.getRole(), user, userWithoutSession);
+        entitiesToPersist.add(user.getEnterprise());
+        entitiesToPersist.add(user.getRole());
+        entitiesToPersist.add(user);
+        entitiesToPersist.add(userWithoutSession);
+
+        ds().persistAll(entitiesToPersist.toArray());
+
         UserDAO dao = createDaoForRollbackTransaction();
 
         Collection<User> users = dao.find(user.getEnterprise(), null, null, false, true, 0, 25);
