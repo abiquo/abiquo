@@ -25,13 +25,16 @@ import static com.abiquo.api.common.UriTestResolver.resolveRolesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RolesDto;
 
@@ -43,7 +46,16 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
     public void getRolesList() throws Exception
     {
         Role role = roleGenerator.createUniqueInstance();
-        setup(role);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+
+        setup(entitiesToSetup.toArray());
 
         Resource resource = client.resource(rolesURI).accept(MediaType.APPLICATION_XML);
 

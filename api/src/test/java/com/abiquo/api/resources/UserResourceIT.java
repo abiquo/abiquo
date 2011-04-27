@@ -31,6 +31,9 @@ import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.testng.Assert;
@@ -45,6 +48,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
@@ -56,23 +60,43 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance();
-
+        Role r = roleGenerator.createInstanceSysAdmin();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
     public void getUser() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin");
         UserDto dto = response.getEntity(UserDto.class);
 
-        assertEquals(200, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 200);
         assertNotNull(dto);
     }
 
@@ -80,11 +104,22 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getUserDoesntExist() throws Exception
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveUserURI(user.getEnterprise().getId(), 123), "sysadmin", "sysadmin");
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
     }
@@ -93,10 +128,21 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getUserWithWrongEnterprise() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response = get(resolveUserURI(1234, user.getId()), "sysadmin", "sysadmin");
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
     }
@@ -105,7 +151,18 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void userContainCorrectLinks() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String href = resolveUserURI(user.getEnterprise().getId(), user.getId());
         String enterpriseUri = resolveEnterpriseURI(user.getEnterprise().getId());
@@ -127,7 +184,18 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void modifyUser() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
@@ -139,14 +207,25 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
 
         UserDto modified = response.getEntity(UserDto.class);
-        assertEquals("name", modified.getName());
+        assertEquals(modified.getName(), "name");
     }
 
     @Test
     public void modifyUserDoesntExist() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
@@ -158,14 +237,25 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         response = put(uri, dto, "sysadmin", "sysadmin");
 
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test
     public void modifyUserEmailIsNotValid() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
@@ -182,7 +272,18 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void modifyUserWrongEnterprise() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
         ClientResponse response = get(uri, "sysadmin", "sysadmin");
@@ -196,7 +297,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         response = put(uri, dto, "sysadmin", "sysadmin");
 
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
 
         assertNonEmptyErrors(response.getEntity(ErrorsDto.class));
 
@@ -204,47 +305,80 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         dto = get(uri, "sysadmin", "sysadmin").getEntity(UserDto.class);
 
-        assertEquals(old, dto.getName());
+        assertEquals(dto.getName(), old);
     }
 
     @Test
     public void removeUser() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             delete(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin",
                 "sysadmin");
-        assertEquals(204, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 204);
     }
 
     @Test
     public void removeUserDoesntExist() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             delete(resolveUserURI(user.getEnterprise().getId(), 1234), "sysadmin", "sysadmin");
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test
     public void removeUserWrongEnterprise() throws ClientWebException
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             delete(resolveUserURI(1234, user.getId()), "sysadmin", "sysadmin");
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 404);
 
         response =
             get(resolveUserURI(user.getEnterprise().getId(), user.getId()), "sysadmin", "sysadmin");
         UserDto dto = response.getEntity(UserDto.class);
 
-        assertEquals(200, response.getStatusCode());
+        assertEquals(response.getStatusCode(), 200);
         assertNotNull(dto);
     }
 
@@ -252,10 +386,25 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesByUser()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
-        setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
-            .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(),
-            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(vm.getEnterprise());
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm.getHypervisor().getMachine());
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+
+        setup(entitiesToSetup.toArray());
 
         String uri =
             resolveUserActionGetVirtualMachinesURI(vm.getEnterprise().getId(), vm.getUser().getId());
@@ -284,7 +433,23 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         Role r2 = roleGenerator.createInstance();
 
         User user = userGenerator.createInstance(r1);
-        setup(r1, r2, user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : r1.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r1);
+        for (Privilege p : r2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r2);
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String userURI = resolveUserURI(user.getEnterprise().getId(), user.getId());
         String roleURI = resolveRoleURI(r2.getId());
@@ -309,7 +474,18 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         Role r = roleGenerator.createUniqueInstance();
         User u = userGenerator.createInstance(e1, r);
 
-        setup(e1, e2, r, u);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(e1);
+        entitiesToSetup.add(e2);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
 
         UserDto dto = UserResource.createTransferObject(u);
 
