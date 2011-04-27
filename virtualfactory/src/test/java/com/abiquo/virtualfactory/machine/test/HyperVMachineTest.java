@@ -31,6 +31,7 @@ import org.jinterop.dcom.core.JIString;
 import org.jinterop.dcom.core.JIVariant;
 import org.jinterop.dcom.impls.JIObjectFactory;
 import org.jinterop.dcom.impls.automation.IJIDispatch;
+import org.jinterop.dcom.impls.automation.JIExcepInfo;
 
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.virtualfactory.hypervisor.impl.HyperVHypervisor;
@@ -56,7 +57,7 @@ public class HyperVMachineTest extends AbsMachineTest
         VirtualDisk virtualDisk =
             new VirtualDisk(diskId,
                 diskLocation,
-                diskCapacity,
+                diskCapacity, 
                 targetDatastore,
                 "",
                 DiskFormat.VHD_FLAT.getDiskFormatUri()); // XXX: Disk format ?
@@ -244,18 +245,19 @@ public class HyperVMachineTest extends AbsMachineTest
 
     }
 
+
     /**
-     * Creates a folder in datastore to
+     * Creates a folder in a remote Win32 System by invoking a Win32_Process
      * 
-     * @return an instance of {@link CIMDataFile}
+     * @param folder it can include full (including drive letter) or relative path for the directory being created
      * @throws Exception
      */
     public void createFolder(String folder) throws Exception
     {
-        // if (detectFile(folder)) {
-        // log.info("Folder " + folder + " already exists. ");
-        // return;
-        // }
+         if (detectFile(folder)) {
+             log.info("Folder " + folder + " already exists. ");
+             return;
+         }
 
         hypervisor = instantiateHypervisor();
 
@@ -263,65 +265,27 @@ public class HyperVMachineTest extends AbsMachineTest
         hypervisor.login(hvUser, hvPassword);
         hypervisor.connect(new URL(hvURL));
         HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
-        // deleteFile(hyperV.getCIMService(),
-        // "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
 
         try
         {
-            // SWbemServices cimService = hyperV.getVirtualizationService();
 
             SWbemServices cimService = hyperV.getCIMService();
-            // SWbemServices cimService = hyperV.getWMIService();
-
-            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
-            // "Win32_CreateFolderAction");
-            //            
-            // disp.put("DirectoryName", new JIVariant(new JIString("C:\\")));
-            // disp.put("Name", new JIVariant(new JIString("fistropecador")));
-
-            // FAILS with 'Provider is not capable of the attempted operation'
-            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
-            // "Win32_Directory");
-            //          
-            // disp.put("Drive", new JIVariant(new JIString("C:")));
-            // disp.put("Name", new JIVariant(new JIString("fistropecador")));
-
-            // disp.get
-            //          
-            // cimService.getObjectDispatcher().callMethod("Create_", disp)
-
-            // disp.callMethod("Put_", null);
-
-            //                        
-            // IJIDispatch disp = HyperVUtils.createNewInstance(cimService.getObjectDispatcher(),
-            // "Win32_Process");
-            //              
-            // // disp.put("CommandLine", new JIVariant(new JIString("mkdir cobarde")));
-            // // disp.put("Name", new JIVariant(new JIString("fistropecador")));
-            //              
-            // // cimService.getObjectDispatcher().callMethodA("Create", disp);
-            //                
-            // JIVariant[] var = disp.callMethodA("Create", new Object[] {new
-            // JIString("cmd.exe /c md c:\test452")});
-            //                
-            // System.out.println(var.length);
-
-            // 3. Sending a command
-            IJIDispatch disp =
-                HyperVUtils.createNewInstance(cimService.getObjectDispatcher(), "Win32_Process");
-            Win32Process proc = new Win32Process(disp, cimService);
-//            proc.create("cmd.exe /C mkdir C:\\test452");
             
-            proc.create("C:\\command.cmd");
-//            proc.create("powershell mkdir venga");
-            // Generic failure Exception occurred. [0x80020009]
+            // Sending a command to a Win32Process
             
+            IJIDispatch instanceClass =
+                (IJIDispatch) JIObjectFactory.narrowObject(cimService.getObjectDispatcher().callMethodA("Get",
+                    new Object[] {new JIString("Win32_Process")})[0].getObjectAsComObject().queryInterface(
+                    IJIDispatch.IID));
+            // Win32_Process do not need to be instanced (SpawnInstance_)
             
+            Win32Process proc = new Win32Process(instanceClass, cimService);
+            proc.create("cmd.exe /C mkdir " + folder);
 
         }
         catch (Exception e)
         {
-            log.error("FAIL!!");
+            log.error("CreateFolder was not possible !!");
             e.printStackTrace();
         }
    
@@ -349,19 +313,13 @@ public class HyperVMachineTest extends AbsMachineTest
 
         try
         {
-            // SWbemServices cimService = hyperV.getVirtualizationService();
-
             SWbemServices cimService = hyperV.getCIMService();
-//             SWbemServices cimService = hyperV.getWMIService();
-
 
             // 3. Copying an existing file
             IJIDispatch disp = getCIMDataFile(hyperV, "C:\\command.cmd".toLowerCase().replace("\\", "\\\\"));
             CIMDataFile folder = new CIMDataFile(disp,cimService);
             folder.copy("C:\\carpeta2");
             // Generic failure Exception occurred. [0x80020009]
-            
-            
 
         }
         catch (Exception e)
@@ -431,5 +389,6 @@ public class HyperVMachineTest extends AbsMachineTest
         // return new CIMDataFile(dispatch, service);
 
     }
+   
 
 }

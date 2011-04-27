@@ -319,5 +319,6 @@ public class HyperVUtils
 
         return (IJIDispatch) JIObjectFactory.narrowObject(tmp[0].getObjectAsComObject()
             .queryInterface(IJIDispatch.IID));
+
     }
 }
