@@ -47,7 +47,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance();
+        Role r = roleGenerator.createUniqueInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -55,8 +55,12 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(e);
         entitiesToSetup.add(r);
         entitiesToSetup.add(u);
-
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
         setup(entitiesToSetup.toArray());
+
     }
 
     @Test
@@ -114,6 +118,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(user.getEnterprise());
+
         for (Privilege p : user.getRole().getPrivileges())
         {
             entitiesToSetup.add(p);
