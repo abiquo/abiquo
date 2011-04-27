@@ -25,6 +25,9 @@ import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +48,14 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         Enterprise e = enterpriseGenerator.createUniqueInstance();
         Role r = roleGenerator.createInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(e);
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
@@ -62,7 +72,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         response = get(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 404);
 
-        tearDown("user", "role", "enterprise");
+        tearDown("user", "role", "privilege", "enterprise");
     }
 
     @Test

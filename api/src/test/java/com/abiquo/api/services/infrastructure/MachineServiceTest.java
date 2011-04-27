@@ -23,9 +23,11 @@ package com.abiquo.api.services.infrastructure;
 
 import static com.abiquo.server.core.cloud.State.RUNNING;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
@@ -41,6 +43,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -48,14 +51,14 @@ import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 public class MachineServiceTest extends AbstractGeneratorTest
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ip_pool_management", "rasd_management", "virtualapp", "nodevirtualimage", "node",
-            "virtualmachine", "virtualimage", "virtualdatacenter", "vlan_network",
-            "network_configuration", "dhcp_service", "remote_service", "hypervisor",
-            "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
-    }
+    // @AfterMethod
+    // public void tearDown()
+    // {
+    // tearDown("ip_pool_management", "rasd_management", "virtualapp", "nodevirtualimage", "node",
+    // "virtualmachine", "virtualimage", "virtualdatacenter", "vlan_network",
+    // "network_configuration", "dhcp_service", "remote_service", "hypervisor",
+    // "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
+    // }
 
     @Test
     public void testDeleteMachineWithVirtualMachinesDeployed()
@@ -77,9 +80,26 @@ public class MachineServiceTest extends AbstractGeneratorTest
 
         hypervisor.getMachine().setHypervisor(hypervisor);
 
-        setup(vdc.getEnterprise(), datacenter, rm, hypervisor.getMachine().getRack(), hypervisor
-            .getMachine(), hypervisor, vdc, image, vapp, vm.getUser().getRole(), vm.getUser(), vm,
-            node);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(vdc.getEnterprise());
+        entitiesToPersist.add(datacenter);
+        entitiesToPersist.add(rm);
+        entitiesToPersist.add(hypervisor.getMachine().getRack());
+        entitiesToPersist.add(hypervisor.getMachine());
+        entitiesToPersist.add(hypervisor);
+        entitiesToPersist.add(vdc);
+        entitiesToPersist.add(image);
+        entitiesToPersist.add(vapp);
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(vm.getUser().getRole());
+        entitiesToPersist.add(vm.getUser());
+        entitiesToPersist.add(vm);
+        entitiesToPersist.add(node);
+
+        setup(entitiesToPersist.toArray());
 
         int machineId = hypervisor.getMachine().getId();
 
@@ -105,7 +125,8 @@ public class MachineServiceTest extends AbstractGeneratorTest
 
         VirtualMachineService vmService = new VirtualMachineService(em);
 
-        VirtualMachine virtualMachine = vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
+        VirtualMachine virtualMachine =
+            vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         Assert.assertNull(virtualMachine.getHypervisor());
         Assert.assertNull(virtualMachine.getDatastore());
         Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);

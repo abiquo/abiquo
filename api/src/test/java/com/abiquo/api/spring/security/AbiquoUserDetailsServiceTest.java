@@ -83,7 +83,7 @@ public class AbiquoUserDetailsServiceTest extends AbstractGeneratorTest
     @Test
     public void testLoadUserAuthoritiesWithoutRoles() throws Exception
     {
-        Role role = roleGenerator.createUniqueInstance();
+        Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(role);
         setup(role, user.getEnterprise(), user);
 
