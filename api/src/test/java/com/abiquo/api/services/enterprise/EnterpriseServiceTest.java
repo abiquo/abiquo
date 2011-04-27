@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
-import com.abiquo.api.common.SysadminAuthenticationStub;
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ExtendedAPIException;
 import com.abiquo.api.exceptions.NotFoundException;
@@ -61,7 +61,7 @@ public class EnterpriseServiceTest extends AbstractGeneratorTest
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
 
-        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthenticationStub());
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
     }
 
     @Override

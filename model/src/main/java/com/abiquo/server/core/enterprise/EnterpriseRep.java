@@ -62,6 +62,9 @@ public class EnterpriseRep extends DefaultRepBase
     private RoleDAO roleDAO;
 
     @Autowired
+    private RoleLdapDAO roleLdapDAO;
+
+    @Autowired
     private UserDAO userDAO;
 
     @Autowired
@@ -86,6 +89,7 @@ public class EnterpriseRep extends DefaultRepBase
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);
+        roleLdapDAO = new RoleLdapDAO(entityManager);
     }
 
     public void insert(final Enterprise enterprise)
@@ -248,6 +252,26 @@ public class EnterpriseRep extends DefaultRepBase
     public Privilege findPrivilegeById(final Integer id)
     {
         return privilegeDAO.findById(id);
+    }
+
+    public RoleLdap findRoleLdapByRoleLdap(final String roleLdap)
+    {
+        return roleLdapDAO.findByRoleLdap(roleLdap);
+    }
+
+    public void insertRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.persist(roleLdap);
+    }
+
+    public void updateRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.flush();
+    }
+
+    public void deleteRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.remove(roleLdap);
     }
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)

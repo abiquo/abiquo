@@ -129,7 +129,7 @@ public class UserService extends DefaultApiService
             // view their enterprise, so force it if necessary. Here we won't fail, because no id
             // was provided in the request
             // if (user.getRole().getType() != Role.Type.SYS_ADMIN)
-            if (securityService.canManageOtherUsers())
+            if (!securityService.canManageOtherEnterprises())
             {
                 enterprise = user.getEnterprise();
             }
@@ -391,8 +391,8 @@ public class UserService extends DefaultApiService
         //
         // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
         // || (role == Role.Type.USER && user.getId() != selfUser.getId()))
-        if (securityService.canManageOtherUsers()
-            && !enterprise.equals(user.getEnterprise())
+        if ((!securityService.canManageOtherEnterprises() && securityService.canManageOtherUsers() && enterprise
+            .getId().intValue() != user.getEnterprise().getId().intValue())
             || (!securityService.canManageOtherEnterprises()
                 && !securityService.canManageOtherUsers() && user.getId() != selfUser.getId()))
 

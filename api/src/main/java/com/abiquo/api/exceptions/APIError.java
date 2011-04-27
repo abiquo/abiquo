@@ -111,6 +111,9 @@ public enum APIError
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
 
+    // ROLE
+    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"),
+
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",

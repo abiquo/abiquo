@@ -40,11 +40,11 @@ public class Privilege extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "privilege";
 
-    protected Privilege()
+    public Privilege()
     {
     }
 
-    protected Privilege(final String name)
+    public Privilege(final String name)
     {
         super();
         this.name = name;

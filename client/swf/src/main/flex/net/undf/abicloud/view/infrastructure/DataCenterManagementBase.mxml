@@ -167,7 +167,8 @@
             protected function onCreationComplete():void
             {
                 //Check privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'visible',manageDCTools);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',addButton,manageDCTools);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',deleteButton,manageDCTools);
                 
                 //Creating Pop Ups				
                 this._datacenterFormAdd = new DatacenterFormAdd();
