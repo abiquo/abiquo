@@ -79,8 +79,6 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
-import com.abiquo.server.core.infrastructure.storage.StoragePool;
-import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.PagedList;
 
@@ -369,9 +367,8 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
-    @Override
-    public List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
-        final Integer datacenterId, final Integer enterpriseId)
+    protected List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
+        final Integer datacenterId, final Integer enterpriseId, final RESTLinkBuilder builder)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -381,7 +378,6 @@ public class RESTBuilder implements IRESTBuilder
         params.put(DatacenterResource.DATACENTER, datacenterId.toString());
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
 
-        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualDatacenterResource.class, REL_EDIT, params));
 
         links.add(builder.buildRestLink(PrivateNetworksResource.class,
@@ -399,6 +395,14 @@ public class RESTBuilder implements IRESTBuilder
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO, "dhcpinfo", params));
 
         return links;
+    }
+
+    @Override
+    public List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        return buildVirtualDatacenterLinks(vdc, datacenterId, enterpriseId, builder);
     }
 
     @Override
@@ -529,7 +533,7 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildPaggingLinks(final String absolutePath, final PagedList list)
+    public List<RESTLink> buildPaggingLinks(final String absolutePath, final PagedList< ? > list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -666,7 +670,13 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildVolumeLinks(final VolumeManagement volume)
+    public List<RESTLink> buildVolumeInfrastructureLinks(final VolumeManagement volume)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
     {
         return null;
     }

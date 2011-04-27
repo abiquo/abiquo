@@ -22,10 +22,13 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "volume")
+@XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
+"availableSizeInMB", "usedSizeInMB", "idScsi"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;

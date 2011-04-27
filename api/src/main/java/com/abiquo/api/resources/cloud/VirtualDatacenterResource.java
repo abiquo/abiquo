@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources.cloud;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -75,8 +74,9 @@ public class VirtualDatacenterResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public VirtualDatacenterDto getVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) Integer id,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public VirtualDatacenterDto getVirtualDatacenter(
+        @PathParam(VIRTUAL_DATACENTER) final Integer id, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         VirtualDatacenter vdc = service.getVirtualDatacenter(id);
 
@@ -89,15 +89,16 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @PUT
-    public VirtualDatacenterDto updateVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) Integer id,
-        VirtualDatacenterDto dto, @Context IRESTBuilder restBuilder) throws Exception
+    public VirtualDatacenterDto updateVirtualDatacenter(
+        @PathParam(VIRTUAL_DATACENTER) final Integer id, final VirtualDatacenterDto dto,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualDatacenter vdc = service.updateVirtualDatacenter(id, dto);
         return createTransferObject(vdc, restBuilder);
     }
 
     @DELETE
-    public void deleteVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) Integer id)
+    public void deleteVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id)
     {
         service.deleteVirtualDatacenter(id);
     }
@@ -106,10 +107,11 @@ public class VirtualDatacenterResource extends AbstractResource
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
-        @PathParam(VIRTUAL_DATACENTER) Integer id, @QueryParam(START_WITH) Integer startwith,
-        @QueryParam(BY) String orderBy, @QueryParam(FILTER) String filter,
-        @QueryParam(LIMIT) Integer limit, @QueryParam(ASC) Boolean desc_or_asc,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VIRTUAL_DATACENTER) final Integer id,
+        @QueryParam(START_WITH) final Integer startwith, @QueryParam(BY) final String orderBy,
+        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) final Integer limit,
+        @QueryParam(ASC) final Boolean desc_or_asc, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         // Set query Params by default if they are not informed
         Integer firstElem = (startwith == null) ? 0 : startwith;
@@ -142,9 +144,8 @@ public class VirtualDatacenterResource extends AbstractResource
 
     @GET
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO)
-    public String getDHCPInfoByVirtualDatacenter(
-        @PathParam(VIRTUAL_DATACENTER) Integer id, @Context IRESTBuilder restBuilder)
-        throws Exception
+    public String getDHCPInfoByVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<IpPoolManagement> all =
             ipService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
@@ -162,8 +163,7 @@ public class VirtualDatacenterResource extends AbstractResource
             if (!ipPool.getMac().contains(":"))
             {
                 String unformattedMA = ipPool.getMac();
-                StringBuilder formattedMA =
-                    new StringBuilder(unformattedMA.substring(0, 2) + ":");
+                StringBuilder formattedMA = new StringBuilder(unformattedMA.substring(0, 2) + ":");
                 formattedMA.append(unformattedMA.substring(2, 4) + ":");
                 formattedMA.append(unformattedMA.substring(4, 6) + ":");
                 formattedMA.append(unformattedMA.substring(6, 8) + ":");
@@ -183,16 +183,16 @@ public class VirtualDatacenterResource extends AbstractResource
         return formattedData.toString();
     }
 
-    private static VirtualDatacenterDto addLinks(IRESTBuilder builder, VirtualDatacenterDto vdc,
-        Integer datacenterId, Integer enterpriseId)
+    private static VirtualDatacenterDto addLinks(final IRESTBuilder builder,
+        final VirtualDatacenterDto vdc, final Integer datacenterId, final Integer enterpriseId)
     {
         vdc.setLinks(builder.buildVirtualDatacenterLinks(vdc, datacenterId, enterpriseId));
 
         return vdc;
     }
 
-    public static VirtualDatacenterDto createTransferObject(VirtualDatacenter vdc,
-        IRESTBuilder builder) throws Exception
+    public static VirtualDatacenterDto createTransferObject(final VirtualDatacenter vdc,
+        final IRESTBuilder builder) throws Exception
     {
         VirtualDatacenterDto response = createTransferObject(vdc);
         response =
@@ -201,7 +201,7 @@ public class VirtualDatacenterResource extends AbstractResource
         return response;
     }
 
-    public static VirtualDatacenterDto createTransferObject(VirtualDatacenter vdc)
+    public static VirtualDatacenterDto createTransferObject(final VirtualDatacenter vdc)
     {
         VirtualDatacenterDto response = new VirtualDatacenterDto();
         response.setId(vdc.getId());

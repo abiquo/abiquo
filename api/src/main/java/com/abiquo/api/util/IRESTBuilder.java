@@ -47,8 +47,6 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
-import com.abiquo.server.core.infrastructure.storage.StoragePool;
-import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.util.PagedList;
 
@@ -103,8 +101,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty);
 
-    @SuppressWarnings("unchecked")
-    public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList list);
+    public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList< ? > list);
 
     public RESTLink buildEnterpriseLink(Integer enterpriseId);
 
@@ -121,5 +118,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildIpRasdLinks(IpPoolManagement ip);
 
-    public List<RESTLink> buildVolumeLinks(final VolumeManagement volume);
+    public List<RESTLink> buildVolumeInfrastructureLinks(final VolumeManagement volume);
+
+    public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
 }
