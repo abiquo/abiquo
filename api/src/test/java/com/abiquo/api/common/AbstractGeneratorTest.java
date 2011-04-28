@@ -43,6 +43,7 @@ import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
+import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
@@ -103,6 +104,8 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected PrivilegeGenerator privilegeGenerator = new PrivilegeGenerator(seed);
 
+    protected RoleLdapGenerator roleLdapGenerator = new RoleLdapGenerator(seed);
+
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
@@ -128,8 +131,8 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
-            "workload_fit_policy_rule", "network", "session", "user", "roles_privileges", "role",
-            "privilege", "enterprise", "enterprise_limits_by_datacenter",
+            "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
+            "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
             "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
             "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
             "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",

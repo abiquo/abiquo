@@ -21,10 +21,12 @@
 
 package com.abiquo.api.services.enterprise;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.springframework.security.context.SecurityContextHolder;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,7 +41,9 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
@@ -62,13 +66,6 @@ public class EnterpriseServiceTest extends AbstractGeneratorTest
         setup(e, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
-    }
-
-    @Override
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ovf_package", "ovf_package_list", "apps_library", "user", "enterprise", "role");
     }
 
     @Test(enabled = false)
@@ -127,6 +124,31 @@ public class EnterpriseServiceTest extends AbstractGeneratorTest
             Assert.assertEquals(e.getErrors().iterator().next(),
                 APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);
         }
+
+    }
+
+    @Test
+    public void getRoleLdap()
+    {
+        RoleLdap rl = roleLdapGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : rl.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(rl.getRole());
+        entitiesToSetup.add(rl);
+
+        setup(entitiesToSetup.toArray());
+
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        EnterpriseService service = new EnterpriseService(em);
+
+        RoleLdap roleLdap = service.getRoleLdap(rl.getRoleLdap());
+        Assert.assertNotNull(roleLdap);
+        Assert.assertEquals(roleLdap.getId(), rl.getId());
 
     }
 }
