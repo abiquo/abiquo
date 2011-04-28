@@ -54,7 +54,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -82,7 +81,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(dataProvider = "createDatastoreProvider")
-    public void postDatastore(DatastoreDto dto)
+    public void postDatastore(final DatastoreDto dto)
     {
         ClientResponse response = createDatastore(dto);
 
@@ -112,8 +111,8 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(dataProvider = "createDatastoreProviderWithDuplicatedField")
-    public void createDatastoreWithDuplicatedField(DatastoreDto dto1, DatastoreDto dto2,
-        String errorCode)
+    public void createDatastoreWithDuplicatedField(final DatastoreDto dto1,
+        final DatastoreDto dto2, final String errorCode)
     {
         createDatastore(dto1);
         ClientResponse response = createDatastore(dto2);
@@ -133,7 +132,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
     }
 
-    private ClientResponse createDatastore(DatastoreDto dto)
+    private ClientResponse createDatastore(final DatastoreDto dto)
     {
         Machine machine = machineGenerator.createMachineIntoRack();
         setup(machine.getDatacenter(), machine.getRack(), machine);
@@ -145,14 +144,14 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
         return createDatastore(uri, dto);
     }
 
-    private ClientResponse createDatastore(String datastoresUri, DatastoreDto dto)
+    private ClientResponse createDatastore(final String datastoresUri, final DatastoreDto dto)
     {
         Resource resource = client.resource(datastoresUri).accept(MediaType.APPLICATION_XML);
         return resource.contentType(MediaType.APPLICATION_XML).post(dto);
     }
 
-    private DatastoreDto createDatastoreDto(String name, String rootPath, String directory,
-        boolean enabled, boolean shared)
+    private DatastoreDto createDatastoreDto(final String name, final String rootPath,
+        final String directory, final boolean enabled, final boolean shared)
     {
         DatastoreDto dto = new DatastoreDto();
         dto.setName(name);
