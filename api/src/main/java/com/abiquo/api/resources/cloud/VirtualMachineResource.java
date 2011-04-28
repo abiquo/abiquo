@@ -147,7 +147,6 @@ public class VirtualMachineResource extends AbstractResource
         return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
     }
 
-    // TODO forceEnterpriseLimits = true
 
     @PUT
     @Path("action/checkedit")

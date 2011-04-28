@@ -174,6 +174,20 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return machines.size();
     }
 
+    
+    /**
+     *Used during HA, selects a machine different of the ''originalHypervisorId'' with the same
+     * ''datastoreUuid'' enabled. 
+     */
+    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
+        Long hdRequiredOnDatastore, Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+       {
+        
+        return null;
+       }
+    
+    
+    
     public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
         Long hdRequiredOnDatastore, Enterprise enterprise)
     {
@@ -335,6 +349,44 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         flush();
     }
 
+    
+    
+
+    private final static String QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL = //
+        "SELECT m FROM " + //
+            "com.abiquo.server.core.infrastructure.Machine m, " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
+            "com.abiquo.server.core.cloud.Hypervisor h " + //
+            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
+            "WHERE m = h.machine " + //
+            "AND h.type = vdc.hypervisorType " + //
+            "AND dc.id = vdc.datacenter.id " + //
+            "AND m.rack.id = :idRack " + //
+            "AND vdc.id = :idVirtualDataCenter " + //
+            "AND m.state = :state " + // reserved machines
+            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
+            "AND h.id != :originalHypervisorId";
+    
+    
+    private final static String QUERY_CANDIDATE_DATASTORE_HA_DATASTOREUUID = //
+        "  SELECT py.id FROM "
+            + //
+            "  com.abiquo.server.core.infrastructure.Datastore datastore, "
+            + //
+            "  com.abiquo.server.core.infrastructure.Machine py "
+            + //
+            "    WHERE py.id in (:candidates)"
+            + "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
+            "    AND py in elements(datastore.machines) " + //
+            "    AND datastore.size > datastore.usedSize " + //
+            "    AND datastore.enabled = true " + //
+            "    AND datastore.datastoreUuid = :datastoreUuid";
+    
+    
+    
+    
+    ///
+    
     private final static String QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE = //
         "SELECT m.id FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
@@ -415,7 +467,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
-
+    
+    
     private final static String QUERY_CANDIDATE_DATASTORE = //
         "  SELECT py.id FROM "
             + //
