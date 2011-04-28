@@ -212,18 +212,18 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
-    // public List<RESTLink> buildRoleLinks(RoleDto role)
-    // {
-    // List<RESTLink> links = new ArrayList<RESTLink>();
-    //
-    // Map<String, String> params =
-    // Collections.singletonMap(RoleResource.ROLE, role.getId().toString());
-    //
-    // RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
-    // links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
-    //
-    // return links;
-    // }
+    public List<RESTLink> buildRoleLinks(final RoleDto role)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(RoleResource.ROLE, role.getId().toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
+
+        return links;
+    }
 
     @Override
     public List<RESTLink> buildRoleLinks(final Integer enterpriseId, final RoleDto role)
