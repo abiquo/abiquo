@@ -28,8 +28,10 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacentersURI
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
@@ -49,6 +51,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enumerator.HypervisorType;
@@ -65,10 +68,23 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         sysEnterprise = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance();
+        Role r = roleGenerator.createUniqueInstance();
 
         User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
-        setup(sysEnterprise, r, u);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(sysEnterprise);
+
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+
     }
 
     @Test
