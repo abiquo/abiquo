@@ -25,6 +25,9 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.User;
+
 /**
  * Security Service to check user privileges
  * 
@@ -34,9 +37,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class SecurityService
 {
-    public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
+    public static final String OTHER_ENTERPRISES_PRIVILEGE =
+        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_OTHER_ENTERPRISES";
 
-    public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
+    public static final String OTHER_USERS_PRIVILEGE = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
+        + "USERS_MANAGE_OTHER_USERS";
 
     /*
      * public static final String ROLES_PRIVILEGE = "USERS_MANAGE_ROLES"; public static final String
@@ -49,6 +54,21 @@ public class SecurityService
         return AuthorityUtils.userHasAuthority(privilege);
     }
 
+    public boolean hasPrivilege(final String privilege, final User user)
+    {
+        if (user.getRole().getPrivileges() != null)
+        {
+            for (Privilege p : user.getRole().getPrivileges())
+            {
+                if (p.getName().equals(privilege))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean canManageOtherEnterprises()
     {
         return hasPrivilege(OTHER_ENTERPRISES_PRIVILEGE);
@@ -57,6 +77,31 @@ public class SecurityService
     public boolean canManageOtherUsers()
     {
         return hasPrivilege(OTHER_USERS_PRIVILEGE);
+    }
+
+    public boolean canManageOtherEnterprises(final User user)
+    {
+        return hasPrivilege(OTHER_ENTERPRISES_PRIVILEGE, user);
+    }
+
+    public boolean canManageOtherUsers(final User user)
+    {
+        return hasPrivilege(OTHER_USERS_PRIVILEGE, user);
+    }
+
+    public boolean isCloudAdmin()
+    {
+        return canManageOtherEnterprises();
+    }
+
+    public boolean isEnterpriseAdmin()
+    {
+        return !canManageOtherEnterprises() && canManageOtherUsers();
+    }
+
+    public boolean isStandardUser()
+    {
+        return !canManageOtherEnterprises() && !canManageOtherUsers();
     }
 
     public boolean hasPrivilegeForEnterprise(final String privilege, final Integer idEnterprise)

@@ -98,11 +98,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
      */
     protected GrantedAuthority[] loadUserAuthorities(final User user)
     {
-        // String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
-        // return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
-
         List<Privilege> privileges = user.getRole().getPrivileges();
-
         ArrayList<String> grantedAuthority = new ArrayList<String>();
 
         if (privileges == null)
@@ -111,12 +107,11 @@ public class AbiquoUserDetailsService implements UserDetailsService
         }
         for (Privilege privilege : privileges)
         {
-            grantedAuthority.add(privilege.getName());
+            grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
         }
 
         return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
             .toArray(new String[privileges.size()]));
-
     }
 
 }

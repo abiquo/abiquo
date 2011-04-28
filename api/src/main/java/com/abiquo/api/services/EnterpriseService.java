@@ -32,7 +32,6 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,34 +94,12 @@ public class EnterpriseService extends DefaultApiService
         datacenterService = new DatacenterService(em);
     }
 
-    /**
-     * Based on the spring authentication context.
-     * 
-     * @see SecurityContextHolder
-     */
-    // public Enterprise getCurrentEnterprise()
-    // {
-    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
-    // SecurityContextHolder.getContext().getAuthentication();
-    //
-    // User user = userService.getCurrentUser();
-    //
-    // return user.getEnterprise();
-    //
-    // // Enterprise enterprise = repo.findById(id);
-    // // if (enterprise == null)
-    // // {
-    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-    // // }
-    //
-    // }
-
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (securityService.canManageOtherUsers())
+        if (!securityService.isEnterpriseAdmin())
         {
             return Collections.singletonList(user.getEnterprise());
         }
