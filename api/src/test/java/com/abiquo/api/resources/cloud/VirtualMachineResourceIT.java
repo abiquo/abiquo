@@ -27,6 +27,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -46,10 +47,8 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -62,13 +61,13 @@ import com.abiquo.scheduler.AllocatorAction;
 import com.abiquo.scheduler.PopulateTestCase;
 import com.abiquo.scheduler.TestPopulate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.tracer.Constants;
@@ -96,7 +95,7 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     @BeforeClass
     public static void setUpServer() throws Exception
-   {
+    {
         ClientConfig conf = new ClientConfig();
         conf.readTimeout(CLIENT_TIMEOUT);
         client = new RestClient(conf);
@@ -120,7 +119,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     }
 
     @Test(enabled = false, dataProvider = TestPopulate.DATA_PROVIDER)
-    public void allocator(List<String> model)
+    public void allocator(final List<String> model)
     {
         PopulateTestCase tcase = setUpModel(model);
 
@@ -134,7 +133,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     }
 
     @Test(dataProvider = TestPopulate.DATA_PROVIDER, enabled = false)
-    public void allocatorConcurrent(List<String> model)
+    public void allocatorConcurrent(final List<String> model)
     {
         PopulateTestCase tcase = setUpModel(model);
 
@@ -175,9 +174,36 @@ public class VirtualMachineResourceIT extends TestPopulate
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm2.getUser().getRole(),
-            vm.getUser(), vm2.getUser(), vm.getVirtualImage(), vm2.getVirtualImage(), vm, vm2, nvi,
-            nvi2);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        for (Privilege p : vm2.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm2.getUser().getRole());
+        entitiesToSetup.add(vm2.getUser());
+        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2);
+        entitiesToSetup.add(nvi2);
+
+        setup(entitiesToSetup.toArray());
 
         // Check for vm
         ClientResponse response =
@@ -227,8 +253,25 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm.getUser(),
-            vm.getVirtualImage(), vm, nvi);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         // Check the vm has been succesfully created
         ClientResponse response =
@@ -252,8 +295,25 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm.getUser(),
-            vm.getVirtualImage(), vm, nvi);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         // Check the vm has been succesfully created
         ClientResponse response =
@@ -278,8 +338,25 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm.getUser(),
-            vm.getVirtualImage(), vm, nvi);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()));
@@ -314,8 +391,25 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm.getUser(),
-            vm.getVirtualImage(), vm, nvi);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(),
@@ -333,8 +427,25 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        setup(ent, datacenter, vdc, vapp, vm.getUser().getRole(), vm.getUser(),
-            vm.getVirtualImage(), vm, nvi);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(),
@@ -346,7 +457,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         AllocatorAction action;
 
-        public AllocatorActionRunner(AllocatorAction action)
+        public AllocatorActionRunner(final AllocatorAction action)
         {
             this.action = action;
         }
@@ -359,7 +470,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         }
     }
 
-    private void allocatorAction(AllocatorAction action)
+    private void allocatorAction(final AllocatorAction action)
     {
         Integer virtualDatacenterId = action.virtualDatacenterId;
         Integer virtualApplianceId = action.virtualApplianceId;
@@ -370,7 +481,7 @@ public class VirtualMachineResourceIT extends TestPopulate
                 virtualMachineId);
 
         vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
-        
+
         Resource resource =
             client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
                 .accept(MediaType.APPLICATION_XML);
@@ -413,7 +524,7 @@ public class VirtualMachineResourceIT extends TestPopulate
                 else
                 {
                     Assert.fail("For vmId[" + String.valueOf(virtualMachineId) + "]Expected "
-                            + action.targetMachineName + ", but was : " + errors.toString());
+                        + action.targetMachineName + ", but was : " + errors.toString());
                 }
 
             }// no success
@@ -456,13 +567,14 @@ public class VirtualMachineResourceIT extends TestPopulate
      */
     static private void initTraceProcessor()
     {
-    	System.setProperty(Constants.ABICLOUD_TRACER_BROKER_URL, "tcp://localhost:6996");
+        System.setProperty(Constants.ABICLOUD_TRACER_BROKER_URL, "tcp://localhost:6996");
         broker = new BrokerService();
 
         // configure the broker
         try
         {
-            brokerUrl = System.getProperty(Constants.ABICLOUD_TRACER_BROKER_URL, Constants.BROKER_URL);
+            brokerUrl =
+                System.getProperty(Constants.ABICLOUD_TRACER_BROKER_URL, Constants.BROKER_URL);
             broker.addConnector(brokerUrl);
             broker.setPersistent(false);
             broker.start();
