@@ -95,11 +95,24 @@ public class RoleResource extends AbstractResource
         return role;
     }
 
+    private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role)
+    {
+        role.setLinks(restBuilder.buildRoleLinks(role));
+        return role;
+    }
+
     public static RoleDto createTransferObject(final Role role, final IRESTBuilder restBuilder)
         throws Exception
     {
         RoleDto dto = ModelTransformer.transportFromPersistence(RoleDto.class, role);
-        dto = addLinks(restBuilder, dto, role.getEnterprise().getId());
+        if (role.getEnterprise() != null)
+        {
+            dto = addLinks(restBuilder, dto, role.getEnterprise().getId());
+        }
+        else
+        {
+            dto = addLinks(restBuilder, dto);
+        }
         // dto = addLinks(restBuilder, dto);
         return dto;
     }

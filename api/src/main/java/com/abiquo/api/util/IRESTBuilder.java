@@ -60,7 +60,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
 
-    // public List<RESTLink> buildRoleLinks(RoleDto role);
+    public List<RESTLink> buildRoleLinks(RoleDto role);
 
     public List<RESTLink> buildRoleLinks(Integer enterpriseId, RoleDto role);
 
