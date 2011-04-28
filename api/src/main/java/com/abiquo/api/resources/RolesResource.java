@@ -56,22 +56,22 @@ public class RolesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
-    @GET
-    public RolesDto getRoles(@Context final IRESTBuilder restBuilder) throws Exception
-    {
-        Collection<Role> all = service.getRoles();
-        RolesDto roles = new RolesDto();
-
-        if (all != null && !all.isEmpty())
-        {
-            for (Role r : all)
-            {
-                roles.add(createTransferObject(r, restBuilder));
-            }
-        }
-
-        return roles;
-    }
+    // @GET
+    // public RolesDto getRoles(@Context final IRESTBuilder restBuilder) throws Exception
+    // {
+    // Collection<Role> all = service.getRoles();
+    // RolesDto roles = new RolesDto();
+    //
+    // if (all != null && !all.isEmpty())
+    // {
+    // for (Role r : all)
+    // {
+    // roles.add(createTransferObject(r, restBuilder));
+    // }
+    // }
+    //
+    // return roles;
+    // }
 
     @GET
     public RolesDto getRoles(@PathParam(EnterpriseResource.ENTERPRISE) final int enterpriseId,

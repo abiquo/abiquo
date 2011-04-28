@@ -27,7 +27,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -48,7 +47,7 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         d.setLocation("situation_datacenter_test");
 
         ClientResponse response = post(resolveDatacentersURI(), d);
-        
+
         assertEquals(response.getStatusCode(), 201);
 
         DatacenterDto entityPost = response.getEntity(DatacenterDto.class);
@@ -62,10 +61,10 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotEmpty(entity.getCollection());
     }
-    
+
     /**
      * Test the creation of the datacenter with remote services in the same call.
-
+     * 
      * @throws Exception like any test
      */
     @Test
@@ -74,14 +73,14 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         // Create the two remote services for the datacenters
         RemoteServiceDto rsAm = new RemoteServiceDto();
         rsAm.setType(RemoteServiceType.NODE_COLLECTOR);
-        rsAm.setUri("http://example.com/nodecollector");        
+        rsAm.setUri("http://example.com/nodecollector");
         RemoteServiceDto rsSSM = new RemoteServiceDto();
         rsSSM.setType(RemoteServiceType.STORAGE_SYSTEM_MONITOR);
-        rsSSM.setUri("http://example.com/ssm");        
+        rsSSM.setUri("http://example.com/ssm");
         RemoteServicesDto rsList = new RemoteServicesDto();
-        rsList.add(rsAm);    
+        rsList.add(rsAm);
         rsList.add(rsSSM);
-        
+
         DatacenterDto d = new DatacenterDto();
         d.setName("datacenter_test");
         d.setLocation("situation_datacenter_test");
@@ -89,19 +88,18 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
 
         // Assert creation
         ClientResponse response = post(resolveDatacentersURI(), d);
-        //System.out.println(response.getStatusCode() + ' ' +  response.getMessage());
+        // System.out.println(response.getStatusCode() + ' ' + response.getMessage());
         assertEquals(response.getStatusCode(), 201);
-        
+
         // Assert there is a Datacenter and it has two Remote Services
         response = get(resolveDatacentersURI());
-        assertEquals(200, response.getStatusCode());        
-        
+        assertEquals(200, response.getStatusCode());
+
         DatacentersDto entities = response.getEntity(DatacentersDto.class);
         assertEquals(entities.getCollection().size(), 1);
-        
+
     }
-    
-    
+
     @Test
     public void testDatacentersAsCollection() throws Exception
     {

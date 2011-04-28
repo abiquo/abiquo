@@ -111,7 +111,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         }
         else
         {
-            criteria.add(genericRole());
+            // criteria.add(genericRole());
         }
 
         if (!StringUtils.isEmpty(filter))

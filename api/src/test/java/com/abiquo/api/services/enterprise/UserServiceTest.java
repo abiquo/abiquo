@@ -64,7 +64,6 @@ public class UserServiceTest extends AbstractGeneratorTest
 
         setup(e, p1, p2, r, u);
 
-
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
 
     }

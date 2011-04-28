@@ -55,11 +55,20 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role role = roleGenerator.createInstance();
+        Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
 
-        setup(role, ent, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
 
+        entitiesToPersist.add(ent);
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(role);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
     }
 
     @Test
@@ -132,11 +141,30 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
-        setup(ent, userRole, entRole, entUser, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        entitiesToPersist.add(ent);
+        for (Privilege p : entRole.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        if (userRole.getPrivileges() != null)
+        {
+            for (Privilege p : userRole.getPrivileges())
+            {
+                entitiesToPersist.add(p);
+            }
+        }
+        entitiesToPersist.add(entRole);
+        entitiesToPersist.add(userRole);
+        entitiesToPersist.add(entUser);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
 
         // Test the get response depending on the user who performs the request
         String wildwardURI = resolveUsersURI("_");
@@ -157,11 +185,31 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
-        setup(ent, ent2, userRole, entRole, entUser, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        entitiesToPersist.add(ent);
+        entitiesToPersist.add(ent2);
+        for (Privilege p : entRole.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        if (userRole.getPrivileges() != null)
+        {
+            for (Privilege p : userRole.getPrivileges())
+            {
+                entitiesToPersist.add(p);
+            }
+        }
+        entitiesToPersist.add(entRole);
+        entitiesToPersist.add(userRole);
+        entitiesToPersist.add(entUser);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
 
         // Test the get response depending on the user who performs the request
         String uri = resolveUsersURI(ent2.getId());
