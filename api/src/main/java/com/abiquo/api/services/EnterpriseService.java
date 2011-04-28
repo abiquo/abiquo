@@ -99,7 +99,7 @@ public class EnterpriseService extends DefaultApiService
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.isEnterpriseAdmin())
+        if (securityService.isEnterpriseAdmin())
         {
             return Collections.singletonList(user.getEnterprise());
         }
