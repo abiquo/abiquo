@@ -429,8 +429,8 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void shouldModifyRoleWhenUpdateUser()
     {
-        Role r1 = roleGenerator.createInstance();
-        Role r2 = roleGenerator.createInstance();
+        Role r1 = roleGenerator.createInstanceSysAdmin();
+        Role r2 = roleGenerator.createInstanceSysAdmin();
 
         User user = userGenerator.createInstance(r1);
 
