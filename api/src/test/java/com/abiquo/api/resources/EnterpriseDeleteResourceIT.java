@@ -77,7 +77,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         response = get(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 404);
 
-        tearDown("user", "role", "privilege", "enterprise");
     }
 
     @Test
@@ -93,7 +92,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
 
         assertErrors(response, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
 
-        tearDown("virtualdatacenter", "user", "role", "enterprise", "datacenter", "network");
     }
 
     @Test
@@ -107,7 +105,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 204);
 
-        tearDown("virtualimage", "user", "role", "enterprise");
     }
 
     @Test
@@ -133,6 +130,5 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 204);
 
-        tearDown("user", "role", "enterprise");
     }
 }
