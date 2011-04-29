@@ -21,6 +21,7 @@
 
 package com.abiquo.api.spring.security;
 
+import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,14 @@ public class SecurityService
     public boolean hasPrivilege(final String privilege)
     {
         return AuthorityUtils.userHasAuthority(privilege);
+    }
+
+    public void requirePrivilege(final String privilege)
+    {
+        if (!hasPrivilege(privilege))
+        {
+            throw new AccessDeniedException("Missing privilege " + privilege);
+        }
     }
 
     public boolean hasPrivilege(final String privilege, final User user)

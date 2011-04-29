@@ -108,6 +108,9 @@ public enum APIError
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
 
+    // ROLE
+    NON_MODIFICABLE_ROLE("ROLE-1", "The requested role cannot be modified"),
+
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
 

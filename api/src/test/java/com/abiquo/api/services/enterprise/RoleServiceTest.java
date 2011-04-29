@@ -21,15 +21,23 @@
 
 package com.abiquo.api.services.enterprise;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.services.RoleService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.User;
 
 public class RoleServiceTest extends AbstractGeneratorTest
@@ -52,6 +60,40 @@ public class RoleServiceTest extends AbstractGeneratorTest
         setup(e, p1, p2, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
+
+    }
+
+    @Test
+    public void modifyRole()
+    {
+        Role oldRole = roleGenerator.createInstance();
+        Role oldRoleBlocked = roleGenerator.createInstanceBlocked();
+        setup(oldRole, oldRoleBlocked);
+
+        RoleDto rl = new RoleDto(oldRole.getId(), "newRoleName", false);
+        RoleDto rlBloked = new RoleDto(oldRoleBlocked.getId(), "newRoleBlokedName", true);
+
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        RoleService service = new RoleService(em);
+
+        service.modifyRole(oldRole.getId(), rl);
+        Role newRole = service.getRole(oldRole.getId());
+        Assert.assertNotNull(newRole);
+        Assert.assertEquals(newRole.getName(), rl.getName());
+
+        try
+        {
+            service.modifyRole(oldRoleBlocked.getId(), rlBloked);
+            Assert.fail("");
+        }
+        catch (NotFoundException e)
+        {
+            Assert.assertEquals(APIError.NON_MODIFICABLE_ROLE.getCode(), e.getCode());
+        }
+        finally
+        {
+            rollbackActiveTransaction(em);
+        }
 
     }
 

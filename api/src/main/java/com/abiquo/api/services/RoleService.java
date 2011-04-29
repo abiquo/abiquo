@@ -23,6 +23,8 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,6 +43,17 @@ public class RoleService extends DefaultApiService
 {
     @Autowired
     EnterpriseRep enterpriseRep;
+
+    public RoleService()
+    {
+
+    }
+
+    // use this to initialize it for tests
+    public RoleService(final EntityManager em)
+    {
+        enterpriseRep = new EnterpriseRep(em);
+    }
 
     public Collection<Role> getRoles()
     {
@@ -77,8 +90,12 @@ public class RoleService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
 
+        if (old.isBlocked())
+        {
+            throw new NotFoundException(APIError.NON_MODIFICABLE_ROLE);
+        }
+
         old.setName(dto.getName());
-        old.setBlocked(dto.isBlocked());
 
         if (!old.isValid())
         {

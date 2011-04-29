@@ -81,6 +81,13 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
+    public Role createInstanceBlocked()
+    {
+        Role role = createInstance();
+        role.setBlocked(true);
+        return role;
+    }
+
     public Role createInstance(final Privilege... privileges)
     {
         Role role = createInstance();

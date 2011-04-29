@@ -28,6 +28,19 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "role")
 public class RoleDto extends SingleResourceTransportDto
 {
+    public RoleDto()
+    {
+        super();
+    }
+
+    public RoleDto(final Integer id, final String name, final boolean blocked)
+    {
+        super();
+        this.id = id;
+        this.name = name;
+        this.blocked = blocked;
+    }
+
     private Integer id;
 
     public Integer getId()
