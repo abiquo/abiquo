@@ -26,12 +26,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.enterprise.Privilege;
@@ -66,5 +68,44 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+    }
+
+    @Test
+    public void getRolessListDescOrder() throws Exception
+    {
+        Role role = roleGenerator.createUniqueInstance();
+        Role role2 = roleGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        for (Privilege p : role2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+
+        entitiesToSetup.add(role2);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = rolesURI;
+        uri =
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("desc", new String[] {"true"}), false);
+
+        ClientResponse response = get(uri);
+
+        assertEquals(response.getStatusCode(), 200);
+
+        RolesDto entity = response.getEntity(RolesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 2);
     }
 }

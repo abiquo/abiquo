@@ -58,7 +58,8 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
     public static Criterion genericRole()
     {
-        return Restrictions.eq(Role.ENTERPRISE_PROPERTY, null);
+        return Restrictions.isNull(Role.ENTERPRISE_PROPERTY);
+
     }
 
     private Criterion filterBy(final String filter)
@@ -111,7 +112,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         }
         else
         {
-            // criteria.add(genericRole());
+            criteria.add(genericRole());
         }
 
         if (!StringUtils.isEmpty(filter))
