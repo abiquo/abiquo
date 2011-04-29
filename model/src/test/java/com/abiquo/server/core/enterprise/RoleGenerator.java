@@ -52,9 +52,6 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     @Override
     public Role createUniqueInstance()
     {
-        // Privilege p = privilegeGenerator.createInstance();
-        // return createInstance(p);
-
         return createInstanceSysAdmin();
     }
 
@@ -74,9 +71,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     public Role createInstance()
     {
         String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
-        boolean blocked = false;
 
-        Role role = new Role(name, blocked);
+        Role role = new Role(name);
 
         return role;
     }
