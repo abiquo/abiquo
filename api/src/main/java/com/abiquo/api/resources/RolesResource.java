@@ -74,7 +74,7 @@ public class RolesResource extends AbstractResource
     // }
 
     @GET
-    public RolesDto getRoles(@PathParam(EnterpriseResource.ENTERPRISE) final int enterpriseId,
+    public RolesDto getRoles(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
         @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
@@ -90,9 +90,14 @@ public class RolesResource extends AbstractResource
             numResults = DEFAULT_PAGE_LENGTH;
         }
 
+        int entId = 0;
+        if (enterpriseId != null)
+        {
+            entId = Integer.valueOf(enterpriseId);
+        }
+
         Collection<Role> all =
-            service.getRolesByEnterprise(enterpriseId, filter, orderBy, desc, connected, page,
-                numResults);
+            service.getRolesByEnterprise(entId, filter, orderBy, desc, page, numResults);
         RolesDto roles = new RolesDto();
 
         if (all != null && !all.isEmpty())

@@ -21,6 +21,10 @@
 
 package com.abiquo.api.services.enterprise;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.springframework.security.context.SecurityContextHolder;
@@ -97,4 +101,85 @@ public class RoleServiceTest extends AbstractGeneratorTest
 
     }
 
+    @Test
+    public void findRoles()
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance(e1);
+        Role r2 = roleGenerator.createInstance(e2);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        entitiesToPersist.add(r1);
+        entitiesToPersist.add(r2);
+
+        setup(entitiesToPersist.toArray());
+
+        RoleService service = new RoleService(getEntityManagerWithAnActiveTransaction());
+
+        Collection<Role> roles = service.getRolesByEnterprise(e1.getId(), null, null, false);
+        Assert.assertSize(roles, 1);
+
+        roles = service.getRolesByEnterprise(e2.getId(), null, null, false);
+        Assert.assertSize(roles, 1);
+
+        // There is the adminRole, without enterprise, created before each method.
+        roles = service.getRolesByEnterprise(0, null, null, false);
+        Assert.assertSize(roles, 1);
+    }
+
+    @Test
+    public void findRolesFiltered()
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance("r1", e1);
+        Role r2 = roleGenerator.createInstance("r2", e1);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(r1);
+        entitiesToPersist.add(r2);
+
+        setup(entitiesToPersist.toArray());
+
+        RoleService service = new RoleService(getEntityManagerWithAnActiveTransaction());
+
+        Collection<Role> roles =
+            service.getRolesByEnterprise(e1.getId(), r1.getName(), null, false);
+        Assert.assertSize(roles, 1);
+
+        roles = service.getRolesByEnterprise(e1.getId(), r2.getName(), null, false);
+        Assert.assertSize(roles, 1);
+
+        roles = service.getRolesByEnterprise(e1.getId(), "Any", null, false);
+        Assert.assertSize(roles, 0);
+
+    }
+
+    @Test
+    public void findRolesOrdered()
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance("r1", e1);
+        Role r2 = roleGenerator.createInstance("r2", e1);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(r1);
+        entitiesToPersist.add(r2);
+
+        setup(entitiesToPersist.toArray());
+
+        RoleService service = new RoleService(getEntityManagerWithAnActiveTransaction());
+
+        Collection<Role> roles = service.getRolesByEnterprise(e1.getId(), null, "name", false);
+        Role r = roles.iterator().next();
+        Assert.assertEquals(r.getName(), "r1");
+
+        roles = service.getRolesByEnterprise(e1.getId(), null, "name", true);
+        r = roles.iterator().next();
+        Assert.assertEquals(u.getNick(), "sysadmin");
+    }
 }

@@ -45,7 +45,11 @@ public class RoleResource extends AbstractResource
 {
     public static final String ROLE = "role";
 
+    public static final String ENTERPRISE = "enterprise";
+
     public static final String ROLE_PARAM = "{" + ROLE + "}";
+
+    public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
 
     @Autowired
     RoleService service;
@@ -95,7 +99,7 @@ public class RoleResource extends AbstractResource
         return role;
     }
 
-    private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role)
+    public static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role)
     {
         role.setLinks(restBuilder.buildRoleLinks(role));
         return role;

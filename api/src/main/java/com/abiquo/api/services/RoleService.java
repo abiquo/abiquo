@@ -129,14 +129,19 @@ public class RoleService extends DefaultApiService
     }
 
     public Collection<Role> getRolesByEnterprise(final int enterpriseId, final String filter,
-        final String order, final boolean desc, final boolean connected, final Integer page,
-        final Integer numResults)
+        final String order, final boolean desc)
+    {
+        return getRolesByEnterprise(enterpriseId, filter, order, desc, 0, 25);
+    }
+
+    public Collection<Role> getRolesByEnterprise(final int enterpriseId, final String filter,
+        final String order, final boolean desc, final Integer page, final Integer numResults)
     {
 
         Enterprise enterprise = null;
         if (enterpriseId != 0)
         {
-            enterprise = findEnterprise(Integer.valueOf(enterpriseId));
+            enterprise = findEnterprise(enterpriseId);
         }
         return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, 0, 25);
     }

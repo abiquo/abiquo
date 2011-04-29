@@ -115,6 +115,14 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return createInstance(enterprise);
     }
 
+    public Role createInstance(final String name, final Enterprise enterprise)
+    {
+
+        Role role = new Role(name, enterprise);
+
+        return role;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final Role entity,
         final List<Object> entitiesToPersist)

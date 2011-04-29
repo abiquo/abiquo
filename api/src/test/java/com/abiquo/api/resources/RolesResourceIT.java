@@ -36,6 +36,7 @@ import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RolesDto;
@@ -47,17 +48,19 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getRolesList() throws Exception
     {
-        Role role = roleGenerator.createUniqueInstance();
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance(e1);
+        Role r2 = roleGenerator.createInstance(e2);
+        Role r3 = roleGenerator.createInstance();
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        for (Privilege p : role.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(role);
-
-        setup(entitiesToSetup.toArray());
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        entitiesToPersist.add(r1);
+        entitiesToPersist.add(r2);
+        entitiesToPersist.add(r3);
+        setup(entitiesToPersist.toArray());
 
         Resource resource = client.resource(rolesURI).accept(MediaType.APPLICATION_XML);
 
@@ -68,10 +71,11 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+
     }
 
     @Test
-    public void getRolessListDescOrder() throws Exception
+    public void getRolesListDescOrder() throws Exception
     {
         Role role = roleGenerator.createUniqueInstance();
         Role role2 = roleGenerator.createUniqueInstance();
