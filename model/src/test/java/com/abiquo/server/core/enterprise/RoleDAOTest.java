@@ -41,7 +41,7 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
     }
 
     @Override
-    protected RoleDAO createDao(EntityManager entityManager)
+    protected RoleDAO createDao(final EntityManager entityManager)
     {
         return new RoleDAO(entityManager);
     }

@@ -32,6 +32,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 {
     PrivilegeGenerator privilegeGenerator;
 
+    EnterpriseGenerator enterpriseGenerator;
+
     public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
 
     public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
@@ -39,6 +41,9 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
+
+        enterpriseGenerator = new EnterpriseGenerator(seed);
+
         privilegeGenerator = new PrivilegeGenerator(seed);
     }
 
@@ -68,6 +73,15 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return createInstance(p2);
     }
 
+    public Role createInstance(final Enterprise enterprise)
+    {
+        String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
+
+        Role role = new Role(name, enterprise);
+
+        return role;
+    }
+
     public Role createInstance()
     {
         String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
@@ -85,6 +99,13 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
             role.addPrivilege(p);
         }
         return role;
+    }
+
+    public Role createInstanceEnterprise()
+    {
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+
+        return createInstance(enterprise);
     }
 
     @Override

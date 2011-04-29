@@ -143,6 +143,13 @@ public class Role extends DefaultEntityBase
 
     }
 
+    public Role(final String name, final Enterprise enterprise)
+    {
+        setName(name);
+        setEnterprise(enterprise);
+
+    }
+
     public final static String ASSOCIATION_TABLE = "roles_privileges";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
