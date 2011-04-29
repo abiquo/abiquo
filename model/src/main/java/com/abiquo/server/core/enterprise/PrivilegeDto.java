@@ -28,6 +28,18 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "privilege")
 public class PrivilegeDto extends SingleResourceTransportDto
 {
+    public PrivilegeDto()
+    {
+
+    }
+
+    public PrivilegeDto(final Integer id, final String name)
+    {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
     private Integer id;
 
     public Integer getId()

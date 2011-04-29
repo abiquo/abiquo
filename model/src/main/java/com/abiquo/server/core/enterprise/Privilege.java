@@ -63,6 +63,11 @@ public class Privilege extends DefaultEntityBase
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     public final static String NAME_PROPERTY = "name";
 
     private final static boolean NAME_REQUIRED = false;
