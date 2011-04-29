@@ -84,7 +84,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param idManagement the idVolume to set
      */
-    public void setIdManagement(Integer idManagement)
+    public void setIdManagement(final Integer idManagement)
     {
         this.idManagement = idManagement;
     }
@@ -92,7 +92,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param resourceType the resourceType to set
      */
-    public void setIdResourceType(String idResourceType)
+    public void setIdResourceType(final String idResourceType)
     {
         this.idResourceType = idResourceType;
     }
@@ -116,7 +116,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param virtualDataCenter the virtualDataCenter to set
      */
-    public void setVirtualDataCenter(VirtualDataCenterHB virtualDataCenter)
+    public void setVirtualDataCenter(final VirtualDataCenterHB virtualDataCenter)
     {
         this.virtualDataCenter = virtualDataCenter;
     }
@@ -132,7 +132,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param idVM the idVM to set
      */
-    public void setVirtualMachine(VirtualmachineHB virtualMachine)
+    public void setVirtualMachine(final VirtualmachineHB virtualMachine)
     {
         this.virtualMachine = virtualMachine;
     }
@@ -148,7 +148,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param idResource the rasd to set
      */
-    public void setRasd(ResourceAllocationSettingData rasd)
+    public void setRasd(final ResourceAllocationSettingData rasd)
     {
         this.rasd = rasd;
     }
@@ -164,7 +164,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     /**
      * @param idVirtualApp the idVirtualApp to set
      */
-    public void setVirtualApp(VirtualappHB virtualApp)
+    public void setVirtualApp(final VirtualappHB virtualApp)
     {
         this.virtualApp = virtualApp;
     }
@@ -203,15 +203,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
     public boolean checkResourceCoherency()
     {
         ResourceAllocationSettingData myRasd = getRasd();
-
-        if (myRasd.getInstanceID() != null && myRasd.getElementName() != null)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return myRasd.getInstanceID() != null && myRasd.getElementName() != null;
     }
 
     /**
