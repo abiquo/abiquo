@@ -137,10 +137,17 @@ public class Role extends DefaultEntityBase
         this.blocked = blocked;
     }
 
-    public Role(final String name, final boolean blocked)
+    public Role(final String name)
     {
         setName(name);
-        setBlocked(blocked);
+
+    }
+
+    public Role(final String name, final Enterprise enterprise)
+    {
+        setName(name);
+        setEnterprise(enterprise);
+
     }
 
     public final static String ASSOCIATION_TABLE = "roles_privileges";

@@ -64,7 +64,7 @@ public class RoleService extends DefaultApiService
     public Role addRole(final RoleDto dto)
     {
 
-        Role role = new Role(dto.getName(), dto.isBlocked());
+        Role role = new Role(dto.getName());
 
         if (!role.isValid())
         {
