@@ -9,3 +9,6 @@ UPDATE kinton.metering SET actionperformed="PERSISTENCE_PROCESS_FINISHED" WHERE 
 UPDATE kinton.metering SET actionperformed="PERSISTENCE_PROCESS_FAILED" WHERE actionperformed="STATEFUL_PROCESS_FAILED";
 UPDATE kinton.metering SET actionperformed="PERSISTENCE_INITIATOR_ADDED" WHERE actionperformed="STATEFUL_INITIATOR_ADDED";
 
+-- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
+update volume_management set state = 1 where state = 2;
+
