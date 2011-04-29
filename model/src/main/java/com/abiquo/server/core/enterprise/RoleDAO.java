@@ -22,7 +22,6 @@
 package com.abiquo.server.core.enterprise;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -74,18 +73,17 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
     public Collection<Role> find(final Enterprise enterprise, final String filter,
         final String orderBy, final boolean desc)
     {
-        return find(enterprise, filter, orderBy, desc, false, 0, 25);
+        return find(enterprise, filter, orderBy, desc, 0, 25);
     }
 
     public Collection<Role> find(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc, final boolean connected, final Integer offset,
-        final Integer numResults)
+        final String orderBy, final boolean desc, final Integer offset, final Integer numResults)
     {
-        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        criteria = createCriteria(enterprise, filter, orderBy, desc);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -102,7 +100,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
     }
 
     private Criteria createCriteria(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc, final boolean connected)
+        final String orderBy, final boolean desc)
     {
         Criteria criteria = createCriteria();
 
@@ -130,11 +128,6 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
             criteria.addOrder(order);
         }
 
-        if (connected)
-        {
-            criteria.createCriteria("sessions").add(Restrictions.gt("expireDate", new Date()));
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        }
         return criteria;
     }
 }

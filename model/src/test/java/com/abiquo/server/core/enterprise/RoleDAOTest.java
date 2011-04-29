@@ -21,23 +21,30 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
 {
+
+    private EnterpriseGenerator enterpriseGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        this.enterpriseGenerator = new EnterpriseGenerator(getSeed());
     }
 
     @Override
@@ -62,6 +69,25 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
     public RoleGenerator eg()
     {
         return (RoleGenerator) super.eg();
+    }
+
+    @Test
+    public void findRoles()
+    {
+        Role role1 = eg().createInstance();
+        Enterprise enterprise = this.enterpriseGenerator.createUniqueInstance();
+        Role role2 = eg().createInstance(enterprise);
+
+        ds().persistAll(role1, enterprise, role2);
+
+        RoleDAO dao = createDaoForRollbackTransaction();
+
+        Collection<Role> roles = dao.find(enterprise, null, null, false, 0, 25);
+        AssertEx.assertSize(roles, 1);
+
+        roles = dao.find(null, null, null, false, 0, 25);
+        AssertEx.assertSize(roles, 1);
+
     }
 
 }

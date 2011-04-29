@@ -138,6 +138,6 @@ public class RoleService extends DefaultApiService
         {
             enterprise = findEnterprise(Integer.valueOf(enterpriseId));
         }
-        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, false, 0, 25);
+        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, 0, 25);
     }
 }

@@ -223,10 +223,9 @@ public class EnterpriseRep extends DefaultRepBase
     }
 
     public Collection<Role> findRolesByEnterprise(final Enterprise enterprise, final String filter,
-        final String order, final boolean desc, final boolean connected, final Integer page,
-        final Integer numResults)
+        final String order, final boolean desc, final Integer page, final Integer numResults)
     {
-        return roleDAO.find(enterprise, filter, order, desc, connected, page, numResults);
+        return roleDAO.find(enterprise, filter, order, desc, page, numResults);
     }
 
     public void insertRole(final Role role)
