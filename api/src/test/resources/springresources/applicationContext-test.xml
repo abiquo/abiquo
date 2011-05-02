@@ -37,4 +37,5 @@
     <import resource="persistencebeans.xml" />
     <import resource="mock-beans.xml" />
     <import resource="security-beans-test.xml"/>   
+    <import resource="security-ldap-beans-test.xml" />
 </beans>

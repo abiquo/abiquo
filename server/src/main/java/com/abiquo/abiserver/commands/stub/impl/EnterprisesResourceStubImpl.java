@@ -44,6 +44,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class EnterprisesResourceStubImpl extends AbstractAPIStub implements EnterprisesResourceStub
@@ -272,8 +273,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
 
         String uri =
-            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
-                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(), enterpriseListOptions
+                .getOffset(), enterpriseListOptions.getNumberOfNodes());
 
         ClientResponse response = get(uri);
         if (response.getStatusCode() == 200)
@@ -334,5 +335,22 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
         Enterprise enterprise = Enterprise.create(responseDto);
         return enterprise;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.EnterprisesResourceStub#getUserByName(java.lang.String,
+     *      java.lang.String)
+     */
+    @Override
+    public DataResult<UserDto> getUserByName(String user, String password)
+    {
+        ClientResponse response = get(createLoginLink(), user, password);
+
+        UserDto userDto = response.getEntity(UserDto.class);
+
+        DataResult<UserDto> data = new DataResult<UserDto>();
+        data.setData(userDto);
+
+        return data;
     }
 }

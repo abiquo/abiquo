@@ -59,6 +59,9 @@ public class EnterpriseRep extends DefaultRepBase
     private RoleDAO roleDAO;
 
     @Autowired
+    private LdapRoleDAO ldapRoleDAO;
+
+    @Autowired
     private UserDAO userDAO;
 
     @Autowired
@@ -82,6 +85,7 @@ public class EnterpriseRep extends DefaultRepBase
         virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
+        ldapRoleDAO = new LdapRoleDAO(entityManager);
     }
 
     public void insert(Enterprise enterprise)
@@ -101,6 +105,11 @@ public class EnterpriseRep extends DefaultRepBase
         assert !enterpriseDAO.existsAnyOtherWithName(enterprise, enterprise.getName()) : BUG_UPDATE_NAME_MUST_BE_UNIQUE;
 
         enterpriseDAO.flush();
+    }
+
+    public LdapRole findLdapRoleByType(String type)
+    {
+        return ldapRoleDAO.findByType(type);
     }
 
     public Enterprise findById(Integer id)

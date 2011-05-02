@@ -170,4 +170,28 @@ public class UserDto extends SingleResourceTransportDto
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
+
+    private int idRole;
+
+    public int getIdRole()
+    {
+        return idRole;
+    }
+
+    public void setIdRole(int idRole)
+    {
+        this.idRole = idRole;
+    }
+
+    private int idEnterprise;
+
+    public int getIdEnterprise()
+    {
+        return idEnterprise;
+    }
+
+    public void setIdEnterprise(int idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
+    }
 }

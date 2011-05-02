@@ -149,6 +149,11 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword()).delete();
     }
 
+    protected String createLoginLink()
+    {
+        return URIResolver.resolveURI(apiUri, "login", null);
+    }
+
     private Resource resource(final String uri, final String user, final String password)
     {
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
@@ -219,12 +224,21 @@ public class AbstractAPIStub
     {
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
             .singletonMap("enterprise", valueOf(enterpriseId)));
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> master
+=======
+>>>>>>> master
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
     {
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/ips",
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+>>>>>>> master
     }
 
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
@@ -237,7 +251,19 @@ public class AbstractAPIStub
             params);
     }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+    protected String getReservedMachinesUri(Integer enterpriseId, Integer machineId)
+=======
     protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
+>>>>>>> master
+=======
+    protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
+>>>>>>> master
+=======
+    protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
+>>>>>>> master
     {
         String uri = createEnterpriseLink(enterpriseId);
 

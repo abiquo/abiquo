@@ -50,7 +50,10 @@ import com.abiquo.util.resources.ResourceManager;
  * This Authentication Manager provides authentication services, with a Data Base backend.
  * 
  * @author Oliver
+ * @deprecated From now on we should log in (authenticat) against the API!
+ *             {@link AuthenticationManagerApi}
  */
+@Deprecated
 public class AuthenticationManagerDB implements IAuthenticationManager
 {
 

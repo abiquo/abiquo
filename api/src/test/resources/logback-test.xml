@@ -6,7 +6,7 @@
 			<Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
 		</layout>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
+			<level>DEBUG</level>
 		</filter>
 	</appender>
 
@@ -34,7 +34,7 @@
 	</logger>
 	
 	<logger name="org.springframework">
-		<level value="WARN" />
+		<level value="DEBUG" />
 	</logger>
 	
 	<logger name="org.mortbay">
@@ -42,7 +42,7 @@
 	</logger>
 	
 	<root>
-		<level value="WARN" />
+		<level value="INFO" />
 		<appender-ref ref="FILE" />
 		<appender-ref ref="STDOUT" />
 	</root>

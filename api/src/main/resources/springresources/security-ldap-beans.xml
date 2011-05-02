@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+
+	<!--
+		Usernames/Passwords are rod/koala dianne/emu scott/wombat
+		<security:ldap-server id="embedded" root="dc=springframework,dc=org"
+		ldif="classpath:ldap/users.ldif" port="7004" />
+	-->
+	<bean id="contextSource"
+		class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+		<!--
+			<constructor-arg
+			value="ldap://localhost:7004/dc=springframework,dc=org" />
+		-->
+		<constructor-arg
+			value="${abiquo.ldap.authentication.server.protocol}://${abiquo.ldap.authentication.server.url}:${abiquo.ldap.authentication.server.port}/${abiquo.ldap.authentication.server.baseDN}" />
+	</bean>
+
+	<bean id="ldapAuthenticator"
+		class="com.abiquo.api.spring.security.authentication.LdapAbiquoAuthenticatorImpl">
+		<constructor-arg>
+			<ref local="contextSource" />
+		</constructor-arg>
+		<property name="contextFactory" ref="contextSource" />
+		<!--
+			With AD which does not support anonymous binding this will make it
+			fail! <property name="userSearch"> <ref local="userSearch" />
+			</property>
+		-->
+		<property name="userDnPatterns">
+			<list>
+				<value>uid={0},ou=people</value>
+				<value>sAMAccountName={0}</value>
+				<value>cn={0},CN=Users</value>
+				<value>${abiquo.ldap.authentication.custom.userDnPattern}</value>
+				<value>${abiquo.ldap.authentication.custom.userDnPattern}</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="ldapAuthorities"
+		class="com.abiquo.api.spring.security.authentication.populator.LdapAbiquoAuthoritiesPopulator">
+		<constructor-arg ref="contextSource" />
+		<constructor-arg value="" />
+		<property name="groupRoleAttribute" value="cn" />
+		<property name="groupSearchFilter" value="member={0}" />
+		<property name="rolePrefix" value="ROLE_" />
+		<property name="defaultRole" value="ROLE_ABIQUO" />
+	</bean>
+	<bean id="userSearch"
+		class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+		<constructor-arg index="0" value="ou=people" />
+		<constructor-arg index="1" value="(uid={0})" />
+		<constructor-arg index="2" ref="contextSource" />
+	</bean>
+
+	<bean id="ldapAuthProvider"
+		class="com.abiquo.api.spring.security.authentication.providers.ldap.LdapAbiquoAuthenticationProvider">
+		<security:custom-authentication-provider />
+		<constructor-arg>
+			<ref local="ldapAuthenticator" />
+		</constructor-arg>
+		<constructor-arg>
+			<ref local="ldapAuthorities" />
+		</constructor-arg>
+		<property name="userDetailsContextMapper" ref="abiquoUserDetailsContextMapper" />
+	</bean>
+
+	<!--
+		No declared with @Service("abiquoUserDetailsContextMapper") for the
+		sake of coherence with all LDAP beans being defined in XML
+	-->
+	<bean id="abiquoUserDetailsContextMapper"
+		class="com.abiquo.api.spring.security.AbiquoUserDetailsContextMapper">
+		<property name="rolePrefix" value="ROLE_" />
+		<property name="defaultRole" value="ROLE_ABIQUO" />
+	</bean>
+	<!--
+		This resource must be imported here since the order in which are
+		providers included into the context matters. It states the order in
+		which providers are called to authenticate
+	-->
+	<import resource="security-abiquo-beans.xml" />
+</beans>

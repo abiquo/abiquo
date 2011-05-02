@@ -25,16 +25,30 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.server.core.enterprise.UserDto;
 
 public interface EnterprisesResourceStub
 {
     public DataResult<Enterprise> createEnterprise(Enterprise enterprise);
-    
+
     public DataResult<Enterprise> editEnterprise(Enterprise enterprise);
 
     public BasicResult deleteEnterprise(Integer enterpriseId);
 
     public DataResult<EnterpriseListResult> getEnterprises(ListRequest enterpriseListOptions);
-    
-    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);    
+
+    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);
+
+    /**
+     * This function returns the currently logged user at the time call. Since this method in the
+     * API Rest is secure user must be logged with valid credentials to reach it. Then we can keep
+     * going with the old login method. <br />
+     * Since this method is an ad-hoc implementation should be deprecated until we get rid of the
+     * <b>server</b>.
+     * 
+     * @param user username.
+     * @param password password.
+     * @return {@link UserDto} of the user currently authenticated.
+     */
+    public DataResult<UserDto> getUserByName(String user, String password);
 }
