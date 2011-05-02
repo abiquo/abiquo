@@ -36,7 +36,6 @@ import com.abiquo.api.services.RoleService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.User;
@@ -72,8 +71,13 @@ public class RoleServiceTest extends AbstractGeneratorTest
         Role oldRoleBlocked = roleGenerator.createInstanceBlocked();
         setup(oldRole, oldRoleBlocked);
 
-        RoleDto rl = new RoleDto(oldRole.getId(), "newRoleName", false);
-        RoleDto rlBloked = new RoleDto(oldRoleBlocked.getId(), "newRoleBlokedName", true);
+        RoleDto rl = new RoleDto();
+        rl.setId(oldRole.getId());
+        rl.setName("newRoleName");
+        RoleDto rlBloked = new RoleDto();
+        rlBloked.setId(oldRoleBlocked.getId());
+        rlBloked.setName("newRoleBlokedName");
+        rlBloked.setBlocked(true);
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         RoleService service = new RoleService(em);
@@ -100,35 +104,6 @@ public class RoleServiceTest extends AbstractGeneratorTest
             rollbackActiveTransaction(em);
         }
 
-    }
-
-    @Test
-    public void modifyRoleWithPrivileges()
-    {
-        Privilege p1 = privilegeGenerator.createUniqueInstance();
-        Privilege p2 = privilegeGenerator.createUniqueInstance();
-        Role oldRole = roleGenerator.createInstance(p1);
-        setup(p1, p2, oldRole);
-
-        PrivilegeDto p2Dto = new PrivilegeDto(p2.getId(), p2.getName());
-        RoleDto rl = new RoleDto(oldRole.getId(), "newRoleName", false, p2Dto);
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        RoleService service = new RoleService(em);
-
-        service.modifyRole(oldRole.getId(), rl);
-        EntityManagerHelper.commit(em);
-
-        EntityManagerHelper.beginReadWriteTransaction(em);
-        Role newRole = service.getRole(oldRole.getId());
-
-        Assert.assertNotNull(newRole);
-        Assert.assertEquals(newRole.getName(), rl.getName());
-        Assert.assertNotNull(newRole.getPrivileges());
-        Assert.assertEquals(newRole.getPrivileges().size(), 1);
-        Assert.assertEquals(newRole.getPrivileges().get(0).getId(), p2.getId());
-
-        commitActiveTransaction(em);
     }
 
 }

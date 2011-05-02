@@ -36,6 +36,7 @@ import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
@@ -91,12 +92,14 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
     public void roleContainCorrectLinks() throws ClientWebException
     {
         Role role = roleGenerator.createUniqueInstance();
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         for (Privilege p : role.getPrivileges())
         {
             entitiesToSetup.add(p);
         }
+        entitiesToSetup.add(ent);
         entitiesToSetup.add(role);
 
         setup(entitiesToSetup.toArray());
@@ -109,5 +112,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dto.getLinks());
 
         assertLinkExist(dto, href, "edit");
+        // assertLinkExist(dto, resolveRoleActionGetPrivilegesURI(role.getId()), "action",
+        // RoleResource.ROLE_ACTION_GET_PRIVILEGES);
     }
 }

@@ -34,8 +34,10 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 
 @Path(PrivilegesResource.PRIVILEGES_PATH)
@@ -57,6 +59,21 @@ public class PrivilegesResource extends AbstractResource
         for (Privilege p : ps)
         {
             privileges.add(createTransferObject(p, restBuilder));
+        }
+
+        return privileges;
+    }
+
+    public static PrivilegesDto createAdminTransferObjects(final Collection<Privilege> privs,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        PrivilegesDto privileges = new PrivilegesDto();
+        for (Privilege privilege : privs)
+        {
+            PrivilegeDto pDto =
+                ModelTransformer.transportFromPersistence(PrivilegeDto.class, privilege);
+
+            privileges.add(pDto);
         }
 
         return privileges;

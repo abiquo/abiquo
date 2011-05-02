@@ -21,7 +21,6 @@
 
 package com.abiquo.api.services;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
@@ -35,8 +34,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
-import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 
@@ -105,18 +102,18 @@ public class RoleService extends DefaultApiService
             addValidationErrors(old.getValidationErrors());
             flushErrors();
         }
-
-        if (dto.getPrivileges() != null)
-        {
-            old.setPrivileges(new ArrayList<Privilege>());
-
-            for (PrivilegeDto priDto : dto.getPrivileges())
-            {
-                Privilege p = new Privilege(priDto.getName());
-                p.setId(priDto.getId());
-                old.addPrivilege(p);
-            }
-        }
+        //
+        // if (dto.getPrivileges() != null)
+        // {
+        // old.setPrivileges(new ArrayList<Privilege>());
+        //
+        // for (PrivilegeDto priDto : dto.getPrivileges())
+        // {
+        // Privilege p = new Privilege(priDto.getName());
+        // p.setId(priDto.getId());
+        // old.addPrivilege(p);
+        // }
+        // }
 
         enterpriseRep.updateRole(old);
         return old;
