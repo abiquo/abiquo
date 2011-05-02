@@ -81,7 +81,6 @@ public class RoleResource extends AbstractResource
     }
 
     @PUT
-    // Not supported yet
     public RoleDto modifyRole(final RoleDto role, @PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

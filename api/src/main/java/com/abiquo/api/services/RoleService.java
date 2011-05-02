@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
@@ -32,8 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 
@@ -102,18 +107,33 @@ public class RoleService extends DefaultApiService
             addValidationErrors(old.getValidationErrors());
             flushErrors();
         }
-        //
-        // if (dto.getPrivileges() != null)
-        // {
-        // old.setPrivileges(new ArrayList<Privilege>());
-        //
-        // for (PrivilegeDto priDto : dto.getPrivileges())
-        // {
-        // Privilege p = new Privilege(priDto.getName());
-        // p.setId(priDto.getId());
-        // old.addPrivilege(p);
-        // }
-        // }
+
+        RESTLink entLink = dto.searchLink(EnterpriseResource.ENTERPRISE);
+        if (entLink != null)
+        {
+            String id =
+                entLink.getHref().substring(
+                    entLink.getHref().lastIndexOf(EnterpriseResource.ENTERPRISE)
+                        + EnterpriseResource.ENTERPRISE.length() + 2);
+            old.setEnterprise(enterpriseRep.findById(new Integer(id)));
+        }
+
+        old.setPrivileges(new ArrayList<Privilege>());
+        if (dto.getLinks() != null)
+        {
+            for (RESTLink rsl : dto.getLinks())
+            {
+                if (rsl.getRel().contains(PrivilegeResource.PRIVILEGE))
+                {
+                    String s =
+                        rsl.getHref().substring(
+                            rsl.getHref().lastIndexOf(PrivilegeResource.PRIVILEGE)
+                                + PrivilegeResource.PRIVILEGE.length() + 2);
+                    Privilege p = enterpriseRep.findPrivilegeById(new Integer(s));
+                    old.addPrivilege(p);
+                }
+            }
+        }
 
         enterpriseRep.updateRole(old);
         return old;

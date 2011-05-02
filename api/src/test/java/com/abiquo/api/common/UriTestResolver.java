@@ -63,6 +63,8 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
+import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.resources.config.SystemPropertiesResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.util.URIResolver;
@@ -114,6 +116,15 @@ public class UriTestResolver
     {
         String uri = resolveURI(RolesResource.ROLES_PATH, new HashMap<String, String>());
         return uri;
+    }
+
+    public static String resolvePrivilegeURI(final Integer privilegeId)
+    {
+        String template =
+            buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
+
+        return resolveURI(template,
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)

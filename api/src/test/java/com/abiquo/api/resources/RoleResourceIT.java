@@ -23,6 +23,7 @@ package com.abiquo.api.resources;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolvePrivilegeURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleActionGetPrivilegesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleURI;
 import static org.testng.Assert.assertEquals;
@@ -36,15 +37,37 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.resources.config.PrivilegeResource;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.User;
 
 public class RoleResourceIT extends AbstractJpaGeneratorIT
 {
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
 
     @Test
     public void getRoleDoesntExist() throws ClientWebException
@@ -120,6 +143,42 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
         assertLinkExist(dto, privilegesUri, "action", "privileges");
+    }
 
+    @Test
+    public void modifyRole() throws ClientWebException
+    {
+        Role role = roleGenerator.createUniqueInstance();
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(role);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveRoleURI(role.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        RoleDto dto = response.getEntity(RoleDto.class);
+        dto.setName("name");
+        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(ent.getId())));
+        for (Privilege p : role.getPrivileges())
+        {
+            dto.addLink(new RESTLink(PrivilegeResource.PRIVILEGE + p.getId(), resolvePrivilegeURI(p
+                .getId())));
+        }
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), 200);
+
+        RoleDto modified = response.getEntity(RoleDto.class);
+        assertEquals(modified.getName(), "name");
+        assertLinkExist(modified, resolveEnterpriseURI(ent.getId()), EnterpriseResource.ENTERPRISE);
     }
 }
