@@ -22,6 +22,7 @@
 package com.abiquo.api.resources;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -32,9 +33,13 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.services.RoleService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 
@@ -49,7 +54,11 @@ public class RoleResource extends AbstractResource
 
     public static final String ROLE_PARAM = "{" + ROLE + "}";
 
+
     public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
+
+    public static final String ROLE_ACTION_GET_PRIVILEGES = "action/privileges";
+
 
     @Autowired
     RoleService service;
@@ -68,7 +77,7 @@ public class RoleResource extends AbstractResource
         return createTransferObject(role, restBuilder);
     }
 
-    // @PUT
+    @PUT
     // Not supported yet
     public RoleDto modifyRole(final RoleDto role, @PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -85,12 +94,30 @@ public class RoleResource extends AbstractResource
         service.removeRole(roleId);
     }
 
-    // private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role)
-    // {
-    // role.setLinks(restBuilder.buildRoleLinks(role));
-    //
-    // return role;
-    // }
+    /**
+     * Retrieves the list Of Virtual machines defined into an enterprise.
+     * 
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder {@linnk IRESTBuilder} object injected by context
+     * @return the {@link VirtualMachinesDto} object. A {@link VirtualMachineDto} wrapper.
+     * @throws Exception
+     */
+    @GET
+    @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES)
+    public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        Role role = service.getRole(roleId);
+
+        if (role == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
+        }
+
+        return PrivilegesResource.createAdminTransferObjects(role.getPrivileges(), restBuilder);
+
+    }
 
     private static RoleDto addLinks(final IRESTBuilder restBuilder, final RoleDto role,
         final Integer enterpriseId)
@@ -117,7 +144,6 @@ public class RoleResource extends AbstractResource
         {
             dto = addLinks(restBuilder, dto);
         }
-        // dto = addLinks(restBuilder, dto);
         return dto;
     }
 

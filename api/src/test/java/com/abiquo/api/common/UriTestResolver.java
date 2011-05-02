@@ -123,6 +123,11 @@ public class UriTestResolver
         return resolveURI(template, Collections.singletonMap(RoleResource.ROLE, roleId.toString()));
     }
 
+    public static String resolveRoleActionGetPrivilegesURI(final Integer entId)
+    {
+        return resolveRoleURI(entId) + RoleResource.ROLE_ACTION_GET_PRIVILEGES;
+    }
+
     public static String resolveUsersURI(final Serializable enterpriseId)
     {
         String template =

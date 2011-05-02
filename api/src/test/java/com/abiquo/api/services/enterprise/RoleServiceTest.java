@@ -40,7 +40,6 @@ import com.abiquo.api.services.RoleService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.User;
@@ -76,8 +75,13 @@ public class RoleServiceTest extends AbstractGeneratorTest
         Role oldRoleBlocked = roleGenerator.createInstanceBlocked();
         setup(oldRole, oldRoleBlocked);
 
-        RoleDto rl = new RoleDto(oldRole.getId(), "newRoleName", false);
-        RoleDto rlBloked = new RoleDto(oldRoleBlocked.getId(), "newRoleBlokedName", true);
+        RoleDto rl = new RoleDto();
+        rl.setId(oldRole.getId());
+        rl.setName("newRoleName");
+        RoleDto rlBloked = new RoleDto();
+        rlBloked.setId(oldRoleBlocked.getId());
+        rlBloked.setName("newRoleBlokedName");
+        rlBloked.setBlocked(true);
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         RoleService service = new RoleService(em);
@@ -105,6 +109,7 @@ public class RoleServiceTest extends AbstractGeneratorTest
         }
 
     }
+
 
     @Test
 
@@ -216,6 +221,7 @@ public class RoleServiceTest extends AbstractGeneratorTest
 
         commitActiveTransaction(em);
     }
+
 
 
 }

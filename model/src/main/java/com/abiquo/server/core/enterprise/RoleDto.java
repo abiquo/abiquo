@@ -21,9 +21,6 @@
 
 package com.abiquo.server.core.enterprise;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -36,40 +33,12 @@ public class RoleDto extends SingleResourceTransportDto
         super();
     }
 
-    public RoleDto(final Integer id, final String name, final boolean blocked)
+    RoleDto(final Integer id, final String name, final boolean blocked)
     {
         super();
         this.id = id;
         this.name = name;
         this.blocked = blocked;
-    }
-
-    public RoleDto(final Integer id, final String name, final boolean blocked,
-        final EnterpriseDto entDto)
-    {
-        this(id, name, blocked);
-        this.enterprise = entDto;
-    }
-
-    public RoleDto(final Integer id, final String name, final boolean blocked,
-        final PrivilegeDto... privileges)
-    {
-        this(id, name, blocked);
-        if (privileges != null && privileges.length > 0)
-        {
-            this.privileges = new ArrayList<PrivilegeDto>();
-            for (PrivilegeDto p : privileges)
-            {
-                this.privileges.add(p);
-            }
-        }
-    }
-
-    public RoleDto(final Integer id, final String name, final boolean blocked,
-        final EnterpriseDto entDto, final PrivilegeDto... privileges)
-    {
-        this(id, name, blocked, privileges);
-        this.enterprise = entDto;
     }
 
     private Integer id;
@@ -96,18 +65,6 @@ public class RoleDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private EnterpriseDto enterprise;
-
-    public EnterpriseDto getEnterprise()
-    {
-        return enterprise;
-    }
-
-    public void setEnterprise(final EnterpriseDto enterprise)
-    {
-        this.enterprise = enterprise;
-    }
-
     private boolean blocked;
 
     public boolean isBlocked()
@@ -118,18 +75,6 @@ public class RoleDto extends SingleResourceTransportDto
     public void setBlocked(final boolean blocked)
     {
         this.blocked = blocked;
-    }
-
-    private List<PrivilegeDto> privileges;
-
-    public List<PrivilegeDto> getPrivileges()
-    {
-        return privileges;
-    }
-
-    public void setPrivileges(final List<PrivilegeDto> privileges)
-    {
-        this.privileges = privileges;
     }
 
 }
