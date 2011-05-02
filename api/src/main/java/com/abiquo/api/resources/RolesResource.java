@@ -27,7 +27,6 @@ import java.util.Collection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -56,25 +55,8 @@ public class RolesResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
-    // @GET
-    // public RolesDto getRoles(@Context final IRESTBuilder restBuilder) throws Exception
-    // {
-    // Collection<Role> all = service.getRoles();
-    // RolesDto roles = new RolesDto();
-    //
-    // if (all != null && !all.isEmpty())
-    // {
-    // for (Role r : all)
-    // {
-    // roles.add(createTransferObject(r, restBuilder));
-    // }
-    // }
-    //
-    // return roles;
-    // }
-
     @GET
-    public RolesDto getRoles(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
+    public RolesDto getRoles(@QueryParam("idEnterprise") final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
         @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,

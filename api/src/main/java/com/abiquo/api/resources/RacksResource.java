@@ -33,7 +33,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.RackService;
@@ -53,8 +52,8 @@ public class RacksResource extends AbstractResource
     protected RackService service;
 
     @GET
-    public RacksDto getRacks(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public RacksDto getRacks(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<Rack> all = service.getRacksByDatacenter(datacenterId);
         RacksDto racks = new RacksDto();
@@ -71,8 +70,8 @@ public class RacksResource extends AbstractResource
     }
 
     @POST
-    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RackDto rack, @Context IRESTBuilder restBuilder) throws Exception
+    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        final RackDto rack, @Context final IRESTBuilder restBuilder) throws Exception
     {
         Rack r = service.addRack(rack, datacenterId);
 
