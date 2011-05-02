@@ -21,10 +21,9 @@
 
 package com.abiquo.api.services;
 
-import java.util.ArrayList;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
-
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
@@ -38,12 +37,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
-<<<<<<< HEAD
-import com.abiquo.api.resources.config.PrivilegeResource;
-=======
 import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.util.URIResolver;
->>>>>>> 91ece9644f085a2f56021fa0607813619015033d
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
