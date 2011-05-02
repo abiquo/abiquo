@@ -111,6 +111,10 @@ public enum APIError
     // ROLE
     NON_MODIFICABLE_ROLE("ROLE-1", "The requested role cannot be modified"),
 
+    // ROLE
+    MISSING_ENTERPRISE_LINK("ROLE-2", "Missing link to the enterprise"), ENTERPRISE_PARAM_NOT_FOUND(
+        "ROLE-3", "Missing enterprise parameter"),
+
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
 

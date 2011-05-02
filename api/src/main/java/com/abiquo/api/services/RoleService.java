@@ -21,9 +21,12 @@
 
 package com.abiquo.api.services;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
@@ -63,8 +70,43 @@ public class RoleService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Role addRole(final RoleDto dto)
     {
+        Enterprise enterprise = findEnterprise(dto);
+        return addRole(dto, enterprise);
+    }
 
-        Role role = new Role(dto.getName());
+    private Enterprise findEnterprise(final RoleDto dto)
+    {
+        return enterpriseRep.findById(getEnterpriseId(dto));
+    }
+
+    private Integer getEnterpriseId(final RoleDto dto)
+    {
+        RESTLink enterprise = dto.searchLink(EnterpriseResource.ENTERPRISE);
+
+        if (enterprise == null)
+        {
+            throw new NotFoundException(APIError.MISSING_ENTERPRISE_LINK);
+        }
+
+        String buildPath =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+        MultivaluedMap<String, String> enterpriseValues =
+            URIResolver.resolveFromURI(buildPath, enterprise.getHref());
+
+        if (enterpriseValues == null
+            || !enterpriseValues.containsKey(EnterpriseResource.ENTERPRISE))
+        {
+            throw new NotFoundException(APIError.ROLE_PARAM_NOT_FOUND);
+        }
+
+        Integer roleId = Integer.valueOf(enterpriseValues.getFirst(EnterpriseResource.ENTERPRISE));
+        return roleId;
+    }
+
+    public Role addRole(final RoleDto dto, final Enterprise enterprise)
+    {
+
+        Role role = new Role(dto.getName(), enterprise);
 
         if (!role.isValid())
         {
