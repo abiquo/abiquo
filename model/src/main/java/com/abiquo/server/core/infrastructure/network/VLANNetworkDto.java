@@ -23,7 +23,6 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -37,9 +36,19 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
 
     private Integer tag;
 
-    private Boolean defaultNetwork;
+    private String gateway;
 
-    private NetworkConfigurationDto networkConfiguration;
+    private String address;
+
+    private Integer mask;
+
+    private String primaryDNS;
+
+    private String secondaryDNS;
+
+    private String sufixDNS;
+    
+    private Boolean defaultNetwork;
 
     public Integer getId()
     {
@@ -70,6 +79,66 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     {
         this.tag = tag;
     }
+    
+    public String getGateway()
+    {
+        return gateway;
+    }
+
+    public void setGateway(String gateway)
+    {
+        this.gateway = gateway;
+    }
+
+    public String getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress(String address)
+    {
+        this.address = address;
+    }
+
+    public Integer getMask()
+    {
+        return mask;
+    }
+
+    public void setMask(Integer mask)
+    {
+        this.mask = mask;
+    }
+
+    public String getPrimaryDNS()
+    {
+        return primaryDNS;
+    }
+
+    public void setPrimaryDNS(String primaryDNS)
+    {
+        this.primaryDNS = primaryDNS;
+    }
+
+    public String getSecondaryDNS()
+    {
+        return secondaryDNS;
+    }
+
+    public void setSecondaryDNS(String secondaryDNS)
+    {
+        this.secondaryDNS = secondaryDNS;
+    }
+
+    public String getSufixDNS()
+    {
+        return sufixDNS;
+    }
+
+    public void setSufixDNS(String sufixDNS)
+    {
+        this.sufixDNS = sufixDNS;
+    }
 
     public Boolean getDefaultNetwork()
     {
@@ -81,14 +150,4 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.defaultNetwork = defaultNetwork;
     }
 
-    @XmlElement(name = "configuration")
-    public NetworkConfigurationDto getNetworkConfiguration()
-    {
-        return networkConfiguration;
-    }
-
-    public void setNetworkConfiguration(NetworkConfigurationDto networkConfiguration)
-    {
-        this.networkConfiguration = networkConfiguration;
-    }
 }

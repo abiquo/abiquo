@@ -35,6 +35,9 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "errors")
 public class ErrorsDto extends WrapperDto<ErrorDto>
 {
+    private static final long serialVersionUID = 1L;
+
+    @Override
     @XmlElement(name = "error")
     public List<ErrorDto> getCollection()
     {

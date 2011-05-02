@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -31,9 +33,12 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -41,55 +46,75 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
-@NamedQueries({
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VLAN", query= IpPoolManagement.BY_VLAN ),
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
-@NamedQuery(name="IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)
-})
+@NamedQueries( {@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
+@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
+@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)})
 public class IpPoolManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "10";
-    public static final String TABLE_NAME = "ip_pool_management";
 
-    public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip, " +
-    		                               " NetworkConfiguration nc, " +
-    		                               " VLANNetwork vn " +
-    		                               " WHERE ip.dhcp.id = nc.dhcp.id " +
-    		                               " AND nc.id = vn.configuration.id " +
-      		                               " AND vn.id = :vlan_id";
-    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip, " +
-                                          " NetworkConfiguration nc, " +
-                                          " VirtualDatacenter vdc, " +
-                                          " VLANNetwork vn " +
-                                          " WHERE ip.dhcp.id = nc.dhcp.id " +
-                                          " AND nc.id = vn.configuration.id " +
-                                          " AND vn.network.id = vdc.network.id" +
-                                          " AND vdc.id = :vdc_id";
-    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip, " +
-                                          " NetworkConfiguration nc, " +
-                                          " VirtualDatacenter vdc, " +
-                                          " VLANNetwork vn, " +
-                                          " Enterprise ent " +
-                                          " WHERE ip.dhcp.id = nc.dhcp.id " +
-                                          " AND nc.id = vn.configuration.id " +
-                                          " AND vn.network.id = vdc.network.id" +
-                                          " AND vdc.enterprise.id = ent.id" +
-                                          " AND ent.id = :ent_id";
-    
-    protected IpPoolManagement()
+    private static final String DEFAULT_RESOURCE_NAME = "MAC Address";
+
+    private static final String DEFAULT_RESOURCE_DESCRIPTION =
+        "MAC Address asociated to private Network";
+
+    public static enum Type
     {
-        super();
+        PRIVATE, PUBLIC; // 0 = private, 1 = public
     }
 
-    public IpPoolManagement(Dhcp dhcp, VLANNetwork vlan, String mac, String name, String ip,
-        String networkName)
+    public static final String TABLE_NAME = "ip_pool_management";
+
+    public static final String BY_VLAN =
+        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, " + " VLANNetwork vn "
+            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+            + " AND vn.id = :vlan_id";
+
+    public static final String BY_VDC =
+        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
+            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+            + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+            + " AND vdc.id = :vdc_id";
+
+    public static final String BY_ENT =
+        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
+            + " VirtualDatacenter vdc, " + " VLANNetwork vn, " + " Enterprise ent "
+            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+            + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
+            + " AND ent.id = :ent_id";
+
+    // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
+    // code
+    protected IpPoolManagement()
+    {
+        // Just for JPA support
+    }
+
+    public IpPoolManagement(final Dhcp dhcp, final VLANNetwork vlan, final String mac,
+        final String name, final String ip, final String networkName, final Type type)
     {
         super(DISCRIMINATOR);
+
+        // RasdManagement properties
+        Rasd rasd =
+            new Rasd(UUID.randomUUID().toString(), DEFAULT_RESOURCE_NAME, Integer
+                .valueOf(DISCRIMINATOR));
+
+        rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
+        rasd.setConnection("");
+        rasd.setAllocationUnits("0");
+        rasd.setAutomaticAllocation(0);
+        rasd.setAutomaticDeallocation(0);
+
+        setRasd(rasd);
+
+        // IpManagement properties
+        setType(type);
         setDhcp(dhcp);
-        setVlanNetwork(vlan);
         setMac(mac);
         setName(name);
         setIp(ip);
+        setVlanNetwork(vlan);
         setNetworkName(networkName);
     }
 
@@ -116,7 +141,7 @@ public class IpPoolManagement extends RasdManagement
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -138,7 +163,7 @@ public class IpPoolManagement extends RasdManagement
         return this.vlanNetwork;
     }
 
-    public void setVlanNetwork(VLANNetwork vlanNetwork)
+    public void setVlanNetwork(final VLANNetwork vlanNetwork)
     {
         this.vlanNetwork = vlanNetwork;
     }
@@ -166,9 +191,10 @@ public class IpPoolManagement extends RasdManagement
         return this.mac;
     }
 
-    private void setMac(String mac)
+    private void setMac(final String mac)
     {
         this.mac = mac;
+        getRasd().setAddress(mac);
     }
 
     public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
@@ -186,7 +212,7 @@ public class IpPoolManagement extends RasdManagement
         return this.configurareGateway;
     }
 
-    private void setConfigureGateway(boolean configurareGateway)
+    public void setConfigureGateway(final boolean configurareGateway)
     {
         this.configurareGateway = configurareGateway;
     }
@@ -206,7 +232,7 @@ public class IpPoolManagement extends RasdManagement
         return this.quarantine;
     }
 
-    private void setQuarantine(boolean quarantine)
+    public void setQuarantine(final boolean quarantine)
     {
         this.quarantine = quarantine;
     }
@@ -234,7 +260,7 @@ public class IpPoolManagement extends RasdManagement
         return this.ip;
     }
 
-    private void setIp(String ip)
+    private void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -256,7 +282,7 @@ public class IpPoolManagement extends RasdManagement
         return this.dhcp;
     }
 
-    public void setDhcp(Dhcp dhcp)
+    public void setDhcp(final Dhcp dhcp)
     {
         this.dhcp = dhcp;
     }
@@ -284,8 +310,61 @@ public class IpPoolManagement extends RasdManagement
         return this.networkName;
     }
 
-    private void setNetworkName(String networkName)
+    private void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
+        getRasd().setParent(networkName);
+    }
+
+    // ********************************** Helper methods ********************************
+
+    public Type getType()
+    {
+        int typeFlag = Integer.valueOf(getRasd().getResourceSubType());
+        return Type.values()[typeFlag];
+    }
+
+    public void setType(final Type type)
+    {
+        getRasd().setResourceSubType(String.valueOf(type.ordinal()));
+        getRasd().setConfigurationName(String.valueOf(type.ordinal()));
+    }
+
+    public boolean isPrivateIp()
+    {
+        return getType() == Type.PRIVATE;
+    }
+
+    public boolean isPublicIp()
+    {
+        return !isPrivateIp();
+    }
+
+    // ********************************** Others ********************************
+    @Override
+    public String toString()
+    {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    /**
+     * Ways to order this element in the queries.
+     */
+    public static enum OrderByEnum
+    {
+        IP, QUARANTINE, MAC, LEASE, VLAN, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE;
+
+        public static OrderByEnum fromValue(final String orderBy)
+        {
+            for (OrderByEnum currentOrder : OrderByEnum.values())
+            {
+                if (currentOrder.name().equalsIgnoreCase(orderBy))
+                {
+                    return currentOrder;
+                }
+            }
+
+            return null;
+        }
     }
 }

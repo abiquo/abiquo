@@ -21,26 +21,37 @@
 
 package com.abiquo.server.core.infrastructure.management;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO, RasdManagement>
 {
+    private VirtualMachineGenerator vmGenerator;
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        vmGenerator = new VirtualMachineGenerator(getSeed());
     }
 
     @Override
-    protected RasdManagementDAO createDao(EntityManager entityManager)
+    protected RasdManagementDAO createDao(final EntityManager entityManager)
     {
         return new RasdManagementDAO(entityManager);
     }
@@ -63,4 +74,41 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         return (RasdManagementGenerator) super.eg();
     }
 
+    @Test
+    public void testFindByVirtualMachine()
+    {
+        RasdManagement rasdManagement = eg().createUniqueInstance();
+        VirtualMachine vm = vmGenerator.createUniqueInstance();
+        rasdManagement.setVirtualMachine(vm);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(rasdManagement, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, rasdManagement);
+
+        RasdManagementDAO dao = createDaoForRollbackTransaction();
+
+        Collection<RasdManagement> results = dao.findByVirtualMachine(vm);
+
+        assertEquals(results.size(), 1);
+        eg().assertAllPropertiesEqual(results.iterator().next(), rasdManagement);
+    }
+
+    @Test
+    public void testFindByVirtualDatacenterAndResourceType()
+    {
+        RasdManagement rasdManagement = eg().createInstance(VolumeManagement.DISCRIMINATOR);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(rasdManagement, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, rasdManagement);
+
+        RasdManagementDAO dao = createDaoForRollbackTransaction();
+
+        Collection<RasdManagement> results =
+            dao.findByVirtualDatacenterAndResourceType(rasdManagement.getVirtualDatacenter(),
+                VolumeManagement.DISCRIMINATOR);
+
+        assertEquals(results.size(), 1);
+        eg().assertAllPropertiesEqual(results.iterator().next(), rasdManagement);
+    }
 }

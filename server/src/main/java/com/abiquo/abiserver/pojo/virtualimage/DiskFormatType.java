@@ -40,10 +40,10 @@ public class DiskFormatType
 
     public DiskFormatType(int id)
     {
-        this(com.abiquo.server.core.enumerator.DiskFormatType.fromId(id));
+        this(com.abiquo.model.enumerator.DiskFormatType.fromId(id));
     }
 
-    public DiskFormatType(com.abiquo.server.core.enumerator.DiskFormatType type)
+    public DiskFormatType(com.abiquo.model.enumerator.DiskFormatType type)
     {
         this.id = type.id();
         this.name = type.name();
@@ -52,9 +52,9 @@ public class DiskFormatType
         this.alias = type.alias.toString();
     }
 
-    public com.abiquo.server.core.enumerator.DiskFormatType toEnum()
+    public com.abiquo.model.enumerator.DiskFormatType toEnum()
     {
-        return com.abiquo.server.core.enumerator.DiskFormatType.fromURI(uri);
+        return com.abiquo.model.enumerator.DiskFormatType.fromURI(uri);
     }
 
     public int getId()

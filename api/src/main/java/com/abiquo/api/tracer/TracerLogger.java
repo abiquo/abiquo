@@ -34,8 +34,10 @@ import com.abiquo.api.tracer.hierarchy.HierarchyProcessor;
 import com.abiquo.commons.amqp.impl.tracer.TracerProducer;
 import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
 import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.Enterprise;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.User;
 
 /**
  * Logger to the Abiquo tracing system.
@@ -79,6 +81,7 @@ public class TracerLogger
             trace.setEnterpriseName(tracerContext.getEnterpriseName());
             trace.setUserId(tracerContext.getUserId());
             trace.setUsername(tracerContext.getUsername());
+            trace.setMessage(message);
 
             LOGGER.info(trace.toString());
 
@@ -89,7 +92,42 @@ public class TracerLogger
         {
             // Just ignore this error for the moment; it appears if the method is invoked outside
             // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
-            LOGGER.warn("Could not send the trace.");
+        }
+    }
+
+    /**
+     * Log a system message to the event system.
+     * <p>
+     * This method should only be used to log system tasks such as infrastructure check, etc.
+     * Actions performed by a user must be logged using the
+     * {@link #log(SeverityType, ComponentType, EventType, String)} method.
+     * 
+     * @param severity The severity of the trace.
+     * @param component The component that generated the trace.
+     * @param event The event being traced.
+     * @param message The message to trace.
+     */
+    public void systemLog(final SeverityType severity, final ComponentType component,
+        final EventType event, final String message)
+    {
+        try
+        {
+            Trace trace = new Trace();
+            trace.setSeverity(severity.name());
+            trace.setComponent(component.name());
+            trace.setEvent(event.name());
+            trace.setEnterpriseName(Enterprise.SYSTEM_ENTERPRISE.getName());
+            trace.setUsername(User.SYSTEM_USER.getName());
+            trace.setMessage(message);
+
+            LOGGER.info(trace.toString());
+
+            publishTrace(trace);
+        }
+        catch (IllegalStateException ex)
+        {
+            // Just ignore this error for the moment; it appears if the method is invoked outside
+            // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
         }
     }
 
