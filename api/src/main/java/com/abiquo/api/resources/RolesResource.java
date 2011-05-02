@@ -26,6 +26,7 @@ import static com.abiquo.api.resources.RoleResource.createTransferObject;
 import java.util.Collection;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -101,8 +102,7 @@ public class RolesResource extends AbstractResource
         return roles;
     }
 
-    // @POST
-    // Not supported yet
+    @POST
     public RoleDto postRole(final RoleDto role, @Context final IRESTBuilder restBuilder)
         throws Exception
     {

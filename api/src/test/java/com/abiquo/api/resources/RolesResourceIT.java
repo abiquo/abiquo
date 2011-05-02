@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRolesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -37,6 +38,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
@@ -126,4 +128,40 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         RoleDto r = entity.getCollection().iterator().next();
         Assert.assertEquals(r.getName(), "r1");
     }
+
+    @Test
+    public void createRole()
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Role role = roleGenerator.createInstance("r1", e1);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(role);
+
+        setup(entitiesToPersist.toArray());
+
+        RoleDto dto = getValidRole(role);
+
+        ClientResponse response = post(rolesURI, dto);
+
+        assertEquals(response.getStatusCode(), 201);
+
+        RoleDto entityPost = response.getEntity(RoleDto.class);
+
+        assertNotNull(entityPost);
+
+        assertEquals(dto.getName(), entityPost.getName());
+    }
+
+    private RoleDto getValidRole(final Role role)
+    {
+        RoleDto dto = new RoleDto();
+        dto.setName("TEST_ROLE");
+
+        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(role
+            .getEnterprise().getId())));
+        return dto;
+    }
+
 }
