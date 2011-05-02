@@ -22,6 +22,8 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
+import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveRoleActionGetPrivilegesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -93,6 +95,8 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
     {
         Role role = roleGenerator.createUniqueInstance();
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        role.setEnterprise(ent);
+
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         for (Privilege p : role.getPrivileges())
@@ -105,6 +109,8 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         String href = resolveRoleURI(role.getId());
+        String enterpriseUri = resolveEnterpriseURI(role.getEnterprise().getId());
+        String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
         Resource resource = client.resource(href);
 
         RoleDto dto = resource.accept(MediaType.APPLICATION_XML).get(RoleDto.class);
@@ -112,7 +118,8 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dto.getLinks());
 
         assertLinkExist(dto, href, "edit");
-        // assertLinkExist(dto, resolveRoleActionGetPrivilegesURI(role.getId()), "action",
-        // RoleResource.ROLE_ACTION_GET_PRIVILEGES);
+        assertLinkExist(dto, enterpriseUri, "enterprise");
+        assertLinkExist(dto, privilegesUri, "action", "privileges");
+
     }
 }

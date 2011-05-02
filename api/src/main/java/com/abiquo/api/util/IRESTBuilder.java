@@ -35,6 +35,7 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -63,6 +64,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildRoleLinks(RoleDto role);
 
     public List<RESTLink> buildRoleLinks(Integer enterpriseId, RoleDto role);
+
+    public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege);
 
     public List<RESTLink> buildEnterpriseLinks(EnterpriseDto enterprise);
 

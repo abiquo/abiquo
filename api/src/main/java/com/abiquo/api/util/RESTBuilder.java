@@ -56,6 +56,7 @@ import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -67,6 +68,7 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -213,6 +215,20 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
     public List<RESTLink> buildRoleLinks(final RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -222,8 +238,8 @@ public class RESTBuilder implements IRESTBuilder
 
         RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
-        links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
 
         return links;
     }
@@ -241,8 +257,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
-        links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
 
         return links;
     }

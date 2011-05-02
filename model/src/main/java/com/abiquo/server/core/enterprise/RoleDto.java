@@ -33,7 +33,7 @@ public class RoleDto extends SingleResourceTransportDto
         super();
     }
 
-    RoleDto(final Integer id, final String name, final boolean blocked)
+    public RoleDto(final Integer id, final String name, final boolean blocked)
     {
         super();
         this.id = id;
