@@ -36,9 +36,10 @@ import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.Assert;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RolesDto;
 
 public class RolesResourceIT extends AbstractJpaGeneratorIT
@@ -72,35 +73,46 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
 
+        //
+        String uri = rolesURI;
+        uri =
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
+                new String[] {Integer.toString(e1.getId())}), false);
+
+        response = get(uri);
+
+        assertEquals(response.getStatusCode(), 200);
+
+        entity = response.getEntity(RolesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 1);
+
     }
 
     @Test
     public void getRolesListDescOrder() throws Exception
     {
-        Role role = roleGenerator.createUniqueInstance();
-        Role role2 = roleGenerator.createUniqueInstance();
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance("r1", e1);
+        Role r2 = roleGenerator.createInstance("r2", e1);
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(r1);
+        entitiesToPersist.add(r2);
 
-        for (Privilege p : role.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-
-        for (Privilege p : role2.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(role);
-
-        entitiesToSetup.add(role2);
-
-        setup(entitiesToSetup.toArray());
+        setup(entitiesToPersist.toArray());
 
         String uri = rolesURI;
         uri =
             UriHelper.appendQueryParamsToPath(uri,
                 Collections.singletonMap("desc", new String[] {"true"}), false);
+
+        uri =
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
+                new String[] {Integer.toString(e1.getId())}), false);
 
         ClientResponse response = get(uri);
 
@@ -111,5 +123,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 2);
+        RoleDto r = entity.getCollection().iterator().next();
+        Assert.assertEquals(r.getName(), "r1");
     }
 }
