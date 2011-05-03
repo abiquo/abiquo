@@ -46,7 +46,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -58,7 +58,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class MachineService extends DefaultApiService
 {
     @Autowired
-    protected DatacenterRep repo;
+    protected InfrastructureRep repo;
 
     @Autowired
     protected DatastoreService dataService;
@@ -82,7 +82,7 @@ public class MachineService extends DefaultApiService
 
     public MachineService(final EntityManager em)
     {
-        repo = new DatacenterRep(em);
+        repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VSMStubImpl();
         remoteServiceService = new RemoteServiceService(em);
@@ -139,17 +139,18 @@ public class MachineService extends DefaultApiService
         // Part 2: Insert the hypervisor into database.
         if (repo.existAnyHypervisorWithIp(machineDto.getIp()))
         {
-            errors.add(APIError.HYPERVISOR_EXIST_IP);
+            addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
         }
 
         if (repo.existAnyHypervisorWithIpService(machineDto.getIpService()))
         {
-            errors.add(APIError.HYPERVISOR_EXIST_SERVICE_IP);
+            addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
         }
+        flushErrors();
 
         if (!hypervisor.isValid())
         {
-            validationErrors.addAll(hypervisor.getValidationErrors());
+            addValidationErrors(hypervisor.getValidationErrors());
         }
         flushErrors();
 
@@ -172,7 +173,7 @@ public class MachineService extends DefaultApiService
     {
         if (id == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
@@ -303,7 +304,7 @@ public class MachineService extends DefaultApiService
     {
         if (!machine.isValid())
         {
-            validationErrors.addAll(machine.getValidationErrors());
+            addValidationErrors(machine.getValidationErrors());
         }
 
         flushErrors();

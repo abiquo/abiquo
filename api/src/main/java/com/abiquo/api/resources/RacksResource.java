@@ -25,7 +25,6 @@ import static com.abiquo.api.resources.RackResource.createTransferObject;
 
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -36,7 +35,7 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.RackService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
@@ -49,14 +48,14 @@ public class RacksResource extends AbstractResource
 {
     public static final String RACKS_PATH = "racks";
 
-    @Resource(name = "rackService")
-    protected RackService service;
+    @Autowired
+    protected InfrastructureService infrastructureService;
 
     @GET
     public RacksDto getRacks(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        List<Rack> all = service.getRacksByDatacenter(datacenterId);
+        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);
         RacksDto racks = new RacksDto();
 
         if (all != null && !all.isEmpty())
@@ -74,7 +73,7 @@ public class RacksResource extends AbstractResource
     public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         RackDto rack, @Context IRESTBuilder restBuilder) throws Exception
     {
-        Rack r = service.addRack(rack, datacenterId);
+        Rack r = infrastructureService.addRack(rack, datacenterId);
 
         return createTransferObject(r, restBuilder);
     }

@@ -38,7 +38,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.MachineService;
-import com.abiquo.api.services.RackService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -64,7 +64,7 @@ public class MachineResource extends AbstractResource
     MachineService service;
 
     @Autowired
-    RackService rackService;
+    InfrastructureService rackService;
 
     @Autowired
     VirtualMachineService vmService;

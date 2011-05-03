@@ -44,12 +44,14 @@ public enum APIError
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"),
-
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4", "Not enough permissions to perform this action"),
+        INVALID_CREDENTIALS("GEN-5", "Invalid credentials"),
+        
     // INVALID_IP("GEN-4", "Invalid IP"),
-    INVALID_PRIVATE_NETWORK_TYPE("GEN-5", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-6", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-7",
-        "Not enough privileges to perform this operation"),
+    INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
+        "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
+        "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
+        "The paramter ID is different from the Entity ID"),
 
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
@@ -106,7 +108,8 @@ public enum APIError
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"),
+        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
+        "RACK-4", "This rack does not exists"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -227,7 +230,7 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR("NODECOLLECTOR-1","Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
@@ -250,10 +253,13 @@ public enum APIError
      */
     String message;
 
-    /**
-     * Additional description
-     */
     String cause;
+    
+    private APIError(final String code, final String message)
+    {
+        this.code = code;
+        this.message = message;
+    }
 
     public String getCode()
     {
@@ -265,21 +271,9 @@ public enum APIError
         return this.message;
     }
 
-    public String getCause()
-    {
-        return cause;
-    }
-
-    APIError(final String code, final String message)
-    {
-        this.code = code;
-        this.message = message;
-    }
-
-    public APIError addCause(final String cause)
+    public void addCause(String cause)
     {
         this.cause = cause;
-        return this;
     }
 
     public static void main(final String[] args)
@@ -302,4 +296,5 @@ public enum APIError
                 .name()));
         }
     }
+
 }

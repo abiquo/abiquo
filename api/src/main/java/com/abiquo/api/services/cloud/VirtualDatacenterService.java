@@ -47,7 +47,10 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.Dhcp;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -64,17 +67,17 @@ public class VirtualDatacenterService extends DefaultApiService
     UserService userService;
 
     @Autowired
-    PrivateNetworkService networkService;
+    InfrastructureRep datacenterRepo;
 
     // New repos and DAOs
     @Autowired
     VirtualDatacenterRep repo;
 
     @Autowired
-    DatacenterRep datacenterRepo;
-
-    @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
+    
+    @Autowired
+    PrivateNetworkService networkService;
 
     public VirtualDatacenterService()
     {
@@ -85,7 +88,7 @@ public class VirtualDatacenterService extends DefaultApiService
     public VirtualDatacenterService(final EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
-        datacenterRepo = new DatacenterRep(em);
+        datacenterRepo = new InfrastructureRep(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
@@ -138,7 +141,7 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         if (!isValidEnterpriseDatacenter(enterprise, datacenter))
         {
-            errors.add(APIError.DATACENTER_NOT_ALLOWED);
+            addForbiddenErrors(APIError.DATACENTER_NOT_ALLOWED);
             flushErrors();
         }
 
@@ -192,12 +195,12 @@ public class VirtualDatacenterService extends DefaultApiService
 
         if (!vdc.isValid())
         {
-            validationErrors.addAll(vdc.getValidationErrors());
+            addValidationErrors(vdc.getValidationErrors());
             flushErrors();
         }
         if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            errors.add(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+            addConflictErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
             flushErrors();
         }
 
@@ -213,12 +216,12 @@ public class VirtualDatacenterService extends DefaultApiService
 
         if (repo.containsVirtualAppliances(vdc))
         {
-            errors.add(APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
+            addConflictErrors(APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
         }
 
         if (repo.containsResources(vdc, VolumeManagement.DISCRIMINATOR))
         {
-            errors.add(APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
+            addConflictErrors(APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
         }
 
         flushErrors();
@@ -264,22 +267,22 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         if (vlan == null)
         {
-            errors.add(APIError.NETWORK_INVALID_CONFIGURATION);
+            addValidationErrors(APIError.NETWORK_INVALID_CONFIGURATION);
         }
 
         if (!vdc.isValid())
         {
-            validationErrors.addAll(vdc.getValidationErrors());
+            addValidationErrors(vdc.getValidationErrors());
         }
         else if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            errors.add(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+            addValidationErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
         }
 
         if (vdc.getHypervisorType() != null
             && !isValidHypervisorForDatacenter(vdc.getHypervisorType(), datacenter))
         {
-            errors.add(APIError.VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE);
+            addValidationErrors(APIError.VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE);
         }
 
         flushErrors();

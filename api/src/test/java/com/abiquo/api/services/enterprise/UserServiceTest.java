@@ -32,7 +32,7 @@ import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthenticationStub;
 import com.abiquo.api.common.UriTestResolver;
-import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.UserService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -145,7 +145,7 @@ public class UserServiceTest extends AbstractGeneratorTest
             service.addUser(dto, e.getId(), r);
             Assert.fail("");
         }
-        catch (ExtendedAPIException e)
+        catch (APIException e)
         {
             Assert.assertSize(e.getErrors(), 1);
         }
@@ -171,7 +171,7 @@ public class UserServiceTest extends AbstractGeneratorTest
             service.modifyUser(u2.getId(), dto);
             Assert.fail("");
         }
-        catch (ExtendedAPIException e)
+        catch (APIException e)
         {
             Assert.assertSize(e.getErrors(), 1);
         }

@@ -40,7 +40,7 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -62,7 +62,7 @@ public class PrivateNetworkService extends DefaultApiService
     VirtualDatacenterRep repo;
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     public static final String FENCE_MODE = "bridge";
 
@@ -77,7 +77,7 @@ public class PrivateNetworkService extends DefaultApiService
     public PrivateNetworkService(final EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
-        datacenterRepo = new DatacenterRep(em);
+        datacenterRepo = new InfrastructureRep(em);
     }
 
     public Collection<VLANNetwork> getNetworks()
@@ -130,7 +130,7 @@ public class PrivateNetworkService extends DefaultApiService
         config.setSufixDNS(networkdto.getSufixDNS());
         if (!config.isValid())
         {
-            validationErrors.addAll(config.getValidationErrors());
+            addValidationErrors(config.getValidationErrors());
             flushErrors();
         }
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
@@ -148,7 +148,7 @@ public class PrivateNetworkService extends DefaultApiService
                 config);
         if (!vlan.isValid())
         {
-            validationErrors.addAll(vlan.getValidationErrors());
+            addValidationErrors(vlan.getValidationErrors());
             flushErrors();
         }
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,

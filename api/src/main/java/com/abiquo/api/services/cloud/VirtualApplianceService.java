@@ -121,7 +121,7 @@ public class VirtualApplianceService extends DefaultApiService
     {
         if (vappId == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
@@ -222,7 +222,8 @@ public class VirtualApplianceService extends DefaultApiService
 
         if (!vapp.isValid())
         {
-            raiseValidationErrors(vapp);
+            addValidationErrors(vapp.getValidationErrors());
+            flushErrors();
         }
 
         repo.insertVirtualAppliance(vapp);

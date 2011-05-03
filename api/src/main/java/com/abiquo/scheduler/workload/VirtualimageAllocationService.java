@@ -44,7 +44,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -123,7 +123,7 @@ public class VirtualimageAllocationService
     private final static Logger log = LoggerFactory.getLogger(VirtualimageAllocationService.class);
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     VirtualApplianceDAO virtualApplianceDao;
@@ -152,7 +152,7 @@ public class VirtualimageAllocationService
      *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance) throws ResourceAllocationException
+        final Integer idVirtualAppliance)
     {
         final List<Integer> rackCandidates = getCandidateRacks(idVirtualAppliance);
 

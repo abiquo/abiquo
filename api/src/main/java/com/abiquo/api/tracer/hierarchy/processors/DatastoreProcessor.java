@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.resources.DatastoresResource;
 import com.abiquo.api.tracer.hierarchy.AbstractHierarchyProcessor;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 
 /**
@@ -39,7 +39,7 @@ public class DatastoreProcessor extends AbstractHierarchyProcessor<Datastore>
 {
     /** The DAO used to get the resource information. */
     @Autowired
-    private DatacenterRep dao;
+    private InfrastructureRep dao;
 
     @Override
     protected String getIdentifierPrefix()

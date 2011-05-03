@@ -65,7 +65,7 @@ public class SystemPropertyService extends DefaultApiService
     {
         if (repo.existsAnyWithName(dto.getName()))
         {
-            errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+            addValidationErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -85,7 +85,7 @@ public class SystemPropertyService extends DefaultApiService
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+            addConflictErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -106,7 +106,7 @@ public class SystemPropertyService extends DefaultApiService
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
         {
-            validationErrors.addAll(property.getValidationErrors());
+            addValidationErrors(property.getValidationErrors());
         }
         flushErrors();
 
@@ -129,7 +129,7 @@ public class SystemPropertyService extends DefaultApiService
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
         {
-            validationErrors.addAll(property.getValidationErrors());
+            addValidationErrors(property.getValidationErrors());
         }
         flushErrors();
 
@@ -159,7 +159,7 @@ public class SystemPropertyService extends DefaultApiService
             // Check that there are no duplicate properties
             if (repo.existsAnyWithName(property.getName()))
             {
-                errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+                addConflictErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
                 flushErrors();
             }
 
@@ -171,7 +171,7 @@ public class SystemPropertyService extends DefaultApiService
     {
         if (!systemProperty.isValid())
         {
-            validationErrors.addAll(systemProperty.getValidationErrors());
+            addValidationErrors(systemProperty.getValidationErrors());
         }
         flushErrors();
     }

@@ -172,12 +172,12 @@ public class UserService extends DefaultApiService
         }
         if (repo.existAnyUserWithNick(user.getNick()))
         {
-            errors.add(APIError.USER_DUPLICATED_NICK);
+            addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
         if (!emailIsValid(user.getEmail()))
         {
-            errors.add(APIError.EMAIL_IS_INVALID);
+            addValidationErrors(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
 
@@ -215,7 +215,7 @@ public class UserService extends DefaultApiService
         if (old.getRole().getType() == Role.Type.SYS_ADMIN
             && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
         {
-            errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
+            addConflictErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
         }
 
@@ -235,7 +235,7 @@ public class UserService extends DefaultApiService
 
         if (!emailIsValid(user.getEmail()))
         {
-            errors.add(APIError.EMAIL_IS_INVALID);
+            addValidationErrors(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
         if (user.searchLink(RoleResource.ROLE) != null)
@@ -254,7 +254,7 @@ public class UserService extends DefaultApiService
         }
         if (repo.existAnyOtherUserWithNick(old, old.getNick()))
         {
-            errors.add(APIError.USER_DUPLICATED_NICK);
+            addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
 
@@ -283,7 +283,7 @@ public class UserService extends DefaultApiService
         if (user.getRole().getType() == Role.Type.SYS_ADMIN
             && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
         {
-            errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
+            addForbiddenErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
         }
 

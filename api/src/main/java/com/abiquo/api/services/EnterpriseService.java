@@ -56,7 +56,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.api.spring.security.AbiquoUserDetails;
 
 @Service
 @Transactional(readOnly = true)
@@ -139,7 +138,7 @@ public class EnterpriseService extends DefaultApiService
     {
         if (repo.existsAnyWithName(dto.getName()))
         {
-            errors.add(APIError.ENTERPRISE_DUPLICATED_NAME);
+            addConflictErrors(APIError.ENTERPRISE_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -189,13 +188,13 @@ public class EnterpriseService extends DefaultApiService
 
         if (dto.getName().isEmpty())
         {
-            errors.add(APIError.ENTERPRISE_EMPTY_NAME);
+            addValidationErrors(APIError.ENTERPRISE_EMPTY_NAME);
             flushErrors();
         }
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.ENTERPRISE_DUPLICATED_NAME);
+            addConflictErrors(APIError.ENTERPRISE_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -225,14 +224,14 @@ public class EnterpriseService extends DefaultApiService
 
         if (user.getEnterprise().equals(enterprise))
         {
-            errors.add(APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);
+            addConflictErrors(APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);
             flushErrors();
         }
 
         Collection<VirtualDatacenter> vdcs = vdcRepo.findByEnterprise(enterprise);
         if (!vdcs.isEmpty())
         {
-            errors.add(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
+            addConflictErrors(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
             flushErrors();
         }
 
@@ -334,7 +333,7 @@ public class EnterpriseService extends DefaultApiService
 
         if (repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter) != null)
         {
-            errors.add(APIError.LIMITS_DUPLICATED);
+            addConflictErrors(APIError.LIMITS_DUPLICATED);
             flushErrors();
         }
 
@@ -441,7 +440,7 @@ public class EnterpriseService extends DefaultApiService
     {
         if (!enterprise.isValid())
         {
-            validationErrors.addAll(enterprise.getValidationErrors());
+            addValidationErrors(enterprise.getValidationErrors());
         }
 
         flushErrors();
