@@ -34,7 +34,7 @@ public enum EventType implements Serializable
     USER_LOGIN(100, "USER_LOGIN", "User logged in"), 
     USER_LOGOUT(101, "USER_LOGOUT", "User logged out"), 
     USER_CREATE(102, "USER_CREATE", "User created"), 
-    USER_DELETE(103, "USER_CREATE", "User deleted"), 
+    USER_DELETE(103, "USER_DELETE", "User deleted"), 
     USER_MODIFY(104, "USER_MODIFY", "User modified"), 
     ENTERPRISE_CREATE(105, "ENTERPRISE_CREATE", "Enterprise created"), 
     ENTERPRISE_MODIFY(106, "ENTERPRISE_MODIFY", "Enterprise modified"), 
@@ -151,7 +151,15 @@ public enum EventType implements Serializable
 
     // Client-related events
     THEME_UPDATE(1100, "THEME_UPDATE", "Theme updated"),
-    UPDATE_PROPERTIES(1101, "UPDATE_PROPERTIES", "Client properties updated");
+    UPDATE_PROPERTIES(1101, "UPDATE_PROPERTIES", "Client properties updated"),
+
+    // Role Event
+    ROLE_CREATED(1200, "ROLE_CREATED", "Role created"),
+    ROLE_MODIFY(1201, "ROLE_MODIFIED", "Role updated"),
+    ROLE_DELETED(1202, "ROLE_DELETED", "Role deleted"),
+    ROLE_PRIVILEGES_MODIFY(1203, "ROLE_PRIVILEGES_MODIFY", "Role's privileges modified")
+    
+    ;
     
 
     private final int event;

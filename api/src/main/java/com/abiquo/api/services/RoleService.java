@@ -30,6 +30,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -48,11 +50,16 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
 public class RoleService extends DefaultApiService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleService.class);
+
     @Autowired
     EnterpriseRep enterpriseRep;
 
@@ -75,19 +82,32 @@ public class RoleService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Role addRole(final RoleDto dto)
     {
+        Role role;
+
+        LOGGER.debug("Getting enterprise link");
         RESTLink enterpriseId = dto.searchLink(EnterpriseResource.ENTERPRISE);
 
         if (enterpriseId == null)
         {
-            return addRole(dto, null);
+            LOGGER.debug("Creating role without enterprise");
+            role = addRole(dto, null);
         }
-        Enterprise enterprise = findEnterprise(dto);
-
-        if (enterprise == null)
+        else
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            Enterprise enterprise = findEnterprise(dto);
+
+            if (enterprise == null)
+            {
+                throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            }
+
+            LOGGER.debug("Creating role with enterprise");
+            role = addRole(dto, enterprise);
         }
-        return addRole(dto, enterprise);
+
+        tracer.log(SeverityType.INFO, ComponentType.ROLE, EventType.ROLE_CREATED, "Created role "
+            + role.getName());
+        return role;
     }
 
     private Enterprise findEnterprise(final RoleDto dto)
@@ -97,6 +117,7 @@ public class RoleService extends DefaultApiService
 
     private Integer getEnterpriseId(final RoleDto dto)
     {
+        LOGGER.debug("Getting enterprise link from role");
         RESTLink enterprise = dto.searchLink(EnterpriseResource.ENTERPRISE);
 
         if (enterprise != null)
@@ -117,12 +138,15 @@ public class RoleService extends DefaultApiService
                 Integer.valueOf(enterpriseValues.getFirst(EnterpriseResource.ENTERPRISE));
             return roleId;
         }
+
+        LOGGER.debug("Role without enterprise link");
         return null;
     }
 
     private List<Integer> getPrivilegeIds(final RoleDto dto)
     {
         List<Integer> idList = new ArrayList<Integer>();
+        LOGGER.debug("Getting privileges links from role");
         for (RESTLink rsl : dto.getLinks())
         {
             if (rsl.getRel().contains(PrivilegeResource.PRIVILEGE))
@@ -185,6 +209,7 @@ public class RoleService extends DefaultApiService
             flushErrors();
         }
 
+        LOGGER.debug("Setting enterprise");
         Integer entId = getEnterpriseId(dto);
         if (entId != null)
         {
@@ -199,6 +224,7 @@ public class RoleService extends DefaultApiService
         old.setPrivileges(new ArrayList<Privilege>());
         if (dto.getLinks() != null)
         {
+            LOGGER.debug("Setting privileges");
             for (Integer pId : getPrivilegeIds(dto))
             {
                 Privilege p = enterpriseRep.findPrivilegeById(pId);
@@ -208,9 +234,15 @@ public class RoleService extends DefaultApiService
                 }
                 old.addPrivilege(p);
             }
+            tracer.log(SeverityType.INFO, ComponentType.ROLE, EventType.ROLE_PRIVILEGES_MODIFY,
+                "Modifying privileges from role " + old.getName());
         }
 
         enterpriseRep.updateRole(old);
+
+        tracer.log(SeverityType.INFO, ComponentType.ROLE, EventType.ROLE_MODIFY, "Updated role "
+            + old.getName());
+
         return old;
     }
 
@@ -223,6 +255,9 @@ public class RoleService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
         enterpriseRep.deleteRole(role);
+
+        tracer.log(SeverityType.INFO, ComponentType.ROLE, EventType.ROLE_DELETED, "Deleted role "
+            + role.getName());
     }
 
     private Enterprise findEnterprise(final Integer enterpriseId)

@@ -33,6 +33,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Workspace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -48,6 +50,8 @@ import com.abiquo.server.core.util.PagedList;
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Roles")
 public class RolesResource extends AbstractResource
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolesResource.class);
+
     public static final String ROLES_PATH = "admin/roles";
 
     @Autowired
@@ -106,8 +110,12 @@ public class RolesResource extends AbstractResource
     public RoleDto postRole(final RoleDto role, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
+        LOGGER.info("Creating new role with name '" + role.getName());
+
         Role r = service.addRole(role);
 
+        LOGGER.info("Role with name '" + r.getName() + "' and id " + r.getId()
+            + " created successfully");
         return createTransferObject(r, restBuilder);
     }
 }

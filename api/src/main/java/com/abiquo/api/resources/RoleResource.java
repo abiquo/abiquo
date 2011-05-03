@@ -33,6 +33,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -54,6 +56,8 @@ import com.abiquo.server.core.enterprise.RoleDto;
 @Controller
 public class RoleResource extends AbstractResource
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleResource.class);
+
     public static final String ROLE = "role";
 
     public static final String ENTERPRISE = "enterprise";
@@ -85,7 +89,11 @@ public class RoleResource extends AbstractResource
     public RoleDto modifyRole(final RoleDto role, @PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        LOGGER.info("Udating role " + role.getName() + " with id " + roleId);
+
         Role r = service.modifyRole(roleId, role);
+
+        LOGGER.info("Role " + role.getName() + " with id " + roleId + " updated successfully");
 
         return createTransferObject(r, restBuilder);
     }
@@ -93,7 +101,11 @@ public class RoleResource extends AbstractResource
     @DELETE
     public void deleteRole(@PathParam(ROLE) final Integer roleId)
     {
+        LOGGER.info("Deleting role with id " + roleId);
+
         service.removeRole(roleId);
+
+        LOGGER.info("Role with id " + roleId + " deleted successfully");
     }
 
     /**
@@ -110,6 +122,7 @@ public class RoleResource extends AbstractResource
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        LOGGER.info("Getting links list of privileges from role with id " + roleId);
 
         Role role = service.getRole(roleId);
 
@@ -135,6 +148,7 @@ public class RoleResource extends AbstractResource
     public PrivilegesDto getFlatPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        LOGGER.info("Getting flat list of privileges from role with id " + roleId);
 
         Role role = service.getRole(roleId);
 
