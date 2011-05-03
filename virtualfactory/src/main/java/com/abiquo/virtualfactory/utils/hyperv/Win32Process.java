@@ -56,6 +56,7 @@ public class Win32Process extends SWbemObject
     public void create(String command) throws JIException
     {
         // TODO: Do we need to get this Create method this way?
+        // Tip: check MsvmImageManagementService.convertVirtualHardDisk 2 methods
         if (this.create == null)
         {
             for (final SWbemMethod m : super.getMethods())
