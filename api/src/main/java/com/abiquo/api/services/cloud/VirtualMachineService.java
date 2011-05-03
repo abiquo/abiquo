@@ -80,12 +80,6 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected OVFGeneratorService ovfService;
 
-    @Autowired
-    protected ResourceUpgradeUse upgradeUse;
-
-    @Autowired
-    protected IAllocator allocator;
-
     public VirtualMachineService()
     {
 
@@ -247,73 +241,6 @@ public class VirtualMachineService extends DefaultApiService
         resource.put(docEnvelopeRunning);
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine reallocateVirtualMachineForHA(VirtualMachine vmachine)
-    {
-
-        try
-        {
-            vmachine = allocator.allocateHAVirtualMachine(vmachine);
-
-        }
-        catch (NotEnoughResourcesException e)
-        {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
-                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
-        }
-        catch (ResourceAllocationException e)
-        {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
-                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
-        }
-        catch (AllocatorException e)
-        {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
-                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace(); // FIXME delete
-            APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
-                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
-        }
-        finally
-        {
-            flushErrors();
-        }
-
-        
-        // move it !!!
-        final VirtualAppliance vapp = contanerVirtualAppliance(vmachine);
-        final EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
-        final Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
-        final Integer datacenterId = vmachine.getHypervisor().getMachine().getDatacenter().getId();
-
-        RemoteService vf =
-            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
-
-        long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
-
-        Resource resource =
-            ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                ResourceFactory.LATEST);
-
-        changeState(resource, envelop, "CREATE"); // TODO 
-        
-        
-        return vmachine;
-    }
-    
-    
-    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
-    {
-        TODO
-        return null;
-    }
     
 
 }
