@@ -110,7 +110,6 @@ import com.abiquo.server.core.util.PagedList;
         return getResultList(criteria);
     }
 
-    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
         final FilterOptions filters) throws Exception
     {
