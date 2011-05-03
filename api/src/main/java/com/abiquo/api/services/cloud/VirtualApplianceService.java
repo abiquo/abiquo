@@ -70,7 +70,7 @@ import com.sun.ws.management.client.ResourceFactory;
 public class VirtualApplianceService extends DefaultApiService
 {
 
-    public static final String RESOURCE_URI =
+    private static final String RESOURCE_URI =
         "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
 
     @Autowired
