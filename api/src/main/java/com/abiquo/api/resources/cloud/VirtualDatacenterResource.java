@@ -79,12 +79,6 @@ public class VirtualDatacenterResource extends AbstractResource
         throws Exception
     {
         VirtualDatacenter vdc = service.getVirtualDatacenter(id);
-
-        if (vdc == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-        }
-
         return createTransferObject(vdc, restBuilder);
     }
 

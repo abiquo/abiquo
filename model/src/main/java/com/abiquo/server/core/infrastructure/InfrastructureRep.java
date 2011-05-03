@@ -51,9 +51,8 @@ import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository
-public class DatacenterRep extends DefaultRepBase
+public class InfrastructureRep extends DefaultRepBase
 {
-
     /* package: test only */static final String BUG_INSERT_NAME_MUST_BE_UNIQUE =
         "ASSERT- insert: datacenter name must be unique";
 
@@ -105,12 +104,12 @@ public class DatacenterRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
 
-    public DatacenterRep()
+    public InfrastructureRep()
     {
 
     }
 
-    public DatacenterRep(final EntityManager entityManager)
+    public InfrastructureRep(final EntityManager entityManager)
     {
         assert entityManager != null;
         assert entityManager.isOpen();
@@ -605,4 +604,8 @@ public class DatacenterRep extends DefaultRepBase
         return false;
     }
 
+    public Rack findRackByIds(Integer datacenterId, Integer rackId)
+    {
+        return rackDao.findByIds(datacenterId, rackId);
+    }
 }

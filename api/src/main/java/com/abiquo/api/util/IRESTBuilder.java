@@ -41,6 +41,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -56,7 +57,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter);
 
-    public List<RESTLink> buildRackLinks(Integer datacenterId, RackDto rack);
+    public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
     public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, MachineDto machine);
 

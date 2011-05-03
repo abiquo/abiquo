@@ -19,29 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.exceptions;
+package com.abiquo.model.transport.error;
 
-import java.util.Set;
-
-import com.abiquo.model.transport.error.CommonError;
-
-
-public class ConflictException extends APIException
+/**
+ * Any exception of the API inside the service layer should 
+ * have this object instead the  {@link ErrorDto} object, which is 
+ * a REST object.
+ * 
+ * @author jdevesa@abiquo.com
+ */
+public class CommonError
 {
-    private static final long serialVersionUID = -4477286042443718135L;
+    private String code;
 
-    public ConflictException(APIError error)
+    private String message;
+
+    public CommonError(String code, String message)
     {
-        super(error);
+        this.code = code;
+        this.message = message;
     }
-    
-    public ConflictException(CommonError error)
+
+    public String getCode()
     {
-        super(error);
+        return code;
     }
-    
-    public ConflictException(Set<CommonError> errors)
+
+    public String getMessage()
     {
-        super(errors);
+        return message;
     }
+   
 }

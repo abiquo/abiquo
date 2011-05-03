@@ -40,7 +40,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -51,7 +51,7 @@ import com.abiquo.server.core.infrastructure.storage.Tier;
 public class DatacenterService extends DefaultApiService
 {
     @Autowired
-    DatacenterRep repo;
+    InfrastructureRep repo;
 
     @Autowired
     RemoteServiceService remoteServiceService;
@@ -63,7 +63,7 @@ public class DatacenterService extends DefaultApiService
 
     public DatacenterService(final EntityManager em)
     {
-        repo = new DatacenterRep(em);
+        repo = new InfrastructureRep(em);
         remoteServiceService = new RemoteServiceService(em);
     }
 
@@ -77,7 +77,7 @@ public class DatacenterService extends DefaultApiService
     {
         if (repo.existsAnyDatacenterWithName(dto.getName()))
         {
-            errors.add(APIError.DATACENTER_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -124,7 +124,8 @@ public class DatacenterService extends DefaultApiService
 
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return datacenter;
@@ -137,7 +138,7 @@ public class DatacenterService extends DefaultApiService
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.DATACENTER_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -166,7 +167,7 @@ public class DatacenterService extends DefaultApiService
     {
         if (!datacenter.isValid())
         {
-            validationErrors.addAll(datacenter.getValidationErrors());
+            addValidationErrors(datacenter.getValidationErrors());
         }
         flushErrors();
     }

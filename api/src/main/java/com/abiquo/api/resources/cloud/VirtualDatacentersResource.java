@@ -169,10 +169,6 @@ public class VirtualDatacentersResource extends AbstractResource
     private Enterprise getEnterprise(Integer enterpriseId)
     {
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-        }
 
         return enterprise;
     }

@@ -165,11 +165,6 @@ public class EnterpriseResource extends AbstractResource
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-        }
-
         Collection<VirtualMachine> vms = vmService.findByEnterprise(enterprise);
 
         return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);

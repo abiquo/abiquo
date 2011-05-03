@@ -31,24 +31,35 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 
-@Service
-@Transactional(readOnly = true)
-public class RackService extends DefaultApiService
-{
-    @Autowired
-    DatacenterRep repo;
+/*
+ *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
+ *  FOR THIS REASON IS OVER-COMMENTED AND DOESN'T HAVE JAVADOC! PLEASE DON'T COPY-PASTE ALL OF THIS
+ *  COMMENTS BECAUSE IS WILL BE SO UGLY TO MAINTAIN THE CODE IN THE API!
+ *
+ */
 
+// Annotate it as a @Service and set the default @Transactional method attributes.
+@Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+public class InfrastructureService extends DefaultApiService
+{
+    // Declare the Repo. It only should use ONE repo.
+    @Autowired
+    InfrastructureRep repo;
+
+    // GET the list of Racks by Datacenter.
     public List<Rack> getRacksByDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
 
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return repo.findRacks(datacenter);
@@ -59,14 +70,14 @@ public class RackService extends DefaultApiService
     {
         if (datacenterId == 0)
         {
-            errors.add(APIError.NON_EXISTENT_DATACENTER);
+            addValidationErrors(APIError.NON_EXISTENT_DATACENTER);
         }
 
         Datacenter datacenter = repo.findById(datacenterId);
 
         if (repo.existsAnyRackWithName(datacenter, rackDto.getName()))
         {
-            errors.add(APIError.RACK_DUPLICATED_NAME);
+            addConflictErrors(APIError.RACK_DUPLICATED_NAME);
         }
         flushErrors();
         Integer vlanIdMax,vlanIdMin,vlanPerVdcExpected,nrsq;
@@ -107,41 +118,46 @@ public class RackService extends DefaultApiService
         return rack;
     }
 
-    public Rack getRack(Integer id)
+    public Rack getRack(final Integer datacenterId, Integer rackId)
     {
-        return repo.findRackById(id);
+        Rack rack = repo.findRackByIds(datacenterId, rackId);
+        if (rack == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_RACK);
+            flushErrors();
+        }
+        return rack;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Rack modifyRack(Integer rackId, RackDto rackDto)
+    public Rack modifyRack(final Integer datacenterId, final Integer rackId, final Rack rack)
     {
-        Rack old = getRack(rackId);
+        Rack old = getRack(datacenterId, rackId);
 
-        if (repo.existsAnyOtherRackWithName(old, rackDto.getName()))
+        if (repo.existsAnyOtherRackWithName(old, rack.getName()))
         {
-            errors.add(APIError.RACK_DUPLICATED_NAME);
+            addConflictErrors(APIError.RACK_DUPLICATED_NAME);
             flushErrors();
         }
 
-        old.setName(rackDto.getName());
-        old.setShortDescription(rackDto.getShortDescription());
-        old.setLongDescription(rackDto.getLongDescription());
+        old.setName(rack.getName());
+        old.setShortDescription(rack.getShortDescription());
+        old.setLongDescription(rack.getLongDescription());
 
         isValidRack(old);
         repo.updateRack(old);
         return old;
     }
 
-    // FIXME: Remote is not rupported right now
-    public void removeRack(Integer id)
+    public void removeRack(final Integer datacenterId, final Integer rackId)
     {
-        // Rack rack = rackDao.findById(id);
-        // rackDao.makeTransient(rack);
+        Rack rack = getRack(datacenterId, rackId);
+        repo.deleteRack(rack);
     }
 
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId)
     {
-        Rack rack = getRack(rackId);
+        Rack rack = getRack(datacenterId, rackId);
 
         return isAssignedTo(datacenterId, rack);
     }
@@ -151,13 +167,16 @@ public class RackService extends DefaultApiService
         return rack != null && rack.getDatacenter().getId().equals(datacenterId);
     }
 
+    /**
+     * This method checks the validation errors for the entity before to persist it.
+     * @param rack entity to check.
+     */
     protected void isValidRack(Rack rack)
     {
         if (!rack.isValid())
         {
-            validationErrors.addAll(rack.getValidationErrors());
+            addValidationErrors(rack.getValidationErrors());
         }
-
         flushErrors();
     }
 }

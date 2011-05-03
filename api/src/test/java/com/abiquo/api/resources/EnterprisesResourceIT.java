@@ -130,7 +130,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
 
         response = postEnterprise(e);
-        assertErrors(response, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        assertErrors(response, 409, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     @Test
