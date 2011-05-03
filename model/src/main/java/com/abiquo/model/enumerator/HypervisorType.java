@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.enumerator;
+package com.abiquo.model.enumerator;
 
-import static com.abiquo.server.core.enumerator.DiskFormatType.HYPERV_COMPATIBLES;
-import static com.abiquo.server.core.enumerator.DiskFormatType.KVM_COMPATIBLES;
-import static com.abiquo.server.core.enumerator.DiskFormatType.VBOX_COMPATIBLES;
-import static com.abiquo.server.core.enumerator.DiskFormatType.VHD_SPARSE;
-import static com.abiquo.server.core.enumerator.DiskFormatType.VMDK_FLAT;
-import static com.abiquo.server.core.enumerator.DiskFormatType.VDI_FLAT;
-import static com.abiquo.server.core.enumerator.DiskFormatType.VMWARE_COMPATIBLES;
-import static com.abiquo.server.core.enumerator.DiskFormatType.XENSERVER_COMPATIBLES;
-import static com.abiquo.server.core.enumerator.DiskFormatType.XEN_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.HYPERV_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.KVM_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.VBOX_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.VDI_FLAT;
+import static com.abiquo.model.enumerator.DiskFormatType.VHD_SPARSE;
+import static com.abiquo.model.enumerator.DiskFormatType.VMDK_FLAT;
+import static com.abiquo.model.enumerator.DiskFormatType.VMWARE_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.XENSERVER_COMPATIBLES;
+import static com.abiquo.model.enumerator.DiskFormatType.XEN_COMPATIBLES;
 
 import org.apache.commons.lang.ArrayUtils;
 

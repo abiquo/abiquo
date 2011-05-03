@@ -23,11 +23,11 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.DefaultEntityWithLimitsGenerator;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.network.Network;

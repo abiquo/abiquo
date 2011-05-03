@@ -68,6 +68,14 @@
                     {
                         this._nodeIcon = (NodeVirtualImage(this._nodeListItem.node).virtualImage.icon) ? NodeVirtualImage(this._nodeListItem.node).virtualImage.icon.path : null;
                         this._nodeSize = NodeVirtualImage(this._nodeListItem.node).virtualImage.hdRequired;
+                        
+                        sizeLabel.text = resourceManager.getString('VirtualAppliance', 'LABEL_SIZE')+ ' : ';
+                    
+	                    if(Number(this._nodeSize / AbiCloudModel.GB_TO_BYTES) < 1){
+		                	sizeLabel.text += Number(this._nodeSize / AbiCloudModel.MB_TO_BYTES).toFixed(0).toString() + " MB";
+		                }else{
+		                    sizeLabel.text += Number(this._nodeSize / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + " GB";                    	
+		                }
                     }
                 }
             }
@@ -112,7 +120,6 @@
         left="80" top="22"
         fontSize="12"
         maxWidth="200"
-        text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_SIZE') + ': ' + (this._nodeSize / AbiCloudModel.GB_TO_BYTES).toFixed(0).toString() + ' GB'}"
         truncateToFit="true" toolTip="{this._nodeName}"/>
 
     <mx:CheckBox id="selectedToBundleCheckbox"

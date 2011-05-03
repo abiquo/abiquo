@@ -26,7 +26,6 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -59,13 +58,13 @@ public @interface Ip
         Ip ip;
 
         @Override
-        public void initialize(Ip constraintAnnotation)
+        public void initialize(final Ip constraintAnnotation)
         {
             this.ip = constraintAnnotation;
         }
 
         @Override
-        public boolean isValid(String value, ConstraintValidatorContext context)
+        public boolean isValid(final String value, final ConstraintValidatorContext context)
         {
             if (!ip.required() && StringUtils.isEmpty(value))
             {
@@ -77,8 +76,7 @@ public @interface Ip
             if (!valid)
             {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(ip.message())
-                    .addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(ip.message()).addConstraintViolation();
             }
 
             return valid;

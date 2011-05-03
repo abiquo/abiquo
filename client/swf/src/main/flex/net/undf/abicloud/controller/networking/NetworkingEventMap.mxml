@@ -119,7 +119,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="createVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.network.networkId, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

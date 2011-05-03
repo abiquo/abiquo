@@ -23,7 +23,6 @@ package com.abiquo.scheduler.workload;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +49,8 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -137,7 +136,7 @@ public class VirtualimageAllocationService
 
     @Resource(name = "physicalmachineRuleFinder")
     // premium impl by replacements
-    public void setRuleFinder(SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
+    public void setRuleFinder(final SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
     {
         this.ruleFinder = ruleFinder;
     }
@@ -205,7 +204,7 @@ public class VirtualimageAllocationService
      * Return a sorted list of racks (sorted by rack goodness based on network params). If some
      * network assigment on the datacenter then the rack is already defined.
      */
-    protected List<Integer> getCandidateRacks(Integer idVirtualApp)
+    protected List<Integer> getCandidateRacks(final Integer idVirtualApp)
     {
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
@@ -238,8 +237,8 @@ public class VirtualimageAllocationService
         }
     }
 
-    protected Collection<Machine> findFirstPassCandidates(VirtualImage vimage,
-        Integer idVirtualApp, Rack rack) throws NotEnoughResourcesException
+    protected Collection<Machine> findFirstPassCandidates(final VirtualImage vimage,
+        final Integer idVirtualApp, final Rack rack) throws NotEnoughResourcesException
     {
         Collection<Machine> candidateMachines;
 
@@ -270,9 +269,10 @@ public class VirtualimageAllocationService
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
-            throw new NotEnoughResourcesException(String.format(
-                "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
-                rack.getName()));
+            throw new NotEnoughResourcesException(String
+                .format(
+                    "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
+                    rack.getName()));
         }
 
         // log.debug("The network assigned to the VM, VLAN network ID: {},  "
@@ -305,15 +305,13 @@ public class VirtualimageAllocationService
         {
 
             final boolean passCPU =
-                pass(Long.valueOf(machine.getVirtualCpusUsed()),
-                    Long.valueOf(image.getCpuRequired()),
-                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                    100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image
+                    .getCpuRequired()), Long.valueOf(machine.getVirtualCpuCores()
+                    * machine.getVirtualCpusPerCore()), 100);
 
             final boolean passRAM =
-                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
-                    Long.valueOf(image.getRamRequired()),
-                    Long.valueOf(machine.getVirtualRamInMb()), 100);
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()), Long.valueOf(image
+                    .getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
@@ -335,7 +333,7 @@ public class VirtualimageAllocationService
      *             target.
      */
     protected final Machine findSecondPassCandidates(final Collection<Machine> firstPassCandidates,
-        VirtualImage vimage, Integer virtualApplianceId, final FitPolicy fitPolicy)
+        final VirtualImage vimage, final Integer virtualApplianceId, final FitPolicy fitPolicy)
         throws NotEnoughResourcesException
     {
         IAllocationFit physicalMachineFit;
@@ -397,7 +395,9 @@ public class VirtualimageAllocationService
             }
             else
             {
-                log.error(String.format("Machine %s rejected by some load rule.", target.getName()));
+                log
+                    .error(String
+                        .format("Machine %s rejected by some load rule.", target.getName()));
             }
         }
 
@@ -420,7 +420,7 @@ public class VirtualimageAllocationService
         return bestTarget;
     }
 
-    private String candidateNames(Collection<Machine> firstPassCandidates)
+    private String candidateNames(final Collection<Machine> firstPassCandidates)
     {
         StringBuilder sb = new StringBuilder();
         for (Machine candidate : firstPassCandidates)
@@ -444,8 +444,8 @@ public class VirtualimageAllocationService
      * When editing a virtual machine this method checks if the increases resources (setted at
      * vimage) are allowed by the workload rules.
      */
-    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage,
-        Integer virtualApplianceId)
+    public boolean checkVirtualMachineResourceIncrease(final Machine machine,
+        final VirtualImage vimage, final Integer virtualApplianceId)
     {
         // get all the rules of the candiate machines
         Map<Machine, List<MachineLoadRule>> machineRulesMap =

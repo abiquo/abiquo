@@ -28,7 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
-import com.abiquo.server.core.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.DiskFormatType;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 

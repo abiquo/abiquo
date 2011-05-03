@@ -134,9 +134,6 @@ public class VirtualDatacentersResource extends AbstractResource
         VirtualDatacenterDto response =
             VirtualDatacenterResource.createTransferObject(vdc, restBuilder);
 
-        dto.getNetworkConfiguration().setDefaultNetwork(Boolean.TRUE);
-        response.setNetworkConfiguration(dto.getNetworkConfiguration());
-
         return response;
     }
 

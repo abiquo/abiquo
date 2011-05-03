@@ -27,7 +27,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorH
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * An Hypervisor controls the virtualization software in a Physical Machine We see it as another
