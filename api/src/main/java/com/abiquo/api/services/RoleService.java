@@ -75,7 +75,18 @@ public class RoleService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Role addRole(final RoleDto dto)
     {
+        RESTLink enterpriseId = dto.searchLink(EnterpriseResource.ENTERPRISE);
+
+        if (enterpriseId == null)
+        {
+            return addRole(dto, null);
+        }
         Enterprise enterprise = findEnterprise(dto);
+
+        if (enterprise == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+        }
         return addRole(dto, enterprise);
     }
 

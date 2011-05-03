@@ -24,6 +24,7 @@ package com.abiquo.api.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -89,8 +90,7 @@ public class RoleResource extends AbstractResource
         return createTransferObject(r, restBuilder);
     }
 
-    // @DELETE
-    // Not supported yet
+    @DELETE
     public void deleteRole(@PathParam(ROLE) final Integer roleId)
     {
         service.removeRole(roleId);

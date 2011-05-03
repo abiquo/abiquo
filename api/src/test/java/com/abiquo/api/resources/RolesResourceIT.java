@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRolesURI;
 import static org.testng.Assert.assertEquals;
@@ -35,18 +36,40 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RolesDto;
+import com.abiquo.server.core.enterprise.User;
 
 public class RolesResourceIT extends AbstractJpaGeneratorIT
 {
     private String rolesURI = resolveRolesURI();
+
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
 
     @Test
     public void getRolesList() throws Exception
@@ -73,7 +96,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         RolesDto entity = response.getEntity(RolesDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
-        assertEquals(entity.getCollection().size(), 1);
+        assertEquals(entity.getCollection().size(), 2);
 
         //
         String uri = rolesURI;
@@ -132,18 +155,13 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createRole()
     {
-        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
-        Role role = roleGenerator.createInstance("r1", e1);
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
 
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        entitiesToPersist.add(e1);
-        entitiesToPersist.add(role);
+        setup(ent);
 
-        setup(entitiesToPersist.toArray());
+        RoleDto dto = getValidRole(ent.getId());
 
-        RoleDto dto = getValidRole(role);
-
-        ClientResponse response = post(rolesURI, dto);
+        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -152,15 +170,38 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entityPost);
 
         assertEquals(dto.getName(), entityPost.getName());
+        assertLinkExist(entityPost, resolveEnterpriseURI(ent.getId()),
+            EnterpriseResource.ENTERPRISE);
     }
 
-    private RoleDto getValidRole(final Role role)
+    @Test
+    public void postWithInvalidEnterprise()
     {
+        RoleDto dto = getValidRole(1223);
+
+        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), 404);
+    }
+
+    @Test
+    public void postWithoutEnterprise()
+    {
+        RoleDto dto = getValidRole(null);
+
+        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), 201);
+    }
+
+    private RoleDto getValidRole(final Integer entId)
+    {
+
         RoleDto dto = new RoleDto();
         dto.setName("TEST_ROLE");
+        if (entId != null)
+        {
+            dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(entId)));
+        }
 
-        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(role
-            .getEnterprise().getId())));
         return dto;
     }
 

@@ -230,4 +230,42 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         assertEquals(response.getStatusCode(), 404);
     }
+
+    public void removeRole() throws ClientWebException
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Role r1 = roleGenerator.createInstance("r1", e1);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(r1);
+
+        setup(entitiesToPersist.toArray());
+
+        Role r2 = roleGenerator.createUniqueInstance();
+        r2.setEnterprise(e1);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : r2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        // entitiesToSetup.add(e1);
+        entitiesToSetup.add(r2);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveRoleURI(r1.getId());
+
+        ClientResponse response = delete(uri, "sysadmin", "sysadmin");
+
+        assertEquals(response.getStatusCode(), 204);
+
+        uri = resolveRoleURI(r2.getId());
+
+        response = delete(uri, "sysadmin", "sysadmin");
+
+        assertEquals(response.getStatusCode(), 204);
+    }
 }
