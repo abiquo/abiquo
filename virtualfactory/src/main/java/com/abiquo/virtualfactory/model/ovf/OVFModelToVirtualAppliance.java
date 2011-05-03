@@ -180,7 +180,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     // Define the inner class to sort the vnicList
     class VNICSequence implements Comparator<VirtualNIC>
     {
-        public int compare(VirtualNIC vn1, VirtualNIC vn2)
+        public int compare(final VirtualNIC vn1, final VirtualNIC vn2)
         {
             return vn1.getOrder() - vn2.getOrder();
         }
@@ -193,52 +193,16 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * .virtualfactory.model.AbsVirtualMachine, org.dmtf.schemas.ovf.envelope._1.ContentType,
      * boolean)
      */
-    public VirtualMachineConfiguration configureVirtualSystem(
-        final AbsVirtualMachine virtualMachine, final ContentType virtualSystem,
-        boolean configureDisks) throws VirtualMachineException, SectionException, Exception
+    public void reconfigureVirtualSystem(final AbsVirtualMachine virtualMachine,
+        final ContentType virtualSystem) throws VirtualMachineException, SectionException,
+        Exception
     {
-        boolean reconfig = false;
+        // Apply the new configuration to the machine in the hypervisor
+        virtualMachine.reconfigVM(virtualMachine.getConfiguration());
 
-        VirtualMachineConfiguration vmConfig = virtualMachine.getConfiguration();
-        // It clones de current configuration
-        VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
-
-        // Getting state property
-
-        // from annotation section take the machine state if present on 'OtherAttributes'
-        // AnnotationSectionType annotationSection = OVFEnvelopeUtils.getSection(virtualSystem,
-        // AnnotationSectionType.class);
-        // uptateMachineStateFromAnnotationSection(annotationSection, virtualMachine,
-        // newConfig.getMachineId().toString());
-
+        // Apply the new state to the virtual machine
         String machineState = getMachineStateFromAnnotation(virtualSystem);
         virtualMachine.applyState(State.fromValue(machineState));
-        VirtualHardwareSectionType virtualHWSection =
-            OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
-
-        // Force a false value: A Virtual Machine will never have disk attached on the fly. To
-        // attach a new disk the Virtual Appliance must be NOT_DEPLOYED
-        configureDisks = false;
-        if (configureDisks)
-        {
-            // TODO Reconfigure when a new disk is added and is not in the Disk Section
-            // from Disk section
-
-            reconfig = addVirtualDiskFromDiskResource(newConfig, virtualHWSection);
-        }
-
-        // from VirtualHardwareSection
-        // TODO Control more than one VirtualHardwareSectionType instances
-        VirtualHardwareSectionType hardwareSection =
-            OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
-        reconfig |= setMemoryAndCpuFromVirtualHardwareSection(newConfig, hardwareSection);
-
-        if (reconfig)
-        {
-            virtualMachine.reconfigVM(newConfig);
-        }
-
-        return newConfig;
     }
 
     /*
@@ -1067,7 +1031,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
     @Override
     public HypervisorConfiguration getHypervisorConfigurationFromVirtualSystem(
-        ContentType virtualSystemInstance) throws SectionNotPresentException,
+        final ContentType virtualSystemInstance) throws SectionNotPresentException,
         InvalidSectionException
     {
         VirtualHardwareSectionType hardwareSection =
