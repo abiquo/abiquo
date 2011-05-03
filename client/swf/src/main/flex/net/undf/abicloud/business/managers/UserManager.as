@@ -304,6 +304,13 @@ package net.undf.abicloud.business.managers
             //Updating the old enterprise without modifying its memory address
             oldEnterprise.id = newEnterprise.id;
             oldEnterprise.name = newEnterprise.name;
+            if(newEnterprise.limits){
+	            oldEnterprise.limits = newEnterprise.limits;
+	            //Update the connected user enterprise
+	            if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == newEnterprise.id){
+	            	AbiCloudModel.getInstance().loginManager.user.enterprise = oldEnterprise;
+	            }            
+            }
 
             var userEvent:UserEvent = new UserEvent(UserEvent.ENTERPRISE_EDITED);
             userEvent.enterprise = oldEnterprise;
