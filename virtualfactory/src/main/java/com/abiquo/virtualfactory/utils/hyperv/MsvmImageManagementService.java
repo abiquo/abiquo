@@ -257,7 +257,7 @@ public class MsvmImageManagementService extends MsvmObject
 
         SWbemObject inParams = this.createVirtualHardDisk.getInParameters();
 
-        long mega = 1048576;
+        long mega = 1048576; // This is needed to provide a valid value to MaxInternalSize parameter 
         
         inParams.getObjectDispatcher().put("Path", new JIVariant(destinationPath));
         inParams.getObjectDispatcher().put("MaxInternalSize", new JIVariant(3*mega));

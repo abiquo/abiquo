@@ -95,7 +95,7 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         // HYPERVISOR configuration properties
         // hvURL = "http://10.60.1.152";
-        hvURL = "http://10.60.1.122";
+        hvURL = "http://10.60.1.121";
         hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
 
@@ -197,12 +197,12 @@ public class HyperVMachineTest extends AbsMachineTest
     }
 
     /**
-     * Tests if a file/folder exists
+     * Tests WQL syntax samples
      * 
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
-    public boolean detectFile(String file) throws Exception
+    public boolean testWQL() throws Exception
     {
         boolean fileExists = false;
 
@@ -218,21 +218,36 @@ public class HyperVMachineTest extends AbsMachineTest
         SWbemServices cimService = hyperV.getCIMService();
 
         // Preparing the query
-//        String query =
-//            "SELECT * FROM CIM_DataFile where FileName = 'Users' ";
+        String query =
+            "SELECT * FROM CIM_DataFile where FileName LIKE 'a%' and Drive = 'z:' ";
+        
+        // Path and NAme don't work with queies
+        //and Path = '\\abiquo monolithic 1.7\\'"; // Only files in rootpath
+//        where Name LIKE 'Z:\\a%'";
+        
         
 //        String query =
-//            "SELECT * FROM Win32_Directory WHERE Name = '\\\\10.60.1.4\\vm_repository\\aa' ";//or FileName = 'carpeta2'";
+//            "SELECT * FROM Win32_Directory WHERE Name = '\\\\10.60.1.4\\vm_repository\\snapshots' ";//or FileName = 'carpeta2'";
 
 //        String query =
 //                   "Select * from Win32_MappedLogicalDisk WHERE SessionID = '164382' AND Caption = 'Z:'";
         // Win32_MappedLogicalDisk CAN be Found by SessionID (session in Logon)
         
-        String query =
-            "Select * from CIM_StorageExtent WHERE SystemName = 'WIN-7HJFVAUQT45' AND DeviceId = 'Z:'";
+//      String query =
+//      "Select * from Win32_MappedLogicalDisk";
+
+        
+//        String query =
+//            "Select * from CIM_StorageExtent WHERE SystemName = 'WIN-7HJFVAUQT45' AND DeviceId = 'Z:'";
+        
+//        String query =
+//            "Select * from Win32_LogonSession";
+        
+//        String query =
+//            "Select * from Win32_Account WHERE Name='Administrator'";
         
 //        String query = 
-//            "ASSOCIATORS OF {Win32_LogicalDisk.DeviceID='C:'} "; // WHERE ClassDefsOnly 
+//            "ASSOCIATORS OF {Win32_Account} "; // WHERE ClassDefsOnly 
         
 //        String query =
 //            "SELECT * FROM Win32_Directory WHERE Name=\"\\\\10.60.1.4\\vm_repository\\abq.datastoreuuid.toma\" ";
@@ -263,11 +278,29 @@ public class HyperVMachineTest extends AbsMachineTest
             throw new Exception("Could not get Any Results for the query");
         }
 
-        System.out.println(results.size());
+        System.out.println("results.size() - " + results.size());
         
         for (IJIDispatch logicalDiskDispatch : results)
         {
-            System.out.println("logicalDiskDispatch.get(\"AssocClass\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"LogonId\").getObjectAsString2(); " + logicalDiskDispatch.get("LogonId").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"LogonType\").getObjectAsString2(); " + logicalDiskDispatch.get("LogonType").getObjectAsInt());
+//            System.out.println("logicalDiskDispatch.get(\"AuthenticationPackage\").getObjectAsString2(); " + logicalDiskDispatch.get("AuthenticationPackage").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Drive\").getObjectAsString2(); " + logicalDiskDispatch.get("Drive").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"ProviderName\").getObjectAsString2(); " + logicalDiskDispatch.get("ProviderName").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"SessionID\").getObjectAsString2(); " + logicalDiskDispatch.get("SessionID").getObjectAsString2());
+            
+//            System.out.println("logicalDiskDispatch.get(\"Caption\").getObjectAsString2(); " + logicalDiskDispatch.get("Caption").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"VolumeName\").getObjectAsString2(); " + logicalDiskDispatch.get("VolumeName").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"VolumeSerialNumber\").getObjectAsString2(); " + logicalDiskDispatch.get("VolumeSerialNumber").getObjectAsString2());
+            
+            
+            
             
 //            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
 //            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
@@ -277,7 +310,7 @@ public class HyperVMachineTest extends AbsMachineTest
 //            System.out.println("logicalDiskDispatch.get(\"FileName\").getObjectAsString2(); " + logicalDiskDispatch.get("FileName").getObjectAsString2());
 //            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
 
-        }
+        } 
         
         
         JIVariant[] res =
@@ -303,6 +336,73 @@ public class HyperVMachineTest extends AbsMachineTest
         hypervisor.logout();
 
         return fileExists;
+
+    }
+    
+    /**
+     * Tests if a file/folder exists
+     * 
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public void detectNetworkDrives() throws Exception
+    {
+
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+
+        SWbemServices cimService = hyperV.getCIMService();
+        
+        String query =
+            "Select * from CIM_StorageExtent  WHERE SystemName = 'WIN-7HJFVAUQT45' AND Caption = 'Z:'";
+
+        List<IJIDispatch> results =
+            HyperVUtils.execQuery(query, cimService);
+
+        if (results == null || results.isEmpty())
+        {
+            throw new Exception("Could not get Any Results for the query");
+        }
+
+        System.out.println(results.size());
+        
+        for (IJIDispatch logicalDiskDispatch : results)
+        {
+//            System.out.println("logicalDiskDispatch.get(\"AssocClass\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Description\").getObjectAsString2(); " + logicalDiskDispatch.get("Description").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"BlockSize\").getObjectAsString2(); " + logicalDiskDispatch.get("BlockSize").getObjectAsInt());
+//            System.out.println("logicalDiskDispatch.get(\"SystemName\").getObjectAsString2(); " + logicalDiskDispatch.get("SystemName").getObjectAsString2());
+            
+//            String logicalDiskName = logicalDiskDispatch.get("DeviceID").getObjectAsString2();
+//            String size = logicalDiskDispatch.get("Size").getObjectAsString2();
+//            String availableSize = logicalDiskDispatch.get("FreeSpace").getObjectAsString2();
+            
+//            System.out.println("logicalDiskDispatch.get(\"Drive\").getObjectAsString2(); " + logicalDiskDispatch.get("Drive").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"FileName\").getObjectAsString2(); " + logicalDiskDispatch.get("FileName").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
+
+        }
+        
+        
+        JIVariant[] res =
+            cimService.getObjectDispatcher().callMethodA("ExecQuery",
+                new Object[] {new JIString(query)});
+
+        JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+        
+        System.out.println("fileSet.length : " + fileSet.length );
+                
+
+        hypervisor.disconnect();
+        hypervisor.logout();
+
 
     }
     
@@ -415,7 +515,7 @@ public class HyperVMachineTest extends AbsMachineTest
             Win32Process proc = new Win32Process(instanceClass, cimService);
 //            proc.create("cmd.exe /C mkdir " + folder);
             
-            proc.create("cmd.exe /C echo toma > C:\\fistropecadorfile");
+            proc.create("cmd.exe /C echo toma > Z:\\fistropecadorfile");
 
         }
         catch (Exception e)
@@ -541,11 +641,14 @@ public class HyperVMachineTest extends AbsMachineTest
         
 //        test.detectFile("\\vm_repository\\abq.datastoreuuid.toma");
         
-//        test.detectFolderInNetworkDrive("abq.datastoreuuid.toma", "Z:");        
+//        test.detectFolderInNetworkDrive("abq.datastoreuuid.toma", "Z:");
+//        test.detectNetworkDrives();
         
-//        test.createFolder("Z:\\fistropecador");
+        test.testWQL();
         
-        test.createFileAsVHD("Z:\\fistrovhd");
+//        test.createFolder("Z:\\fistropecadordelapradera");
+        
+//        test.createFileAsVHD("Z:\\fistrovhd");
         
 //        test.copyFolder();
     }
