@@ -33,7 +33,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
 
     private NetworkConfigurationGenerator configuratorGenerator;
 
-    public VLANNetworkGenerator(SeedGenerator seed)
+    public VLANNetworkGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.networkGenerator = new NetworkGenerator(seed);
@@ -41,7 +41,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
     }
 
     @Override
-    public void assertAllPropertiesEqual(VLANNetwork obj1, VLANNetwork obj2)
+    public void assertAllPropertiesEqual(final VLANNetwork obj1, final VLANNetwork obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VLANNetwork.ID_PROPERTY,
             VLANNetwork.NAME_PROPERTY);
@@ -54,7 +54,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
         return createInstance(network);
     }
 
-    public VLANNetwork createInstance(Network network)
+    public VLANNetwork createInstance(final Network network)
     {
         NetworkConfiguration configuration = this.configuratorGenerator.createUniqueInstance();
 
@@ -62,10 +62,10 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
-    
-    public VLANNetwork createInstance(Network network, RemoteService rsDHCP)
+
+    public VLANNetwork createInstance(final Network network, final RemoteService rsDHCP)
     {
         NetworkConfiguration configuration = this.configuratorGenerator.createInstance(rsDHCP);
 
@@ -73,41 +73,41 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
-    
-    public VLANNetwork createInstance(Network network, RemoteService rsDHCP, String netmask)
+
+    public VLANNetwork createInstance(final Network network, final RemoteService rsDHCP,
+        final String netmask)
     {
-        NetworkConfiguration configuration = this.configuratorGenerator.createInstance(rsDHCP, netmask);
+        NetworkConfiguration configuration =
+            this.configuratorGenerator.createInstance(rsDHCP, netmask);
 
         final String name =
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
-    
-    public VLANNetwork createInstance(Network network, String name)
+
+    public VLANNetwork createInstance(final Network network, final String name)
     {
         NetworkConfiguration configuration = this.configuratorGenerator.createUniqueInstance();
 
-        return new VLANNetwork(name, network, 0, configuration);
+        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
     }
-    
-    
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VLANNetwork entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final VLANNetwork entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
         Network network = entity.getNetwork();
         this.networkGenerator.addAuxiliaryEntitiesToPersist(network, entitiesToPersist);
+        entitiesToPersist.add(network);
 
         NetworkConfiguration configuration = entity.getConfiguration();
         this.configuratorGenerator.addAuxiliaryEntitiesToPersist(configuration, entitiesToPersist);
-
-        entitiesToPersist.add(network);
         entitiesToPersist.add(configuration);
     }
 }

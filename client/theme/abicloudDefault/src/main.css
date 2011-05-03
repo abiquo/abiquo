@@ -444,7 +444,10 @@
  * Common assets used all over the application
  * they all use the "source" custom property
  **/
- 
+ .CommonAssetsInfo
+ {
+	source:Embed("/assets/application/icons/info.png");
+ }
  
  .CommonAssetsMagnifier
  {

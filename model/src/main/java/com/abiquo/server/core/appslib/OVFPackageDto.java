@@ -23,8 +23,8 @@ package com.abiquo.server.core.appslib;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 
 @XmlRootElement(name = "ovfPackage")
 public class OVFPackageDto extends SingleResourceTransportDto

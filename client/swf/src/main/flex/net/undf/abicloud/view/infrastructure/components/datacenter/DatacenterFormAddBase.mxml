@@ -27,7 +27,8 @@
     xmlns:mx="http://www.adobe.com/2006/mxml"
     creationComplete="onCreationComplete()"
     xmlns:datacenter="net.undf.abicloud.view.infrastructure.components.datacenter.*"
-    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_DATACENTERADD')">
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_DATACENTERADD')"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_infra_createDatacenter.value}">
 
     <mx:Metadata>
 		[Event(name="DatacenterFormAddClose", type="flash.events.Event")]

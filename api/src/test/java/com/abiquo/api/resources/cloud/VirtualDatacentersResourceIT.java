@@ -43,6 +43,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -54,12 +55,12 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
+@Test
 public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 {
     Enterprise sysEnterprise;
@@ -282,25 +283,6 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void createVirtualDatacenterRaiseErrorWhenHypervisorTypeIsInvalid()
-    {
-        Datacenter dc = datacenterGenerator.createUniqueInstance();
-        Enterprise e = enterpriseGenerator.createUniqueInstance();
-        setup(dc, e, new DatacenterLimits(e, dc));
-
-        VirtualDatacenterDto dto = new VirtualDatacenterDto();
-        RESTLink datacenterLink = new RESTLink("datacenter", resolveDatacenterURI(dc.getId()));
-        dto.addLink(datacenterLink);
-        RESTLink enterpriseLink = new RESTLink("enterprise", resolveEnterpriseURI(e.getId()));
-        dto.addLink(enterpriseLink);
-
-        dto.setName("vdc_test_create");
-
-        ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
-        assertErrors(response, APIError.NETWORK_INVALID_CONFIGURATION.getCode(), "hypervisorType");
-    }
-
-    @Test
     public void createVirtualDatacenterRaiseErrorWhenHypervisorTypeIsNotInDatacenter()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -313,7 +295,7 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 
         setup(dc, machine, hypervisor, e, rs, new DatacenterLimits(e, dc));
 
-        VirtualDatacenterDto dto = new VirtualDatacenterDto();
+        VirtualDatacenterDto dto = getValidVdc();
         RESTLink datacenterLink = new RESTLink("datacenter", resolveDatacenterURI(dc.getId()));
         dto.addLink(datacenterLink);
         RESTLink enterpriseLink = new RESTLink("enterprise", resolveEnterpriseURI(e.getId()));
@@ -323,8 +305,7 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         dto.setHypervisorType(HypervisorType.KVM);
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
-        assertErrors(response, APIError.VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE,
-            APIError.NETWORK_INVALID_CONFIGURATION);
+        assertErrors(response, APIError.VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE);
     }
 
     @Test
@@ -436,11 +417,10 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 400);
     }
 
-    @Test
     public void createVirtualDatacenterFailsWithInvalidIps()
     {
         VirtualDatacenterDto dto = getValidVdc();
-        dto.getNetworkConfiguration().setAddress("foo");
+        dto.getVlan().setAddress("foo");
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 400);
@@ -448,12 +428,11 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, "address");
     }
 
-    @Test
     public void createVirtualDatacenterPassWithOptionalDns()
     {
         VirtualDatacenterDto dto = getValidVdc();
-        dto.getNetworkConfiguration().setPrimaryDNS(null);
-        dto.getNetworkConfiguration().setSecondaryDNS(null);
+        dto.getVlan().setPrimaryDNS(null);
+        dto.getVlan().setSecondaryDNS(null);
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 201);
@@ -481,18 +460,16 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         dto.setName("vdc_test_create");
         dto.setHypervisorType(hypervisor.getType());
 
-        NetworkConfigurationDto configDto = new NetworkConfigurationDto();
-        configDto.setAddress("192.168.0.0");
-        configDto.setDefaultNetwork(true);
-        configDto.setFenceMode("bridge");
-        configDto.setGateway("192.168.0.1");
-        configDto.setMask(24);
-        configDto.setNetMask("255.255.255.248");
-        configDto.setNetworkName("KVM VLAN");
-        configDto.setPrimaryDNS("10.0.0.1");
-        configDto.setSecondaryDNS("10.0.0.1");
+        VLANNetworkDto networkDto = new VLANNetworkDto();
+        networkDto.setName("Default Network");
+        networkDto.setDefaultNetwork(Boolean.TRUE);
+        networkDto.setAddress("192.168.0.0");
+        networkDto.setGateway("192.168.0.1");
+        networkDto.setMask(24);
+        networkDto.setPrimaryDNS("10.0.0.1");
+        networkDto.setSecondaryDNS("10.0.0.1");
 
-        dto.setNetworkConfiguration(configDto);
+        dto.setVlan(networkDto);
 
         return dto;
     }

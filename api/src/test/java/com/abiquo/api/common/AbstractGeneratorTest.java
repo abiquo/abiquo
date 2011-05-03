@@ -32,6 +32,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
@@ -46,6 +47,7 @@ import com.abiquo.server.core.enterprise.RoleGenerator;
 import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
+import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
@@ -53,6 +55,7 @@ import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
@@ -70,6 +73,9 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected DatacenterGenerator datacenterGenerator = new DatacenterGenerator(seed);
 
+    protected DatacenterLimitsGenerator datacenterLimitsGenerator =
+        new DatacenterLimitsGenerator(seed);
+
     protected RackGenerator rackGenerator = new RackGenerator(seed);
 
     protected MachineGenerator machineGenerator = new MachineGenerator(seed);
@@ -81,7 +87,10 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected VirtualApplianceGenerator virtualApplianceGenerator =
         new VirtualApplianceGenerator(seed);
 
-    protected RasdManagementGenerator rasdGenerator = new RasdManagementGenerator(seed);
+    protected RasdManagementGenerator rasdManagementGenerator = new RasdManagementGenerator(seed);
+
+    protected VolumeManagementGenerator volumeManagementGenerator =
+        new VolumeManagementGenerator(seed);
 
     protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
 
@@ -117,7 +126,16 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-
+    
+    @BeforeMethod
+    public void setup()
+    {
+        // Set system properties for tests
+        // WARINING!!! This value should be the same than the used in the POM.xml to define the
+        // system property in the jetty runtime!!!
+        System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
+    }
+    
     @AfterMethod
     public void tearDown()
     {
@@ -132,12 +150,11 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
             "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
-            "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
-            "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
-            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
-            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
-            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
-            "alerts", "heartbeatlog", "icon", "register"};
+            "role_ldap", "role", "privilege", "enterprise","enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
+            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
+            "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
+            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
+            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register"};
 
         tearDown(entities);
     }

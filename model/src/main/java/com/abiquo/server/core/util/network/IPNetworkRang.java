@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * This class provides a Rang of IP's available for a given DataCenter.
@@ -64,6 +64,11 @@ public class IPNetworkRang
      */
     public static IPAddress transformIntegerMaskToIPMask(Integer mask)
     {
+        if (mask == null)
+        {
+            return IPAddress.newIPAddress("255.255.255.255");
+        }
+        
         switch (mask)
         {
             case 0:

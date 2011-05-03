@@ -37,6 +37,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ExtendedAPIException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
@@ -45,7 +46,6 @@ import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 public class EnterpriseServiceTest extends AbstractGeneratorTest

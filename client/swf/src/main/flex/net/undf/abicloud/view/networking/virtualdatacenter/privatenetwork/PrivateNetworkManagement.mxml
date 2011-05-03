@@ -84,6 +84,7 @@
 
             override protected function createChildren():void
             {
+                
                 //Creating PopUps
                 vlanFormAdd = new PrivateVLANFormAdd();
                 vlanFormAdd.addEventListener("vlanFormAddClose", closeVLANFormAdd)
@@ -158,7 +159,7 @@
                                       true);
                 PopUpManager.centerPopUp(vlanFormAdd);
 
-                vlanFormAdd.init(_virtualDatacenter.network);
+                vlanFormAdd.init(_virtualDatacenter);
             }
 
             private function closeVLANFormAdd(event:Event = null):void

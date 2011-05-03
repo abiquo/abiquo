@@ -93,6 +93,35 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
+<<<<<<< HEAD
+=======
+    
+    /**
+    * Based on the spring authentication context.
+    * 
+    * @see SecurityContextHolder
+    */
+//   public Enterprise getCurrentEnterprise()
+//   {
+//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
+//       
+//       User user = userService.getCurrentUser();
+//       
+//       return user.getEnterprise();
+//       
+////       Enterprise enterprise = repo.findById(id);
+////       if (enterprise == null)
+////       {
+////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+////       }
+//
+//   }
+
+    public Enterprise getCurrentEnterprise()
+    {
+        return userService.getCurrentUser().getEnterprise();
+    }
+>>>>>>> stable
 
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)

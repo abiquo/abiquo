@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     resizeEffect="{myResize}"
     creationComplete="onCreationComplete()"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_apps_uploadVM.value}"
     xmlns:mx="http://www.adobe.com/2006/mxml">
 
     <mx:Metadata>

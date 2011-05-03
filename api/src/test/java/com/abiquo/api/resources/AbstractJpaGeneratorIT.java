@@ -40,60 +40,62 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
     }
-    
+
     protected ClientResponse get(String uri, String username, String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).header("Authorization",
-            "Basic " + basicAuth).get();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .header("Authorization", "Basic " + basicAuth).get();
     }
-    
+
     protected ClientResponse get(String uri, String mediaType)
     {
         return client.resource(uri).accept(mediaType).get();
     }
-    
+
     protected ClientResponse post(String uri, Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).post(dto);
     }
-    
+
     protected ClientResponse post(String uri, Object dto, String mediaType)
     {
-        return client.resource(uri).accept(mediaType).contentType(
-            mediaType).post(dto);
+        return client.resource(uri).accept(mediaType).contentType(mediaType).post(dto);
     }
 
     protected ClientResponse post(String uri, Object dto, String username, String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .post(dto);
     }
-    
-    protected ClientResponse post(String uri, Object dto, String username, String password, String mediaType)
+
+    protected ClientResponse post(String uri, Object dto, String username, String password,
+        String mediaType)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(mediaType).contentType(
-            mediaType).header("Authorization", "Basic " + basicAuth).post(dto);
+        return client.resource(uri).accept(mediaType).contentType(mediaType)
+            .header("Authorization", "Basic " + basicAuth).post(dto);
     }
 
     protected ClientResponse put(String uri, Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
     protected ClientResponse put(String uri, Object dto, String username, String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .put(dto);
     }
 
     protected ClientResponse delete(String uri)
@@ -105,11 +107,12 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).delete();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .delete();
     }
 
-    private String basicAuth(String username, String password)
+    protected String basicAuth(String username, String password)
     {
         return new String(Base64.encodeBase64((username + ":" + password).getBytes()));
     }

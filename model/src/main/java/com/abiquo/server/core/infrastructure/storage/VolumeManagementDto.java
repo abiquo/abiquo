@@ -19,60 +19,126 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.infrastructure.storage;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class VolumeManagementDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private String idScsi;
-
-public String getIdSCSI()
+@XmlRootElement(name = "volume")
+@XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
+"availableSizeInMB", "usedSizeInMB", "idScsi"})
+public class VolumeManagementDto extends SingleResourceTransportDto
 {
-    return idScsi;
+    private static final long serialVersionUID = 1L;
+
+    private Integer id;
+
+    private String uuid;
+
+    private String name;
+
+    private String description;
+
+    private String state;
+
+    private long sizeInMB;
+
+    private long availableSizeInMB;
+
+    private long usedSizeInMB;
+
+    private String idScsi;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    public String getIdScsi()
+    {
+        return idScsi;
+    }
+
+    public void setIdScsi(final String idScsi)
+    {
+        this.idScsi = idScsi;
+    }
+
+    public String getState()
+    {
+        return state;
+    }
+
+    public void setState(final String state)
+    {
+        this.state = state;
+    }
+
+    public long getUsedSizeInMB()
+    {
+        return usedSizeInMB;
+    }
+
+    public void setUsedSizeInMB(final long usedSizeInMB)
+    {
+        this.usedSizeInMB = usedSizeInMB;
+    }
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    public long getSizeInMB()
+    {
+        return sizeInMB;
+    }
+
+    public void setSizeInMB(final long sizeInMB)
+    {
+        this.sizeInMB = sizeInMB;
+    }
+
+    public long getAvailableSizeInMB()
+    {
+        return availableSizeInMB;
+    }
+
+    public void setAvailableSizeInMB(final long availableSizeInMB)
+    {
+        this.availableSizeInMB = availableSizeInMB;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(final String description)
+    {
+        this.description = description;
+    }
+
 }
-
-public void setIdSCSI(String idScsi)
-{
-    this.idScsi = idScsi;
-}
-
-private int state;
-
-public int getState()
-{
-    return state;
-}
-
-public void setState(int state)
-{
-    this.state = state;
-}
-
-private long usedSize;
-
-public long getUsedSize()
-{
-    return usedSize;
-}
-
-public void setUsedSize(long usedSize)
-{
-    this.usedSize = usedSize;
-}
-
-  }

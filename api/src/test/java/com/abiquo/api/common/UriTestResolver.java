@@ -112,6 +112,10 @@ public class UriTestResolver
             + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES;
     }
 
+    public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) +"/"+ DatacenterResource.ENTERPRISES_PATH;
+    }
     public static String resolveRolesURI()
     {
         String uri = resolveURI(RolesResource.ROLES_PATH, new HashMap<String, String>());
@@ -651,6 +655,12 @@ public class UriTestResolver
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
             + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
+    }
+    
+    public static String resolveVirtualDatacenterActionGetDHCPInfoURI(final Integer virtualDatacenterId)
+    {
+        return resolveVirtualDatacenterURI(virtualDatacenterId)
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
     }
 
     public static String resolveVirtualDatacentersURI()

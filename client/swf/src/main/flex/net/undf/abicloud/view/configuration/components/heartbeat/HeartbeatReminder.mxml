@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     width="500" height="300"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_config_heartbeat.value}"
     titleText="@Resource(bundle='Configuration', key='LABEL_HEARTBEATING')">
 
 

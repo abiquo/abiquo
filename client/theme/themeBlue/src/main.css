@@ -32,13 +32,13 @@
 		horizontal-gap: 0;
 		selectedButtonTextStyleName:	"MainHeaderToggleButtonBarSelectedButtonText";
 		header-height:					64;
-		color:							#505050;
+		color:							#333333;
 		vertical-align:					middle;
 	}
 	
 		.MainHeaderToggleButtonBarSelectedButtonText
 		{
-			color: 						#505050;
+			color: 						#333333;
 		}
 
 		.SecurableHeader
@@ -51,8 +51,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:					#505050;
-		text-roll-over-color:	#505050;
+		color:					#333333;
+		text-roll-over-color:	#333333;
 		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -78,8 +78,8 @@
 	{			
 		padding-left:			5;
 		padding-right:			5;
-		color:					#505050;
-		text-roll-over-color:	#505050;
+		color:					#333333;
+		text-roll-over-color:	#333333;
 		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -104,8 +104,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:					#505050;
-		text-roll-over-color:	#505050;
+		color:					#333333;
+		text-roll-over-color:	#333333;
 		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -130,8 +130,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:					#505050;
-		text-roll-over-color:	#505050;
+		color:					#333333;
+		text-roll-over-color:	#333333;
 		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -156,8 +156,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:				#505050;
-		text-roll-over-color:		#505050;
+		color:				#212121;
+		text-roll-over-color:		#212121;
 		text-selected-color:		#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -182,9 +182,9 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:				#505050;
-		text-roll-over-color:		#505050;
-		text-selected-color:		#000000;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
 		
@@ -208,8 +208,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:				#505050;
-		text-roll-over-color:		#505050;
+		color:				#333333;
+		text-roll-over-color:		#333333;
 		text-selected-color:		#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -234,8 +234,8 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:						#505050;
-		text-roll-over-color:		#505050;
+		color:						#333333;
+		text-roll-over-color:		#333333;
 		text-selected-color:		#000000;
 		font-size:				10;
 		font-weight:			bold;
@@ -260,9 +260,9 @@
 	{
 		padding-left:			5;
 		padding-right:			5;
-		color:				#505050;
-		text-roll-over-color:		#505050;
-		text-selected-color:		#000000;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
 		font-size:				10;
 		font-weight:			bold;
 		
@@ -290,8 +290,8 @@
 		padding-left:			0;
 		padding-right:			0;
 		horizontal-gap:			0;
-		color:				#505050;
-		text-roll-over-color:		#505050;
+		color:				#333333;
+		text-roll-over-color:		#333333;
 		text-selected-color:		#000000;
 		font-size:				11;
 		font-weight:			bold;
@@ -444,7 +444,10 @@
  * Common assets used all over the application
  * they all use the "source" custom property
  **/
- 
+ .CommonAssetsInfo
+ {
+	source:Embed("/assets/application/icons/info.png");
+ }
  
  .CommonAssetsMagnifier
  {

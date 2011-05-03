@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     resizeEffect="{myResize}"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_editVirtualMachine.value}"
     titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_NODE_FORM')">
 
 
@@ -33,6 +34,7 @@
         <![CDATA[
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.model.AbiCloudModel;
             import mx.managers.PopUpManager;
             import mx.resources.ResourceManager;
 

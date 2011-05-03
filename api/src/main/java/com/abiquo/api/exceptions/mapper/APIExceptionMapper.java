@@ -30,13 +30,15 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.ExtendedAPIException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.InvalidParameterConstraint;
 import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.exceptions.InvalidParameterConstraint;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -45,6 +47,8 @@ import com.abiquo.scheduler.limit.LimitExceededException;
 @Provider
 public class APIExceptionMapper implements ExceptionMapper<APIException>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(APIExceptionMapper.class);
+    
     @Override
     public Response toResponse(APIException exception)
     {
@@ -81,6 +85,11 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
             errors.add(createError(exception.getCode(), exception.getMessage()));
         }
 
+        if (exception instanceof InternalServerErrorException)
+        {
+            LOGGER.error("Unexpected exception that throws a 500 error code in API:", exception);
+        }
+        
         ResponseBuilder builder = new ResponseBuilderImpl();
         builder.entity(errors);
         builder.status(exception.getHttpStatus());

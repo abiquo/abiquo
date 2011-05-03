@@ -48,6 +48,8 @@
             public function set datacenter(value:DataCenter):void
             {
                 this._datacenter = value;
+                nameInput.text = this._datacenter.name;
+                situationInput.text = this._datacenter.situation;
                 saveButton.enabled = false;
             }
 
@@ -82,7 +84,7 @@
         required="true">
         <mx:TextInput id="nameInput"
             height="20"
-            maxChars="19" text="{this._datacenter.name}"
+            maxChars="19"
             change="validateForm()"/>
     </mx:FormItem>
 
@@ -90,7 +92,7 @@
         label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_SITUATION')"
         required="true">
         <mx:TextArea id="situationInput"
-            maxChars="100" text="{this._datacenter.situation}"
+            maxChars="100"
             change="validateForm()"/>
     </mx:FormItem>
 

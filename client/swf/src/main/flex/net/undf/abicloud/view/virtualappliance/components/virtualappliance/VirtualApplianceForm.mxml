@@ -25,7 +25,8 @@
 <AbiCloudPopUp 
 	creationComplete="onCreationComplete()"
     xmlns="net.undf.abicloud.view.general.*"
-    xmlns:mx="http://www.adobe.com/2006/mxml">
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createVapp.value}">
 
 
     <mx:Script>

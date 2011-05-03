@@ -30,27 +30,25 @@ import com.softwarementors.commons.testng.AssertEx;
 public class RasdGenerator extends GenericEntityGenerator<Rasd>
 {
 
-    public RasdGenerator(SeedGenerator seed)
+    public RasdGenerator(final SeedGenerator seed)
     {
         super(seed);
 
     }
 
     @Override
-    public void assertAllPropertiesEqual(Rasd obj1, Rasd obj2)
+    public void assertAllPropertiesEqual(final Rasd obj1, final Rasd obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Rasd.ADDRESS_ON_PARENT_PROPERTY,
             Rasd.ADDRESS_PROPERTY, Rasd.PARENT_PROPERTY, Rasd.VIRTUAL_QUANTITY_PROPERTY,
-            Rasd.HOST_RESOURCE_PROPERTY, Rasd.GENERATION_PROPERTY,
-            Rasd.CHANGEABLE_TYPE_PROPERTY, Rasd.AUTOMATIC_ALLOCATION_PROPERTY,
-            Rasd.RESOURCE_SUB_TYPE_PROPERTY, Rasd.RESERVATION_PROPERTY,
-            Rasd.POOL_ID_PROPERTY, Rasd.CONNECTION_PROPERTY,
+            Rasd.HOST_RESOURCE_PROPERTY, Rasd.GENERATION_PROPERTY, Rasd.CHANGEABLE_TYPE_PROPERTY,
+            Rasd.AUTOMATIC_ALLOCATION_PROPERTY, Rasd.RESOURCE_SUB_TYPE_PROPERTY,
+            Rasd.RESERVATION_PROPERTY, Rasd.POOL_ID_PROPERTY, Rasd.CONNECTION_PROPERTY,
             Rasd.CONFIGURATION_NAME_PROPERTY, Rasd.WEIGHT_PROPERTY,
             Rasd.OTHER_RESOURCE_TYPE_PROPERTY, Rasd.MAPPING_BEHAVIOUR_PROPERTY,
             Rasd.AUTOMATIC_DEALLOCATION_PROPERTY, Rasd.CAPTION_PROPERTY,
-            Rasd.ALLOCATION_UNITS_PROPERTY, Rasd.ELEMENT_NAME_PROPERTY,
-            Rasd.DESCRIPTION_PROPERTY, Rasd.CONSUMER_VISIBILITY_PROPERTY,
-            Rasd.LIMIT_PROPERTY, Rasd.RESOURCE_TYPE_PROPERTY); // RasdRaw.INSTANCE_ID_PROPERTY,
+            Rasd.ALLOCATION_UNITS_PROPERTY, Rasd.ELEMENT_NAME_PROPERTY, Rasd.DESCRIPTION_PROPERTY,
+            Rasd.CONSUMER_VISIBILITY_PROPERTY, Rasd.LIMIT_PROPERTY, Rasd.RESOURCE_TYPE_PROPERTY);
     }
 
     @Override
@@ -61,13 +59,21 @@ public class RasdGenerator extends GenericEntityGenerator<Rasd>
         String elementName =
             newString(nextSeed(), Rasd.ELEMENT_NAME_LENGTH_MIN, Rasd.ELEMENT_NAME_LENGTH_MAX);
 
-        int resourceType = newBigDecimal().intValue() % 64; // TODO maxvalue
+        int resourceType = newBigDecimal().intValue() % 64;
 
         return new Rasd(id, elementName, resourceType);
     }
 
+    public Rasd createInstance(final int resourceType)
+    {
+        Rasd rasd = createUniqueInstance();
+        rasd.setResourceType(resourceType);
+        return rasd;
+    }
+
     @Override
-    public void addAuxiliaryEntitiesToPersist(Rasd entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Rasd entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }

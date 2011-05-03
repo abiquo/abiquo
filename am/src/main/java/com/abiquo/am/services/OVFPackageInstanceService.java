@@ -26,11 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,9 +52,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.am.services.util.OVFPackageInstanceFromOVFEnvelope;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
-import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.EventException;
@@ -65,17 +63,16 @@ import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
-import com.abiquo.ovfmanager.ovf.exceptions.IdAlreadyExistsException;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 
 @Component(value = "ovfPackageInstanceService")
 public class OVFPackageInstanceService extends OVFPackageConventions
@@ -85,25 +82,26 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     static OVFPackageInstanceDownloader downloader;
 
     @Resource(name = "ovfPackageInstanceDownloader")
-    public void setDownloader(OVFPackageInstanceDownloader downloader)
+    public void setDownloader(final OVFPackageInstanceDownloader downloader)
     {
         this.downloader = downloader;
     }
 
     /** The constant logger object. */
-    private final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceDownloader.class);
+    private final static Logger logger =
+        LoggerFactory.getLogger(OVFPackageInstanceDownloader.class);
 
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout =
+        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
 
     public OVFPackageInstanceService()
     {
         super();
     }
 
-    public void delete(String erId, String ovfId) throws RepositoryException, IdNotFoundException
+    public void delete(final String erId, final String ovfId) throws RepositoryException,
+        IdNotFoundException
     {
         OVFPackageInstanceStatusType status = getOVFStatus(erId, ovfId);
 
@@ -134,7 +132,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
     }
 
-    public void startDownload(String erId, String ovfId) throws DownloadException,
+    public void startDownload(final String erId, final String ovfId) throws DownloadException,
         RepositoryException
     {
         // first create the folder in order to allow the creation of ERROR marks.
@@ -161,8 +159,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
     }
 
-    public void upload(OVFPackageInstanceDto diskinfo, File diskFile) throws RepositoryException,
-        IOException, IdNotFoundException, EventException
+    public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile)
+        throws RepositoryException, IOException, IdNotFoundException, EventException
     {
         downloader.uploadOVFPackage(diskinfo, diskFile);
 
@@ -206,7 +204,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
                     String relativePackagePath = erepo.getRelativePackagePath(ovfId);
                     relativePackagePath = erId + '/' + relativePackagePath; // FIXME use
-                                                                            // EnterpriseRepo
+                    // EnterpriseRepo
 
                     packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
                     packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
@@ -261,7 +259,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     private OVFPackageInstanceDto fixFilePathWithRelativeOVFPackagePath(
-        OVFPackageInstanceDto ovfpi, String relativePackagePath)
+        final OVFPackageInstanceDto ovfpi, final String relativePackagePath)
     {
         ovfpi.setDiskFilePath(relativePackagePath + ovfpi.getDiskFilePath());
 
@@ -272,7 +270,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      * @throws RepositoryException, if some of the Disk files of the bundle do not exist on the
      *             repository.
      */
-    public String createOVFBundle(OVFPackageInstanceDto diskInfo, final String snapshot)
+    public String createOVFBundle(final OVFPackageInstanceDto diskInfo, final String snapshot)
         throws RepositoryException
     {
 
@@ -330,7 +328,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         return envelope;
     }
 
-    private void checkEnvelopeIsValid(EnvelopeType envelope) throws EmptyEnvelopeException,
+    private void checkEnvelopeIsValid(final EnvelopeType envelope) throws EmptyEnvelopeException,
         SectionNotPresentException, InvalidSectionException, RequiredAttributeException
     {
 
@@ -444,8 +442,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
     }
 
-    private EnvelopeType fixDiskFormtatUriAndFileSizes(EnvelopeType envelope, String ovfId)
-        throws SectionNotPresentException, InvalidSectionException
+    private EnvelopeType fixDiskFormtatUriAndFileSizes(final EnvelopeType envelope,
+        final String ovfId) throws SectionNotPresentException, InvalidSectionException
     {
 
         DiskSectionType diskSection = OVFEnvelopeUtils.getSection(envelope, DiskSectionType.class);
@@ -511,8 +509,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
-                e.toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
+                .toString()));
         }
 
         return envelope;
@@ -520,7 +518,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
     private final static String CONTENT_LENGTH = "Content-Length";
 
-    private Long getFileSizeFromHttpHead(URL fileUrl) throws DownloadException
+    private Long getFileSizeFromHttpHead(final URL fileUrl) throws DownloadException
     {
         try
         {
@@ -536,8 +534,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
         catch (Exception e)
         {
-            throw new DownloadException(String.format("Can not obtain file [%s] size",
-                fileUrl.toExternalForm()), e);
+            throw new DownloadException(String.format("Can not obtain file [%s] size", fileUrl
+                .toExternalForm()), e);
         }
     }
 
@@ -546,7 +544,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      * 
      * @throws EmptyEnvelopeException
      */
-    private EnvelopeType fixMissingProductSection(EnvelopeType envelope)
+    private EnvelopeType fixMissingProductSection(final EnvelopeType envelope)
         throws InvalidSectionException, EmptyEnvelopeException
     {
 
@@ -780,7 +778,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      * Decode CimStrings (on the OVF namespce) on the Disk RASD's HostResource attribute to delete
      * the ''ovf://disk/'' prefix
      **/
-    private static String getVirtualSystemDiskId(List<CimString> cimStrs)
+    private static String getVirtualSystemDiskId(final List<CimString> cimStrs)
     {
         String cimStringVal = "";
         for (CimString cimString : cimStrs)
