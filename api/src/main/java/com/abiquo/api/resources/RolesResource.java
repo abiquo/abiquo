@@ -63,9 +63,9 @@ public class RolesResource extends AbstractResource
     @GET
     public RolesDto getRoles(@QueryParam("idEnterprise") final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
-        @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
-        @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam("desc") final boolean desc, @QueryParam("page") Integer page,
+        @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         if (page == null)
         {
