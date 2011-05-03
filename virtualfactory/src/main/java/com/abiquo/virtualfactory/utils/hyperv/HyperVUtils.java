@@ -23,6 +23,7 @@ package com.abiquo.virtualfactory.utils.hyperv;
 import static org.jinterop.dcom.impls.JIObjectFactory.narrowObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jinterop.dcom.common.JIException;
 import org.jinterop.dcom.core.IJIComObject;
@@ -35,6 +36,8 @@ import org.jinterop.dcom.impls.automation.IJIDispatch;
 import org.jinterop.dcom.impls.automation.IJIEnumVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hyper9.jwbem.SWbemServices;
 
 /**
  * Hyper-v utils
@@ -320,5 +323,54 @@ public class HyperVUtils
         return (IJIDispatch) JIObjectFactory.narrowObject(tmp[0].getObjectAsComObject()
             .queryInterface(IJIDispatch.IID));
 
+    }
+    
+    /**
+     * Parses an array of COM Objects and transforms them to a list of {@link IJIDispatch} objects.
+     * 
+     * @param set The array to transform.
+     * @return The list of <code>IJIDispatch</code> objects.
+     * @throws JIException If transformation cannot be done.
+     */
+    public static List<IJIDispatch> enumToIJIDispatchList(final JIVariant[] set) throws JIException
+    {
+        List<IJIDispatch> results = new ArrayList<IJIDispatch>();
+        JIVariant[][] tmpSet = enumToJIVariantArray(set);
+
+        for (JIVariant[] element : tmpSet)
+        {
+            for (JIVariant element2 : element)
+            {
+                IJIDispatch dispatch =
+                    (IJIDispatch) JIObjectFactory.narrowObject(element2.getObjectAsComObject()
+                        .queryInterface(IJIDispatch.IID));
+
+                results.add(dispatch);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Runs a query using the specified service.
+     * 
+     * @param query The query to run.
+     * @param service Service to use to run the query.
+     * @return The query results.
+     * @throws JIException If query can not be executed.
+     */
+    public static List<IJIDispatch> execQuery(final String query, final SWbemServices service)
+        throws JIException
+    {
+        IJIDispatch dispatcher = service.getObjectDispatcher();
+
+        Object[] inParams =
+            new Object[] {new JIString(query), JIVariant.OPTIONAL_PARAM(),
+            JIVariant.OPTIONAL_PARAM(), JIVariant.OPTIONAL_PARAM()};
+
+        JIVariant[] results = dispatcher.callMethodA("ExecQuery", inParams);
+
+        return HyperVUtils.enumToIJIDispatchList(results);
     }
 }
