@@ -92,7 +92,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
         PagedList<Role> page = new PagedList<Role>();
         page.addAll(result);
-        page.setCurrentPage(offset);
+        page.setCurrentElement(offset);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
