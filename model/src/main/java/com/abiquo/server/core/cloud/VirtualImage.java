@@ -550,6 +550,11 @@ public class VirtualImage extends DefaultEntityBase
         return getRepository() != null;
     }
 
+    public boolean isStateful()
+    {
+        return getStateful() != 0;
+    }
+
     public String getFileRef()
     {
         return getName() + "." + getId();

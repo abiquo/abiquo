@@ -31,7 +31,6 @@ import org.jinterop.dcom.core.JIString;
 import org.jinterop.dcom.core.JIVariant;
 import org.jinterop.dcom.impls.JIObjectFactory;
 import org.jinterop.dcom.impls.automation.IJIDispatch;
-import org.jinterop.dcom.impls.automation.JIExcepInfo;
 
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.virtualfactory.hypervisor.impl.HyperVHypervisor;
@@ -41,6 +40,7 @@ import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVUtils;
+import com.abiquo.virtualfactory.utils.hyperv.MsvmImageManagementService;
 import com.abiquo.virtualfactory.utils.hyperv.Win32Process;
 import com.hyper9.jwbem.SWbemObjectSet;
 import com.hyper9.jwbem.SWbemServices;
@@ -95,7 +95,7 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         // HYPERVISOR configuration properties
         // hvURL = "http://10.60.1.152";
-        hvURL = "http://10.60.1.122";
+        hvURL = "http://10.60.1.121";
         hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
 
@@ -197,12 +197,12 @@ public class HyperVMachineTest extends AbsMachineTest
     }
 
     /**
-     * Tests if a file/folder exists
+     * Tests WQL syntax samples
      * 
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
-    public boolean detectFile(String file) throws Exception
+    public boolean testWQL() throws Exception
     {
         boolean fileExists = false;
 
@@ -219,24 +219,255 @@ public class HyperVMachineTest extends AbsMachineTest
 
         // Preparing the query
         String query =
-            "SELECT * FROM CIM_DataFile WHERE Name='" + file.toLowerCase().replace("\\", "\\\\")
-                + "'";
+            "SELECT * FROM CIM_DataFile where FileName LIKE 'a%' and Drive = 'z:' ";
+        
+        // Path and NAme don't work with queies
+        //and Path = '\\abiquo monolithic 1.7\\'"; // Only files in rootpath
+//        where Name LIKE 'Z:\\a%'";
+        
+        
+//        String query =
+//            "SELECT * FROM Win32_Directory WHERE Name = '\\\\10.60.1.4\\vm_repository\\snapshots' ";//or FileName = 'carpeta2'";
 
+//        String query =
+//                   "Select * from Win32_MappedLogicalDisk WHERE SessionID = '164382' AND Caption = 'Z:'";
+        // Win32_MappedLogicalDisk CAN be Found by SessionID (session in Logon)
+        
+//      String query =
+//      "Select * from Win32_MappedLogicalDisk";
+
+        
+//        String query =
+//            "Select * from CIM_StorageExtent WHERE SystemName = 'WIN-7HJFVAUQT45' AND DeviceId = 'Z:'";
+        
+//        String query =
+//            "Select * from Win32_LogonSession";
+        
+//        String query =
+//            "Select * from Win32_Account WHERE Name='Administrator'";
+        
+//        String query = 
+//            "ASSOCIATORS OF {Win32_Account} "; // WHERE ClassDefsOnly 
+        
+//        String query =
+//            "SELECT * FROM Win32_Directory WHERE Name=\"\\\\10.60.1.4\\vm_repository\\abq.datastoreuuid.toma\" ";
+                
+            
+//        String query =
+//            "SELECT * FROM CIM_DataFile WHERE Name Like \"" + file.toLowerCase().replace("\\", "\\\\")
+//                + "%\"";
+
+
+        List<IJIDispatch> results =
+            HyperVUtils.execQuery(query, cimService);
+//        RELATION with CIM_LogicalDevice ??? http://msdn.microsoft.com/en-us/library/aa394083%28v=vs.85%29.aspx#properties
+        
+//        List<IJIDispatch> results =
+//            HyperVUtils.execQuery("ASSOCIATORS OF {Win32_Share} ", cimService);
+        
+//        WHERE ResultClass = Cim_Directory
+        
+        
+        
+//        
+//        List<IJIDispatch> results =
+//            HyperVUtils.execQuery("Select * from Win32_MappedLogicalDisk", cimService);
+
+        if (results == null || results.isEmpty())
+        {
+            throw new Exception("Could not get Any Results for the query");
+        }
+
+        System.out.println("results.size() - " + results.size());
+        
+        for (IJIDispatch logicalDiskDispatch : results)
+        {
+//            System.out.println("logicalDiskDispatch.get(\"LogonId\").getObjectAsString2(); " + logicalDiskDispatch.get("LogonId").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"LogonType\").getObjectAsString2(); " + logicalDiskDispatch.get("LogonType").getObjectAsInt());
+//            System.out.println("logicalDiskDispatch.get(\"AuthenticationPackage\").getObjectAsString2(); " + logicalDiskDispatch.get("AuthenticationPackage").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Drive\").getObjectAsString2(); " + logicalDiskDispatch.get("Drive").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"ProviderName\").getObjectAsString2(); " + logicalDiskDispatch.get("ProviderName").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"SessionID\").getObjectAsString2(); " + logicalDiskDispatch.get("SessionID").getObjectAsString2());
+            
+//            System.out.println("logicalDiskDispatch.get(\"Caption\").getObjectAsString2(); " + logicalDiskDispatch.get("Caption").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"VolumeName\").getObjectAsString2(); " + logicalDiskDispatch.get("VolumeName").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"VolumeSerialNumber\").getObjectAsString2(); " + logicalDiskDispatch.get("VolumeSerialNumber").getObjectAsString2());
+            
+            
+            
+            
+//            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"ProviderName\").getObjectAsString2(); " + logicalDiskDispatch.get("ProviderName").getObjectAsString2());
+            
+//            System.out.println("logicalDiskDispatch.get(\"Drive\").getObjectAsString2(); " + logicalDiskDispatch.get("Drive").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"FileName\").getObjectAsString2(); " + logicalDiskDispatch.get("FileName").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
+
+        } 
+        
+        
         JIVariant[] res =
             cimService.getObjectDispatcher().callMethodA("ExecQuery",
                 new Object[] {new JIString(query)});
 
         JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+        
+        System.out.println("fileSet.length : " + fileSet.length );
+                
 
         if (fileSet.length != 1)
         {
-            fileExists = true;
+            fileExists = false;
             // throw new Exception("Cannot identify the vhd to delete: " + file);
         }
         else
         {
-            fileExists = false;
+            fileExists = true;
         }
+
+        hypervisor.disconnect();
+        hypervisor.logout();
+
+        return fileExists;
+
+    }
+    
+    /**
+     * Tests if a file/folder exists
+     * 
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public void detectNetworkDrives() throws Exception
+    {
+
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+
+        SWbemServices cimService = hyperV.getCIMService();
+        
+        String query =
+            "Select * from CIM_StorageExtent  WHERE SystemName = 'WIN-7HJFVAUQT45' AND Caption = 'Z:'";
+
+        List<IJIDispatch> results =
+            HyperVUtils.execQuery(query, cimService);
+
+        if (results == null || results.isEmpty())
+        {
+            throw new Exception("Could not get Any Results for the query");
+        }
+
+        System.out.println(results.size());
+        
+        for (IJIDispatch logicalDiskDispatch : results)
+        {
+//            System.out.println("logicalDiskDispatch.get(\"AssocClass\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+            
+            System.out.println("logicalDiskDispatch.get(\"DeviceID\").getObjectAsString2(); " + logicalDiskDispatch.get("DeviceID").getObjectAsString2());
+            System.out.println("logicalDiskDispatch.get(\"Name\").getObjectAsString2(); " + logicalDiskDispatch.get("Name").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Description\").getObjectAsString2(); " + logicalDiskDispatch.get("Description").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"BlockSize\").getObjectAsString2(); " + logicalDiskDispatch.get("BlockSize").getObjectAsInt());
+//            System.out.println("logicalDiskDispatch.get(\"SystemName\").getObjectAsString2(); " + logicalDiskDispatch.get("SystemName").getObjectAsString2());
+            
+//            String logicalDiskName = logicalDiskDispatch.get("DeviceID").getObjectAsString2();
+//            String size = logicalDiskDispatch.get("Size").getObjectAsString2();
+//            String availableSize = logicalDiskDispatch.get("FreeSpace").getObjectAsString2();
+            
+//            System.out.println("logicalDiskDispatch.get(\"Drive\").getObjectAsString2(); " + logicalDiskDispatch.get("Drive").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"FileName\").getObjectAsString2(); " + logicalDiskDispatch.get("FileName").getObjectAsString2());
+//            System.out.println("logicalDiskDispatch.get(\"Path\").getObjectAsString2(); " + logicalDiskDispatch.get("Path").getObjectAsString2());
+
+        }
+        
+        
+        JIVariant[] res =
+            cimService.getObjectDispatcher().callMethodA("ExecQuery",
+                new Object[] {new JIString(query)});
+
+        JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+        
+        System.out.println("fileSet.length : " + fileSet.length );
+                
+
+        hypervisor.disconnect();
+        hypervisor.logout();
+
+
+    }
+    
+    /**
+     * Tests if a file/folder exists
+     * 
+     * @return an instance of {@link CIMDataFile}
+     * @throws Exception
+     */
+    public boolean detectFolderInNetworkDrive(String file, String drive) throws Exception
+    {
+        boolean fileExists = false;
+
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+        // deleteFile(hyperV.getCIMService(),
+        // "C:\\localRepository\\cf53c7eb-55a0-4528-9c87-5c331b4ab8f1.vhd");
+
+        SWbemServices cimService = hyperV.getCIMService();
+
+        String query =
+            "Select * from Win32_MappedLogicalDisk";//or FileName = 'carpeta2'";
+        
+//        List<IJIDispatch> results =
+//            HyperVUtils.execQuery("Select * from Win32_MappedLogicalDisk WHERE DeviceID = '" + drive +"'", cimService);
+        
+        List<IJIDispatch> results =
+            HyperVUtils.execQuery("Select * from Win32_MappedLogicalDisk", cimService);
+
+        if (results == null || results.isEmpty())
+        {
+            throw new Exception("Could not get Win32_MappedLogicalDisk");
+        }
+
+        for (IJIDispatch logicalDiskDispatch : results)
+        {
+            String subQuery =
+                "Select * from Win32_Directory";//or FileName = 'carpeta2'";
+            
+            JIVariant[] res =
+                logicalDiskDispatch.callMethodA("ExecQuery",
+                    new Object[] {new JIString(query)});
+
+            JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
+            
+            System.out.println(fileSet.length);
+            
+        }
+        
+        
+//       
+//        if (fileSet.length != 1)
+//        {
+//            
+//            fileExists = false;
+//            // throw new Exception("Cannot identify the vhd to delete: " + file);
+//        }
+//        else
+//        {
+//            fileExists = true;
+//        }
 
         hypervisor.disconnect();
         hypervisor.logout();
@@ -251,13 +482,15 @@ public class HyperVMachineTest extends AbsMachineTest
      * 
      * @param folder it can include full (including drive letter) or relative path for the directory being created
      * @throws Exception
+     * 
+     * TODO: It doesn't work with mapped network drives, even if user is logged on.
      */
     public void createFolder(String folder) throws Exception
     {
-         if (detectFile(folder)) {
-             log.info("Folder " + folder + " already exists. ");
-             return;
-         }
+//         if (detectFile(folder)) {
+//             log.info("Folder " + folder + " already exists. ");
+//             return;
+//         }
 
         hypervisor = instantiateHypervisor();
 
@@ -280,12 +513,67 @@ public class HyperVMachineTest extends AbsMachineTest
             // Win32_Process do not need to be instanced (SpawnInstance_)
             
             Win32Process proc = new Win32Process(instanceClass, cimService);
-            proc.create("cmd.exe /C mkdir " + folder);
+//            proc.create("cmd.exe /C mkdir " + folder);
+            
+            proc.create("cmd.exe /C echo toma > Z:\\fistropecadorfile");
 
         }
         catch (Exception e)
         {
             log.error("CreateFolder was not possible !!");
+            e.printStackTrace();
+        }
+   
+        //
+        hypervisor.disconnect();
+        hypervisor.logout();
+
+    }
+    
+    
+    /**
+     * 
+     * @param path
+     * @throws Exception
+     */
+    public void createFileAsVHD(String path) throws Exception
+    {
+//         if (detectFile(folder)) {
+//             log.info("Folder " + folder + " already exists. ");
+//             return;
+//         }
+
+        hypervisor = instantiateHypervisor();
+
+        hypervisor.init(new URL(hvURL), hvUser, hvPassword);
+        hypervisor.login(hvUser, hvPassword);
+        hypervisor.connect(new URL(hvURL));
+        HyperVHypervisor hyperV = (HyperVHypervisor) hypervisor;
+
+        try
+        {
+
+            SWbemServices cimService = hyperV.getCIMService();
+            
+            MsvmImageManagementService imageManagementService =
+                MsvmImageManagementService.getManagementService(hyperV
+                    .getVirtualizationService());
+            
+//          TRY This too ->  imageManagementService.createFixedVirtualHardDisk("C:\\aquimismo.vhd");
+            
+//            imageManagementService.createFixedVirtualHardDisk2("Z:\\aquimismo.vhd");
+            
+            imageManagementService.createFixedVirtualHardDisk2("\\\\nfs-devel.bcn.abiquo.com\\vm_repository\\aquimismo.vhd");
+                       
+            
+//            THIS WORKS
+//            imageManagementService.convertVirtualHardDisk("\\\\nfs-devel.bcn.abiquo.com\\vm_repository\\1\\rs.bcn.abiquo.com\\mw\\formats\\AbiquoMW.vdi-VHD_SPARSE.vhd", "C:\\carpeta3.vhd", 2);
+            
+
+        }
+        catch (Exception e)
+        {
+            log.error("createFileAsVHD was not possible !!");
             e.printStackTrace();
         }
    
@@ -347,8 +635,20 @@ public class HyperVMachineTest extends AbsMachineTest
         // test.testAddRemoveISCSI();
         // System.out.println("test.detectFile(): " + test.detectFile("C:\\folder"));
         
+//        test.detectFile("C:\\test45%");
+//        test.detectFile("C:\\test452");
+//        test.detectFile("C:\\carpeta2");
         
-        test.createFolder("C:\\fistropecador");
+//        test.detectFile("\\vm_repository\\abq.datastoreuuid.toma");
+        
+//        test.detectFolderInNetworkDrive("abq.datastoreuuid.toma", "Z:");
+//        test.detectNetworkDrives();
+        
+        test.testWQL();
+        
+//        test.createFolder("Z:\\fistropecadordelapradera");
+        
+//        test.createFileAsVHD("Z:\\fistrovhd");
         
 //        test.copyFolder();
     }
@@ -363,7 +663,8 @@ public class HyperVMachineTest extends AbsMachineTest
     public IJIDispatch getCIMDataFile(HyperVHypervisor hyperVHypervisor, final String file) throws Exception
     {
         // Preparing the query
-        String query = "SELECT * FROM CIM_DataFile WHERE Name='" + file + "'";
+//        String query = "SELECT * FROM CIM_DataFile WHERE Name='" + file + "'";
+        String query = "SELECT * FROM CIM_DataFile WHERE Name Like '" + file + "%'";
 
         JIVariant[] res =
             hyperVHypervisor.getCIMService().getObjectDispatcher().callMethodA("ExecQuery",
