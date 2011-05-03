@@ -144,26 +144,28 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
         Datacenter datacenter = datacenterService.getDatacenter(d.getId());
 
         VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
-    	VLANNetworkDto networkDto = new VLANNetworkDto();
-    	networkDto.setName("DefaultNetwork");
-    	networkDto.setDefaultNetwork(Boolean.TRUE);
-    	networkDto.setAddress("192.168.0.0");
-    	networkDto.setGateway("192.168.0.1");
-    	networkDto.setMask(24);
-    	networkDto.setPrimaryDNS("10.0.0.1");
-    	networkDto.setSecondaryDNS("10.0.0.1");
+        VLANNetworkDto networkDto = new VLANNetworkDto();
+        networkDto.setName("DefaultNetwork");
+        networkDto.setDefaultNetwork(Boolean.TRUE);
+        networkDto.setAddress("192.168.0.0");
+        networkDto.setGateway("192.168.0.1");
+        networkDto.setMask(24);
+        networkDto.setPrimaryDNS("10.0.0.1");
+        networkDto.setSecondaryDNS("10.0.0.1");
 
         dto.setVlan(networkDto);
-    	
-    	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);
-    	
-    	UserService userService = new UserService(em);
+
+        VirtualDatacenter virtualDatacenter =
+            service.createVirtualDatacenter(dto, datacenter, enterprise);
+
+        UserService userService = new UserService(em);
 
         User currentUser = userService.getCurrentUser();
 
         commitActiveTransaction(em);
 
-    	Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith("," + virtualDatacenter.getId()))
+        Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
+            "," + virtualDatacenter.getId()));
 
     }
 }

@@ -37,12 +37,8 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
-<<<<<<< HEAD
 import com.abiquo.api.spring.security.SecurityService;
-import com.abiquo.model.enumerator.RemoteServiceType;
-=======
 import com.abiquo.model.enumerator.HypervisorType;
->>>>>>> stable
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -252,8 +248,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);

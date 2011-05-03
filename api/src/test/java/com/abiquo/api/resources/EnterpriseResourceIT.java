@@ -48,7 +48,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
@@ -202,9 +201,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         while (!ip.equals(lastIP))
         {
@@ -226,8 +225,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
-            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0),
+            resolvePrivateNetworkURI(vdc.getId(), vlan.getId()),
+            PrivateNetworkResource.PRIVATE_NETWORK);
         assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
             "virtualdatacenter");
 
