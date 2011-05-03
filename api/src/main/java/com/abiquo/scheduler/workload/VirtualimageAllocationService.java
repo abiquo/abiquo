@@ -123,16 +123,16 @@ public class VirtualimageAllocationService
     private final static Logger log = LoggerFactory.getLogger(VirtualimageAllocationService.class);
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    private DatacenterRep datacenterRepo;
 
     @Autowired
-    VirtualApplianceDAO virtualApplianceDao;
+    private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
-    NetworkAssignmentDAO networkAssignmentDao;
+    private NetworkAssignmentDAO networkAssignmentDao;
 
     /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */
-    SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
+    private SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
 
     @Resource(name = "physicalmachineRuleFinder")
     // premium impl by replacements
@@ -164,28 +164,27 @@ public class VirtualimageAllocationService
     /**
      * Finds the targets that best fits a given resource. If there is no target that can accept the
      * resource, then null will be returned.
+     * <p>
      * 
      * @param datastoreUuid, the selected machine should have this datastore enabled.
      * @param originalHypervisorId, the selected machine IS NOT this provided hypervisor.
      * @param rackId, the rack is already defined.
-     * 
-     * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the target.
+     * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
+     *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId, Integer rackId)
-        throws ResourceAllocationException
+        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
+        Integer rackId) throws ResourceAllocationException
     {
 
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
         final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
-        final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
-        
-        final Collection<Machine> firstPassCandidates  =
-                datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId,
-                    hdRequiredOnDatastore, vapp.getEnterprise());
-            
+        // final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
 
-        
+        final Collection<Machine> firstPassCandidates =
+            datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
+                datastoreUuid, originalHypervisorId);
+
         return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
     }
 

@@ -496,13 +496,15 @@ public class DatacenterRep extends DefaultRepBase
     /**
      * Used during HA, selects a machine different of the ''originalHypervisorId'' with the same
      * ''datastoreUuid'' enabled.
+     * 
+     * doesn't require the virtual image info as the vmachine is already deployed on the target
+     * datastore (so no additional space used).
      */
     public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise, String datastoreUuid,
-        Integer originalHypervisorId)
+        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
     {
-        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, hdRequiredOnDatastore,
-            enterprise, datastoreUuid, originalHypervisorId);
+        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
+            datastoreUuid, originalHypervisorId);
     }
 
     public List<Integer> getRackIdByMinVLANCount(int idDatacenter)

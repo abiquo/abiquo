@@ -24,6 +24,7 @@ package com.abiquo.api.services.cloud;
 import java.util.Collection;
 import java.util.List;
 
+import javax.jms.ResourceAllocationException;
 import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -41,10 +42,16 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.scheduler.IAllocator;
+import com.abiquo.scheduler.ResourceUpgradeUse;
+import com.abiquo.scheduler.limit.LimitExceededException;
+import com.abiquo.scheduler.workload.AllocatorException;
+import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -72,6 +79,12 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected OVFGeneratorService ovfService;
+
+    @Autowired
+    protected ResourceUpgradeUse upgradeUse;
+
+    @Autowired
+    protected IAllocator allocator;
 
     public VirtualMachineService()
     {
@@ -166,6 +179,7 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Block the virtual by changing its state to IN_PROGRESS
+     * 
      * @param vm VirtualMachine to be blocked
      */
     public void blockVirtualMachine(VirtualMachine vm)
@@ -181,9 +195,10 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Changes the state of the VirtualMachine to the state passed
+     * 
      * @param vappId Virtual Appliance Id
      * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change 
+     * @param state The state to which change
      * @throws Exception
      */
     public void changeVirtualMachineState(Integer vappId, Integer vdcId, State state)
@@ -230,5 +245,75 @@ public class VirtualMachineService extends DefaultApiService
             OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
 
         resource.put(docEnvelopeRunning);
-    }   
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualMachine reallocateVirtualMachineForHA(VirtualMachine vmachine)
+    {
+
+        try
+        {
+            vmachine = allocator.allocateHAVirtualMachine(vmachine);
+
+        }
+        catch (NotEnoughResourcesException e)
+        {
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
+                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
+        }
+        catch (ResourceAllocationException e)
+        {
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
+                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
+        }
+        catch (AllocatorException e)
+        {
+            APIError error = APIError.ALLOCATOR_ERROR;
+            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
+                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // FIXME delete
+            APIError error = APIError.ALLOCATOR_ERROR;
+            errors.add(error.addCause(String.format("%s\nVirtual Machine id:%d name:%s UUID:%s.",
+                e.getMessage(), vmachine.getId(), vmachine.getName(), vmachine.getUuid())));
+        }
+        finally
+        {
+            flushErrors();
+        }
+
+        
+        // move it !!!
+        final VirtualAppliance vapp = contanerVirtualAppliance(vmachine);
+        final EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
+        final Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
+        final Integer datacenterId = vmachine.getHypervisor().getMachine().getDatacenter().getId();
+
+        RemoteService vf =
+            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+
+        long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+
+        Resource resource =
+            ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
+                ResourceFactory.LATEST);
+
+        changeState(resource, envelop, "CREATE"); // TODO 
+        
+        
+        return vmachine;
+    }
+    
+    
+    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    {
+        TODO
+        return null;
+    }
+    
+
 }

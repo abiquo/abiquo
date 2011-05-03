@@ -73,12 +73,17 @@ public interface IAllocator
     VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer vmachineId,
         Boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException;
 
-    
-    
-    // TODO TBD
-    VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer vmachineId,
-        Boolean foreceEnterpriseSoftLimits, String datastoreUuid, Integer originalHypervisorId)
-        throws AllocatorException, ResourceAllocationException;
+    /**
+     * <p>
+     * .DO NOT perform any resource limitation check (Enterprise, VDC or DC). As the original
+     * virtual machine running on the original hypervisor will be deallocated one the hypervisor can
+     * be reached.
+     * 
+     * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
+     *         but we wants to move it.
+     */
+    VirtualMachine allocateHAVirtualMachine(VirtualMachine vmachine) throws AllocatorException,
+        ResourceAllocationException;
 
     /**
      * Roll back the changes on the target physical machine after the virtual machine is destroyed

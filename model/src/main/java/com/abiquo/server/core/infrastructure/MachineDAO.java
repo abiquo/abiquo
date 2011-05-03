@@ -174,20 +174,97 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return machines.size();
     }
 
-    
     /**
-     *Used during HA, selects a machine different of the ''originalHypervisorId'' with the same
-     * ''datastoreUuid'' enabled. 
+     * Do not require additional space on the datastore. Used during HA, selects a machine different
+     * of the ''originalHypervisorId'' with the same ''datastoreUuid'' enabled.
      */
     public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
-       {
-        
-        return null;
-       }
-    
-    
-    
+        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    {
+
+        Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL);
+        query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
+        query.setInteger("idRack", idRack);
+        query.setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        query.setParameter("enterpriseId", enterprise.getId());
+        query.setParameter("originalHypervisorId", originalHypervisorId);
+
+        List<Machine> machines = query.list();
+
+        if (machines == null || machines.size() == 0)
+        {
+            query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL);
+            query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
+            query.setInteger("idRack", idRack);
+            query
+                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("enterpriseId", enterprise.getId());
+
+            machines = query.list();
+
+            if (machines == null || machines.size() == 0)
+            {
+                throw new PersistenceException(String.format(
+                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                        + "Pleas check the machine reservation policies.", idRack,
+                    idVirtualDatacenter, enterprise.getName()));
+            }
+            else
+            {
+                throw new PersistenceException(String.format(
+                    "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
+                        + "is the target of the high availability (so can't be used) ", idRack,
+                    idVirtualDatacenter, enterprise.getName()));
+            }
+        }
+
+        // StringBuilder sbcandidates = new StringBuilder();
+        List<Integer> candidatesids = new LinkedList<Integer>();
+        for (Machine m : machines)
+        {
+            candidatesids.add(m.getId());
+        }
+
+        // with datastore
+        Query datastoreQuery = getSession().createQuery(QUERY_CANDIDATE_DATASTORE_HA_DATASTOREUUID);
+        datastoreQuery.setParameterList("candidates", candidatesids);
+        datastoreQuery.setParameter("datastoreUuid", datastoreUuid);
+
+        List<Integer> includedIds = datastoreQuery.list();
+
+        if (includedIds.size() == 0)
+        {
+            throw new PersistenceException(String.format(
+                "There isn't any machine with the required shared datastore [%s]", datastoreUuid));
+        }
+
+        // execute the enterprise exclusion rule
+        Query excludedQuery = getSession().createQuery(QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED);
+        excludedQuery.setParameter("enterpriseId", enterprise.getId());
+        List<Integer> excludedMachineIds = excludedQuery.list();
+
+        List<Machine> notExcludedMachines = new LinkedList<Machine>();
+
+        for (Machine m : machines)
+        {
+            Integer machineId = m.getId();
+
+            if (!excludedMachineIds.contains(machineId) && includedIds.contains(machineId))
+            {
+                notExcludedMachines.add(m);
+            }
+        }
+
+        if (notExcludedMachines.size() == 0)
+        {
+            throw new PersistenceException("All the candiate machines are excluded by other enterprsies "
+                + "with virtual machines deployed on it. Please check the enterprise affinity rules.");
+        }
+
+        return notExcludedMachines;
+
+    }
+
     public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
         Long hdRequiredOnDatastore, Enterprise enterprise)
     {
@@ -349,8 +426,20 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         flush();
     }
 
-    
-    
+    // TODO use criteria (problems with SELECT DISTICNT)
+    private final static String QUERY_CANDIDATE_MACHINES = //
+        "SELECT m FROM " + //
+            "com.abiquo.server.core.infrastructure.Machine m, " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
+            "com.abiquo.server.core.cloud.Hypervisor h " + //
+            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
+            "WHERE m = h.machine " + //
+            "AND h.type = vdc.hypervisorType " + //
+            "AND dc.id = vdc.datacenter.id " + //
+            "AND m.rack.id = :idRack " + //
+            "AND vdc.id = :idVirtualDataCenter " + //
+            "AND m.state = :state " + // reserved machines
+            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
 
     private final static String QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL = //
         "SELECT m FROM " + //
@@ -366,9 +455,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
             "AND h.id != :originalHypervisorId";
-    
-    
-    private final static String QUERY_CANDIDATE_DATASTORE_HA_DATASTOREUUID = //
+
+    private final static String QUERY_CANDIDATE_DATASTORE = //
         "  SELECT py.id FROM "
             + //
             "  com.abiquo.server.core.infrastructure.Datastore datastore, "
@@ -379,14 +467,48 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             + "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
             "    AND py in elements(datastore.machines) " + //
             "    AND datastore.size > datastore.usedSize " + //
+            "    AND datastore.enabled = true";
+
+    private final static String QUERY_CANDIDATE_DATASTORE_HA_DATASTOREUUID = //
+        "  SELECT py.id FROM " + //
+            "  com.abiquo.server.core.infrastructure.Datastore datastore, " + //
+            "  com.abiquo.server.core.infrastructure.Machine py " + //
+            "    WHERE py.id in (:candidates)" + //
+            // "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
+            "    AND py in elements(datastore.machines) " + //
+            "    AND datastore.size > datastore.usedSize " + //
             "    AND datastore.enabled = true " + //
             "    AND datastore.datastoreUuid = :datastoreUuid";
-    
-    
-    
-    
-    ///
-    
+
+    private final static String QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED = //
+        "SELECT DISTINCT vm.hypervisor.machine.id "
+            + //
+            "FROM com.abiquo.server.core.cloud.VirtualMachine vm WHERE "
+            + //
+            "   (vm.enterprise.id IN "
+            + "      ( SELECT rule.enterprise2.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise1.id = :enterpriseId )"
+            + "   ) OR "
+            + "   (vm.enterprise.id IN "
+            + "      ( SELECT rule.enterprise1.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise2.id = :enterpriseId )"
+            + "   ) "
+            + //
+            "   OR " // enterprise doesn't have exlusion rules
+            + //
+            "   (vm.enterprise.id IN "
+            + "      ( SELECT rule.enterprise1.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise2.id = :enterpriseId )"
+            + "   ) ";
+
+    private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
+        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
+            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h " + "join h.machine mac "
+            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + ") AND m.id = :machineId";
+
+    /**
+     * Reasoning queries.
+     */
+
     private final static String QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE = //
         "SELECT m.id FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
@@ -425,68 +547,5 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + //
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId "; // reserved machines
-
-    //
-    // private final static String QUERY_CANDIDATE_ENOUGH_DATASTORE = //
-    // "  SELECT py.id FROM " + //
-    // "  com.abiquo.server.core.infrastructure.Datastore datastore, " + //
-    // "  com.abiquo.server.core.infrastructure.Machine py " + //
-    // "    WHERE (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
-    // "    AND py in elements(datastore.machines) " + //
-    // "    AND datastore.size > datastore.usedSize ";//
-
-    private final static String QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED = //
-        "SELECT DISTINCT vm.hypervisor.machine.id "
-            + //
-            "FROM com.abiquo.server.core.cloud.VirtualMachine vm WHERE "
-            + //
-            "   (vm.enterprise.id IN "
-            + "      ( SELECT rule.enterprise2.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise1.id = :enterpriseId )"
-            + "   ) OR "
-            + "   (vm.enterprise.id IN "
-            + "      ( SELECT rule.enterprise1.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise2.id = :enterpriseId )"
-            + "   ) "
-            + //
-            "   OR " // enterprise doesn't have exlusion rules
-            + //
-            "   (vm.enterprise.id IN "
-            + "      ( SELECT rule.enterprise1.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise2.id = :enterpriseId )"
-            + "   ) ";
-
-    // TODO use criteria (problems with SELECT DISTICNT)
-    private final static String QUERY_CANDIDATE_MACHINES = //
-        "SELECT m FROM " + //
-            "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
-            "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + // reserved machines
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
-    
-    
-    private final static String QUERY_CANDIDATE_DATASTORE = //
-        "  SELECT py.id FROM "
-            + //
-            "  com.abiquo.server.core.infrastructure.Datastore datastore, "
-            + //
-            "  com.abiquo.server.core.infrastructure.Machine py "
-            + //
-            "    WHERE py.id in (:candidates)"
-            + "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
-            "    AND py in elements(datastore.machines) " + //
-            "    AND datastore.size > datastore.usedSize " + //
-            "    AND datastore.enabled = true";
-
-    private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
-        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
-            + ") AND m.id = :machineId";
 
 }
