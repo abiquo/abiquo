@@ -45,10 +45,10 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 

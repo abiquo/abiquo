@@ -21,6 +21,11 @@
 
 package com.abiquo.abiserver.eventing;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hibernate.Query;
+
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.commons.amqp.impl.tracer.TracerCallback;
 import com.abiquo.commons.amqp.impl.tracer.domain.Trace;
@@ -32,39 +37,108 @@ public class SQLTracerListener implements TracerCallback
 {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * This map holds the mappings between the Hierarchy processor prefixes and the column in the
+     * metering table where the trace information will be persisted.
+     */
+    private static final Map<String, String> parameterMappings;
+
+    static
+    {
+        parameterMappings = new HashMap<String, String>();
+        parameterMappings.put("datacenter", "admin/datacenters");
+        parameterMappings.put("rack", "racks");
+        parameterMappings.put("machine", "machines");
+        parameterMappings.put("storage", "");
+        parameterMappings.put("storagePool", "");
+        parameterMappings.put("volume", "volumes");
+        parameterMappings.put("network", "");
+        parameterMappings.put("subnet", "");
+        parameterMappings.put("virtualDatacenter", "cloud/virtualdatacenters");
+        parameterMappings.put("virtualApp", "");
+        parameterMappings.put("virtualMachine", "");
+
+        // TODO: Uncomment this. Currently the hierarchy shows the enterprise and user who performs
+        // the action. Not the enterprise/user resource where the action happens!
+        // parameterMappings.put("enterprise", "admin/enterprises");
+        // parameterMappings.put("user", "users");
+    }
+
     @Override
-    public void onTrace(Trace trace)
+    public void onTrace(final Trace trace)
     {
         try
         {
             String insert =
-                "INSERT DELAYED INTO metering(datacenter, rack, physicalMachine, storageSystem,"
-                    + " storagePool, volume, network, subnet, enterprise, idUser, user, virtualDatacenter,"
-                    + " virtualApp, virtualmachine, severity, performedby, actionperformed, component, stacktrace)"
-                    + " VALUES (:datacenter, :rack, :machine, :storage, :storagePool, :volume, :network, :subnet,"
-                    + " :enterprise, :userId, :user, :virtualDatacenter, :virtualApp, :virtualMachine, :severity,"
-                    + " :performedBy, :actionPerformed, :component, :stacktrace)";
+                "INSERT DELAYED INTO metering(idDatacenter, datacenter, idRack, rack, idPhysicalMachine, physicalMachine,"
+                    + " idStorageSystem, storageSystem, idStoragePool, storagePool, idVolume, volume, idNetwork, network,"
+                    + " idSubnet, subnet, idEnterprise, enterprise, idUser, user, idVirtualDataCenter, virtualDataCenter,"
+                    + " idVirtualApp, virtualApp, idVirtualMachine, virtualmachine, severity, performedby, actionperformed,"
+                    + " component, stacktrace)"
+                    + " VALUES (:datacenterId, :datacenter, :rackId, :rack, :machineId, :machine, :storageId, :storage,"
+                    + " :storagePoolId, :storagePool, :volumeId, :volume, :networkId, :network, :subnetId, :subnet,"
+                    + " :enterpriseId, :enterprise, :userId, :user, :virtualDatacenterId, :virtualDatacenter, :virtualAppId,"
+                    + " :virtualApp, :virtualMachineId, :virtualMachine, :severity, :performedBy, :actionPerformed,"
+                    + " :component, :stacktrace)";
 
             HibernateDAOFactory.instance().beginConnection();
 
-            HibernateDAOFactory.getSessionFactory().getCurrentSession().createSQLQuery(insert)
-                .setParameter("datacenter", null).setParameter("rack", null)
-                .setParameter("machine", null).setParameter("storage", null)
-                .setParameter("storagePool", null).setParameter("volume", null)
-                .setParameter("network", null).setParameter("subnet", null)
-                .setParameter("enterprise", trace.getEnterpriseName())
-                .setParameter("userId", trace.getUserId())
-                .setParameter("user", trace.getUsername()).setParameter("virtualDatacenter", null)
-                .setParameter("virtualApp", null).setParameter("virtualMachine", null)
-                .setParameter("severity", trace.getSeverity())
-                .setParameter("performedBy", trace.getUsername())
-                .setParameter("actionPerformed", trace.getEvent())
-                .setParameter("component", trace.getComponent())
-                .setParameter("stacktrace", trace.getHierarchy()).executeUpdate();
+            Query query =
+                HibernateDAOFactory.getSessionFactory().getCurrentSession().createSQLQuery(insert)
+                    .setParameter("severity", trace.getSeverity()).setParameter("performedBy",
+                        trace.getUsername()).setParameter("actionPerformed", trace.getEvent())
+                    .setParameter("component", trace.getComponent()).setParameter("stacktrace",
+                        trace.getMessage());
+
+            // TODO: Remove these parameters. Currently the hierarchy shows the enterprise and user
+            // who performs the action. Not the enterprise/user resource where the action happens!
+            query.setParameter("enterpriseId", trace.getEnterpriseId());
+            query.setParameter("enterprise", trace.getEnterpriseName());
+            query.setParameter("userId", trace.getUserId());
+            query.setParameter("user", trace.getUsername());
+
+            addTraceParameters(trace, query);
+
+            query.executeUpdate();
         }
         finally
         {
             HibernateDAOFactory.instance().endConnection();
         }
     }
+
+    private void addTraceParameters(final Trace trace, final Query query)
+    {
+        // Only process if we have hierarchy data
+        if (trace.getHierarchyData() != null)
+        {
+            // For each column, check if the values are present in the trace
+            for (Map.Entry<String, String> entry : parameterMappings.entrySet())
+            {
+                String column = entry.getKey();
+                String traceKey = entry.getValue();
+
+                String parameterId = null;
+                String parameterName = null;
+
+                // Can eb empty if the processor still does not exist
+                if (!traceKey.equals(""))
+                {
+                    String parameterData = trace.getHierarchyData().get(traceKey);
+
+                    // If the parameter is present, parse the info; otherwise set it to null
+                    if (parameterData != null)
+                    {
+                        int separator = parameterData.indexOf('|');
+                        parameterId = parameterData.substring(0, separator);
+                        parameterName = parameterData.substring(separator + 1);
+                    }
+                }
+
+                query.setParameter(column + "Id", parameterId);
+                query.setParameter(column, parameterName);
+            }
+        }
+    }
+
 }

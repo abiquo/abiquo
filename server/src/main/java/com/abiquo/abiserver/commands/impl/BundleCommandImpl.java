@@ -69,7 +69,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.server.core.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;

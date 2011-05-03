@@ -27,8 +27,8 @@ import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.networking.Network;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 /**
  * This method manages the virtual Data Center information In abiCloud, an enterprise has any/one or

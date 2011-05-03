@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "error")
 public class ErrorDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private String code;
 
     private String message;
@@ -37,7 +39,7 @@ public class ErrorDto extends SingleResourceTransportDto
 
     }
 
-    public ErrorDto(String code, String message)
+    public ErrorDto(final String code, final String message)
     {
         this.code = code;
         this.message = message;
@@ -48,7 +50,7 @@ public class ErrorDto extends SingleResourceTransportDto
         return code;
     }
 
-    public void setCode(String code)
+    public void setCode(final String code)
     {
         this.code = code;
     }
@@ -58,7 +60,7 @@ public class ErrorDto extends SingleResourceTransportDto
         return message;
     }
 
-    public void setMessage(String message)
+    public void setMessage(final String message)
     {
         this.message = message;
     }

@@ -16,5 +16,4 @@ client/swf/src/main/resources/themes
 api/test-output/
 server/test-output/
 virtualfactory/test-output/
-
-
+model/test-output/

@@ -35,8 +35,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
