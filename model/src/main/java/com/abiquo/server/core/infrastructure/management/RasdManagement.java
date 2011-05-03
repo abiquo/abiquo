@@ -36,10 +36,10 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -52,15 +52,16 @@ public class RasdManagement extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "rasd_management";
 
+    // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
+    // code
     protected RasdManagement()
     {
+        // Just for JPA support
     }
 
-    protected RasdManagement(String idResourceType)
+    protected RasdManagement(final String idResourceType)
     {
-        // setVirtualDatacenter(vdc);
         setIdResourceType(idResourceType);
-        // setVirtualAppliance(virtualAppliance);
     }
 
     private final static String ID_COLUMN = "idManagement";
@@ -76,36 +77,6 @@ public class RasdManagement extends DefaultEntityBase
         return this.id;
     }
 
-    // public final static String ID_RESOURCE_PROPERTY = "idResource";
-    //
-    // private final static boolean ID_RESOURCE_REQUIRED = false;
-    //
-    // private final static int ID_RESOURCE_LENGTH_MIN = 0;
-    //
-    // private final static int ID_RESOURCE_LENGTH_MAX = 255;
-    //
-    // private final static boolean ID_RESOURCE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-    //
-    // private final static String ID_RESOURCE_COLUMN = "idResource";
-    //
-    // @Column(name = ID_RESOURCE_COLUMN, nullable = !ID_RESOURCE_REQUIRED, length =
-    // ID_RESOURCE_LENGTH_MAX)
-    // private String idResource;
-    //
-    // @Required(value = ID_RESOURCE_REQUIRED)
-    // @Length(min = ID_RESOURCE_LENGTH_MIN, max = ID_RESOURCE_LENGTH_MAX)
-    // @LeadingOrTrailingWhitespace(allowed = ID_RESOURCE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    // public String getIdResource()
-    // {
-    // return this.idResource;
-    // }
-    //
-    // protected void setIdResource(String idResource)
-    // {
-    // this.idResource = idResource;
-    // }
-
-    //
     public final static String VIRTUAL_APPLIANCE_PROPERTY = "virtualAppliance";
 
     private final static boolean VIRTUAL_APPLIANCE_REQUIRED = false;
@@ -123,12 +94,11 @@ public class RasdManagement extends DefaultEntityBase
         return this.virtualAppliance;
     }
 
-    public void setVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void setVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         this.virtualAppliance = virtualAppliance;
     }
 
-    //
     public final static String VIRTUAL_DATACENTER_PROPERTY = "virtualDatacenter";
 
     private final static boolean VIRTUAL_DATACENTER_REQUIRED = false;
@@ -146,31 +116,31 @@ public class RasdManagement extends DefaultEntityBase
         return this.virtualDatacenter;
     }
 
-    public void setVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public void setVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }
 
-    public final static String ID_VM_PROPERTY = "idVm";
+    public final static String VIRTUAL_MACHINE_PROPERTY = "virtualMachine";
 
-    private final static String ID_VM_COLUMN = "idVM";
+    private final static boolean VIRTUAL_MACHINE_REQUIRED = false;
 
-    private final static int ID_VM_MIN = Integer.MIN_VALUE;
+    private final static String VIRTUAL_MACHINE_ID_COLUMN = "idVM";
 
-    private final static int ID_VM_MAX = Integer.MAX_VALUE;
+    @JoinColumn(name = VIRTUAL_MACHINE_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualMAchine")
+    private VirtualMachine virtualMachine;
 
-    @Column(name = ID_VM_COLUMN, nullable = true)
-    @Range(min = ID_VM_MIN, max = ID_VM_MAX)
-    private Integer idVm;
-
-    public Integer getIdVm()
+    public void setVirtualMachine(final VirtualMachine virtualMachine)
     {
-        return this.idVm;
+        this.virtualMachine = virtualMachine;
     }
 
-    protected void setIdVm(Integer idVm)
+    @Required(value = VIRTUAL_MACHINE_REQUIRED)
+    public VirtualMachine getVirtualMachine()
     {
-        this.idVm = idVm;
+        return virtualMachine;
     }
 
     public final static String ID_RESOURCE_TYPE_PROPERTY = "idResourceType";
@@ -196,31 +166,52 @@ public class RasdManagement extends DefaultEntityBase
         return this.idResourceType;
     }
 
-    protected void setIdResourceType(String idResourceType)
+    protected void setIdResourceType(final String idResourceType)
     {
         this.idResourceType = idResourceType;
     }
 
-    //
-    public final static String RASDRAW_PROPERTY = "rasdRaw";
+    public final static String RASD_PROPERTY = "rasd";
 
-    private final static boolean RASDRAW_REQUIRED = false;
+    private final static boolean RASD_REQUIRED = false;
 
-    private final static String RASDRAW_ID_COLUMN = "idResource";
+    private final static String RASD_ID_COLUMN = "idResource";
 
-    @JoinColumn(name = RASDRAW_ID_COLUMN)
+    @JoinColumn(name = RASD_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_rasdraw")
-    private Rasd rasdRaw;
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_rasd")
+    private Rasd rasd;
 
-    @Required(value = RASDRAW_REQUIRED)
-    public Rasd getRasdRaw()
+    @Required(value = RASD_REQUIRED)
+    public Rasd getRasd()
     {
-        return this.rasdRaw;
+        return this.rasd;
     }
 
-    public void setRasdRaw(Rasd rasdRaw)
+    protected void setRasd(final Rasd rasd)
     {
-        this.rasdRaw = rasdRaw;
+        this.rasd = rasd;
+    }
+
+    // **************************** Rasd delegating methods ***************************
+
+    public String getDescription()
+    {
+        return getRasd().getDescription();
+    }
+
+    public void setDescription(final String description)
+    {
+        getRasd().setDescription(description);
+    }
+
+    public long getAttachmentOrder()
+    {
+        return getRasd().getGeneration();
+    }
+
+    public void setAttachmentOrder(final long order)
+    {
+        getRasd().setGeneration(order);
     }
 }

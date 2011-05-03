@@ -28,10 +28,13 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response.Status;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.scheduler.limit.LimitExceededException;
-import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.common.GenericEnityBase;
 
 public abstract class DefaultApiService
 {
@@ -42,6 +45,9 @@ public abstract class DefaultApiService
 
     protected Collection<ConstraintViolation< ? >> validationErrors =
         new LinkedHashSet<ConstraintViolation< ? >>();
+
+    @Autowired
+    protected TracerLogger tracer;
 
     protected void flushErrors()
     {
@@ -62,17 +68,25 @@ public abstract class DefaultApiService
         }
     }
 
-    protected void addValidationErrors(Set<ConstraintViolation< ? >> errors)
+    protected <T extends GenericEnityBase< ? >> void validate(final T entity)
+    {
+        if (!entity.isValid())
+        {
+            raiseValidationErrors(entity);
+        }
+    }
+
+    protected void addValidationErrors(final Set<ConstraintViolation< ? >> errors)
     {
         validationErrors.addAll(errors);
     }
 
-    protected void addValidationErrors(DefaultEntityBase entity)
+    protected <T extends GenericEnityBase< ? >> void addValidationErrors(final T entity)
     {
         addValidationErrors(entity.getValidationErrors());
     }
 
-    protected void raiseValidationErrors(DefaultEntityBase entity)
+    protected <T extends GenericEnityBase< ? >> void raiseValidationErrors(final T entity)
     {
         addValidationErrors(entity);
         flushErrors();

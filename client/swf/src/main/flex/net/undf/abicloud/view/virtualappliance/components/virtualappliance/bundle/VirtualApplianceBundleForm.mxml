@@ -26,10 +26,12 @@
     xmlns="net.undf.abicloud.view.general.*"
     initialize="onInitialize()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_createInstance.value}"
     titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_VIRTUALAPPLIANCE_BUNDLE_FORM')">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
             import mx.binding.utils.ChangeWatcher;
             import net.undf.abicloud.vo.infrastructure.State;
             import net.undf.abicloud.events.VirtualApplianceEvent;

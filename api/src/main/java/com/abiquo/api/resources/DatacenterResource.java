@@ -22,12 +22,14 @@
 package com.abiquo.api.resources;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -35,12 +37,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
 @Path(DatacenterResource.DATACENTER_PARAM)
@@ -54,12 +60,19 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES_PATH = "action/enterprises";
+
+    public static final String NETWORK = "network";
+
     @Autowired
     DatacenterService service;
 
+    @Autowired
+    IpAddressService ipService;
+
     @GET
-    public DatacenterDto getDatacenter(@PathParam(DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Datacenter datacenter = service.getDatacenter(datacenterId);
 
@@ -67,8 +80,8 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    public DatacenterDto modifyDatacenter(DatacenterDto datacenter,
-        @PathParam(DATACENTER) Integer datacenterId, @Context IRESTBuilder restBuilder)
+    public DatacenterDto modifyDatacenter(final DatacenterDto datacenter,
+        @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         Datacenter d = service.getDatacenter(datacenterId);
@@ -79,9 +92,37 @@ public class DatacenterResource extends AbstractResource
     }
 
     @GET
+    @Path(ENTERPRISES_PATH)
+    public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
+        @QueryParam(START_WITH) final Integer startwith, @QueryParam(NETWORK) Boolean network,
+        @QueryParam(LIMIT) final Integer limit, @Context final IRESTBuilder restBuilder)
+        throws Exception
+
+    {
+        Integer firstElem = (startwith == null) ? 0 : startwith;
+        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        if (network == null)
+            network = false;
+
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Enterprise> enterprises =
+            service
+                .findEnterprisesByDatacenterWithNetworks(datacenter, network, firstElem, numElem);
+        EnterprisesDto enterprisesDto = new EnterprisesDto();
+        for (Enterprise e : enterprises)
+        {
+            enterprisesDto.add(EnterpriseResource.createTransferObject(e, restBuilder));
+        }
+        enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
+        return enterprisesDto;
+
+    }
+
+    @GET
     @Path(HYPERVISORS_PATH)
-    public HypervisorTypesDto getAvailableHypervisors(@PathParam(DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public HypervisorTypesDto getAvailableHypervisors(
+        @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Datacenter datacenter = service.getDatacenter(datacenterId);
 
@@ -100,15 +141,15 @@ public class DatacenterResource extends AbstractResource
     // service.removeDatacenter(datacenterId);
     // }
 
-    public static DatacenterDto addLinks(IRESTBuilder builder, DatacenterDto datacenter)
+    public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
         datacenter.setLinks(builder.buildDatacenterLinks(datacenter));
 
         return datacenter;
     }
 
-    public static DatacenterDto createTransferObject(Datacenter datacenter, IRESTBuilder builder)
-        throws Exception
+    public static DatacenterDto createTransferObject(final Datacenter datacenter,
+        final IRESTBuilder builder) throws Exception
     {
         DatacenterDto dto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
@@ -116,7 +157,8 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
-    public static Datacenter createPersistenceObject(DatacenterDto datacenter) throws Exception
+    public static Datacenter createPersistenceObject(final DatacenterDto datacenter)
+        throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Datacenter.class, datacenter);
     }

@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlElement;
 
 public abstract class SingleResourceWithLimitsDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private int ramSoftLimitInMb;
 
     private int ramHardLimitInMb;
@@ -55,7 +57,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return ramSoftLimitInMb;
     }
 
-    public void setRamSoftLimitInMb(int ramSoftLimitInMb)
+    public void setRamSoftLimitInMb(final int ramSoftLimitInMb)
     {
         this.ramSoftLimitInMb = ramSoftLimitInMb;
     }
@@ -66,7 +68,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return ramHardLimitInMb;
     }
 
-    public void setRamHardLimitInMb(int ramHardLimitInMb)
+    public void setRamHardLimitInMb(final int ramHardLimitInMb)
     {
         this.ramHardLimitInMb = ramHardLimitInMb;
     }
@@ -77,7 +79,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return cpuCountSoftLimit;
     }
 
-    public void setCpuCountSoftLimit(int cpuCountSoftLimit)
+    public void setCpuCountSoftLimit(final int cpuCountSoftLimit)
     {
         this.cpuCountSoftLimit = cpuCountSoftLimit;
     }
@@ -88,7 +90,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return cpuCountHardLimit;
     }
 
-    public void setCpuCountHardLimit(int cpuCountHardLimit)
+    public void setCpuCountHardLimit(final int cpuCountHardLimit)
     {
         this.cpuCountHardLimit = cpuCountHardLimit;
     }
@@ -99,7 +101,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return hdSoftLimitInMb;
     }
 
-    public void setHdSoftLimitInMb(long hdSoftLimitInMb)
+    public void setHdSoftLimitInMb(final long hdSoftLimitInMb)
     {
         this.hdSoftLimitInMb = hdSoftLimitInMb;
     }
@@ -110,7 +112,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return hdHardLimitInMb;
     }
 
-    public void setHdHardLimitInMb(long hdHardLimitInMb)
+    public void setHdHardLimitInMb(final long hdHardLimitInMb)
     {
         this.hdHardLimitInMb = hdHardLimitInMb;
     }
@@ -120,7 +122,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return storageSoft;
     }
 
-    public void setStorageSoft(long storageSoft)
+    public void setStorageSoft(final long storageSoft)
     {
         this.storageSoft = storageSoft;
     }
@@ -130,7 +132,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return storageHard;
     }
 
-    public void setStorageHard(long storageHard)
+    public void setStorageHard(final long storageHard)
     {
         this.storageHard = storageHard;
     }
@@ -140,7 +142,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return vlansSoft;
     }
 
-    public void setVlansSoft(long vlansSoft)
+    public void setVlansSoft(final long vlansSoft)
     {
         this.vlansSoft = vlansSoft;
     }
@@ -150,7 +152,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return vlansHard;
     }
 
-    public void setVlansHard(long vlansHard)
+    public void setVlansHard(final long vlansHard)
     {
         this.vlansHard = vlansHard;
     }
@@ -160,7 +162,7 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return publicIpsSoft;
     }
 
-    public void setPublicIpsSoft(long publicIpsSoft)
+    public void setPublicIpsSoft(final long publicIpsSoft)
     {
         this.publicIpsSoft = publicIpsSoft;
     }
@@ -170,42 +172,42 @@ public abstract class SingleResourceWithLimitsDto extends SingleResourceTranspor
         return publicIpsHard;
     }
 
-    public void setPublicIpsHard(long publicIpsHard)
+    public void setPublicIpsHard(final long publicIpsHard)
     {
         this.publicIpsHard = publicIpsHard;
     }
 
-    public void setStorageLimits(long softLimit, long hardLimit)
+    public void setStorageLimits(final long softLimit, final long hardLimit)
     {
         setStorageSoft(softLimit);
         setStorageHard(hardLimit);
     }
 
-    public void setVlansLimits(long softLimit, long hardLimit)
+    public void setVlansLimits(final long softLimit, final long hardLimit)
     {
         setVlansSoft(softLimit);
         setVlansHard(hardLimit);
     }
 
-    public void setPublicIPLimits(long softLimit, long hardLimit)
+    public void setPublicIPLimits(final long softLimit, final long hardLimit)
     {
         setPublicIpsSoft(softLimit);
         setPublicIpsHard(hardLimit);
     }
 
-    public void setRamLimitsInMb(int softLimit, int hardLimit)
+    public void setRamLimitsInMb(final int softLimit, final int hardLimit)
     {
         setRamSoftLimitInMb(softLimit);
         setRamHardLimitInMb(hardLimit);
     }
 
-    public void setCpuCountLimits(int softLimit, int hardLimit)
+    public void setCpuCountLimits(final int softLimit, final int hardLimit)
     {
         setCpuCountSoftLimit(softLimit);
         setCpuCountHardLimit(hardLimit);
     }
 
-    public void setHdLimitsInMb(long softLimit, long hardLimit)
+    public void setHdLimitsInMb(final long softLimit, final long hardLimit)
     {
         setHdSoftLimitInMb(softLimit);
         setHdHardLimitInMb(hardLimit);

@@ -23,9 +23,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -35,17 +33,15 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class TierDAOTest extends DefaultDAOTestBase<TierDAO, Tier>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
-        // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected TierDAO createDao(EntityManager entityManager)
+    protected TierDAO createDao(final EntityManager entityManager)
     {
         return new TierDAO(entityManager);
     }
@@ -68,5 +64,4 @@ public class TierDAOTest extends DefaultDAOTestBase<TierDAO, Tier>
         return (TierGenerator) super.eg();
     }
 
-    
 }

@@ -40,7 +40,7 @@ import com.abiquo.abiserver.persistence.SessionUtils;
 import com.abiquo.abiserver.persistence.TestDAOHelper;
 import com.abiquo.abiserver.persistence.TestEntityGenerationUtils;
 import com.abiquo.abiserver.persistence.dao.workload.EnterpriseExclusionRuleDAO;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 @Test
 public class EnterpriseExclusionRuleDAOTest extends DataAccessTestBase

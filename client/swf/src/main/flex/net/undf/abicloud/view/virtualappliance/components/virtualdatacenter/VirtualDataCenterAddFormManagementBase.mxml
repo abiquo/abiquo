@@ -26,7 +26,8 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_VIRTUALDATACENTER_ADD')"
-    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*">
+    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createVdc.value}">
 
     <mx:Script>
         <![CDATA[

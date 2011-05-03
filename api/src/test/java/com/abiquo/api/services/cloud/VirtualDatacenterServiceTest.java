@@ -35,16 +35,16 @@ import com.abiquo.api.common.AuthenticationStub;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
 {
@@ -141,18 +141,16 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
     	Datacenter datacenter = datacenterService.getDatacenter(d.getId());
     	
     	VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
-    	NetworkConfigurationDto configDto = new NetworkConfigurationDto();
-        configDto.setAddress("192.168.0.0");
-        configDto.setDefaultNetwork(true);
-        configDto.setFenceMode("bridge");
-        configDto.setGateway("192.168.0.1");
-        configDto.setMask(24);
-        configDto.setNetMask("255.255.255.248");
-        configDto.setNetworkName("KVM VLAN");
-        configDto.setPrimaryDNS("10.0.0.1");
-        configDto.setSecondaryDNS("10.0.0.1");
-
-        dto.setNetworkConfiguration(configDto);
+    	VLANNetworkDto networkDto = new VLANNetworkDto();
+    	networkDto.setName("DefaultNetwork");
+    	networkDto.setDefaultNetwork(Boolean.TRUE);
+    	networkDto.setAddress("192.168.0.0");
+    	networkDto.setGateway("192.168.0.1");
+    	networkDto.setMask(24);
+    	networkDto.setPrimaryDNS("10.0.0.1");
+    	networkDto.setSecondaryDNS("10.0.0.1");
+        
+        dto.setVlan(networkDto);
     	
     	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);
     	

@@ -23,8 +23,8 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 @XmlRootElement(name = "hypervisor")
 public class HypervisorDto extends SingleResourceTransportDto

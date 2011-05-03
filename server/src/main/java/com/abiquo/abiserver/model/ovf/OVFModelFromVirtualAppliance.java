@@ -83,6 +83,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -99,7 +100,6 @@ import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFDiskUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 public class OVFModelFromVirtualAppliance
 {

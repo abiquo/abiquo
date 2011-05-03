@@ -375,8 +375,10 @@
 					</connectors>
 					<systemProperties>
 						<systemProperty>
+                            <!-- WARNING!!! - In order to execute the tests in the right way -->
+                            <!-- the class AbstractGeneratorTest should define the same value!!! -->
 							<name>abiquo.server.networking.vlanPerVdc</name>
-							<value>10</value>
+                            <value>4</value>
 						</systemProperty>
 						<systemProperty>
 						    <name>abicloud.tracer.brokerUrl</name>

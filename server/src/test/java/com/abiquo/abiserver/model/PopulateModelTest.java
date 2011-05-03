@@ -85,8 +85,8 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
-import com.abiquo.server.core.enumerator.DiskFormatType;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * XXX TBD + Creates a DataCenter a Rack and a VirtualDatacenter named ''test''.<br>
