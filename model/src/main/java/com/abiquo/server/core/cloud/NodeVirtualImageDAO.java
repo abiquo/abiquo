@@ -51,7 +51,9 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
 
     public VirtualAppliance findVirtualAppliance(VirtualMachine vmachine)
     {
-        return findByVirtualMachine(vmachine).getVirtualAppliance();
+        NodeVirtualImage node = findByVirtualMachine(vmachine);
+
+        return node != null ? node.getVirtualAppliance() : null;
     }
 
     public NodeVirtualImage findByVirtualMachine(VirtualMachine vmachine)
