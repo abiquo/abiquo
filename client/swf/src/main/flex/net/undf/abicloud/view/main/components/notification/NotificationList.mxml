@@ -30,6 +30,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
             import net.undf.abicloud.business.managers.notification.Notification;
             import net.undf.abicloud.model.AbiCloudModel;
             	
@@ -42,7 +43,7 @@
             private function dateLabelFunction(item:Object, column:DataGridColumn):String
             {
                 var date:Date = Notification(item).date
-                return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+                return AbicloudUtils.formatDate(date,true);
             }
 
             private function onClickDataGrid():void
@@ -93,8 +94,8 @@
                                 horizontalScrollPolicy="off">
                                 <mx:Script>
                                     <![CDATA[
+                                    	import net.undf.abicloud.utils.AbicloudUtils;
                                         import net.undf.abicloud.business.managers.notification.Notification;
-                                        import mx.formatters.DateFormatter;
 
                                         [Bindable]
                                         private var _notification:Notification;
@@ -107,12 +108,11 @@
                                         
                                     ]]>
                                 </mx:Script>
-                                <mx:DateFormatter id="dateFormat" formatString="DD/MM/YYYY JJ:NN"/>
                                 <mx:Label id="dateLabel"
                                     fontWeight="{this._notification.read ? 'normal' : 'bold'}"
                                     horizontalCenter="0"
                                     verticalCenter="0"
-                                    text="{dateFormat.format(this._notification.date)}"
+                                    text="{AbicloudUtils.formatDate(this._notification.date, true)}"
                                     toolTip="{this._notification.message}"/>
                  
                             </mx:Canvas>
