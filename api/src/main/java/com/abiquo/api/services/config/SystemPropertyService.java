@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -47,7 +48,13 @@ public class SystemPropertyService extends DefaultApiService
 
     public SystemProperty getSystemProperty(Integer id)
     {
-        return repo.findById(id);
+        SystemProperty property = repo.findById(id);
+        if (property == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_SYSTEM_PROPERTY);
+            flushErrors();
+        }
+        return property;        
     }
 
     public SystemProperty findByName(String name)

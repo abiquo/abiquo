@@ -124,7 +124,8 @@ public class DatacenterService extends DefaultApiService
 
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return datacenter;

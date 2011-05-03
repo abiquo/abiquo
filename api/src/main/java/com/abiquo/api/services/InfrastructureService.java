@@ -58,7 +58,8 @@ public class InfrastructureService extends DefaultApiService
 
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return repo.findRacks(datacenter);
@@ -122,7 +123,8 @@ public class InfrastructureService extends DefaultApiService
         Rack rack = repo.findRackByIds(datacenterId, rackId);
         if (rack == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_RACK);
+            addNotFoundErrors(APIError.NON_EXISTENT_RACK);
+            flushErrors();
         }
         return rack;
     }

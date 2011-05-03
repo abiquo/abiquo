@@ -84,7 +84,8 @@ public class RemoteServiceService extends DefaultApiService
         Datacenter datacenter = datacenterRepo.findById(datacenterId);
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return datacenterRepo.findRemoteServicesByDatacenter(datacenter);
@@ -195,7 +196,8 @@ public class RemoteServiceService extends DefaultApiService
         Datacenter datacenter = datacenterRepo.findById(datacenterId);
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         List<RemoteService> services =
@@ -209,7 +211,8 @@ public class RemoteServiceService extends DefaultApiService
         }
         else
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+            flushErrors();
         }
 
         return remoteService;

@@ -180,7 +180,8 @@ public class MachineService extends DefaultApiService
         Machine machine = repo.findMachineById(id);
         if (machine == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
         }
 
         return machine;

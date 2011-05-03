@@ -105,7 +105,8 @@ public class PrivateNetworkService extends DefaultApiService
         VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
         if (virtualDatacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
         }
 
         // check if we have reached the maximum number of VLANs for this virtualdatacenter
@@ -114,7 +115,8 @@ public class PrivateNetworkService extends DefaultApiService
         // check if we have a vlan with the same name in the VirtualDatacenter
         if (repo.existAnyVlanWithName(virtualDatacenter.getNetwork(), networkdto.getName()))
         {
-            throw new ConflictException(APIError.VLANS_DUPLICATED_VLAN_NAME);
+            addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME);
+            flushErrors();
         }
 
         // Create the NetworkConfiguration object
@@ -184,12 +186,14 @@ public class PrivateNetworkService extends DefaultApiService
         VirtualDatacenter vdc = repo.findById(virtualdatacenterId);
         if (vdc == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
         }
         VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
         if (vlan == null)
         {
-            throw new NotFoundException(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+            flushErrors();
         }
         return vlan;
     }
@@ -211,7 +215,8 @@ public class PrivateNetworkService extends DefaultApiService
         Integer currentVLANs = repo.findVlansByVirtualDatacener(vdc).size();
         if (currentVLANs >= maxVLANs)
         {
-            throw new ConflictException(APIError.VLANS_PRIVATE_MAXIMUM_REACHED);
+            addConflictErrors(APIError.VLANS_PRIVATE_MAXIMUM_REACHED);
+            flushErrors();
         }
     }
 
@@ -241,16 +246,17 @@ public class PrivateNetworkService extends DefaultApiService
             // check the mask is coherent with the server.
             if (firstOctet == 10 && netmask < 22)
             {
-                throw new ConflictException(APIError.VLANS_TOO_BIG_NETWORK);
+                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK);
             }
             if ((firstOctet == 172 || firstOctet == 192) && netmask < 24)
             {
-                throw new ConflictException(APIError.VLANS_TOO_BIG_NETWORK_II);
+                addConflictErrors(APIError.VLANS_TOO_BIG_NETWORK_II);
             }
             if (netmask > 30)
             {
-                throw new ConflictException(APIError.VLANS_TOO_SMALL_NETWORK);
+                addConflictErrors(APIError.VLANS_TOO_SMALL_NETWORK);
             }
+            flushErrors();
 
             // Check the network address depending on the mask. For instance, the network address
             // 192.168.1.128
@@ -258,7 +264,8 @@ public class PrivateNetworkService extends DefaultApiService
             // for the mask 24.
             if (!NetworkResolver.isValidNetworkMask(netAddress, netmask))
             {
-                throw new BadRequestException(APIError.VLANS_INVALID_NETWORK_AND_MASK);
+                addValidationErrors(APIError.VLANS_INVALID_NETWORK_AND_MASK);
+                flushErrors();
             }
         }
         else
@@ -283,7 +290,8 @@ public class PrivateNetworkService extends DefaultApiService
         //
         if (!IPAddress.isIntoRange(range, vlan.getGateway()))
         {
-            throw new BadRequestException(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+            addValidationErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+            flushErrors();
         }
 
         return range;

@@ -167,7 +167,8 @@ public class EnterpriseService extends DefaultApiService
         Enterprise enterprise = repo.findById(id);
         if (enterprise == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
 
 //        userService.checkEnterpriseAdminCredentials(enterprise);
@@ -181,7 +182,8 @@ public class EnterpriseService extends DefaultApiService
         Enterprise old = repo.findById(enterpriseId);
         if (old == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
 
         userService.checkEnterpriseAdminCredentials(old);
@@ -266,7 +268,8 @@ public class EnterpriseService extends DefaultApiService
         Machine machine = repo.findReservedMachine(enterprise, machineId);
         if (machine == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
         }
 
         repo.releaseMachine(machine);
@@ -287,7 +290,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (limit == null)
         {
-            throw new NotFoundException(APIError.LIMITS_NOT_EXIST);
+            addNotFoundErrors(APIError.LIMITS_NOT_EXIST);
+            flushErrors();
         }
 
         return limit;
@@ -418,7 +422,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (datacenterLink == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         String buildPath =
@@ -428,7 +433,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (values.isEmpty())
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         Integer datacenterId = Integer.valueOf(values.getFirst(DatacenterResource.DATACENTER));

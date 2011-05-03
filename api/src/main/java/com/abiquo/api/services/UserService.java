@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
@@ -192,7 +193,8 @@ public class UserService extends DefaultApiService
 
         if (user == null)
         {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
         }
 
         checkUserCredentialsForSelfUser(user, user.getEnterprise());
@@ -206,7 +208,8 @@ public class UserService extends DefaultApiService
         User old = repo.findUserById(userId);
         if (old == null)
         {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
         }
 
         checkUserCredentialsForSelfUser(old, old.getEnterprise());
@@ -272,10 +275,6 @@ public class UserService extends DefaultApiService
     public void removeUser(final Integer id)
     {
         User user = getUser(id);
-        if (user == null)
-        {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
-        }
 
         checkEnterpriseAdminCredentials(user.getEnterprise());
 
@@ -302,7 +301,8 @@ public class UserService extends DefaultApiService
         Enterprise enterprise = repo.findById(enterpriseId);
         if (enterprise == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
         return enterprise;
     }
@@ -312,7 +312,8 @@ public class UserService extends DefaultApiService
         User user = repo.findUserByEnterprise(userId, enterprise);
         if (user == null)
         {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
         }
         return user;
     }
@@ -328,7 +329,8 @@ public class UserService extends DefaultApiService
 
         if (role == null)
         {
-            throw new NotFoundException(APIError.MISSING_ROLE_LINK);
+            addValidationErrors(APIError.MISSING_ROLE_LINK);
+            flushErrors();
         }
 
         String buildPath = buildPath(RolesResource.ROLES_PATH, RoleResource.ROLE_PARAM);
@@ -337,7 +339,8 @@ public class UserService extends DefaultApiService
 
         if (roleValues == null || !roleValues.containsKey(RoleResource.ROLE))
         {
-            throw new NotFoundException(APIError.ROLE_PARAM_NOT_FOUND);
+            addNotFoundErrors(APIError.ROLE_PARAM_NOT_FOUND);
+            flushErrors();
         }
 
         Integer roleId = Integer.valueOf(roleValues.getFirst(RoleResource.ROLE));

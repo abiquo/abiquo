@@ -128,7 +128,8 @@ public class VirtualApplianceService extends DefaultApiService
         VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
         if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
         }
         return vapp;
     }

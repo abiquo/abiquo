@@ -130,7 +130,8 @@ public class VirtualDatacenterService extends DefaultApiService
         VirtualDatacenter vdc = repo.findById(id);
         if (vdc == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
         }
         return vdc;
     }
