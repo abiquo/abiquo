@@ -21,7 +21,7 @@
 
 package com.abiquo.commons.amqp.impl.ha;
 
-import static com.abiquo.commons.amqp.impl.am.AMConfiguration.AM_QUEUE;
+import static com.abiquo.commons.amqp.impl.ha.HAConfiguration.HA_QUEUE;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.ackMessage;
 import static com.abiquo.commons.amqp.util.ConsumerUtils.rejectMessage;
 
@@ -35,7 +35,7 @@ public class HAConsumer extends BasicConsumer<HAConfiguration, HACallback>
 {
     public HAConsumer()
     {
-        super(AM_QUEUE);
+        super(HA_QUEUE);
     }
 
     @Override
