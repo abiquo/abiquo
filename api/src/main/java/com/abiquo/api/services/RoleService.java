@@ -73,7 +73,18 @@ public class RoleService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Role addRole(final RoleDto dto)
     {
+        RESTLink enterpriseId = dto.searchLink(EnterpriseResource.ENTERPRISE);
+
+        if (enterpriseId == null)
+        {
+            return addRole(dto, null);
+        }
         Enterprise enterprise = findEnterprise(dto);
+
+        if (enterprise == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+        }
         return addRole(dto, enterprise);
     }
 
@@ -86,11 +97,6 @@ public class RoleService extends DefaultApiService
     {
         RESTLink enterprise = dto.searchLink(EnterpriseResource.ENTERPRISE);
 
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.MISSING_ENTERPRISE_LINK);
-        }
-
         String buildPath =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
         MultivaluedMap<String, String> enterpriseValues =
@@ -99,11 +105,11 @@ public class RoleService extends DefaultApiService
         if (enterpriseValues == null
             || !enterpriseValues.containsKey(EnterpriseResource.ENTERPRISE))
         {
-            throw new NotFoundException(APIError.ROLE_PARAM_NOT_FOUND);
+            throw new NotFoundException(APIError.ENTERPRISE_PARAM_NOT_FOUND);
         }
 
-        Integer roleId = Integer.valueOf(enterpriseValues.getFirst(EnterpriseResource.ENTERPRISE));
-        return roleId;
+        Integer entId = Integer.valueOf(enterpriseValues.getFirst(EnterpriseResource.ENTERPRISE));
+        return entId;
     }
 
     public Role addRole(final RoleDto dto, final Enterprise enterprise)
