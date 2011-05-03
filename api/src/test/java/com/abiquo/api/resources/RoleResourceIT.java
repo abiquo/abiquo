@@ -181,4 +181,53 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         assertEquals(modified.getName(), "name");
         assertLinkExist(modified, resolveEnterpriseURI(ent.getId()), EnterpriseResource.ENTERPRISE);
     }
+
+    @Test
+    public void modifyRoleDoesntExist() throws ClientWebException
+    {
+        Role role = roleGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveRoleURI(role.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        RoleDto dto = response.getEntity(RoleDto.class);
+        dto.setName("name");
+
+        uri = resolveRoleURI(1234);
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+
+        assertEquals(response.getStatusCode(), 404);
+    }
+
+    @Test
+    public void modifyRoleWrongEnterpriseAndPrivileges() throws ClientWebException
+    {
+        Role role = roleGenerator.createInstance();
+        setup(role);
+
+        String uri = resolveRoleURI(role.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        Integer nonExistentId = 1234;
+        RoleDto dto = response.getEntity(RoleDto.class);
+        dto.setName("name");
+        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(nonExistentId)));
+        dto.addLink(new RESTLink(PrivilegeResource.PRIVILEGE + nonExistentId,
+            resolvePrivilegeURI(nonExistentId)));
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+
+        assertEquals(response.getStatusCode(), 404);
+    }
 }

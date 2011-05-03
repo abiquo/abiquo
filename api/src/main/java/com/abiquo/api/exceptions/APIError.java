@@ -128,19 +128,16 @@ public enum APIError
         "VM-2", "The virtual machine is already in progress"),
 
     // ROLE
-    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
-
-    // ROLE
-    NON_MODIFICABLE_ROLE("ROLE-1", "The requested role cannot be modified"),
-
-    // ROLE
-    MISSING_ENTERPRISE_LINK("ROLE-2", "Missing link to the enterprise"), ENTERPRISE_PARAM_NOT_FOUND(
-        "ROLE-3", "Missing enterprise parameter"),
+    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
+        "ROLE-1", "The requested role cannot be modified"), MISSING_ENTERPRISE_LINK("ROLE-2",
+        "Missing link to the enterprise"), ENTERPRISE_PARAM_NOT_FOUND("ROLE-3",
+        "Missing enterprise parameter"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-4",
+        "Missing privilege parameter"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
 
-    // ROLE
+    // ROLE_LDAP
     NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"),
 
     // USER
@@ -311,8 +308,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 }
