@@ -321,7 +321,8 @@
                             	<include>**/enumerator/*.class</include>
                                 <include>**/transport/**/*.class</include>
                                 <include>**/rest/*.class</include>
-                                <incluide>**/*Dto.class</incluide>                                
+                                <incluide>**/*Dto.class</incluide>
+                                <incluide>com/abiquo/model/util/*.class</incluide>                                
                             </includes>
                         </configuration>
                     </execution>

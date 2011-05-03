@@ -25,9 +25,9 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.softwarementors.commons.test.SeedGenerator;

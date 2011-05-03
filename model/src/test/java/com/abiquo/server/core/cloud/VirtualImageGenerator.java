@@ -23,10 +23,10 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.softwarementors.commons.test.SeedGenerator;

@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
             import mx.controls.Button;
             import mx.controls.TextInput;
 
@@ -40,6 +41,8 @@
 
             //The PrivateNetwork where the VLAN will be added
             private var _network:Network;
+            
+            private var _virtualDatacenter:VirtualDataCenter;
 
             [Bindable]
             private var _isFormValid:Boolean = false;
@@ -47,9 +50,10 @@
             /**
              * Initializes this component to create a new VLAN
              */
-            public function init(network:Network):void
+            public function init(virtualDatacenter:VirtualDataCenter):void
             {
-                _network = network;
+                _virtualDatacenter = virtualDatacenter;
+                _network = virtualDatacenter.network;
 
                 privateNetworkForm.init("");
 
@@ -72,8 +76,10 @@
 
             private function onAccept():void
             {
+                
                 var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.CREATE_VLAN);
-                networkingEvent.network = _network;
+                networkingEvent.virtualDatacenter = _virtualDatacenter;
+                networkingEvent.network = _virtualDatacenter.network;
                 networkingEvent.networkName = privateNetworkForm.networkName;
                 networkingEvent.networkConfiguration = privateNetworkForm.networkConfiguration;
                 networkingEvent.defaultNetwork = privateNetworkForm.isDefaultNetwork;

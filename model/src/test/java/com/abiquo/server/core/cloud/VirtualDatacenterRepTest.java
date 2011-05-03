@@ -44,7 +44,6 @@ import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 public class VirtualDatacenterRepTest extends DefaultJpaDataAccessTestBase
 {
-
     private VirtualDatacenterGenerator virtualDatacenterGenerator;
 
     private VLANNetworkGenerator vlanGenerator;
@@ -212,8 +211,10 @@ public class VirtualDatacenterRepTest extends DefaultJpaDataAccessTestBase
                 .getDatacenter());
         ip.getDhcp().setRemoteService(rs);
 
-        ds().persistAll(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, rs,
-            ip.getDhcp(), ip.getVlanNetwork().getConfiguration(), ip.getVlanNetwork(), ip);
+        List<Object> additionalEntities = new ArrayList<Object>();
+        ipGenerator.addAuxiliaryEntitiesToPersist(ip, additionalEntities);
+
+        persistAll(ds(), additionalEntities, ip);
 
         EntityManager em = ds().createEntityManagerAndBeginReadWriteTransaction();
 
