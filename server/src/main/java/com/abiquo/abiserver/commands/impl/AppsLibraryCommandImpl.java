@@ -693,7 +693,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             oldVimage.setVolumePath(vimage.getVolumePath());
             oldVimage.setIdEnterprise(vimage.getIdEnterprise());
             oldVimage.setShared(vimage.getShared());
-
+            oldVimage.setCostCode(vimage.getCostCode());
             // oldVimage.setDeleted(deleted);
             // XXX oldVimage.setMaster(master);
 
