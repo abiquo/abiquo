@@ -243,6 +243,17 @@ public class Allocator implements IAllocator
 
         return vmachine;
     }
+    
+    
+    public VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer vmachineId,
+        Boolean foreceEnterpriseSoftLimits, String datastoreUuid, Integer originalHypervisorId)
+        throws AllocatorException, ResourceAllocationException
+        {
+            return null;
+        }
+    
+    
+    
 
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)

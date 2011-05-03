@@ -161,6 +161,34 @@ public class VirtualimageAllocationService
         return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
     }
 
+    /**
+     * Finds the targets that best fits a given resource. If there is no target that can accept the
+     * resource, then null will be returned.
+     * 
+     * @param datastoreUuid, the selected machine should have this datastore enabled.
+     * @param originalHypervisorId, the selected machine IS NOT this provided hypervisor.
+     * @param rackId, the rack is already defined.
+     * 
+     * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the target.
+     */
+    public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
+        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId, Integer rackId)
+        throws ResourceAllocationException
+    {
+
+        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
+        final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
+        final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
+        
+        final Collection<Machine> firstPassCandidates  =
+                datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId,
+                    hdRequiredOnDatastore, vapp.getEnterprise());
+            
+
+        
+        return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
+    }
+
     protected Collection<Machine> findFirstPassCandidates(VirtualImage vimage, Integer idVirtualApp)
         throws NotEnoughResourcesException
     {
@@ -219,7 +247,7 @@ public class VirtualimageAllocationService
             final Long hdRequiredOnDatastore = vimage.getHdRequiredInBytes();
 
             try
-            {                
+            {
                 candidateMachines =
                     datacenterRepo.findCandidateMachines(idRack, virtualDatacenter.getId(),
                         hdRequiredOnDatastore, enterprise);
@@ -303,7 +331,7 @@ public class VirtualimageAllocationService
         final String msg =
             "Any rack can be selected: There is no physical machine capacity to instantiate the required virtual appliance."
                 + sbErrorRacks.toString();
-        
+
         throw new NotEnoughResourcesException(msg);
     }
 
@@ -339,8 +367,8 @@ public class VirtualimageAllocationService
         }
     }
 
-    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();    
-    
+    private final MachineLoadRule DEFAULT_RULE = new DefaultLoadRule();
+
     /**
      * TODO TBD
      * 
@@ -452,20 +480,20 @@ public class VirtualimageAllocationService
         // TODO never is good enough
         return false;
     }
-    
-    
-    
+
     /**
-     * When editing a virtual machine this method checks if the increases resources (setted at vimage) are allowed by the workload rules.
-     * */
-    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage, Integer virtualApplianceId)
+     * When editing a virtual machine this method checks if the increases resources (setted at
+     * vimage) are allowed by the workload rules.
+     */
+    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage,
+        Integer virtualApplianceId)
     {
         // get all the rules of the candiate machines
         Map<Machine, List<MachineLoadRule>> machineRulesMap =
             ruleFinder.initializeMachineLoadRuleCache(Collections.singletonList(machine));
-        
+
         boolean pass = false;
-        
+
         if (machineRulesMap != null) // community impl --> rules == null (so always pass)
         {
             List<MachineLoadRule> rules = machineRulesMap.get(machine);
@@ -491,9 +519,8 @@ public class VirtualimageAllocationService
         {
             pass = DEFAULT_RULE.pass(vimage, machine, virtualApplianceId);
         }
-        
+
         return pass;
     }
-    
 
 }

@@ -493,6 +493,18 @@ public class DatacenterRep extends DefaultRepBase
             enterprise);
     }
 
+    /**
+     * Used during HA, selects a machine different of the ''originalHypervisorId'' with the same
+     * ''datastoreUuid'' enabled.
+     */
+    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
+        Long hdRequiredOnDatastore, Enterprise enterprise, String datastoreUuid,
+        Integer originalHypervisorId)
+    {
+        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, hdRequiredOnDatastore,
+            enterprise, datastoreUuid, originalHypervisorId);
+    }
+
     public List<Integer> getRackIdByMinVLANCount(int idDatacenter)
     {
         return rackDao.getRackIdByMinVLANCount(idDatacenter);

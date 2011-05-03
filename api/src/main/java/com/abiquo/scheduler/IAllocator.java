@@ -73,6 +73,13 @@ public interface IAllocator
     VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer vmachineId,
         Boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException;
 
+    
+    
+    // TODO TBD
+    VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer vmachineId,
+        Boolean foreceEnterpriseSoftLimits, String datastoreUuid, Integer originalHypervisorId)
+        throws AllocatorException, ResourceAllocationException;
+
     /**
      * Roll back the changes on the target physical machine after the virtual machine is destroyed
      * (of excluded by some exception on the virtual machine creation on the hypervisor).

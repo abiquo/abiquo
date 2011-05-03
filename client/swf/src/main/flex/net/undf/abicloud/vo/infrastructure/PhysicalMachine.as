@@ -79,6 +79,8 @@ package net.undf.abicloud.vo.infrastructure
         public static const STATE_HALTED:int = 4;
         
         public static const STATE_UNLICENSED:int = 5;
+        
+        public static const STATE_DISABLED_BY_HA:int = 6;
 
         /* ------------- Constructor ------------- */
         public function PhysicalMachine()

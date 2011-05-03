@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -55,22 +56,22 @@ import com.sun.ws.management.client.ResourceFactory;
 
 @Repository
 @Transactional(readOnly = true)
-public class VirtualMachineService
+public class VirtualMachineService extends DefaultApiService
 {
     private static final String RESOURCE_URI =
         "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
 
     @Autowired
-    VirtualMachineRep repo;
+    protected VirtualMachineRep repo;
 
     @Autowired
-    VirtualApplianceService vappService;
+    protected VirtualApplianceService vappService;
 
     @Autowired
-    RemoteServiceService remoteService;
+    protected RemoteServiceService remoteService;
 
     @Autowired
-    OVFGeneratorService ovfService;
+    protected OVFGeneratorService ovfService;
 
     public VirtualMachineService()
     {
@@ -229,5 +230,5 @@ public class VirtualMachineService
             OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
 
         resource.put(docEnvelopeRunning);
-    }
+    }   
 }
