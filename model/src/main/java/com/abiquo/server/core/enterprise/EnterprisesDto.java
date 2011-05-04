@@ -31,9 +31,16 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "enterprises")
 public class EnterprisesDto extends WrapperDto<EnterpriseDto>
 {
+    @Override
     @XmlElement(name = "enterprise")
     public List<EnterpriseDto> getCollection()
     {
         return collection;
+    }
+
+    public void setCollection(List<EnterpriseDto> enterprises)
+    {
+        collection = enterprises;
+
     }
 }

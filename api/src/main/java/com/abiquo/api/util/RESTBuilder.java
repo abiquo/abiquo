@@ -81,6 +81,12 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
@@ -122,6 +128,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter)
+
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -677,9 +684,29 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion)
+    {
+        return null;
+    }
+
+    @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
     {
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
+    {
+        return null;
+    }
 }
