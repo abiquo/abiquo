@@ -21,7 +21,11 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
+import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.Role;
 
 // Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA
@@ -41,6 +45,18 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
     private boolean blocked;
 
     private EnterpriseHB enterpriseHB;
+
+    private List<PrivilegeHB> privilegesHB;
+
+    public List<PrivilegeHB> getPrivilegesHB()
+    {
+        return privilegesHB;
+    }
+
+    public void setPrivilegesHB(final List<PrivilegeHB> privilegesHB)
+    {
+        this.privilegesHB = privilegesHB;
+    }
 
     public Integer getIdRole()
     {
@@ -96,6 +112,15 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
         else
         {
             role.setEnterprise(null);
+        }
+
+        role.setPrivileges(new ArrayList<Privilege>());
+        if (privilegesHB != null)
+        {
+            for (PrivilegeHB pHB : privilegesHB)
+            {
+                role.getPrivileges().add(pHB.toPojo());
+            }
         }
         return role;
     }

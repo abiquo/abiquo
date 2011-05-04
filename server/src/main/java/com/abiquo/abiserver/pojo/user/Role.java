@@ -21,11 +21,12 @@
 
 package com.abiquo.abiserver.pojo.user;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.RoleDto;
 
 public class Role implements IPojo<RoleHB>
@@ -116,16 +117,26 @@ public class Role implements IPojo<RoleHB>
         {
             roleHB.setEnterpriseHB(null);
         }
+        roleHB.setPrivilegesHB(new ArrayList<PrivilegeHB>());
+        if (privileges != null)
+        {
+            for (Privilege p : privileges)
+            {
+                roleHB.getPrivilegesHB().add(p.toPojoHB());
+            }
+        }
         return roleHB;
     }
 
-    public static Role create(final RoleDto dto, final Enterprise enterprise)
+    public static Role create(final RoleDto dto, final Enterprise enterprise,
+        final List<Privilege> privileges)
     {
         Role role = new Role();
         role.setId(dto.getId());
         role.setName(dto.getName());
         role.setBlocked(dto.isBlocked());
         role.setEnterprise(enterprise);
+        role.setPrivileges(privileges);
 
         return role;
     }

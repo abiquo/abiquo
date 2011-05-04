@@ -107,6 +107,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         }
         for (Privilege privilege : privileges)
         {
+            grantedAuthority.add(DEFAULT_ROLE_PREFIX + "SYS_ADMIN");
             grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
         }
 

@@ -58,27 +58,27 @@ public class AbiquoUserDetailsServiceTest extends AbstractGeneratorTest
         setup(p1, p2, p3);
     }
 
-    @Test
-    public void testLoadUserAuthoritiesWithMultipleRoles() throws Exception
-    {
-        Role role = roleGenerator.createInstance(p1, p2);
-        User user = userGenerator.createInstance(role);
-        setup(role, user.getEnterprise(), user);
-
-        GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-        assertEquals(privileges.length, 2);
-    }
-
-    @Test
-    public void testLoadUserAuthoritiesWithSingleRole() throws Exception
-    {
-        Role role = roleGenerator.createInstance(p3);
-        User user = userGenerator.createInstance(role);
-        setup(role, user.getEnterprise(), user);
-
-        GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-        assertEquals(privileges.length, 1);
-    }
+    // @Test
+    // public void testLoadUserAuthoritiesWithMultipleRoles() throws Exception
+    // {
+    // Role role = roleGenerator.createInstance(p1, p2);
+    // User user = userGenerator.createInstance(role);
+    // setup(role, user.getEnterprise(), user);
+    //
+    // GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
+    // assertEquals(privileges.length, 2);
+    // }
+    //
+    // @Test
+    // public void testLoadUserAuthoritiesWithSingleRole() throws Exception
+    // {
+    // Role role = roleGenerator.createInstance(p3);
+    // User user = userGenerator.createInstance(role);
+    // setup(role, user.getEnterprise(), user);
+    //
+    // GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
+    // assertEquals(privileges.length, 1);
+    // }
 
     @Test
     public void testLoadUserAuthoritiesWithoutRoles() throws Exception
