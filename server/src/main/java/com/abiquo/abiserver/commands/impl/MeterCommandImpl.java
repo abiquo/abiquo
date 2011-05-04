@@ -29,6 +29,8 @@ import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.MeterCommand;
+import com.abiquo.abiserver.commands.stub.UsersResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.exception.MeterCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
@@ -36,7 +38,10 @@ import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.security.SecurityService;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.User;
+import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.user.UserListResult;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
@@ -45,6 +50,8 @@ import com.abiquo.tracer.SeverityType;
  */
 public class MeterCommandImpl extends BasicCommand implements MeterCommand
 {
+
+    private UsersResourceStub userResourceStub;
 
     /**
      * To create DAOs and manage transactions
@@ -55,6 +62,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
     {
         // get the factory from hibernate framework
         factory = HibernateDAOFactory.instance();
+        userResourceStub = new UsersResourceStubImpl();
     }
 
     /*
@@ -82,28 +90,47 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
             // We split all the users inside the string separated by "/";
             List<String> listOfUsers = new ArrayList<String>();
 
-            // if (user.getRoleHB().getIdRole() == Role.ENTERPRISE_ADMIN)
-            if (SecurityService.isEnterpriseAdmin(user.getRoleHB().toPojo()))
+            // TODO scastro TEST IT
+            // ============================
+
+            DataResult<UserListResult> users = userResourceStub.getUsers(new UserListOptions());
+
+            if (users.getData() != null && users.getData().getUsersList() != null
+                && !users.getData().getUsersList().isEmpty())
             {
-                downUsers =
-                    userDAO.getUsersByUserPrivileges(
-                        user.getRoleHB().getSecurityLevel().toString(), user.getEnterpriseHB()
-                            .getIdEnterprise());
-                listOfUsers.add(user.getUser());
-                for (UserHB currentUser : downUsers)
+                for (User u : users.getData().getUsersList())
                 {
-                    listOfUsers.add(currentUser.getUser());
+                    listOfUsers.add(u.getUser());
                 }
             }
-            // else if (user.getRoleHB().getIdRole() == Role.SYS_ADMIN)
-            else if (SecurityService.isCloudAdmin(user.getRoleHB().toPojo()))
-            {
-                downUsers = userDAO.findAll();
-            }
-            else
-            {
-                listOfUsers.add(user.getUser());
-            }
+
+            // ============================
+
+            // // if (user.getRoleHB().getIdRole() == Role.ENTERPRISE_ADMIN)
+            // if (SecurityService.isEnterpriseAdmin(user.getRoleHB().toPojo()))
+            // {
+            // downUsers =
+            // userDAO.getUsersByUserPrivileges(
+            // user.getRoleHB().getSecurityLevel().toString(), user.getEnterpriseHB()
+            // .getIdEnterprise());
+            // listOfUsers.add(user.getUser());
+            // for (UserHB currentUser : downUsers)
+            // {
+            // listOfUsers.add(currentUser.getUser());
+            // }
+            // }
+            // // else if (user.getRoleHB().getIdRole() == Role.SYS_ADMIN)
+            // else if (SecurityService.isCloudAdmin(user.getRoleHB().toPojo()))
+            // {
+            // downUsers = userDAO.findAll();
+            // }
+            // else
+            // {
+            // listOfUsers.add(user.getUser());
+            // }
+
+            // ============================
+
             listOfMeters =
                 meterDAO.findAllByFilter(filters, listOfUsers, numrows, user.getRoleHB());
 
