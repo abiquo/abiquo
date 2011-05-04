@@ -29,11 +29,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RackDto;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -54,72 +52,55 @@ public class InfrastructureService extends DefaultApiService
     // GET the list of Racks by Datacenter.
     public List<Rack> getRacksByDatacenter(final Integer datacenterId)
     {
-        Datacenter datacenter = repo.findById(datacenterId);
-
-        if (datacenter == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
-            flushErrors();
-        }
-
+        // get the datacenter.
+        Datacenter datacenter = this.getDatacenter(datacenterId);
         return repo.findRacks(datacenter);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Rack addRack(RackDto rackDto, Integer datacenterId)
+    public Rack addRack(Rack rack, Integer datacenterId)
     {
-        if (datacenterId == 0)
-        {
-            addValidationErrors(APIError.NON_EXISTENT_DATACENTER);
-        }
+        Datacenter datacenter = this.getDatacenter(datacenterId);
 
-        Datacenter datacenter = repo.findById(datacenterId);
-
-        if (repo.existsAnyRackWithName(datacenter, rackDto.getName()))
+        // Check if there is a rack with the same name in the Datacenter
+        if (repo.existsAnyRackWithName(datacenter, rack.getName()))
         {
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
+            flushErrors();
         }
-        flushErrors();
-        Integer vlanIdMax,vlanIdMin,vlanPerVdcExpected,nrsq;
-        vlanIdMax = rackDto.getVlanIdMax();
-        vlanIdMin = rackDto.getVlanIdMin();
-        vlanPerVdcExpected = rackDto.getVlanPerVdcExpected();
-        nrsq = rackDto.getNrsq();
-        String vlansIdAvoided = rackDto.getVlansIdAvoided();
-        if(rackDto.getVlanIdMax() == null)
-        {
-        	vlanIdMax = Rack.VLAN_ID_MAX_DEFAULT_VALUE;
-        }
-        if(rackDto.getVlanIdMin() == null)
-        {
-        	vlanIdMin = Rack.VLAN_ID_MIN_DEFAULT_VALUE;
-        }
-        if(rackDto.getVlanPerVdcExpected() == null)
-        {
-        	vlanPerVdcExpected =Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE;
-        }
-        if((rackDto.getNrsq() == null) || (rackDto.getNrsq() > 100))
-        {
-        	nrsq = Rack.NRSQ_DEFAULT_VALUE;
-        }
-        if(rackDto.getVlansIdAvoided() == null)
-        {
-        	vlansIdAvoided = Rack.VLANS_ID_AVOIDED_DEFAULT_VALUE;
-        }
-        Rack rack = datacenter.createRack(rackDto.getName(), vlanIdMin,
-                vlanIdMax, vlanPerVdcExpected,nrsq);
-        rack.setShortDescription(rackDto.getShortDescription());
-        rack.setLongDescription(rackDto.getLongDescription());
-        rack.setVlansIdAvoided(vlansIdAvoided);
 
-        isValidRack(rack);
+        // Set the default values if they are not initialized.
+        if (rack.getVlanIdMin() == null)
+        {
+            rack.setVlanIdMin(Rack.VLAN_ID_MIN_DEFAULT_VALUE);
+        }
+        if (rack.getVlanIdMax() == null)
+        {
+            rack.setVlanIdMax(Rack.VLAN_ID_MAX_DEFAULT_VALUE);
+        }
+        if (rack.getVlanPerVdcExpected() == null)
+        {
+            rack.setVlanPerVdcExpected(Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE);
+        }
+        if (rack.getNrsq() == null)
+        {
+            rack.setNrsq(Rack.NRSQ_DEFAULT_VALUE);
+        }
+        
+        // Set the datacenter that belongs to
+        rack.setDatacenter(datacenter);
+            
+        // Call the inherited 'validate' function in the DefaultApiService
+        validate(rack);
         repo.insertRack(rack);
 
         return rack;
     }
 
+    // Return a rack.
     public Rack getRack(final Integer datacenterId, Integer rackId)
     {
+        // Find the rack by itself and by its datacenter.
         Rack rack = repo.findRackByIds(datacenterId, rackId);
         if (rack == null)
         {
@@ -134,6 +115,7 @@ public class InfrastructureService extends DefaultApiService
     {
         Rack old = getRack(datacenterId, rackId);
 
+        // Check 
         if (repo.existsAnyOtherRackWithName(old, rack.getName()))
         {
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
@@ -144,7 +126,7 @@ public class InfrastructureService extends DefaultApiService
         old.setShortDescription(rack.getShortDescription());
         old.setLongDescription(rack.getLongDescription());
 
-        isValidRack(old);
+        validate(old);
         repo.updateRack(old);
         return old;
     }
@@ -167,16 +149,20 @@ public class InfrastructureService extends DefaultApiService
         return rack != null && rack.getDatacenter().getId().equals(datacenterId);
     }
 
-    /**
-     * This method checks the validation errors for the entity before to persist it.
-     * @param rack entity to check.
+    /*
+     * Get the Datacenter and check if it exists.
      */
-    protected void isValidRack(Rack rack)
+    private Datacenter getDatacenter(Integer datacenterId)
     {
-        if (!rack.isValid())
+        Datacenter datacenter = repo.findById(datacenterId);
+
+        if (datacenter == null)
         {
-            addValidationErrors(rack.getValidationErrors());
+            // Adding the NON_EXISTENT_DATACENTER to the list of NotFoundErrors and flush them.
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
-        flushErrors();
+
+        return datacenter;
     }
 }
