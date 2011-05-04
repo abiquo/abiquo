@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.scheduler;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,7 +30,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ForeignKey;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
@@ -41,7 +39,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = EnterpriseExclusionRule.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = EnterpriseExclusionRule.TABLE_NAME)
-public class EnterpriseExclusionRule extends DefaultEntityBase
+public class EnterpriseExclusionRule extends DefaultEntityBase implements PersistentRule
 {
     public static final String TABLE_NAME = "workload_enterprise_exclusion_rule";
 
@@ -77,9 +75,8 @@ public class EnterpriseExclusionRule extends DefaultEntityBase
     private final static String ENTERPRISE1_ID_COLUMN = "idEnterprise1";
 
     @JoinColumn(name = ENTERPRISE1_ID_COLUMN)
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    // @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    // @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise1")
     private Enterprise enterprise1;
 
@@ -101,9 +98,8 @@ public class EnterpriseExclusionRule extends DefaultEntityBase
     private final static String ENTERPRISE2_ID_COLUMN = "idEnterprise2";
 
     @JoinColumn(name = ENTERPRISE2_ID_COLUMN)
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    // @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    // @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise2")
     private Enterprise enterprise2;
 

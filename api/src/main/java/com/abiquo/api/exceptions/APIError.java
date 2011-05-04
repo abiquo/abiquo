@@ -61,7 +61,8 @@ public enum APIError
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
-        "ENTERPRISE-7", "Enterprise name can't be empty"),
+        "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
+        "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -229,14 +230,20 @@ public enum APIError
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
         "STATS-3", "Non existent statistical data found for the requested enterprise"),
 
-    // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
 
     VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume")
+        "An unexpected error occured while creating the volume"),
+
+    // RULES
+    NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
+        "RULE-2", "The requested fit policy rule does not exist"), NON_EXISTENT_MLR("RULE-3",
+        "The requeste machine load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
+        "At least one fit policy rule is required"), ONE_LINK_REQUIRED("RULE-5",
+        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)")
 
     ;
 
@@ -279,6 +286,7 @@ public enum APIError
     public APIError addCause(final String cause)
     {
         this.cause = cause;
+        this.message = cause;
         return this;
     }
 
@@ -298,8 +306,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 }
