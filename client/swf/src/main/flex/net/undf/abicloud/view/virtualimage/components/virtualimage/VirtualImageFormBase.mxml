@@ -221,6 +221,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
+                    costInput.text = this._virtualImage.cost_code;
                 }
                 else
                 {
@@ -241,6 +242,7 @@
                     hdUnitsSelector.selectedIndex = 0;
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
+                    costInput.text = "";
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -276,7 +278,9 @@
                     if (publicImageInput.selected)
                         updatedValues.shared = 1;
                     else
-                        updatedValues.shared = 0;                    
+                        updatedValues.shared = 0; 
+                        
+                    updatedValues.cost_code = costInput.text;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
@@ -740,6 +744,16 @@
                 visible="{this._virtualImage != null &amp;&amp; this._canShare}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:TextInput id="costInput"
+                    height="18"
+                    maxChars="50"
+                    change="validateForm()"/>
             </mx:FormItem>
         </mx:Form>
 
