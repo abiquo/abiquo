@@ -22,9 +22,12 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.api.resources.RackResource.createTransferObject;
+import static com.abiquo.api.resources.RackResource.createPersistenceObject;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -46,18 +49,22 @@ import com.abiquo.server.core.infrastructure.RacksDto;
 @Controller
 public class RacksResource extends AbstractResource
 {
+    // Define the static variables that represent the URI
     public static final String RACKS_PATH = "racks";
 
+    // Define its service. It should only have ONE service!
     @Autowired
     protected InfrastructureService infrastructureService;
 
     @GET
-    public RacksDto getRacks(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
+    public RacksDto getRacks(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) Integer datacenterId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);
+        
+        // Receive the Racks and convert them as RacksDto in the 'createTransferObject' loop. 
+        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);       
         RacksDto racks = new RacksDto();
-
         if (all != null && !all.isEmpty())
         {
             for (Rack r : all)
@@ -65,16 +72,15 @@ public class RacksResource extends AbstractResource
                 racks.add(createTransferObject(r, restBuilder));
             }
         }
-
         return racks;
     }
 
     @POST
     public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RackDto rack, @Context IRESTBuilder restBuilder) throws Exception
+        RackDto rackDto, @Context IRESTBuilder restBuilder) throws Exception
     {
+        Rack rack = createPersistenceObject(rackDto);
         Rack r = infrastructureService.addRack(rack, datacenterId);
-
         return createTransferObject(r, restBuilder);
     }
 }
