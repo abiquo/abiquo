@@ -23,7 +23,7 @@ package com.abiquo.abiserver.pojo.authentication;
 
 import java.util.ArrayList;
 
-import com.abiquo.abiserver.pojo.authorization.Resource;
+import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.User;
 
 /**
@@ -38,13 +38,13 @@ public class LoginResult
 
     private User user;
 
-    private ArrayList<Resource> clientResources;
+    private ArrayList<Privilege> clientPrivileges;
 
     public LoginResult()
     {
         session = new UserSession();
         user = new User();
-        clientResources = new ArrayList<Resource>();
+        clientPrivileges = new ArrayList<Privilege>();
     }
 
     public UserSession getSession()
@@ -52,7 +52,7 @@ public class LoginResult
         return session;
     }
 
-    public void setSession(UserSession session)
+    public void setSession(final UserSession session)
     {
         this.session = session;
     }
@@ -62,19 +62,19 @@ public class LoginResult
         return user;
     }
 
-    public void setUser(User user)
+    public void setUser(final User user)
     {
         this.user = user;
     }
 
-    public ArrayList<Resource> getClientResources()
+    public ArrayList<Privilege> getClientPrivileges()
     {
-        return clientResources;
+        return clientPrivileges;
     }
 
-    public void setClientResources(ArrayList<Resource> clientResources)
+    public void setClientPrivileges(final ArrayList<Privilege> clientPrivileges)
     {
-        this.clientResources = clientResources;
+        this.clientPrivileges = clientPrivileges;
     }
 
 }

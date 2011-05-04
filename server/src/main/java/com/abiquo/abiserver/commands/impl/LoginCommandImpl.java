@@ -25,11 +25,9 @@ import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.AuthService;
-import com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthClientResourceHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthClientresourceExceptionHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
@@ -37,9 +35,9 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.authorization.Resource;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -59,8 +57,125 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
      * com.abiquo.abiserver.commands.impl.LoginCommand#login(com.abiquo.abiserver.pojo.authentication
      * .Login)
      */
+    // @SuppressWarnings("unchecked")
+    // public DataResult<LoginResult> login(Login loginData)
+    // {
+    // DataResult<LoginResult> resultResponse = AuthService.getInstance().doLogin(loginData);
+    //
+    // if (resultResponse.getSuccess())
+    // {
+    // // Generating the list of client resources for the user that has
+    // // logged in
+    // Session session = null;
+    // Transaction transaction = null;
+    //
+    // ArrayList<Resource> userResources = new ArrayList<Resource>();
+    //
+    // try
+    // {
+    // session = HibernateUtil.getSession();
+    // transaction = session.beginTransaction();
+    //
+    // // Getting the user that is being loggin in
+    // UserHB userHBLogged =
+    // (UserHB) session.get(UserHB.class, resultResponse.getData().getUser().getId());
+    //
+    // // Getting the list of all client resources
+    // ArrayList<AuthClientResourceHB> allClientResourcesHB =
+    // (ArrayList<AuthClientResourceHB>) session.createCriteria(
+    // AuthClientResourceHB.class).list();
+    //
+    // AuthClientresourceExceptionHB authClientresourceExceptionHB;
+    // for (AuthClientResourceHB authClientResourceHB : allClientResourcesHB)
+    // {
+    // // Checking if there is any exception for this client
+    // // resource and this user
+    // authClientresourceExceptionHB = null;
+    // authClientresourceExceptionHB =
+    // (AuthClientresourceExceptionHB) session.createCriteria(
+    // AuthClientresourceExceptionHB.class).add(
+    // Restrictions.eq("userHB", userHBLogged)).add(
+    // Restrictions.eq("authResourceHB", authClientResourceHB)).uniqueResult();
+    //
+    // int priorAuth =
+    // authClientResourceHB.getRoleHB().getSecurityLevel().compareTo(
+    // userHBLogged.getRoleHB().getSecurityLevel());
+    // if (priorAuth >= 0)
+    // {
+    // // User has authorization for this client resource.
+    // // Checking if there is any
+    // // exception for that
+    // if (authClientresourceExceptionHB == null)
+    // {
+    // // No exceptions. Adding the client resource for
+    // // this user
+    // userResources.add(authClientResourceHB.toPojo());
+    // }
+    // else
+    // {
+    // // There is an exception, so this user is not
+    // // authorized to use this
+    // // client resource
+    // // We do not add this client resource
+    // }
+    // }
+    // else
+    // {
+    // // User is not authorized for this client resource.
+    // // Checking if there is any
+    // // exception for that
+    // if (authClientresourceExceptionHB != null)
+    // {
+    // // An exception exists, so this user is authorized.
+    // // Adding the client
+    // // resource
+    // userResources.add(authClientResourceHB.toPojo());
+    // }
+    // else
+    // {
+    // // No exception exists, so we do not add this client
+    // // resource
+    // }
+    // }
+    // }
+    //
+    // transaction.commit();
+    //
+    // // log the event
+    // traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGIN,
+    // resultResponse.getData().getSession(), null, null, null, null, null, null,
+    // resultResponse.getData().getSession().getUser(), resultResponse.getData()
+    // .getSession().getEnterpriseName());
+    //
+    // }
+    // catch (Exception e)
+    // {
+    // if (transaction != null && transaction.isActive())
+    // {
+    // transaction.rollback();
+    // }
+    //
+    // errorManager.reportError(resourceManager, resultResponse, "login.resourceCreation",
+    // e);
+    //
+    // traceLog(SeverityType.CRITICAL, ComponentType.USER, EventType.USER_LOGIN,
+    // resultResponse.getData().getSession(), null, null, e.getMessage(), null, null,
+    // null, resultResponse.getData().getUser().getUser(), resultResponse.getData()
+    // .getSession().getEnterpriseName());
+    //
+    // return resultResponse;
+    // }
+    //
+    // // Returning result
+    // resultResponse.getData().setClientResources(userResources);
+    // }
+    //
+    // return resultResponse;
+    // }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public DataResult<LoginResult> login(Login loginData)
+    public DataResult<LoginResult> login(final Login loginData)
     {
         DataResult<LoginResult> resultResponse = AuthService.getInstance().doLogin(loginData);
 
@@ -71,7 +186,7 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             Session session = null;
             Transaction transaction = null;
 
-            ArrayList<Resource> userResources = new ArrayList<Resource>();
+            ArrayList<Privilege> clientPrivileges = new ArrayList<Privilege>();
 
             try
             {
@@ -82,63 +197,14 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
                 UserHB userHBLogged =
                     (UserHB) session.get(UserHB.class, resultResponse.getData().getUser().getId());
 
-                // Getting the list of all client resources
-                ArrayList<AuthClientResourceHB> allClientResourcesHB =
-                    (ArrayList<AuthClientResourceHB>) session.createCriteria(
-                        AuthClientResourceHB.class).list();
+                // Getting the list of user privileges
+                ArrayList<PrivilegeHB> allUserPrivilegesHB =
+                    (ArrayList<PrivilegeHB>) userHBLogged.getRoleHB().getPrivilegesHB();
 
-                AuthClientresourceExceptionHB authClientresourceExceptionHB;
-                for (AuthClientResourceHB authClientResourceHB : allClientResourcesHB)
+                for (PrivilegeHB userPrivilegeHB : allUserPrivilegesHB)
                 {
-                    // Checking if there is any exception for this client
-                    // resource and this user
-                    authClientresourceExceptionHB = null;
-                    authClientresourceExceptionHB =
-                        (AuthClientresourceExceptionHB) session.createCriteria(
-                            AuthClientresourceExceptionHB.class).add(
-                            Restrictions.eq("userHB", userHBLogged)).add(
-                            Restrictions.eq("authResourceHB", authClientResourceHB)).uniqueResult();
+                    clientPrivileges.add(userPrivilegeHB.toPojo());
 
-                    int priorAuth =
-                        authClientResourceHB.getRoleHB().getSecurityLevel().compareTo(
-                            userHBLogged.getRoleHB().getSecurityLevel());
-                    if (priorAuth >= 0)
-                    {
-                        // User has authorization for this client resource.
-                        // Checking if there is any
-                        // exception for that
-                        if (authClientresourceExceptionHB == null)
-                        {
-                            // No exceptions. Adding the client resource for
-                            // this user
-                            userResources.add(authClientResourceHB.toPojo());
-                        }
-                        else
-                        {
-                            // There is an exception, so this user is not
-                            // authorized to use this
-                            // client resource
-                            // We do not add this client resource
-                        }
-                    }
-                    else
-                    {
-                        // User is not authorized for this client resource.
-                        // Checking if there is any
-                        // exception for that
-                        if (authClientresourceExceptionHB != null)
-                        {
-                            // An exception exists, so this user is authorized.
-                            // Adding the client
-                            // resource
-                            userResources.add(authClientResourceHB.toPojo());
-                        }
-                        else
-                        {
-                            // No exception exists, so we do not add this client
-                            // resource
-                        }
-                    }
                 }
 
                 transaction.commit();
@@ -169,7 +235,7 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
 
             // Returning result
-            resultResponse.getData().setClientResources(userResources);
+            resultResponse.getData().setClientPrivileges(clientPrivileges);
         }
 
         return resultResponse;
@@ -181,7 +247,8 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
      * com.abiquo.abiserver.commands.impl.LoginCommand#logout(com.abiquo.abiserver.pojo.authentication
      * .UserSession)
      */
-    public BasicResult logout(UserSession session)
+    @Override
+    public BasicResult logout(final UserSession session)
     {
         traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGOUT, session, null, null,
             null, null, null, null, null, null);
