@@ -50,7 +50,7 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
 {
     @Override
     @SuppressWarnings("unchecked")
-    public DataResult<MainResult> getCommonInformation(UserSession userSession)
+    public DataResult<MainResult> getCommonInformation(final UserSession userSession)
     {
         DataResult<MainResult> dataResult = new DataResult<MainResult>();
         ArrayList<Role> rolesList = new ArrayList<Role>();
@@ -66,26 +66,26 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
 
             // Getting the user that called this method
             UserHB userHB =
-                (UserHB) session.createCriteria(UserHB.class).add(
-                    Restrictions.eq("user", userSession.getUser())).uniqueResult();
+                (UserHB) session.createCriteria(UserHB.class)
+                    .add(Restrictions.eq("user", userSession.getUser())).uniqueResult();
 
             // 2 - Retrieving the list of Roles
             // Only the Roles with a security level equal or less than the user who called this
             // method will be returned
             ArrayList<RoleHB> rolesHB =
-                (ArrayList<RoleHB>) session.createCriteria(RoleHB.class).addOrder(
-                    Order.asc("shortDescription")).list();
-
-            for (RoleHB roleHB : rolesHB)
-            {
-                // Tip: in securityLevel scale, 1 is the greater level of security, and 99 the
-                // lowest
-                if (roleHB.getSecurityLevel().compareTo(userHB.getRoleHB().getSecurityLevel()) > -1)
-                {
-                    // This user can view this role
-                    rolesList.add(roleHB.toPojo());
-                }
-            }
+                (ArrayList<RoleHB>) session.createCriteria(RoleHB.class)
+                    .addOrder(Order.asc("shortDescription")).list();
+            //
+            // for (RoleHB roleHB : rolesHB)
+            // {
+            // // Tip: in securityLevel scale, 1 is the greater level of security, and 99 the
+            // // lowest
+            // if (roleHB.getSecurityLevel().compareTo(userHB.getRoleHB().getSecurityLevel()) > -1)
+            // {
+            // // This user can view this role
+            // rolesList.add(roleHB.toPojo());
+            // }
+            // }
 
             for (HypervisorType type : HypervisorType.values())
             {
