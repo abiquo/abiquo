@@ -51,6 +51,14 @@ public class Role implements IPojo<RoleHB>
 
     }
 
+    public Role(final Integer id, final String name, final boolean blocked)
+    {
+
+        this.id = id;
+        this.name = name;
+        this.blocked = blocked;
+    }
+
     public int getId()
     {
         return id;

@@ -24,6 +24,7 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -37,6 +38,7 @@ import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
@@ -44,6 +46,7 @@ import com.abiquo.abiserver.pojo.user.UserListResult;
 import com.abiquo.abiserver.security.SecurityService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UsersDto;
@@ -168,21 +171,41 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             Collection<User> normalUsers = new ArrayList<User>();
             Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
             Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
+            Map<String, PrivilegeDto> catchedPrivileges = new HashMap<String, PrivilegeDto>();
 
             for (UserDto dto : usersDto.getCollection())
             {
                 RoleDto role = getRole(dto.searchLink("role").getHref(), catchedRoles);
                 EnterpriseDto enterprise =
                     getEnterprise(dto.searchLink("enterprise").getHref(), catchedEnterprises);
-                if (role.getShortDescription().equalsIgnoreCase("USER")
-                    && orderBy.equalsIgnoreCase("role"))
+
+                EnterpriseDto enterpriseRole =
+                    getEnterprise(role.searchLink("enterprise").getHref(), catchedEnterprises);
+
+                List<Privilege> privileges = new ArrayList<Privilege>();
+                for (RESTLink rsl : role.getLinks())
+                {
+                    if (rsl.getRel().contains("privilege"))
+                    {
+                        Privilege p =
+                            Privilege.create(getPrivilege(rsl.getHref(), catchedPrivileges));
+                        privileges.add(p);
+                    }
+                }
+
+                Role rolePojo = new Role(role.getId(), role.getName(), role.isBlocked());
+
+                // if (role.getShortDescription().equalsIgnoreCase("USER")
+                // && orderBy.equalsIgnoreCase("role"))
+                if (SecurityService.isStandardUser(rolePojo) && orderBy.equalsIgnoreCase("role"))
                 {
                     normalUsers.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role)));
+                        Role.create(role, Enterprise.create(enterpriseRole), privileges)));
                 }
                 else
                 {
-                    users.add(User.create(dto, Enterprise.create(enterprise), Role.create(role)));
+                    users.add(User.create(dto, Enterprise.create(enterprise),
+                        Role.create(role, Enterprise.create(enterpriseRole), privileges)));
                 }
             }
             Collection<User> usersWithoutVDC = new ArrayList<User>();
@@ -221,6 +244,22 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         return dataResult;
+    }
+
+    private PrivilegeDto getPrivilege(final String privilegeUri,
+        final Map<String, PrivilegeDto> cache)
+    {
+        PrivilegeDto dto = null;
+        if (!cache.containsKey(privilegeUri))
+        {
+            dto = get(privilegeUri).getEntity(PrivilegeDto.class);
+            cache.put(privilegeUri, dto);
+        }
+        else
+        {
+            dto = cache.get(privilegeUri);
+        }
+        return dto;
     }
 
     private RoleDto getRole(final String roleUri, final Map<String, RoleDto> cache)
