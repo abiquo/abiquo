@@ -41,18 +41,18 @@ import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
+import com.abiquo.abiserver.security.SecurityService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UsersDto;
-import com.vmware.vim25.UserNotFound;
 
 public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResourceStub
 {
 
     @Override
-    public DataResult<User> createUser(User user)
+    public DataResult<User> createUser(final User user)
     {
         DataResult<User> result = new DataResult<User>();
 
@@ -77,7 +77,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     }
 
     @Override
-    public BasicResult updateUser(User user)
+    public BasicResult updateUser(final User user)
     {
         BasicResult result = new BasicResult();
 
@@ -96,7 +96,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return result;
     }
 
-    public BasicResult deleteUser(User user)
+    @Override
+    public BasicResult deleteUser(final User user)
     {
         BasicResult result = new BasicResult();
 
@@ -114,7 +115,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return result;
     }
 
-    public DataResult<UserListResult> getUsers(UserListOptions userListOptions)
+    @Override
+    public DataResult<UserListResult> getUsers(final UserListOptions userListOptions)
     {
         DataResult<UserListResult> dataResult = new DataResult<UserListResult>();
         UserListResult userListResult = new UserListResult();
@@ -126,7 +128,10 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         UserHB currentUser = getCurrentUser();
-        if (currentUser.getRoleHB().getType() == com.abiquo.server.core.enterprise.Role.Type.ENTERPRISE_ADMIN)
+
+        // if(currentUser.getRoleHB().getType() ==
+        // com.abiquo.server.core.enterprise.Role.Type.ENTERPRISE_ADMIN)
+        if (SecurityService.isEnterpriseAdmin(currentUser.getRoleHB().toPojo()))
         {
             enterpriseWildcard = String.valueOf(currentUser.getEnterpriseHB().getIdEnterprise());
         }
@@ -151,8 +156,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         String uri =
-            createUsersLink(enterpriseWildcard, userListOptions.getOffset(), userListOptions
-                .getLength());
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
+                userListOptions.getLength());
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
         ClientResponse response = get(uri);
@@ -172,8 +177,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 if (role.getShortDescription().equalsIgnoreCase("USER")
                     && orderBy.equalsIgnoreCase("role"))
                 {
-                    normalUsers.add(User.create(dto, Enterprise.create(enterprise), Role
-                        .create(role)));
+                    normalUsers.add(User.create(dto, Enterprise.create(enterprise),
+                        Role.create(role)));
                 }
                 else
                 {
@@ -218,7 +223,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return dataResult;
     }
 
-    private RoleDto getRole(String roleUri, Map<String, RoleDto> cache)
+    private RoleDto getRole(final String roleUri, final Map<String, RoleDto> cache)
     {
         RoleDto dto = null;
         if (!cache.containsKey(roleUri))
@@ -233,7 +238,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return dto;
     }
 
-    private EnterpriseDto getEnterprise(String enterpriseUri, Map<String, EnterpriseDto> cache)
+    private EnterpriseDto getEnterprise(final String enterpriseUri,
+        final Map<String, EnterpriseDto> cache)
     {
         EnterpriseDto dto = null;
         if (!cache.containsKey(enterpriseUri))
@@ -248,11 +254,16 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return dto;
     }
 
-    private UserDto fromUserToDto(User user)
+    private UserDto fromUserToDto(final User user)
     {
         UserDto newUser =
-            new UserDto(user.getName(), user.getSurname(), user.getEmail(), user.getUser(), user
-                .getPass(), user.getLocale(), user.getDescription());
+            new UserDto(user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getUser(),
+                user.getPass(),
+                user.getLocale(),
+                user.getDescription());
 
         newUser.setActive(user.getActive());
         newUser.addLink(new RESTLink("role", createRoleLink(user.getRole().getId())));
@@ -261,8 +272,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         if (!ArrayUtils.isEmpty(user.getAvailableVirtualDatacenters()))
         {
-            newUser.setAvailableVirtualDatacenters(StringUtils.join(user
-                .getAvailableVirtualDatacenters(), ","));
+            newUser.setAvailableVirtualDatacenters(StringUtils.join(
+                user.getAvailableVirtualDatacenters(), ","));
         }
         else
         {

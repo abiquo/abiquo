@@ -34,6 +34,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
@@ -54,7 +55,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
     @SuppressWarnings("unchecked")
     @Override
     public List<MeterHB> findAllByFilter(final HashMap<String, String> filter,
-        final List<String> performedbyList, final Integer numrows, final Integer role)
+        final List<String> performedbyList, final Integer numrows, final RoleHB role)
         throws PersistenceException
     {
         Integer numberOfParameters = 0;
@@ -166,7 +167,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
 
         // if (role != Role.SYS_ADMIN)
-        if (!SecurityService.isCloudAdmin(role))
+        if (!SecurityService.isCloudAdmin(role.toPojo()))
         {
             // performedby filter
             stringQuery.append(" and performedby in (");
