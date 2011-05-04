@@ -110,12 +110,11 @@ public class RolesResource extends AbstractResource
     public RoleDto postRole(final RoleDto role, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        LOGGER.info("Creating new role with name '" + role.getName());
+        LOGGER.info("Creating new role " + role.getName());
 
         Role r = service.addRole(role);
 
-        LOGGER.info("Role with name '" + r.getName() + "' and id " + r.getId()
-            + " created successfully");
+        LOGGER.info("Role " + r.getName() + " with id " + r.getId() + " created successfully");
         return createTransferObject(r, restBuilder);
     }
 }

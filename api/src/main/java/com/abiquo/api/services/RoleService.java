@@ -43,6 +43,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.PrivilegesResource;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -72,6 +73,7 @@ public class RoleService extends DefaultApiService
     public RoleService(final EntityManager em)
     {
         enterpriseRep = new EnterpriseRep(em);
+        tracer = new TracerLogger();
     }
 
     public Collection<Role> getRoles()
