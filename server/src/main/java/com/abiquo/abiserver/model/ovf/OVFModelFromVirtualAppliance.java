@@ -110,14 +110,15 @@ public class OVFModelFromVirtualAppliance
     // /////////// InfrastructureWS
 
     public EnvelopeType changeMachineState(final VirtualMachine virtualMachine,
-        final String machineState) throws Exception
+        final String machineState, final List<ResourceAllocationSettingData> additionalRasds)
+        throws Exception
     {
         EnvelopeType envelope = null;
 
         try
         {
             // Creates an OVF envelope from the virtual machine parameters
-            envelope = constructEnvelopeType(virtualMachine, machineState);
+            envelope = constructEnvelopeType(virtualMachine, machineState, additionalRasds);
         }
         catch (RequiredAttributeException e)
         {
@@ -144,7 +145,8 @@ public class OVFModelFromVirtualAppliance
      * @throws Exception, if the virtualMachine can not be represented as an OVF document.
      */
     public EnvelopeType constructEnvelopeType(final VirtualMachine virtualMachine,
-        final String machineState) throws Exception
+        final String machineState, final List<ResourceAllocationSettingData> additionalRasds)
+        throws Exception
     {
         EnvelopeType envelope = new EnvelopeType();
         ReferencesType references = new ReferencesType();
@@ -161,13 +163,16 @@ public class OVFModelFromVirtualAppliance
 
             // There is only one virtual base disk
             VirtualHardwareSectionType hardwareSection =
-                createVirtualSystemSection(virtualMachine, virtualImage, null, 0);
+                createVirtualSystemSection(virtualMachine, virtualImage, null, 0, additionalRasds);
 
             // Configure AnnotationSection with the RD port
             AnnotationSectionType annotationSection =
                 createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
-            annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
-                machineState);
+            if (machineState != null)
+            {
+                annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
+                    machineState);
+            }
 
             // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
             OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -184,50 +189,6 @@ public class OVFModelFromVirtualAppliance
             // Setting the virtual system as envelope content
             OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
             envelope.setReferences(references);
-
-            // ************************************************
-
-            // // creating Disk section and References
-            // // XXX DiskSectionType diskSectionSystem = createSystemDisk(virtualMachine);
-            // DiskSectionType diskSectionEnvelope = createEnvelopeDisk(virtualImage);
-            //            
-            // ReferencesType diskReferences =
-            // createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
-            //            
-            // final String virtualImageId = String.valueOf(virtualImage.getId());
-            // String diskId = virtualImageId;
-            // CIMResourceAllocationSettingDataType cimDisk =
-            // CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
-            // "Harddisk" + virtualImageId + "'", virtualImageId,
-            // CIMResourceTypeEnum.Disk_Drive);
-            // CIMResourceAllocationSettingDataUtils.addHostResourceToRASD(cimDisk,
-            // OVFVirtualHadwareSectionUtils.OVF_DISK_URI + diskId);
-            //            
-            // // Creating the Annotation Type (machine state)
-            // AnnotationSectionType annotationSection =
-            // createAnnotationMachineStateAndRDPPort(machineState, String.valueOf(virtualMachine
-            // .getVdrpPort()));
-            //            
-            // // creating Virtual hardware section (containing hypervisor information)
-            // VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
-            //            
-            // // Setting the RAM and CPU from machine
-            // hardwareSection.getItem().add(createCPU(virtualMachine));
-            // hardwareSection.getItem().add(createMemory(virtualMachine));
-            // hardwareSection.getItem().add(
-            // CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(cimDisk));
-            //            
-            // // adding virtual system sections
-            // // OVFEnvelopeUtils.addSection(virtualSystem, diskSectionSystem);
-            // OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
-            // OVFEnvelopeUtils.addSection(virtualSystem, annotationSection);
-            //            
-            // // adding envelope sections
-            // OVFEnvelopeUtils.addSection(envelope, diskSectionEnvelope);
-            // envelope.setReferences(diskReferences);
-            //            
-            // // Setting the virtual system as envelope content
-            // OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
         }
         catch (Exception e) // RequiredAttributeException(vs creation) and SectionException
         {
@@ -888,7 +849,7 @@ public class OVFModelFromVirtualAppliance
         // NodeVirtualImage is a temporal attribute!!!
         VirtualHardwareSectionType hardwareSection =
             createVirtualSystemSection(virtualMachine, virtualImage, networkName, nodeVirtualImage
-                .getId());
+                .getId(), null);
 
         // Configure AnnotationSection with the RD port
         AnnotationSectionType annotationSection =
@@ -925,7 +886,9 @@ public class OVFModelFromVirtualAppliance
      */
     private VirtualHardwareSectionType createVirtualSystemSection(
         final VirtualMachine virtualMachine, final VirtualImage virtualImage,
-        final String networkName, final Integer nodeId) throws RequiredAttributeException
+        final String networkName, final Integer nodeId,
+        final List<ResourceAllocationSettingData> additionalRasds)
+        throws RequiredAttributeException
     {
         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
         String hypervisorAddres = "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
@@ -983,7 +946,7 @@ public class OVFModelFromVirtualAppliance
         // follows ...
         List<ResourceAllocationSettingData> rasdList =
             getResourceAllocationSettingDataList(virtualMachine,
-                getPhysicalMachineIqn(virtualMachine));
+                getPhysicalMachineIqn(virtualMachine), additionalRasds);
 
         for (ResourceAllocationSettingData rasd : rasdList)
         {
@@ -1036,7 +999,8 @@ public class OVFModelFromVirtualAppliance
      * @return the resource allocation setting data list
      */
     protected List<ResourceAllocationSettingData> getResourceAllocationSettingDataList(
-        final VirtualMachine virtualMachine, final String initiatorIqn)
+        final VirtualMachine virtualMachine, final String initiatorIqn,
+        final List<ResourceAllocationSettingData> additionalRasds)
         throws RequiredAttributeException
     {
         List<ResourceAllocationSettingData> rads = new ArrayList<ResourceAllocationSettingData>();

@@ -1897,7 +1897,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.RESUME_ACTION);
                     break;
                 case POWERED_OFF:
-                    beforeStartingVirtualMachine(virtualMachine);
                     basicResult =
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.POWERUP_ACTION);
                     break;
@@ -2561,16 +2560,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         factory.endConnection();
 
         return updateUsedResourcesByDatacenter(dataCenter);
-    }
-
-    /**
-     * Helper method to be overriden to add information to the virtual machine before starting it.
-     * 
-     * @param virtualMachine
-     */
-    protected void beforeStartingVirtualMachine(final VirtualMachine virtualMachine)
-    {
-        // Do nothing
     }
 
 }
