@@ -109,6 +109,18 @@ public class InfrastructureService extends DefaultApiService
         }
         return rack;
     }
+    
+    public Rack getRackById(Integer rackId)
+    {
+        // Find the rack by itself and by its datacenter.
+        Rack rack = repo.findRackById(rackId);
+        if (rack == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_RACK);
+            flushErrors();
+        }
+        return rack;
+    }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Rack modifyRack(final Integer datacenterId, final Integer rackId, final Rack rack)

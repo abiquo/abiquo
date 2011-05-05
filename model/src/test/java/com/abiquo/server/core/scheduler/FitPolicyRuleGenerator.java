@@ -54,6 +54,11 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
     {
         Datacenter datacenter = datacenterGen.createUniqueInstance();
 
+        return createInstance(datacenter);
+    }
+    
+    public FitPolicyRule createInstance(Datacenter datacenter)
+    {
         FitPolicyRule fitPolicyRule = new FitPolicyRule(datacenter, FitPolicy.PROGRESSIVE);
 
         return fitPolicyRule;
