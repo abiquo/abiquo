@@ -67,6 +67,7 @@ public class AuthService
         {
             authenticationManager = new AuthenticationManagerDB();
         }
+        authenticationManager = new AuthenticationManagerApi();
     }
 
     public static AuthService getInstance()

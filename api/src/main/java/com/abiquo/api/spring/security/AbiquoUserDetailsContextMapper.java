@@ -22,11 +22,13 @@
 package com.abiquo.api.spring.security;
 
 import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.DirContextAdapter;
 import org.springframework.ldap.core.DirContextOperations;
+import org.springframework.security.BadCredentialsException;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.userdetails.UserDetails;
@@ -50,6 +52,31 @@ import com.abiquo.server.core.enterprise.User;
 public class AbiquoUserDetailsContextMapper implements UserDetailsContextMapper
 {
     /**
+     * Is auto user creation from LDAP/AD enabled?
+     */
+    private boolean autoUserCreation = true;
+
+    /**
+     * Is auto user creation from LDAP/AD enabled?
+     * 
+     * @return boolean
+     */
+    public boolean isAutoUserCreation()
+    {
+        return autoUserCreation;
+    }
+
+    /**
+     * Is auto user creation from LDAP/AD enabled?
+     * 
+     * @param autoUserCreation void
+     */
+    public void setAutoUserCreation(boolean autoUserCreation)
+    {
+        this.autoUserCreation = autoUserCreation;
+    }
+
+    /**
      * A default role which will be assigned to all authenticated users if set <br>
      * Defaults to <code>ROLE_ABIQUO</code>.
      */
@@ -59,13 +86,13 @@ public class AbiquoUserDetailsContextMapper implements UserDetailsContextMapper
     private String rolePrefix;
 
     /**
-     * The default role prefix to use. By convention ROLE_
+     * The default role prefix to use. By convention ROLE_, by default empty string.
      * 
      * @return String
      */
     public String getRolePrefix()
     {
-        return rolePrefix;
+        return rolePrefix == null ? "" : rolePrefix;
     }
 
     /**
@@ -86,6 +113,32 @@ public class AbiquoUserDetailsContextMapper implements UserDetailsContextMapper
     protected EnterpriseRep enterpriseRep;
 
     /**
+     * Active Directory allow login in
+     * <ul>
+     * <li>login</li>
+     * <li>domain\login</li >
+     * <li>login@full.domain.dn</li>
+     * </ul>
+     * To provide this compatibility we must get rid of <b>domain\</b> and <b>@full.domain.dn</b>.
+     * 
+     * @param username login.
+     * @return login.
+     */
+    private String activeDirectoryToLdapLogin(String username)
+    {
+        String login = username;
+        int index = 0;
+
+        if ((index = username.indexOf("\\")) != -1)
+            login = username.substring(index + 1);
+        else if ((index = username.indexOf("@")) != -1)
+            login = username.substring(0, index);
+        else
+            login = username;
+        return login;
+    }
+
+    /**
      * This implementation tries to lookup the user in Abiquo database and if it does not exists
      * creates a user and registers it. The data of that brand new user is retrieved from the
      * LDAP/Active Directory.
@@ -100,40 +153,71 @@ public class AbiquoUserDetailsContextMapper implements UserDetailsContextMapper
     {
         AbiquoUserDetails userDetails = new AbiquoUserDetails();
 
-        String login = username; // activeDirectoryToLdapLogin(username);
+        String login = activeDirectoryToLdapLogin(username);
         User user = enterpriseRep.getUserByUserName(login);
         Attributes attributes = ctx.getAttributes();
         try
         {
             if (user != null)
             {
-                // the roles might change in LDAP
-                GrantedAuthority role = authority[0];
-                if (!role.getAuthority().equalsIgnoreCase(user.getRole().getType().name()))
-                {
-                    LdapRole ldapRole;
-
-                    ldapRole = (LdapRole) attributes.get("ldapRole").get();
-                    user.setRole(ldapRole.getRole());
-                    enterpriseRep.updateUser(user);
-                }
+                // checks for updates in function
+                updateUserIfNeeded(authority, user, attributes);
 
                 userDetailsFromUser(userDetails, user);
             }
-            else
+            else if (isAutoUserCreation())
             {
                 // We register a new User
                 User u = addUser(login, attributes);
                 userDetailsFromUser(userDetails, u);
             }
+            else
+            {
+                throw new BadCredentialsException("LDAP/AD auto user creation is disabled.");
+            }
 
         }
         catch (NamingException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new BadCredentialsException("LDAP/AD user must have informed the attribute and it must match an Abiquo enterprise.");
         }
         return userDetails;
+    }
+
+    /**
+     * This function look up current roles to see if the Role in LDAP/AD had changed.
+     * 
+     * @param authority
+     * @param user
+     * @param attributes
+     * @throws NamingException void
+     */
+    private void updateUserIfNeeded(GrantedAuthority[] authority, User user, Attributes attributes)
+        throws NamingException
+    {
+        // the roles might change in LDAP
+        GrantedAuthority role = null;
+        for (GrantedAuthority r : authority)
+        {
+            if (defaultRole != null && !r.getAuthority().equals(defaultRole.getAuthority()))
+            {
+                role = r;
+            }
+        }
+        if (role == null)
+        {
+            // revoked role from LDAP/AD
+            return;
+        }
+        if (!role.getAuthority().equalsIgnoreCase(
+            this.getRolePrefix() + user.getRole().getType().name()))
+        {
+            LdapRole ldapRole;
+
+            ldapRole = (LdapRole) attributes.get("ldapRole").get();
+            user.setRole(ldapRole.getRole());
+            enterpriseRep.updateUser(user);
+        }
     }
 
     /**
@@ -146,38 +230,69 @@ public class AbiquoUserDetailsContextMapper implements UserDetailsContextMapper
      */
     private User addUser(String username, Attributes attributes) throws NamingException
     {
-        LdapRole ldapRole = (LdapRole) attributes.get("ldapRole").get();
-        String name = (String) attributes.get("givenName").get();
-        String surname = (String) attributes.get("sn").get();
-        String email = (String) attributes.get("mail").get();
+        Attribute attRole = attributes.get("ldapRole");
+        Attribute attName = attributes.get("givenName");
+        Attribute attSurname = attributes.get("sn");
+        Attribute attEmail = attributes.get("mail");
+        Attribute attDescription = attributes.get("description");
 
-        Enterprise enterprise = addEnterprise(attributes);
+        Enterprise enterprise = validateEnterprise(attributes);
+        //
+        LdapRole ldapRole = (LdapRole) attRole.get();
+
+        String name = username;
+        String surname = "";
+        String email = null;
+
+        // name ?
+        if (attName != null)
+        {
+            name = (String) attName.get();
+        }
+        if (attEmail != null)
+        {
+            email = (String) attEmail.get();
+        }
+        if (attSurname != null)
+        {
+            surname = (String) attSurname.get();
+        }
 
         User u =
             new User(enterprise, ldapRole.getRole(), name, surname, email, username, null, "en_US");
         u.setActive(1);
-        u.setDescription((String) attributes.get("description").get());
+        if (attDescription != null)
+        {
+
+            u.setDescription((String) attDescription.get());
+        }
         enterpriseRep.insertUser(u);
         return u;
     }
 
     /**
-     * There can't be users with no enterprise associated.
+     * There can't be users with no enterprise associated. The enterprise must exist in Abiquo.
      * 
      * @param attributes context attributes from LDAP/AD.
      * @return Brand new enterprise or an existing enterprise that matches by name.
      * @throws NamingException Enterprise
      */
-    private Enterprise addEnterprise(Attributes attributes) throws NamingException
+    private Enterprise validateEnterprise(Attributes attributes) throws NamingException,
+        BadCredentialsException
     {
-        String enterpriseName = (String) attributes.get("company").get();
-        Enterprise e = enterpriseRep.findByName(enterpriseName);
-        if (e == null)
+        Attribute attEntName = attributes.get("company");
+
+        if (attEntName != null)
         {
-            e = new Enterprise(enterpriseName, 0, 0, 0, 0, 0, 0);
-            enterpriseRep.insert(e);
+
+            String enterpriseName = (String) attEntName.get();
+            Enterprise e = enterpriseRep.findByName(enterpriseName);
+            if (e != null)
+            {
+                return e;
+            }
         }
-        return e;
+        throw new BadCredentialsException("LDAP/AD user must have informed the 'company' attribute and it must match an Abiquo enterprise.");
     }
 
     /**

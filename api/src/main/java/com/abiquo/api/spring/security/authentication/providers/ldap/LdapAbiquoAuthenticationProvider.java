@@ -58,8 +58,8 @@ public class LdapAbiquoAuthenticationProvider implements AuthenticationProvider
     /**
      * logger.
      */
-    private static final Logger logger =
-        LoggerFactory.getLogger(LdapAbiquoAuthenticationProvider.class);
+    private static final Logger logger = LoggerFactory
+        .getLogger(LdapAbiquoAuthenticationProvider.class);
 
     /**
      * Constructor.

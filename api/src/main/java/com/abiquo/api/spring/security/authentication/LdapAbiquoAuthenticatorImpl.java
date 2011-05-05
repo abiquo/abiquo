@@ -21,12 +21,14 @@
 
 package com.abiquo.api.spring.security.authentication;
 
+import java.text.MessageFormat;
 import java.util.Iterator;
 
 import javax.naming.Context;
 import javax.naming.directory.DirContext;
 import javax.naming.ldap.InitialLdapContext;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.ldap.NamingException;
 import org.springframework.ldap.core.ContextSource;
@@ -68,9 +70,20 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
     private DefaultSpringSecurityContextSource contextFactory;
 
     /**
-     *Roles Prefix.
+     * Roles Prefix.
      */
     private String principalPrefix = "";
+
+    /**
+     * Query to look up in openLDAP. Should not be changed, thats why it is not in xml.
+     */
+    protected static final String USER_SEARCH_FILTER_LDAP = "CN={0},CN=Users";
+
+    /**
+     * Query to look up in AD. Should not be changed, thats why it is not in xml.
+     */
+    protected static final String USER_SEARCH_FILTER_AD =
+        "(&(objectClass=user)(samAccountName={0}))";
 
     /**
      * Binds the <code>username</code> to the server with the <code>userDn</code> using
@@ -83,13 +96,12 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
      */
     private DirContextOperations bindWithDn(String userDn, String username, String password)
     {
-        SpringSecurityLdapTemplate template =
-            new SpringSecurityLdapTemplate(new BindWithSpecificDnContextSource((SpringSecurityContextSource) getContextSource(),
-                userDn,
-                password));
-
         try
         {
+            SpringSecurityLdapTemplate template =
+                new SpringSecurityLdapTemplate(new BindWithSpecificDnContextSource((SpringSecurityContextSource) getContextSource(),
+                    userDn,
+                    password));
 
             DirContextOperations user = template.retrieveEntry(userDn, getUserAttributes());
             // We pass the ldapTemplate binded to the dn in order to make searches later in the
@@ -98,7 +110,7 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
             return user;
 
         }
-        catch (BadCredentialsException e)
+        catch (Exception e)
         {
             // This will be thrown if an invalid user name is used and the method may
             // be called multiple times to try different names, so we trap the exception
@@ -121,24 +133,128 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
     private DirContextOperations bindWithDomainName(String username, String password)
     {
         try
-        { // If this fails the login is not admitted by the server
-            this.contextFactory.getContext(username, password);
-
+        {
             // Work Around to allow domain\login and login@full.domain
             String login = activeDirectoryToLdapLogin(username);
             // cn={0},CN=Users is the default search in AD
-            return bindWithDn("cn=" + login + ",CN=Users", login, password);
+            String formattedFilter =
+                MessageFormat.format(USER_SEARCH_FILTER_LDAP, new Object[] {login});
+            return bindWithDn(formattedFilter, login, password);
         }
         catch (Exception e)
         {
             // This will be thrown if an invalid user name is used and the method may
             // be called multiple times to try different names, so we trap the exception
             // unless a subclass wishes to implement more specialized behaviour.
-            handleBindException(this.contextFactory.getBaseLdapPathAsString(), username, e
-                .getCause());
+            handleBindException(this.contextFactory.getBaseLdapPathAsString(), username,
+                e.getCause());
         }
 
         return null;
+    }
+
+    /**
+     * Binds the <code>username</code> to the server with the <code>userDn</code> using
+     * <code>password</code>. Active Directory needs the form username@full.name.dn. This function
+     * deals with old DOMAIN\\login with new form.
+     * 
+     * @param userDn Distinguished name.
+     * @param username login.
+     * @param password password.
+     * @return DirContextOperations binded context.
+     */
+    private DirContextOperations bindWithSAMName(String username, String password)
+    {
+        try
+        {
+            // Work Around to allow domain\login and login@full.domain
+            String login = activeDirectoryToLdapLogin(username);
+
+            String fullDnLogin =
+                preparePrincipalDn(login, this.contextFactory.getBaseLdapPathAsString());
+
+            return bindWithAD(fullDnLogin, login, password);
+        }
+        catch (Exception e)
+        {
+            // This will be thrown if an invalid user name is used and the method may
+            // be called multiple times to try different names, so we trap the exception
+            // unless a subclass wishes to implement more specialized behaviour.
+            handleBindException(this.contextFactory.getBaseLdapPathAsString(), username,
+                e.getCause());
+        }
+
+        return null;
+    }
+
+    /**
+     * In the new Windows Active Directory servers users should login with login@full.domain.dn.
+     * 
+     * @param principalDn login in the form login@full.domain.dn.
+     * @param username plain username.
+     * @param password password.
+     * @return DirContextOperations .
+     */
+    protected DirContextOperations bindWithAD(String principalDn, String username, String password)
+    {
+
+        // bind as principalDn/password)
+        SpringSecurityLdapTemplate template =
+            new SpringSecurityLdapTemplate(new BindWithSpecificADContextSource((SpringSecurityContextSource) getContextSource(),
+                principalDn,
+                password));
+
+        // search for account info for username
+        Object[] params = null;
+        String base = "";
+
+        String formattedFilter =
+            MessageFormat.format(USER_SEARCH_FILTER_AD, new Object[] {username});
+        DirContextOperations user = template.searchForSingleEntry(base, formattedFilter, params);
+        user.addAttributeValue("ldapTemplate", template);
+        return user;
+    }
+
+    /**
+     * Prepare principalDn in the form required by Active Directory: username@dc1-DOT-dc2
+     * 
+     * @param username for which to generate the principalDn
+     * @param rootDn For example: "DC=dc1,DC=dc2"
+     * @return generated principalDn
+     */
+    private String preparePrincipalDn(String username, String rootDn)
+    {
+        return username + "@" + prepareDomainControllers(rootDn);
+    }
+
+    /**
+     * Extracts DCs from ldap root parameter and prepares string: "dc1.dc2"
+     * 
+     * @param rootDn For example: "DC=dc1,DC=dc2"
+     * @return The domain controllers string in Active Directory format.
+     */
+    public static String prepareDomainControllers(String rootDn)
+    {
+        String[] dcNameValues = StringUtils.split(StringUtils.deleteWhitespace(rootDn), ",");
+
+        StringBuilder domainControllers = new StringBuilder("");
+        for (int i = 0; i < dcNameValues.length; i++)
+        {
+            if (i > 0)
+            {
+                domainControllers.append(".");
+            }
+
+            String[] dcNameValue = StringUtils.split(dcNameValues[i], "=");
+            if (dcNameValue.length == 2)
+            {
+                domainControllers.append(dcNameValue[1]);
+            }
+        }
+
+        Assert.hasLength(domainControllers.toString(), "domainControllers must not be empty");
+
+        return domainControllers.toString();
     }
 
     /**
@@ -168,9 +284,43 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
     }
 
     /**
+     * Implementació de ContextSource <code>bind</code>ed to a principal name to Active Directory.
+     */
+    public class BindWithSpecificADContextSource implements ContextSource
+    {
+        private final SpringSecurityContextSource ctxFactory;
+
+        private final String userDn;
+
+        private final String password;
+
+        public BindWithSpecificADContextSource(SpringSecurityContextSource ctxFactory,
+            String userDn, String password)
+        {
+            this.ctxFactory = ctxFactory;
+            this.userDn = userDn;
+            this.password = password;
+        }
+
+        public DirContext getReadOnlyContext() throws DataAccessException
+        {
+            return ctxFactory.getReadWriteContext(userDn, password);
+        }
+
+        public DirContext getReadWriteContext() throws DataAccessException
+        {
+            return getReadOnlyContext();
+        }
+
+        @Override
+        public DirContext getContext(String principal, String credentials) throws NamingException
+        {
+            return ctxFactory.getReadWriteContext(principal, credentials);
+        }
+    }
+
+    /**
      * Implementació de ContextSource <code>bind</code>ed to a Distinguished name.
-     * 
-     * @author ssedano
      */
     private class BindWithSpecificDnContextSource implements ContextSource
     {
@@ -236,6 +386,7 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
     /**
      * @see org.springframework.security.providers.ldap.authenticator.BindAuthenticator#authenticate(org.springframework.security.Authentication)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public DirContextOperations authenticate(Authentication authentication)
     {
@@ -250,11 +401,11 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
             username = principalPrefix.concat("\\").concat(username);
         }
         // If DN patterns are configured, try authenticating with them directly
-        Iterator dns = getUserDns(username).iterator();
+        Iterator<String> dns = getUserDns(username).iterator();
 
         while (dns.hasNext() && user == null)
         {
-            String dn = (String) dns.next();
+            String dn = dns.next();
             user = bindWithDn(dn, username, password);
             if (user != null)
             {
@@ -266,6 +417,11 @@ public class LdapAbiquoAuthenticatorImpl extends BindAuthenticator
         if (user == null)
         {
             user = bindWithDomainName(username, password);
+        }
+        // new AD?
+        if (user == null)
+        {
+            user = bindWithSAMName(username, password);
         }
 
         // Otherwise use the configured locator to find the user
