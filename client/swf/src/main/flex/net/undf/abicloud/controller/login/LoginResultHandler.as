@@ -63,7 +63,7 @@ package net.undf.abicloud.controller.login
                 AbiCloudModel.getInstance().loginManager.user = loginResult.user;
 
                 //Saving user's authorized client resources
-                AbiCloudModel.getInstance().authorizationManager.authorizedResources = loginResult.clientResources;
+                AbiCloudModel.getInstance().userManager.privileges = loginResult.privileges;
 
                 //Notifying that a user has logged in
                 AbiCloudModel.getInstance().loginManager.userLogged = true;
@@ -291,7 +291,7 @@ package net.undf.abicloud.controller.login
                 privilege.name = PrivilegeType.EVENTLOG_VIEW_ALL;
                 privileges.addItem(privilege);
                 
-                AbiCloudModel.getInstance().userManager.privileges = privileges;
+                //AbiCloudModel.getInstance().userManager.privileges = privileges;
             }
             else
             {
