@@ -31,6 +31,9 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.UsersResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
@@ -38,6 +41,9 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Privilege;
+import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.user.UserListResult;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -81,6 +87,15 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
                 // Getting the user that is being loggin in
                 UserHB userHBLogged =
                     (UserHB) session.get(UserHB.class, resultResponse.getData().getUser().getId());
+
+                UsersResourceStub proxy =
+                    APIStubFactory.getInstance(resultResponse.getData().getSession(),
+                        new UsersResourceStubImpl(), UsersResourceStub.class);
+
+                UserListOptions userListOptions = new UserListOptions();
+                userListOptions.setFilter(resultResponse.getData().getUser().getUser());
+                userListOptions.setOrderBy(User.NICK_PROPERTY);
+                DataResult<UserListResult> user = proxy.getUsers(userListOptions);
 
                 // Getting the list of user privileges
                 ArrayList<PrivilegeHB> allUserPrivilegesHB =
