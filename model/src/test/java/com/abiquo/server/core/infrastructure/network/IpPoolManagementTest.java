@@ -19,17 +19,32 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.infrastructure.network;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import org.testng.annotations.Test;
 
-  public class IpPoolManagementTest extends DefaultEntityTestBase<IpPoolManagement>
-  {
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-      @Override
-      protected InstanceTester<IpPoolManagement> createEntityInstanceGenerator()
-      {
-          return new IpPoolManagementGenerator(getSeed());
-      }
-  }
+public class IpPoolManagementTest extends DefaultEntityTestBase<IpPoolManagement>
+{
+
+    @Override
+    protected InstanceTester<IpPoolManagement> createEntityInstanceGenerator()
+    {
+        return new IpPoolManagementGenerator(getSeed());
+    }
+
+    @Test
+    public void testIpType()
+    {
+        IpPoolManagement ip = createUniqueEntity();
+
+        assertTrue(ip.isPrivateIp());
+        assertFalse(ip.isPublicIp());
+
+        ip.setType(IpPoolManagement.Type.PUBLIC);
+        assertFalse(ip.isPrivateIp());
+        assertTrue(ip.isPublicIp());
+    }
+}

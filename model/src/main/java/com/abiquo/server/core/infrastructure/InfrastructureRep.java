@@ -34,23 +34,25 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
-import com.abiquo.server.core.infrastructure.storage.TierDAO;
+import com.abiquo.server.core.util.PagedList;
 
 @Repository
-public class DatacenterRep extends DefaultRepBase
+public class InfrastructureRep extends DefaultRepBase
 {
-
     /* package: test only */static final String BUG_INSERT_NAME_MUST_BE_UNIQUE =
         "ASSERT- insert: datacenter name must be unique";
 
@@ -97,14 +99,17 @@ public class DatacenterRep extends DefaultRepBase
     private VirtualMachineDAO virtualMachineDao;
 
     @Autowired
-    private TierDAO tierDao;
+    private StorageRep storageRep;
 
-    public DatacenterRep()
+    @Autowired
+    private DatacenterLimitsDAO datacenterLimitDao;
+
+    public InfrastructureRep()
     {
 
     }
 
-    public DatacenterRep(EntityManager entityManager)
+    public InfrastructureRep(final EntityManager entityManager)
     {
         assert entityManager != null;
         assert entityManager.isOpen();
@@ -119,9 +124,11 @@ public class DatacenterRep extends DefaultRepBase
         this.remoteServiceDao = new RemoteServiceDAO(entityManager);
         this.repositoryDao = new RepositoryDAO(entityManager);
         this.networkDao = new NetworkDAO(entityManager);
+        this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
+        this.storageRep = new StorageRep(entityManager);
     }
 
-    public Datacenter findById(Integer id)
+    public Datacenter findById(final Integer id)
     {
         assert id != null;
 
@@ -133,7 +140,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.dao.findAll();
     }
 
-    public void insert(Datacenter datacenter)
+    public void insert(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert !this.dao.isManaged(datacenter);
@@ -150,7 +157,7 @@ public class DatacenterRep extends DefaultRepBase
      * this.virtualMachineDao.haveVirtualMachines(machines); }
      */
 
-    public void delete(Datacenter datacenter)
+    public void delete(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
@@ -160,7 +167,7 @@ public class DatacenterRep extends DefaultRepBase
         this.dao.flush();
     }
 
-    public void update(Datacenter datacenter)
+    public void update(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
@@ -169,14 +176,14 @@ public class DatacenterRep extends DefaultRepBase
         this.dao.flush();
     }
 
-    public boolean existsAnyDatacenterWithName(String name)
+    public boolean existsAnyDatacenterWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return this.dao.existsAnyWithName(name);
     }
 
-    public boolean existsAnyOtherWithName(Datacenter datacenter, String name)
+    public boolean existsAnyOtherWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
@@ -185,7 +192,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.dao.existsAnyOtherWithName(datacenter, name);
     }
 
-    public List<Rack> findRacks(Datacenter datacenter)
+    public List<Rack> findRacks(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
@@ -193,12 +200,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.rackDao.findRacks(datacenter);
     }
 
-    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
-    {
-        return this.rackDao.findRacksWithHAEnabled(datacenter);
-    }
-
-    public List<Machine> findMachines(Datacenter datacenter)
+    public List<Machine> findMachines(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
@@ -206,7 +208,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.machineDao.findMachines(datacenter);
     }
 
-    public List<Machine> findRackMachines(Rack rack)
+    public List<Machine> findRackMachines(final Rack rack)
     {
         assert rack != null;
         assert this.rackDao.isManaged(rack);
@@ -214,12 +216,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.machineDao.findRackMachines(rack);
     }
 
-    public List<Machine> findRackEnabledMachines(Rack rack)
-    {
-        return this.machineDao.findRackEnabledMachines(rack);
-    }
-
-    public Set<HypervisorType> findHypervisors(Datacenter datacenter)
+    public Set<HypervisorType> findHypervisors(final Datacenter datacenter)
     {
         Set<HypervisorType> types = new HashSet<HypervisorType>();
 
@@ -231,7 +228,38 @@ public class DatacenterRep extends DefaultRepBase
         return types;
     }
 
-    public boolean existsAnyRackWithName(Datacenter datacenter, String name)
+    public List<Enterprise> findEnterprisesByDataCenter(final Datacenter datacenter,
+        final Boolean network, final Integer firstElem, final Integer numElem)
+    {
+        PagedList<Enterprise> enterprises = new PagedList<Enterprise>();
+        if (network)
+        {
+            enterprises =
+                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter,
+                    firstElem, numElem);
+        }
+        else
+        {
+            Collection<DatacenterLimits> dlimits =
+                this.datacenterLimitDao.findByDatacenter(datacenter);
+            for (DatacenterLimits d : dlimits)
+            {
+                Enterprise e = d.getEnterprise();
+                enterprises.add(e);
+            }
+            enterprises.setTotalResults(enterprises.size());
+        }
+
+        return enterprises;
+    }
+
+    public DatacenterLimits findDatacenterLimits(final Enterprise enterprise,
+        final Datacenter datacenter)
+    {
+        return datacenterLimitDao.findByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    public boolean existsAnyRackWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert !StringUtils.isEmpty(name);
@@ -239,7 +267,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.rackDao.existsAnyWithDatacenterAndName(datacenter, name);
     }
 
-    public boolean existsAnyOtherRackWithName(Rack rack, String name)
+    public boolean existsAnyOtherRackWithName(final Rack rack, final String name)
     {
         assert rack != null;
         assert !StringUtils.isEmpty(name);
@@ -247,7 +275,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
-    public boolean existsAnyMachineWithName(Datacenter datacenter, String name)
+    public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert !StringUtils.isEmpty(name);
@@ -255,7 +283,7 @@ public class DatacenterRep extends DefaultRepBase
         return this.machineDao.existsAnyWithDatacenterAndName(datacenter, name);
     }
 
-    public boolean existsAnyOtherMachineWithName(Machine machine, String name)
+    public boolean existsAnyOtherMachineWithName(final Machine machine, final String name)
     {
         assert machine != null;
         assert !StringUtils.isEmpty(name);
@@ -263,14 +291,14 @@ public class DatacenterRep extends DefaultRepBase
         return this.machineDao.existsAnyOtherWithDatacenterAndName(machine, name);
     }
 
-    public Rack findRackById(Integer id)
+    public Rack findRackById(final Integer id)
     {
         assert id != null;
 
         return this.rackDao.findById(id);
     }
 
-    public void insertRack(Rack rack)
+    public void insertRack(final Rack rack)
     {
         assert rack != null;
         assert !this.rackDao.isManaged(rack);
@@ -281,7 +309,7 @@ public class DatacenterRep extends DefaultRepBase
         this.rackDao.flush();
     }
 
-    public void updateRack(Rack rack)
+    public void updateRack(final Rack rack)
     {
         assert rack != null;
         assert this.rackDao.isManaged(rack);
@@ -290,7 +318,7 @@ public class DatacenterRep extends DefaultRepBase
         this.rackDao.flush();
     }
 
-    public void deleteRack(Rack rack)
+    public void deleteRack(final Rack rack)
     {
         assert rack != null;
         assert this.rackDao.isManaged(rack);
@@ -301,14 +329,14 @@ public class DatacenterRep extends DefaultRepBase
         this.rackDao.flush();
     }
 
-    public Machine findMachineById(Integer id)
+    public Machine findMachineById(final Integer id)
     {
         assert id != null;
 
         return this.machineDao.findById(id);
     }
 
-    public void insertMachine(Machine machine)
+    public void insertMachine(final Machine machine)
     {
         assert machine != null;
         assert !this.machineDao.isManaged(machine);
@@ -318,12 +346,16 @@ public class DatacenterRep extends DefaultRepBase
         this.machineDao.flush();
     }
 
-    public void updateMachine(Machine machine)
+    public void updateMachine(final Machine machine)
     {
+        assert machine != null;
+        assert this.machineDao.isManaged(machine);
+        assert !existsAnyOtherMachineWithName(machine, machine.getName()) : BUG_UPDATE_MACHINE_NAME_MUST_BE_UNIQUE;
+
         this.machineDao.flush();
     }
 
-    public void deleteMachine(Machine machine)
+    public void deleteMachine(final Machine machine)
     {
         assert machine != null;
         assert this.machineDao.isManaged(machine);
@@ -332,14 +364,12 @@ public class DatacenterRep extends DefaultRepBase
         this.machineDao.flush();
     }
 
-    public void insertTier(Tier tier)
+    public void insertTier(final Tier tier)
     {
-
-        this.tierDao.persist(tier);
-        this.tierDao.flush();
+        storageRep.insertTier(tier);
     }
 
-    public void insertHypervisor(Hypervisor hypervisor)
+    public void insertHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         assert !hypervisorDao.isManaged(hypervisor);
@@ -355,35 +385,35 @@ public class DatacenterRep extends DefaultRepBase
         updateMachine(machine);
     }
 
-    public boolean existAnyHypervisorWithIp(String ip)
+    public boolean existAnyHypervisorWithIp(final String ip)
     {
         assert !StringUtils.isEmpty(ip);
 
         return hypervisorDao.existsAnyWithIp(ip);
     }
 
-    public boolean existAnyHypervisorWithIpService(String ipService)
+    public boolean existAnyHypervisorWithIpService(final String ipService)
     {
         assert !StringUtils.isEmpty(ipService);
 
         return hypervisorDao.existsAnyWithIpService(ipService);
     }
 
-    public List<Datastore> findMachineDatastores(Machine machine)
+    public List<Datastore> findMachineDatastores(final Machine machine)
     {
         assert machine != null;
 
         return datastoreDao.findMachineDatastores(machine);
     }
 
-    public Datastore findDatastoreById(Integer id)
+    public Datastore findDatastoreById(final Integer id)
     {
         assert id != null;
 
         return datastoreDao.findById(id);
     }
 
-    public void insertDatastore(Datastore datastore)
+    public void insertDatastore(final Datastore datastore)
     {
         assert datastore != null;
         assert !datastoreDao.isManaged(datastore);
@@ -394,7 +424,7 @@ public class DatacenterRep extends DefaultRepBase
         datastoreDao.flush();
     }
 
-    public void updateDatastore(Datastore datastore)
+    public void updateDatastore(final Datastore datastore)
     {
         assert datastore != null;
         assert datastoreDao.isManaged(datastore);
@@ -404,48 +434,49 @@ public class DatacenterRep extends DefaultRepBase
         datastoreDao.flush();
     }
 
-    public boolean existAnyDatastoreWithName(String name)
+    public boolean existAnyDatastoreWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
         return datastoreDao.existsAnyWithName(name);
     }
 
-    public boolean existAnyOtherDatastoreWithName(Datastore datastore, String name)
+    public boolean existAnyOtherDatastoreWithName(final Datastore datastore, final String name)
     {
         assert !StringUtils.isEmpty(name);
         return datastoreDao.existsAnyOtherWithName(datastore, name);
     }
 
-    public boolean existAnyDatastoreWithDirectory(String directory)
+    public boolean existAnyDatastoreWithDirectory(final String directory)
     {
         assert !StringUtils.isEmpty(directory);
         return datastoreDao.existsAnyWithDirectory(directory);
     }
 
-    public boolean existAnyOtherDatastoreWithDirectory(Datastore datastore, String directory)
+    public boolean existAnyOtherDatastoreWithDirectory(final Datastore datastore,
+        final String directory)
     {
         assert !StringUtils.isEmpty(directory);
         return datastoreDao.existsAnyOtherWithDirectory(datastore, directory);
     }
 
-    public void insertRemoteService(RemoteService remoteService)
+    public void insertRemoteService(final RemoteService remoteService)
     {
         this.remoteServiceDao.persist(remoteService);
         this.remoteServiceDao.flush();
     }
 
-    public void insertNetwork(Network network)
+    public void insertNetwork(final Network network)
     {
         this.networkDao.persist(network);
         this.networkDao.flush();
     }
 
-    public void updateRemoteService(RemoteService remoteService)
+    public void updateRemoteService(final RemoteService remoteService)
     {
         remoteServiceDao.flush();
     }
 
-    public void deleteRemoteService(RemoteService remoteService)
+    public void deleteRemoteService(final RemoteService remoteService)
     {
         assert remoteService != null;
         assert remoteServiceDao.isManaged(remoteService);
@@ -454,12 +485,12 @@ public class DatacenterRep extends DefaultRepBase
         this.remoteServiceDao.flush();
     }
 
-    public boolean existAnyRemoteServiceWithUri(String uri) throws URISyntaxException
+    public boolean existAnyRemoteServiceWithUri(final String uri) throws URISyntaxException
     {
         return remoteServiceDao.existRemoteServiceUri(uri);
     }
 
-    public List<RemoteService> findRemoteServicesByDatacenter(Datacenter datacenter)
+    public List<RemoteService> findRemoteServicesByDatacenter(final Datacenter datacenter)
     {
         return remoteServiceDao.findByDatacenter(datacenter);
     }
@@ -469,91 +500,79 @@ public class DatacenterRep extends DefaultRepBase
         return remoteServiceDao.findAll();
     }
 
-    public RemoteService findRemoteServiceById(int id)
+    public RemoteService findRemoteServiceById(final int id)
     {
         return remoteServiceDao.findById(id);
     }
 
-    public List<RemoteService> findRemoteServiceWithTypeInDatacenter(Datacenter datacenter,
-        RemoteServiceType type)
+    public List<RemoteService> findRemoteServiceWithTypeInDatacenter(final Datacenter datacenter,
+        final RemoteServiceType type)
     {
         return remoteServiceDao.findByDatacenterAndType(datacenter, type);
     }
 
-    public boolean existAnyRemoteServiceWithTypeInDatacenter(Datacenter datacenter,
-        RemoteServiceType type)
+    public boolean existAnyRemoteServiceWithTypeInDatacenter(final Datacenter datacenter,
+        final RemoteServiceType type)
     {
         return !findRemoteServiceWithTypeInDatacenter(datacenter, type).isEmpty();
     }
 
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise)
+    public List<Machine> findCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Long hdRequiredOnDatastore,
+        final Enterprise enterprise)
     {
         return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, hdRequiredOnDatastore,
             enterprise);
     }
 
-    /**
-     * Used during HA, selects a machine different of the ''originalHypervisorId'' with the same
-     * ''datastoreUuid'' enabled.
-     * 
-     * doesn't require the virtual image info as the vmachine is already deployed on the target
-     * datastore (so no additional space used).
-     */
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
-    {
-        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
-            datastoreUuid, originalHypervisorId);
-    }
-
-    public List<Integer> getRackIdByMinVLANCount(int idDatacenter)
+    public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
     {
         return rackDao.getRackIdByMinVLANCount(idDatacenter);
     }
 
     // Populate requireds
-    public Datacenter findByName(String name)
+    public Datacenter findByName(final String name)
     {
         return dao.findUniqueByProperty(Datacenter.NAME_PROPERTY, name);
     }
 
-    public Rack findRackByName(String name)
+    public Rack findRackByName(final String name)
     {
         return rackDao.findUniqueByProperty(Rack.NAME_PROPERTY, name);
     }
 
-    public Machine findMachineByName(String name)
+    public Machine findMachineByName(final String name)
     {
         return machineDao.findUniqueByProperty(Machine.NAME_PROPERTY, name);
     }
 
-    public Long getNumberOfDeployedVlanNetworksByRack(Integer rackId)
+    public Long getNumberOfDeployedVlanNetworksByRack(final Integer rackId)
     {
         return rackDao.getNumberOfDeployedVlanNetworks(rackId);
     }
 
-    public boolean isRepositoryBeingUsed(Datacenter datacenter)
+    public boolean isRepositoryBeingUsed(final Datacenter datacenter)
     {
         return repositoryDao.isBeingUsed(datacenter);
     }
 
-    public void updateRepositoryLocation(Datacenter datacenter, String url)
+    public void updateRepositoryLocation(final Datacenter datacenter, final String url)
     {
         repositoryDao.updateRepositoryLocation(datacenter, url);
     }
 
-    public void deleteRepository(Datacenter datacenter)
+    public void deleteRepository(final Datacenter datacenter)
     {
         repositoryDao.removeByDatacenter(datacenter);
     }
 
-    public boolean existRepositoryInOtherDatacenter(Datacenter datacenter, String repositoryLocation)
+    public boolean existRepositoryInOtherDatacenter(final Datacenter datacenter,
+        final String repositoryLocation)
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
 
-    public void createRepository(Datacenter datacenter, String repositoryLocation)
+    public void createRepository(final Datacenter datacenter, final String repositoryLocation)
     {
         com.abiquo.server.core.infrastructure.Repository repo =
             new com.abiquo.server.core.infrastructure.Repository(datacenter, repositoryLocation);
@@ -562,12 +581,12 @@ public class DatacenterRep extends DefaultRepBase
     }
 
     public com.abiquo.server.core.infrastructure.Repository findRepositoryByDatacenter(
-        Datacenter datacenter)
+        final Datacenter datacenter)
     {
         return repositoryDao.findByDatacenter(datacenter);
     }
 
-    public boolean existDeployedVirtualMachines(Datacenter datacenter)
+    public boolean existDeployedVirtualMachines(final Datacenter datacenter)
     {
         assert datacenter != null;
         List<VirtualMachine> vmachinesInDC =
@@ -585,4 +604,8 @@ public class DatacenterRep extends DefaultRepBase
         return false;
     }
 
+    public Rack findRackByIds(Integer datacenterId, Integer rackId)
+    {
+        return rackDao.findByIds(datacenterId, rackId);
+    }
 }

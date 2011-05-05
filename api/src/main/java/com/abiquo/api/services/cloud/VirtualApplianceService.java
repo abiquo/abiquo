@@ -132,14 +132,15 @@ public class VirtualApplianceService extends DefaultApiService
     {
         if (vappId == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
         VirtualAppliance vapp = repo.findVirtualApplianceById(vappId);
         if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
         }
         return vapp;
     }
@@ -233,7 +234,8 @@ public class VirtualApplianceService extends DefaultApiService
 
         if (!vapp.isValid())
         {
-            raiseValidationErrors(vapp);
+            addValidationErrors(vapp.getValidationErrors());
+            flushErrors();
         }
 
         repo.insertVirtualAppliance(vapp);

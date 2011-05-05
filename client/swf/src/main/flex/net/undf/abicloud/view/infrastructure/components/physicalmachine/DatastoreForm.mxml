@@ -23,6 +23,7 @@
 -->
 
 <general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
+	wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_infra_addDatastore.value}"
     xmlns:general="net.undf.abicloud.view.general.*">
 
     <mx:Script>

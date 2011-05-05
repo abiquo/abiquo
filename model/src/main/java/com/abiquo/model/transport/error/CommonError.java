@@ -19,18 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.util.network;
+package com.abiquo.model.transport.error;
 
-public class InvalidPrivateNetworkClassTypeException extends RuntimeException
+/**
+ * Any exception of the API inside the service layer should 
+ * have this object instead the  {@link ErrorDto} object, which is 
+ * a REST object.
+ * 
+ * @author jdevesa@abiquo.com
+ */
+public class CommonError
 {
-    /**
-     * Serial version.
-     */
-    private static final long serialVersionUID = 1L;
+    private String code;
 
-    public InvalidPrivateNetworkClassTypeException(String message)
+    private String message;
+
+    public CommonError(String code, String message)
     {
-        super(message);
+        this.code = code;
+        this.message = message;
     }
 
+    public String getCode()
+    {
+        return code;
+    }
+
+    public String getMessage()
+    {
+        return message;
+    }
+   
 }

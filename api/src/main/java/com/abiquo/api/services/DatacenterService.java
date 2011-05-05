@@ -26,33 +26,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.EntityManager;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.transformer.ModelTransformer;
-import com.abiquo.server.core.enumerator.HypervisorType;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RemoteServiceDto;
-import com.abiquo.server.core.infrastructure.RemoteServicesDto;
-import com.abiquo.server.core.infrastructure.network.Network;
-import com.abiquo.server.core.infrastructure.storage.Tier;
 
 @Service
 @Transactional(readOnly = true)
 public class DatacenterService extends DefaultApiService
 {
     @Autowired
-    DatacenterRep repo;
+    InfrastructureRep repo;
 
     @Autowired
     RemoteServiceService remoteServiceService;
@@ -62,9 +44,9 @@ public class DatacenterService extends DefaultApiService
 
     }
 
-    public DatacenterService(EntityManager em)
+    public DatacenterService(final EntityManager em)
     {
-        repo = new DatacenterRep(em);
+        repo = new InfrastructureRep(em);
         remoteServiceService = new RemoteServiceService(em);
     }
 
@@ -74,11 +56,11 @@ public class DatacenterService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public DatacenterDto addDatacenter(DatacenterDto dto) throws Exception
+    public DatacenterDto addDatacenter(final DatacenterDto dto) throws Exception
     {
         if (repo.existsAnyDatacenterWithName(dto.getName()))
         {
-            errors.add(APIError.DATACENTER_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -119,26 +101,27 @@ public class DatacenterService extends DefaultApiService
         return responseDto;
     }
 
-    public Datacenter getDatacenter(Integer id)
+    public Datacenter getDatacenter(final Integer id)
     {
         Datacenter datacenter = repo.findById(id);
 
         if (datacenter == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         return datacenter;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Datacenter modifyDatacenter(Integer datacenterId, DatacenterDto dto)
+    public Datacenter modifyDatacenter(final Integer datacenterId, final DatacenterDto dto)
     {
         Datacenter old = getDatacenter(datacenterId);
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.DATACENTER_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -151,16 +134,23 @@ public class DatacenterService extends DefaultApiService
         return old;
     }
 
-    public Set<HypervisorType> getHypervisorTypes(Datacenter datacenter)
+    public Set<HypervisorType> getHypervisorTypes(final Datacenter datacenter)
     {
         return repo.findHypervisors(datacenter);
     }
 
-    private void isValidDatacenter(Datacenter datacenter)
+    public List<Enterprise> findEnterprisesByDatacenterWithNetworks(final Datacenter datacenter,
+        final Boolean network, final Integer firstElem, final Integer numElem)
+    {
+        return repo.findEnterprisesByDataCenter(datacenter, network, firstElem, numElem);
+
+    }
+
+    private void isValidDatacenter(final Datacenter datacenter)
     {
         if (!datacenter.isValid())
         {
-            validationErrors.addAll(datacenter.getValidationErrors());
+            addValidationErrors(datacenter.getValidationErrors());
         }
         flushErrors();
     }

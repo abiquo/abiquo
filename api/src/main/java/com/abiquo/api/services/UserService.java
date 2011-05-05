@@ -24,6 +24,7 @@ package com.abiquo.api.services;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +40,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
@@ -66,7 +68,7 @@ public class UserService extends DefaultApiService
     }
 
     // use this to initialize it for tests
-    public UserService(EntityManager em)
+    public UserService(final EntityManager em)
     {
         repo = new EnterpriseRep(em);
     }
@@ -83,30 +85,58 @@ public class UserService extends DefaultApiService
         return repo.getUserByUserName(userName);
     }
 
-    public Collection<User> getUsers()
-    {
-        return repo.findAllUsers();
-    }
+    // TODO: Remove unused method
+    // public Collection<User> getUsers()
+    // {
+    // return repo.findAllUsers();
+    // }
 
-    public Collection<User> getUsersByEnterprise(final Integer enterpriseId)
-    {
-        return repo.findUsersByEnterprise(findEnterprise(enterpriseId));
-    }
+    // TODO: Remove Unused method
+    // public Collection<User> getUsersByEnterprise(final Integer enterpriseId)
+    // {
+    // return repo.findUsersByEnterprise(findEnterprise(enterpriseId));
+    // }
 
-    public Collection<User> getUsersByEnterprise(String enterpriseId, String filter, String order,
-        boolean desc)
+    public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
+        final String order, final boolean desc)
     {
         return getUsersByEnterprise(enterpriseId, filter, order, desc, false, 0, 25);
     }
 
-    public Collection<User> getUsersByEnterprise(String enterpriseId, String filter, String order,
-        boolean desc, boolean connected, Integer page, Integer numResults)
+    public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
+        String order, final boolean desc, final boolean connected, final Integer page,
+        final Integer numResults)
     {
         Enterprise enterprise = null;
+        User user = getCurrentUser();
+
         if (!enterpriseId.equals("_"))
         {
             enterprise = findEnterprise(Integer.valueOf(enterpriseId));
+
+            // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
+            // view their enterprise: check that the provided id corresponds to their enterprise,
+            // and fail if the id is invalid
+            checkCurrentEnterprise(enterprise);
         }
+        else
+        {
+            // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
+            // view their enterprise, so force it if necessary. Here we won't fail, because no id
+            // was provided in the request
+            if (user.getRole().getType() != Role.Type.SYS_ADMIN)
+            {
+                enterprise = user.getEnterprise();
+            }
+        }
+
+        // [ABICLOUDPREMIUM-1310] If all the checks are valid, we still need to restrict to the
+        // current user if the role of the requestes is a standard user
+        if (user.getRole().getType() == Role.Type.USER)
+        {
+            return Collections.singletonList(user);
+        }
+
         if (StringUtils.isEmpty(order))
         {
             order = User.NAME_PROPERTY;
@@ -117,21 +147,21 @@ public class UserService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public User addUser(UserDto dto, Integer enterpriseId)
+    public User addUser(final UserDto dto, final Integer enterpriseId)
     {
         Role role = findRole(dto);
         return addUser(dto, enterpriseId, role);
     }
 
-    public User addUser(UserDto dto, Integer enterpriseId, Role role)
+    public User addUser(final UserDto dto, final Integer enterpriseId, final Role role)
     {
         Enterprise enterprise = findEnterprise(enterpriseId);
 
-        checkUserCredentials(enterprise);
+        checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
@@ -143,45 +173,55 @@ public class UserService extends DefaultApiService
         }
         if (repo.existAnyUserWithNick(user.getNick()))
         {
-            errors.add(APIError.USER_DUPLICATED_NICK);
+            addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
         if (!emailIsValid(user.getEmail()))
         {
-            errors.add(APIError.EMAIL_IS_INVALID);
+            addValidationErrors(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
-        
 
         repo.insertUser(user);
 
         return user;
     }
 
-    public User getUser(Integer id)
+    public User getUser(final Integer id)
     {
-        return repo.findUserById(id);
+        User user = repo.findUserById(id);
+
+        if (user == null)
+        {
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
+        }
+
+        checkUserCredentialsForSelfUser(user, user.getEnterprise());
+
+        return user;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public User modifyUser(Integer userId, UserDto user)
+    public User modifyUser(final Integer userId, final UserDto user)
     {
         User old = repo.findUserById(userId);
         if (old == null)
         {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
         }
 
-        checkUserCredentialsForSelfEdit(old, old.getEnterprise());
-        
+        checkUserCredentialsForSelfUser(old, old.getEnterprise());
+
         // Cloud Admins should only be editable by other Cloud Admins
         if (old.getRole().getType() == Role.Type.SYS_ADMIN
             && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
         {
-            errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
+            addConflictErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
         }
-        
+
         old.setActive(user.isActive() ? 1 : 0);
         old.setEmail(user.getEmail());
         old.setLocale(user.getLocale());
@@ -198,7 +238,7 @@ public class UserService extends DefaultApiService
 
         if (!emailIsValid(user.getEmail()))
         {
-            errors.add(APIError.EMAIL_IS_INVALID);
+            addValidationErrors(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
         if (user.searchLink(RoleResource.ROLE) != null)
@@ -217,15 +257,14 @@ public class UserService extends DefaultApiService
         }
         if (repo.existAnyOtherUserWithNick(old, old.getNick()))
         {
-            errors.add(APIError.USER_DUPLICATED_NICK);
+            addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();
         }
-        
 
         return updateUser(old);
     }
 
-    public User updateUser(User user)
+    public User updateUser(final User user)
     {
         repo.updateUser(user);
 
@@ -233,21 +272,17 @@ public class UserService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeUser(Integer id)
+    public void removeUser(final Integer id)
     {
         User user = getUser(id);
-        if (user == null)
-        {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
-        }
 
-        checkUserCredentials(user.getEnterprise());
-     
+        checkEnterpriseAdminCredentials(user.getEnterprise());
+
         // Cloud Admins should only be editable by other Cloud Admins
         if (user.getRole().getType() == Role.Type.SYS_ADMIN
             && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
         {
-            errors.add(APIError.NOT_ENOUGH_PRIVILEGES);
+            addForbiddenErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
         }
 
@@ -261,38 +296,41 @@ public class UserService extends DefaultApiService
         return user != null && user.getEnterprise().getId().equals(enterpriseId);
     }
 
-    private Enterprise findEnterprise(Integer enterpriseId)
+    private Enterprise findEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = repo.findById(enterpriseId);
         if (enterprise == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
         return enterprise;
     }
 
-    public User findUserByEnterprise(Integer userId, Enterprise enterprise)
+    public User findUserByEnterprise(final Integer userId, final Enterprise enterprise)
     {
         User user = repo.findUserByEnterprise(userId, enterprise);
         if (user == null)
         {
-            throw new NotFoundException(APIError.USER_NON_EXISTENT);
+            addNotFoundErrors(APIError.USER_NON_EXISTENT);
+            flushErrors();
         }
         return user;
     }
 
-    private Role findRole(UserDto dto)
+    private Role findRole(final UserDto dto)
     {
         return repo.findRoleById(getRoleId(dto));
     }
 
-    private Integer getRoleId(UserDto user)
+    private Integer getRoleId(final UserDto user)
     {
         RESTLink role = user.searchLink(RoleResource.ROLE);
 
         if (role == null)
         {
-            throw new NotFoundException(APIError.MISSING_ROLE_LINK);
+            addValidationErrors(APIError.MISSING_ROLE_LINK);
+            flushErrors();
         }
 
         String buildPath = buildPath(RolesResource.ROLES_PATH, RoleResource.ROLE_PARAM);
@@ -301,14 +339,15 @@ public class UserService extends DefaultApiService
 
         if (roleValues == null || !roleValues.containsKey(RoleResource.ROLE))
         {
-            throw new NotFoundException(APIError.ROLE_PARAM_NOT_FOUND);
+            addNotFoundErrors(APIError.ROLE_PARAM_NOT_FOUND);
+            flushErrors();
         }
 
         Integer roleId = Integer.valueOf(roleValues.getFirst(RoleResource.ROLE));
         return roleId;
     }
 
-    private Integer getEnterpriseID(UserDto user)
+    private Integer getEnterpriseID(final UserDto user)
     {
         RESTLink ent = user.searchLink(EnterpriseResource.ENTERPRISE);
 
@@ -321,35 +360,43 @@ public class UserService extends DefaultApiService
         return entId;
     }
 
-    public void checkUserCredentials(Enterprise enterprise)
+    public void checkEnterpriseAdminCredentials(final Enterprise enterprise)
     {
         User user = getCurrentUser();
-        checkUserCredentials(user, enterprise);
-    }
+        Role.Type role = user.getRole().getType();
 
-    private void checkUserCredentials(User user, Enterprise enterprise)
-    {
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN
-            && !enterprise.equals(user.getEnterprise()))
+        if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+            || role == Role.Type.USER)
         {
             throw new AccessDeniedException("");
         }
     }
 
-    private void checkUserCredentialsForSelfEdit(User userToEdit, Enterprise enterprise)
+    private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)
     {
-        User currentUser = getCurrentUser();
+        User user = getCurrentUser();
+        Role.Type role = user.getRole().getType();
 
-        if ((currentUser.getRole().getType() == Role.Type.ENTERPRISE_ADMIN && //
-            !enterprise.equals(currentUser.getEnterprise()))
-            || (currentUser.getRole().getType() == Role.Type.USER && //
-            currentUser.getId() != userToEdit.getId()))
+        if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+            || (role == Role.Type.USER && user.getId() != selfUser.getId()))
         {
             throw new AccessDeniedException("");
         }
     }
 
-    private Boolean emailIsValid(String email)
+    public void checkCurrentEnterprise(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        Role.Type role = user.getRole().getType();
+        boolean sameEnterprise = enterprise.equals(user.getEnterprise());
+
+        if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
+        {
+            throw new AccessDeniedException("");
+        }
+    }
+
+    private Boolean emailIsValid(final String email)
     {
         final Pattern pattern;
         final Matcher matchers;

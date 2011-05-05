@@ -28,6 +28,7 @@
     xmlns:general="net.undf.abicloud.view.general.*"
     xmlns:registration="net.undf.abicloud.view.configuration.components.registration.*"
     xmlns:heartbeat="net.undf.abicloud.view.configuration.components.heartbeat.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_config_general.value}"
     titleText="@Resource(bundle='Main', key='HEADER_MENU_CONFIG')">
 
     <mx:Script>

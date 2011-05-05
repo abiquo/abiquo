@@ -20,7 +20,6 @@
  */
 
 package com.abiquo.api.services;
-
 import javax.jms.ResourceAllocationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.IAllocator;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.scheduler.ResourceUpgradeUseException;
@@ -64,7 +64,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         
         if(vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
         {
-            errors.add(APIError.CHECK_EDIT_NO_TARGET_MACHINE);
+            addConflictErrors(APIError.CHECK_EDIT_NO_TARGET_MACHINE);
             flushErrors();
         }
         
@@ -76,32 +76,34 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (LimitExceededException limite)
         {
-            limitExceptions.add(limite);
+            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
         }
         catch (ResourceAllocationException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (AllocatorException e)
         {
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (Exception e)
         {
-            e.printStackTrace(); // FIXME delete
-
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addUnexpectedErrors(error);
         }
         finally
         {
@@ -132,32 +134,34 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (LimitExceededException limite)
         {
-            limitExceptions.add(limite);
+            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
         }
         catch (ResourceAllocationException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (AllocatorException e)
         {
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         catch (Exception e)
         {
-            e.printStackTrace(); // FIXME delete
-
             APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage())));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
+                e.getMessage()));
+            addUnexpectedErrors(error);
         }
         finally
         {
@@ -176,9 +180,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (ResourceUpgradeUseException e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()),
-                e.getMessage())));
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         finally
         {
@@ -196,9 +201,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (ResourceUpgradeUseException e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            errors.add(error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
-                e.getMessage())));
+            APIError error = APIError.NOT_ENOUGH_RESOURCES;
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
+                e.getMessage()));
+            addConflictErrors(error);
         }
         finally
         {

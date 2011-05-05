@@ -21,95 +21,100 @@
 
 package com.abiquo.api.exceptions.mapper;
 
-import java.security.InvalidParameterException;
-
-import javax.validation.ConstraintViolation;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
-import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.exceptions.ConflictException;
+import com.abiquo.api.exceptions.ForbiddenException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.InvalidParameterConstraint;
-import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.model.rest.RESTLink;
+import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.scheduler.limit.LimitExceededException;
 
 @Provider
 public class APIExceptionMapper implements ExceptionMapper<APIException>
 {
+    
+    private static final Logger logger = LoggerFactory.getLogger(APIExceptionMapper.class);
+    
     @Override
     public Response toResponse(APIException exception)
     {
         ErrorsDto errors = new ErrorsDto();
-        if (exception instanceof ExtendedAPIException)
+        APIException ext = (APIException) exception;
+        for (CommonError error : ext.getErrors())
         {
-            ExtendedAPIException ext = (ExtendedAPIException) exception;
-            for (APIError error : ext.getErrors())
-            {
-                String message =
-                    error.getCause() != null ? String.format("%s\nCaused by:%s",
-                        error.getMessage(), error.getCause()) : error.getMessage();
-
-                errors.add(createError(error.getCode(), message));
-            }
-            
-            for (ConstraintViolation< ? > error : ext.getValidationErrors())
-            {
-                errors.add(createError(error.getPropertyPath().toString(), error.getMessage()));
-            }
-
-            for (LimitExceededException limitex : ext.getLimitExceededExceptions())
-            {
-                errors.add(createError(limitex));
-            }
-            
-            for (InvalidParameterConstraint paramEx : ext.getParamConstraints())
-            {
-                errors.add(createError(paramEx));
-            }
-        }
-        else
-        {
-            errors.add(createError(exception.getCode(), exception.getMessage()));
+            errors.add(createError(error));
         }
 
         ResponseBuilder builder = new ResponseBuilderImpl();
         builder.entity(errors);
-        builder.status(exception.getHttpStatus());
-
+        builder.status(defineStatus(exception, errors));
         return builder.build();
     }
 
-    private ErrorDto createError(String code, String message)
+    private ErrorDto createError(CommonError error)
     {
-        ErrorDto error = new ErrorDto();
-        error.setCode(code);
-        error.setMessage(message);
-        return error;
-    }
-
-    private ErrorDto createError(LimitExceededException limitException)
-    {
-        ErrorDto error = new ErrorDto();
-        error.setCode(APIError.LIMIT_EXCEEDED.getCode());
-        error.setMessage(limitException.toString());
-        return error;
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setCode(error.getCode());
+        errorDto.setMessage(error.getMessage());
+        return errorDto;
     }
     
-    private ErrorDto createError(InvalidParameterConstraint paramEx)
+    private Status defineStatus(APIException exception, ErrorsDto dto)
     {
-        ErrorDto error = new ErrorDto();
-        error.setCode("CONSTR-" + paramEx.getAnnotation().annotationType().getSimpleName().toUpperCase());
-        error.setMessage(paramEx.getMessageError());
-        return error;
-    }
+        if (exception instanceof ForbiddenException)
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("API Response " + Status.FORBIDDEN.name() + "\n" + dto.toString(), exception);
+            }
+            return Status.FORBIDDEN;
+        }
+        if (exception instanceof BadRequestException)
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("API Response " + Status.BAD_REQUEST.name() + "\n" + dto.toString(), exception);
+            }
+            return Status.BAD_REQUEST;
+        }
+        if (exception instanceof ConflictException)
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("API Response " + Status.CONFLICT.name() + "\n" + dto.toString(), exception);
+            }
+            return Status.CONFLICT;
+        }
+        if (exception instanceof NotFoundException)
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace("API Response " + Status.NOT_FOUND.name() + "\n" + dto.toString(), exception);
+            }
+            return Status.NOT_FOUND;
+        }
+        if (exception instanceof InternalServerErrorException)
+        {
+            logger.error("Unexpected exception that throws a 500 error code in API:\n" + dto.toString(), exception);
+            return Status.INTERNAL_SERVER_ERROR;
+        }
+        else
+        {
+            logger.error("Unknown exception thrown.", exception);
+            return Status.INTERNAL_SERVER_ERROR;
+        }
 
+    }
 }

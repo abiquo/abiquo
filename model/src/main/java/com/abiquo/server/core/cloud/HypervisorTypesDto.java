@@ -26,8 +26,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.WrapperDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 /**
  * Represent a collection of HypervisorTypes

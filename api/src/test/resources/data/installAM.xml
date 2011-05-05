@@ -45,7 +45,7 @@
 		name="dcrep1" URL="url_dcrep1" /><!--  version_c="1"/ -->
 
 	<remote_service idRemoteService="1" uri="http://localhost:9009/am" 
-		idDataCenter="1" status="1" remoteServiceType="APPLIANCE_MANAGER"  status="1" version_c="0" />
+		idDataCenter="1" status="1" remoteServiceType="APPLIANCE_MANAGER" version_c="0" />
 
 
 	<apps_library id_apps_library="1" idEnterprise="1" />

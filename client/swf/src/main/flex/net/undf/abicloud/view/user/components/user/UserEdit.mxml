@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" 
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_user_createUser.value}"
     xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
     <mx:Metadata>
@@ -108,6 +109,7 @@
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
                 labelOldPasswordInvalid.visible = true;
+                currentPassword.enabled = true;
                 acceptButton.enabled = false;
                 
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
@@ -128,7 +130,10 @@
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
-                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
+                //Retrieve the list of virtual datacenter if you are not a Simple User
+                if(AbiCloudModel.getInstance().loginManager.user.role.id != Role.USER_ROLE){
+	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");                	
+                }
             }
             
             /**
