@@ -21,12 +21,24 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
 
 public class PreconditionFailedException extends APIException
 {
-    public PreconditionFailedException(APIError error)
+    public PreconditionFailedException(APIError apiError)
     {
-        super(Status.PRECONDITION_FAILED, error);
+        super(apiError);
+    }
+    
+    public PreconditionFailedException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public PreconditionFailedException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

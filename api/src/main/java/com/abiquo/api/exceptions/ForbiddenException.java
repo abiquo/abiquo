@@ -19,38 +19,33 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
 package com.abiquo.api.exceptions;
 
-import java.lang.annotation.Annotation;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
 
 /**
  * @author jdevesa
  *
  */
-public class InvalidParameterConstraint
+public class ForbiddenException extends APIException
 {
-    private Annotation annotation;
+
+    private static final long serialVersionUID = 1L;
+
+    public ForbiddenException(APIError error)
+    {
+        super(error);
+    }    
     
-    private String messageError;
-    
-    public void setMessageError(String messageError)
+    public ForbiddenException(CommonError error)
     {
-        this.messageError = messageError;
-    }
-    public String getMessageError()
-    {
-        return messageError;
+        super(error);
     }
     
-    public void setAnnotation(Annotation annotation)
+    public ForbiddenException(Set<CommonError> errors)
     {
-        this.annotation = annotation;
-    }
-    public Annotation getAnnotation()
-    {
-        return annotation;
+        super(errors);
     }
 }

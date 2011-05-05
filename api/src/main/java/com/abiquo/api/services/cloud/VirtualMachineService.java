@@ -36,6 +36,7 @@ import org.w3c.dom.Document;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -55,7 +56,7 @@ import com.sun.ws.management.client.ResourceFactory;
 
 @Repository
 @Transactional(readOnly = true)
-public class VirtualMachineService
+public class VirtualMachineService extends DefaultApiService
 {
     private static final String RESOURCE_URI =
         "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
@@ -113,7 +114,8 @@ public class VirtualMachineService
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
         }
         return vm;
     }
