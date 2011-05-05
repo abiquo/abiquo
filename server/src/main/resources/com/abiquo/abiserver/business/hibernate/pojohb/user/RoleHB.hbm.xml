@@ -16,9 +16,9 @@
     
   </class>
   
-	<query name="GET_ROLE_BY_SHORT_DESC">
+	<query name="GET_ROLE_BY_NAME">
 	    from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB
-	    where name like :shortDescription
+	    where name like :name
   	</query>
   
   

@@ -23,18 +23,12 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 import com.abiquo.abiserver.business.AuthService;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
-import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -72,21 +66,11 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
 
         if (resultResponse.getSuccess())
         {
-            // Generating the list of client resources for the user that has
-            // logged in
-            Session session = null;
-            Transaction transaction = null;
 
-            ArrayList<Privilege> clientPrivileges = new ArrayList<Privilege>();
+            ArrayList<Privilege> privileges = new ArrayList<Privilege>();
 
             try
             {
-                session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
-
-                // Getting the user that is being loggin in
-                UserHB userHBLogged =
-                    (UserHB) session.get(UserHB.class, resultResponse.getData().getUser().getId());
 
                 UsersResourceStub proxy =
                     APIStubFactory.getInstance(resultResponse.getData().getSession(),
@@ -97,17 +81,18 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
                 userListOptions.setOrderBy(User.NICK_PROPERTY);
                 DataResult<UserListResult> user = proxy.getUsers(userListOptions);
 
-                // Getting the list of user privileges
-                ArrayList<PrivilegeHB> allUserPrivilegesHB =
-                    (ArrayList<PrivilegeHB>) userHBLogged.getRoleHB().getPrivilegesHB();
-
-                for (PrivilegeHB userPrivilegeHB : allUserPrivilegesHB)
+                if (user.getSuccess() && user.getData().getTotalUsers() == 1)
                 {
-                    clientPrivileges.add(userPrivilegeHB.toPojo());
+                    // Getting the list of user privileges
+                    for (com.abiquo.abiserver.pojo.user.User u : user.getData().getUsersList())
+                    {
+                        for (Privilege p : u.getRole().getPrivileges())
+                        {
+                            privileges.add(p.toPojoHB().toPojo());
+                        }
 
+                    }
                 }
-
-                transaction.commit();
 
                 // log the event
                 traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGIN,
@@ -118,10 +103,6 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
             catch (Exception e)
             {
-                if (transaction != null && transaction.isActive())
-                {
-                    transaction.rollback();
-                }
 
                 errorManager.reportError(resourceManager, resultResponse, "login.resourceCreation",
                     e);
@@ -135,7 +116,7 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
 
             // Returning result
-            resultResponse.getData().setClientPrivileges(clientPrivileges);
+            resultResponse.getData().setClientPrivileges(privileges);
         }
 
         return resultResponse;

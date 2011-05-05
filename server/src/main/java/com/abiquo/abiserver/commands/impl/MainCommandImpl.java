@@ -74,7 +74,7 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
             // method will be returned
             ArrayList<RoleHB> rolesHB =
                 (ArrayList<RoleHB>) session.createCriteria(RoleHB.class)
-                    .addOrder(Order.asc("shortDescription")).list();
+                    .addOrder(Order.asc("name")).list();
             //
             // for (RoleHB roleHB : rolesHB)
             // {

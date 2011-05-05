@@ -38,13 +38,13 @@ public class LoginResult
 
     private User user;
 
-    private ArrayList<Privilege> clientPrivileges;
+    private ArrayList<Privilege> privileges;
 
     public LoginResult()
     {
         session = new UserSession();
         user = new User();
-        clientPrivileges = new ArrayList<Privilege>();
+        privileges = new ArrayList<Privilege>();
     }
 
     public UserSession getSession()
@@ -67,14 +67,14 @@ public class LoginResult
         this.user = user;
     }
 
-    public ArrayList<Privilege> getClientPrivileges()
+    public ArrayList<Privilege> getPrivileges()
     {
-        return clientPrivileges;
+        return privileges;
     }
 
-    public void setClientPrivileges(final ArrayList<Privilege> clientPrivileges)
+    public void setPrivileges(final ArrayList<Privilege> privileges)
     {
-        this.clientPrivileges = clientPrivileges;
+        this.privileges = privileges;
     }
 
 }

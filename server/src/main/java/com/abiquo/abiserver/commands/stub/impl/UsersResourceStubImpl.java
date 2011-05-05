@@ -133,8 +133,6 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         UserHB currentUser = getCurrentUser();
 
-        // if(currentUser.getRoleHB().getType() ==
-        // com.abiquo.server.core.enterprise.Role.Type.ENTERPRISE_ADMIN)
         if (SecurityService.isEnterpriseAdmin(currentUser.getRoleHB().toPojo()))
         {
             enterpriseWildcard = String.valueOf(currentUser.getEnterpriseHB().getIdEnterprise());
@@ -196,20 +194,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                     privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
                 }
 
-                // for (RESTLink rsl : role.getLinks())
-                // {
-                // if (rsl.getRel().contains("privilege"))
-                // {
-                // Privilege p =
-                // Privilege.create(getPrivilege(rsl.getHref(), catchedPrivileges));
-                // privileges.add(p);
-                // }
-                // }
-
                 Role rolePojo = new Role(role.getId(), role.getName(), role.isBlocked());
 
-                // if (role.getShortDescription().equalsIgnoreCase("USER")
-                // && orderBy.equalsIgnoreCase("role"))
                 if (SecurityService.isStandardUser(rolePojo) && orderBy.equalsIgnoreCase("role"))
                 {
                     normalUsers.add(User.create(dto, Enterprise.create(enterprise),
@@ -258,22 +244,6 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         return dataResult;
     }
-
-    // private PrivilegeDto getPrivilege(final String privilegeUri,
-    // final Map<String, PrivilegeDto> cache)
-    // {
-    // PrivilegeDto dto = null;
-    // if (!cache.containsKey(privilegeUri))
-    // {
-    // dto = get(privilegeUri).getEntity(PrivilegeDto.class);
-    // cache.put(privilegeUri, dto);
-    // }
-    // else
-    // {
-    // dto = cache.get(privilegeUri);
-    // }
-    // return dto;
-    // }
 
     private List<Privilege> getPrivileges(final String privilegesUri,
         final Map<String, List<Privilege>> cache)
