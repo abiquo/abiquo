@@ -1069,14 +1069,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             item.getConfigurationName() != null && item.getConfigurationName().getValue() != null
                 && item.getConfigurationName().getValue().length() > 0;
 
-        if (changingStorage)
-        {
-            return item.getConfigurationName().getValue().equals(value);
-        }
-        else
-        {
-            return false;
-        }
+        return !changingStorage || item.getConfigurationName().getValue().equals(value);
     }
 
     /**
