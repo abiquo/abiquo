@@ -31,8 +31,6 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "privileges")
 public class PrivilegesDto extends WrapperDto<PrivilegeDto>
 {
-    public static final String MEDIA_TYPE = "application/privilegesdto+xml";
-
     @Override
     @XmlElement(name = "privilege")
     public List<PrivilegeDto> getCollection()

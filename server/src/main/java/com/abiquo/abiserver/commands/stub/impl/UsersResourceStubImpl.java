@@ -282,7 +282,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         if (!cache.containsKey(privilegesUri))
         {
             PrivilegesDto ps =
-                get(privilegesUri, PrivilegesDto.MEDIA_TYPE).getEntity(PrivilegesDto.class);
+                get(privilegesUri, UsersResourceStubImpl.FLAT_MEDIA_TYPE).getEntity(
+                    PrivilegesDto.class);
             if (ps.getCollection() != null)
             {
                 for (PrivilegeDto p : ps.getCollection())

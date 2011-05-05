@@ -118,7 +118,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES)
-    @Produces("application/xml")
+    @Produces(RoleResource.LINK_MEDIA_TYPE)
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -144,7 +144,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES)
-    @Produces(PrivilegesDto.MEDIA_TYPE)
+    @Produces(RoleResource.FLAT_MEDIA_TYPE)
     public PrivilegesDto getFlatPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
