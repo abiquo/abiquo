@@ -1278,7 +1278,43 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.infra.defaultHypervisorUser","root","Default Hypervisor user used when creating Physical Machines"),
  ("client.storage.volumeMaxSizeValues","1,2,4,8,16,32,64,128,256","Comma separated values, with the allowed sizes when creating or editing a VolumeManagement"),
  ("client.virtual.virtualImagesRefreshConversionsInterval","5","Time interval in seconds to refresh missing virtual image conversions"),
- ("client.main.enterpriseLogoURL","http://www.abiquo.com","URL displayed when the header enterprise logo is clicked");
+ ("client.main.enterpriseLogoURL","http://www.abiquo.com","URL displayed when the header enterprise logo is clicked"),
+ ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
+ ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
+ ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI17/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
+ ("client.wiki.infra.createDatacenter","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter","datacenter creation wiki"), 
+ ("client.wiki.infra.editDatacenter","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-ModifyingaDatacenter","datacenter edition wiki"), 
+ ("client.wiki.infra.editRemoteService","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-RemoteServices","remote service edition wiki"), 
+ ("client.wiki.infra.createPhysicalMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingPhysicalMachines","physical machine creation wiki"),
+ ("client.wiki.infra.mailNotification","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Sendingemailnotifications","mail notification wiki"),
+ ("client.wiki.infra.addDatastore","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Datastoresmanagement","Datastore manager wiki"),
+ ("client.wiki.infra.createRack","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingRacks","rack creation wiki"),
+ ("client.wiki.infra.createMultiplePhysicalMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Createmultiplesphysicalmachines.","multiple physical machine creation wiki"),
+ ("client.wiki.network.publicVlan","http://community.abiquo.com/display/ABI17/Manage+Networking+Configuration#ManageNetworkingConfiguration-PublicVLANManagement","public vlan creation wiki"),
+ ("client.wiki.storage.storageDevice","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StorageDevicemanagement","storage device creation wiki"),
+ ("client.wiki.storage.storagePool","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StoragePoolmanagement","storage pool creation wiki"), 
+ ("client.wiki.storage.tier","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-TierManagement","tier edition wiki"),
+ ("client.wiki.allocation.global","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Globalrulesmanagement","global rules wiki"),
+ ("client.wiki.allocation.datacenter","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Datacenterrulesmanagement","datacenter rules wiki"),
+ ("client.wiki.vdc.createVdc","http://community.abiquo.com/display/ABI17/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter","virtual datacenter creation wiki"),
+ ("client.wiki.vdc.createVapp","http://community.abiquo.com/display/ABI17/Basic+operations#Basicoperations-CreatinganewVirtualAppliance","virtual app creation wiki"),
+ ("client.wiki.vdc.createPrivateNetwork","http://community.abiquo.com/display/ABI17/Manage+Networks#ManageNetworks-PrivateIPaddresses","VDC private network creation wiki"),
+ ("client.wiki.vdc.createPublicNetwork","http://community.abiquo.com/display/ABI17/Manage+Networks#ManageNetworks-PublicIPreservation","VDC public network creation wiki"),
+ ("client.wiki.vdc.createVolume","http://community.abiquo.com/display/ABI17/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolume","VDC virtual volume creation wiki"),
+ ("client.wiki.vm.editVirtualMachine","http://community.abiquo.com/display/ABI17/Configure+Virtual+Machines","Virtual Machine edition wiki"),
+ ("client.wiki.vm.bundleVirtualMachine","http://community.abiquo.com/display/ABI17/Configure+a+Virtual+Appliance#ConfigureaVirtualAppliance-Configure","Bundles VM wiki"),
+ ("client.wiki.vm.createNetworkInterface","http://community.abiquo.com/display/ABI17/Configure+Virtual+Machines#ConfigureVirtualMachines-CreatinganewNetworkInterface","Network Interface creation wiki"),
+ ("client.wiki.vm.createInstance","http://community.abiquo.com/display/ABI17/Create+Virtual+Machine+instances","Virtual Machine instance creation wiki"),
+ ("client.wiki.vm.createStateful","http://community.abiquo.com/display/ABI17/Create+Stateful+Virtual+Machines","Virtual Machine stateful creation wiki"),
+ ("client.wiki.vm.captureVirtualMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Importaretrievedmachine.","Capture Virtual Machine wiki"),
+ ("client.wiki.apps.uploadVM","http://community.abiquo.com/display/ABI17/Adding+virtual+images+into+the+repository#Addingvirtualimagesintotherepository-Uploadingfromourlocalfilesystem","Virtual Image upload wiki"),
+ ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-CreatingoreditinganEnterprise","Enterprise creation wiki"),
+ ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-Datacenters","Datacenter Limits wiki"),
+ ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI17/Manage+Users#ManageUsers-Creatingoreditinganuser","User creation wiki"),
+ ("client.wiki.config.general","http://community.abiquo.com/display/ABI17/Configuration+view","Configuration wiki"),
+ ("client.wiki.config.heartbeat","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Heartbeating","Heartbeat configuration wiki"),
+ ("client.wiki.config.licence","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Licensemanagement","Licence configuration wiki"),
+ ("client.wiki.config.registration","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-ProductRegistration","Registration wiki");
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;
 
@@ -2223,6 +2259,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
+	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
@@ -2243,8 +2280,38 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;     
-        IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
-            -- Activates if state changes or machines are captured
+	IF NEW.idType = 1 AND OLD.idType = 0 THEN
+		-- Imported !!!
+		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+                WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		IF NEW.state = "RUNNING" THEN 	
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualApp = idVirtualAppObj;
+		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+		        WHERE idDataCenter = idDataCenterObj;       
+		        UPDATE IGNORE enterprise_resources_stats 
+		            SET vCpuUsed = vCpuUsed + NEW.cpu,
+		                memoryUsed = memoryUsed + NEW.ram,
+		                localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idEnterprise = NEW.idEnterprise;
+		        UPDATE IGNORE dc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
+		            memoryUsed = memoryUsed + NEW.ram,
+		            localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+		        UPDATE IGNORE vdc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
+		            memoryUsed = memoryUsed + NEW.ram,
+		            localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
+		END IF;
+	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
@@ -2519,7 +2586,10 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_created` AFTER INSERT ON `kinton`.`vi
 |
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+    DECLARE vlanNetworkIdObj INTEGER;    
+        	  DECLARE networkNameObj VARCHAR(40);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'),'NEW.networktypeID ', IFNULL(NEW.networktypeID,'NULL')));
             -- Checks for changes
             IF OLD.name != NEW.name THEN
                 -- Name changed !!!
@@ -2538,6 +2608,26 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
                 vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
             WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;            
         END IF;
+        IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
+        -- Remove VlanUsed
+            SELECT DISTINCT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
+		    FROM vlan_network vn
+		    WHERE vn.network_id = OLD.networktypeID;
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
+            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+                CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
+            END IF;
+            -- Statistics
+            UPDATE IGNORE cloud_usage_stats
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idDataCenter = -1;
+            UPDATE IGNORE enterprise_resources_stats 
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idEnterprise = OLD.idEnterprise;
+            UPDATE IGNORE vdc_enterprise_stats 
+                SET     vlanUsed = vlanUsed - 1
+            WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+        END IF;
     END;
 |
 -- ******************************************************************************************
@@ -2548,12 +2638,41 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
 -- Fires: On an DELETE for the virtualdatacenter table
 --
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` AFTER DELETE ON `kinton`.`virtualdatacenter`
+CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+	DECLARE currentIdManagement INTEGER DEFAULT -1;
+	DECLARE currentDataCenter INTEGER DEFAULT -1;
+	DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+	DECLARE no_more_ipsfreed INT;
+	DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement	
+           FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
+           WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+           AND vn.network_configuration_id = nc.network_configuration_id
+           AND vn.network_id = dc.network_id
+           AND ra.idManagement = ipm.idManagement
+           AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
+	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
             UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated-1 WHERE idDataCenter = OLD.idDataCenter;  
             -- Remove Stats
-            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;	
+           -- 	
+	SET no_more_ipsfreed = 0;	    
+	    OPEN curIpFreed;  	    	
+   		my_loop:WHILE(no_more_ipsfreed=0) DO 
+   		FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
+		IF no_more_ipsfreed=1 THEN
+                	LEAVE my_loop;
+	         END IF;
+--		INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
+		IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+               		CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
+           	END IF;                    
+		UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise;	
+	    END WHILE my_loop;	       
+	    CLOSE curIpFreed;
         END IF;
     END;
 --

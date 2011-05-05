@@ -21,58 +21,39 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-public class APIException extends WebApplicationException
+import com.abiquo.model.transport.error.CommonError;
+
+public abstract class APIException extends RuntimeException
 {
-    protected String message;
+    private static final long serialVersionUID = -6140840253539726342L;
 
-    protected Status httpStatus;
-
-    protected String code;
-
-    public APIException(Status httpStatus)
+    private Set<CommonError> errors;    
+   
+    public Set<CommonError> getErrors()
     {
-        super(httpStatus);
-        this.httpStatus = httpStatus;
+        if (errors == null)
+        {
+            errors = new LinkedHashSet<CommonError>();
+        }
+        return errors;
     }
 
-    public APIException(Status httpStatus, String message)
+    public APIException (CommonError error)
     {
-        super(httpStatus);
-        this.httpStatus = httpStatus;
-        this.message = message;
+        getErrors().add(error);
     }
-
-    public APIException(Status httpStatus, APIError error)
+    
+    public APIException(Set<CommonError> errors)
     {
-        super(httpStatus);
-
-        this.httpStatus = httpStatus;
-        this.message = error.getMessage();
-        this.code = error.getCode();
+        getErrors().addAll(errors);
     }
-
-    public APIException(Status httpStatus, String message, Throwable cause)
+    
+    public APIException (APIError apiError)
     {
-        super(cause, httpStatus);
-        this.httpStatus = httpStatus;
-        this.message = message;
+        getErrors().add(new CommonError(apiError.getCode(), apiError.getMessage()));
     }
-
-    public String getMessage()
-    {
-        return this.message;
-    }
-
-    public Status getHttpStatus()
-    {
-        return this.httpStatus;
-    }
-
-    public String getCode()
-    {
-        return this.code;
-    }
+    
 }

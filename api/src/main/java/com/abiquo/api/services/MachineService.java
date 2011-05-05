@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
@@ -45,7 +46,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -57,7 +58,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class MachineService extends DefaultApiService
 {
     @Autowired
-    protected DatacenterRep repo;
+    protected InfrastructureRep repo;
 
     @Autowired
     protected DatastoreService dataService;
@@ -79,9 +80,9 @@ public class MachineService extends DefaultApiService
 
     }
 
-    public MachineService(EntityManager em)
+    public MachineService(final EntityManager em)
     {
-        repo = new DatacenterRep(em);
+        repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VSMStubImpl();
         remoteServiceService = new RemoteServiceService(em);
@@ -96,7 +97,7 @@ public class MachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Machine addMachine(MachineDto machineDto, Integer rackId)
+    public Machine addMachine(final MachineDto machineDto, final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
         Datacenter datacenter = rack.getDatacenter();
@@ -105,16 +106,16 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(), machineDto
-                .getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
+                machineDto.getVirtualRamUsedInMb(),
 
-            machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(), machineDto
-                .getVirtualHardDiskUsedInMb(),
+                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
+                machineDto.getVirtualHardDiskUsedInMb(),
 
-            machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(), machineDto
-                .getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
+                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
 
-            machineDto.getState(), machineDto.getVirtualSwitch());
+                machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
@@ -126,9 +127,9 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
-                .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
-                .getPassword());
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
+                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
+                machineDto.getPassword());
 
         vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
             .name(), hypervisor.getUser(), hypervisor.getPassword());
@@ -138,17 +139,18 @@ public class MachineService extends DefaultApiService
         // Part 2: Insert the hypervisor into database.
         if (repo.existAnyHypervisorWithIp(machineDto.getIp()))
         {
-            errors.add(APIError.HYPERVISOR_EXIST_IP);
+            addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
         }
 
         if (repo.existAnyHypervisorWithIpService(machineDto.getIpService()))
         {
-            errors.add(APIError.HYPERVISOR_EXIST_SERVICE_IP);
+            addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
         }
+        flushErrors();
 
         if (!hypervisor.isValid())
         {
-            validationErrors.addAll(hypervisor.getValidationErrors());
+            addValidationErrors(hypervisor.getValidationErrors());
         }
         flushErrors();
 
@@ -167,25 +169,26 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
-    public Machine getMachine(Integer id)
+    public Machine getMachine(final Integer id)
     {
         if (id == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
         Machine machine = repo.findMachineById(id);
         if (machine == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
         }
 
         return machine;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Machine modifyMachine(Integer machineId, MachineDto machineDto)
+    public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
     {
         Machine old = getMachine(machineId);
 
@@ -208,12 +211,37 @@ public class MachineService extends DefaultApiService
 
         isValidMachine(old);
 
+        // [ABICLOUDPREMIUM-1516] If ip service changes, must change the vrdp ip of the
+        // virtual machines deployed in that hypervisor
+        if (StringUtils.hasText(machineDto.getIpService())
+            && !machineDto.getIpService().equals(old.getHypervisor().getIpService()))
+        {
+            old.getHypervisor().setIpService(machineDto.getIpService());
+            updateVirtualMachines(old.getHypervisor(), machineDto.getIpService());
+        }
+
         repo.updateMachine(old);
+
         return old;
     }
 
+    private void updateVirtualMachines(final Hypervisor hypervisor, final String ipService)
+    {
+        Collection<VirtualMachine> vms = virtualMachineService.findByHypervisor(hypervisor);
+        if (vms != null && !vms.isEmpty())
+        {
+            for (VirtualMachine vm : vms)
+            {
+                if (StringUtils.hasText(vm.getVdrpIP()))
+                {
+                    vm.setVdrpIP(ipService);
+                }
+            }
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    public void removeMachine(Integer id)
+    public void removeMachine(final Integer id)
     {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
@@ -273,11 +301,11 @@ public class MachineService extends DefaultApiService
             .equals(rackId));
     }
 
-    private void isValidMachine(Machine machine)
+    private void isValidMachine(final Machine machine)
     {
         if (!machine.isValid())
         {
-            validationErrors.addAll(machine.getValidationErrors());
+            addValidationErrors(machine.getValidationErrors());
         }
 
         flushErrors();

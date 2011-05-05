@@ -26,7 +26,7 @@ import java.util.Date;
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.virtualimage.StateConversion;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
-import com.abiquo.server.core.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.DiskFormatType;
 
 public class VirtualImageConversionsHB implements java.io.Serializable,
     IPojoHB<VirtualImageConversions>

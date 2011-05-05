@@ -33,9 +33,4 @@ public class NotEnoughResourcesException extends AllocatorException
         super(cause);
     }
 
-    public NotEnoughResourcesException(final String cause, final Throwable t)
-    {
-        super(cause, t);
-    }
-
 }

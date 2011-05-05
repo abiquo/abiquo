@@ -45,7 +45,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -75,7 +75,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     DatastoreDAO datastoreDao;
@@ -106,7 +106,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      *             virtual datacenter.
      */
     @Override
-    public void updateUse(final Integer virtualApplianceId, VirtualMachine virtualMachine)
+    public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
         throws ResourceUpgradeUseException
     {
 
@@ -143,11 +143,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             cve.printStackTrace(); // FIXME
             throw new ResourceUpgradeUseException(msg.toString());
         }
-        catch (final Exception e) 
+        catch (final Exception e)
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
-            throw new ResourceUpgradeUseException(e);
+            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
         }
     }
 
@@ -171,7 +171,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         catch (final Exception e) // HibernateException NotEnoughResourcesException
         // NoSuchObjectException
         {
-            throw new ResourceUpgradeUseException(e);
+            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
         }
     }
 
@@ -197,7 +197,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             netAssignDao.findByVirtualDatacenter(virtualDatacenter);
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine.getId());
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
 
         if (networksAssignedList.isEmpty())
         {
@@ -215,14 +215,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                        .getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
 
                     vlanNetworkDao.flush();
                     // vlanNetworkDao.persist(vlanNetwork);
                 }
-                Rasd rasd = ipPoolManagement.getRasdRaw();
+                Rasd rasd = ipPoolManagement.getRasd();
                 rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
                 rasd.setParent(ipPoolManagement.getNetworkName());
                 rasd.setConnection(physicalTarget.getVirtualSwitch());
@@ -235,11 +235,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
         else
         {
-            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
+            log
+                .debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
             for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
             {
                 VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
-                Rasd rasd = ipPoolManagement.getRasdRaw();
+                Rasd rasd = ipPoolManagement.getRasd();
                 final Rack rack = physicalTarget.getRack();
                 if (vlanNetwork.getTag() == null)
                 {
@@ -248,8 +249,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
 
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                        .getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
                     final NetworkAssignment nb =
                         new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -280,7 +281,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine.getId());
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {
@@ -324,11 +325,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu());
+                .getVirtualCpusUsed()
+                + used.getCpu());
 
         final int newRam =
             (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam());
+                .getVirtualRamUsedInMb()
+                + used.getRam());
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -337,25 +340,26 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes()
+                + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
         machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
-        
+
         machine.setRealCpuCores(machine.getVirtualCpuCores());
         machine.setRealHardDiskInBytes(machine.getVirtualHardDiskInBytes());
         machine.setRealRamInMb(machine.getVirtualRamInMb());
 
         datacenterRepo.updateMachine(machine);
     }
-    
+
     public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
-    {       
+    {
         machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);
         machine.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb() + ramIncrease);
-        
+
         datacenterRepo.updateMachine(machine);
     }
 
@@ -395,7 +399,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @return
      * @throws SchedulerException
      */
-    public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, Rack rack)
+    public Integer getFreeVLANFromUsedList(final List<Integer> vlanIds, final Rack rack)
         throws NotEnoughResourcesException
     {
         Integer candidatePort = rack.getVlanIdMin();
@@ -453,7 +457,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return candidatePort;
     }
 
-    public Collection<Integer> getVlansIdAvoidAsCollection(Rack rack)
+    public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)
     {
 
         Collection<Integer> vlans_avoided_collection = new HashSet();
@@ -514,7 +518,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return vlans_avoided_collection;
     }
 
-    public List<Integer> getPublicVLANIdsFROMVLANNetworkList(List<VLANNetwork> vlanNetworkList)
+    public List<Integer> getPublicVLANIdsFROMVLANNetworkList(final List<VLANNetwork> vlanNetworkList)
     {
         List<Integer> publicIdsList = new ArrayList<Integer>();
         for (VLANNetwork vlanNetwork : vlanNetworkList)

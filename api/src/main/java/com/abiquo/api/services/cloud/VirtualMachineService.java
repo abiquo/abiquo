@@ -80,6 +80,12 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected OVFGeneratorService ovfService;
 
+    @Autowired
+    RemoteServiceService remoteService;
+
+    @Autowired
+    OVFGeneratorService ovfService;
+
     public VirtualMachineService()
     {
 
@@ -121,7 +127,8 @@ public class VirtualMachineService extends DefaultApiService
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
         }
         return vm;
     }
@@ -192,7 +199,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param vappId Virtual Appliance Id
      * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change
+     * @param state The state to which change 
      * @throws Exception
      */
     public void changeVirtualMachineState(Integer vappId, Integer vdcId, State state)
@@ -240,7 +247,4 @@ public class VirtualMachineService extends DefaultApiService
 
         resource.put(docEnvelopeRunning);
     }
-
-    
-
 }

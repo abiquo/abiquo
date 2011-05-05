@@ -40,8 +40,8 @@ import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 
 public class OVFPackageInstanceToVirtualImage
 {

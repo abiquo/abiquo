@@ -115,9 +115,7 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         dto.setStatus(1);
 
         ClientResponse response = resource.post(dto);
-        assertEquals(response.getStatusCode(), 400);
-
-        Assert.assertErrors(response, APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS.getCode());
+        Assert.assertErrors(response, 409, APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS.getCode());
     }
 
     @Test
@@ -138,8 +136,6 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         dto.setStatus(1);
 
         ClientResponse response = resource.post(dto);
-        assertEquals(response.getStatusCode(), 400);
-
-        Assert.assertErrors(response, APIError.REMOTE_SERVICE_TYPE_EXISTS.getCode());
+        Assert.assertErrors(response, 409, APIError.REMOTE_SERVICE_TYPE_EXISTS.getCode());
     }
 }

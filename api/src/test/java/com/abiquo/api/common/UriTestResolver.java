@@ -23,6 +23,7 @@ package com.abiquo.api.common;
 
 import static com.abiquo.api.util.URIResolver.buildPath;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,13 +72,13 @@ public class UriTestResolver
 {
     public static final String API_URI = "http://localhost:9009/api";
 
-    public static String resolveURI(String pathTemplate, Map<String, String> values)
+    public static String resolveURI(final String pathTemplate, final Map<String, String> values)
     {
         return URIResolver.resolveURI(API_URI, pathTemplate, values);
     }
 
-    public static String resolveURI(String pathTemplate, Map<String, String> values,
-        Map<String, String[]> queryParams)
+    public static String resolveURI(final String pathTemplate, final Map<String, String> values,
+        final Map<String, String[]> queryParams)
     {
         return URIResolver.resolveURI(API_URI, pathTemplate, values, queryParams);
     }
@@ -89,7 +90,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveEnterpriseURI(Integer enterpriseId)
+    public static String resolveEnterpriseURI(final Integer enterpriseId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
@@ -109,20 +110,24 @@ public class UriTestResolver
             + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES;
     }
 
+    public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) +"/"+ DatacenterResource.ENTERPRISES_PATH;
+    }
     public static String resolveRolesURI()
     {
         String uri = resolveURI(RolesResource.ROLES_PATH, new HashMap<String, String>());
         return uri;
     }
 
-    public static String resolveRoleURI(Integer roleId)
+    public static String resolveRoleURI(final Integer roleId)
     {
         String template = buildPath(RolesResource.ROLES_PATH, RoleResource.ROLE_PARAM);
 
         return resolveURI(template, Collections.singletonMap(RoleResource.ROLE, roleId.toString()));
     }
 
-    public static String resolveUsersURI(Integer enterpriseId)
+    public static String resolveUsersURI(final Serializable enterpriseId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
@@ -134,12 +139,12 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveUserURI(Integer enterpriseId, Integer userId)
+    public static String resolveUserURI(final Integer enterpriseId, final Integer userId)
     {
         return resolveUserURI(enterpriseId.toString(), userId);
     }
 
-    public static String resolveUserURI(String enterpriseWildcardOrId, Integer userId)
+    public static String resolveUserURI(final String enterpriseWildcardOrId, final Integer userId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
@@ -165,7 +170,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveDatacenterURI(Integer datacenterId)
+    public static String resolveDatacenterURI(final Integer datacenterId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
@@ -173,7 +178,7 @@ public class UriTestResolver
             datacenterId.toString()));
     }
 
-    public static String resolveRacksURI(Integer datacenterId)
+    public static String resolveRacksURI(final Integer datacenterId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -182,7 +187,7 @@ public class UriTestResolver
             datacenterId.toString()));
     }
 
-    public static String resolveRackURI(Integer datacenterId, Integer rackId)
+    public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -203,7 +208,7 @@ public class UriTestResolver
      * @param rackId identifier of the rack to resolve the URI
      * @return the resolved URI
      */
-    public static String resolveMachinesURI(Integer datacenterId, Integer rackId)
+    public static String resolveMachinesURI(final Integer datacenterId, final Integer rackId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -225,7 +230,8 @@ public class UriTestResolver
      * @param machineId identifier of the machine to resolve the URI.
      * @return the resolved URI
      */
-    public static String resolveMachineURI(Integer datacenterId, Integer rackId, Integer machineId)
+    public static String resolveMachineURI(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -250,8 +256,8 @@ public class UriTestResolver
      * @param machineId identifier of the machine to resolve the URI.
      * @return the resolved URI
      */
-    public static String resolveDatastoresURI(Integer datacenterId, Integer rackId,
-        Integer machineId)
+    public static String resolveDatastoresURI(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -277,8 +283,8 @@ public class UriTestResolver
      * @param datastoreId identifier of the datastore to resolve the URI.
      * @return the resolved URI
      */
-    public static String resolveDatastoreURI(Integer datacenterId, Integer rackId,
-        Integer machineId, Integer datastoreId)
+    public static String resolveDatastoreURI(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer datastoreId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -312,7 +318,7 @@ public class UriTestResolver
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES);
     }
 
-    public static String resolveRemoteServicesURI(Integer datacenterId)
+    public static String resolveRemoteServicesURI(final Integer datacenterId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -324,7 +330,8 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveRemoteServiceURI(Integer datacenterId, RemoteServiceType type)
+    public static String resolveRemoteServiceURI(final Integer datacenterId,
+        final RemoteServiceType type)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -352,7 +359,7 @@ public class UriTestResolver
     }
 
     public static String resolveOVFPackageListURI(final Integer enterpriseId,
-        Integer ovfPackageListId)
+        final Integer ovfPackageListId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
@@ -381,7 +388,7 @@ public class UriTestResolver
     }
 
     public static String resolveOVFPackageInstancesURI(final Integer datacenterId,
-        String remoteServiceType, final Integer enterpriseId)
+        final String remoteServiceType, final Integer enterpriseId)
     {
 
         String template =
@@ -401,7 +408,7 @@ public class UriTestResolver
     }
 
     public static String resolveOVFPackageInstanceURI(final Integer datacenterId,
-        String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
+        final String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
     {
 
         String template =
@@ -422,7 +429,7 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveOVFPackageURI(final Integer enterpriseId, Integer ovfPackageId)
+    public static String resolveOVFPackageURI(final Integer enterpriseId, final Integer ovfPackageId)
     {
 
         String template =
@@ -436,7 +443,7 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveURI(Integer datacenterId)
+    public static String resolveURI(final Integer datacenterId)
     {
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
@@ -445,7 +452,7 @@ public class UriTestResolver
             datacenterId.toString()));
     }
 
-    public static String resolvePrivateNetworksURI(Integer virtualDatacenterId)
+    public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -456,7 +463,8 @@ public class UriTestResolver
             VirtualDatacenterResource.VIRTUAL_DATACENTER, virtualDatacenterId.toString()));
     }
 
-    public static String resolvePrivateNetworkURI(Integer virtualDatacenterId, Integer networkId)
+    public static String resolvePrivateNetworkURI(final Integer virtualDatacenterId,
+        final Integer networkId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -471,7 +479,8 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolvePrivateNetworkIPsURI(Integer virtualDatacenterId, Integer vlanId)
+    public static String resolvePrivateNetworkIPsURI(final Integer virtualDatacenterId,
+        final Integer vlanId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -493,7 +502,7 @@ public class UriTestResolver
      * @param vdcId identifier of the virtual datacenter
      * @return URI of the virtual appliance resource into string object
      */
-    public static String resolveVirtualAppliancesURI(Integer virtualDatacenterId)
+    public static String resolveVirtualAppliancesURI(final Integer virtualDatacenterId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -514,7 +523,7 @@ public class UriTestResolver
      * @param vappId identifier of the virtual apliance
      * @return URI of the virtual appliance resource into string object
      */
-    public static String resolveVirtualApplianceURI(Integer vdcId, Integer vappId)
+    public static String resolveVirtualApplianceURI(final Integer vdcId, final Integer vappId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -553,7 +562,7 @@ public class UriTestResolver
      * @param vappId identifier of the virtual apliance
      * @return URI of the virtual appliance resource into string object
      */
-    public static String resolveVirtualMachinesURI(Integer vdcId, Integer vappId)
+    public static String resolveVirtualMachinesURI(final Integer vdcId, final Integer vappId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -614,7 +623,7 @@ public class UriTestResolver
             + VirtualMachineResource.VIRTUAL_MACHINE_ACTION_GET_IPS;
     }
 
-    public static String resolveVirtualDatacenterURI(Integer virtualDatacenterId)
+    public static String resolveVirtualDatacenterURI(final Integer virtualDatacenterId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -631,6 +640,12 @@ public class UriTestResolver
         return resolveVirtualDatacenterURI(virtualDatacenterId)
             + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
     }
+    
+    public static String resolveVirtualDatacenterActionGetDHCPInfoURI(final Integer virtualDatacenterId)
+    {
+        return resolveVirtualDatacenterURI(virtualDatacenterId)
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
+    }
 
     public static String resolveVirtualDatacentersURI()
     {
@@ -640,7 +655,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveHypervisorTypesURI(Integer datacenterId)
+    public static String resolveHypervisorTypesURI(final Integer datacenterId)
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
@@ -660,7 +675,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveSystemPropertiesURIByName(String name)
+    public static String resolveSystemPropertiesURIByName(final String name)
     {
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(SystemPropertiesResource.NAME_QUERY_PARAM, new String[] {name});
@@ -671,7 +686,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveSystemPropertiesURIByComponent(String component)
+    public static String resolveSystemPropertiesURIByComponent(final String component)
     {
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(SystemPropertiesResource.COMPONENT_QUERY_PARAM, new String[] {component});
@@ -682,7 +697,7 @@ public class UriTestResolver
         return uri;
     }
 
-    public static String resolveSystemPropertyURI(Integer propertyId)
+    public static String resolveSystemPropertyURI(final Integer propertyId)
     {
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,

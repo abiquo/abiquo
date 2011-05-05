@@ -149,4 +149,16 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
         return numberOfDeployedNetworks;
     }
+
+    /**
+     * Return the Rack by datacenter id and rack id.
+     * @param datacenterId
+     * @param rackId
+     * @return
+     */
+    public Rack findByIds(Integer datacenterId, Integer rackId)
+    {
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
+            Restrictions.eq(Rack.ID_PROPERTY, rackId));
+    }
 }

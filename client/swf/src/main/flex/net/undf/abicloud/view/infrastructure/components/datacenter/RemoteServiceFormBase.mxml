@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_REMOTE_SERVICE')"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_infra_editRemoteService.value}"
     xmlns:datacenter="net.undf.abicloud.view.infrastructure.components.datacenter.*">
 
     <mx:Metadata>

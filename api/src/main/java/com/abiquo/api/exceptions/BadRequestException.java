@@ -21,7 +21,9 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
 
 public class BadRequestException extends APIException
 {
@@ -29,6 +31,16 @@ public class BadRequestException extends APIException
 
     public BadRequestException(APIError error)
     {
-        super(Status.BAD_REQUEST, error);
+        super(error);
+    }    
+    
+    public BadRequestException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public BadRequestException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

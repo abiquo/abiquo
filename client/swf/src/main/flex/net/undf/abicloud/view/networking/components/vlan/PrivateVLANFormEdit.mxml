@@ -24,7 +24,8 @@
 
 <general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
-    titleText="@Resource(bundle='Networking', key='POPUP_TITLE_VLAN_EDIT')">
+    titleText="@Resource(bundle='Networking', key='POPUP_TITLE_VLAN_EDIT')"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createPrivateNetwork.value}">
 
     <mx:Script>
         <![CDATA[

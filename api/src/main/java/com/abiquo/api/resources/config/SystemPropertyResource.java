@@ -56,12 +56,6 @@ public class SystemPropertyResource extends AbstractResource
         @Context IRESTBuilder restBuilder) throws Exception
     {
         SystemProperty property = service.getSystemProperty(propertyId);
-
-        if (property == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_SYSTEM_PROPERTY);
-        }
-
         return createTransferObject(property, restBuilder);
     }
 
@@ -71,11 +65,6 @@ public class SystemPropertyResource extends AbstractResource
         throws Exception
     {
         SystemProperty property = service.getSystemProperty(propertyId);
-
-        if (property == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_SYSTEM_PROPERTY);
-        }
 
         property = service.modifySystemProperty(propertyId, systemProperty);
 

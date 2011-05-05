@@ -113,7 +113,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
         PagedList<User> page = new PagedList<User>();
         page.addAll(result);
-        page.setCurrentPage(offset);
+        page.setCurrentElement(offset);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 

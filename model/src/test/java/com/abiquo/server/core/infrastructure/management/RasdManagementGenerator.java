@@ -23,69 +23,114 @@ package com.abiquo.server.core.infrastructure.management;
 
 import java.util.List;
 
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManagement>
-
 {
+    private RasdGenerator rasdGenerator;
 
-    VirtualDatacenterGenerator vdcGen;
+    private VirtualDatacenterGenerator vdcGenerator;
 
-    // VirtualApplianceGenerator virtualApplianceGenerator;
+    private VirtualApplianceGenerator vappGenerator;
 
-    public RasdManagementGenerator(SeedGenerator seed)
+    private VirtualMachineGenerator vmGenerator;
+
+    public RasdManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
-        vdcGen = new VirtualDatacenterGenerator(seed);
-        // virtualApplianceGenerator = new VirtualApplianceGenerator(seed);
-
+        rasdGenerator = new RasdGenerator(seed);
+        vdcGenerator = new VirtualDatacenterGenerator(seed);
+        vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(RasdManagement obj1, RasdManagement obj2)
+    public void assertAllPropertiesEqual(final RasdManagement obj1, final RasdManagement obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.RASDRAW_PROPERTY,
-            RasdManagement.ID_VM_PROPERTY, RasdManagement.ID_RESOURCE_TYPE_PROPERTY, RasdManagement.VIRTUAL_APPLIANCE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.ID_RESOURCE_TYPE_PROPERTY);
+
+        rasdGenerator.assertAllPropertiesEqual(obj1.getRasd(), obj2.getRasd());
+
+        if (obj1.getVirtualDatacenter() != null || obj2.getVirtualDatacenter() != null)
+        {
+            vdcGenerator.assertAllPropertiesEqual(obj1.getVirtualDatacenter(), obj2
+                .getVirtualDatacenter());
+        }
+
+        if (obj1.getVirtualAppliance() != null || obj2.getVirtualAppliance() != null)
+        {
+            vappGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
+                .getVirtualAppliance());
+        }
+
+        if (obj1.getVirtualMachine() != null || obj2.getVirtualMachine() != null)
+        {
+            vmGenerator
+                .assertAllPropertiesEqual(obj1.getVirtualMachine(), obj2.getVirtualMachine());
+        }
     }
 
     @Override
     public RasdManagement createUniqueInstance()
     {
-        String idResource = newString(nextSeed(), 0, 255); // TODO generate resources with sense -->
-                                                           // storage and network
+        String idResource = newString(nextSeed(), 0, 255);
         return createInstance(idResource);
     }
 
-    public RasdManagement createInstance(String idResource)
+    public RasdManagement createInstance(final String idResource)
     {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        return createInstance(idResource, vdc);
+    }
 
-        RasdManagement rasd = new RasdManagement(idResource);
-        rasd.setVirtualDatacenter(vdcGen.createUniqueInstance());
+    public RasdManagement createInstance(final String idResource, final VirtualDatacenter vdc)
+    {
+        RasdManagement rasdManagement = new RasdManagement(idResource);
+        Rasd rasd = rasdGenerator.createInstance(Integer.valueOf(idResource));
 
-        return rasd;
+        rasdManagement.setRasd(rasd);
+        rasdManagement.setVirtualDatacenter(vdc);
+
+        return rasdManagement;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(RasdManagement entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final RasdManagement entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
+        Rasd rasd = entity.getRasd();
+        rasdGenerator.addAuxiliaryEntitiesToPersist(rasd, entitiesToPersist);
+        entitiesToPersist.add(rasd);
+
         VirtualDatacenter vdc = entity.getVirtualDatacenter();
+        if (vdc != null)
+        {
+            vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
+            entitiesToPersist.add(vdc);
+        }
 
-        vdcGen.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
-        entitiesToPersist.add(vdc);
+        VirtualAppliance vapp = entity.getVirtualAppliance();
+        if (vapp != null)
+        {
+            vappGenerator.addAuxiliaryEntitiesToPersist(vapp, entitiesToPersist);
+            entitiesToPersist.add(vapp);
+        }
 
-        // TODO if virtualdatacenter and other relations not null
-
-        // VirtualAppliance virtualAppliance = entity.getVirtualAppliance();
-        //
-        // virtualApplianceGenerator
-        // .addAuxiliaryEntitiesToPersist(virtualAppliance, entitiesToPersist);
-        // entitiesToPersist.add(virtualAppliance);
+        VirtualMachine vm = entity.getVirtualMachine();
+        if (vm != null)
+        {
+            vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
+            entitiesToPersist.add(vm);
+        }
     }
-
 }
