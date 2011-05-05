@@ -380,8 +380,13 @@
              */
             private function showPhysicalMachine():void
             {
-                physicalMachineRenderer.init();
-                showMoreInfoContainer(0);
+                //Need to preserve the state when the background process update data
+                if(virtualMachineList.selectedVirtualMachine){
+                	//virtualMachineList.virtualMachinesDataGrid.selectedItem
+                }else{
+	                physicalMachineRenderer.init();
+	                showMoreInfoContainer(0);                	
+                }
             }
 
             /////////////////////////////////////////////////////////
