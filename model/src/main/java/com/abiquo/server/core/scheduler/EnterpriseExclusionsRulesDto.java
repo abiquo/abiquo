@@ -21,47 +21,23 @@
 
 package com.abiquo.server.core.scheduler;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "machineLoadRule")
-public class MachineLoadRuleDto extends SingleResourceTransportDto
+/**
+ * Represent a collection of enterpriseExclusionRules
+ */
+@XmlRootElement(name = "enterpriseExclusionRules")
+public class EnterpriseExclusionsRulesDto extends WrapperDto<EnterpriseExclusionRuleDto>
 {
-    private Integer id;
-
-    public Integer getId()
+    @Override
+    @XmlElement(name = "enterpriseExclusionRule")
+    public List<EnterpriseExclusionRuleDto> getCollection()
     {
-        return id;
+        return collection;
     }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    private int cpuLoadPercentage;
-
-    public int getCpuLoadPercentage()
-    {
-        return cpuLoadPercentage;
-    }
-
-    public void setCpuLoadPercentage(int cpuLoadPercentage)
-    {
-        this.cpuLoadPercentage = cpuLoadPercentage;
-    }
-
-    private int ramLoadPercentage;
-
-    public int getRamLoadPercentage()
-    {
-        return ramLoadPercentage;
-    }
-
-    public void setRamLoadPercentage(int ramLoadPercentage)
-    {
-        this.ramLoadPercentage = ramLoadPercentage;
-    }
-
 }

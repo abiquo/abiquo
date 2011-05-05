@@ -49,6 +49,12 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 public interface IRESTBuilder
@@ -122,4 +128,14 @@ public interface IRESTBuilder
     public List<RESTLink> buildVolumeInfrastructureLinks(final VolumeManagement volume);
 
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
+
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion);
+
+    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
+        final MachineLoadRule mlr);
+
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
 }
