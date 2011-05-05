@@ -145,7 +145,7 @@ public class EnterpriseService extends DefaultApiService
     {
         if (repo.existsAnyWithName(dto.getName()))
         {
-            errors.add(APIError.ENTERPRISE_DUPLICATED_NAME);
+            addConflictErrors(APIError.ENTERPRISE_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -174,7 +174,8 @@ public class EnterpriseService extends DefaultApiService
         Enterprise enterprise = repo.findById(id);
         if (enterprise == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
 
         // userService.checkEnterpriseAdminCredentials(enterprise);
@@ -188,20 +189,21 @@ public class EnterpriseService extends DefaultApiService
         Enterprise old = repo.findById(enterpriseId);
         if (old == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
 
         userService.checkEnterpriseAdminCredentials(old);
 
         if (dto.getName().isEmpty())
         {
-            errors.add(APIError.ENTERPRISE_EMPTY_NAME);
+            addValidationErrors(APIError.ENTERPRISE_EMPTY_NAME);
             flushErrors();
         }
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.ENTERPRISE_DUPLICATED_NAME);
+            addConflictErrors(APIError.ENTERPRISE_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -231,14 +233,14 @@ public class EnterpriseService extends DefaultApiService
 
         if (user.getEnterprise().equals(enterprise))
         {
-            errors.add(APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);
+            addConflictErrors(APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);
             flushErrors();
         }
 
         Collection<VirtualDatacenter> vdcs = vdcRepo.findByEnterprise(enterprise);
         if (!vdcs.isEmpty())
         {
-            errors.add(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
+            addConflictErrors(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
             flushErrors();
         }
 
@@ -273,7 +275,8 @@ public class EnterpriseService extends DefaultApiService
         Machine machine = repo.findReservedMachine(enterprise, machineId);
         if (machine == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_MACHINE);
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
         }
 
         repo.releaseMachine(machine);
@@ -294,7 +297,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (limit == null)
         {
-            throw new NotFoundException(APIError.LIMITS_NOT_EXIST);
+            addNotFoundErrors(APIError.LIMITS_NOT_EXIST);
+            flushErrors();
         }
 
         return limit;
@@ -340,7 +344,7 @@ public class EnterpriseService extends DefaultApiService
 
         if (repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter) != null)
         {
-            errors.add(APIError.LIMITS_DUPLICATED);
+            addConflictErrors(APIError.LIMITS_DUPLICATED);
             flushErrors();
         }
 
@@ -425,7 +429,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (datacenterLink == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         String buildPath =
@@ -435,7 +440,8 @@ public class EnterpriseService extends DefaultApiService
 
         if (values.isEmpty())
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_DATACENTER);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
         }
 
         Integer datacenterId = Integer.valueOf(values.getFirst(DatacenterResource.DATACENTER));
@@ -447,7 +453,7 @@ public class EnterpriseService extends DefaultApiService
     {
         if (!enterprise.isValid())
         {
-            validationErrors.addAll(enterprise.getValidationErrors());
+            addValidationErrors(enterprise.getValidationErrors());
         }
 
         flushErrors();

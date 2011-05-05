@@ -88,9 +88,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveEnterpriseURI(vdc.getEnterprise().getId());
 
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 400);
-
-        assertErrors(response, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
+        assertErrors(response, 409, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
 
     }
 

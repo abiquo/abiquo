@@ -46,7 +46,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
  */
 @Service
 @Transactional(readOnly = true)
-public class IpAddressService
+public class IpAddressService extends DefaultApiService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(IpAddressService.class);
     
@@ -67,7 +67,8 @@ public class IpAddressService
         if (orderByEnum == null)
         {
             LOGGER.info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
-            throw new BadRequestException(APIError.QUERY_INVALID_PARAMETER);
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
         }
         return repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
     }
@@ -81,7 +82,8 @@ public class IpAddressService
         if (orderByEnum == null)
         {
             LOGGER.info("Bad parameter 'by' in request to get the private ips by enterprise.");
-            throw new BadRequestException(APIError.QUERY_INVALID_PARAMETER);
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
         }
         return repo.findIpsByEnterprise(entId, firstElem, numElem, has, orderByEnum, asc);
     }

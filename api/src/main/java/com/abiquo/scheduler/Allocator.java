@@ -44,7 +44,7 @@ import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
@@ -73,7 +73,7 @@ public class Allocator implements IAllocator
     FitPolicyRuleDAO fitPolicyDao;
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     VirtualApplianceDAO virtualApplianceDao;
@@ -105,7 +105,7 @@ public class Allocator implements IAllocator
     
     
     public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
-        boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException
+        boolean foreceEnterpriseSoftLimits) throws AllocatorException
     {
 
         final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
@@ -155,7 +155,7 @@ public class Allocator implements IAllocator
 
     @Override
     public VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer virtualMachineId,
-        Boolean foreceEnterpriseSoftLimits) throws AllocatorException, ResourceAllocationException
+        Boolean foreceEnterpriseSoftLimits) throws AllocatorException
     {
 
         VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);

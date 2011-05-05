@@ -186,7 +186,13 @@ public class RoleService extends DefaultApiService
 
     public Role getRole(final Integer id)
     {
-        return enterpriseRep.findRoleById(id);
+        Role role = enterpriseRep.findRoleById(id);
+        if (role == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            flushErrors();
+        }
+        return role;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -195,7 +201,8 @@ public class RoleService extends DefaultApiService
         Role old = getRole(roleId);
         if (old == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            flushErrors();
         }
 
         if (old.isBlocked())
@@ -252,10 +259,6 @@ public class RoleService extends DefaultApiService
     public void removeRole(final Integer id)
     {
         Role role = getRole(id);
-        if (role == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
-        }
         enterpriseRep.deleteRole(role);
 
         tracer.log(SeverityType.INFO, ComponentType.ROLE, EventType.ROLE_DELETED, "Deleted role "

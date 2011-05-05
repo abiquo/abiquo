@@ -183,7 +183,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = put(uri2, dto2, "sysadmin", "sysadmin");
 
-        assertErrors(response, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        assertErrors(response, 409, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     // TESTS refered to the action of GET IPs by Enterprise

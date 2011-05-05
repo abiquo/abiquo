@@ -39,6 +39,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ConflictException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
@@ -76,7 +77,7 @@ public class IpAddressesResource extends AbstractResource
 
         if (all == null || all.isEmpty())
         {
-            throw new ConflictException(APIError.NETWORK_WITHOUT_IPS);
+            throw new InternalServerErrorException(APIError.NETWORK_WITHOUT_IPS);
         }
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();

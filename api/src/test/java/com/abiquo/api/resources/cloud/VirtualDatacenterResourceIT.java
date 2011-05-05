@@ -160,7 +160,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, vapp);
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
-        assertErrors(response, APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
+        assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
     }
 
     @Test
@@ -176,7 +176,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToPersist.toArray());
 
         ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
-        assertErrors(response, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
+        assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
     }
 
     @Test
