@@ -116,7 +116,7 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
 
             // Returning result
-            resultResponse.getData().setClientPrivileges(privileges);
+            resultResponse.getData().setPrivileges(privileges);
         }
 
         return resultResponse;
