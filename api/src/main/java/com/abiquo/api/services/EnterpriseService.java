@@ -469,11 +469,10 @@ public class EnterpriseService extends DefaultApiService
         Privilege privilege = repo.findPrivilegeById(id);
         if (privilege == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_PRIVILEGE);
+            addNotFoundErrors(APIError.NON_EXISTENT_PRIVILEGE);
+            flushErrors();
         }
 
-        // TODO scastro
-        // userService.checkCurrentPrivilege(privilege);
         return privilege;
     }
 

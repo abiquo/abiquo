@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
@@ -100,7 +99,8 @@ public class RoleService extends DefaultApiService
 
             if (enterprise == null)
             {
-                throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+                addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+                flushErrors();
             }
 
             LOGGER.debug("Creating role with enterprise");
@@ -133,7 +133,8 @@ public class RoleService extends DefaultApiService
             if (enterpriseValues == null
                 || !enterpriseValues.containsKey(EnterpriseResource.ENTERPRISE))
             {
-                throw new NotFoundException(APIError.ROLE_PARAM_NOT_FOUND);
+                addNotFoundErrors(APIError.ROLE_PARAM_NOT_FOUND);
+                flushErrors();
             }
 
             Integer roleId =
@@ -160,7 +161,8 @@ public class RoleService extends DefaultApiService
                 if (privilegeValues == null
                     || !privilegeValues.containsKey(PrivilegeResource.PRIVILEGE))
                 {
-                    throw new NotFoundException(APIError.PRIVILEGE_PARAM_NOT_FOUND);
+                    addNotFoundErrors(APIError.PRIVILEGE_PARAM_NOT_FOUND);
+                    flushErrors();
                 }
                 idList.add(Integer.valueOf(privilegeValues.getFirst(PrivilegeResource.PRIVILEGE)));
             }
@@ -207,7 +209,8 @@ public class RoleService extends DefaultApiService
 
         if (old.isBlocked())
         {
-            throw new NotFoundException(APIError.NON_MODIFICABLE_ROLE);
+            addConflictErrors(APIError.NON_MODIFICABLE_ROLE);
+            flushErrors();
         }
 
         old.setName(dto.getName());
@@ -225,7 +228,8 @@ public class RoleService extends DefaultApiService
             Enterprise ent = enterpriseRep.findById(entId);
             if (ent == null)
             {
-                throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+                addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+                flushErrors();
             }
             old.setEnterprise(ent);
         }
@@ -239,7 +243,8 @@ public class RoleService extends DefaultApiService
                 Privilege p = enterpriseRep.findPrivilegeById(pId);
                 if (p == null)
                 {
-                    throw new NotFoundException(APIError.NON_EXISTENT_PRIVILEGE);
+                    addNotFoundErrors(APIError.NON_EXISTENT_PRIVILEGE);
+                    flushErrors();
                 }
                 old.addPrivilege(p);
             }
@@ -270,7 +275,8 @@ public class RoleService extends DefaultApiService
         Enterprise enterprise = enterpriseRep.findById(enterpriseId);
         if (enterprise == null)
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
         }
         return enterprise;
     }

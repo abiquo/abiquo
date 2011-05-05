@@ -35,7 +35,7 @@ import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.RoleService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -100,9 +100,10 @@ public class RoleServiceTest extends AbstractGeneratorTest
             service.modifyRole(oldRoleBlocked.getId(), rlBloked);
             Assert.fail("");
         }
-        catch (NotFoundException e)
+        catch (ConflictException e)
         {
-            Assert.assertEquals(APIError.NON_MODIFICABLE_ROLE.getCode(), e.getCode());
+            Assert.assertEquals(e.getErrors().iterator().next().getCode(),
+                APIError.NON_MODIFICABLE_ROLE.getCode());
         }
         finally
         {

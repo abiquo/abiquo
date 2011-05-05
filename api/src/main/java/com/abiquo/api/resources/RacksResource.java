@@ -21,8 +21,8 @@
 
 package com.abiquo.api.resources;
 
-import static com.abiquo.api.resources.RackResource.createTransferObject;
 import static com.abiquo.api.resources.RackResource.createPersistenceObject;
+import static com.abiquo.api.resources.RackResource.createTransferObject;
 
 import java.util.List;
 
@@ -35,6 +35,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.InfrastructureService;
@@ -57,12 +58,12 @@ public class RacksResource extends AbstractResource
 
     @GET
     public RacksDto getRacks(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        
-        // Receive the Racks and convert them as RacksDto in the 'createTransferObject' loop. 
-        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);       
+
+        // Receive the Racks and convert them as RacksDto in the 'createTransferObject' loop.
+        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);
         RacksDto racks = new RacksDto();
         if (all != null && !all.isEmpty())
         {
@@ -75,8 +76,8 @@ public class RacksResource extends AbstractResource
     }
 
     @POST
-    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RackDto rackDto, @Context IRESTBuilder restBuilder) throws Exception
+    public RackDto postRack(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        final RackDto rackDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         Rack rack = createPersistenceObject(rackDto);
         Rack r = infrastructureService.addRack(rack, datacenterId);
