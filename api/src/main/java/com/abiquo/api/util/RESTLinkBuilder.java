@@ -73,10 +73,10 @@ public class RESTLinkBuilder extends SingleLinkBuilderImpl
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-                if (!pathParams.containsKey(entry.getKey()))
-                {
+//                if (!pathParams.containsKey(entry.getKey()))
+//                {
                     pathParam(entry.getKey(), entry.getValue());
-                }
+//                }
             }
         }
         return this;
