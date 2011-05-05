@@ -218,8 +218,11 @@ public class HyperVMachineTest extends AbsMachineTest
         SWbemServices cimService = hyperV.getCIMService();
 
         // Preparing the query
+//        String query =
+//            "SELECT * FROM CIM_DataFile where FileName LIKE 'a%' and Drive = 'z:' ";
+        
         String query =
-            "SELECT * FROM CIM_DataFile where FileName LIKE 'a%' and Drive = 'z:' ";
+        "SELECT * FROM CIM_DataFile WHERE FileName like 'abq_datastoreuuid_%' and Drive = 'Z:'"; //FileName = 'aquimismo.vhd' AND 
         
         // Path and NAme don't work with queies
         //and Path = '\\abiquo monolithic 1.7\\'"; // Only files in rootpath
