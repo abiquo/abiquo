@@ -35,6 +35,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.Assert;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -98,6 +99,49 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+    }
+
+    @Test
+    public void getUsersListFilteredByID() throws Exception
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createUniqueInstance();
+        User u1 = userGenerator.createInstance(e1, r, "p1", "u1", "s1", "e1", "neck");
+        User u2 = userGenerator.createInstance(e2, r, "p2", "u2", "s2", "e2", "nack");
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(r);
+        entitiesToPersist.add(u1);
+        entitiesToPersist.add(u2);
+
+        setup(entitiesToPersist.toArray());
+
+        String uri = resolveUsersURI("_");
+        uri =
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("orderBy", new String[] {"nick"}), false);
+        uri =
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("filter", new String[] {u1.getNick()}), false);
+
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), 200);
+
+        UsersDto entity = response.getEntity(UsersDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 1);
+        UserDto u = entity.getCollection().iterator().next();
+        Assert.assertEquals(u.getNick(), "neck");
     }
 
     @Test
