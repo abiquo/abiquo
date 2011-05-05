@@ -24,7 +24,6 @@ package com.abiquo.api.services.cloud;
 import java.util.Collection;
 import java.util.List;
 
-import javax.jms.ResourceAllocationException;
 import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -35,23 +34,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-import com.abiquo.scheduler.IAllocator;
-import com.abiquo.scheduler.ResourceUpgradeUse;
-import com.abiquo.scheduler.limit.LimitExceededException;
-import com.abiquo.scheduler.workload.AllocatorException;
-import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -79,12 +71,6 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected OVFGeneratorService ovfService;
-
-    @Autowired
-    RemoteServiceService remoteService;
-
-    @Autowired
-    OVFGeneratorService ovfService;
 
     public VirtualMachineService()
     {

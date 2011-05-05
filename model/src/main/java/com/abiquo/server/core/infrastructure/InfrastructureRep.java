@@ -615,4 +615,15 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
+
+    public List<Rack> findRacksWithHAEnabled(Datacenter dc)
+    {
+        return rackDao.findRacksWithHAEnabled(dc);
+    }
+
+    public List<Machine> findRackEnabledMachines(Rack rack)
+    {
+        return machineDao.findRackEnabledMachines(rack);
+    }
+
 }
