@@ -517,8 +517,9 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(nodeVirtualImage.getId()
-                .toString(), nodeVirtualImage.getVirtualImage()));
+            final String diskid = nodeVirtualImage.getId() == null ? "to": nodeVirtualImage.getId().toString();
+            
+            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(diskid, nodeVirtualImage.getVirtualImage()));
 
             OVFReferenceUtils.addFileOrIgnore(references, createFileFromVirtualImage(
                 nodeVirtualImage, bundling));
