@@ -33,5 +33,5 @@
     <!-- load the configuration file -->
     <import resource="persistencebeans.xml" />
     <import resource="security-beans.xml" />
-    <import resource="security-${abiquo.security.mode}-beans.xml" />
+    <import resource="security-abiquo-beans.xml" />
 </beans>

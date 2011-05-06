@@ -134,44 +134,7 @@
 			<artifactId>spring-security-core</artifactId>
 			<version>2.0.4</version>
 		</dependency>
-		<!-- LDAP -->
-		<dependency>
-			<groupId>org.springframework.ldap</groupId>
-			<artifactId>spring-ldap-core</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.ldap</groupId>
-			<artifactId>spring-ldap-core-tiger</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.ldap</groupId>
-			<artifactId>spring-ldap-odm</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.ldap</groupId>
-			<artifactId>spring-ldap-ldif-core</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.ldap</groupId>
-			<artifactId>spring-ldap-ldif-batch</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.server</groupId>
-			<artifactId>apacheds-server-jndi</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-		<dependency>
-            <groupId>org.apache.directory.server</groupId>
-            <artifactId>apacheds-core</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-
-		<!-- LDAP -->
+		
 		<!-- END: SPRING DEPENDENCIES -->
 
 		<!-- WINK DEPENDENCIES -->
@@ -527,61 +490,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-                <groupId>ca.grimoire.maven</groupId>
-                <artifactId>apacheds-maven-plugin</artifactId>
-                <version>0.1</version>
-
-                <configuration>
-                    <!-- The LDAP server port. -->
-                    <port>7007</port>
-                    <partitions>
-                        <partition>
-                            <id>springframework.org</id>
-                            <baseDn>dc=springframework,dc=org</baseDn>
-                        </partition>
-                        
-                    </partitions>
-                    
-                    <ldifDirectory>src/test/resources/ldap/users.ldif</ldifDirectory>
-                    <workingDirectory>${project.build.directory}/apache-ds/</workingDirectory>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <id>start-apache-ds</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-
-                    <execution>
-                        <id>stop-apache-ds</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                     
-                    <!-- 
-                    <execution>
-                        <id>start-apache-ds1</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    
-                    <execution>
-                        <id>stop-apache-ds1</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution> -->
-                </executions>
-            </plugin>
+			
 		</plugins>
 		<filters>
 			<filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
