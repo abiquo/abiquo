@@ -35,6 +35,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
@@ -164,6 +165,12 @@ import com.abiquo.server.core.util.PagedList;
                 Restrictions.eq("id", volumeId));
         return (VolumeManagement) criteria.uniqueResult();
     }
+    
+    public VolumeManagement getVolumeByRasd(final Rasd rasd)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("rasd", rasd));
+        return (VolumeManagement) criteria.uniqueResult();
+    }
 
     public List<VolumeManagement> getVolumesByEnterprise(final Integer id,
         final FilterOptions filters)
@@ -203,7 +210,14 @@ import com.abiquo.server.core.util.PagedList;
         return volumes;
 
     }
-
+    
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("virtualImage.id", idImage));
+        Object obj = criteria.uniqueResult();
+        return (VolumeManagement) obj;
+    }
+    
     @SuppressWarnings("unchecked")
     private <T> List<T> getSQLQueryResults(final Session session, final Query query,
         final Class<T> objectClass, final int idFieldPosition)

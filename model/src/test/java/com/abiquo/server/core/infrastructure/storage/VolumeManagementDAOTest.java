@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -102,5 +103,22 @@ public class VolumeManagementDAOTest extends
 
         assertEquals(results.size(), 1);
         eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+    }
+
+    @Test
+    public void testGetVolumesByRasd()
+    {
+        // Test without filtering
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+        Rasd rasd = volume.getRasd();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        VolumeManagement vol = dao.getVolumeByRasd(rasd);
+
+        eg().assertAllPropertiesEqual(vol,volume);
     }
 }

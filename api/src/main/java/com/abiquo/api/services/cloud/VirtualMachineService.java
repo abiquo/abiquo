@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
@@ -53,8 +54,8 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
-@Repository
-@Transactional(readOnly = true)
+@Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService
 {
     private static final String RESOURCE_URI =
@@ -185,13 +186,14 @@ public class VirtualMachineService
      * @param state The state to which change 
      * @throws Exception
      */
-    public void changeVirtualMachineState(Integer vappId, Integer vdcId, State state)
+    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
         throws Exception
     {
         VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
-
+        VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
         EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
+         //EnvelopeType envelop = ovfService.changeMachineState(vm, vm.getState().toResourceState());
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
@@ -217,7 +219,7 @@ public class VirtualMachineService
      */
     public Boolean sameState(VirtualMachine vm, State state)
     {
-        String actual = OVFGeneratorService.getActualState(vm);
+        String actual = vm.getState().toOVF();//OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);
     }
 

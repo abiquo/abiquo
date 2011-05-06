@@ -59,6 +59,7 @@
 		<class>com.abiquo.server.core.infrastructure.storage.StorageDevice</class>
     	<class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
 		<class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
+		<class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
 		<!-- end: storage -->
 
 		<!-- workload -->
