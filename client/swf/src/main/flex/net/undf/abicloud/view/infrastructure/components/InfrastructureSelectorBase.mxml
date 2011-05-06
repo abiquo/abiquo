@@ -44,7 +44,7 @@
 		[Event(name="editRack", type="flash.events.Event")]
 		[Event(name="editPhysicalMachine", type="flash.events.Event")]
 		
-		[Event(name="infrastructureElementSelected", type="flash.events.Event")]
+		[Event(name="infrastructureElementSelected", type="net.undf.abicloud.events.InfrastructureEvent")]
 		
 		[Event(name="refreshDatacenterResources", type="flash.events.Event")]
 	</mx:Metadata>
@@ -235,7 +235,13 @@
                 }
 
                 //Announcing that a InfrastructureElement has been selected
-                dispatchEvent(new Event("infrastructureElementSelected"));
+                var eventElement:InfrastructureEvent = new InfrastructureEvent("infrastructureElementSelected");
+                if(event){
+	                eventElement.automaticUpdate = true;
+                }else{
+                	eventElement.automaticUpdate = false;
+                }
+                dispatchEvent(eventElement);
             }
 
             private function onClickRefreshDatacenterResourcesButton():void
