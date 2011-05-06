@@ -623,7 +623,7 @@ public class InfrastructureRep extends DefaultRepBase
 
     public List<Machine> findRackEnabledMachines(Rack rack)
     {
-        return machineDao.findRackEnabledMachines(rack);
+        return machineDao.findRackEnabledForHAMachines(rack);
     }
 
 }
