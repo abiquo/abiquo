@@ -621,7 +621,7 @@ public class InfrastructureRep extends DefaultRepBase
         return rackDao.findRacksWithHAEnabled(dc);
     }
 
-    public List<Machine> findRackEnabledMachines(Rack rack)
+    public List<Machine> findRackEnabledForHAMachines(Rack rack)
     {
         return machineDao.findRackEnabledForHAMachines(rack);
     }
