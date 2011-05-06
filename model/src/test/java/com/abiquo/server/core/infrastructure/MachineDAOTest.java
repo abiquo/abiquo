@@ -306,6 +306,6 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         MachineDAO dao = createDaoForRollbackTransaction();
 
         Assert.assertEquals(State.values().length, 8);
-        Assert.assertEquals(dao.findRackEnabledMachines(reload(dao, rack)).size(), 2);
+        Assert.assertEquals(dao.findRackEnabledForHAMachines(reload(dao, rack)).size(), 2);
     }
 }

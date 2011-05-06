@@ -85,19 +85,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private static Criterion enabledMachine()
-    {
-        return Restrictions.or(managedMachine(), provisionedMachine());
-    }
-
-    private static Criterion managedMachine()
+    private static Criterion enabledForHAMachine()
     {
         return Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED);
-    }
-
-    private static Criterion provisionedMachine()
-    {
-        return Restrictions.eq(Machine.STATE_PROPERTY, State.PROVISIONED);
     }
 
     public List<Machine> findMachines(Datacenter datacenter)
@@ -134,10 +124,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public List<Machine> findRackEnabledMachines(Rack rack)
+    public List<Machine> findRackEnabledForHAMachines(Rack rack)
     {
         Criteria criteria = createCriteria(sameRack(rack));
-        criteria.add(enabledMachine());
+        criteria.add(enabledForHAMachine());
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
 
         List<Machine> result = getResultList(criteria);
