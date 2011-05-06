@@ -68,6 +68,19 @@
                 this._selectedVirtualMachine = value;
                 dispatchEvent(new Event("selectedVirtualMachineChange"));
             }
+            
+            //The index of selected virtual machine
+            private var _selectedIndex:int = -1;
+
+            public function get selectedIndex():int
+            {
+                return this._selectedIndex;
+            }
+
+            public function set selectedIndex(index:int):void
+            {
+                this._selectedIndex = index;
+            }
 
             //The Array of VirtualMachines
             [Bindable]
@@ -169,8 +182,9 @@
                     }
 
                     //Showing the filtered virtual machines
-                    this._virtualMachinesFiltered = virtualMachinesFiltered;
+                    this._virtualMachinesFiltered = virtualMachinesFiltered;                    
                 }
+                virtualMachinesDataGrid.selectedIndex = this._selectedIndex;
             }
 
             /**
@@ -185,6 +199,7 @@
                 if (virtualMachinesDataGrid.selectedIndex > -1)
                 {
                     selectedVirtualMachine = virtualMachinesDataGrid.selectedItem as VirtualMachine;
+                    this._selectedIndex = virtualMachinesDataGrid.selectedIndex;
                     dispatchEvent(new Event("virtualMachineSelected"));
 
                     if (virtualMachinesTile)
@@ -200,6 +215,7 @@
                 if (virtualMachinesTile.selectedIndex > -1)
                 {
                     selectedVirtualMachine = virtualMachinesTile.selectedItem as VirtualMachine;
+                    this._selectedIndex = virtualMachinesTile.selectedIndex;
                     dispatchEvent(new Event("virtualMachineSelected"));
 
                     virtualMachinesDataGrid.selectedIndex = virtualMachinesTile.selectedIndex;
