@@ -134,9 +134,6 @@ public class VirtualDatacentersResource extends AbstractResource
         VirtualDatacenterDto response =
             VirtualDatacenterResource.createTransferObject(vdc, restBuilder);
 
-        dto.getNetworkConfiguration().setDefaultNetwork(Boolean.TRUE);
-        response.setNetworkConfiguration(dto.getNetworkConfiguration());
-
         return response;
     }
 
@@ -172,13 +169,10 @@ public class VirtualDatacentersResource extends AbstractResource
     private Enterprise getEnterprise(Integer enterpriseId)
     {
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-        }
 
         return enterprise;
     }
+    
 
     private Integer getLinkId(RESTLink link, String path, String param, String key, APIError error)
     {

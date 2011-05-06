@@ -137,11 +137,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         response =
             resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
                 rack);
-        assertEquals(response.getStatusCode(), 400);
+        assertEquals(response.getStatusCode(), 409);
 
-        ErrorsDto errors = response.getEntity(ErrorsDto.class);
-        assertEquals(errors.getCollection().get(0).getCode(), APIError.RACK_DUPLICATED_NAME
-            .getCode());
     }
 
     @Test
@@ -151,6 +148,7 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
 
         RackDto rack = resource.accept(MediaType.APPLICATION_XML).get(RackDto.class);
         rack.setShortDescription("dummy_description");
+        rack.setId(1234);
 
         resource = client.resource(invalidRack);
 

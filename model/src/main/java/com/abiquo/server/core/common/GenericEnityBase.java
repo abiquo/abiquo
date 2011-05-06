@@ -29,6 +29,7 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 
+import com.abiquo.model.transport.error.CommonError;
 import com.softwarementors.bzngine.entities.PersistentVersionedEntityBase;
 import com.softwarementors.validation.ValidationManager;
 
@@ -46,9 +47,18 @@ public abstract class GenericEnityBase<T extends Serializable> extends
         return Validation.buildDefaultValidatorFactory().getValidator().validate(this).isEmpty();
     }
 
-    public Set<ConstraintViolation< ? extends Object>> getValidationErrors()
+    public Set<CommonError> getValidationErrors()
     {
-        return new LinkedHashSet<ConstraintViolation< ? extends Object>>(ValidationManager
-            .getValidator().validate(this));
+        Set<ConstraintViolation< ? extends Object>> constraintValidations =
+            new LinkedHashSet<ConstraintViolation< ? extends Object>>(ValidationManager
+                .getValidator().validate(this));
+        
+        Set<CommonError> setOfErrors = new LinkedHashSet<CommonError>();
+        for (ConstraintViolation<? extends Object> cons : constraintValidations)
+        {
+            setOfErrors.add(new CommonError(cons.getPropertyPath().toString(), cons.getMessage()));
+        }
+        return setOfErrors;
     }
+    
 }

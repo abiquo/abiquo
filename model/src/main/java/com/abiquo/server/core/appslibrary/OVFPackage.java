@@ -88,7 +88,7 @@ public class OVFPackage implements Serializable, PersistenceDto
     private Icon icon;
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
-    private com.abiquo.server.core.enumerator.DiskFormatType type;
+    private com.abiquo.model.enumerator.DiskFormatType type;
 
     private Long diskSizeMb;
 
@@ -251,12 +251,12 @@ public class OVFPackage implements Serializable, PersistenceDto
         this.diskSizeMb = diskSizeMb;
     }
 
-    public com.abiquo.server.core.enumerator.DiskFormatType getType()
+    public com.abiquo.model.enumerator.DiskFormatType getType()
     {
         return type;
     }
 
-    public void setType(com.abiquo.server.core.enumerator.DiskFormatType type)
+    public void setType(com.abiquo.model.enumerator.DiskFormatType type)
     {
         this.type = type;
     }

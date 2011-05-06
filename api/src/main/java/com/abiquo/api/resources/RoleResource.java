@@ -56,11 +56,6 @@ public class RoleResource extends AbstractResource
     {
         Role role = service.getRole(roleId);
 
-        if (role == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
-        }
-
         return createTransferObject(role, restBuilder);
     }
 

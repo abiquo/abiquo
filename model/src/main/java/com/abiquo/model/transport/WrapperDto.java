@@ -26,13 +26,15 @@ import java.util.List;
 
 public abstract class WrapperDto<T> extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     protected List<T> collection = new ArrayList<T>();
 
     private Integer totalSize;
 
     public abstract List<T> getCollection();
 
-    public void add(T element)
+    public void add(final T element)
     {
         collection.add(element);
     }
@@ -42,12 +44,12 @@ public abstract class WrapperDto<T> extends SingleResourceTransportDto
         return collection.isEmpty();
     }
 
-    public void addAll(WrapperDto<T> errors)
+    public void addAll(final WrapperDto<T> errors)
     {
         collection.addAll(errors.getCollection());
     }
 
-    public void setTotalSize(Integer totalSize)
+    public void setTotalSize(final Integer totalSize)
     {
         this.totalSize = totalSize;
     }

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaRasdRawDAO")
+@Repository("jpaRasdDAO")
 public class RasdDAO extends DefaultDAOBase<String, Rasd>
 {
     public RasdDAO()
@@ -35,7 +35,7 @@ public class RasdDAO extends DefaultDAOBase<String, Rasd>
         super(Rasd.class);
     }
 
-    public RasdDAO(EntityManager entityManager)
+    public RasdDAO(final EntityManager entityManager)
     {
         super(Rasd.class, entityManager);
     }

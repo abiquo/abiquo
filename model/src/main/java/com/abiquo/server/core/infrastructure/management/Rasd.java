@@ -40,15 +40,18 @@ public class Rasd extends GenericEnityBase<String>
 {
     public static final String TABLE_NAME = "rasd";
 
-    public Rasd(String id, String elementName, int resourceType)
+    // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
+    // code
+    protected Rasd()
+    {
+        // Just for JPA support
+    }
+
+    public Rasd(final String id, final String elementName, final int resourceType)
     {
         this.id = id;
         setElementName(elementName);
         setResourceType(resourceType);
-    }
-
-    protected Rasd()
-    {
     }
 
     private final static String ID_COLUMN = "instanceID";
@@ -93,7 +96,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.addressOnParent;
     }
 
-    private void setAddressOnParent(String addressOnParent)
+    public void setAddressOnParent(final String addressOnParent)
     {
         this.addressOnParent = addressOnParent;
     }
@@ -121,7 +124,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.address;
     }
 
-    private void setAddress(String address)
+    public void setAddress(final String address)
     {
         this.address = address;
     }
@@ -149,7 +152,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.parent;
     }
 
-    public void setParent(String parent)
+    public void setParent(final String parent)
     {
         this.parent = parent;
     }
@@ -171,7 +174,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.virtualQuantity;
     }
 
-    private void setVirtualQuantity(Integer virtualQuantity)
+    public void setVirtualQuantity(final Integer virtualQuantity)
     {
         this.virtualQuantity = virtualQuantity;
     }
@@ -199,7 +202,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.hostResource;
     }
 
-    private void setHostResource(String hostResource)
+    public void setHostResource(final String hostResource)
     {
         this.hostResource = hostResource;
     }
@@ -221,7 +224,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.generation;
     }
 
-    private void setGeneration(Long generation)
+    public void setGeneration(final Long generation)
     {
         this.generation = generation;
     }
@@ -243,7 +246,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.changeableType;
     }
 
-    private void setChangeableType(Integer changeableType)
+    public void setChangeableType(final Integer changeableType)
     {
         this.changeableType = changeableType;
     }
@@ -265,7 +268,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.automaticAllocation;
     }
 
-    private void setAutomaticAllocation(Integer automaticAllocation)
+    public void setAutomaticAllocation(final Integer automaticAllocation)
     {
         this.automaticAllocation = automaticAllocation;
     }
@@ -293,7 +296,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.resourceSubType;
     }
 
-    private void setResourceSubType(String resourceSubType)
+    public void setResourceSubType(final String resourceSubType)
     {
         this.resourceSubType = resourceSubType;
     }
@@ -315,7 +318,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.reservation;
     }
 
-    private void setReservation(Long reservation)
+    public void setReservation(final Long reservation)
     {
         this.reservation = reservation;
     }
@@ -343,7 +346,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.poolId;
     }
 
-    private void setPoolId(String poolId)
+    public void setPoolId(final String poolId)
     {
         this.poolId = poolId;
     }
@@ -371,7 +374,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.connection;
     }
 
-    public void setConnection(String connection)
+    public void setConnection(final String connection)
     {
         this.connection = connection;
     }
@@ -399,7 +402,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.configurationName;
     }
 
-    private void setConfigurationName(String configurationName)
+    public void setConfigurationName(final String configurationName)
     {
         this.configurationName = configurationName;
     }
@@ -424,7 +427,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.weight;
     }
 
-    private void setWeight(Integer weight)
+    public void setWeight(final Integer weight)
     {
         this.weight = weight;
     }
@@ -453,7 +456,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.otherResourceType;
     }
 
-    private void setOtherResourceType(String otherResourceType)
+    public void setOtherResourceType(final String otherResourceType)
     {
         this.otherResourceType = otherResourceType;
     }
@@ -475,7 +478,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.mappingBehaviour;
     }
 
-    private void setMappingBehaviour(Integer mappingBehaviour)
+    public void setMappingBehaviour(final Integer mappingBehaviour)
     {
         this.mappingBehaviour = mappingBehaviour;
     }
@@ -497,7 +500,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.automaticDeallocation;
     }
 
-    private void setAutomaticDeallocation(Integer automaticDeallocation)
+    public void setAutomaticDeallocation(final Integer automaticDeallocation)
     {
         this.automaticDeallocation = automaticDeallocation;
     }
@@ -525,7 +528,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.caption;
     }
 
-    private void setCaption(String caption)
+    public void setCaption(final String caption)
     {
         this.caption = caption;
     }
@@ -553,7 +556,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.allocationUnits;
     }
 
-    public void setAllocationUnits(String allocationUnits)
+    public void setAllocationUnits(final String allocationUnits)
     {
         this.allocationUnits = allocationUnits;
     }
@@ -562,9 +565,9 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static boolean ELEMENT_NAME_REQUIRED = true;
 
-    protected final static int ELEMENT_NAME_LENGTH_MIN = 0;
+    public final static int ELEMENT_NAME_LENGTH_MIN = 0;
 
-    protected final static int ELEMENT_NAME_LENGTH_MAX = 255;
+    public final static int ELEMENT_NAME_LENGTH_MAX = 255;
 
     private final static boolean ELEMENT_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -581,7 +584,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.elementName;
     }
 
-    private void setElementName(String elementName)
+    public void setElementName(final String elementName)
     {
         this.elementName = elementName;
     }
@@ -609,7 +612,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.description;
     }
 
-    private void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -631,7 +634,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.consumerVisibility;
     }
 
-    private void setConsumerVisibility(Integer consumerVisibility)
+    public void setConsumerVisibility(final Integer consumerVisibility)
     {
         this.consumerVisibility = consumerVisibility;
     }
@@ -653,7 +656,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.limit;
     }
 
-    private void setLimit(Long limit)
+    public void setLimit(final Long limit)
     {
         this.limit = limit;
     }
@@ -678,7 +681,7 @@ public class Rasd extends GenericEnityBase<String>
         return this.resourceType;
     }
 
-    private void setResourceType(Integer resourceType)
+    public void setResourceType(final Integer resourceType)
     {
         this.resourceType = resourceType;
     }

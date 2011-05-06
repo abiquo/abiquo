@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.enumerator;
+package com.abiquo.model.enumerator;
 
 public enum DiskFormatType
 {

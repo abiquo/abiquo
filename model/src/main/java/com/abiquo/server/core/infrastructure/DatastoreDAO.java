@@ -43,6 +43,7 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -54,6 +55,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository("jpaDatastoreDAO")
 public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
@@ -81,7 +83,7 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
         List<Datastore> result = getResultList(criteria);
         return result;
     }
-
+    
     private static Criterion equalName(String name)
     {
         assert !StringUtils.isEmpty(name);

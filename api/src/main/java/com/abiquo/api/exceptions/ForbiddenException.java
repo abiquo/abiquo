@@ -19,9 +19,33 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.enumerator;
+package com.abiquo.api.exceptions;
 
-public enum VirtualMachineState
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
+
+/**
+ * @author jdevesa
+ *
+ */
+public class ForbiddenException extends APIException
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
+
+    private static final long serialVersionUID = 1L;
+
+    public ForbiddenException(APIError error)
+    {
+        super(error);
+    }    
+    
+    public ForbiddenException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public ForbiddenException(Set<CommonError> errors)
+    {
+        super(errors);
+    }
 }

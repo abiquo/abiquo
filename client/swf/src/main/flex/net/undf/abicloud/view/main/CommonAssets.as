@@ -27,6 +27,9 @@ package net.undf.abicloud.view.main
 	{
 		[Bindable]
 		public static var magnifier:Object;
+		
+		[Bindable]
+		public static var info:Object;
 
 		[Bindable]
 		public static var alert:Object;
@@ -126,6 +129,7 @@ package net.undf.abicloud.view.main
 			errors = new Array();
 			
 			CommonAssets.magnifier = getImage("CommonAssetsMagnifier");
+			CommonAssets.info = getImage("CommonAssetsInfo");
 			CommonAssets.alert = getImage("CommonAssetsAlert");
 			CommonAssets.checked = getImage("CommonAssetsChecked");
 			CommonAssets.alertIconOk = getImage("CommonAssetsAlertIconOk");

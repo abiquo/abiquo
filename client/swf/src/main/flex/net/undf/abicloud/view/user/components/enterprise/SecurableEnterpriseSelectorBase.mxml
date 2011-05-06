@@ -469,6 +469,7 @@
         <mx:Button id="editEnterpriseButton"
             styleName="ConfigurationButton"
             label=""
+            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
             enabled="{enterprisesList.selectedIndex != -1}"
             click="onClickEditEnterpriseButton(event)"/>
     </general:GeneralPanelToolBox>

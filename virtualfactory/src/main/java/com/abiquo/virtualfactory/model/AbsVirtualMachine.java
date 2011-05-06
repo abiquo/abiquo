@@ -120,10 +120,16 @@ public abstract class AbsVirtualMachine
                 catch (Exception e)
                 {
                     logger.info("An error was occurred when powering on the VM after deploy: ", e);
-                    logger.info("Proceeding to roll back");
+                    logger.info("Proceeding to rollback");
                     try
                     {
-                        deleteMachine();
+                        // ONLY Deletes Machine if it's an Abiquo Managed VM
+                        if (config.getRepositoryManagerAddress() != null){
+                            //deleteMachine();
+                            logger.info("Error detected when powering ON a MANAGED VM");
+                        } else {
+                            logger.info("Error detected when powering ON an imported VM");
+                        }
                         state = State.NOT_DEPLOYED;
                     }
                     catch (Exception e1)

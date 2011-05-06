@@ -71,6 +71,16 @@ public class AbstractAPIStub
         this.apiUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
     }
 
+    public UserSession getCurrentSession()
+    {
+        return currentSession;
+    }
+
+    public void setCurrentSession(final UserSession currentSession)
+    {
+        this.currentSession = currentSession;
+    }
+
     protected ClientResponse get(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).get();
@@ -115,8 +125,8 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
-            .accept(mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
+            mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -207,7 +217,13 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
+            .singletonMap("enterprise", valueOf(enterpriseId)));
+    }
+
+    protected String createEnterpriseIPsLink(final int enterpriseId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/action/ips",
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
@@ -221,10 +237,22 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
+    {
+        String uri = createEnterpriseLink(enterpriseId);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("machineId", valueOf(machineId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/reservedmachines/{machineId}", params);
+    }
+
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
-            Collections.singletonMap("role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
+            "role", valueOf(roleId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -236,8 +264,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
-                Collections.singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
+                .singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -285,6 +313,14 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters",
             new HashMap<String, String>(), queryParams);
+    }
+
+    protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips", params);
     }
 
     protected String createMachineLink(final PhysicalMachine machine)

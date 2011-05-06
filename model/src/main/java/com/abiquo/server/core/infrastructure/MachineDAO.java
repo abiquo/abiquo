@@ -468,7 +468,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND py in elements(datastore.machines) " + //
             "    AND datastore.size > datastore.usedSize " + //
             "    AND datastore.enabled = true " + //
-            "    AND datastore.datastoreUuid = :datastoreUuid";
+            "    AND datastore.datastoreUUID = :datastoreUuid";
 
     private final static String QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED = //
         "SELECT DISTINCT vm.hypervisor.machine.id "

@@ -38,11 +38,11 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enumerator.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 @Repository("jpaVirtualDatacenterDAO")

@@ -39,7 +39,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
-import com.abiquo.api.services.RackService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -56,7 +56,7 @@ public class MachinesResource extends AbstractResource
     private MachineService machineService;
 
     @Autowired
-    private RackService rackService;
+    private InfrastructureService rackService;
 
     @GET
     public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
@@ -72,7 +72,7 @@ public class MachinesResource extends AbstractResource
 
         return transformMachinesDto(restBuilder, all);
     }
-
+    
     @POST
     public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId, MachineDto machine,

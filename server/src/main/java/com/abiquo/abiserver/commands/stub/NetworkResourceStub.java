@@ -24,13 +24,47 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
  * @author jdevesa
- *
  */
 public interface NetworkResourceStub
 {
     public BasicResult getPrivateNetworks(final Integer vdcId);
+
+    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
+        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
+        throws NetworkCommandException;
+    
+    /**
+     * Creates a new Private vlan network
+     * @param userSession user who performs the action
+     * @param vdcId identifier of the virtualdatacenter
+     * @param vlanDto object to create.
+     * @return BasicResult
+     */
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
+    
+    /**
+     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
+     * 
+     * @param userSession user who performs the action.
+     * @param vdcId virtual datacenter identifier.
+     * @return the DHCP info into a parsed String.
+     * @throws NetworkCommandException for encapsulate any non-runtime exception.
+     */
+    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
+        throws NetworkCommandException;
 }
