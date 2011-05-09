@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
-
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -46,22 +45,27 @@ public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorM
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, InitiatorMapping.TARGET_LUN_PROPERTY,
             InitiatorMapping.TARGET_IQN_PROPERTY, InitiatorMapping.INITIATOR_IQN_PROPERTY);
-        
-        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(), obj2.getVolumeManagement());
+
+        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(), obj2
+            .getVolumeManagement());
     }
 
     @Override
     public InitiatorMapping createUniqueInstance()
     {
-        
-
         VolumeManagement vm = volumeGenerator.createUniqueInstance();
+
+        return createInstance(vm);
+    }
+
+    public InitiatorMapping createInstance(VolumeManagement vm)
+    {
         final String iIQN = newString(nextSeed(), 1, 10);
         final String targetIQN = newString(nextSeed(), 1, 10);
         final Integer targetLUN = nextSeed();
 
         InitiatorMapping initiatorMapping =
-            new InitiatorMapping("IQN" + iIQN, vm, "targetIQN" + targetIQN,  targetLUN);
+            new InitiatorMapping("IQN" + iIQN, vm, "targetIQN" + targetIQN, targetLUN);
 
         return initiatorMapping;
     }
@@ -75,7 +79,7 @@ public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorM
         VolumeManagement volumeManagement = entity.getVolumeManagement();
         volumeGenerator.addAuxiliaryEntitiesToPersist(volumeManagement, entitiesToPersist);
         entitiesToPersist.add(volumeManagement);
-        
+
     }
 
 }

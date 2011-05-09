@@ -21,26 +21,30 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
-
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class InitiatorMappingDAOTest extends DefaultDAOTestBase<InitiatorMappingDAO, InitiatorMapping>
+public class InitiatorMappingDAOTest extends
+    DefaultDAOTestBase<InitiatorMappingDAO, InitiatorMapping>
 {
 
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
@@ -67,6 +71,22 @@ public class InitiatorMappingDAOTest extends DefaultDAOTestBase<InitiatorMapping
     {
         return (InitiatorMappingGenerator) super.eg();
     }
-  
-    
+
+    @Test
+    public void testfindByVolumeAndInitiator()
+    {
+        InitiatorMapping m = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(m, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, m);
+        InitiatorMappingDAO dao = createDaoForRollbackTransaction();
+        String initm = m.getInitiatorIqn();
+        Integer idVm = m.getVolumeManagement().getId();
+        
+        InitiatorMapping im1 = dao.findByVolumeAndInitiator(idVm, initm);
+        assertNotNull(im1);
+        eg().assertAllPropertiesEqual(m, im1);
+    }
+
 }
