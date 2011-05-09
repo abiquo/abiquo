@@ -40,11 +40,6 @@
 		<level value="DEBUG" />
 	</logger>
 	
-	<logger name="com.abiquo.virtualfactory.machine.impl.VirtualBoxMachine">
-        <level value="TRACE" />
-        <appender-ref ref="VBOX" />
-    </logger>
-	
 	<root>
 		<level value="INFO" />
 		<appender-ref ref="FILE" />
