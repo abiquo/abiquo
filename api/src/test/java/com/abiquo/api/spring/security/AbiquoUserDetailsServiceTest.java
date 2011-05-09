@@ -20,10 +20,16 @@
  */
 package com.abiquo.api.spring.security;
 
+import static org.testng.Assert.assertEquals;
+
+import org.springframework.security.GrantedAuthority;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 
 /**
  * unit tests for the {@link AbiquoUserDetailsService} class.
@@ -73,15 +79,15 @@ public class AbiquoUserDetailsServiceTest extends AbstractGeneratorTest
     // GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
     // assertEquals(privileges.length, 1);
     // }
-    //
-    // @Test
-    // public void testLoadUserAuthoritiesWithoutRoles() throws Exception
-    // {
-    // Role role = roleGenerator.createInstance();
-    // User user = userGenerator.createInstance(role);
-    // setup(role, user.getEnterprise(), user);
-    //
-    // GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-    // assertEquals(privileges.length, 0);
-    // }
+
+    @Test
+    public void testLoadUserAuthoritiesWithoutRoles() throws Exception
+    {
+        Role role = roleGenerator.createInstance();
+        User user = userGenerator.createInstance(role);
+        setup(role, user.getEnterprise(), user);
+
+        GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
+        assertEquals(privileges.length, 0);
+    }
 }

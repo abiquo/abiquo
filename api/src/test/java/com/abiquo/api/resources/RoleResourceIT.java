@@ -23,7 +23,6 @@ package com.abiquo.api.resources;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolvePrivilegeURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleActionGetPrivilegesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleURI;
 import static org.testng.Assert.assertEquals;
@@ -40,8 +39,6 @@ import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.resources.config.PrivilegeResource;
-import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -145,127 +142,4 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, privilegesUri, "action", "privileges");
     }
 
-    @Test
-    public void modifyRole() throws ClientWebException
-    {
-        Role role = roleGenerator.createUniqueInstance();
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        for (Privilege p : role.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(ent);
-        entitiesToSetup.add(role);
-
-        setup(entitiesToSetup.toArray());
-
-        String uri = resolveRoleURI(role.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
-
-        RoleDto dto = response.getEntity(RoleDto.class);
-        dto.setName("name");
-        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(ent.getId())));
-        for (Privilege p : role.getPrivileges())
-        {
-            dto.addLink(new RESTLink(PrivilegeResource.PRIVILEGE + p.getId(), resolvePrivilegeURI(p
-                .getId())));
-        }
-
-        response = put(uri, dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 200);
-
-        RoleDto modified = response.getEntity(RoleDto.class);
-        assertEquals(modified.getName(), "name");
-        assertLinkExist(modified, resolveEnterpriseURI(ent.getId()), EnterpriseResource.ENTERPRISE);
-    }
-
-    @Test
-    public void modifyRoleDoesntExist() throws ClientWebException
-    {
-        Role role = roleGenerator.createUniqueInstance();
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        for (Privilege p : role.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(role);
-
-        setup(entitiesToSetup.toArray());
-
-        String uri = resolveRoleURI(role.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
-
-        RoleDto dto = response.getEntity(RoleDto.class);
-        dto.setName("name");
-
-        uri = resolveRoleURI(1234);
-
-        response = put(uri, dto, "sysadmin", "sysadmin");
-
-        assertEquals(response.getStatusCode(), 404);
-    }
-
-    @Test
-    public void modifyRoleWrongEnterpriseAndPrivileges() throws ClientWebException
-    {
-        Role role = roleGenerator.createInstance();
-        setup(role);
-
-        String uri = resolveRoleURI(role.getId());
-        ClientResponse response = get(uri, "sysadmin", "sysadmin");
-
-        Integer nonExistentId = 1234;
-        RoleDto dto = response.getEntity(RoleDto.class);
-        dto.setName("name");
-        dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(nonExistentId)));
-        dto.addLink(new RESTLink(PrivilegeResource.PRIVILEGE + nonExistentId,
-            resolvePrivilegeURI(nonExistentId)));
-
-        response = put(uri, dto, "sysadmin", "sysadmin");
-
-        assertEquals(response.getStatusCode(), 404);
-    }
-
-    public void removeRole() throws ClientWebException
-    {
-        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
-        Role r1 = roleGenerator.createInstance("r1", e1);
-
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        entitiesToPersist.add(e1);
-        entitiesToPersist.add(r1);
-
-        setup(entitiesToPersist.toArray());
-
-        Role r2 = roleGenerator.createUniqueInstance();
-        r2.setEnterprise(e1);
-
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        for (Privilege p : r2.getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        // entitiesToSetup.add(e1);
-        entitiesToSetup.add(r2);
-
-        setup(entitiesToSetup.toArray());
-
-        String uri = resolveRoleURI(r1.getId());
-
-        ClientResponse response = delete(uri, "sysadmin", "sysadmin");
-
-        assertEquals(response.getStatusCode(), 204);
-
-        uri = resolveRoleURI(r2.getId());
-
-        response = delete(uri, "sysadmin", "sysadmin");
-
-        assertEquals(response.getStatusCode(), 204);
-    }
 }
