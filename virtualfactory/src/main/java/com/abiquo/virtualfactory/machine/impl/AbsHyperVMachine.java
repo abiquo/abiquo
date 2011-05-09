@@ -315,21 +315,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         // }
 
     }
-    
-    @Override
-    public void deployMachineExistingDisk() throws VirtualMachineException
-    {
-        deployMachine(false);        
-    }
-    
+
     @Override
     public void deployMachine() throws VirtualMachineException
-    {
-        deployMachine(true);
-    }
- 
-//    @Override
-    public void deployMachine(boolean vhdCopyNeeded) throws VirtualMachineException
     {
         try
         {
@@ -341,7 +329,10 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 {
                     // Just clones the image if the virtual disk is standard
                     // Cloning the virtual disk
-                    cloneVirtualDisk(); 
+                    if (!config.getVirtualDiskBase().isHa())
+                    {
+                        cloneVirtualDisk();
+                    }
                 }
 
                 createVirtualMachine();
@@ -1562,8 +1553,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         String query = "SELECT * FROM CIM_DataFile WHERE Name='" + file + "'";
 
         JIVariant[] res =
-            hyperVHypervisor.getCIMService().getObjectDispatcher().callMethodA("ExecQuery",
-                new Object[] {new JIString(query)});
+            hyperVHypervisor.getCIMService().getObjectDispatcher()
+                .callMethodA("ExecQuery", new Object[] {new JIString(query)});
 
         JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
 

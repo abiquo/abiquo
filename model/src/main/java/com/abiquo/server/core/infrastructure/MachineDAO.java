@@ -177,7 +177,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         query.setInteger("idRack", idRack);
         query.setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         query.setParameter("enterpriseId", enterprise.getId());
-        query.setParameter("originalHypervisorId", originalHypervisorId);
+        query.setInteger("originalHypervisorId", originalHypervisorId);
 
         List<Machine> machines = query.list();
 
@@ -444,7 +444,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
-            "AND h.id != :originalHypervisorId";
+            "AND h.id <> :originalHypervisorId";
 
     private final static String QUERY_CANDIDATE_DATASTORE = //
         "  SELECT py.id FROM "

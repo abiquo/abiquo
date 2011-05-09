@@ -68,6 +68,12 @@ public class VirtualDisk
     private String format;
 
     /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private boolean isha;
+
+    /**
      * Instantiates a new virtual disk.
      */
     public VirtualDisk()
@@ -413,4 +419,13 @@ public class VirtualDisk
 
     }
 
+    public void setHa()
+    {
+        isha = true;
+    }
+
+    public boolean isHa()
+    {
+        return isha;
+    }
 }
