@@ -24,6 +24,8 @@ package com.abiquo.abiserver.commands.stub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListOptions;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -39,4 +41,6 @@ public interface UsersResourceStub
     public BasicResult deleteUser(User user);
 
     public DataResult<Role> getRole(int roleId);
+
+    public DataResult<RoleListResult> getRoles(RoleListOptions roleListOptions);
 }

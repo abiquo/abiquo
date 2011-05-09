@@ -29,6 +29,8 @@ import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListOptions;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -150,5 +152,17 @@ public interface UserCommand
         final Integer enterpriseId);
 
     public DataResult<Role> getRole(final UserSession userSession, final Integer roleId);
+
+    /**
+     * Returns a list of roles stored in the Data Base.
+     * 
+     * @param userSession
+     * @param roleListOptions an RoleListOptions object containing the options to retrieve the list
+     *            of users
+     * @return A DataResult object containing an RoleListResult object
+     */
+    @SuppressWarnings("unchecked")
+    public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
+        final RoleListOptions roleListOptions);
 
 }

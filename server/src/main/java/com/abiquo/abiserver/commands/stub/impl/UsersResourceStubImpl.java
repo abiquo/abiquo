@@ -41,6 +41,8 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListOptions;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -50,6 +52,7 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UsersDto;
 
@@ -360,6 +363,12 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     {
         RoleDto role = response.getEntity(RoleDto.class);
 
+        return getRole(role);
+    }
+
+    protected Role getRole(final RoleDto role)
+    {
+
         RESTLink enterpriseLink = role.searchLink("enterprise");
         EnterpriseDto enterpriseRole = null;
         Enterprise entRole = null;
@@ -379,5 +388,61 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         return Role.create(role, entRole, privileges);
+    }
+
+    @Override
+    public DataResult<RoleListResult> getRoles(final RoleListOptions roleListOptions)
+    {
+        DataResult<RoleListResult> dataResult = new DataResult<RoleListResult>();
+        RoleListResult roleListResult = new RoleListResult();
+
+        String enterpriseId = null;
+        if (roleListOptions.getIdEnterprise() != 0)
+        {
+            enterpriseId = String.valueOf(roleListOptions.getIdEnterprise());
+        }
+
+        boolean desc = !roleListOptions.getAsc();
+        String orderBy = roleListOptions.getOrderBy();
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (!StringUtils.isEmpty(roleListOptions.getFilter()))
+        {
+            queryParams.put("filter", new String[] {roleListOptions.getFilter()});
+        }
+        queryParams.put("orderBy", new String[] {orderBy});
+        queryParams.put("desc", new String[] {String.valueOf(desc)});
+
+        String uri =
+            createRolesLink(enterpriseId, roleListOptions.getOffset(), roleListOptions.getLength());
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            RolesDto rolesDto = response.getEntity(RolesDto.class);
+            Collection<Role> roles = new ArrayList<Role>();
+            for (RoleDto dto : rolesDto.getCollection())
+            {
+                roles.add(getRole(dto));
+
+            }
+
+            Integer total =
+                rolesDto.getTotalSize() != null ? rolesDto.getTotalSize() : rolesDto
+                    .getCollection().size();
+
+            roleListResult.setTotalRoles(total);
+            roleListResult.setRolesList(roles);
+
+            dataResult.setData(roleListResult);
+            dataResult.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getRoles");
+        }
+
+        return dataResult;
     }
 }
