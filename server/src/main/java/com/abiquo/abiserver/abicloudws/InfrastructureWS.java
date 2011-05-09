@@ -316,11 +316,16 @@ public class InfrastructureWS implements IInfrastructureWS
         try
         {
             // Creates an OVF envelope from the virtual machine parameters
+            // [ABICLOUDPREMIUM-1491] When editing a VM we do not perform a state change
             envelope =
                 OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
-                    virtualMachine,
-                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
-                        virtualMachine), null);
+                    virtualMachine, null, null);
+
+            // envelope =
+            // OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
+            // virtualMachine,
+            // OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
+            // virtualMachine), null);
         }
         catch (Exception e)
         {
