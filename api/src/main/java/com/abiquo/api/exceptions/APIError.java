@@ -44,9 +44,10 @@ public enum APIError
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4", "Not enough permissions to perform this action"),
-        INVALID_CREDENTIALS("GEN-5", "Invalid credentials"),
-        
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
+        "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
+        "Invalid credentials"),
+
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
         "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
@@ -97,7 +98,7 @@ public enum APIError
         "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
         "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
-        "VLAN-4", "This Networks allow a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
+        "VLAN-4", "This network allows a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
         "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
         "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
         "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
@@ -230,7 +231,8 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR("NODECOLLECTOR-1","Nodecollector has raised an error"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
+        "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
@@ -254,7 +256,7 @@ public enum APIError
     String message;
 
     String cause;
-    
+
     private APIError(final String code, final String message)
     {
         this.code = code;
@@ -271,7 +273,7 @@ public enum APIError
         return this.message;
     }
 
-    public void addCause(String cause)
+    public void addCause(final String cause)
     {
         this.cause = cause;
     }
