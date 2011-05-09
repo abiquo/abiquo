@@ -259,6 +259,12 @@ public class AbstractAPIStub
             Collections.singletonMap("role", valueOf(roleId)));
     }
 
+    protected String createPrivilegeLink(final int privilegeId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
+    }
+
     protected String createUsersLink(final String enterpriseId)
     {
         return createUsersLink(enterpriseId, null, null);
