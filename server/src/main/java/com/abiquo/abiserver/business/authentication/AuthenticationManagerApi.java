@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 import org.springframework.security.BadCredentialsException;
@@ -39,8 +38,8 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
-import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
-import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.LoginResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.LoginResourceStubImpl;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.persistence.DAOFactory;
@@ -75,8 +74,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager =
-        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager = ErrorManager
+        .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     public AuthenticationManagerApi()
     {
@@ -233,7 +232,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
 
         UserSession session = new UserSession();
         session.setUser(login.getUser());
-        // EnterprisesResourceStub proxy = getEnterpriseStubProxy(session);
+        LoginResourceStub proxy = getLoginStubProxy(session);
         ClientConfig clientConfig = new ClientConfig();
         BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
         clientConfig.handlers(basicAuthHandler);
@@ -245,15 +244,15 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             URI uri = new URI(getApiUri() + "login");
 
             // We perform this call to a secure location. If success then the credentials are valid
-            ClientResponse response = client.resource(uri).get();
-            // DataResult<UserDto> data = proxy.getUserByName(login.getUser(), login.getPassword());
-            UserDto userDto = response.getEntity(UserDto.class);
+            // ClientResponse response = client.resource(uri).get();
+            DataResult<UserDto> data = proxy.getUserByName(login.getUser(), login.getPassword());
+            // UserDto userDto = response.getEntity(UserDto.class);
             // Old DB login needs a Md5 password
             String passwordHash = createMd5encodedPassword(login);
             basicAuthHandler.setPassword(passwordHash);
             login.setPassword(passwordHash);
 
-            userHB = getUserToPersistSession(login, userDto);
+            userHB = getUserToPersistSession(login, data.getData()); // userDto);
             dataResult = persistLogin(userHB);
         }
         catch (BadCredentialsException e)
@@ -417,11 +416,11 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userSession current logged user.
      * @return EnterprisesResourceStub.
      */
-    protected EnterprisesResourceStub getEnterpriseStubProxy(final UserSession userSession)
+    protected LoginResourceStub getLoginStubProxy(final UserSession userSession)
     {
-        EnterprisesResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new EnterprisesResourceStubImpl(),
-                EnterprisesResourceStub.class);
+        LoginResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new LoginResourceStubImpl(),
+                LoginResourceStub.class);
         return proxy;
     }
 
@@ -504,8 +503,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
-                    .getPassword());
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
+                    userHB.getPassword());
 
             if (!signature.equals(tokenSignature))
             {
