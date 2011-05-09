@@ -21,8 +21,8 @@
 
 package com.abiquo.abiserver.pojo.user;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
@@ -41,7 +41,7 @@ public class Role implements IPojo<RoleHB>
 
     private Enterprise enterprise;
 
-    List<Privilege> privileges;
+    Set<Privilege> privileges;
 
     /* ------------- Constructor ------------- */
     public Role()
@@ -99,12 +99,12 @@ public class Role implements IPojo<RoleHB>
         this.enterprise = enterprise;
     }
 
-    public List<Privilege> getPrivileges()
+    public Set<Privilege> getPrivileges()
     {
         return privileges;
     }
 
-    public void setPrivileges(final List<Privilege> privileges)
+    public void setPrivileges(final Set<Privilege> privileges)
     {
         this.privileges = privileges;
     }
@@ -125,19 +125,28 @@ public class Role implements IPojo<RoleHB>
         {
             roleHB.setEnterpriseHB(null);
         }
-        roleHB.setPrivilegesHB(new ArrayList<PrivilegeHB>());
+        Set<PrivilegeHB> privilegeHB = new HashSet<PrivilegeHB>();
         if (privileges != null)
         {
-            for (Privilege p : privileges)
+            for (Privilege privilege : privileges)
             {
-                roleHB.getPrivilegesHB().add(p.toPojoHB());
+                privilegeHB.add(privilege.toPojoHB());
             }
         }
+
+        roleHB.setPrivilegesHB(privilegeHB);
+        // if (privileges != null)
+        // {
+        // for (Privilege p : privileges)
+        // {
+        // roleHB.getPrivilegesHB().add(p.toPojoHB());
+        // }
+        // }
         return roleHB;
     }
 
     public static Role create(final RoleDto dto, final Enterprise enterprise,
-        final List<Privilege> privileges)
+        final Set<Privilege> privileges)
     {
         Role role = new Role();
         role.setId(dto.getId());

@@ -21,7 +21,7 @@
 
 package net.undf.abicloud.vo.user
 {
-	//[RemoteClass(alias="com.abiquo.abiserver.pojo.virtualstorage.InitiatorMapping")]
+	[RemoteClass(alias="com.abiquo.abiserver.pojo.user.Privilege")]
     [Bindable]
 	public class Privilege
 	{

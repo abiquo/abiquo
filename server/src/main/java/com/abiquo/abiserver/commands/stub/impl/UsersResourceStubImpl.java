@@ -24,8 +24,9 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -170,7 +171,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             Collection<User> normalUsers = new ArrayList<User>();
             Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
             Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
-            Map<String, List<Privilege>> catchedPrivileges = new HashMap<String, List<Privilege>>();
+            Map<String, Set<Privilege>> catchedPrivileges = new HashMap<String, Set<Privilege>>();
 
             for (UserDto dto : usersDto.getCollection())
             {
@@ -188,15 +189,16 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 }
 
                 RESTLink privilegesLink = role.searchLink("action", "privileges");
-                List<Privilege> privileges = new ArrayList<Privilege>();
+                Set<Privilege> privileges = new HashSet<Privilege>();
                 if (privilegesLink != null)
                 {
                     privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
                 }
 
-                Role rolePojo = new Role(role.getId(), role.getName(), role.isBlocked());
+                // Role rolePojo = new Role(role.getId(), role.getName(), role.isBlocked());
 
-                if (SecurityService.isStandardUser(rolePojo) && orderBy.equalsIgnoreCase("role"))
+                if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
+                    && orderBy.equalsIgnoreCase("role"))
                 {
                     normalUsers.add(User.create(dto, Enterprise.create(enterprise),
                         Role.create(role, entRole, privileges)));
@@ -245,10 +247,10 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         return dataResult;
     }
 
-    private List<Privilege> getPrivileges(final String privilegesUri,
-        final Map<String, List<Privilege>> cache)
+    private Set<Privilege> getPrivileges(final String privilegesUri,
+        final Map<String, Set<Privilege>> cache)
     {
-        List<Privilege> privileges = new ArrayList<Privilege>();
+        Set<Privilege> privileges = new HashSet<Privilege>();
         if (!cache.containsKey(privilegesUri))
         {
             PrivilegesDto ps =

@@ -21,8 +21,8 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.user;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.user.Privilege;
@@ -46,14 +46,14 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
 
     private EnterpriseHB enterpriseHB;
 
-    private List<PrivilegeHB> privilegesHB;
+    private Set<PrivilegeHB> privilegesHB;
 
-    public List<PrivilegeHB> getPrivilegesHB()
+    public Set<PrivilegeHB> getPrivilegesHB()
     {
         return privilegesHB;
     }
 
-    public void setPrivilegesHB(final List<PrivilegeHB> privilegesHB)
+    public void setPrivilegesHB(final Set<PrivilegeHB> privilegesHB)
     {
         this.privilegesHB = privilegesHB;
     }
@@ -114,14 +114,24 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
             role.setEnterprise(null);
         }
 
-        role.setPrivileges(new ArrayList<Privilege>());
+        Set<Privilege> privilege = new HashSet<Privilege>();
         if (privilegesHB != null)
         {
             for (PrivilegeHB pHB : privilegesHB)
             {
-                role.getPrivileges().add(pHB.toPojo());
+                privilege.add(pHB.toPojo());
             }
         }
+
+        role.setPrivileges(privilege);
+        // role.setPrivileges(new ArrayList<Privilege>());
+        // if (privilegesHB != null)
+        // {
+        // for (PrivilegeHB pHB : privilegesHB)
+        // {
+        // role.getPrivileges().add(pHB.toPojo());
+        // }
+        // }
         return role;
     }
 }

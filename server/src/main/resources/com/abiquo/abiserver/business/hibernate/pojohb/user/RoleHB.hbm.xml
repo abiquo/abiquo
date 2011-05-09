@@ -13,7 +13,14 @@
     <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
       <column name="idEnterprise"/>
     </many-to-one>
-    
+   <set name="privilegesHB" table="roles_privileges" lazy="false" cascade="all">
+			<key>
+				<column name="idRole" not-null="true" />
+			</key>
+			<many-to-many column="idPrivilege"
+				class="com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB" />
+		</set>
+		
   </class>
   
 	<query name="GET_ROLE_BY_NAME">
