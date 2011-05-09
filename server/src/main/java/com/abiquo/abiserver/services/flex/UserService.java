@@ -282,6 +282,7 @@ public class UserService
         }
     }
 
+
     /**
      * Returns a list of roles stored in the Data Base.
      * 
@@ -297,6 +298,14 @@ public class UserService
         try
         {
             return command.getRoles(userSession, roleListOptions);
+
+    public BasicResult getRole(final UserSession userSession, final Integer roleId)
+    {
+        UserCommand command = proxyCommand(userSession);
+        try
+        {
+            return command.getRole(userSession, roleId);
+
         }
         catch (UserSessionException e)
         {
