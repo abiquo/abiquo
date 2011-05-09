@@ -670,7 +670,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     /**
      * Check every 5 seconds if the operation ended.
      */
-    private void waitOperation(final IProgress progress, final long totalms)
+    protected void waitOperation(final IProgress progress, final long totalms)
         throws VirtualMachineException
     {
         for (long current = 0; current < totalms; current = current + 1000)
@@ -1086,6 +1086,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
     protected void reconfigDisks(final VirtualMachineConfiguration newConfiguration,
         final VirtualMachineConfiguration config, final IMachine machine)
+        throws VirtualMachineException
     {
         // Do nothing.
     }
