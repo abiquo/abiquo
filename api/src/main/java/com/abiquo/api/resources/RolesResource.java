@@ -26,7 +26,6 @@ import static com.abiquo.api.resources.RoleResource.createTransferObject;
 import java.util.Collection;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -41,7 +40,6 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.services.RoleService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Role;
-import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.util.PagedList;
 
@@ -106,15 +104,4 @@ public class RolesResource extends AbstractResource
         return roles;
     }
 
-    @POST
-    public RoleDto postRole(final RoleDto role, @Context final IRESTBuilder restBuilder)
-        throws Exception
-    {
-        LOGGER.info("Creating new role " + role.getName());
-
-        Role r = service.addRole(role);
-
-        LOGGER.info("Role " + r.getName() + " with id " + r.getId() + " created successfully");
-        return createTransferObject(r, restBuilder);
-    }
 }

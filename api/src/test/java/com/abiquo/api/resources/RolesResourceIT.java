@@ -21,8 +21,6 @@
 
 package com.abiquo.api.resources;
 
-import static com.abiquo.api.common.Assert.assertLinkExist;
-import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRolesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -40,7 +38,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
-import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -50,7 +47,7 @@ import com.abiquo.server.core.enterprise.User;
 
 public class RolesResourceIT extends AbstractJpaGeneratorIT
 {
-    private String rolesURI = resolveRolesURI();
+    protected String rolesURI = resolveRolesURI();
 
     @BeforeMethod
     public void setupSysadmin()
@@ -150,59 +147,6 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(entity.getCollection().size(), 2);
         RoleDto r = entity.getCollection().iterator().next();
         Assert.assertEquals(r.getName(), "r1");
-    }
-
-    @Test
-    public void createRole()
-    {
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
-
-        setup(ent);
-
-        RoleDto dto = getValidRole(ent.getId());
-
-        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
-
-        assertEquals(response.getStatusCode(), 201);
-
-        RoleDto entityPost = response.getEntity(RoleDto.class);
-
-        assertNotNull(entityPost);
-
-        assertEquals(dto.getName(), entityPost.getName());
-        assertLinkExist(entityPost, resolveEnterpriseURI(ent.getId()),
-            EnterpriseResource.ENTERPRISE);
-    }
-
-    @Test
-    public void postWithInvalidEnterprise()
-    {
-        RoleDto dto = getValidRole(1223);
-
-        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 404);
-    }
-
-    @Test
-    public void postWithoutEnterprise()
-    {
-        RoleDto dto = getValidRole(null);
-
-        ClientResponse response = post(rolesURI, dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 201);
-    }
-
-    private RoleDto getValidRole(final Integer entId)
-    {
-
-        RoleDto dto = new RoleDto();
-        dto.setName("TEST_ROLE");
-        if (entId != null)
-        {
-            dto.addLink(new RESTLink(EnterpriseResource.ENTERPRISE, resolveEnterpriseURI(entId)));
-        }
-
-        return dto;
     }
 
 }

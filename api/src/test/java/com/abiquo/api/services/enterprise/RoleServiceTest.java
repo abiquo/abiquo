@@ -25,27 +25,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.RoleService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.Role;
-import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.User;
-import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
+@Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class RoleServiceTest extends AbstractGeneratorTest
 {
     private Enterprise e;
@@ -66,49 +64,6 @@ public class RoleServiceTest extends AbstractGeneratorTest
         setup(e, p1, p2, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
-
-    }
-
-    @Test
-    public void modifyRole()
-    {
-        Role oldRole = roleGenerator.createInstance();
-        Role oldRoleBlocked = roleGenerator.createInstanceBlocked();
-        setup(oldRole, oldRoleBlocked);
-
-        RoleDto rl = new RoleDto();
-        rl.setId(oldRole.getId());
-        rl.setName("newRoleName");
-        RoleDto rlBloked = new RoleDto();
-        rlBloked.setId(oldRoleBlocked.getId());
-        rlBloked.setName("newRoleBlokedName");
-        rlBloked.setBlocked(true);
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        RoleService service = new RoleService(em);
-
-        service.modifyRole(oldRole.getId(), rl);
-        EntityManagerHelper.commit(em);
-
-        EntityManagerHelper.beginRollbackTransaction(em);
-        Role newRole = service.getRole(oldRole.getId());
-        Assert.assertNotNull(newRole);
-        Assert.assertEquals(newRole.getName(), rl.getName());
-
-        try
-        {
-            service.modifyRole(oldRoleBlocked.getId(), rlBloked);
-            Assert.fail("");
-        }
-        catch (ConflictException e)
-        {
-            Assert.assertEquals(e.getErrors().iterator().next().getCode(),
-                APIError.NON_MODIFICABLE_ROLE.getCode());
-        }
-        finally
-        {
-            rollbackActiveTransaction(em);
-        }
 
     }
 
@@ -192,34 +147,6 @@ public class RoleServiceTest extends AbstractGeneratorTest
         roles = service.getRolesByEnterprise(e1.getId(), null, "name", true);
         r = roles.iterator().next();
         Assert.assertEquals(u.getNick(), "sysadmin");
-    }
-
-    public void modifyRoleWithPrivileges()
-    {
-        Privilege p1 = privilegeGenerator.createUniqueInstance();
-        Privilege p2 = privilegeGenerator.createUniqueInstance();
-        Role oldRole = roleGenerator.createInstance(p1);
-        setup(p1, p2, oldRole);
-
-        PrivilegeDto p2Dto = new PrivilegeDto(p2.getId(), p2.getName());
-        RoleDto rl = new RoleDto(oldRole.getId(), "newRoleName", false);
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        RoleService service = new RoleService(em);
-
-        service.modifyRole(oldRole.getId(), rl);
-        EntityManagerHelper.commit(em);
-
-        EntityManagerHelper.beginReadWriteTransaction(em);
-        Role newRole = service.getRole(oldRole.getId());
-
-        Assert.assertNotNull(newRole);
-        Assert.assertEquals(newRole.getName(), rl.getName());
-        Assert.assertNotNull(newRole.getPrivileges());
-        Assert.assertEquals(newRole.getPrivileges().size(), 1);
-        Assert.assertEquals(newRole.getPrivileges().get(0).getId(), p2.getId());
-
-        commitActiveTransaction(em);
     }
 
 }

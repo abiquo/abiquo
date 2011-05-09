@@ -24,9 +24,7 @@ package com.abiquo.api.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -78,29 +76,6 @@ public class RoleResource extends AbstractResource
         Role role = service.getRole(roleId);
 
         return createTransferObject(role, restBuilder);
-    }
-
-    @PUT
-    public RoleDto modifyRole(final RoleDto role, @PathParam(ROLE) final Integer roleId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        LOGGER.info("Udating role " + role.getName() + " with id " + roleId);
-
-        Role r = service.modifyRole(roleId, role);
-
-        LOGGER.info("Role " + role.getName() + " with id " + roleId + " updated successfully");
-
-        return createTransferObject(r, restBuilder);
-    }
-
-    @DELETE
-    public void deleteRole(@PathParam(ROLE) final Integer roleId)
-    {
-        LOGGER.info("Deleting role with id " + roleId);
-
-        service.removeRole(roleId);
-
-        LOGGER.info("Role with id " + roleId + " deleted successfully");
     }
 
     /**
