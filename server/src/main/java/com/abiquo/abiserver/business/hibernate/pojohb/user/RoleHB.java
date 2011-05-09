@@ -124,14 +124,7 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
         }
 
         role.setPrivileges(privilege);
-        // role.setPrivileges(new ArrayList<Privilege>());
-        // if (privilegesHB != null)
-        // {
-        // for (PrivilegeHB pHB : privilegesHB)
-        // {
-        // role.getPrivileges().add(pHB.toPojo());
-        // }
-        // }
+
         return role;
     }
 }

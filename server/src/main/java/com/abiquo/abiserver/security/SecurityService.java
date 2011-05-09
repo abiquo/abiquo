@@ -37,11 +37,9 @@ public class SecurityService
 {
     public static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
-    public static final String OTHER_ENTERPRISES_PRIVILEGE = DEFAULT_ROLE_PREFIX
-        + "USERS_MANAGE_OTHER_ENTERPRISES";
+    public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
 
-    public static final String OTHER_USERS_PRIVILEGE = DEFAULT_ROLE_PREFIX
-        + "USERS_MANAGE_OTHER_USERS";
+    public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
 
     public static boolean hasPrivilege(final String privilege, final Role role)
     {

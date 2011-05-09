@@ -135,13 +135,7 @@ public class Role implements IPojo<RoleHB>
         }
 
         roleHB.setPrivilegesHB(privilegeHB);
-        // if (privileges != null)
-        // {
-        // for (Privilege p : privileges)
-        // {
-        // roleHB.getPrivilegesHB().add(p.toPojoHB());
-        // }
-        // }
+
         return roleHB;
     }
 

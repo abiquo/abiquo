@@ -38,8 +38,6 @@ public class PrivilegeHB implements java.io.Serializable, IPojoHB<Privilege>
 
     private String name;
 
-    // private Set<RoleHB> rolesHB;
-
     public Integer getIdPrivilege()
     {
         return idPrivilege;
@@ -60,16 +58,6 @@ public class PrivilegeHB implements java.io.Serializable, IPojoHB<Privilege>
         this.name = name;
     }
 
-    // public Set<RoleHB> getRolesHB()
-    // {
-    // return rolesHB;
-    // }
-    //
-    // public void setRolesHB(final Set<RoleHB> rolesHB)
-    // {
-    // this.rolesHB = rolesHB;
-    // }
-
     @Override
     public Privilege toPojo()
     {
@@ -77,15 +65,6 @@ public class PrivilegeHB implements java.io.Serializable, IPojoHB<Privilege>
 
         p.setId(idPrivilege);
         p.setName(name);
-        // Set<Role> roles = new HashSet<Role>();
-        // if (rolesHB != null)
-        // {
-        // for (RoleHB roleHB : this.getRolesHB())
-        // {
-        // roles.add(roleHB.toPojo());
-        // }
-        // p.setRoles(roles);
-        // }
 
         return p;
     }

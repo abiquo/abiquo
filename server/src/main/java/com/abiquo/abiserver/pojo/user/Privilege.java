@@ -33,8 +33,6 @@ public class Privilege implements IPojo<PrivilegeHB>
 
     private String name;
 
-    // private Set<Role> roles;
-
     /* ------------- Constructor ------------- */
     public Privilege()
     {
@@ -82,15 +80,5 @@ public class Privilege implements IPojo<PrivilegeHB>
 
         return privilege;
     }
-
-    // public Set<Role> getRoles()
-    // {
-    // return roles;
-    // }
-    //
-    // public void setRoles(final Set<Role> roles)
-    // {
-    // this.roles = roles;
-    // }
 
 }

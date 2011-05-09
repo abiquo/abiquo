@@ -195,8 +195,6 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                     privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
                 }
 
-                // Role rolePojo = new Role(role.getId(), role.getName(), role.isBlocked());
-
                 if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
                     && orderBy.equalsIgnoreCase("role"))
                 {

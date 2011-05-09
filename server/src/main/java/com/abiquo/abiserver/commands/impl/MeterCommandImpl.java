@@ -80,22 +80,16 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
         UserDAO userDAO = factory.getUserDAO();
         MeterDAO meterDAO = factory.getMeterDAO();
 
-        List<UserHB> downUsers = new ArrayList<UserHB>();
-
         try
         {
 
             // We split all the users inside the string separated by "/";
             List<String> listOfUsers = new ArrayList<String>();
 
-            // TODO scastro TEST IT
-            // ============================
-
             UsersResourceStub proxy =
                 APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
                     UsersResourceStub.class);
             DataResult<UserListResult> users = proxy.getUsers(new UserListOptions());
-            // DataResult<UserListResult> users = userResourceStub.getUsers(new UserListOptions());
 
             if (users.getData() != null && users.getData().getUsersList() != null
                 && !users.getData().getUsersList().isEmpty())
@@ -107,47 +101,9 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
                 }
             }
 
-            // ============================
-
-            // // if (user.getRoleHB().getIdRole() == Role.ENTERPRISE_ADMIN)
-            // if (SecurityService.isEnterpriseAdmin(user.getRoleHB().toPojo()))
-            // {
-            // downUsers =
-            // userDAO.getUsersByUserPrivileges(
-            // user.getRoleHB().getSecurityLevel().toString(), user.getEnterpriseHB()
-            // .getIdEnterprise());
-            // listOfUsers.add(user.getUser());
-            // for (UserHB currentUser : downUsers)
-            // {
-            // listOfUsers.add(currentUser.getUser());
-            // }
-            // }
-            // // else if (user.getRoleHB().getIdRole() == Role.SYS_ADMIN)
-            // else if (SecurityService.isCloudAdmin(user.getRoleHB().toPojo()))
-            // {
-            // downUsers = userDAO.findAll();
-            // }
-            // else
-            // {
-            // listOfUsers.add(user.getUser());
-            // }
-
-            // ============================
-
             factory.beginConnection();
 
             UserHB user = userDAO.getUserByUserName(userSession.getUser());
-
-            // Role role = user.toPojo().getRole();
-            // ArrayList<Privilege> privileges = new ArrayList<Privilege>();
-            //
-            // // Getting the list of user privileges
-            //
-            // for (Privilege p : role.getPrivileges())
-            // {
-            // privileges.add(p.toPojoHB().toPojo());
-            // }
-            // role.setPrivileges(privileges);
 
             listOfMeters =
                 meterDAO.findAllByFilter(filters, listOfUsers, numrows, user.getRoleHB());
