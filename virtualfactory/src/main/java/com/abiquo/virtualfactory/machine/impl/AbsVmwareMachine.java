@@ -134,13 +134,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     }
 
     
-    @Override
-    public void deployMachineExistingDisk() throws VirtualMachineException
-    {
-        // TODO ABICLOUDPREMIUM-1533
-        
-    }
-    
     
     @Override
     public void deployMachine() throws VirtualMachineException
@@ -179,7 +172,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 if (vmConfig.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
                 {
                     // Copy from the NAS to the template virtual machine
-                    cloneVirtualDisk();
+                    
+                    if(!vmConfig.getVirtualDiskBase().isHa())
+                    {                        
+                        cloneVirtualDisk();
+                    }
+                    
                 }
 
                 // Attach the initial extended disks

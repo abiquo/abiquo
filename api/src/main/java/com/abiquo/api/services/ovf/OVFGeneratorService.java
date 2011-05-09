@@ -67,7 +67,9 @@ import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
 import com.abiquo.ovfmanager.ovf.exceptions.IdAlreadyExistsException;
+import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
+import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
@@ -117,6 +119,8 @@ public class OVFGeneratorService
     public final static QName ADMIN_USER_PASSWORD_QNAME = new QName("adminPassword");
 
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
+
+    public final static QName HA_DISK = new QName("ha");
 
     // /////////// InfrastructureWS
 
@@ -179,8 +183,8 @@ public class OVFGeneratorService
 
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
-                createAnnotationMachineStateAndRDPPort(machineState, String.valueOf(virtualMachine
-                    .getVdrpPort()));
+                createAnnotationMachineStateAndRDPPort(machineState,
+                    String.valueOf(virtualMachine.getVdrpPort()));
 
             // creating Virtual hardware section (containing hypervisor information)
             VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
@@ -473,11 +477,11 @@ public class OVFGeneratorService
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance)
         throws Exception
     {
-        return createVirtualApplication(virtualAppliance, false);
+        return createVirtualApplication(virtualAppliance, false, false);
     }
 
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
-        final boolean bundling) throws Exception
+        final boolean bundling, final boolean ha) throws Exception
     {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
@@ -517,12 +521,14 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            final String diskid = nodeVirtualImage.getId() == null ? "to": nodeVirtualImage.getId().toString();
-            
-            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(diskid, nodeVirtualImage.getVirtualImage()));
+            final String diskid =
+                nodeVirtualImage.getId() == null ? "to" : nodeVirtualImage.getId().toString();
 
-            OVFReferenceUtils.addFileOrIgnore(references, createFileFromVirtualImage(
-                nodeVirtualImage, bundling));
+            OVFDiskUtils.addDisk(envelope,
+                createDiskFromVirtualImage(diskid, nodeVirtualImage.getVirtualImage()));
+
+            OVFReferenceUtils.addFileOrIgnore(references,
+                createFileFromVirtualImage(nodeVirtualImage, bundling, ha));
         }
 
         // Adding the virtual System collection to the envelope
@@ -620,7 +626,7 @@ public class OVFGeneratorService
     }
 
     private FileType createFileFromVirtualImage(final NodeVirtualImage nodeVirtualImage,
-        final boolean bundling) throws RequiredAttributeException
+        final boolean bundling, final boolean ha) throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -657,6 +663,11 @@ public class OVFGeneratorService
         insertTargetDataStore(virtualDiskImageFile, nodeVirtualImage.getVirtualMachine()
             .getDatastore().getName()
             + nodeVirtualImage.getVirtualMachine().getDatastore().getDirectory());
+
+        if (ha)
+        {
+            setHA(virtualDiskImageFile);
+        }
 
         String path = null;
         if (!virtualImage.isManaged())
@@ -702,6 +713,15 @@ public class OVFGeneratorService
         final String dataStore)
     {
         virtualDiskImageFile.getOtherAttributes().put(DATASTORE_QNAME, dataStore);
+    }
+
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(HA_DISK, Boolean.TRUE.toString());
     }
 
     private static VirtualDiskDescType createDiskFromVirtualImage(final String diskId,
@@ -814,18 +834,20 @@ public class OVFGeneratorService
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
-        String virtualImageId = String.valueOf(node.getId());
+        final String virtualImageId =
+            node.getId() == null ? "to" : node.getId().toString();
+        
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("Harddisk"
@@ -1083,5 +1105,4 @@ public class OVFGeneratorService
 
         return rasdOut;
     }
-
 }

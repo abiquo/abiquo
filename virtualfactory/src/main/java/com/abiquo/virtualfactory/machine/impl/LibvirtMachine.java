@@ -1577,11 +1577,4 @@ public class LibvirtMachine extends AbsVirtualMachine
         return machineName;
     }
 
-    @Override
-    public void deployMachineExistingDisk() throws VirtualMachineException
-    {
-        // TODO Auto-generated method stub
-        
-    }
-
 }
