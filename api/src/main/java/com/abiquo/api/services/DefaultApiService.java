@@ -60,7 +60,7 @@ public abstract class DefaultApiService
         if (!getUnexpectedErrors().isEmpty())
         {
             errors.addAll(unexpectedErrors);
-            forbiddenErrors.clear();
+            unexpectedErrors.clear();
             throw new InternalServerErrorException(errors);
         }
         if (!getForbiddenErrors().isEmpty())
