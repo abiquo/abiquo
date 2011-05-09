@@ -103,4 +103,22 @@ public class VolumeManagementDAOTest extends
         assertEquals(results.size(), 1);
         eg().assertAllPropertiesEqual(results.iterator().next(), volume);
     }
+
+    @Test
+    public void testGetVolumeByVirtualDatacenter()
+    {
+        // Test without filtering
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        VolumeManagement result =
+            dao.getVolumeByVirtualDatacenter(volume.getVirtualDatacenter(), volume.getId());
+
+        eg().assertAllPropertiesEqual(result, volume);
+    }
 }

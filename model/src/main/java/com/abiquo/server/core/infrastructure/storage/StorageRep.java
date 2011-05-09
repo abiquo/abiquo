@@ -204,8 +204,8 @@ public class StorageRep extends DefaultRepBase
 
     public void removeVolume(final VolumeManagement volume)
     {
-        // volumeDAO.remove(volume);
-        // volumeDAO.flush();
+        volumeDAO.remove(volume);
+        volumeDAO.flush();
     }
 
     public void updateDevice(final StorageDevice sd)
