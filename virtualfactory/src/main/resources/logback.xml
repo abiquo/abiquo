@@ -21,13 +21,29 @@
     	</rollingPolicy>
 	</appender>
 	
+	<appender name="VBOX" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/virtualfactory-vbox.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/virtualfactory-vbox-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+	
+	<logger name="org.jinterop">
+        <level value="ERROR" />
+    </logger>
+	
 	<logger name="com.abiquo">
 		<level value="DEBUG" />
 	</logger>
 	
-	<logger name="org.jinterop">
-		<level value="ERROR" />
-	</logger>
+	<logger name="com.abiquo.virtualfactory.machine.impl.VirtualBoxMachine">
+        <level value="TRACE" />
+        <appender-ref ref="VBOX" />
+    </logger>
 	
 	<root>
 		<level value="INFO" />

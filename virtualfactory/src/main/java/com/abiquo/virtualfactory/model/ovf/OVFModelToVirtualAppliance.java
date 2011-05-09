@@ -197,18 +197,22 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         final ContentType virtualSystem) throws VirtualMachineException, SectionException,
         Exception
     {
-        // Get the njew virtual machine configuration
-        VirtualMachineConfiguration newConfig =
-            buildUpdateConfiguration(virtualMachine, virtualSystem);
-
-        // Apply the new configuration to the machine in the hypervisor
-        virtualMachine.reconfigVM(newConfig);
-
-        // Apply the new state to the virtual machine (can be null if reconfiguring only the disks)
+        // We will change the state or reconfigure the machine depending on the state field value
         String machineState = getMachineStateFromAnnotation(virtualSystem);
+
         if (machineState != null)
         {
+            // Apply the new state to the virtual machine
             virtualMachine.applyState(State.fromValue(machineState));
+        }
+        else
+        {
+            // Get the njew virtual machine configuration
+            VirtualMachineConfiguration newConfig =
+                buildUpdateConfiguration(virtualMachine, virtualSystem);
+
+            // Apply the new configuration to the machine in the hypervisor
+            virtualMachine.reconfigVM(newConfig);
         }
     }
 
