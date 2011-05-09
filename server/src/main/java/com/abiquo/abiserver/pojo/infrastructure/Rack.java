@@ -106,6 +106,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
         }
+        rackPojo.setHaEnabled(getHaEnabled());
         return rackPojo;
     }
     

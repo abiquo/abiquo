@@ -86,6 +86,11 @@ public class InfrastructureService extends DefaultApiService
         {
             rack.setNrsq(Rack.NRSQ_DEFAULT_VALUE);
         }
+        if (rack.getNrsq() == null)
+        {
+            rack.setNrsq(Rack.NRSQ_DEFAULT_VALUE);
+        }
+        
         
         // Set the datacenter that belongs to
         rack.setDatacenter(datacenter);

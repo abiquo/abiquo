@@ -325,7 +325,7 @@ public class Rack extends DefaultEntityBase
     private final static boolean HAENABLED_REQUIRED = true;
 
     @Column(name = HAENABLED_COLUMN, nullable = false)
-    private boolean haEnabled;
+    private boolean haEnabled = false;
 
     @Required(value = HAENABLED_REQUIRED)
     public boolean isHaEnabled()
