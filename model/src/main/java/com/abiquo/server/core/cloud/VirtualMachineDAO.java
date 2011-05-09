@@ -107,6 +107,13 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     {
         return findUniqueByProperty(VirtualMachine.NAME_PROPERTY, name);
     }
+    
+    public VirtualMachine findByUUID(String uuid)
+    {
+        return findUniqueByProperty(VirtualMachine.UUID_PROPERTY, uuid);
+    }
+    
+    
 
     public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(Integer vappId)
     {

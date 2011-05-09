@@ -104,6 +104,11 @@ public class VirtualMachineService extends DefaultApiService
     {
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
+    
+    public VirtualMachine findByUUID(String uuid)
+    {
+        return repo.findByUUID(uuid);
+    }
 
     public VirtualMachine getVirtualMachine(Integer vdcId, Integer vappId, Integer vmId)
     {

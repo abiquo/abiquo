@@ -64,16 +64,16 @@ public class MachineService extends DefaultApiService
     protected DatastoreService dataService;
 
     @Autowired
-    private VSMStub vsm;
+    protected VSMStub vsm;
 
     @Autowired
-    private RemoteServiceService remoteServiceService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
-    private VirtualMachineService virtualMachineService;
+    protected VirtualMachineService virtualMachineService;
 
     @Autowired
-    private VirtualDatacenterRep virtualDatacenterRep;
+    protected VirtualDatacenterRep virtualDatacenterRep;
 
     public MachineService()
     {
@@ -310,4 +310,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
+       
 }

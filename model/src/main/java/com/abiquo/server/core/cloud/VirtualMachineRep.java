@@ -81,7 +81,12 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return dao.findVirtualMachinesByVirtualAppliance(vappId);
     }
-
+    
+    public VirtualMachine findByUUID(String uuid)
+    {
+        return dao.findByUUID(uuid);
+    }    
+    
     public VirtualMachine findVirtualMachineById(Integer vmId)
     {
         return dao.findById(vmId);
