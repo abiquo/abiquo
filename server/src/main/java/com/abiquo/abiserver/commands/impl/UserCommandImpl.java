@@ -41,6 +41,7 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -454,6 +455,17 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
 
         DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+
+        return dataResult;
+    }
+
+    public DataResult<Role> getRole(final UserSession userSession, final Integer roleId)
+    {
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        DataResult<Role> dataResult = proxy.getRole(roleId);
 
         return dataResult;
     }

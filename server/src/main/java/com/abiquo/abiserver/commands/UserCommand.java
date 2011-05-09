@@ -28,6 +28,7 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -144,7 +145,10 @@ public interface UserCommand
      */
     public abstract BasicResult deleteEnterprise(final UserSession userSession,
         final Enterprise enterprise);
-    
-    public DataResult<Enterprise> getEnterprise(final UserSession userSession, final Integer enterpriseId);
+
+    public DataResult<Enterprise> getEnterprise(final UserSession userSession,
+        final Integer enterpriseId);
+
+    public DataResult<Role> getRole(final UserSession userSession, final Integer roleId);
 
 }

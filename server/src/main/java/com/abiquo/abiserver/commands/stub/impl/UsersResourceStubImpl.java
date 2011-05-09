@@ -330,4 +330,54 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         return newUser;
     }
+
+    @Override
+    public DataResult<Role> getRole(final int roleId)
+    {
+        DataResult<Role> result = new DataResult<Role>();
+
+        String uri = createRoleLink(roleId);
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+
+            Role role = getRole(response);
+
+            result.setData(role);
+        }
+        else
+        {
+            populateErrors(response, result, "getRole");
+        }
+
+        return result;
+    }
+
+    protected Role getRole(final ClientResponse response)
+    {
+        RoleDto role = response.getEntity(RoleDto.class);
+
+        RESTLink enterpriseLink = role.searchLink("enterprise");
+        EnterpriseDto enterpriseRole = null;
+        Enterprise entRole = null;
+        if (enterpriseLink != null)
+        {
+            enterpriseRole =
+                getEnterprise(enterpriseLink.getHref(), new HashMap<String, EnterpriseDto>());
+            entRole = Enterprise.create(enterpriseRole);
+        }
+
+        RESTLink privilegesLink = role.searchLink("action", "privileges");
+        Set<Privilege> privileges = new HashSet<Privilege>();
+        if (privilegesLink != null)
+        {
+            privileges =
+                getPrivileges(privilegesLink.getHref(), new HashMap<String, Set<Privilege>>());
+        }
+
+        return Role.create(role, entRole, privileges);
+    }
 }
