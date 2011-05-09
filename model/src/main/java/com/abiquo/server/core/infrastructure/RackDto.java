@@ -40,7 +40,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
 
     private String vlansIdAvoided;
     
-    private boolean haEnabled;    
+    private boolean haEnabled = false;    
 
 
     public Integer getId()
