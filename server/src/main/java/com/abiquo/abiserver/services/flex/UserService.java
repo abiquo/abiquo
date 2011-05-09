@@ -282,7 +282,6 @@ public class UserService
         }
     }
 
-
     /**
      * Returns a list of roles stored in the Data Base.
      * 
@@ -298,6 +297,13 @@ public class UserService
         try
         {
             return command.getRoles(userSession, roleListOptions);
+
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
 
     public BasicResult getRole(final UserSession userSession, final Integer roleId)
     {

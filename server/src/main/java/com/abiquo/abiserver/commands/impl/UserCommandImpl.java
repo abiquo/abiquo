@@ -42,6 +42,8 @@ import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListOptions;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -459,6 +461,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         return dataResult;
     }
 
+    @Override
     public DataResult<Role> getRole(final UserSession userSession, final Integer roleId)
     {
         UsersResourceStub proxy =
@@ -468,5 +471,17 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         DataResult<Role> dataResult = proxy.getRole(roleId);
 
         return dataResult;
+    }
+
+    @Override
+    public DataResult<RoleListResult> getRoles(final UserSession userSession,
+        final RoleListOptions roleListOptions)
+    {
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        return proxy.getRoles(roleListOptions);
     }
 }
