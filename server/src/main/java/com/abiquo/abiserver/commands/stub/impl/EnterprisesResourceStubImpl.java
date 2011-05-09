@@ -337,20 +337,5 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return enterprise;
     }
 
-    /**
-     * @see com.abiquo.abiserver.commands.stub.EnterprisesResourceStub#getUserByName(java.lang.String,
-     *      java.lang.String)
-     */
-    @Override
-    public DataResult<UserDto> getUserByName(String user, String password)
-    {
-        ClientResponse response = get(createLoginLink(), user, password);
-
-        UserDto userDto = response.getEntity(UserDto.class);
-
-        DataResult<UserDto> data = new DataResult<UserDto>();
-        data.setData(userDto);
-
-        return data;
-    }
+    
 }
