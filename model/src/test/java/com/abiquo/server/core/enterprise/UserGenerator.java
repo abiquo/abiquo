@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -85,13 +86,31 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         return createInstance(enterprise, role, password);
     }
 
+    public User createInstance(AuthType authType)
+    {
+        String password = newString(nextSeed(), 0, 255);
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        Role role = roleGenerator.createUniqueInstance();
+        return createInstance(enterprise, role, password);
+    }
+
     public User createInstance(Enterprise enterprise, Role role, String password)
     {
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
         String email = "abc@example.com";
         String nick = newString(nextSeed(), 0, 255);
-        return createInstance(enterprise, role, password, name, surname, email, nick);
+        return createInstance(enterprise, role, password, name, surname, email, nick,
+            User.AuthType.ABIQUO);
+    }
+
+    public User createInstance(Enterprise enterprise, Role role, String password, AuthType authType)
+    {
+        String name = newString(nextSeed(), 0, 255);
+        String surname = newString(nextSeed(), 0, 255);
+        String email = "abc@example.com";
+        String nick = newString(nextSeed(), 0, 255);
+        return createInstance(enterprise, role, password, name, surname, email, nick, authType);
     }
 
     public User createInstance(Enterprise enterprise, Role role, String nick, String password)
@@ -99,9 +118,11 @@ public class UserGenerator extends DefaultEntityGenerator<User>
         String name = newString(nextSeed(), 0, 255);
         String surname = newString(nextSeed(), 0, 255);
         String email = "abc@example.com";
-        return createInstance(enterprise, role, password, name, surname, email, nick);
+        return createInstance(enterprise, role, password, name, surname, email, nick,
+            User.AuthType.ABIQUO);
     }
 
+    @Deprecated
     public User createInstance(Enterprise enterprise, Role role, String password, String name,
         String surname, String email, String nick)
     {
@@ -115,7 +136,28 @@ public class UserGenerator extends DefaultEntityGenerator<User>
                 email,
                 nick,
                 DigestUtils.md5Hex(password),
-                locale);
+                locale,
+                User.AuthType.ABIQUO);
+
+        user.setActive(1);
+        return user;
+    }
+
+    public User createInstance(Enterprise enterprise, Role role, String password, String name,
+        String surname, String email, String nick, AuthType authType)
+    {
+        String locale = newString(nextSeed(), 0, 255);
+
+        User user =
+            new User(enterprise,
+                role,
+                name,
+                surname,
+                email,
+                nick,
+                DigestUtils.md5Hex(password),
+                locale,
+                authType);
 
         user.setActive(1);
         return user;

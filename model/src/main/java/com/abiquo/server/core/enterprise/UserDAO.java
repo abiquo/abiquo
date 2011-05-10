@@ -162,4 +162,20 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     {
         return existsAnyOtherByCriterions(user, sameNick(nick));
     }
+
+    /**
+     * Returns a User with login {login} that is login to DB.
+     * 
+     * @param login that must match.
+     * @return User.
+     */
+    public User getAbiquoUserByLogin(String login)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameNick(login));
+
+        criteria.add(Restrictions.eq("authType", User.AuthType.ABIQUO));
+
+        return (User) criteria.uniqueResult();
+    }
 }

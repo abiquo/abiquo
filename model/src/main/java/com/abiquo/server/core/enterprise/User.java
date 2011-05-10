@@ -400,6 +400,7 @@ public class User extends DefaultEntityBase
         setNick(nick);
         setPassword(password);
         setLocale(locale);
+        setAuthType(authType);
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
