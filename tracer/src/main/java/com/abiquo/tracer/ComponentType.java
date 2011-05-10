@@ -56,7 +56,7 @@ public enum ComponentType implements Serializable
     LICENSE_MANAGER(32768 | PLATFORM.getValue(), "License Manager"),
 
     // Stateful converter
-    STATEFUL_CONVERTER(65536 | VIRTUAL_APPLIANCE.getValue(), "Persistence converter"),
+    STATEFUL_CONVERTER(65536 | VIRTUAL_APPLIANCE.getValue(), "Persistent converter"),
 
     // Abiquo's API
     API(131072, "API"),
