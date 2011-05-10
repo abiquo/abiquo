@@ -53,30 +53,7 @@ package net.undf.abicloud.controller
                 var mainResult:MainResult = DataResult(result).data as MainResult;
 
                 //Setting the common information
-                //AbiCloudModel.getInstance().userManager.roles = mainResult.roles;
                 AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes = mainResult.hypervisorTypes;
-                
-                //Roles
-                var roles:ArrayCollection = new ArrayCollection();
-                
-                var role:NewRole = new NewRole();
-                role.id = 1;
-                role.idEnterprise = 0;
-                role.name = "Cloud Admin";                
-                roles.addItem(role);
-                
-                role = new NewRole();
-                role.id = 2;
-                role.idEnterprise = 1;
-                role.name = "Enterprise Admin";
-                roles.addItem(role);
-                
-                role = new NewRole();
-                role.id = 3;
-                role.name = "User";
-                roles.addItem(role);
-                
-                AbiCloudModel.getInstance().userManager.roles = roles;
             }
             else
             {
