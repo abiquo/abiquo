@@ -347,7 +347,8 @@ public class User extends DefaultEntityBase
     }
 
     /**
-     * Constructor.
+     * THIS CONSTRUCTOR FORCES THE TYPE, AND THEREFORE THE AUTHENTICATION MODE TO <b>ABIQUO</b>.
+     * THAT MEANS THAT THIS USER CAN ONLY AUTHENTICATE TO DB. Constructor.
      * 
      * @param enterprise Enterprise to which the user belonsg.
      * @param role Role in Abiquo.
