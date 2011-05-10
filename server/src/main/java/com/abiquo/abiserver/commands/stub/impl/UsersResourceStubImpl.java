@@ -364,10 +364,10 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     {
         RoleDto role = response.getEntity(RoleDto.class);
 
-        return getRole(role);
+        return getRole(role, true);
     }
 
-    protected Role getRole(final RoleDto role)
+    protected Role getRole(final RoleDto role, final boolean getPrivileges)
     {
 
         RESTLink enterpriseLink = role.searchLink("enterprise");
@@ -379,15 +379,18 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 getEnterprise(enterpriseLink.getHref(), new HashMap<String, EnterpriseDto>());
             entRole = Enterprise.create(enterpriseRole);
         }
-
-        RESTLink privilegesLink = role.searchLink("action", "privileges");
         Set<Privilege> privileges = new HashSet<Privilege>();
-        if (privilegesLink != null)
-        {
-            privileges =
-                getPrivileges(privilegesLink.getHref(), new HashMap<String, Set<Privilege>>());
-        }
 
+        if (getPrivileges)
+        {
+            RESTLink privilegesLink = role.searchLink("action", "privileges");
+
+            if (privilegesLink != null)
+            {
+                privileges =
+                    getPrivileges(privilegesLink.getHref(), new HashMap<String, Set<Privilege>>());
+            }
+        }
         return Role.create(role, entRole, privileges);
     }
 
@@ -425,7 +428,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             Collection<Role> roles = new ArrayList<Role>();
             for (RoleDto dto : rolesDto.getCollection())
             {
-                roles.add(getRole(dto));
+                roles.add(getRole(dto, false));
 
             }
 
