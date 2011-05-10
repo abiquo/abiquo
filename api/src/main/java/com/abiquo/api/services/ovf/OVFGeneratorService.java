@@ -55,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -67,9 +69,7 @@ import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
 import com.abiquo.ovfmanager.ovf.exceptions.IdAlreadyExistsException;
-import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
-import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
@@ -97,6 +97,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 @Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFGeneratorService
 {
     @Autowired
@@ -845,9 +846,8 @@ public class OVFGeneratorService
         CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
             new Long(virtualMachine.getCpu()));
 
-        final String virtualImageId =
-            node.getId() == null ? "to" : node.getId().toString();
-        
+        final String virtualImageId = node.getId() == null ? "to" : node.getId().toString();
+
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("Harddisk"

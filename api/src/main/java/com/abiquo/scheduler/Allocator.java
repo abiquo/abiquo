@@ -209,12 +209,12 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarded machine [{}] : Not Enough Resources [{}]", targetMachine
-                        .getName(), e);
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                        targetMachine.getName(), e);
 
                     errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(), e
-                            .getMessage());
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
                     targetMachine = null;
                 }
             }
@@ -240,12 +240,13 @@ public class Allocator implements IAllocator
             throw new NotEnoughResourcesException(cause);
         }
 
-        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]", targetMachine
-            .getName(), vmachine.getName());
+        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
+            targetMachine.getName(), vmachine.getName());
 
         return vmachine;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public VirtualMachine allocateHAVirtualMachine(VirtualMachine vmachine)
         throws AllocatorException, ResourceAllocationException
     {
@@ -309,12 +310,12 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarded machine [{}] : Not Enough Resources [{}]", targetMachine
-                        .getName(), e);
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                        targetMachine.getName(), e);
 
                     errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(), e
-                            .getMessage());
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
                     targetMachine = null;
                 }
             }

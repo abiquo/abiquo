@@ -35,8 +35,8 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.SystemProperty;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 
 /**
@@ -70,7 +70,7 @@ public class VirtualMachineFactory
 
     public final static int MAX_REMOTE_DESKTOP_PORT = 65534;
 
-    private final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
+    protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
     /**
      * Create a Virtual Machine on the given PhysicalMachine to deploy the given VirtualImage.
@@ -139,8 +139,7 @@ public class VirtualMachineFactory
 
         if (datastores.isEmpty())
         {
-            final String cause =
-                "The target physical machine has no datastores.";
+            final String cause = "The target physical machine has no datastores.";
             throw new NotEnoughResourcesException(cause);
         }
 
