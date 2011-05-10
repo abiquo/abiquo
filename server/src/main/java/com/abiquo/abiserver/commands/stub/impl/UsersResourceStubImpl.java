@@ -409,6 +409,10 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         String orderBy = roleListOptions.getOrderBy();
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (enterpriseId != null)
+        {
+            queryParams.put("enterpriseId", new String[] {enterpriseId});
+        }
         if (!StringUtils.isEmpty(roleListOptions.getFilter()))
         {
             queryParams.put("filter", new String[] {roleListOptions.getFilter()});
@@ -416,8 +420,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         queryParams.put("orderBy", new String[] {orderBy});
         queryParams.put("desc", new String[] {String.valueOf(desc)});
 
-        String uri =
-            createRolesLink(enterpriseId, roleListOptions.getOffset(), roleListOptions.getLength());
+        String uri = createRolesLink(roleListOptions.getOffset(), roleListOptions.getLength());
+
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
         ClientResponse response = get(uri);

@@ -259,16 +259,16 @@ public class AbstractAPIStub
             Collections.singletonMap("role", valueOf(roleId)));
     }
 
-    protected String createRolesLink(final String enterpriseId, Integer offset,
-        final Integer numResults)
+    protected String createRolesLink()
+    {
+        return createRolesLink(null, null);
+    }
+
+    protected String createRolesLink(Integer offset, final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "admin/roles", Collections.emptyMap());
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (enterpriseId != null)
-        {
-            queryParams.put("enterpriseId", new String[] {enterpriseId});
-        }
 
         if (offset != null && numResults != null)
         {
