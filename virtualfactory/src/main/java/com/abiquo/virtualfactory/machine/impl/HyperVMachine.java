@@ -106,7 +106,9 @@ public class HyperVMachine extends AbsHyperVMachine
                 //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
                 //{
                     // Just deleted the base disk when the virtual disk is stateless
+                if (!config.getVirtualDiskBase().isHa()){
                     deleteBaseDisk();
+                }
                 //}
             }
             else
