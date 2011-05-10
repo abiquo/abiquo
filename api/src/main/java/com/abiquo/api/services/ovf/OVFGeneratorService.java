@@ -526,11 +526,10 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            final String diskid =
-                nodeVirtualImage.getId() == null ? "to" : nodeVirtualImage.getId().toString();
+            final String id = nodeVirtualImage.getId() == null? "10" : nodeVirtualImage.getId().toString();
+            
+            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(id, nodeVirtualImage.getVirtualImage()));
 
-            OVFDiskUtils.addDisk(envelope,
-                createDiskFromVirtualImage(diskid, nodeVirtualImage.getVirtualImage()));
 
             OVFReferenceUtils.addFileOrIgnore(references,
                 createFileFromVirtualImage(nodeVirtualImage, bundling, ha));
@@ -850,7 +849,7 @@ public class OVFGeneratorService
         CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
             new Long(virtualMachine.getCpu()));
 
-        final String virtualImageId = node.getId() == null ? "to" : node.getId().toString();
+        String virtualImageId = node.getId() == null? "10" : node.getId().toString();
 
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
