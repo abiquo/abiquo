@@ -152,6 +152,8 @@ public class UserResource extends AbstractResource
         u.setNick(user.getNick());
         u.setDescription(user.getDescription());
         u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+        u.setAuthType(user.getAuthType().name());
+
         return u;
     }
 
