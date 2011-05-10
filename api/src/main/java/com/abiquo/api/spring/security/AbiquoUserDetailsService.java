@@ -61,7 +61,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         User user = null;
         try
         {
-            user = enterpriseRep.getUserByUserName(username);
+            user = enterpriseRep.getAbiquoUserByUserName(username);
         }
         catch (Exception ex)
         {
@@ -81,6 +81,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         userDetails.setActive(user.getActive() == 1);
         userDetails.setEnterpriseId(user.getEnterprise().getId());
         userDetails.setEnterpriseName(user.getEnterprise().getName());
+        userDetails.setAuthType(user.getAuthType().name());
 
         // Set user authorities
         GrantedAuthority[] authorities = loadUserAuthorities(user);

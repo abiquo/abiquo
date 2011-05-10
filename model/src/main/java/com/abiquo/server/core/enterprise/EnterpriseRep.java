@@ -308,4 +308,9 @@ public class EnterpriseRep extends DefaultRepBase
     {
         limitsDAO.remove(limit);
     }
+
+    public User getAbiquoUserByUserName(String nick)
+    {
+        return userDAO.getAbiquoUserByLogin(nick);
+    }
 }
