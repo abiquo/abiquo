@@ -25,11 +25,7 @@ import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.MainCommand;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
@@ -37,7 +33,6 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.main.MainResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.model.enumerator.HypervisorType;
 
 /**
@@ -53,7 +48,6 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
     public DataResult<MainResult> getCommonInformation(final UserSession userSession)
     {
         DataResult<MainResult> dataResult = new DataResult<MainResult>();
-        ArrayList<Role> rolesList = new ArrayList<Role>();
         ArrayList<HyperVisorType> hypervisorTypesList = new ArrayList<HyperVisorType>();
 
         Session session = null;
@@ -63,29 +57,6 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-
-            // Getting the user that called this method
-            UserHB userHB =
-                (UserHB) session.createCriteria(UserHB.class)
-                    .add(Restrictions.eq("user", userSession.getUser())).uniqueResult();
-
-            // 2 - Retrieving the list of Roles
-            // Only the Roles with a security level equal or less than the user who called this
-            // method will be returned
-            ArrayList<RoleHB> rolesHB =
-                (ArrayList<RoleHB>) session.createCriteria(RoleHB.class)
-                    .addOrder(Order.asc("name")).list();
-            //
-            // for (RoleHB roleHB : rolesHB)
-            // {
-            // // Tip: in securityLevel scale, 1 is the greater level of security, and 99 the
-            // // lowest
-            // if (roleHB.getSecurityLevel().compareTo(userHB.getRoleHB().getSecurityLevel()) > -1)
-            // {
-            // // This user can view this role
-            // rolesList.add(roleHB.toPojo());
-            // }
-            // }
 
             for (HypervisorType type : HypervisorType.values())
             {
@@ -111,7 +82,6 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
         }
 
         MainResult mainResult = new MainResult();
-        mainResult.setRoles(rolesList);
         mainResult.setHypervisorTypes(hypervisorTypesList);
 
         dataResult.setData(mainResult);
