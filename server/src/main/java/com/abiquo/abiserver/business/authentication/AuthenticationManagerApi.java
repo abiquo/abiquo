@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
+import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 import org.springframework.security.BadCredentialsException;
@@ -230,9 +231,9 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
 
-        UserSession session = new UserSession();
-        session.setUser(login.getUser());
-        LoginResourceStub proxy = getLoginStubProxy(session);
+        // UserSession session = new UserSession();
+        // session.setUser(login.getUser());
+        // LoginResourceStub proxy = getLoginStubProxy(session);
         ClientConfig clientConfig = new ClientConfig();
         BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
         clientConfig.handlers(basicAuthHandler);
@@ -244,15 +245,15 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             URI uri = new URI(getApiUri() + "login");
 
             // We perform this call to a secure location. If success then the credentials are valid
-            // ClientResponse response = client.resource(uri).get();
-            DataResult<UserDto> data = proxy.getUserByName(login.getUser(), login.getPassword());
-            // UserDto userDto = response.getEntity(UserDto.class);
+            ClientResponse response = client.resource(uri).get();
+            // DataResult<UserDto> data = proxy.getUserByName(login.getUser(), login.getPassword());
+            UserDto userDto = response.getEntity(UserDto.class);
             // Old DB login needs a Md5 password
             String passwordHash = createMd5encodedPassword(login);
             basicAuthHandler.setPassword(passwordHash);
             login.setPassword(passwordHash);
 
-            userHB = getUserToPersistSession(login, data.getData()); // userDto);
+            userHB = getUserToPersistSession(login, userDto);
             dataResult = persistLogin(userHB);
         }
         catch (BadCredentialsException e)

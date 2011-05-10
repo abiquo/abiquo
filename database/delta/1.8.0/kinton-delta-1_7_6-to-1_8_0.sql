@@ -17,3 +17,11 @@ update volume_management set state = 1 where state = 2;
 -- [ABICLOUDPREMIUM-1616]
 ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
+-- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
+alter table kinton.user modify user varchar(128) NOT NULL;
+alter table kinton.user add authType varchar(20) NOT NULL;
+alter table kinton.user modify column password varchar(32);
+
+update kinton.user set authtype = 'ABIQUO';
+
+commit;
