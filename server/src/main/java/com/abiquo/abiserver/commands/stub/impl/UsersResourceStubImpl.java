@@ -40,6 +40,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.Privilege;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
 import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.RoleListResult;
@@ -437,6 +438,35 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
             dataResult.setData(roleListResult);
             dataResult.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getRoles");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public DataResult<PrivilegeListResult> getPrivilegesByRole(final int roleId)
+    {
+        DataResult<PrivilegeListResult> dataResult = new DataResult<PrivilegeListResult>();
+        PrivilegeListResult privilegeListResult = new PrivilegeListResult();
+
+        String uri = createRoleActionGetPrivilegesURI(roleId);
+
+        ClientResponse response = get(uri, FLAT_MEDIA_TYPE);
+        if (response.getStatusCode() == 200)
+        {
+            PrivilegesDto dto = response.getEntity(PrivilegesDto.class);
+            Collection<Privilege> privileges = new ArrayList<Privilege>();
+            for (PrivilegeDto p : dto.getCollection())
+            {
+                Privilege priv = Privilege.create(p);
+                privileges.add(priv);
+            }
+            privilegeListResult.setPrivilegesList(privileges);
+            privilegeListResult.setTotalPrivileges(dto.getCollection().size());
         }
         else
         {

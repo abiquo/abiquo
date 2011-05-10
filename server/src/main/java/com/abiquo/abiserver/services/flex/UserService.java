@@ -318,4 +318,18 @@ public class UserService
             return e.getResult();
         }
     }
+
+    public BasicResult getPrivilegesByRole(final UserSession userSession, final Integer roleId)
+    {
+        UserCommand command = proxyCommand(userSession);
+        try
+        {
+            return command.getPrivilegesByRole(userSession, roleId.intValue());
+
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
 }

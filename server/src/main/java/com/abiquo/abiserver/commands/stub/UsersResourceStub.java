@@ -23,6 +23,7 @@ package com.abiquo.abiserver.commands.stub;
 
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
 import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.RoleListResult;
@@ -43,4 +44,6 @@ public interface UsersResourceStub
     public DataResult<Role> getRole(int roleId);
 
     public DataResult<RoleListResult> getRoles(RoleListOptions roleListOptions);
+
+    public DataResult<PrivilegeListResult> getPrivilegesByRole(int roleId);
 }

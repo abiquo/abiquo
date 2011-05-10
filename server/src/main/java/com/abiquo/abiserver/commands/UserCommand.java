@@ -28,6 +28,7 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
 import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.RoleListResult;
@@ -165,4 +166,13 @@ public interface UserCommand
     public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
         final RoleListOptions roleListOptions);
 
+    /**
+     * Returns a list of privileges from a role
+     * 
+     * @param userSession
+     * @param roleId role id owner of privileges
+     * @return a DataResult object containing an PrivilegeListResult
+     */
+    public DataResult<PrivilegeListResult> getPrivilegesByRole(final UserSession userSession,
+        final int roleId);
 }
