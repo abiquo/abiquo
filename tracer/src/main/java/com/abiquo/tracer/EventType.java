@@ -108,14 +108,14 @@ public enum EventType implements Serializable
     RAW_IMPORT_CONVERSION(504, "RAW_IMPORT_CONVERSION", "Raw import conversion started"), 
 
     // Stateful related events
-    STATEFUL_PROCESS_START(600, "PERSISTENCE_PROCESS_START", "A Persistence conversion process has started"), 
-    STATEFUL_RAW_FINISHED(601, "PERSISTENCE_RAW_FINISHED", "A Persistence RAW conversion has finished and it is ready to be dumped to a volume"), 
-    STATEFUL_VOLUME_CREATED(602, "PERSISTENCE_VOLUME_CREATED", "A Persistence volume has been created"), 
-    STATEFUL_DUMP_ENQUEUED(603, "PERSISTENCE_DUMP_ENQUEUED", "A Persistence volume dump has been enqueued"), 
-    STATEFUL_DUMP_FINISHED(604, "PERSISTENCE_DUMP_FINISHED", "A Persistence dump to a volume has finished"), 
-    STATEFUL_PROCESS_FINISHED(605, "PERSISTENCE_PROCESS_FINISHED", "A Persistence conversion process has finished"), 
-    STATEFUL_PROCESS_FAILED(606, "PERSISTENCE_PROCESS_FAILED", "A Persistence process has failed"), 
-    STATEFUL_INITIATOR_ADDED(607, "PERSISTENCE_INITIATOR_ADDED", "Persistence initiator has added"),
+    STATEFUL_PROCESS_START(600, "PERSISTENT_PROCESS_START", "A Persistent conversion process has started"), 
+    STATEFUL_RAW_FINISHED(601, "PERSISTENT_RAW_FINISHED", "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), 
+    STATEFUL_VOLUME_CREATED(602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), 
+    STATEFUL_DUMP_ENQUEUED(603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), 
+    STATEFUL_DUMP_FINISHED(604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), 
+    STATEFUL_PROCESS_FINISHED(605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), 
+    STATEFUL_PROCESS_FAILED(606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), 
+    STATEFUL_INITIATOR_ADDED(607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
 
     // License related events
     LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), 

@@ -23,6 +23,7 @@ alter table kinton.user add authType varchar(20) NOT NULL;
 alter table kinton.user modify column password varchar(32);
 update kinton.user set authtype = 'ABIQUO';
 
+
 -- [ABICLOUDPREMIUM 1615]  Accounting changes --
 
 DROP TABLE IF EXISTS `kinton`.`accounting_event_vm`;
