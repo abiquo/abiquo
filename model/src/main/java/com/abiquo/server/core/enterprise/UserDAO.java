@@ -164,7 +164,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     }
 
     /**
-     * Returns a User with login {login} that is login to DB.
+     * Returns a User with nick {login} that is login to DB.
      * 
      * @param login that must match.
      * @return User.
