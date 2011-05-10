@@ -61,7 +61,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         User user = null;
         try
         {
-            user = enterpriseRep.getAbiquoUserByUserName(username);
+            user = enterpriseRep.getUserByUserName(username);
         }
         catch (Exception ex)
         {
