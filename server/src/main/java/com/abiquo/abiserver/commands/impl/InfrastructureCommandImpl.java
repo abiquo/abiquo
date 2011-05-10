@@ -981,6 +981,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
+            
+            rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
 
