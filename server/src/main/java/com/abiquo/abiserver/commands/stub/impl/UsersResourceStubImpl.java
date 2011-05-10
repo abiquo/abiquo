@@ -38,11 +38,11 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
 import com.abiquo.abiserver.pojo.user.Role;
-import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
@@ -395,33 +395,27 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     }
 
     @Override
-    public DataResult<RoleListResult> getRoles(final RoleListOptions roleListOptions)
+    public DataResult<RoleListResult> getRoles(final ListRequest roleListOptions)
     {
         DataResult<RoleListResult> dataResult = new DataResult<RoleListResult>();
         RoleListResult roleListResult = new RoleListResult();
-
-        String enterpriseId = null;
-        if (roleListOptions.getIdEnterprise() != 0)
-        {
-            enterpriseId = String.valueOf(roleListOptions.getIdEnterprise());
-        }
 
         boolean desc = !roleListOptions.getAsc();
         String orderBy = roleListOptions.getOrderBy();
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (enterpriseId != null)
+        if (!StringUtils.isEmpty(roleListOptions.getFilterLike()))
         {
-            queryParams.put("enterpriseId", new String[] {enterpriseId});
+            queryParams.put("filter", new String[] {roleListOptions.getFilterLike()});
         }
-        if (!StringUtils.isEmpty(roleListOptions.getFilter()))
+        if (!StringUtils.isEmpty(roleListOptions.getOrderBy()))
         {
-            queryParams.put("filter", new String[] {roleListOptions.getFilter()});
+            queryParams.put("orderBy", new String[] {orderBy});
         }
-        queryParams.put("orderBy", new String[] {orderBy});
         queryParams.put("desc", new String[] {String.valueOf(desc)});
 
-        String uri = createRolesLink(roleListOptions.getOffset(), roleListOptions.getLength());
+        String uri =
+            createRolesLink(roleListOptions.getOffset(), roleListOptions.getNumberOfNodes());
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
@@ -474,6 +468,9 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             }
             privilegeListResult.setPrivilegesList(privileges);
             privilegeListResult.setTotalPrivileges(dto.getCollection().size());
+
+            dataResult.setData(privilegeListResult);
+            dataResult.setSuccess(true);
         }
         else
         {

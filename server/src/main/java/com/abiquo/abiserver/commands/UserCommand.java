@@ -30,7 +30,6 @@ import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
 import com.abiquo.abiserver.pojo.user.Role;
-import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
@@ -164,7 +163,7 @@ public interface UserCommand
      */
     @SuppressWarnings("unchecked")
     public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
-        final RoleListOptions roleListOptions);
+        final ListRequest roleListOptions);
 
     /**
      * Returns a list of privileges from a role

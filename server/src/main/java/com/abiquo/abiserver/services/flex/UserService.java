@@ -31,7 +31,6 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
-import com.abiquo.abiserver.pojo.user.RoleListOptions;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 
@@ -290,7 +289,7 @@ public class UserService
      *            of users
      * @return A DataResult object containing an RoleListResult object
      */
-    public BasicResult getRoles(final UserSession userSession, final RoleListOptions roleListOptions)
+    public BasicResult getRoles(final UserSession userSession, final ListRequest roleListOptions)
     {
         UserCommand command = proxyCommand(userSession);
 
