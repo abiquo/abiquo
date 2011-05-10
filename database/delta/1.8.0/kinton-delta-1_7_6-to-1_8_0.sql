@@ -17,6 +17,12 @@ UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FINISHED" WHERE a
 UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FAILED" WHERE actionperformed="STATEFUL_PROCESS_FAILED";
 UPDATE kinton.metering SET actionperformed="PERSISTENT_INITIATOR_ADDED" WHERE actionperformed="STATEFUL_INITIATOR_ADDED";
 
+-- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
+alter table kinton.user modify user varchar(128) NOT NULL;
+alter table kinton.user add authType varchar(20) NOT NULL;
+alter table kinton.user modify column password varchar(32);
+update kinton.user set authtype = 'ABIQUO';
+
 -- [ABICLOUDPREMIUM 1615]  Accounting changes --
 
 DROP TABLE IF EXISTS `kinton`.`accounting_event_vm`;
@@ -412,8 +418,3 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
     END IF;
     END;
 
--- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
-alter table kinton.user modify user varchar(128) NOT NULL;
-alter table kinton.user add authType varchar(20) NOT NULL;
-alter table kinton.user modify column password varchar(32);
-update kinton.user set authtype = 'ABIQUO';
