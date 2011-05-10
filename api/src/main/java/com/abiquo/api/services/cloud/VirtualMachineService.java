@@ -39,11 +39,14 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
@@ -51,6 +54,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -166,6 +170,7 @@ public class VirtualMachineService
 
     /**
      * Block the virtual by changing its state to IN_PROGRESS
+     * 
      * @param vm VirtualMachine to be blocked
      */
     public void blockVirtualMachine(VirtualMachine vm)
@@ -181,9 +186,10 @@ public class VirtualMachineService
 
     /**
      * Changes the state of the VirtualMachine to the state passed
+     * 
      * @param vappId Virtual Appliance Id
      * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change 
+     * @param state The state to which change
      * @throws Exception
      */
     public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
@@ -192,8 +198,8 @@ public class VirtualMachineService
         VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
-        EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
-         //EnvelopeType envelop = ovfService.changeMachineState(vm, vm.getState().toResourceState());
+        VirtualAppliance vapp = contanerVirtualAppliance(vm); 
+        EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
@@ -210,6 +216,33 @@ public class VirtualMachineService
 
     }
 
+    @Deprecated
+    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    {
+
+        VirtualDatacenter vdc =
+            new VirtualDatacenter(vmachine.getEnterprise(),
+                null,
+                new Network("uuid"),
+                HypervisorType.VMX_04,
+                "name");
+
+        // TODO do not set VDC network
+        VirtualAppliance vapp =
+            new VirtualAppliance(vmachine.getEnterprise(),
+                vdc,
+                "haVapp",
+                com.abiquo.server.core.cloud.State.NOT_DEPLOYED,
+                com.abiquo.server.core.cloud.State.NOT_DEPLOYED);
+
+        NodeVirtualImage nvi =
+            new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);
+
+        vapp.addToNodeVirtualImages(nvi);
+
+        return vapp;
+    }
+
     /**
      * Compare the state of vm with the state passed through parameter
      * 
@@ -219,7 +252,7 @@ public class VirtualMachineService
      */
     public Boolean sameState(VirtualMachine vm, State state)
     {
-        String actual = vm.getState().toOVF();//OVFGeneratorService.getActualState(vm);
+        String actual = vm.getState().toOVF();// OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);
     }
 

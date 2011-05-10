@@ -60,6 +60,14 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
     public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
     @Autowired
     VirtualMachineService vmService;
