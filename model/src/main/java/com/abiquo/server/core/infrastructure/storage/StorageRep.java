@@ -33,6 +33,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.util.FilterOptions;
 
@@ -57,6 +58,9 @@ public class StorageRep extends DefaultRepBase
     @Autowired
     private RasdDAO rasdDAO;
 
+    @Autowired
+    private InitiatorMappingDAO initiatorMappingDAO;
+
     public StorageRep()
     {
 
@@ -71,6 +75,7 @@ public class StorageRep extends DefaultRepBase
         this.deviceDAO = new StorageDeviceDAO(entityManager);
         this.poolDAO = new StoragePoolDAO(entityManager);
         this.volumeDAO = new VolumeManagementDAO(entityManager);
+        this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -94,6 +99,12 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolById(deviceId, poolId);
     }
 
+    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
+        final String initiatorIqn)
+    {
+        return initiatorMappingDAO.findByVolumeAndInitiator(idVolumeManagement, initiatorIqn);
+    }
+
     public StoragePool findPoolByName(final Integer deviceId, final String name)
     {
         return poolDAO.findPoolByName(deviceId, name);
@@ -102,6 +113,10 @@ public class StorageRep extends DefaultRepBase
     public VolumeManagement findVolumeById(final Integer volumeId)
     {
         return volumeDAO.findById(volumeId);
+    }
+    
+    public VolumeManagement findVolumeByRasd(final Rasd rasd) {
+        return volumeDAO.getVolumeByRasd(rasd);
     }
 
     public List<StoragePool> findPoolsByTier(final Tier tier)
@@ -144,6 +159,11 @@ public class StorageRep extends DefaultRepBase
     public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
+    }
+    
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        return volumeDAO.getVolumeFromImage(idImage);
     }
 
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)

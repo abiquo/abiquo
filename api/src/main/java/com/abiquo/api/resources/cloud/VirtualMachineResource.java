@@ -60,6 +60,14 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
     public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
+    
+    public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
     @Autowired
     VirtualMachineService vmService;
@@ -194,7 +202,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.blockVirtualMachine(vm);
 
-            vmService.changeVirtualMachineState(vappId, vdcId, State.RUNNING);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
         }
     }
     /**
@@ -218,7 +226,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.blockVirtualMachine(vm);
 
-            vmService.changeVirtualMachineState(vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
         }
     }
     /**
@@ -242,7 +250,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.blockVirtualMachine(vm);
 
-            vmService.changeVirtualMachineState(vappId, vdcId, State.REBOOTED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
         }
     }
     /**
@@ -266,7 +274,7 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.blockVirtualMachine(vm);
 
-            vmService.changeVirtualMachineState(vappId, vdcId, State.PAUSED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
         }
     }
 }

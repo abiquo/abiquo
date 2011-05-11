@@ -55,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -95,6 +97,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 @Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFGeneratorService
 {
     @Autowired
@@ -517,8 +520,9 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(nodeVirtualImage.getId()
-                .toString(), nodeVirtualImage.getVirtualImage()));
+            final String id = nodeVirtualImage.getId() == null? "10" : nodeVirtualImage.getId().toString();
+            
+            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(id, nodeVirtualImage.getVirtualImage()));
 
             OVFReferenceUtils.addFileOrIgnore(references, createFileFromVirtualImage(
                 nodeVirtualImage, bundling));
@@ -824,7 +828,9 @@ public class OVFGeneratorService
         CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
             .getCpu()));
 
-        String virtualImageId = String.valueOf(node.getId());
+        
+        String virtualImageId = node.getId() == null? "10" : node.getId().toString();
+        
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("Harddisk"
