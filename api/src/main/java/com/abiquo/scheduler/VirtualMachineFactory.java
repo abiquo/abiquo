@@ -96,6 +96,8 @@ public class VirtualMachineFactory
         final int vdrpPort = selectVrdpPort(machine);
         final Datastore datastore = selectDatastore(machine, datastoreRequ);
 
+        log.error("hypervisor id is {}", hypervisor.getId()); // TODO remove
+
         virtualMachine.setHypervisor(hypervisor);
         virtualMachine.setDatastore(datastore);
 

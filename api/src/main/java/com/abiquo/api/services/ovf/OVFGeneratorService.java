@@ -481,6 +481,7 @@ public class OVFGeneratorService
         return createVirtualApplication(virtualAppliance, false, false);
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling, final boolean ha) throws Exception
     {
