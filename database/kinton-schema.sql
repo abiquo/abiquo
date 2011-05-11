@@ -839,7 +839,7 @@ CREATE TABLE  `kinton`.`user` (
   `idRole` int(3) unsigned NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `user` varchar(128) NOT NULL,
-  `name` varchar(30) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `surname` varchar(50) default NULL,
   `description` varchar(100) default NULL,
   `email` varchar(200),
@@ -874,7 +874,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`session`;
 CREATE TABLE  `kinton`.`session` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `user` varchar(20) NOT NULL,
+  `user` varchar(128) NOT NULL,
   `key` varchar(100) NOT NULL,
   `expireDate` timestamp NOT NULL,
   `idUser` int(10) unsigned default null,
@@ -1105,7 +1105,7 @@ CREATE TABLE  `kinton`.`metering` (
   `idEnterprise` int(10) unsigned default NULL,
   `enterprise` varchar(40) default NULL,
   `idUser` int(10) unsigned default NULL,
-  `user` varchar(20) default NULL,
+  `user` varchar(128) default NULL,
   `idVirtualDataCenter` int(10) unsigned default NULL,
   `virtualDataCenter` varchar(40) default NULL,
   `idVirtualApp` int(10) unsigned default NULL,
