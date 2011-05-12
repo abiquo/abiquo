@@ -28,7 +28,7 @@ package net.undf.abicloud.controller
     import net.undf.abicloud.vo.main.MainResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
-    import net.undf.abicloud.vo.user.NewRole;
+    import net.undf.abicloud.vo.user.Role;
 
     /**
      * Class to handle server responses when calling infrastructure remote services defined in InfrastructureEventMap

@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" 
+    creationComplete="onCreationComplete()"
     wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_user_createUser.value}"
     xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
@@ -36,6 +37,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.user.Role;
         	import mx.managers.PopUpManager;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.binding.utils.ChangeWatcher;
@@ -81,6 +85,15 @@
             private var _restrict:Boolean;
 
 
+            private function onCreationComplete():void{
+            	//SecuredPrivilegeAccess.checkElementAccess(
+            	
+            	//TO DO -> Role and Privileges
+                //Retrieve the list of virtual datacenter if you are not a Simple User
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION)){	                
+	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");             	
+               	}
+            }
             /**
              * Initializes this form to create a new user
              **/
@@ -93,7 +106,7 @@
                 nameInput.text = this._userToEdit.name;
                 surnameInput.text = this._userToEdit.surname;
                 roleInput.selectedIndex = -1;
-                roleInput.prompt = this._userToEdit.role.shortDescription;
+                roleInput.prompt = this._userToEdit.role.name;
                 userInput.text = this._userToEdit.user;
                 //Now user will be able to modify all the information without changing the pass
                 //passwordInput.text = this._userToEdit.pass;
@@ -129,11 +142,6 @@
                 
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
-                
-                //Retrieve the list of virtual datacenter if you are not a Simple User
-                if(AbiCloudModel.getInstance().loginManager.user.role.id != Role.USER_ROLE){
-	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");                	
-                }
             }
             
             /**

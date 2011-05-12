@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.managers.PopUpManager;
         	import mx.controls.Alert;

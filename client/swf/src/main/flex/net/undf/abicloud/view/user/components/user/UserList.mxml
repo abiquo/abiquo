@@ -417,14 +417,12 @@
              **/
             private function usersDataGridRoleColumnLabel(item:User, column:DataGridColumn):String
             {
-                var label:String = item.role.shortDescription;
-                if(item.role.id == Role.USER_ROLE){
-                	if(item.availableVirtualDatacenters){
-                		if(item.availableVirtualDatacenters.length > 0){
-                			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
-                		}
-                	}
-                }
+                var label:String = item.role.name;
+            	if(item.availableVirtualDatacenters){
+            		if(item.availableVirtualDatacenters.length > 0){
+            			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
+            		}
+            	}
                 return label;
             }
 
