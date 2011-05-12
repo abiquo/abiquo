@@ -113,11 +113,11 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<Integer> getVLANsIdUsedInRack(Rack rack)
+    public List<Integer> getVLANTagsUsedInRack(Rack rack)
     {
         String idRack = String.valueOf(rack.getId());
 
-        Query query = getSession().createQuery("SELECT vn.id FROM " //
+        Query query = getSession().createQuery("SELECT vn.tag FROM " //
             + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
             + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
             + "WHERE vn.id = vna.vlanNetwork.id " + //
