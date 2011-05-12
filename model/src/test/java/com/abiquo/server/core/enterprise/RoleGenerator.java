@@ -66,6 +66,13 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
         return createInstance(p1, p2);
     }
+    
+    public Role createInstanceSysAdmin(String name)
+    {
+        Privilege p1 = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
+        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        return createInstance(name, p1, p2);
+    }
 
     public Role createInstanceEnterprisAdmin()
     {
@@ -85,6 +92,14 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     public Role createInstance()
     {
         String name = newString(nextSeed(), Role.NAME_LENGTH_MIN, Role.NAME_LENGTH_MAX);
+
+        Role role = new Role(name);
+
+        return role;
+    }
+
+    public Role createInstance(final String name)
+    {
 
         Role role = new Role(name);
 
@@ -111,6 +126,16 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     public Role createInstance(final Privilege... privileges)
     {
         Role role = createInstance();
+        for (Privilege p : privileges)
+        {
+            role.addPrivilege(p);
+        }
+        return role;
+    }
+
+    public Role createInstance(final String name, final Privilege... privileges)
+    {
+        Role role = createInstance(name);
         for (Privilege p : privileges)
         {
             role.addPrivilege(p);

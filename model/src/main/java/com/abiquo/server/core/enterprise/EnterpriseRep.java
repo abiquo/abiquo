@@ -192,6 +192,11 @@ public class EnterpriseRep extends DefaultRepBase
         return userDAO.existAnyOtherUserWithNick(user, nick);
     }
 
+    public boolean existAnyUserWithRole(final Role role)
+    {
+        return userDAO.existAnyUserWithRole(role);
+    }
+
     public void insertUser(final User user)
     {
         userDAO.persist(user);

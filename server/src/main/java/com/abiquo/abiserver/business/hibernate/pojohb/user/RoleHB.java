@@ -46,6 +46,10 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
 
     private EnterpriseHB enterpriseHB;
 
+    private String ldap;
+
+    // private Integer idEnterprise;
+
     private Set<PrivilegeHB> privilegesHB;
 
     public Set<PrivilegeHB> getPrivilegesHB()
@@ -98,16 +102,31 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
         this.enterpriseHB = enterpriseHB;
     }
 
+    public String getLdap()
+    {
+        return ldap;
+    }
+
+    public void setLdap(final String ldap)
+    {
+        this.ldap = ldap;
+    }
+
     @Override
     public Role toPojo()
     {
         Role role = new Role();
 
         role.setId(idRole);
+        role.setName(name);
+        role.setBlocked(blocked);
+
+        role.setLdap(ldap);
 
         if (enterpriseHB != null)
         {
             role.setEnterprise(enterpriseHB.toPojo());
+            role.setIdEnterprise(enterpriseHB.getIdEnterprise());
         }
         else
         {
@@ -127,4 +146,5 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
 
         return role;
     }
+
 }

@@ -33,7 +33,7 @@ public class RoleListOptions
 
     private Boolean asc;
 
-    private int idEnterprise;
+    private String idEnterprise;
 
     public RoleListOptions()
     {
@@ -42,7 +42,7 @@ public class RoleListOptions
         filter = "";
         orderBy = "name";
         asc = true;
-        idEnterprise = 0;
+        idEnterprise = "";
     }
 
     public int getOffset()
@@ -95,12 +95,12 @@ public class RoleListOptions
         this.asc = asc;
     }
 
-    public int getIdEnterprise()
+    public String getIdEnterprise()
     {
         return idEnterprise;
     }
 
-    public void setIdEnterprise(final int idEnterprise)
+    public void setIdEnterprise(final String idEnterprise)
     {
         this.idEnterprise = idEnterprise;
     }

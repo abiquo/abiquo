@@ -289,13 +289,14 @@ public class UserService
      *            of users
      * @return A DataResult object containing an RoleListResult object
      */
-    public BasicResult getRoles(final UserSession userSession, final ListRequest roleListOptions)
+    public BasicResult getRoles(final UserSession userSession, final ListRequest roleListOptions,
+        final Enterprise enterprise)
     {
         UserCommand command = proxyCommand(userSession);
 
         try
         {
-            return command.getRoles(userSession, roleListOptions);
+            return command.getRoles(userSession, roleListOptions, enterprise);
 
         }
         catch (UserSessionException e)

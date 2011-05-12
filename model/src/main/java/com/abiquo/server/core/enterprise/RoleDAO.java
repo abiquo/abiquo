@@ -52,7 +52,12 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
     public static Criterion sameEnterprise(final Enterprise enterprise)
     {
-        return Restrictions.eq(Role.ENTERPRISE_PROPERTY, enterprise);
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.eq(Role.ENTERPRISE_PROPERTY, enterprise));
+        filterDisjunction.add(Restrictions.isNull(Role.ENTERPRISE_PROPERTY));
+
+        return filterDisjunction;
     }
 
     public static Criterion genericRole()

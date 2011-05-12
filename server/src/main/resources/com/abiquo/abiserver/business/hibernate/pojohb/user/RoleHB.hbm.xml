@@ -10,6 +10,7 @@
     <property name="name" type="string">
       <column length="20" name="name" not-null="true"/>
     </property>
+ 
     <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
       <column name="idEnterprise"/>
     </many-to-one>

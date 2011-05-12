@@ -33,12 +33,15 @@ public class RoleDto extends SingleResourceTransportDto
         super();
     }
 
-    public RoleDto(final Integer id, final String name, final boolean blocked)
+    public RoleDto(final Integer id, final String name, final boolean blocked, final String ldap,
+        final Integer idEnterprise)
     {
         super();
         this.id = id;
         this.name = name;
         this.blocked = blocked;
+        this.ldap = ldap;
+        this.idEnterprise = idEnterprise;
     }
 
     private Integer id;
@@ -75,6 +78,30 @@ public class RoleDto extends SingleResourceTransportDto
     public void setBlocked(final boolean blocked)
     {
         this.blocked = blocked;
+    }
+
+    private String ldap;
+
+    public String getLdap()
+    {
+        return ldap;
+    }
+
+    public void setLdap(final String ldap)
+    {
+        this.ldap = ldap;
+    }
+
+    private Integer idEnterprise;
+
+    public Integer getIdEnterprise()
+    {
+        return idEnterprise;
+    }
+
+    public void setIdEnterprise(final Integer idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
     }
 
 }

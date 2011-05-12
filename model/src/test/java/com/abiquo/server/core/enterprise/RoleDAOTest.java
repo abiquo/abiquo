@@ -83,7 +83,7 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
         RoleDAO dao = createDaoForRollbackTransaction();
 
         Collection<Role> roles = dao.find(enterprise, null, null, false, 0, 25);
-        AssertEx.assertSize(roles, 1);
+        AssertEx.assertSize(roles, 2);
 
         roles = dao.find(null, null, null, false, 0, 25);
         AssertEx.assertSize(roles, 1);

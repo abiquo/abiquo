@@ -58,7 +58,7 @@ public class RoleServiceTest extends AbstractGeneratorTest
         e = enterpriseGenerator.createUniqueInstance();
         Privilege p1 = new Privilege(SecurityService.OTHER_ENTERPRISES_PRIVILEGE);
         Privilege p2 = new Privilege(SecurityService.OTHER_USERS_PRIVILEGE);
-        r = roleGenerator.createInstance(p1, p2);
+        r = roleGenerator.createInstance("sys", p1, p2);
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         setup(e, p1, p2, r, u);
@@ -86,10 +86,10 @@ public class RoleServiceTest extends AbstractGeneratorTest
         RoleService service = new RoleService(getEntityManagerWithAnActiveTransaction());
 
         Collection<Role> roles = service.getRolesByEnterprise(e1.getId(), null, null, false);
-        Assert.assertSize(roles, 1);
+        Assert.assertSize(roles, 2);
 
         roles = service.getRolesByEnterprise(e2.getId(), null, null, false);
-        Assert.assertSize(roles, 1);
+        Assert.assertSize(roles, 2);
 
         // There is the adminRole, without enterprise, created before each method.
         roles = service.getRolesByEnterprise(0, null, null, false);

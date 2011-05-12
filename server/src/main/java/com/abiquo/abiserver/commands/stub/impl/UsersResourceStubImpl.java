@@ -395,7 +395,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     }
 
     @Override
-    public DataResult<RoleListResult> getRoles(final ListRequest roleListOptions)
+    public DataResult<RoleListResult> getRoles(final ListRequest roleListOptions,
+        final Enterprise enterprise)
     {
         DataResult<RoleListResult> dataResult = new DataResult<RoleListResult>();
         RoleListResult roleListResult = new RoleListResult();
@@ -404,6 +405,10 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         String orderBy = roleListOptions.getOrderBy();
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (enterprise != null)
+        {
+            queryParams.put("idEnterprise", new String[] {String.valueOf(enterprise.getId())});
+        }
         if (!StringUtils.isEmpty(roleListOptions.getFilterLike()))
         {
             queryParams.put("filter", new String[] {roleListOptions.getFilterLike()});

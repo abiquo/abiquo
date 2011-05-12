@@ -163,7 +163,7 @@ public interface UserCommand
      */
     @SuppressWarnings("unchecked")
     public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
-        final ListRequest roleListOptions);
+        final ListRequest roleListOptions, Enterprise enterprise);
 
     /**
      * Returns a list of privileges from a role
@@ -174,4 +174,5 @@ public interface UserCommand
      */
     public DataResult<PrivilegeListResult> getPrivilegesByRole(final UserSession userSession,
         final int roleId);
+
 }

@@ -475,14 +475,14 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
     @Override
     public DataResult<RoleListResult> getRoles(final UserSession userSession,
-        final ListRequest roleListOptions)
+        final ListRequest roleListOptions, final Enterprise enterprise)
     {
 
         UsersResourceStub proxy =
             APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
                 UsersResourceStub.class);
 
-        return proxy.getRoles(roleListOptions);
+        return proxy.getRoles(roleListOptions, enterprise);
     }
 
     @Override

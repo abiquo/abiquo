@@ -24,8 +24,11 @@ package com.abiquo.abiserver.pojo.user;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.server.core.enterprise.RoleDto;
 
@@ -41,6 +44,10 @@ public class Role implements IPojo<RoleHB>
 
     private Enterprise enterprise;
 
+    private String ldap;
+
+    private int idEnterprise;
+
     Set<Privilege> privileges;
 
     /* ------------- Constructor ------------- */
@@ -51,12 +58,15 @@ public class Role implements IPojo<RoleHB>
 
     }
 
-    public Role(final Integer id, final String name, final boolean blocked)
+    public Role(final Integer id, final String name, final boolean blocked, final String ldap,
+        final Integer idEnterprise)
     {
 
         this.id = id;
         this.name = name;
         this.blocked = blocked;
+        this.ldap = ldap;
+        this.idEnterprise = idEnterprise;
     }
 
     public int getId()
@@ -109,6 +119,26 @@ public class Role implements IPojo<RoleHB>
         this.privileges = privileges;
     }
 
+    public String getLdap()
+    {
+        return ldap;
+    }
+
+    public void setLdap(final String ldap)
+    {
+        this.ldap = ldap;
+    }
+
+    public int getIdEnterprise()
+    {
+        return idEnterprise;
+    }
+
+    public void setIdEnterprise(final int idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
+    }
+
     @Override
     public RoleHB toPojoHB()
     {
@@ -117,6 +147,9 @@ public class Role implements IPojo<RoleHB>
         roleHB.setIdRole(id);
         roleHB.setName(name);
         roleHB.isBlocked();
+
+        roleHB.setLdap(ldap);
+
         if (enterprise != null)
         {
             roleHB.setEnterpriseHB(enterprise.toPojoHB());
@@ -124,7 +157,21 @@ public class Role implements IPojo<RoleHB>
         else
         {
             roleHB.setEnterpriseHB(null);
+
         }
+
+        if (idEnterprise != 0)
+        {
+            DAOFactory factory = HibernateDAOFactory.instance();
+            EnterpriseHB enterpriseHB = factory.getEnterpriseDAO().findById(idEnterprise);
+            roleHB.setEnterpriseHB(enterpriseHB);
+        }
+        else
+        {
+            roleHB.setEnterpriseHB(null);
+
+        }
+
         Set<PrivilegeHB> privilegeHB = new HashSet<PrivilegeHB>();
         if (privileges != null)
         {
@@ -146,7 +193,11 @@ public class Role implements IPojo<RoleHB>
         role.setId(dto.getId());
         role.setName(dto.getName());
         role.setBlocked(dto.isBlocked());
-        role.setEnterprise(enterprise);
+        if (enterprise != null)
+        {
+            role.setEnterprise(enterprise);
+        }
+        role.setLdap(dto.getLdap());
         role.setPrivileges(privileges);
 
         return role;

@@ -53,7 +53,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstanceSysAdmin();
+        Role r = roleGenerator.createInstanceSysAdmin("sysRole");
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -109,7 +109,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
 
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
-        assertEquals(entity.getCollection().size(), 1);
+        assertEquals(entity.getCollection().size(), 3);
 
     }
 
@@ -144,9 +144,9 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
 
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
-        assertEquals(entity.getCollection().size(), 2);
+        assertEquals(entity.getCollection().size(), 3);
         RoleDto r = entity.getCollection().iterator().next();
-        Assert.assertEquals(r.getName(), "r1");
+        Assert.assertEquals(r.getName(), "sysRole");
     }
 
 }
