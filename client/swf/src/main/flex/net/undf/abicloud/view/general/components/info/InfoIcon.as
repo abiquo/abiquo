@@ -77,11 +77,15 @@ package net.undf.abicloud.view.general.components.info
         private function displayIcon():void{
     		visible = true;
         	if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showDefaultHelp.value == 0){
-        		if(this._wikiUrl == AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value){
+        		if(this._wikiUrl == AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value
+        		|| this._wikiUrl == ''){
 	        		visible = false;        			
         		}
-        	}
-        }
-		
+        	}else{
+        		if(this._wikiUrl == ''){
+        			this._wikiUrl = AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value;
+        		}
+        	}        	
+        }		
 	}
 }
