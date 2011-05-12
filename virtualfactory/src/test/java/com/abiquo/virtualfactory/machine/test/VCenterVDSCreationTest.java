@@ -1,38 +1,49 @@
 package com.abiquo.virtualfactory.machine.test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.RemoteException;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.fail;
 
-import junit.framework.TestCase;
+import java.net.URL;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
-import com.abiquo.virtualfactory.machine.impl.VCenterDVSCreation;
+import com.abiquo.virtualfactory.machine.impl.vcenter.VCenterDVSCreation;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.ServiceInstance;
 
 /**
- * @author jdevesa
+ * Class that test the {@link VCenterDVSCreation} class.
+ * In order to check this class you need.
+ * 
+ * 1. Have a vCenter remote, with correct license and enough permissions.
+ * 2. Create a 'dvSwitch' there.
+ * 3. Remove all the @Test(enabled=false) here.
+ * 4. Put it again because otherwise they always be executed.
+ * 
+ * @author jdevesa@abiquo.com
  */
 public class VCenterVDSCreationTest
 {
 
-    private String vcIPAddress = "10.60.21.204";
+    private final String vcIPAddress = "10.60.1.90";
 
-    private String user = "Administrator";
+    private final String user = "root";
 
-    private String password = "abiqu0!";
+    private final String password = "temporal";
+    
+    // Name of the already-created dvSwitch in the remote vCenter.
+    private final String dvSwitchName = "dvSwitch";
+    private final String wrongSwitchName = "veintemillonedename";
 
     private ServiceInstance serviceInstance;
 
     private VCenterDVSCreation vcenterDVS;
 
     /**
-     * @throws java.lang.Exception
+     * Open the connection
      */
     @Before
     public void setUp() throws Exception
@@ -47,7 +58,7 @@ public class VCenterVDSCreationTest
     }
 
     /**
-     * @throws java.lang.Exception
+     * Clean the connection.
      */
     @After
     public void tearDown() throws Exception
@@ -60,15 +71,13 @@ public class VCenterVDSCreationTest
 
     /**
      * Just execute the methods with the correct flow of the creation, get, and deletion of DVS.
-     * 
-     * @throws Exception
      */
     @Test
     public void createGetAndDeleteDVS() throws Exception
     {
-        String portGroupName = vcenterDVS.createPortGroupInDVS("dvSwitch", "dvs_network", 34);
+        String portGroupName = vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
         Thread.sleep(1000);
-        DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup("dvSwitch", portGroupName);
+        DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
         Thread.sleep(1000);
         vcenterDVS.deletePortGroup(portGroup);
     }
@@ -76,27 +85,30 @@ public class VCenterVDSCreationTest
     @Test(expected = VirtualMachineException.class)
     public void createPortGroupFailsWhenDVSwitchDoesNotExist() throws VirtualMachineException
     {
-        vcenterDVS.createPortGroupInDVS("veintemillonedenave", "dvs_network", 34);
+        vcenterDVS.createPortGroupInDVS(wrongSwitchName, "dvs_network", 34);
     }
 
+    /**
+     * Check we can not create two port groups with the same name.
+     */
     @Test
     public void createPortGroupFailsWhenPortGroupNameDuplicated() throws Exception
     {
         String portGroupName = "";
         try
         {
-            portGroupName = vcenterDVS.createPortGroupInDVS("dvSwitch", "dvs_network", 34);
+            portGroupName = vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
             Thread.sleep(1000);
         }
         catch (VirtualMachineException e)
         {
             // The first one should be created!
-            TestCase.fail("Failed because the first one has not been created.");
+            fail("Failed because the first one has not been created.");
         }
 
         try
         {
-            vcenterDVS.createPortGroupInDVS("dvSwitch", "dvs_network", 34);
+            vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
             Thread.sleep(1000);
         }
         catch (VirtualMachineException e)
@@ -107,10 +119,70 @@ public class VCenterVDSCreationTest
                 vcenterDVS.getPortGroup("dvSwitch", portGroupName);
             Thread.sleep(2000);
             vcenterDVS.deletePortGroup(portGroup);
+            return;
         }
 
         // The second one should not fail
-        TestCase.fail("Failed because the second one has been created!");
+        fail("Failed because the second one has been created!");
+    }
+    
+    /**
+     * Ensure the exception is controlled even if we have an invalid session
+     */
+    @Test(expected = VirtualMachineException.class)
+    public void createPortGroupFailsWhenSessionInvalid() throws VirtualMachineException
+    {
+        serviceInstance = null;
+        vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
+    }
+        
+    /**
+     * Assert the get returns null when the port group does not exist.
+     */
+    @Test
+    public void getPortGroupReturnsNullWhenPortGroupDoesNotExist() throws VirtualMachineException
+    {
+        DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, "dvs_network_34");
+        assertNull(portGroup);
+    }
+    
+    /**
+     * When you provide a good port group name (it exists) but the switch name does not exist, 
+     * throws an exception.
+     * 
+     * 1. Create a port group.
+     * 2. Get the port group but with the incorrect dvSwitch name.
+     * 3. Be sure the 
+     * @throws VirtualMachineException 
+     */
+    @Test
+    public void getPortGroupRaisesWhenDVSwitchWrong() throws InterruptedException, VirtualMachineException
+    {
+        String portGroupName = null;
+        try
+        {
+            portGroupName = vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
+        }
+        catch(VirtualMachineException e)
+        {
+            fail("Creation should not fail!");
+        }
+        Thread.sleep(1000);
+        try
+        {
+            // This is what we are testing!
+            vcenterDVS.getPortGroup(wrongSwitchName, portGroupName);
+        }
+        catch (VirtualMachineException e)
+        {
+            // IT SHOULD THROW THIS EXCEPTION. Clean the port group.
+            DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
+            Thread.sleep(1000);
+            vcenterDVS.deletePortGroup(portGroup);
+            return;
+            
+        }
+        fail("Failed because it should raise an exception!");
     }
 
 }
