@@ -125,12 +125,8 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
 
         if (enterpriseHB != null)
         {
-            role.setEnterprise(enterpriseHB.toPojo());
+
             role.setIdEnterprise(enterpriseHB.getIdEnterprise());
-        }
-        else
-        {
-            role.setEnterprise(null);
         }
 
         Set<Privilege> privilege = new HashSet<Privilege>();
