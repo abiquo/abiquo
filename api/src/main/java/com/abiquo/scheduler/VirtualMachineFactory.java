@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.config.SystemPropertyService;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
@@ -49,6 +51,7 @@ import com.abiquo.server.core.infrastructure.Machine;
  * TODO this should be a @Repository
  */
 @Component
+@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 public class VirtualMachineFactory
 {
     /** Use an invalid port to indicate a disabled vrdp. */

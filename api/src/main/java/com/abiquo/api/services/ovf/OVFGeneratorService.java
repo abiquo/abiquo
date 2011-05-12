@@ -79,6 +79,7 @@ import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -86,6 +87,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -108,6 +110,8 @@ public class OVFGeneratorService
 
     @Autowired
     VirtualMachineRep vmRepo;
+    
+    
 
     private final static Logger logger = LoggerFactory.getLogger(OVFGeneratorService.class);
 
@@ -481,7 +485,6 @@ public class OVFGeneratorService
         return createVirtualApplication(virtualAppliance, false, false);
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling, final boolean ha) throws Exception
     {
@@ -1043,16 +1046,20 @@ public class OVFGeneratorService
 
     }
 
-    private String getRepositoryManagerAddress(final NodeVirtualImage nvi)
-    {
+    private String getRepositoryManagerAddress(NodeVirtualImage nvi)
+    {       
+        VirtualMachine vmachine = vmRepo.findVirtualMachineById(nvi.getVirtualMachine().getId());
+        
         // Get Virtual Datacenter
-        Hypervisor hypervisor = nvi.getVirtualMachine().getHypervisor();
+        Hypervisor hypervisor = vmachine.getHypervisor();        
         Machine pm = hypervisor.getMachine();
-        Rack rack = pm.getRack();
-        Integer idDatacenter = rack.getDatacenter().getId();
-
+        
+        Integer datacenterId = pm.getId();
+        
+        Datacenter dc = datacenterRepo.findById(datacenterId);
+        
         List<RemoteService> am =
-            datacenterRepo.findRemoteServiceWithTypeInDatacenter(rack.getDatacenter(),
+            datacenterRepo.findRemoteServiceWithTypeInDatacenter(dc,
                 RemoteServiceType.APPLIANCE_MANAGER);
 
         if (am == null || am.isEmpty())

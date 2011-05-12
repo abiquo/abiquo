@@ -247,10 +247,14 @@ public class Allocator implements IAllocator
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public VirtualMachine allocateHAVirtualMachine(VirtualMachine vmachine)
+    public VirtualMachine allocateHAVirtualMachine(Integer vmId)
         throws AllocatorException, ResourceAllocationException
     {
 
+        VirtualMachine vmachine = virtualMachineDao.findById(vmId);
+        
+        
+        
         if (vmachine.getHypervisor() == null)
         {
             // XXX check also is on HA ???
@@ -304,7 +308,7 @@ public class Allocator implements IAllocator
                 try
                 {
                     vmachine = vmFactory.createVirtualMachine(targetMachine, vmachine);
-
+                    
                     // refresh vmachine with the information added on the VirtualMachineFactory
                     virtualMachineDao.flush();
                 }
