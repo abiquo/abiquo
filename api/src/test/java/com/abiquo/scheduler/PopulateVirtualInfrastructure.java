@@ -49,7 +49,6 @@ import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -69,7 +68,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 {
 
     @Autowired
-    DatacenterRep dcRep;
+    InfrastructureRep dcRep;
 
     @Autowired
     VirtualDatacenterRep vdcRep;
@@ -79,7 +78,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     @Autowired
     DatacenterLimitsDAO dcLimitsDao;
-    
+
     @Autowired
     RepositoryDAO repoDao;
 
@@ -212,32 +211,55 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     }
 
+    /**
+     * @param enterprise, e1:1 (enterprise isReservationRestricted=1)
+     * @return
+     */
     private Enterprise createEnterprise(String enter)
     {
         Enterprise enterprise = enterRep.findByName(enter);
 
         if (enterprise == null)
         {
+
+            String[] frg = enter.split(DELIMITER_DEFINITION);
+
+            String enterName = frg[0];
+
             enterprise = enterGen.createInstanceNoLimits(enter);
+
+            if (frg.length == 2)
+            {
+                String isReservationRestricted = frg[1];
+
+                if (isReservationRestricted.equals("1"))
+                {
+                    enterprise.setIsReservationRestricted(true);
+                }
+                else
+                {
+                    enterprise.setIsReservationRestricted(false);
+                }
+
+            }
+
             enterRep.insert(enterprise);
-            
-            //allowAllDatacentersByDefault(enterprise);
+
+            // allowAllDatacentersByDefault(enterprise);
         }
 
         return enterprise;
     }
-    
-    
+
     public void allowAllDatacentersByDefault(Enterprise enterprise)
     {
-        for(Datacenter dc : dcRep.findAll())
+        for (Datacenter dc : dcRep.findAll())
         {
             DatacenterLimits dcLimit = new DatacenterLimits(enterprise, dc);
 
             dcLimitsDao.persist(dcLimit);
         }
     }
-    
 
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
