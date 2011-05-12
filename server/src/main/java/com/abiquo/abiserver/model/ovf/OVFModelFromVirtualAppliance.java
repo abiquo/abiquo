@@ -24,6 +24,8 @@ package com.abiquo.abiserver.model.ovf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
@@ -68,7 +69,6 @@ import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
-import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.Datastore;
@@ -157,6 +157,21 @@ public class OVFModelFromVirtualAppliance
 
         try
         {
+            // Create NetworkSection and Network and add to Envelope
+            NetworkSectionType netSection =
+                OVFEnvelopeUtils.createSection(NetworkSectionType.class, null);
+            Network net =
+                OVFNetworkUtils.createNetwork(virtualMachine.getName() + "_network",
+                    "Appliance Network identifier");
+            OVFNetworkUtils.addNetwork(netSection, net);
+
+            // Set the network section on the envelope
+            OVFEnvelopeUtils.addSection(envelope, netSection);
+
+            // Add the custom network;
+            AbicloudNetworkType customNetwork = createCustomNetwork(virtualMachine.getId());
+            OVFEnvelopeUtils.addSection(envelope, customNetwork);
+
             // The Id of the virtualSystem is used for machine name
             VirtualSystemType virtualSystem =
                 OVFEnvelopeUtils.createVirtualSystem(instanceId, machineName, null);
@@ -535,7 +550,8 @@ public class OVFModelFromVirtualAppliance
         OVFEnvelopeUtils.addSection(envelope, netSection);
 
         // Add the custom network;
-        addCustomNetwork(envelope, virtualAppliance);
+        AbicloudNetworkType customNetwork = createCustomNetwork(virtualAppliance);
+        OVFEnvelopeUtils.addSection(envelope, customNetwork);
 
         // Getting the all the virtual Machines
         for (Node node : virtualAppliance.getNodes())
@@ -593,54 +609,53 @@ public class OVFModelFromVirtualAppliance
         return envelope;
     }
 
-    /**
-     * Helper method to createVirtualApplication - Adds the CustomNetwork to the EnvelopeType
-     * 
-     * @param envelope a reference to an EnvelopeType object to which the CustomNetwork section will
-     *            be added
-     * @param virtualAppliance a VirtualAppliance object which may or may not have a network
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    private static void addCustomNetwork(final EnvelopeType envelope,
-        final VirtualAppliance virtualAppliance) throws Exception
+    private static AbicloudNetworkType createCustomNetwork(final Integer idVirtualMachine)
+        throws Exception
     {
         DAOFactory factory = HibernateDAOFactory.instance();
-        VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-        VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
+        VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
+        VlanNetworkDAO vlanDAO = factory.getVlanNetworkDAO();
 
         factory.beginConnection();
-        VirtualDataCenterHB vdc = vdcDAO.findById(virtualAppliance.getVirtualDataCenter().getId());
-        VirtualappHB persistedVapp = vappDAO.findByIdNamedExtended(virtualAppliance.getId());
 
-        AbicloudNetworkType network = vdc.getNetwork();
-        AbicloudNetworkType networkToDeploy = new AbicloudNetworkType();
-        VlanNetworkDAO vlanDAO = factory.getVlanNetworkDAO();
-        VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
+        Map<Integer, List<IpPoolManagementHB>> vlansConfig =
+            new HashMap<Integer, List<IpPoolManagementHB>>();
 
-        List<Integer> listOfVLANidentifiers = new ArrayList<Integer>();
-        for (NodeHB nodeHB : persistedVapp.getNodesHB())
+        AbicloudNetworkType networkType = new AbicloudNetworkType();
+        VirtualmachineHB vmHB = vmDAO.findById(idVirtualMachine);
+
+        // Build the Map of vlans with the IPs used by the VM
+        for (ResourceManagementHB rasman : vmHB.getResman())
         {
-            Node node = nodeHB.toPojo();
-            NodeVirtualImageHB nvi = ((NodeVirtualImage) node).toPojoHB();
-            VirtualmachineHB vmHB = vmDAO.findById(nvi.getVirtualMachineHB().getIdVm());
-            for (ResourceManagementHB rasman : vmHB.getResman())
+            if (rasman instanceof IpPoolManagementHB)
             {
-                if (rasman instanceof IpPoolManagementHB)
+                IpPoolManagementHB ipman = (IpPoolManagementHB) rasman;
+
+                if (networkType.getUuid() == null)
                 {
-                    IpPoolManagementHB ipman = (IpPoolManagementHB) rasman;
-                    if (!listOfVLANidentifiers.contains(ipman.getVlanNetworkId()))
-                    {
-                        listOfVLANidentifiers.add(ipman.getVlanNetworkId());
-                    }
+                    networkType.setUuid(ipman.getVirtualDataCenter().getNetwork().getUuid());
                 }
+
+                Integer vlanId = ipman.getVlanNetworkId();
+                List<IpPoolManagementHB> vlanIPs = vlansConfig.get(vlanId);
+
+                if (vlanIPs == null)
+                {
+                    vlanIPs = new LinkedList<IpPoolManagementHB>();
+                }
+
+                vlanIPs.add(ipman);
+                vlansConfig.put(vlanId, vlanIPs);
             }
         }
-        networkToDeploy.setUuid(network.getUuid());
-        for (Integer vlanId : listOfVLANidentifiers)
+
+        for (Map.Entry<Integer, List<IpPoolManagementHB>> vlanConfig : vlansConfig.entrySet())
         {
-            OrgNetworkType vlan = vlanDAO.findById(vlanId);
+            Integer vlanId = vlanConfig.getKey();
+            List<IpPoolManagementHB> ips = vlanConfig.getValue();
+
             Integer numberOfRules = 0;
+            OrgNetworkType vlan = vlanDAO.findById(vlanId);
             DHCPServiceHB service = (DHCPServiceHB) vlan.getConfiguration().getDhcpService();
             if (service.getDhcpRemoteServiceId() != null)
             {
@@ -650,34 +665,69 @@ public class OVFModelFromVirtualAppliance
                 service.setDhcpAddress(remo.getURI().getHost());
                 service.setDhcpPort(remo.getURI().getPort());
             }
+
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
-            for (IpPoolManagementHB man : service.getIpPoolManagement())
+            for (IpPoolManagementHB ip : ips)
             {
-                if (man.getVirtualMachine() != null
-                    && man.getVirtualApp().getIdVirtualApp() == virtualAppliance.getId())
-                {
-                    IpPoolType rule = new IpPoolType();
-                    rule.setConfigureGateway(man.getConfigureGateway());
-                    rule.setIp(man.getIp());
-                    rule.setMac(man.getMac());
-                    rule.setName(man.getName());
+                IpPoolType rule = new IpPoolType();
+                rule.setConfigureGateway(ip.getConfigureGateway());
+                rule.setIp(ip.getIp());
+                rule.setMac(ip.getMac());
+                rule.setName(ip.getName());
 
-                    service.getStaticRules().add(rule);
+                service.getStaticRules().add(rule);
 
-                    numberOfRules++;
-                }
+                numberOfRules++;
             }
 
             if (numberOfRules > 0)
             {
-                networkToDeploy.getNetworks().add(vlan);
+                networkType.getNetworks().add(vlan);
             }
         }
 
-        // OVFSerializer.getInstance().writeXML(abicloudNetworkType, System.out);
-        OVFEnvelopeUtils.addSection(envelope, networkToDeploy);
         factory.endConnection();
 
+        return networkType;
+    }
+
+    /**
+     * Helper method to createVirtualApplication - Adds the CustomNetwork to the EnvelopeType
+     * 
+     * @param envelope a reference to an EnvelopeType object to which the CustomNetwork section will
+     *            be added
+     * @param virtualAppliance a VirtualAppliance object which may or may not have a network
+     * @throws Exception
+     */
+    private static AbicloudNetworkType createCustomNetwork(final VirtualAppliance virtualAppliance)
+        throws Exception
+    {
+        DAOFactory factory = HibernateDAOFactory.instance();
+
+        factory.beginConnection();
+
+        VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
+        VirtualappHB persistedVapp = vappDAO.findByIdNamedExtended(virtualAppliance.getId());
+
+        factory.endConnection();
+
+        AbicloudNetworkType networkType = new AbicloudNetworkType();
+
+        for (NodeHB< ? > nodeHB : persistedVapp.getNodesHB())
+        {
+            NodeVirtualImageHB nvi = (NodeVirtualImageHB) nodeHB;
+            AbicloudNetworkType vmNetwork =
+                createCustomNetwork(nvi.getVirtualMachineHB().getIdVm());
+
+            if (networkType.getUuid() == null)
+            {
+                networkType.setUuid(vmNetwork.getUuid());
+            }
+
+            networkType.getNetworks().addAll(vmNetwork.getNetworks());
+        }
+
+        return networkType;
     }
 
     private FileType createFileFromVirtualImage(final VirtualMachine virtualMachine,
