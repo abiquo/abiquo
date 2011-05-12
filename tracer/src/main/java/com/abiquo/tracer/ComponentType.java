@@ -67,6 +67,9 @@ public enum ComponentType implements Serializable
     // Roles
     ROLE(524288, "Role"),
 
+    // Roles
+    ROLE_LDAP(1048576, "Role LDAP"),
+
     ;
 
     private final int component;

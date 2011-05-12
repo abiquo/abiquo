@@ -258,7 +258,23 @@ public class EnterpriseRep extends DefaultRepBase
         return privilegeDAO.findById(id);
     }
 
-    public RoleLdap findRoleLdapByRoleLdap(final String roleLdap)
+    public Collection<RoleLdap> findRolesLdap(final String filter, final String order,
+        final boolean desc, final Integer page, final Integer numResults)
+    {
+        return roleLdapDAO.find(filter, order, desc, page, numResults);
+    }
+
+    public Collection<RoleLdap> findRoleLdapByRole(final Role role)
+    {
+        return roleLdapDAO.findByRole(role);
+    }
+
+    public RoleLdap findRoleLdapById(final Integer id)
+    {
+        return roleLdapDAO.findById(id);
+    }
+
+    public List<RoleLdap> findRoleLdapByRoleLdap(final String roleLdap)
     {
         return roleLdapDAO.findByRoleLdap(roleLdap);
     }
@@ -276,6 +292,11 @@ public class EnterpriseRep extends DefaultRepBase
     public void deleteRoleLdap(final RoleLdap roleLdap)
     {
         roleLdapDAO.remove(roleLdap);
+    }
+
+    public boolean existAnyRoleLdapWithRole(final Role role)
+    {
+        return roleLdapDAO.existAnyRoleLdapWithRole(role);
     }
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)

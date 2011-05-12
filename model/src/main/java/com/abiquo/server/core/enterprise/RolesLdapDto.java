@@ -21,35 +21,20 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "roleLdap")
-public class RoleLdapDto extends SingleResourceTransportDto
+@XmlRootElement(name = "roles")
+public class RolesLdapDto extends WrapperDto<RoleLdapDto>
 {
-    private Integer id;
-
-    public Integer getId()
+    @Override
+    @XmlElement(name = "role")
+    public List<RoleLdapDto> getCollection()
     {
-        return id;
+        return collection;
     }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
-
-    private String roleLdap;
-
-    public String getRoleLdap()
-    {
-        return roleLdap;
-    }
-
-    public void setRoleLdap(final String roleLdap)
-    {
-        this.roleLdap = roleLdap;
-    }
-
 }

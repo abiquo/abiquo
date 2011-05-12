@@ -134,15 +134,18 @@ public enum APIError
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
         "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",
-        "Missing privilege parameter"), DELETE_ERROR_WITH_USER("ROLE-3",
-        "Cannot delete a Role with associated User"), DELETE_ERROR("ROLE-4",
-        "The requested role is blocked. Cannot be deleted"),
+        "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
+        "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
+        "Cannot delete a Role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
+        "Cannot delete a Role with associated RoleLdap"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
 
     // ROLE_LDAP
-    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"),
+    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"), MULTIPLE_ENTRIES_ROLELDAP(
+        "ROLELDAP-1", "There are multiple entries for the requested roleLdap"), NOT_ASSIGNED_ROLE(
+        "ROLELDAP-2", "The roleLdap must have a Role"),
 
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(

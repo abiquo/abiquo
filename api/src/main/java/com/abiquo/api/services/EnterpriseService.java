@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
@@ -483,13 +482,18 @@ public class EnterpriseService extends DefaultApiService
 
     public RoleLdap getRoleLdap(final String role_ldap)
     {
-        RoleLdap roleLdap = repo.findRoleLdapByRoleLdap(role_ldap);
-        if (roleLdap == null)
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        if (list == null || list.isEmpty())
         {
-            throw new NotFoundException(APIError.NON_EXISTENT_ROLELDAP);
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
+            flushErrors();
         }
-
-        return roleLdap;
+        else if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+        return list.get(0);
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)
