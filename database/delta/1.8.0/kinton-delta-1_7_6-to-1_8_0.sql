@@ -4,7 +4,7 @@
 
 ALTER TABLE `kinton`.`role` DROP COLUMN `securityLevel` , 
 DROP COLUMN `largeDescription` , DROP COLUMN `shortDescription` , 
-DROP COLUMN `type` , ADD COLUMN `name` VARCHAR(20) NOT NULL  AFTER `version_c` , 
+DROP COLUMN `type` , ADD COLUMN `name` VARCHAR(40) NOT NULL  AFTER `version_c` , 
 ADD COLUMN `idEnterprise` INT(10) UNSIGNED NULL DEFAULT NULL  AFTER `name` ,
 ADD COLUMN `blocked` TINYINT(1)  NOT NULL DEFAULT 0  AFTER `idEnterprise` , 
   ADD CONSTRAINT `fk_role_enterprise`

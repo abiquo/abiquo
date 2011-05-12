@@ -131,6 +131,7 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
                 order = Order.desc(orderBy);
             }
             criteria.addOrder(order);
+            criteria.addOrder(Order.asc("name"));
         }
 
         return criteria;

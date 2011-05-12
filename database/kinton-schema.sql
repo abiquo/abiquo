@@ -809,7 +809,7 @@ DROP TABLE IF EXISTS `kinton`.`role`;
 
 CREATE TABLE  `kinton`.`role` (
   `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(20) NOT NULL DEFAULT 'auto_name',
+  `name` varchar(40) NOT NULL DEFAULT 'auto_name',
   `idEnterprise` int(10) unsigned DEFAULT NULL,
   `blocked` tinyint(1) NOT NULL DEFAULT '0',
   `version_c` int(11) DEFAULT '0',
