@@ -26,6 +26,7 @@ import javax.jms.ResourceAllocationException;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.Machine;
 
 /**
  * Selects the target machine to allocate a virtual machines.
