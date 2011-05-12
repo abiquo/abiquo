@@ -35,6 +35,10 @@ public class Enterprise implements Serializable
     private User user;
 
     private VirtualDatacenter virtualDatacenter;
+    
+    private String chefURL;
+    
+    private String chefCertificate;
 
     private Enterprise(String storagePool)
     {
@@ -86,5 +90,25 @@ public class Enterprise implements Serializable
     public VirtualDatacenter getVirtualDatacenter()
     {
         return virtualDatacenter;
+    }
+
+    public void setChefURL(String URL)
+    {
+        this.chefURL= URL;
+    }
+
+    public String getURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefCertificate(String certificate)
+    {
+        this.chefCertificate = certificate;
+    }
+
+    public String getChefCertificate()
+    {
+        return chefCertificate;
     }
 }

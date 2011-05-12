@@ -78,6 +78,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private String volumePath;
 
+    private Boolean isChef;
+
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -248,6 +250,16 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public void setDeleted(final int deleted)
     {
         this.deleted = deleted;
+    }
+
+    public Boolean isChef()
+    {
+        return isChef;
+    }
+
+    public void setChef(final Boolean isChef)
+    {
+        this.isChef = isChef;
     }
 
     public Integer getIdEnterprise()
