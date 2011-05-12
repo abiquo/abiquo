@@ -27,7 +27,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterH
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * Specific interface to work with the {@link

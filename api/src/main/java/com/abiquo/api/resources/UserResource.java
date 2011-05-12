@@ -114,11 +114,6 @@ public class UserResource extends AbstractResource
 
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
 
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-        }
-
         User user = service.findUserByEnterprise(userId, enterprise);
 
         Collection<VirtualMachine> vms = vmService.findVirtualMachinesByUser(enterprise, user);

@@ -18,39 +18,21 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.model.enumerator;
 
 /**
+ * Sets the States of a Volume Storage can live in AbiCloud
  * 
+ * @author abiquo
  */
-package com.abiquo.api.exceptions;
-
-import java.lang.annotation.Annotation;
-
-/**
- * @author jdevesa
- *
- */
-public class InvalidParameterConstraint
+public enum VolumeState
 {
-    private Annotation annotation;
-    
-    private String messageError;
-    
-    public void setMessageError(String messageError)
-    {
-        this.messageError = messageError;
-    }
-    public String getMessageError()
-    {
-        return messageError;
-    }
-    
-    public void setAnnotation(Annotation annotation)
-    {
-        this.annotation = annotation;
-    }
-    public Annotation getAnnotation()
-    {
-        return annotation;
-    }
+    /** When a volume storage is created but not already associated to any Virtual Machine. */
+    NOT_MOUNTED_NOT_RESERVED,
+
+    /** When a volume storage is reserved but we don't want to mount to any Virtual Machine. */
+    NOT_MOUNTED_RESERVED,
+
+    /** When a volume is reserved and ready to mount to a given Virtual Machine. */
+    MOUNTED_RESERVED
 }

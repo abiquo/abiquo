@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -36,7 +38,6 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
@@ -54,16 +55,16 @@ public class PrivateNetworkResource extends AbstractResource
 
     @GET
     public VLANNetworkDto getPrivateNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer virtualDatacenterId,
-        @PathParam(PRIVATE_NETWORK) Integer networkId, @Context IRESTBuilder restBuilder)
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(0) Integer virtualDatacenterId,
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(0) Integer vlanId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
-        validatePathParameters(virtualDatacenterId, networkId);
-
-        VLANNetwork network = service.getNetwork(networkId);
+        VLANNetwork network = service.getNetwork(virtualDatacenterId, vlanId);
 
         return createTransferObject(network, virtualDatacenterId, restBuilder);
     }
+    
+       
 
     private static VLANNetworkDto addLinks(IRESTBuilder restBuilder, VLANNetworkDto network,
         Integer virtualDatacenterId)
@@ -78,22 +79,16 @@ public class PrivateNetworkResource extends AbstractResource
         VLANNetworkDto dto =
             ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
 
-        dto.setNetworkConfiguration(ModelTransformer.transportFromPersistence(
-            NetworkConfigurationDto.class, network.getConfiguration()));
-
+        dto.setAddress(network.getConfiguration().getAddress());
+        dto.setGateway(network.getConfiguration().getGateway());
+        dto.setMask(network.getConfiguration().getMask());
+        dto.setPrimaryDNS(network.getConfiguration().getPrimaryDNS());
+        dto.setSecondaryDNS(network.getConfiguration().getSecondaryDNS());
+        dto.setSufixDNS(network.getConfiguration().getSufixDNS());
+        
         dto = addLinks(restBuilder, dto, virtualDatacenterId);
 
         return dto;
     }
 
-    // TODO createPersistenceObject
-
-    private void validatePathParameters(final Integer virtualDatacenterId, final Integer networkId)
-        throws NotFoundException
-    {
-        if (!service.isAssignedTo(virtualDatacenterId, networkId))
-        {
-            throw new NotFoundException(APIError.NOT_ASSIGNED_NETWORK_VIRTUAL_DATACENTER);
-        }
-    }
 }

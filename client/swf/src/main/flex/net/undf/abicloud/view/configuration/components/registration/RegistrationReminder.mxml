@@ -27,6 +27,7 @@
     width="500" height="300"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_config_registration.value}"
     titleText="@Resource(bundle='Configuration', key='LABEL_REGISTRATION')">
 
 

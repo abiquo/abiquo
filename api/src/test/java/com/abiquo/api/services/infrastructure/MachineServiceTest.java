@@ -100,7 +100,7 @@ public class MachineServiceTest extends AbstractGeneratorTest
         }
         catch (NotFoundException e)
         {
-            Assert.assertEquals(e.getMessage(), "The requested machine does not exist");
+            Assert.assertEquals(e.getErrors().iterator().next().getMessage(), "The requested machine does not exist");
         }
 
         VirtualMachineService vmService = new VirtualMachineService(em);

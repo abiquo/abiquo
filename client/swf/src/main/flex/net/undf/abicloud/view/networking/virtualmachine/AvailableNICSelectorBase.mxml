@@ -26,10 +26,12 @@
     resizeEffect="{myResize}"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_createNetworkInterface.value}"
     titleText="@Resource(bundle='Networking', key='POPUP_TITLE_AVAILABLE_NIC_SELECTION')">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.vo.networking.IPPoolManagement;
         	import net.undf.abicloud.events.NetworkingEvent;
             import mx.containers.ViewStack;

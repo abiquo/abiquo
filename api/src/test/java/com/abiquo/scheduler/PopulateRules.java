@@ -32,7 +32,7 @@ import org.testng.Assert;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
@@ -48,7 +48,7 @@ import com.abiquo.server.core.scheduler.MachineLoadRuleDAO;
 public class PopulateRules extends PopulateConstants
 {
     @Autowired
-    DatacenterRep dcRep;
+    InfrastructureRep dcRep;
 
     @Autowired
     EnterpriseRep enterRep;

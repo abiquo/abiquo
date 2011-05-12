@@ -19,25 +19,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.infrastructure.management;
+package com.abiquo.model.enumerator;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
-
-/**
- * Represent a collection of management resources
- */
-@XmlRootElement(name = "rasds")
-public class RasdManagementsDto extends WrapperDto<RasdManagementDto>
+public enum DiskFormatTypeAlias
 {
-    @Override
-    @XmlElement(name = "rasd")
-    public List<RasdManagementDto> getCollection()
-    {
-        return collection;
-    }
+    UNKNOWN, RAW, INCOMPATIBLE, VMDK_STREAM_OPTIMIZED, VMDK_FLAT, VMDK_SPARSE, VHD, VDI, QCOW2;
 }

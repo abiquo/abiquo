@@ -36,9 +36,9 @@ import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;

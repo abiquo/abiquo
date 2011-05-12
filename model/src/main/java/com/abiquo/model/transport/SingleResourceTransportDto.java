@@ -23,11 +23,14 @@ package com.abiquo.model.transport;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.util.CompositeComparator;
 
 public abstract class SingleResourceTransportDto implements Serializable
 {
@@ -38,17 +41,23 @@ public abstract class SingleResourceTransportDto implements Serializable
     protected List<RESTLink> links;
 
     @XmlElement(name = "link")
+    @SuppressWarnings("unchecked")
     public List<RESTLink> getLinks()
     {
+        if (links != null)
+        {
+            Collections
+                .sort(links, CompositeComparator.build(LinkOrder.BY_REL, LinkOrder.BY_TITLE));
+        }
         return links;
     }
 
-    public void setLinks(List<RESTLink> links)
+    public void setLinks(final List<RESTLink> links)
     {
         this.links = links;
     }
 
-    public void addLink(RESTLink link)
+    public void addLink(final RESTLink link)
     {
         if (this.links == null)
         {
@@ -57,7 +66,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         this.links.add(link);
     }
 
-    public void addLinks(List<RESTLink> links)
+    public void addLinks(final List<RESTLink> links)
     {
         if (this.links == null)
         {
@@ -75,7 +84,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         return editLink;
     }
 
-    public void addEditLink(RESTLink edit)
+    public void addEditLink(final RESTLink edit)
     {
         editLink = edit;
         RESTLink currentEdit = searchLink("edit");
@@ -86,7 +95,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         links.add(editLink);
     }
 
-    public RESTLink searchLink(String rel)
+    public RESTLink searchLink(final String rel)
     {
         if (getLinks() == null)
         {
@@ -106,7 +115,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
-    public RESTLink searchLink(String rel, String title)
+    public RESTLink searchLink(final String rel, final String title)
     {
         if (getLinks() == null)
         {
@@ -123,7 +132,7 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
-    public RESTLink searchLinkByHref(String href)
+    public RESTLink searchLinkByHref(final String href)
     {
         if (getLinks() == null)
         {
@@ -140,8 +149,40 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
-    public void modifyLink(String rel, String href)
+    public void modifyLink(final String rel, final String href)
     {
         searchLink(rel).setHref(href);
     }
+
+    public static enum LinkOrder implements Comparator<RESTLink>
+    {
+        BY_REL
+        {
+            @Override
+            public int compare(final RESTLink link0, final RESTLink link1)
+            {
+                if (link0.getRel() == null || link1.getRel() == null)
+                {
+                    return 0;
+                }
+
+                return String.CASE_INSENSITIVE_ORDER.compare(link0.getRel(), link1.getRel());
+            }
+        },
+
+        BY_TITLE
+        {
+            @Override
+            public int compare(final RESTLink link0, final RESTLink link1)
+            {
+                if (link0.getTitle() == null || link1.getTitle() == null)
+                {
+                    return 0;
+                }
+
+                return String.CASE_INSENSITIVE_ORDER.compare(link0.getTitle(), link1.getTitle());
+            }
+        }
+    }
+
 }

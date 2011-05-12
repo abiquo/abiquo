@@ -42,6 +42,11 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
+        	import net.undf.abicloud.view.general.components.info.InfoIcon;
+        	import flash.net.navigateToURL;
+        	import mx.effects.Fade;
+        	import net.undf.abicloud.view.main.CommonAssets;
             import mx.core.Application;
             import mx.controls.Label;
             import mx.controls.Image;
@@ -54,7 +59,11 @@
             private var _titleText:String = "The title for this Pop Up has not been set!";
 
             private var _iconSource:String = ""; //TODO: Set default icon source
-
+            
+            private var _iconInfo:InfoIcon;
+            
+            private var _wikiUrl:String = AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value;
+            
             /**
              * When a Pop Up preinitializes, we add the common information that will be present
              * in all Pop Ups: an Icon and a Title
@@ -68,17 +77,29 @@
                 //Creating Title
                 _title = new Label();
                 _title.text = _titleText;
+                _title.percentWidth = 100;
                 _title.styleName = "AbiCloudPopUpTitle";
 
+                //Adding the info icon
+                _iconInfo = new InfoIcon();
+                _iconInfo.wikiUrl = this._wikiUrl;
+                
                 //Adding it to the view
                 var header:HBox = new HBox();
                 header.percentWidth = 100;
                 header.setStyle("horizontalAlign", "left");
                 header.addChild(_popUpIcon);
                 header.addChild(_title);
+                
+                //Show only if required
+                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 1){
+	                header.addChild(_iconInfo);                	
+                }
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
+                addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
+                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo);
                 this.addChildAt(header, 0);
 
                 //Registering Keyboard events, for standard application behaivor
@@ -100,12 +121,36 @@
             {
                 stopDrag();
             }
+            
+            /**
+             * Show the info icon if user presses the CTRL key
+             */
+            private function showIconInfo(keyboardEvent:KeyboardEvent):void
+            {
+                //this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
+            }
 
+            /**
+             * Hide the info icon
+             */
+            private function hideIconInfo(keyboardEvent:KeyboardEvent):void
+            {
+                //this._iconInfo.hideIconInfo();
+            }
+            
+            
             public function set titleText(text:String):void
             {
                 this._titleText = text;
                 if (this._title)
                     this._title.text = this._titleText;
+            }
+            
+            public function set wikiUrl(text:String):void
+            {
+                this._wikiUrl = text;
+                if (this._iconInfo)
+                    this._iconInfo.wikiUrl = this._wikiUrl;
             }
 
             public function set iconSource(source:String):void

@@ -25,7 +25,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageH
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeType;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * @author Oliver

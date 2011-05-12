@@ -21,14 +21,26 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
 
 public class InternalServerErrorException extends APIException
 {
     private static final long serialVersionUID = -6673459980522505070L;
 
-    public InternalServerErrorException(APIError error)
+    public InternalServerErrorException(APIError apiError)
     {
-        super(Status.INTERNAL_SERVER_ERROR, error);
+        super(apiError);
+    }
+    
+    public InternalServerErrorException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public InternalServerErrorException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

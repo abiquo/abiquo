@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.impl.NetworkCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -41,7 +40,7 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.result.ListResponse;
-import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
  * This class defines all services related to Networking
@@ -80,35 +79,30 @@ public class NetworkingService
      * 
      * @param userSession UserSession object with the information of the user that called this
      *            method
-     * @param networkId identifer of the network that the VLAN will belong to.
+     * @param virtualdatacenterId identifer of the virtualdatacenter where the VLAN will belong to.
      * @param vlanName name of the Vlan. It should be unique by network.
      * @param configuration configuration of the network
      * @param defaultNetwork if the network is default or not. If its set to 'true' it will replace
      *            the previous default network.
      * @return a Data Result containing the created VLAN.
      */
-    public BasicResult createVLAN(UserSession userSession, Integer networkId, String vlanName,
-        NetworkConfiguration configuration, Boolean defaultNetwork)
+    public BasicResult createVLAN(UserSession userSession, Integer virtualdatacenterId,
+        String vlanName, NetworkConfiguration configuration, Boolean defaultNetwork)
     {
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
-        try
-        {
+        VLANNetworkDto vlandto = new VLANNetworkDto();
+        vlandto.setName(vlanName);
+        vlandto.setDefaultNetwork(defaultNetwork);
+        vlandto.setAddress(configuration.getNetworkAddress());
+        vlandto.setGateway(configuration.getGateway());
+        vlandto.setMask(configuration.getMask());
+        vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
+        vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+        vlandto.setSufixDNS(configuration.getSufixDNS());
+        return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId,
+            vlandto);
 
-            NetworkCommand proxy =
-                BusinessDelegateProxy.getInstance(userSession, instantiateNetworkCommand(),
-                    NetworkCommand.class);
-            dataResult.setData(proxy.createPrivateVlanNetwork(userSession, vlanName, networkId,
-                configuration.toPojoHB(), defaultNetwork).toPojo());
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
     }
 
     private NetworkCommand instantiateNetworkCommand()
@@ -247,27 +241,7 @@ public class NetworkingService
 
     public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
     {
-        DataResult<String> dataResult = new DataResult<String>();
-
-        Object[] argsInfo = new Object[2];
-        argsInfo[0] = userSession;
-        argsInfo[1] = vdcId;
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-            dataResult.setData(proxy.getInfoDHCPServer(userSession, vdcId));
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getInfoDHCPServer(userSession, vdcId);
     }
 
     /**
@@ -282,47 +256,10 @@ public class NetworkingService
     public BasicResult getEnterprisesWithNetworkInDataCenter(UserSession userSession,
         Integer datacenterId, ListRequest listRequest)
     {
-        DataResult<ListResponse<Enterprise>> dataResult =
-            new DataResult<ListResponse<Enterprise>>();
 
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            // Execute the commands
-            List<EnterpriseHB> response =
-                proxy.getEnterprisesWithNetworksByDatacenter(userSession, datacenterId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike());
-            Integer responseNumber =
-                proxy.getNumberEnterprisesWithNetworksByDatacenter(userSession, datacenterId,
-                    listRequest.getFilterLike());
-
-            // Prepare the transfer objects
-            List<Enterprise> listEnt = new ArrayList<Enterprise>();
-            for (EnterpriseHB ent : response)
-            {
-                listEnt.add(ent.toPojo());
-            }
-
-            // Prepare the data
-            ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
-            listResponse.setList(listEnt);
-            listResponse.setTotalNumEntities(responseNumber);
-
-            dataResult.setData(listResponse);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getEnterprisesWithNetworksByDatacenter(userSession,
+            datacenterId, listRequest.getOffset(), listRequest.getNumberOfNodes(),
+            listRequest.getFilterLike());
     }
 
     /**
@@ -398,48 +335,9 @@ public class NetworkingService
     public BasicResult getNetworkPoolInfoByEnterprise(UserSession userSession,
         Integer enterpriseId, ListRequest listRequest)
     {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            String orderBy =
-                (listRequest.getOrderBy() != null) ? listRequest.getOrderBy() : new String();
-
-            // Get the responses from the command (proxy var)
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolByEnterprise(userSession, enterpriseId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike(), orderBy, listRequest.getAsc());
-            Integer netmanValues =
-                proxy.getNumberNetworkPoolByEnterprise(userSession, enterpriseId,
-                    listRequest.getFilterLike());
-
-            // Build the response
-            List<IpPoolManagement> listResp = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB currentNetman : listPoolAvailable)
-            {
-                listResp.add(currentNetman.toPojo());
-            }
-
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            listResult.setList(listResp);
-            listResult.setTotalNumEntities(netmanValues);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getListNetworkPoolByEnterprise(enterpriseId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc());
     }
 
     /**
@@ -455,49 +353,9 @@ public class NetworkingService
     public BasicResult getNetworkPoolInfoByVDC(UserSession userSession,
         Integer virtualDataCenterId, ListRequest listRequest)
     {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            String orderBy =
-                (listRequest.getOrderBy() != null) ? listRequest.getOrderBy() : new String();
-
-            // Get the responses from the command (proxy var)
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolByVDC(userSession, virtualDataCenterId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike(), orderBy, listRequest.getAsc());
-            Integer netmanValues =
-                proxy.getNumberNetworkPoolByVDC(userSession, virtualDataCenterId,
-                    listRequest.getFilterLike());
-
-            // Build the response
-            List<IpPoolManagement> listResp = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB currentNetman : listPoolAvailable)
-            {
-                listResp.add(currentNetman.toPojo());
-            }
-
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            listResult.setList(listResp);
-            listResult.setTotalNumEntities(netmanValues);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getListNetworkPoolByVirtualDatacenter(virtualDataCenterId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc());
     }
 
     /**
@@ -798,6 +656,7 @@ public class NetworkingService
 
     /**
      * Return the list of virtual networks from a virtual datacenter
+     * 
      * @param userSession user who performs the action
      * @param vdcId identifier of the virtual datacenter
      * @return a BasicResult
