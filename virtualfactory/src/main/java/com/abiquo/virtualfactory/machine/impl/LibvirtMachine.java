@@ -677,27 +677,22 @@ public class LibvirtMachine extends AbsVirtualMachine
     private void reconfigDisks(final VirtualMachineConfiguration newConfiguration,
         final VirtualMachineConfiguration config) throws VirtualMachineException
     {
-        List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
-        List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
+        throw new VirtualMachineException("Cannot reconfigure the extended disks in "
+            + "KVM and XEN guests wihout undeploying.");
 
-        // If there are no more extended disks, I remove the existent ones
-        if (newExtendedDiskList.size() == 0
-            && newExtendedDiskList.size() < oldExtendedDiskList.size())
-        {
-            // It deteches all the storage pools
-            detachExtendedDisksFromConfig(newConfiguration);
-
-            // Updates the domain definition
-            updateDomain(newConfiguration);
-        }
-        else if (newExtendedDiskList.size() > 0)
-        {
-            // Updates the domain definition
-            // As the attach configuration does not work properly we are just adding the storage
-            // pools and modifying the xml definition
-            // Updates the domain definition
-            updateDomain(newConfiguration);
-        }
+        // List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
+        // List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
+        //
+        // // If there are no more extended disks, I remove the existent ones
+        // if (newExtendedDiskList.isEmpty()
+        // && newExtendedDiskList.size() < oldExtendedDiskList.size())
+        // {
+        // // It deteches all the storage pools
+        // // detachExtendedDisksFromConfig(newConfiguration);
+        //
+        // // Updates the domain definition
+        // updateDomain(newConfiguration);
+        // }
     }
 
     /**
@@ -876,7 +871,6 @@ public class LibvirtMachine extends AbsVirtualMachine
     private String defineXMLdomain(final VirtualMachineConfiguration configuration)
         throws VirtualMachineException
     {
-
         // Base XML
         String src_xml =
             "<domain type='kvm'>" + "<name>debian</name>"
@@ -919,15 +913,15 @@ public class LibvirtMachine extends AbsVirtualMachine
 
             // Analyzing if the base virtual disk is an stateless or statefull disk
 
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            if (configuration.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
             {
-                String targetDatastore = getDatastore(config.getVirtualDiskBase());
+                String targetDatastore = getDatastore(configuration.getVirtualDiskBase());
                 attachDisktoDoc(doc, "hda", targetDatastore + getMachineName().toString(), "ide",
-                    config.getVirtualDiskBase().getFormat());
+                    configuration.getVirtualDiskBase().getFormat());
             }
-            else if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
+            else if (configuration.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
             {
-                attachIscsiDisk(config.getVirtualDiskBase(), doc, "hda", "virtio");
+                attachIscsiDisk(configuration.getVirtualDiskBase(), doc, "hda", "virtio");
             }
 
             // replaceAttribute(doc, "source", "file", destinationRepository// + File.separatorChar
@@ -1146,12 +1140,12 @@ public class LibvirtMachine extends AbsVirtualMachine
      * Private helper to attach the extended disks to the xml domain definition
      * 
      * @param doc the xml domain definition
-     * @param config the config file containing the extended disks to attach
+     * @param config the configuration file containing the extended disks to attach
      */
-    private void attachExtendedDisk(final Document doc, final VirtualMachineConfiguration config)
-        throws Exception
+    private void attachExtendedDisk(final Document doc,
+        final VirtualMachineConfiguration configuration) throws Exception
     {
-        for (VirtualDisk vdisk : config.getExtendedVirtualDiskList())
+        for (VirtualDisk vdisk : configuration.getExtendedVirtualDiskList())
         {
             // TODO Attaching other STANDARD extended disks
             if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)
