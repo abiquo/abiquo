@@ -109,7 +109,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
-    
+
     public VirtualMachine findByUUID(String uuid)
     {
         return repo.findByUUID(uuid);
@@ -201,16 +201,19 @@ public class VirtualMachineService extends DefaultApiService
     public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
         throws Exception
     {
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
-        Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
+        // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        // Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
-        VirtualAppliance vapp = contanerVirtualAppliance(vm); 
+
+        Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
+        
+        VirtualAppliance vapp = contanerVirtualAppliance(vm);
         EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
         RemoteService vf =
-            remoteService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
+            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
 
         long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 
@@ -262,7 +265,7 @@ public class VirtualMachineService extends DefaultApiService
         return state.toOVF().equalsIgnoreCase(actual);
     }
 
-    private void changeState(final Resource resource, final EnvelopeType envelope,
+    public void changeState(final Resource resource, final EnvelopeType envelope,
         final String machineState) throws Exception
     {
         EnvelopeType envelopeRunning = ovfService.changeStateVirtualMachine(envelope, machineState);
