@@ -820,6 +820,7 @@ CREATE TABLE  `kinton`.`role` (
 -- Dumping data for table `kinton`.`role`
 --
 
+-- These values are used by the ldap_role table.
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
 INSERT INTO `kinton`.`role` VALUES
@@ -1893,14 +1894,14 @@ CREATE  TABLE `kinton`.`role_ldap` (`idLdapRole` int(3) unsigned NOT NULL AUTO_I
   INDEX `fk_role_ldap_role` (`idRole` ASC) ,
   PRIMARY KEY (`idLdapRole`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
-
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-LOCK TABLES `role_ldap` WRITE;
-insert into `kinton`.`role_ldap`(idRole, role_ldap,  version_c) values ((select idRole from `kinton`.`role` where type = 'SYS_ADMIN'), 'LDAP_SYS_ADMIN', 0);
-insert into `kinton`.`role_ldap`(idRole, role_ldap, version_c) values ((select idRole from `kinton`.`role` where type = 'USER'), 'LDAP_USER', 0);
-insert into `kinton`.`role_ldap`(idRole, role_ldap, version_c) values ((select idRole from `kinton`.`role` where type = 'ENTERPRISE_ADMIN'), 'LDAP_ENTERPRISE_ADMIN', 0);
+-- The idRole values are taken from the above role table.
+/*!40000 ALTER TABLE `role_ldap` DISABLE KEYS */;
+LOCK TABLES `kinton`.`role_ldap` WRITE;
+insert into `kinton`.`role_ldap` values (1,1, 'LDAP_SYS_ADMIN', 0),
+(2,2, 'LDAP_USER', 0),
+(3,3, 'LDAP_ENTERPRISE_ADMIN', 0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+/*!40000 ALTER TABLE `role_ldap` ENABLE KEYS */;
 
 --
 -- STATISTICS MODULE TRIGGERS
