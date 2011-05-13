@@ -21,14 +21,12 @@
 
 package com.abiquo.abiserver.business.authentication;
 
-import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 import org.springframework.security.BadCredentialsException;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
@@ -235,18 +233,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
         clientConfig.handlers(basicAuthHandler);
 
-        RestClient client = new RestClient(clientConfig);
         UserHB userHB = null;
         try
         {
-            URI uri = new URI(getApiUri() + "login");
-
             // We perform this call to a secure location. If success then the credentials are valid
-            // ClientResponse response = client.resource(uri).get();
             LoginResourceStub proxy = getLoginStubProxy();
             DataResult<UserDto> dataResultDto =
                 proxy.getUserByName(login.getUser(), login.getPassword(), basicAuthHandler);
-            UserDto userDto = dataResultDto.getData(); // response.getEntity(UserDto.class);
+            UserDto userDto = dataResultDto.getData();
             // Old DB login needs a Md5 password
             String passwordHash = createMd5encodedPassword(login);
             basicAuthHandler.setPassword(passwordHash);
