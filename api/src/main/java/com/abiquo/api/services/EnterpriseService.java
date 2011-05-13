@@ -32,13 +32,11 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
