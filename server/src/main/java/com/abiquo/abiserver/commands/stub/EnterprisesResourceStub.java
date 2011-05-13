@@ -29,12 +29,12 @@ import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 public interface EnterprisesResourceStub
 {
     public DataResult<Enterprise> createEnterprise(Enterprise enterprise);
-    
+
     public DataResult<Enterprise> editEnterprise(Enterprise enterprise);
 
     public BasicResult deleteEnterprise(Integer enterpriseId);
 
     public DataResult<EnterpriseListResult> getEnterprises(ListRequest enterpriseListOptions);
-    
-    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);    
+
+    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);
 }

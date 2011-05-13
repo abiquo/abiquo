@@ -23,9 +23,11 @@ package com.abiquo.abiserver.business;
 
 import java.util.List;
 
+import com.abiquo.abiserver.business.authentication.AuthenticationManagerApi;
 import com.abiquo.abiserver.business.authentication.AuthenticationManagerDB;
 import com.abiquo.abiserver.business.authentication.IAuthenticationManager;
 import com.abiquo.abiserver.business.authorization.IAuthorizationManager;
+import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -54,7 +56,18 @@ public class AuthService
     private AuthService()
     {
         // TODO Instantiate convenient authentication and authorization managers
-        authenticationManager = new AuthenticationManagerDB();
+        String securityMode = AbiConfigManager.getInstance().getAbiConfig().getAbiquoSecurityMode();
+
+        // FIXME DB is deprecated we should always use API authentication
+        if ("ldap".equals(securityMode))
+        {
+            authenticationManager = new AuthenticationManagerApi();
+        }
+        else
+        {
+            authenticationManager = new AuthenticationManagerDB();
+        }
+        authenticationManager = new AuthenticationManagerApi();
     }
 
     public static AuthService getInstance()

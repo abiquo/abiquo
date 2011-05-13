@@ -44,6 +44,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class EnterprisesResourceStubImpl extends AbstractAPIStub implements EnterprisesResourceStub
@@ -272,8 +273,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
 
         String uri =
-            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
-                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(), enterpriseListOptions
+                .getOffset(), enterpriseListOptions.getNumberOfNodes());
 
         ClientResponse response = get(uri);
         if (response.getStatusCode() == 200)
@@ -335,4 +336,6 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         Enterprise enterprise = Enterprise.create(responseDto);
         return enterprise;
     }
+
+    
 }

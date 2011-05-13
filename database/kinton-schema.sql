@@ -838,15 +838,16 @@ CREATE TABLE  `kinton`.`user` (
   `idUser` int(10) unsigned NOT NULL auto_increment,
   `idRole` int(3) unsigned NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
-  `user` varchar(20) NOT NULL,
-  `name` varchar(30) NOT NULL,
+  `user` varchar(128) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `surname` varchar(50) default NULL,
   `description` varchar(100) default NULL,
-  `email` varchar(200) NOT NULL,
+  `email` varchar(200),
   `locale` varchar(10) NOT NULL,
-  `password` varchar(32) NOT NULL,
+  `password` varchar(32),
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
+  `authType` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idUser`),
   KEY `User_FK1` (`idRole`),
@@ -861,8 +862,8 @@ CREATE TABLE  `kinton`.`user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 LOCK TABLES `user` WRITE;
-INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1,0),
- (2,2,1,'user','Standard','User','Standard user','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1,0);
+INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0),
+ (2,2,1,'user','Standard','User','Standard user','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
@@ -873,10 +874,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`session`;
 CREATE TABLE  `kinton`.`session` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `user` varchar(20) NOT NULL,
+  `user` varchar(128) NOT NULL,
   `key` varchar(100) NOT NULL,
   `expireDate` timestamp NOT NULL,
   `idUser` int(10) unsigned default null,
+  `authType` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`id`),
   CONSTRAINT `fk_session_user` foreign key (`idUser`) references `user` (`idUser`)
@@ -1104,7 +1106,7 @@ CREATE TABLE  `kinton`.`metering` (
   `idEnterprise` int(10) unsigned default NULL,
   `enterprise` varchar(40) default NULL,
   `idUser` int(10) unsigned default NULL,
-  `user` varchar(20) default NULL,
+  `user` varchar(128) default NULL,
   `idVirtualDataCenter` int(10) unsigned default NULL,
   `virtualDataCenter` varchar(40) default NULL,
   `idVirtualApp` int(10) unsigned default NULL,
@@ -1879,6 +1881,17 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`enterprise_theme` (
   CONSTRAINT `THEME_FK1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE CASCADE
 )ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
+
+--
+-- LDAP TABLE
+--
+DROP  TABLE IF EXISTS `kinton`.`role_ldap`;
+CREATE  TABLE `kinton`.`role_ldap` (`idLdapRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `role_ldap` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  INDEX `fk_role_ldap_role` (`idRole` ASC) ,
+  PRIMARY KEY (`idLdapRole`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- STATISTICS MODULE TRIGGERS

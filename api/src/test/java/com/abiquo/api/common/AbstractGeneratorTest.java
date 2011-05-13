@@ -42,6 +42,7 @@ import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.enterprise.LdapRoleGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
@@ -56,7 +57,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -97,6 +98,8 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected RoleGenerator roleGenerator = new RoleGenerator(seed);
 
+    protected LdapRoleGenerator ldapRoleGenerator = new LdapRoleGenerator(seed);
+
     protected UserGenerator userGenerator = new UserGenerator(seed);
 
     protected VirtualMachineGenerator vmGenerator = new VirtualMachineGenerator(seed);
@@ -120,7 +123,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-    
+
     @BeforeMethod
     public void setup()
     {
@@ -129,7 +132,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         // system property in the jetty runtime!!!
         System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
     }
-    
+
     @AfterMethod
     public void tearDown()
     {
@@ -143,12 +146,12 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
-            "workload_fit_policy_rule", "network", "session", "user", "role", "workload_enterprise_exclusion_rule",
-            "enterprise_limits_by_datacenter", "enterprise",
+            "workload_fit_policy_rule", "network", "session", "user", "role",
+            "workload_enterprise_exclusion_rule", "enterprise_limits_by_datacenter", "enterprise",
             "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
             "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
             "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register"};
+            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register", "role_ldap"};
 
         tearDown(entities);
     }

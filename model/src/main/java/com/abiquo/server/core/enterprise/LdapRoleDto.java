@@ -18,21 +18,38 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.model.enumerator;
 
-/**
- * Sets the States of a Volume Storage can live in AbiCloud
- * 
- * @author abiquo
- */
-public enum VolumeState
+package com.abiquo.server.core.enterprise;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "")
+public class LdapRoleDto extends SingleResourceTransportDto
 {
-    /** When a volume storage is created but not already associated to any Virtual Machine. */
-    NOT_MOUNTED_NOT_RESERVED,
+    private Integer id;
 
-    /** When a volume storage is reserved but we don't want to mount to any Virtual Machine. */
-    NOT_MOUNTED_RESERVED,
+    public Integer getId()
+    {
+        return id;
+    }
 
-    /** When a volume is reserved and ready to mount to a given Virtual Machine. */
-    MOUNTED_RESERVED, ATTACHED
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private String ldapRole;
+
+    public String getLdapRole()
+    {
+        return ldapRole;
+    }
+
+    public void setLdapRole(String ldapRole)
+    {
+        this.ldapRole = ldapRole;
+    }
+
 }

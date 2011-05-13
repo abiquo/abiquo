@@ -28,6 +28,11 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "user")
 public class UserDto extends SingleResourceTransportDto
 {
+    /**
+     * UID.
+     */
+    private static final long serialVersionUID = -3233121860012587479L;
+
     private Integer id;
 
     public UserDto()
@@ -35,8 +40,47 @@ public class UserDto extends SingleResourceTransportDto
 
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param name Name.
+     * @param surname Surname.
+     * @param email Email Address.
+     * @param nick Login.
+     * @param password Password.
+     * @param locale Language.
+     * @param description Desc.
+     * @deprecated use
+     *             {@link #UserDto(String, String, String, String, String, String, String, String)}
+     *             instead.
+     */
+    @Deprecated
     public UserDto(String name, String surname, String email, String nick, String password,
         String locale, String description)
+    {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.nick = nick;
+        this.password = password;
+        this.locale = locale;
+        this.description = description;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param name Name.
+     * @param surname Surname.
+     * @param email Email Address.
+     * @param nick Login.
+     * @param password Password.
+     * @param locale Language.
+     * @param description Desc.
+     * @param authType AuthType value.
+     */
+    public UserDto(String name, String surname, String email, String nick, String password,
+        String locale, String description, String authType)
     {
         this.name = name;
         this.surname = surname;
@@ -169,5 +213,54 @@ public class UserDto extends SingleResourceTransportDto
     public void setAvailableVirtualDatacenters(String availableVirtualDatacenters)
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
+    }
+
+    private int idRole;
+
+    public int getIdRole()
+    {
+        return idRole;
+    }
+
+    public void setIdRole(int idRole)
+    {
+        this.idRole = idRole;
+    }
+
+    private int idEnterprise;
+
+    public int getIdEnterprise()
+    {
+        return idEnterprise;
+    }
+
+    public void setIdEnterprise(int idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
+    }
+
+    /**
+     * String representation for {@link com.abiquo.server.core.enterprise.User.AuthType} value.
+     */
+    private String authType;
+
+    /**
+     * {@link com.abiquo.server.core.enterprise.User.AuthType} value.
+     * 
+     * @return {@link com.abiquo.server.core.enterprise.User.AuthType} value. String.
+     */
+    public String getAuthType()
+    {
+        return authType;
+    }
+
+    /**
+     * {@link com.abiquo.server.core.enterprise.User.AuthType} value.
+     * 
+     * @param authType {@link com.abiquo.server.core.enterprise.User.AuthType} value.
+     */
+    public void setAuthType(String authType)
+    {
+        this.authType = authType;
     }
 }

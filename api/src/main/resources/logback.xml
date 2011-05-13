@@ -26,7 +26,7 @@
 	</logger>
 	
 	<logger name="org.hibernate">
-        <level value="WARN" />
+        <level value="DEBUG" />
     </logger>
     
     <logger name="org.apache.wink">
@@ -42,7 +42,7 @@
 	</logger>
 	
 	<root>
-		<level value="INFO" />
+		<level value="DEBUG" />
 		<appender-ref ref="FILE" />
 		<appender-ref ref="STDOUT" />
 	</root>

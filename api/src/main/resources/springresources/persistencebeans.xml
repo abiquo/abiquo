@@ -75,6 +75,9 @@
 	      <!-- Configuration -->
 	      <ref bean="systemPropertiesResource"/>
 	      <ref bean="systemPropertyResource"/>
+	      
+	      <!-- Login -->
+	      <ref bean="loginResource" />
 	    </set>
 	  </property>
 	</bean>

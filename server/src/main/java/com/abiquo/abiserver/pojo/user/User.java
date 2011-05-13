@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -60,6 +61,18 @@ public class User implements IPojo<UserHB>
     private Enterprise enterprise;
 
     private Integer[] availableVirtualDatacenters;
+
+    private AuthType authType;
+
+    public AuthType getAuthType()
+    {
+        return authType;
+    }
+
+    public void setAuthType(AuthType authType)
+    {
+        this.authType = authType;
+    }
 
     public Integer[] getAvailableVirtualDatacenters()
     {

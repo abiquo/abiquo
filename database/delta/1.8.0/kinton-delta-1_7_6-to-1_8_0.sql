@@ -17,6 +17,17 @@ UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FINISHED" WHERE a
 UPDATE kinton.metering SET actionperformed="PERSISTENT_PROCESS_FAILED" WHERE actionperformed="STATEFUL_PROCESS_FAILED";
 UPDATE kinton.metering SET actionperformed="PERSISTENT_INITIATOR_ADDED" WHERE actionperformed="STATEFUL_INITIATOR_ADDED";
 
+-- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
+alter table kinton.user modify user varchar(128) NOT NULL;
+alter table kinton.user add authType varchar(20) NOT NULL;
+alter table kinton.user modify column password varchar(32);
+update kinton.user set authtype = 'ABIQUO';
+alter table kinton.session modify user varchar(128) NOT NULL;
+alter table kinton.user modify name varchar(128) NOT NULL;
+alter table kinton.metering modify user varchar(128) NOT NULL;
+alter table kinton.session add authType varchar(20) NOT NULL;
+
+
 -- [ABICLOUDPREMIUM 1615]  Accounting changes --
 
 DROP TABLE IF EXISTS `kinton`.`accounting_event_vm`;
@@ -280,7 +291,6 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE costCodeObj VARCHAR(50);
-
 	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
@@ -303,38 +313,38 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
 
-	IF NEW.idType = 1 AND OLD.idType = 0 THEN
-		-- Imported !!!
-		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+    IF NEW.idType = 1 AND OLD.idType = 0 THEN
+        -- Imported !!!
+        UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		IF NEW.state = "RUNNING" THEN 	
-			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualApp = idVirtualAppObj;
-		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
-		        WHERE idDataCenter = idDataCenterObj;       
-		        UPDATE IGNORE enterprise_resources_stats 
-		            SET vCpuUsed = vCpuUsed + NEW.cpu,
-		                memoryUsed = memoryUsed + NEW.ram,
-		                localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise;
-		        UPDATE IGNORE dc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
-		        UPDATE IGNORE vdc_enterprise_stats 
-		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
-		            memoryUsed = memoryUsed + NEW.ram,
-		            localStorageUsed = localStorageUsed + NEW.hd
-		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
-		END IF;
-	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
+        IF NEW.state = "RUNNING" THEN   
+            UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+                UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+                WHERE idDataCenter = idDataCenterObj;       
+                UPDATE IGNORE enterprise_resources_stats 
+                    SET vCpuUsed = vCpuUsed + NEW.cpu,
+                        memoryUsed = memoryUsed + NEW.ram,
+                        localStorageUsed = localStorageUsed + NEW.hd
+                WHERE idEnterprise = NEW.idEnterprise;
+                UPDATE IGNORE dc_enterprise_stats 
+                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+                    memoryUsed = memoryUsed + NEW.ram,
+                    localStorageUsed = localStorageUsed + NEW.hd
+                WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vdc_enterprise_stats 
+                SET     vCpuUsed = vCpuUsed + NEW.cpu,
+                    memoryUsed = memoryUsed + NEW.ram,
+                    localStorageUsed = localStorageUsed + NEW.hd
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
+        END IF;
+    ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1

@@ -69,4 +69,5 @@ public interface UserDAO extends DAO<UserHB, Integer>
     List<UserHB> getUsersByUserRol(String rol, Integer enterprise);
 
     public UserHB findUserHBByName(String name);
+
 }

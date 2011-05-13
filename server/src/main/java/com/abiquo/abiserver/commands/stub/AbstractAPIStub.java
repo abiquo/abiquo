@@ -32,9 +32,11 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.apache.wink.client.handlers.ClientHandler;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
@@ -51,6 +53,7 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
@@ -125,8 +128,8 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
+            .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -149,6 +152,11 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword()).delete();
     }
 
+    protected String createLoginLink()
+    {
+        return URIResolver.resolveURI(apiUri, "/login", Collections.emptyMap());
+    }
+
     private Resource resource(final String uri, final String user, final String password)
     {
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
@@ -156,8 +164,19 @@ public class AbstractAPIStub
 
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
-        String cookieValue =
-            StringUtils.join(new String[] {user, valueOf(tokenExpiration), signature}, ":");
+        String[] tokens;
+        if (this.currentSession != null && currentSession.getAuthType() != null)
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
 
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
@@ -217,8 +236,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -251,8 +270,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -264,8 +283,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -376,4 +395,43 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
     }
 
+    protected Resource resource(final String uri, final String user, final String password,
+        ClientHandler... handlers)
+    {
+        if (handlers == null || handlers.length == 0)
+        {
+            return resource(uri, user, password);
+        }
+        ClientConfig config = new ClientConfig();
+        config.handlers(handlers);
+
+        Resource resource = new RestClient(config).resource(uri).accept(MediaType.APPLICATION_XML);
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+
+        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
+
+        String[] tokens;
+        if (this.currentSession != null && currentSession.getAuthType() != null)
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
+
+        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
+
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
+
+    protected ClientResponse get(final String uri, final String user, final String password,
+        ClientHandler... handlers)
+    {
+        return resource(uri, user, password, handlers).get();
+    }
 }

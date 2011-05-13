@@ -27,6 +27,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -345,6 +346,22 @@ public class User extends DefaultEntityBase
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
 
+    /**
+     * THIS CONSTRUCTOR FORCES THE TYPE, AND THEREFORE THE AUTHENTICATION MODE TO <b>ABIQUO</b>.
+     * THAT MEANS THAT THIS USER CAN ONLY AUTHENTICATE TO DB. Constructor.
+     * 
+     * @param enterprise Enterprise to which the user belonsg.
+     * @param role Role in Abiquo.
+     * @param name Name.
+     * @param surname Surname.
+     * @param email Email address.
+     * @param nick Login.
+     * @param password Password.
+     * @param locale Language preferred for communications with Abiquo.
+     * @deprecated use instead
+     *             {@link #User(Enterprise, Role, String, String, String, String, String, String, AuthType)}
+     */
+    @Deprecated
     public User(Enterprise enterprise, Role role, String name, String surname, String email,
         String nick, String password, String locale)
     {
@@ -356,6 +373,34 @@ public class User extends DefaultEntityBase
         setNick(nick);
         setPassword(password);
         setLocale(locale);
+        setAuthType(AuthType.ABIQUO);
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param enterprise Enterprise to which the user belonsg.
+     * @param role Role in Abiquo.
+     * @param name Name.
+     * @param surname Surname.
+     * @param email Email address.
+     * @param nick Login.
+     * @param password Password.
+     * @param locale Language preferred for communications with Abiquo.
+     * @param authType Which system this user signed up.
+     */
+    public User(Enterprise enterprise, Role role, String name, String surname, String email,
+        String nick, String password, String locale, AuthType authType)
+    {
+        setEnterprise(enterprise);
+        setRole(role);
+        setName(name);
+        setSurname(surname);
+        setEmail(email);
+        setNick(nick);
+        setPassword(password);
+        setLocale(locale);
+        setAuthType(authType);
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
@@ -364,5 +409,47 @@ public class User extends DefaultEntityBase
     protected void addSession(Session session)
     {
         sessions.add(session);
+    }
+
+    /**
+     * Which system this user signed up. This also indicates to which system this user will
+     * authenticate.
+     */
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = "authType", nullable = false)
+    private AuthType authType;
+
+    /**
+     * Which system this user signed up. This also indicates to which system this user will
+     * authenticate.
+     * 
+     * @return AuthType
+     */
+    @Required(value = true)
+    public AuthType getAuthType()
+    {
+        return authType;
+    }
+
+    /**
+     * Which system this user signed up. This also indicates to which system this user will
+     * authenticate.
+     * 
+     * @param authType {@link com.abiquo.server.core.enterprise.User.AuthType} value.
+     */
+    private void setAuthType(AuthType authType)
+    {
+        this.authType = authType;
+    }
+
+    /**
+     * Which system this user signed up. This also indicates to which system this user will
+     * authenticate.
+     * 
+     * @author ssedano
+     */
+    public static enum AuthType
+    {
+        ABIQUO, LDAP;
     }
 }
