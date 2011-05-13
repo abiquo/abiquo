@@ -196,4 +196,27 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
         return (User) criteria.uniqueResult();
     }
+
+    /**
+     * Same AuthType?.
+     * 
+     * @param authType AuthType.a {@link User.AuthType} value.
+     * @return Criterion
+     */
+    public static Criterion sameAuthType(AuthType authType)
+    {
+        return Restrictions.eq("authType", authType);
+    }
+
+    /**
+     * Look up in the DB for a user with login == nick and authType == authType.
+     * 
+     * @param nick login.
+     * @param authType a {@link User.AuthType} value.
+     * @return boolean true if exists, false otherwise.
+     */
+    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    {
+        return existsAnyByCriterions(sameNick(nick), sameAuthType(authType));
+    }
 }

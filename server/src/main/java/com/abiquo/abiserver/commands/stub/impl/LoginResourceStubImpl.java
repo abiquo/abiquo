@@ -21,6 +21,7 @@
 package com.abiquo.abiserver.commands.stub.impl;
 
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.LoginResourceStub;
@@ -35,9 +36,10 @@ public class LoginResourceStubImpl extends AbstractAPIStub implements LoginResou
      *      java.lang.String)
      */
     @Override
-    public DataResult<UserDto> getUserByName(String user, String password)
+    public DataResult<UserDto> getUserByName(String user, String password,
+        BasicAuthSecurityHandler basicAuthSecurityHandler)
     {
-        ClientResponse response = get(createLoginLink(), user, password);
+        ClientResponse response = get(createLoginLink(), user, password, basicAuthSecurityHandler);
 
         UserDto userDto = response.getEntity(UserDto.class);
 

@@ -325,4 +325,16 @@ public class EnterpriseRep extends DefaultRepBase
     {
         return userDAO.getUserByAuth(nick, authType);
     }
+
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param nick login.
+     * @param authType an {@link AuthType} value.
+     * @return boolean false if there is no other user with same nick + authType. False otherwise.
+     */
+    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    {
+        return userDAO.existAnyUserWithNickAndAuth(nick, authType);
+    }
 }

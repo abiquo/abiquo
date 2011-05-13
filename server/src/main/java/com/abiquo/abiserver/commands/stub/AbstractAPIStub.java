@@ -32,9 +32,11 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.apache.wink.client.handlers.ClientHandler;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
@@ -393,4 +395,43 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
     }
 
+    protected Resource resource(final String uri, final String user, final String password,
+        ClientHandler... handlers)
+    {
+        if (handlers == null || handlers.length == 0)
+        {
+            return resource(uri, user, password);
+        }
+        ClientConfig config = new ClientConfig();
+        config.handlers(handlers);
+
+        Resource resource = new RestClient(config).resource(uri).accept(MediaType.APPLICATION_XML);
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+
+        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
+
+        String[] tokens;
+        if (this.currentSession != null && currentSession.getAuthType() != null)
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
+
+        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
+
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
+
+    protected ClientResponse get(final String uri, final String user, final String password,
+        ClientHandler... handlers)
+    {
+        return resource(uri, user, password, handlers).get();
+    }
 }

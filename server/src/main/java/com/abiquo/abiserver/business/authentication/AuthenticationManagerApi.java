@@ -28,7 +28,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
 import org.springframework.security.BadCredentialsException;
@@ -243,11 +242,11 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             URI uri = new URI(getApiUri() + "login");
 
             // We perform this call to a secure location. If success then the credentials are valid
-            ClientResponse response = client.resource(uri).get();
-            // LoginResourceStub proxy = getLoginStubProxy();
-            // DataResult<UserDto> dataResultDto =
-            // proxy.getUserByName(login.getUser(), login.getPassword());
-            UserDto userDto = response.getEntity(UserDto.class);
+            // ClientResponse response = client.resource(uri).get();
+            LoginResourceStub proxy = getLoginStubProxy();
+            DataResult<UserDto> dataResultDto =
+                proxy.getUserByName(login.getUser(), login.getPassword(), basicAuthHandler);
+            UserDto userDto = dataResultDto.getData(); // response.getEntity(UserDto.class);
             // Old DB login needs a Md5 password
             String passwordHash = createMd5encodedPassword(login);
             basicAuthHandler.setPassword(passwordHash);
@@ -256,6 +255,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             userHB = getUserToPersistSession(login, userDto);
             dataResult = persistLogin(userHB);
         }
+
         catch (BadCredentialsException e)
         {
             if (getFactory().isTransactionActive())

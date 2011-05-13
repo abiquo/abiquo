@@ -40,8 +40,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
@@ -52,6 +50,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 
 @Service
@@ -160,8 +159,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
-                .getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
+                dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
@@ -171,7 +170,7 @@ public class UserService extends DefaultApiService
             addValidationErrors(user.getValidationErrors());
             flushErrors();
         }
-        if (repo.existAnyUserWithNick(user.getNick()))
+        if (repo.existAnyUserWithNickAndAuth(user.getNick(), AuthType.ABIQUO))
         {
             addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();

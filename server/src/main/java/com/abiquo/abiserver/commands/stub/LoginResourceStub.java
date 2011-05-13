@@ -20,6 +20,8 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
+
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.enterprise.UserDto;
 
@@ -35,8 +37,10 @@ public interface LoginResourceStub
      * 
      * @param user username.
      * @param password password.
+     * @param basicAuthSecurityHandler handler for authentication.
      * @return {@link UserDto} of the user currently authenticated.
      */
-    public DataResult<UserDto> getUserByName(String user, String password);
+    public DataResult<UserDto> getUserByName(String user, String password,
+        BasicAuthSecurityHandler basicAuthSecurityHandler);
 
 }
