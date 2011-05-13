@@ -691,6 +691,9 @@ public class LibvirtMachine extends AbsVirtualMachine
         // // detachExtendedDisksFromConfig(newConfiguration);
         //
         // // Updates the domain definition
+        // // As the attach configuration does not work properly we are just adding the storage
+        // // pools and modifying the xml definition
+        // // Updates the domain definition
         // updateDomain(newConfiguration);
         // }
     }
