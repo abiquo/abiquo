@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.7.5-HF2</version>
+        <version>1.7.6-HF1-SNAPSHOT</version>
     </parent>
 
     <!--      Dependences                    -->
@@ -209,12 +209,12 @@
         <dependency>
             <groupId>com.abiquo.heartbeat</groupId>
             <artifactId>client</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.abiquo.heartbeat</groupId>
             <artifactId>server</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
             <classifier>shared</classifier>
         </dependency>
         <dependency>

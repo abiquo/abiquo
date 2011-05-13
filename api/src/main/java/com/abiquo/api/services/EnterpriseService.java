@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,6 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -56,6 +56,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.api.spring.security.AbiquoUserDetails;
 
 @Service
 @Transactional(readOnly = true)
@@ -89,6 +90,27 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
+    
+    /**
+    * Based on the spring authentication context.
+    * 
+    * @see SecurityContextHolder
+    */
+//   public Enterprise getCurrentEnterprise()
+//   {
+//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
+//       
+//       User user = userService.getCurrentUser();
+//       
+//       return user.getEnterprise();
+//       
+////       Enterprise enterprise = repo.findById(id);
+////       if (enterprise == null)
+////       {
+////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+////       }
+//
+//   }
 
     public Collection<Enterprise> getEnterprises(String filterName, Integer offset,
         Integer numResults)
@@ -145,7 +167,8 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(enterprise);
+//        userService.checkEnterpriseAdminCredentials(enterprise);
+        userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
 
@@ -158,7 +181,7 @@ public class EnterpriseService extends DefaultApiService
             throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
         }
 
-        userService.checkUserCredentials(old);
+        userService.checkEnterpriseAdminCredentials(old);
 
         if (dto.getName().isEmpty())
         {
@@ -189,6 +212,8 @@ public class EnterpriseService extends DefaultApiService
         repo.update(old);
         return old;
     }
+
+    
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeEnterprise(Integer id)

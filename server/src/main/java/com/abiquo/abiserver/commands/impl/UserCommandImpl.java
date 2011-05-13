@@ -99,8 +99,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
                     + user.getEnterprise().getName() + ", Name: " + user.getName() + ", Surname: "
                     + user.getSurname() + ", Role: " + user.getRole().getShortDescription()
                     + ", User: " + user.getUser() + ", Email: " + user.getEmail()
-                    + ", Description: " + user.getDescription() + "]", null, null, null,
-                user.getUser(), user.getEnterprise().getName());
+                    + ", Description: " + user.getDescription() + "]", null, null, null, user
+                    .getUser(), user.getEnterprise().getName());
         }
 
         return dataResult;
@@ -255,8 +255,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             // Generating a custom query to delete all sessions, except userSession
             String hqlDelete =
                 "delete UserSession uS where uS.user != :notUser and uS.key != :notKey";
-            session.createQuery(hqlDelete).setString("notUser", userSession.getUser())
-                .setString("notKey", userSession.getKey()).executeUpdate();
+            session.createQuery(hqlDelete).setString("notUser", userSession.getUser()).setString(
+                "notKey", userSession.getKey()).executeUpdate();
 
             transaction.commit();
 
@@ -357,6 +357,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             basicResult.setMessage(resourceManager.getMessage("editEnterprise.limitExceeded"));
 
             return basicResult;
+                        
         }
         finally
         {
@@ -364,18 +365,12 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             enterpriseHB = null;
         }
 
-//        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
-//
-//        BasicResult result = proxy.editEnterprise(enterprise);
+        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
         
-        session = HibernateUtil.getSession();
-        transaction = session.beginTransaction();
-        session.saveOrUpdate(enterprise.toPojoHB());
-        transaction.commit();
         DataResult<Enterprise> result = new DataResult<Enterprise>();
-        result.setData(enterprise);
-        result.setSuccess(Boolean.TRUE);
-
+        
+        result = proxy.editEnterprise(enterprise);
+        
         if (result.getSuccess())
         {
             // Building result
@@ -398,8 +393,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             // result.getMessage());
 
             traceLog(SeverityType.CRITICAL, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                userSession, null, null, result.getMessage(), null, null, null, null,
-                enterprise.getName());
+                userSession, null, null, result.getMessage(), null, null, null, null, enterprise
+                    .getName());
         }
 
         return result;
@@ -432,8 +427,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         else
         {
             traceLog(SeverityType.CRITICAL, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
-                userSession, null, null, result.getMessage(), null, null, null, null,
-                enterprise.getName());
+                userSession, null, null, result.getMessage(), null, null, null, null, enterprise
+                    .getName());
         }
 
         return result;
@@ -444,16 +439,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     {
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
 
-        DAOFactory factory = HibernateDAOFactory.instance();
-        factory.beginConnection();
-
-        // DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
-        Enterprise ent = factory.getEnterpriseDAO().findById(enterpriseId).toPojo();
-        DataResult<Enterprise> dataResult = new DataResult<Enterprise>();
-        dataResult.setData(ent);
-        dataResult.setSuccess(Boolean.TRUE);
-        factory.endConnection();
-
+        DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
+        
         return dataResult;
     }
 }

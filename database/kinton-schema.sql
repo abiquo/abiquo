@@ -1908,7 +1908,8 @@ CREATE TRIGGER `kinton`.`datacenter_created` AFTER INSERT ON `kinton`.`datacente
 CREATE TRIGGER `kinton`.`datacenter_deleted` AFTER DELETE ON `kinton`.`datacenter`
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-      DELETE FROM cloud_usage_stats WHERE idDataCenter = OLD.idDataCenter;
+	DELETE FROM dc_enterprise_stats WHERE idDataCenter = OLD.idDataCenter;
+      	DELETE FROM cloud_usage_stats WHERE idDataCenter = OLD.idDataCenter;
     END IF;
   END;
 --
@@ -2218,6 +2219,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
+	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
@@ -2238,8 +2240,38 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;     
-        IF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
-            -- Activates if state changes or machines are captured
+	IF NEW.idType = 1 AND OLD.idType = 0 THEN
+		-- Imported !!!
+		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
+                WHERE idDataCenter = idDataCenterObj;
+                UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		IF NEW.state = "RUNNING" THEN 	
+			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualApp = idVirtualAppObj;
+		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+		        UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
+		        WHERE idDataCenter = idDataCenterObj;       
+		        UPDATE IGNORE enterprise_resources_stats 
+		            SET vCpuUsed = vCpuUsed + NEW.cpu,
+		                memoryUsed = memoryUsed + NEW.ram,
+		                localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idEnterprise = NEW.idEnterprise;
+		        UPDATE IGNORE dc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
+		            memoryUsed = memoryUsed + NEW.ram,
+		            localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idEnterprise = NEW.idEnterprise AND idDataCenter = idDataCenterObj;
+		        UPDATE IGNORE vdc_enterprise_stats 
+		        SET     vCpuUsed = vCpuUsed + NEW.cpu,
+		            memoryUsed = memoryUsed + NEW.ram,
+		            localStorageUsed = localStorageUsed + NEW.hd
+		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
+		END IF;
+	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
             IF NEW.state = "RUNNING" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
@@ -2514,7 +2546,10 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_created` AFTER INSERT ON `kinton`.`vi
 |
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+    DECLARE vlanNetworkIdObj INTEGER;    
+        	  DECLARE networkNameObj VARCHAR(40);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'),'NEW.networktypeID ', IFNULL(NEW.networktypeID,'NULL')));
             -- Checks for changes
             IF OLD.name != NEW.name THEN
                 -- Name changed !!!
@@ -2533,6 +2568,26 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
                 vlanReserved = vlanReserved - OLD.vlanHard + NEW.vlanHard
             WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;            
         END IF;
+        IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
+        -- Remove VlanUsed
+            SELECT DISTINCT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
+		    FROM vlan_network vn
+		    WHERE vn.network_id = OLD.networktypeID;
+            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
+            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+                CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
+            END IF;
+            -- Statistics
+            UPDATE IGNORE cloud_usage_stats
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idDataCenter = -1;
+            UPDATE IGNORE enterprise_resources_stats 
+                SET     vlanUsed = vlanUsed - 1
+                WHERE idEnterprise = OLD.idEnterprise;
+            UPDATE IGNORE vdc_enterprise_stats 
+                SET     vlanUsed = vlanUsed - 1
+            WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+        END IF;
     END;
 |
 -- ******************************************************************************************
@@ -2543,12 +2598,41 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
 -- Fires: On an DELETE for the virtualdatacenter table
 --
 -- ******************************************************************************************
-CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` AFTER DELETE ON `kinton`.`virtualdatacenter`
+CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
+	DECLARE currentIdManagement INTEGER DEFAULT -1;
+	DECLARE currentDataCenter INTEGER DEFAULT -1;
+	DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+	DECLARE no_more_ipsfreed INT;
+	DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement	
+           FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
+           WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+           AND vn.network_configuration_id = nc.network_configuration_id
+           AND vn.network_id = dc.network_id
+           AND ra.idManagement = ipm.idManagement
+           AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
+	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
             UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated-1 WHERE idDataCenter = OLD.idDataCenter;  
             -- Remove Stats
-            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;	
+           -- 	
+	SET no_more_ipsfreed = 0;	    
+	    OPEN curIpFreed;  	    	
+   		my_loop:WHILE(no_more_ipsfreed=0) DO 
+   		FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
+		IF no_more_ipsfreed=1 THEN
+                	LEAVE my_loop;
+	         END IF;
+--		INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
+		IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+               		CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
+           	END IF;                    
+		UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise;	
+	    END WHILE my_loop;	       
+	    CLOSE curIpFreed;
         END IF;
     END;
 --
@@ -3098,14 +3182,15 @@ END;
 -- ******************************************************************************************
 CREATE TRIGGER `kinton`.`dclimit_created` AFTER INSERT ON `kinton`.`enterprise_limits_by_datacenter`
     FOR EACH ROW BEGIN      
-        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
-            --  Creates a New row in dc_enterprise_stats to store this enterprise's statistics
-            INSERT IGNORE INTO dc_enterprise_stats 
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                   
+        		 IF (NEW.idEnterprise != 0 AND NEW.idDataCenter != 0) THEN
+        INSERT IGNORE INTO dc_enterprise_stats 
                 (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
                 extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
             VALUES 
                 (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
                 NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);
+                END IF;
             -- cloud_usage_stats
             UPDATE IGNORE cloud_usage_stats 
                 SET vCpuReserved = vCpuReserved + NEW.cpuHard,
@@ -3128,13 +3213,15 @@ CREATE TRIGGER `kinton`.`dclimit_updated` AFTER UPDATE ON `kinton`.`enterprise_l
 FOR EACH ROW BEGIN     
 	 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
                 -- Limit is not used anymore. Statistics are removed
-                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;                
+                DELETE FROM dc_enterprise_stats WHERE idEnterprise = OLD.idEnterprise AND idDataCenter = OLD.idDataCenter;
+                IF (NEW.idEnterprise != 0 AND NEW.idDataCenter != 0) THEN
                 INSERT IGNORE INTO dc_enterprise_stats 
-                (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
-                extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
-            	VALUES 
-                (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
-                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);       
+	                (idDataCenter,idEnterprise,vCpuReserved,vCpuUsed,memoryReserved,memoryUsed,localStorageReserved,localStorageUsed,
+	                extStorageReserved,extStorageUsed,repositoryReserved,repositoryUsed,publicIPsReserved,publicIPsUsed,vlanReserved,vlanUsed)
+	            	VALUES 
+	                (NEW.idDataCenter, NEW.idEnterprise, NEW.cpuHard, 0, NEW.ramHard, 0, NEW.hdHard, 0,
+	                NEW.storageHard, 0, NEW.repositoryHard, 0, NEW.publicIPHard, 0, NEW.vlanHard, 0);       
+                END IF;
 		-- 
                 UPDATE IGNORE cloud_usage_stats 
                 SET vCpuReserved = vCpuReserved - OLD.cpuHard + NEW.cpuHard,

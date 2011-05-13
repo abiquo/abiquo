@@ -220,6 +220,18 @@ public class AbstractAPIStub
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits/{limit}",
             params);
     }
+    
+    protected String getReservedMachinesUri(Integer enterpriseId, Integer machineId )
+    {
+        String uri = createEnterpriseLink(enterpriseId);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("machineId", valueOf(machineId));
+
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/reservedmachines/{machineId}",
+            params);
+    }
 
     protected String createRoleLink(final int roleId)
     {

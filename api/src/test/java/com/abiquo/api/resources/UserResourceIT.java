@@ -63,13 +63,6 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         setup(e, r, u);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualmachine", "hypervisor", "physicalmachine", "rack", "datacenter",
-            "virtualimage", "user", "enterprise", "role");
-    }
-
     @Test
     public void getUser() throws ClientWebException
     {
