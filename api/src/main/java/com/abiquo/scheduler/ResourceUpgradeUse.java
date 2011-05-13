@@ -100,16 +100,24 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
-    /**
-     * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
-     *             resources to allocate the virtual machine, the virtual appliances is not on any
-     *             virtual datacenter.
-     */
+
     @Override
     public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
         throws ResourceUpgradeUseException
     {
+        updateUse(virtualApplianceId, virtualMachine, true);
+    }
 
+    
+    @Override
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine)
+    {
+        updateUse(virtualApplianceId, virtualMachine, false);
+    }
+    
+    
+    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean updateDatastore)
+    {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
         {
@@ -150,7 +158,10 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
         }
     }
-
+    
+    
+    
+    
     @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {

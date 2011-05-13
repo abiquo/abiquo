@@ -37,9 +37,19 @@ public interface IResourceUpgradeUse
      * @param virtualMachine, the new resource requirements (based on its virtual image and
      *            additional resource configuration).
      * @param virtualApplianceId, the virtual appliance the virtual machine belongs to.
+     * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
+     *             resources to allocate the virtual machine, the virtual appliances is not on any
+     *             virtual datacenter.
      */
     public void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine);
 
+    
+    /**
+     * Do not update the datastore utilization.
+     * */
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine);
+    
+    
     /**
      * Decrements the physical machine resource utilization
      * 

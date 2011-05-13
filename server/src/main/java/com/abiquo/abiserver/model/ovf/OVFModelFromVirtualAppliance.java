@@ -169,7 +169,6 @@ public class OVFModelFromVirtualAppliance
             ReferencesType diskReferences =
                 createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
 
-            
             final String virtualImageId = String.valueOf(virtualImage.getId());
             String diskId = virtualImageId;
             CIMResourceAllocationSettingDataType cimDisk =
@@ -178,8 +177,7 @@ public class OVFModelFromVirtualAppliance
                     CIMResourceTypeEnum.Disk_Drive);
             CIMResourceAllocationSettingDataUtils.addHostResourceToRASD(cimDisk,
                 OVFVirtualHadwareSectionUtils.OVF_DISK_URI + diskId);
-            
-            
+
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
                 createAnnotationMachineStateAndRDPPort(machineState,
@@ -193,7 +191,6 @@ public class OVFModelFromVirtualAppliance
             hardwareSection.getItem().add(createMemory(virtualMachine));
             hardwareSection.getItem().add(
                 CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(cimDisk));
-            
 
             // adding virtual system sections
             // OVFEnvelopeUtils.addSection(virtualSystem, diskSectionSystem);
@@ -525,6 +522,18 @@ public class OVFModelFromVirtualAppliance
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling) throws Exception
     {
+        return createVirtualApplication(virtualAppliance, bundling, false);
+    }
+
+    public EnvelopeType createVirtualApplicationHA(final VirtualAppliance virtualAppliance)
+        throws Exception
+    {
+        return createVirtualApplication(virtualAppliance, false, true);
+    }
+
+    private EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
+        final boolean bundling, final boolean isHa) throws Exception
+    {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
 
@@ -575,7 +584,7 @@ public class OVFModelFromVirtualAppliance
                 try
                 {
                     OVFReferenceUtils.addFile(references,
-                        createFileFromVirtualImage(nodeVirtualImage, bundling));
+                        createFileFromVirtualImage(nodeVirtualImage, bundling, isHa));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -693,7 +702,7 @@ public class OVFModelFromVirtualAppliance
     }
 
     private FileType createFileFromVirtualImage(final NodeVirtualImage nodeVirtualImage,
-        final boolean bundling) throws RequiredAttributeException
+        final boolean bundling, final boolean isHa) throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -747,6 +756,11 @@ public class OVFModelFromVirtualAppliance
             .getDatastore().getUUID()
             + nodeVirtualImage.getVirtualMachine().getDatastore().getDirectory());
 
+        if (isHa)
+        {
+            setHA(virtualDiskImageFile);
+        }
+
         // compression
         // chunk
         VirtualImageDecorator decorator =
@@ -780,6 +794,16 @@ public class OVFModelFromVirtualAppliance
         insertRepositoryManager(virtualDiskImageFile, nodeVirtualImage);
 
         return virtualDiskImageFile;
+    }
+
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(AbiCloudConstants.HA_DISK,
+            Boolean.TRUE.toString());
     }
 
     /**

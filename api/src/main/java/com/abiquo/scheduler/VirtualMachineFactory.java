@@ -92,37 +92,26 @@ public class VirtualMachineFactory
     public VirtualMachine createVirtualMachine(final Machine machine, VirtualMachine virtualMachine)
         throws NotEnoughResourcesException
     {
-
-        final Hypervisor hypervisor = machine.getHypervisor();
-        final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
-
-        final int vdrpPort = selectVrdpPort(machine);
-        final Datastore datastore = selectDatastore(machine, datastoreRequ);
-
-        log.error("hypervisor id is {}", hypervisor.getId()); // TODO remove
-
-        virtualMachine.setHypervisor(hypervisor);
-        virtualMachine.setDatastore(datastore);
-
         // TODO set UUID and name
         // TODO default also high disponibility flag)
         // To define a new UUID when the VM is ready to be instanced decomment the line below
         // virtualMachine.setUUID(UUID.randomUUID().toString());
         // virtualMachine.setDescription(image.getDescription()); // same description as the vimage
 
-        // XXX already done, can be different from its virtual machine
-        // virtualMachine.setCpu(image.getCpuRequired());
-        // virtualMachine.setRam(image.getRamRequired());
-        // virtualMachine.setHd((int) image.getHdRequired()); // XXX
+        final Hypervisor hypervisor = machine.getHypervisor();
+        virtualMachine.setHypervisor(hypervisor);
 
+        if (virtualMachine.getDatastore() == null)
+        {
+            final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
+            final Datastore datastore = selectDatastore(machine, datastoreRequ);
+            virtualMachine.setDatastore(datastore);
+        }
+        // else its an HA reallocation, the datastore was already
+
+        final int vdrpPort = selectVrdpPort(machine);
         virtualMachine.setVdrpIP(hypervisor.getIpService());
         virtualMachine.setVdrpPort(vdrpPort);
-
-        /*
-         * TODO virtualMachine.setHighDisponibility(virtualMachinePojo.get)
-         * virtual.setVdrpIP(virtualMachinePojo.getVdrpIp());
-         * virtual.setVdrpPort(virtualMachinePojo.getVdrpPort());
-         */
 
         return virtualMachine;
     }
