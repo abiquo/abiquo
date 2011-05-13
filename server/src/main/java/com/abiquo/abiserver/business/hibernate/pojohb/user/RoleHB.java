@@ -121,7 +121,7 @@ public class RoleHB implements java.io.Serializable, IPojoHB<Role>
         role.setName(name);
         role.setBlocked(blocked);
 
-        role.setRoleLdap(ldap);
+        role.setLdap(ldap);
 
         if (enterpriseHB != null)
         {

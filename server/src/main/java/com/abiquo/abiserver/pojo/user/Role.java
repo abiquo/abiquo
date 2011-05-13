@@ -47,8 +47,6 @@ public class Role implements IPojo<RoleHB>
 
     Set<Privilege> privileges;
 
-    private String roleLdap;
-
     /* ------------- Constructor ------------- */
     public Role()
     {
@@ -118,14 +116,14 @@ public class Role implements IPojo<RoleHB>
         this.idEnterprise = idEnterprise;
     }
 
-    public String getRoleLdap()
+    public String getLdap()
     {
-        return roleLdap;
+        return ldap;
     }
 
-    public void setRoleLdap(final String roleLdap)
+    public void setLdap(final String ldap)
     {
-        this.roleLdap = roleLdap;
+        this.ldap = ldap;
     }
 
     @Override
@@ -168,6 +166,11 @@ public class Role implements IPojo<RoleHB>
         return roleHB;
     }
 
+    public static Role create(final RoleDto dto)
+    {
+        return create(dto, null, new HashSet<Privilege>());
+    }
+
     public static Role create(final RoleDto dto, final Enterprise enterprise,
         final Set<Privilege> privileges)
     {
@@ -180,7 +183,7 @@ public class Role implements IPojo<RoleHB>
         {
             role.setIdEnterprise(enterprise.getId());
         }
-        role.setRoleLdap(dto.getLdap());
+        role.setLdap(dto.getLdap());
         role.setPrivileges(privileges);
 
         return role;

@@ -28,6 +28,19 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "roleLdap")
 public class RoleLdapDto extends SingleResourceTransportDto
 {
+
+    public RoleLdapDto()
+    {
+        super();
+    }
+
+    public RoleLdapDto(final Integer id, final String roleLdap)
+    {
+        super();
+        this.id = id;
+        this.roleLdap = roleLdap;
+    }
+
     private Integer id;
 
     public Integer getId()
