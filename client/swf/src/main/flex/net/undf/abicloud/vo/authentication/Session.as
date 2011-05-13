@@ -40,6 +40,8 @@ package net.undf.abicloud.vo.authentication
 	public var enterpriseName:String;
 
 	public var userIdDb:int;
+	
+	public var authType:String;
 
         /* ------------- Constructor ------------- */
         public function Session()
@@ -49,6 +51,7 @@ package net.undf.abicloud.vo.authentication
             key = "";
             expireDate = new Date();
             locale = "";
+            authType = "ABIQUO";
         }
 
     }

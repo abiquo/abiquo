@@ -31,7 +31,8 @@
     </security:http>
 
 	<bean id="tokenService"
-		class="org.springframework.security.ui.rememberme.TokenBasedRememberMeServices">
+		class="com.abiquo.api.spring.security.rememberme.AbiquoTokenBasedRememberMe">
+		<!-- This must be an AbiquoUserDetailsService -->
 		<property name="userDetailsService" ref="userDetailsService" />
 		<property name="alwaysRemember" value="true" />
 		<property name="key" value="abiquo-auth-key" />

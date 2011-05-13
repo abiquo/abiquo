@@ -173,7 +173,7 @@ public class UserGenerator extends DefaultEntityGenerator<User>
 
         Date expireDate = cal.getTime();
 
-        Session session = new Session(user, key, expireDate);
+        Session session = new Session(user, key, expireDate, AuthType.ABIQUO.name());
         user.addSession(session);
 
         return user;

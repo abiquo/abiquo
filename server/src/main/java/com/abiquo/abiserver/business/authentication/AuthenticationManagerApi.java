@@ -38,7 +38,6 @@ import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
-import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.LoginResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.LoginResourceStubImpl;
 import com.abiquo.abiserver.config.AbiConfig;
@@ -202,6 +201,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         Date expireDate = new Date(expireMilis);
         userSession.setExpireDate(expireDate);
 
+        userSession.setAuthType(userHB.getAuthType());
+
         // Saving in Data Base the created User Session
         getUserSessionDAO().makePersistent(userSession);
         return userSession;
@@ -231,9 +232,6 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
 
-        // UserSession session = new UserSession();
-        // session.setUser(login.getUser());
-        // LoginResourceStub proxy = getLoginStubProxy(session);
         ClientConfig clientConfig = new ClientConfig();
         BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
         clientConfig.handlers(basicAuthHandler);
@@ -246,7 +244,9 @@ public class AuthenticationManagerApi implements IAuthenticationManager
 
             // We perform this call to a secure location. If success then the credentials are valid
             ClientResponse response = client.resource(uri).get();
-            // DataResult<UserDto> data = proxy.getUserByName(login.getUser(), login.getPassword());
+            // LoginResourceStub proxy = getLoginStubProxy();
+            // DataResult<UserDto> dataResultDto =
+            // proxy.getUserByName(login.getUser(), login.getPassword());
             UserDto userDto = response.getEntity(UserDto.class);
             // Old DB login needs a Md5 password
             String passwordHash = createMd5encodedPassword(login);
@@ -412,16 +412,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     }
 
     /**
-     * Retrieves the gateway to the api, focused on Enterprise resource.
+     * Retrieves the gateway to the api, focused on Enterprise resource. This method instantiates a
+     * new LoginResourceStubImpl
      * 
-     * @param userSession current logged user.
      * @return EnterprisesResourceStub.
      */
-    protected LoginResourceStub getLoginStubProxy(final UserSession userSession)
+    protected LoginResourceStub getLoginStubProxy()
     {
-        LoginResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new LoginResourceStubImpl(),
-                LoginResourceStub.class);
+        LoginResourceStub proxy = new LoginResourceStubImpl();
         return proxy;
     }
 
@@ -601,7 +599,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         userHB.setPassword(userDto.getPassword());
         userHB.setSurname(userDto.getSurname());
         userHB.setUser(userDto.getNick());
-
+        userHB.setAuthType(userDto.getAuthType());
         EnterpriseHB enterpriseHB = getEnterpriseDAO().findById(userDto.getIdEnterprise());
 
         RoleHB roleHB = getRoleDAO().findById(userDto.getIdRole());

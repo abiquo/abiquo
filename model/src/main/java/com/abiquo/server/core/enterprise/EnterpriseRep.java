@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
@@ -309,8 +310,19 @@ public class EnterpriseRep extends DefaultRepBase
         limitsDAO.remove(limit);
     }
 
+    /**
+     * {@see UserDAO#getAbiquoUserByLogin(String)}
+     */
     public User getAbiquoUserByUserName(String nick)
     {
         return userDAO.getAbiquoUserByLogin(nick);
+    }
+
+    /**
+     * {@see UserDAO#getUserByAuth(String, authType)}
+     */
+    public User getUserByAuth(String nick, AuthType authType)
+    {
+        return userDAO.getUserByAuth(nick, authType);
     }
 }

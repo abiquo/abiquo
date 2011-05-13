@@ -34,5 +34,5 @@ public enum VolumeState
     NOT_MOUNTED_RESERVED,
 
     /** When a volume is reserved and ready to mount to a given Virtual Machine. */
-    MOUNTED_RESERVED
+    MOUNTED_RESERVED, ATTACHED
 }

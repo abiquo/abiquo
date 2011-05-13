@@ -33,8 +33,8 @@ public class LoginResourceStubImpl extends AbstractAPIStub implements LoginResou
     /**
      * @see com.abiquo.abiserver.commands.stub.EnterprisesResourceStub#getUserByName(java.lang.String,
      *      java.lang.String)
-     * @Override
      */
+    @Override
     public DataResult<UserDto> getUserByName(String user, String password)
     {
         ClientResponse response = get(createLoginLink(), user, password);
@@ -46,4 +46,5 @@ public class LoginResourceStubImpl extends AbstractAPIStub implements LoginResou
 
         return data;
     }
+
 }

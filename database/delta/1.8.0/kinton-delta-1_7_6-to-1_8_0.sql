@@ -25,6 +25,7 @@ update kinton.user set authtype = 'ABIQUO';
 alter table kinton.session modify user varchar(128) NOT NULL;
 alter table kinton.user modify name varchar(128) NOT NULL;
 alter table kinton.metering modify user varchar(128) NOT NULL;
+alter table kinton.session add authType varchar(20) NOT NULL;
 
 
 -- [ABICLOUDPREMIUM 1615]  Accounting changes --

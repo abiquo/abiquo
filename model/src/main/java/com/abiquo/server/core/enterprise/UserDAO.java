@@ -37,6 +37,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaUserDAO")
@@ -175,6 +176,23 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         criteria.add(sameNick(login));
 
         criteria.add(Restrictions.eq("authType", User.AuthType.ABIQUO));
+
+        return (User) criteria.uniqueResult();
+    }
+
+    /**
+     * eturns a User with nick {login} that is login to [authType].
+     * 
+     * @param login that must match.
+     * @param authType a {@link User.AuthType} value.
+     * @return User .
+     */
+    public User getUserByAuth(String login, AuthType authType)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameNick(login));
+
+        criteria.add(Restrictions.eq("authType", authType));
 
         return (User) criteria.uniqueResult();
     }

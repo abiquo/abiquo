@@ -51,6 +51,7 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
@@ -151,7 +152,7 @@ public class AbstractAPIStub
 
     protected String createLoginLink()
     {
-        return URIResolver.resolveURI(apiUri, "/login", null);
+        return URIResolver.resolveURI(apiUri, "/login", Collections.emptyMap());
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -161,8 +162,19 @@ public class AbstractAPIStub
 
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
-        String cookieValue =
-            StringUtils.join(new String[] {user, valueOf(tokenExpiration), signature}, ":");
+        String[] tokens;
+        if (this.currentSession != null && currentSession.getAuthType() != null)
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
 
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 

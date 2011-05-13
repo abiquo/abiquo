@@ -38,4 +38,5 @@ public interface LoginResourceStub
      * @return {@link UserDto} of the user currently authenticated.
      */
     public DataResult<UserDto> getUserByName(String user, String password);
+
 }

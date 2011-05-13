@@ -878,6 +878,7 @@ CREATE TABLE  `kinton`.`session` (
   `key` varchar(100) NOT NULL,
   `expireDate` timestamp NOT NULL,
   `idUser` int(10) unsigned default null,
+  `authType` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`id`),
   CONSTRAINT `fk_session_user` foreign key (`idUser`) references `user` (`idUser`)

@@ -162,7 +162,7 @@
 
                 var loginInfo:net.undf.abicloud.vo.authentication.Login = new net.undf.abicloud.vo.authentication.Login();
                 loginInfo.user = tiUsuario.text;
-                loginInfo.password = MD5.hash(tiPasswd.text);
+                loginInfo.password = tiPasswd.text; // MD5.hash()
                 loginInfo.locale = ResourceManager.getInstance().localeChain[0];
 
                 var event:LoginEvent = new LoginEvent(LoginEvent.LOGIN);
