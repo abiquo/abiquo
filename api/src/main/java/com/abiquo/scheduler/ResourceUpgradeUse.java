@@ -371,6 +371,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
         Integer candidatePort = rack.getVlanIdMin();
 
+        if (vlanTags.isEmpty())
+        {
+            return candidatePort;
+        }
+        
         // Adding Vlans Id not to add
 
         vlanTags.addAll(getVlansIdAvoidAsCollection(rack));
