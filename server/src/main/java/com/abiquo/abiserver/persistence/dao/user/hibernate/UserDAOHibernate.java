@@ -32,6 +32,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * * Class that implements the extra DAO functions for the
@@ -56,20 +57,44 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
     @Override
     public UserHB getUserByUserName(String username)
     {
+        return getUserByLoginAuth(username, AuthType.ABIQUO.name());
+    }
+
+    /**
+     * @see com.abiquo.abiserver.persistence.dao.user.UserDAO#getUserByLoginAuth(java.lang.String,
+     *      com.abiquo.server.core.enterprise.User.AuthType)
+     */
+    @Override
+    public UserHB getUserByLoginAuth(String username, String authType)
+    {
         UserHB requestedUser = new UserHB();
 
+        if (authType == null)
+        {
+            authType = AuthType.ABIQUO.name();
+        }
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query userQuery = session.getNamedQuery(GET_USER_BY_USER_NAME);
         userQuery.setString("username", username);
+        userQuery.setString("authType", authType);
         requestedUser = (UserHB) userQuery.uniqueResult();
-
         return requestedUser;
     }
 
     @Override
     public String getEmailByUserName(String username)
     {
-        return getUserByUserName(username).getEmail();
+        return getEmailByUserName(username, AuthType.ABIQUO.name());
+    }
+
+    /**
+     * @see com.abiquo.abiserver.persistence.dao.user.UserDAO#getEmailByUserName(java.lang.String,
+     *      java.lang.String)
+     */
+    @Override
+    public String getEmailByUserName(String username, String authType)
+    {
+        return getUserByLoginAuth(username, authType).getEmail();
     }
 
     @SuppressWarnings("unchecked")

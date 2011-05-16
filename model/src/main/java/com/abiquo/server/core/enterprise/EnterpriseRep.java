@@ -248,6 +248,15 @@ public class EnterpriseRep extends DefaultRepBase
         return enterpriseDAO.findUniqueByProperty(Enterprise.NAME_PROPERTY, name);
     }
 
+    /**
+     * This function does not guarantee anymore returning a single record.
+     * 
+     * @param nick login.
+     * @return User.
+     * @deprecated Since 1.8 uniqueness of users is granted by Nick + AuthType. Use
+     *             {@link #getUserByAuth(String, AuthType)} instead.
+     */
+    @Deprecated
     public User getUserByUserName(String nick)
     {
         return userDAO.findUniqueByProperty(User.NICK_PROPERTY, nick);

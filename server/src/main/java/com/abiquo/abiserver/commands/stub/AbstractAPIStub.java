@@ -188,7 +188,9 @@ public class AbstractAPIStub
         DAOFactory factory = HibernateDAOFactory.instance();
         factory.beginConnection();
 
-        UserHB user = factory.getUserDAO().getUserByUserName(currentSession.getUser());
+        UserHB user =
+            factory.getUserDAO().getUserByLoginAuth(currentSession.getUser(),
+                currentSession.getAuthType());
 
         factory.endConnection();
 

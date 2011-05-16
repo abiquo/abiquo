@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.persistence.DAO;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * Specific interface to work with the
@@ -70,4 +71,21 @@ public interface UserDAO extends DAO<UserHB, Integer>
 
     public UserHB findUserHBByName(String name);
 
+    /**
+     * Return User with AuthType.
+     * 
+     * @param username login.
+     * @param authType {@link AuthType} value.
+     * @return UserHB.
+     */
+    public UserHB getUserByLoginAuth(String username, String authType);
+
+    /**
+     * Return User mail with AuthType.
+     * 
+     * @param username login.
+     * @param authType {@link AuthType} value.
+     * @return UserHB.
+     */
+    String getEmailByUserName(String username, String authType);
 }

@@ -72,7 +72,8 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
         DAOFactory factory = HibernateDAOFactory.instance();
         factory.beginConnection();
-        UserHB user = factory.getUserDAO().getUserByUserName(session.getUser());
+        UserHB user =
+            factory.getUserDAO().getUserByLoginAuth(session.getUser(), session.getAuthType());
         factory.endConnection();
 
         this.user = user.getUser();
