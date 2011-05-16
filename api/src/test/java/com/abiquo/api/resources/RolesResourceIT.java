@@ -37,7 +37,6 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -146,7 +145,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 3);
         RoleDto r = entity.getCollection().iterator().next();
-        Assert.assertEquals(r.getName(), "sysRole");
+        assertEquals(r.getName(), "sysRole");
     }
 
 }
