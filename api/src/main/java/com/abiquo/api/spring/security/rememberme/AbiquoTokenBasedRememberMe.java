@@ -48,7 +48,10 @@ import com.abiquo.server.core.enterprise.User.AuthType;
  */
 public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
 {
-
+    /**
+     * @see org.springframework.security.ui.rememberme.TokenBasedRememberMeServices#processAutoLoginCookie(java.lang.String[],
+     *      javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     @Override
     public UserDetails processAutoLoginCookie(String[] cookieTokens, HttpServletRequest request,
         HttpServletResponse response)
@@ -77,49 +80,62 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
             throw new InvalidCookieException("Cookie token[1] has expired (expired on '"
                 + new Date(tokenExpiryTime) + "'; current time is '" + new Date() + "')");
         }
-
-        // Since UserDetails is an Abiquo Implementation we set the authType
-        try
+        synchronized (this) // Concurrency might change the value of the authType before the read.
         {
-            AuthType authType = AuthType.valueOf(cookieTokens[3]);
-            getTargetObject(getUserDetailsService(), AbiquoUserDetailsService.class).setAuthType(
-                authType);
+            // Since UserDetails is an Abiquo Implementation we set the authType
+            try
+            {
+                AuthType authType = AuthType.valueOf(cookieTokens[3]);
+                getTargetObject(getUserDetailsService(), AbiquoUserDetailsService.class)
+                    .setAuthType(authType);
+            }
+            catch (ClassCastException e)
+            {
+                throw new InvalidCookieException("UserDetailsService must be an  AbiquoUserDetailsService'");
+            }
+            catch (Exception nfe)
+            {
+                throw new InvalidCookieException("Cookie token[3] did not contain a valid AuthType (contained '"
+                    + cookieTokens[3] + "')");
+            }
+
+            // Check the user exists.
+            // Defer lookup until after expiry time checked, to possibly avoid expensive database
+            // call.
+            UserDetails userDetails = getUserDetailsService().loadUserByUsername(cookieTokens[0]);
+
+            // Check signature of token matches remaining details.
+            // Must do this after user lookup, as we need the DAO-derived password.
+            // If efficiency was a major issue, just add in a UserCache implementation,
+            // but recall that this method is usually only called once per HttpSession - if the
+            // token is
+            // valid,
+            // it will cause SecurityContextHolder population, whilst if invalid, will cause the
+            // cookie
+            // to be cancelled.
+            String expectedTokenSignature =
+                makeTokenSignature(tokenExpiryTime, userDetails.getUsername(),
+                    userDetails.getPassword());
+
+            if (!expectedTokenSignature.equals(cookieTokens[2]))
+            {
+                throw new InvalidCookieException("Cookie token[2] contained signature '"
+                    + cookieTokens[2] + "' but expected '" + expectedTokenSignature + "'");
+            }
+
+            return userDetails;
         }
-        catch (ClassCastException e)
-        {
-            throw new InvalidCookieException("UserDetailsService must be an  AbiquoUserDetailsService'");
-        }
-        catch (Exception nfe)
-        {
-            throw new InvalidCookieException("Cookie token[3] did not contain a valid AuthType (contained '"
-                + cookieTokens[3] + "')");
-        }
-
-        // Check the user exists.
-        // Defer lookup until after expiry time checked, to possibly avoid expensive database call.
-
-        UserDetails userDetails = getUserDetailsService().loadUserByUsername(cookieTokens[0]);
-
-        // Check signature of token matches remaining details.
-        // Must do this after user lookup, as we need the DAO-derived password.
-        // If efficiency was a major issue, just add in a UserCache implementation,
-        // but recall that this method is usually only called once per HttpSession - if the token is
-        // valid,
-        // it will cause SecurityContextHolder population, whilst if invalid, will cause the cookie
-        // to be cancelled.
-        String expectedTokenSignature =
-            makeTokenSignature(tokenExpiryTime, userDetails.getUsername(),
-                userDetails.getPassword());
-
-        if (!expectedTokenSignature.equals(cookieTokens[2]))
-        {
-            throw new InvalidCookieException("Cookie token[2] contained signature '"
-                + cookieTokens[2] + "' but expected '" + expectedTokenSignature + "'");
-        }
-
-        return userDetails;
     }
 
+    /**
+     * Return the actual class at runtime in case of Proxy.
+     * 
+     * @param <T> Type.
+     * @param proxy object.
+     * @param targetClass actual class.
+     * @return runtime instance.
+     * @throws Exception T
+     */
     protected <T> T getTargetObject(Object proxy, Class<T> targetClass) throws Exception
     {
         while (AopUtils.isJdkDynamicProxy(proxy))
@@ -130,6 +146,10 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
                           // class
     }
 
+    /**
+     * @see org.springframework.security.ui.rememberme.TokenBasedRememberMeServices#onLoginSuccess(javax.servlet.http.HttpServletRequest,
+     *      javax.servlet.http.HttpServletResponse, org.springframework.security.Authentication)
+     */
     @Override
     public void onLoginSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication successfulAuthentication)
@@ -161,6 +181,12 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
         }
     }
 
+    /**
+     * The mode of authentication.
+     * 
+     * @param authentication object.
+     * @return String value of {@link AuthType }.
+     */
     protected String retrieveAuthType(Authentication authentication)
     {
         if (isInstanceOfAbiquoUserDetails(authentication))
@@ -171,8 +197,13 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
         {
             return null;
         }
-    }
-
+    } 
+/**Actual {@link AbiquoUserDetails.} or not.
+ * 
+ * @param authentication login.
+ * @return true if is an instance of {@link AbiquoUserDetails }. False otherwise.
+ * 
+ */
     private boolean isInstanceOfAbiquoUserDetails(Authentication authentication)
     {
         return authentication.getPrincipal() instanceof AbiquoUserDetails;
