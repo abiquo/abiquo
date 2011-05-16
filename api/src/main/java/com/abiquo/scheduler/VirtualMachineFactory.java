@@ -101,12 +101,12 @@ public class VirtualMachineFactory
         final Hypervisor hypervisor = machine.getHypervisor();
         virtualMachine.setHypervisor(hypervisor);
 
-        if (virtualMachine.getDatastore() == null)
-        {
-            final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
-            final Datastore datastore = selectDatastore(machine, datastoreRequ);
-            virtualMachine.setDatastore(datastore);
-        }
+        // if (virtualMachine.getDatastore() == null)
+        // {
+        final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
+        final Datastore datastore = selectDatastore(machine, datastoreRequ);
+        virtualMachine.setDatastore(datastore);
+        // }
         // else its an HA reallocation, the datastore was already
 
         final int vdrpPort = selectVrdpPort(machine);
