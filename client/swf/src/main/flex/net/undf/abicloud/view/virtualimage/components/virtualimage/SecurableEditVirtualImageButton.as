@@ -24,14 +24,10 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
     import mx.controls.Button;
 
     import net.undf.abicloud.model.AbiCloudModel;
-    import net.undf.abicloud.security.ISecurableComponent;
-    import net.undf.abicloud.security.SecurableResource;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
 
-    public class SecurableEditVirtualImageButton extends Button implements ISecurableComponent
+    public class SecurableEditVirtualImageButton extends Button
     {
-        //Securable Resources of this Securable Component
-        private var _securableResource:SecurableResource;
 
         //We also need the VirtualImage to decide if user has permission to use this resource
         private var _virtualImage:VirtualImage;
@@ -40,7 +36,6 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
         {
             super();
 
-            defineSecurableResources();
             if (this._virtualImage)
                 checkSecurableResources();
             else
@@ -56,15 +51,9 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 makeUnavailable();
         }
 
-        public function defineSecurableResources():void
-        {
-            this._securableResource = new SecurableResource("EDIT_PUBLIC_VIRTUAL_IMAGE",
-                                                            "APPLIANCE_LIBRARY");
-        }
-
         public function checkSecurableResources():void
         {
-            if (this._virtualImage.idEnterprise == 0 && !this._securableResource.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
+            if (this._virtualImage.idEnterprise == 0)
                 makeUnavailable();
             else
             {
