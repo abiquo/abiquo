@@ -62,7 +62,10 @@ public enum ComponentType implements Serializable
     API(131072, "API"),
 
     // Workload Engine
-    WORKLOAD(262144, "Workload Engine");
+    WORKLOAD(262144, "Workload Engine"),
+
+    // HA
+    HIGH_AVAILABILITY(2621444, "High availability engine");
 
     private final int component;
 
