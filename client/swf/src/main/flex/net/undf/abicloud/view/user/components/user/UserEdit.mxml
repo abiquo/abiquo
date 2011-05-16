@@ -241,7 +241,7 @@
                 dispatchEvent(userEvent);
 
                 //Closing the form
-                onCancel();
+                //onCancel();
             }
             
 
@@ -261,10 +261,31 @@
             /**
              * Handler for success in new user creation
              **/
-            private function onUserEdited(event:Event):void
+            private function onUserEdited(event:UserEvent):void
             {
+            	//we update logged user data if necessary
+            	updateLoggedUser(event.users);
                 //Now that user has been successfully created, we can close this Pop Up
                 onCancel();
+            }
+            
+            /**
+             * Update logged user data
+             **/
+            private function updateLoggedUser(listOfUsers:ArrayCollection):void
+            {
+            	var loggedUser:User = AbiCloudModel.getInstance().loginManager.user;
+            	var user:User;
+            	if(listOfUsers){
+            		for(var i:int = 0 ; i < listOfUsers.length ; i++){
+            			user = listOfUsers.getItemAt(i) as User;
+            			if(loggedUser.id == user.id){
+            				AbiCloudModel.getInstance().loginManager.user = user;
+            				return;
+            			}
+            		}
+            	}
+            	
             }
 
             /**
