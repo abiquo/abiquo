@@ -42,19 +42,17 @@ package net.undf.abicloud.vo.result
 
         public static const VIRTUAL_IMAGE_IN_USE:int = 7;
 
-
         public static const SOFT_LIMT_EXCEEDED:int = 8;
-
 
         public static const HARD_LIMT_EXCEEDED:int = 9;
 
-
         public static const CLOUD_LIMT_EXCEEDED:int = 10;
-
 
         public static const NOT_MANAGED_VIRTUAL_IMAGE:int = 11;
 
         public static const IP_USED:int = 12;
+        
+        public static const EMPTY_VIRTUAL_APPLIANCE:int = 13;
 
         public var success:Boolean;
 

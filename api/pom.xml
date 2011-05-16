@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>com.abiquo.abicloud</groupId>
 		<artifactId>platform</artifactId>
-		<version>1.7.5-SNAPSHOT</version>
+		<version>1.8-SNAPSHOT</version>
 	</parent>
 
 	<!-- Set dependences -->
@@ -67,7 +67,7 @@
 		<dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>4.1.0.Final</version>
+            <version>4.2.0.Beta2</version>
         </dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -375,8 +375,10 @@
 					</connectors>
 					<systemProperties>
 						<systemProperty>
+                            <!-- WARNING!!! - In order to execute the tests in the right way -->
+                            <!-- the class AbstractGeneratorTest should define the same value!!! -->
 							<name>abiquo.server.networking.vlanPerVdc</name>
-							<value>10</value>
+                            <value>4</value>
 						</systemProperty>
 						<systemProperty>
 						    <name>abicloud.tracer.brokerUrl</name>

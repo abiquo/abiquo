@@ -98,9 +98,9 @@ public class VirtualMachineRep extends DefaultRepBase
     }
 
     public Collection<RasdManagement> findRasdManagementByVirtualMachine(
-        final Integer virtualMachineId)
+        final VirtualMachine virtualMachine)
     {
-        return rasdDao.findByVirtualMachine(virtualMachineId);
+        return rasdDao.findByVirtualMachine(virtualMachine);
     }
 
 }

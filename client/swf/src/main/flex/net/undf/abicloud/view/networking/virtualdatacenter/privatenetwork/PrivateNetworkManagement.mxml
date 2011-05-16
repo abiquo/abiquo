@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
             import mx.controls.Alert;
             import mx.core.Application;
             import mx.events.CloseEvent;
@@ -81,6 +82,7 @@
 
             override protected function createChildren():void
             {
+                
                 //Creating PopUps
                 vlanFormAdd = new PrivateVLANFormAdd();
                 vlanFormAdd.addEventListener("vlanFormAddClose", closeVLANFormAdd)
@@ -102,8 +104,21 @@
             private function init():void
             {
                 _selectedVLAN = null;
-
+				getNetworksByVirtualDatacenter();
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+            }
+            
+            private function getNetworksByVirtualDatacenter():void{
+            	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
+            	event.virtualDatacenter = this._virtualDatacenter;
+            	event.callback = populatePrivateNetworks;
+            	if(this._virtualDatacenter){
+	            	dispatchEvent(event);            		
+            	}
+            }
+            
+            private function populatePrivateNetworks(networks:ArrayCollection):void{
+            	_virtualDatacenter.network.networks = networks;
             }
 
             private function onClickAllVLANLabel():void
@@ -139,7 +154,7 @@
                                       true);
                 PopUpManager.centerPopUp(vlanFormAdd);
 
-                vlanFormAdd.init(_virtualDatacenter.network);
+                vlanFormAdd.init(_virtualDatacenter);
             }
 
             private function closeVLANFormAdd(event:Event = null):void

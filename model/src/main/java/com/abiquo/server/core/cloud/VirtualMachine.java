@@ -193,7 +193,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
-    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    //private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String DESCRIPTION_COLUMN = "Description";
 
@@ -202,7 +202,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Required(value = DESCRIPTION_REQUIRED)
     @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    //@LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getDescription()
     {
         return this.description;

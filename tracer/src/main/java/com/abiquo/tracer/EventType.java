@@ -108,14 +108,14 @@ public enum EventType implements Serializable
     RAW_IMPORT_CONVERSION(504, "RAW_IMPORT_CONVERSION", "Raw import conversion started"), 
 
     // Stateful related events
-    STATEFUL_PROCESS_START(600, "STATEFUL_PROCESS_START", "A Stateful conversion process has started"), 
-    STATEFUL_RAW_FINISHED(601, "STATEFUL_RAW_FINISHED", "A Stateful RAW conversion has finished and it is ready to be dumped to a volume"), 
-    STATEFUL_VOLUME_CREATED(602, "STATEFUL_VOLUME_CREATED", "A Stateful volume has been created"), 
-    STATEFUL_DUMP_ENQUEUED(603, "STATEFUL_DUMP_ENQUEUED", "A Stateful volume dump has been enqueued"), 
-    STATEFUL_DUMP_FINISHED(604, "STATEFUL_DUMP_FINISHED", "A Stateful dump to a volume has finished"), 
-    STATEFUL_PROCESS_FINISHED(605, "STATEFUL_PROCESS_FINISHED", "A Stateful conversion process has finished"), 
-    STATEFUL_PROCESS_FAILED(606, "STATEFUL_PROCESS_FAILED", "A Stateful process has failed"), 
-    STATEFUL_INITIATOR_ADDED(607, "STATEFUL_INITIATOR_ADDED", "Stateful inititator has added"),
+    STATEFUL_PROCESS_START(600, "PERSISTENT_PROCESS_START", "A Persistent conversion process has started"), 
+    STATEFUL_RAW_FINISHED(601, "PERSISTENT_RAW_FINISHED", "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), 
+    STATEFUL_VOLUME_CREATED(602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), 
+    STATEFUL_DUMP_ENQUEUED(603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), 
+    STATEFUL_DUMP_FINISHED(604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), 
+    STATEFUL_PROCESS_FINISHED(605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), 
+    STATEFUL_PROCESS_FAILED(606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), 
+    STATEFUL_INITIATOR_ADDED(607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
 
     // License related events
     LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), 

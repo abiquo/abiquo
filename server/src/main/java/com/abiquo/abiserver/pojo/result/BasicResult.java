@@ -55,6 +55,9 @@ public class BasicResult
     
     /** When we try to release a public ip from an enterprise used by a node. */
     public final static int PUBLIC_IP_USED=12;
+    
+    /** When a user tries to deploy a virtual appliance with zero nodes */
+    public final static int ZERO_NODES=13;
        
     private Boolean success;
 

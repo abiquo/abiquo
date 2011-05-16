@@ -35,7 +35,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.SystemProperty;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 
@@ -57,7 +57,7 @@ public class VirtualMachineFactory
     private final static Logger log = LoggerFactory.getLogger(VirtualMachineFactory.class);
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     HypervisorDAO hypervisorDao;
@@ -160,7 +160,7 @@ public class VirtualMachineFactory
             }
         }
 
-        if (betterDatastore == null)
+        if (betterDatastore == null || freeLargerSize < hdImageRequired)
         {
             final String cause =
                 "The target physical machine has no datastores enabled with the required free size.";

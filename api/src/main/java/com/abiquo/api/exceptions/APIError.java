@@ -7,8 +7,7 @@
  * modify it under the terms of the GNU LESSER GENERAL PUBLIC
  * LICENSE as published by the Free Software Foundation under
  * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
+ * * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
@@ -31,31 +30,54 @@ import java.util.Comparator;
  */
 public enum APIError
 {
+    // STATUSCODES
+    STATUS_BAD_REQUEST("400-BAD REQUEST", "Request not valid"), STATUS_UNAUTHORIZED(
+        "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
+        "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
+        "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
+        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_UNSUPPORTED_MEDIA_TYPE(
+        "415-UNSUPPORTED MEDIA TYPE",
+        "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
+        "500-INTERNAL SERVER ERROR", "Unexpected exception"),
+
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"),
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
+        "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
+        "Invalid credentials"),
+
     // INVALID_IP("GEN-4", "Invalid IP"),
-    INVALID_PRIVATE_NETWORK_TYPE("GEN-5", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-6", "Unexpected error"),
+    INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
+        "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
+        "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
+        "The paramter ID is different from the Entity ID"),
 
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
-        "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWD("DC-4",
+        "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
         "The current enterprise can't use this datacenter"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
-        "ENTERPRISE-6", "Cannot delete the current user enterprise"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-7", "Missing link to the enterprise"),
+        "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
+        "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
+        "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
         "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
-        "Limits by enterprise and datacenter don't exist"),
+        "Limits by enterprise and datacenter don't exist"), //
+    ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
+        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), //
+    DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "LIMIT-10",
+        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
@@ -64,14 +86,31 @@ public enum APIError
         "This datacenter contains virtual appliances and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_CONTAINS_RESOURCES(
         "VDC-3",
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
-        "VDC-4", "This datacenter has networks without IPs!"),
+        "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
+        "VDC-5",
+        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "VDC-6", "Virtual Datacenter must be created with a private network"),
+
+    // VLANS
+    VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
+        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME(
+        "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
+        "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
+        "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
+        "VLAN-4", "This network allows a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
+        "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
+        "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
+        "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
+        "VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"),
+        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
+        "RACK-4", "This rack does not exists"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -83,16 +122,14 @@ public enum APIError
         "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
 
     // NETWORK
-    NOT_ASSIGNED_NETWORK_VIRTUAL_DATACENTER("NETWORK-0",
-        "The private network is not assigned to the datacenter"), NETWORK_INVALID_CONFIGURATION(
-        "NET-0", "Invalid network configuration for the virtual datacenter"), NETWORK_GATEWAY_OUT_OF_RANGE(
-        "NET-6", "Gateway address out of range. It must be into the ip range address"), NON_EXISTENT_VIRTUAL_NETWORK(
-        "NET-7", "The requested virtual network does not exist"), NETWORK_WITHOUT_IPS("NET-8",
+    NETWORK_INVALID_CONFIGURATION("NET-0",
+        "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
         "This network doesn't have IPs"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
-        "VM-1", "The requested virtual machine does not exist"),
+        "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
+        "VM-2", "The virtual machine is already in progress"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
@@ -160,6 +197,9 @@ public enum APIError
         "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
+    CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",
+        "This method require the virtual machine being deployed on some target hypervisor"),
+
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error was occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(
@@ -191,7 +231,16 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
+        "NODECOLLECTOR-1", "Nodecollector has raised an error"),
+
+    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
+
+    VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
+        "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
+        "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
+        "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
+        "An unexpected error occured while creating the volume"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
@@ -212,6 +261,14 @@ public enum APIError
      */
     String message;
 
+    String cause;
+
+    private APIError(final String code, final String message)
+    {
+        this.code = code;
+        this.message = message;
+    }
+
     public String getCode()
     {
         return String.valueOf(this.code);
@@ -222,16 +279,9 @@ public enum APIError
         return this.message;
     }
 
-    APIError(final String code, final String message)
+    public void addCause(final String cause)
     {
-        this.code = code;
-        this.message = message;
-    }
-
-    public APIError addCause(final String cause)
-    {
-        this.message = cause;// String.format("%s.\ncaused by:%s", this.message, cause);
-        return this;
+        this.cause = cause;
     }
 
     public static void main(final String[] args)
@@ -254,4 +304,5 @@ public enum APIError
                 error.name()));
         }
     }
+
 }

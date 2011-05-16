@@ -29,7 +29,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageH
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageConversionsDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
-import com.abiquo.server.core.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.DiskFormatType;
 
 /**
  * Class that implements the extra DAO functions for the

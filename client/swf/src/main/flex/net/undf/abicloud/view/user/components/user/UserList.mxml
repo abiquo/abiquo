@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.core.UIComponent;
@@ -116,6 +117,7 @@
 
             private var _usersOrderBy:String;
 
+            [Bindable]
             private var USERS_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_user_numberUsersPerPage.value;
 
 
@@ -320,25 +322,28 @@
              **/
             private function editUser():void
             {
+            	var id:int =AbiCloudModel.getInstance().loginManager.user.id; 
                 if (AbiCloudModel.getInstance().loginManager.user.id == User(usersDataGrid.selectedItem).id)
                 {
                     //The user that is currently logged can not be edited here
-                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                    /* AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_UNABLE_EDIT_HEADER"),
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_UNABLE_EDIT_TEXT"),
                                             Alert.OK,
-                                            null);
+                                            null); */
+                	this._userEdit.activeEditable = false;
+                	this._userEdit.roleEditable = false;
+                }else{
+                	this._userEdit.activeEditable = true;
+                	this._userEdit.roleEditable = false;
                 }
-                else
-                {
-                    PopUpManager.addPopUp(this._userEdit, this, true);
-                    PopUpManager.centerPopUp(this._userEdit);
+                PopUpManager.addPopUp(this._userEdit, this, true);
+                PopUpManager.centerPopUp(this._userEdit);
 
-                    this._userEdit.init(usersDataGrid.selectedItem as User);
-                }
+                this._userEdit.init(usersDataGrid.selectedItem as User, false);
             }
 
 
@@ -382,9 +387,17 @@
             /**
              * Label function for Role column in usersDataGrid
              **/
-            private function usersDataGridRoleColumnLabel(item:Object, column:DataGridColumn):String
+            private function usersDataGridRoleColumnLabel(item:User, column:DataGridColumn):String
             {
-                return User(item).role.shortDescription;
+                var label:String = item.role.shortDescription;
+                if(item.role.id == Role.USER_ROLE){
+                	if(item.availableVirtualDatacenters){
+                		if(item.availableVirtualDatacenters.length > 0){
+                			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
+                		}
+                	}
+                }
+                return label;
             }
 
             /**
@@ -466,7 +479,9 @@
                 //Dispatching event
                 event.users = copiedUsers;
                 event.oldUsers = oldUsers;
-                dispatchEvent(event);
+                if(length != 0){
+	                dispatchEvent(event);                	
+                }
             }
 
             private function onOpenMoreActions(event:Event):void

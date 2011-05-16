@@ -54,7 +54,7 @@ package net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree
                 listData.label = VlanNetwork(value).networkName;
                 if (VlanNetwork(value).defaultNetwork)
                 {
-//                    setStyle("fontStyle", "ital ic");
+                    setStyle("fontStyle", "italic");
                 }
             }
         }

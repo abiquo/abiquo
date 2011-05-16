@@ -42,17 +42,44 @@ import com.ning.http.client.HttpResponseStatus;
  */
 public class FileInfo implements AsyncHandler<Boolean>
 {
+    boolean berror = false;
+    
     @Override
     public STATE onStatusReceived(HttpResponseStatus status) throws Exception
     {
         if (status.getStatusCode() / 200 != 1)
         {
-            String error =
-                String.format("%d - %s \n%s", status.getStatusCode(), status.getStatusText(),
-                    status.getUrl().toString());
-            
-            getPackage().onError(error);
+            String error;
 
+            if (status.getStatusCode() == 401)
+            {
+                error =
+                    String.format("[Unauthorized] You might not have permissions to read "
+                        + "the file or folder at the following location: %s", fileUrl);
+            }
+            else if (status.getStatusCode() == 403)
+            {
+                error =
+                    String.format("[Forbidden] You might not have permissions to read "
+                        + "the file or folder at the following location: %s", fileUrl);
+            }
+            else if (status.getStatusCode() == 404)
+            {
+                error =
+                    String.format(
+                        "[Not Found] The file or folder at the location: %s does not exist",
+                        fileUrl);
+            }
+            else
+            // generic error status message
+            {
+                error =
+                    String.format("%d - [%s] at the location : %s", status.getStatusCode(),
+                        status.getStatusText(), status.getUrl().toString());
+            }
+
+            getPackage().onError(error);
+            berror = true;
             return STATE.ABORT;
         }
         else
@@ -93,18 +120,24 @@ public class FileInfo implements AsyncHandler<Boolean>
         catch (IOException e)
         {
             getPackage().onError(e.getMessage());
+            berror = true;
             return STATE.ABORT;
             // throw e;
         }
     }
 
+    
+    
     @Override
     public Boolean onCompleted() throws Exception
     {
-
-        onDownload();
         // Will be invoked once the response has been fully read or a ResponseComplete exception
         // has been thrown.
+
+        if(!berror)
+        {
+            onDownload();    
+        }
 
         return true;
     }
@@ -112,6 +145,7 @@ public class FileInfo implements AsyncHandler<Boolean>
     @Override
     public void onThrowable(Throwable t)
     {
+        berror = true;
         getPackage().onError(t.getMessage());
     }
 

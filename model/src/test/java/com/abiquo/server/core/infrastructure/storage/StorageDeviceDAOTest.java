@@ -33,17 +33,15 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class StorageDeviceDAOTest extends DefaultDAOTestBase<StorageDeviceDAO, StorageDevice>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
-        // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected StorageDeviceDAO createDao(EntityManager entityManager)
+    protected StorageDeviceDAO createDao(final EntityManager entityManager)
     {
         return new StorageDeviceDAO(entityManager);
     }
@@ -66,5 +64,4 @@ public class StorageDeviceDAOTest extends DefaultDAOTestBase<StorageDeviceDAO, S
         return (StorageDeviceGenerator) super.eg();
     }
 
-    
 }

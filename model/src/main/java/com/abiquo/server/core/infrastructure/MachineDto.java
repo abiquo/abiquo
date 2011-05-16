@@ -26,9 +26,9 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.cloud.HypervisorDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Machine.State;
 
 @XmlRootElement(name = "machine")

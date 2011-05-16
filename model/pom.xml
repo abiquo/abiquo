@@ -16,7 +16,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.7.5-SNAPSHOT</version>
+        <version>1.8-SNAPSHOT</version>
     </parent>
 
     <!-- Set dependences -->
@@ -321,7 +321,8 @@
                             	<include>**/enumerator/*.class</include>
                                 <include>**/transport/**/*.class</include>
                                 <include>**/rest/*.class</include>
-                                <incluide>**/*Dto.class</incluide>                                
+                                <incluide>**/*Dto.class</incluide>
+                                <incluide>com/abiquo/model/util/*.class</incluide>                                
                             </includes>
                         </configuration>
                     </execution>

@@ -25,6 +25,7 @@
 <AbiCloudPopUp 
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_user_createEnterprise.value}"
     xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*">
 
     <mx:Script>

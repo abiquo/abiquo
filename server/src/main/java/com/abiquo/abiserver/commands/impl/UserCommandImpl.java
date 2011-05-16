@@ -29,6 +29,7 @@ import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -36,6 +37,8 @@ import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -46,6 +49,8 @@ import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
+import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
+import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -338,100 +343,70 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     @SuppressWarnings("unchecked")
     public BasicResult editEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
-        BasicResult basicResult = new BasicResult();
 
-        Session session = null;
-        Transaction transaction = null;
+        // Getting the enterprise that will be edited
+        Session session = HibernateUtil.getSession();
+        Transaction transaction = session.beginTransaction();
 
+        EnterpriseHB enterpriseHB =
+            (EnterpriseHB) session.get(EnterpriseHB.class, enterprise.getId());
         try
         {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            // Check name is not empty
-            if (enterprise.getName() == null || enterprise.getName().length() <= 0)
-            {
-                basicResult.setSuccess(false);
-                basicResult.setMessage(resourceManager
-                    .getMessage("createEnterprise.enterpriseNameCannotBeEmpty"));
-
-                traceLog(SeverityType.MINOR, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                    userSession, null, null, "Enterprise name can't be empty", null, null, null,
-                    null, null);
-
-                transaction.commit();
-
-                return basicResult;
-            }
-
-            // Getting the enterprise that will be edited
-            EnterpriseHB enterpriseHB =
-                (EnterpriseHB) session.get(EnterpriseHB.class, enterprise.getId());
-
-            // Assure that there isn't not enterprise with the same enterprise name
-            Conjunction conjunction = Restrictions.conjunction();
-            conjunction.add(Restrictions.eq("name", enterprise.getName()));
-            conjunction.add(Restrictions.ne("id", enterprise.getId()));
-            ArrayList<EnterpriseHB> enterprises =
-                (ArrayList<EnterpriseHB>) session.createCriteria(EnterpriseHB.class).add(
-                    conjunction).list();
-
-            transaction.commit();
-
-            /*
-             * If the enterprise name exists send the error, if not save the modified enterprise
-             */
-            if (enterprises != null && enterprises.size() > 0)
-            {
-                basicResult.setSuccess(false);
-                basicResult.setMessage(resourceManager
-                    .getMessage("editEnterprise.enterpriseNotAvailable"));
-
-                traceLog(SeverityType.MINOR, ComponentType.ENTERPRISE, EventType.ENTERPRISE_CREATE,
-                    userSession, null, null, "Enterprise '" + enterprise.getName()
-                        + "' already exists", null, null, null, null, null);
-
-                transaction.commit();
-
-                return basicResult;
-            }
-            else
-            {
-                session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
-
-                session.update(enterprise.toPojoHB());
-
-                transaction.commit();
-
-                // Building result
-                basicResult.setSuccess(true);
-                basicResult.setMessage(resourceManager.getMessage("editEnterprise.success"));
-
-                // Log the event
-                traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                    userSession, null, null, "Enterprise '" + enterpriseHB.getName()
-                        + "' has been modified [Name: " + enterprise.getName() + "]", null, null,
-                    null, null, enterpriseHB.getName());
-
-            }
-
+            checkEditLimits(enterpriseHB, enterprise);
         }
-        catch (Exception e)
+        catch (HardLimitExceededException e)
         {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
+            BasicResult basicResult = new BasicResult();
+            basicResult.setSuccess(false);
+            basicResult.setMessage(resourceManager.getMessage("editEnterprise.limitExceeded"));
 
-            errorManager.reportError(resourceManager, basicResult, "createEnterprise", e);
+            return basicResult;
+                        
+        }
+        finally
+        {
+            transaction.commit();
+        }
+
+        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
+        
+        DataResult<Enterprise> result = new DataResult<Enterprise>();
+        
+        result = proxy.editEnterprise(enterprise);
+        
+        if (result.getSuccess())
+        {
+            // Building result
+            result.setSuccess(true);
+            result.setMessage(resourceManager.getMessage("editEnterprise.success"));
+
+            // Log the event
+            traceLog(SeverityType.INFO, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
+                userSession, null, null, "Enterprise '" + enterprise.getName()
+                    + "' has been modified [Name: " + enterprise.getName() + "]", null, null, null,
+                null, enterprise.getName());
+        }
+        else
+        {
+
+            // result.setSuccess(false);
+            // result.setMessage(resourceManager.getMessage("editEnterprise.limitExceeded"));
+            //
+            // errorManager.reportError(resourceManager, result, "editEnterprise",
+            // result.getMessage());
 
             traceLog(SeverityType.CRITICAL, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                userSession, null, null, e.getMessage(), null, null, null, null, enterprise
+                userSession, null, null, result.getMessage(), null, null, null, null, enterprise
                     .getName());
         }
 
-        return basicResult;
+        return result;
+    }
+
+    protected void checkEditLimits(EnterpriseHB currentEnterprise, Enterprise newEnterprise)
+        throws HardLimitExceededException
+    {
+        // community impl (no limits at all)
     }
 
     /*
@@ -461,10 +436,11 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         return result;
     }
-    
-    public DataResult<Enterprise> getEnterprise(final UserSession userSession, final Integer enterpriseId)
+
+    public DataResult<Enterprise> getEnterprise(final UserSession userSession,
+        final Integer enterpriseId)
     {
-    	EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
+        EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
 
         DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
         

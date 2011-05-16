@@ -76,13 +76,6 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
                 .getId());
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualmachine", "virtualimage", "physicalmachine", "rack", "datacenter",
-            "remote_service", "user", "role", "enterprise");
-    }
-
     @Test
     public void getMachine() throws ClientWebException
     {

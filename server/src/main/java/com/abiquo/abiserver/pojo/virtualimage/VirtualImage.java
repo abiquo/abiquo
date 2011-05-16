@@ -70,6 +70,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
+    private String costCode;
+
     /* ------------- Constructor ------------- */
     public VirtualImage()
     {
@@ -82,6 +84,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         stateful = 0;
         deleted = false;
         shared = 0;
+        costCode = "";
     }
 
     public int getId()
@@ -274,6 +277,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.shared = shared;
     }
 
+    public String getCostCode()
+    {
+        return costCode;
+    }
+
+    public void setCostCode(String costCode)
+    {
+        this.costCode = costCode;
+    }
+
     @Override
     public VirtualimageHB toPojoHB()
     {
@@ -321,6 +334,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         }
 
         virtualImageHB.setOvfId(ovfId);
+        virtualImageHB.setCostCode(costCode);
 
         return virtualImageHB;
     }

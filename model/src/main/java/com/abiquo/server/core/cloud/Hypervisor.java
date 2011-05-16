@@ -37,8 +37,8 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -68,6 +68,7 @@ public class Hypervisor extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -99,7 +100,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.ip;
     }
 
-    private void setIp(String ip)
+    private void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -127,7 +128,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.ipService;
     }
 
-    private void setIpService(String ipService)
+    public void setIpService(final String ipService)
     {
         this.ipService = ipService;
     }
@@ -149,7 +150,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.port;
     }
 
-    private void setPort(int port)
+    private void setPort(final int port)
     {
         this.port = port;
     }
@@ -172,7 +173,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.type;
     }
 
-    private void setType(HypervisorType type)
+    private void setType(final HypervisorType type)
     {
         this.type = type;
     }
@@ -194,7 +195,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.machine;
     }
 
-    public void setMachine(Machine machine)
+    public void setMachine(final Machine machine)
     {
         this.machine = machine;
     }
@@ -216,7 +217,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.user;
     }
 
-    private void setUser(String user)
+    private void setUser(final String user)
     {
         this.user = user;
     }
@@ -238,7 +239,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.password;
     }
 
-    private void setPassword(String password)
+    private void setPassword(final String password)
     {
         this.password = password;
     }
@@ -250,8 +251,8 @@ public class Hypervisor extends DefaultEntityBase
 
     // *************************** Mandatory constructors ***********************
     // TODO: define mandatory constructors
-    public Hypervisor(Machine machine, HypervisorType type, String ip,
-        String ipService, int port, String user, String password)
+    public Hypervisor(final Machine machine, final HypervisorType type, final String ip,
+        final String ipService, final int port, final String user, final String password)
     {
         setMachine(machine);
         setType(type);

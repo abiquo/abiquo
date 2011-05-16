@@ -26,7 +26,6 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,12 +47,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
 
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
-    }
-
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise");
     }
 
     @Test
@@ -82,9 +75,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveEnterpriseURI(vdc.getEnterprise().getId());
 
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 400);
-
-        assertErrors(response, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
+        assertErrors(response, 409, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
 
         tearDown("virtualdatacenter", "user", "role", "enterprise", "datacenter", "network");
     }

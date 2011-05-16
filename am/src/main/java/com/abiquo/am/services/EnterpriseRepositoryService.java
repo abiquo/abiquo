@@ -372,6 +372,12 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     {
         TimeoutFSUtils.getInstance().canUseRepository();
 
+        if (isImportedBundleOvfId(ovfId))
+        {
+            deleteImportedBundle(ovfId);
+            return;
+        }
+
         if (isBundleOvfId(ovfId))
         {
             deleteBundle(ovfId);
@@ -380,7 +386,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
 
         OVFPackageInstanceStatusType status = getOVFStatus(ovfId);
 
-        if(status == OVFPackageInstanceStatusType.NOT_DOWNLOAD)
+        if (status == OVFPackageInstanceStatusType.NOT_DOWNLOAD)
         {
             // already deleted
             return;
@@ -420,6 +426,40 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
             throw new RepositoryException(stBuffer.toString());
         }
     }
+    
+
+    public void deleteImportedBundle(final String ovfId) throws IdNotFoundException
+    {
+        final String path =
+            ovfId.substring(OVF_BUNDLE_IMPORTED_PREFIX.length(), ovfId.lastIndexOf('/'));
+        final String absPath = BASE_REPO_PATH + path;  // imported bundles do not use the ''enterpriserepopath''
+
+        File importBundleDir = new File(absPath);
+
+        if (!importBundleDir.exists())
+        {
+            throw new IdNotFoundException(String.format(
+                "The path do not exist. %s\nShould be a bundle of an imported virtual machien.",
+                absPath));
+        }
+        else if (!importBundleDir.isDirectory())
+        {
+            throw new IdNotFoundException(String.format(
+                "The path is not a folder. %s\nShould be a bundle of an imported virtual machien.",
+                absPath));
+        }
+        try
+        {
+            FileUtils.deleteDirectory(importBundleDir);
+        }
+        catch (IOException e)
+        {
+            logger.error("Can not delete the bundle of an imported virtual machine, on folder {}",
+                absPath);
+        }
+
+    }
+    
 
     public void deleteBundle(final String ovfId) throws IdNotFoundException
     {

@@ -60,12 +60,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 public class DatastoreResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("datastore_assignment", "datastore", "physicalmachine", "rack", "datacenter");
-    }
-
     @Test
     public void getDatastore()
     {

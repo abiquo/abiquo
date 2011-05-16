@@ -176,6 +176,8 @@ package net.undf.abicloud.events
         public var physicalMachine:PhysicalMachine;
         
         public var branch:CustomTreeNode;
+        
+        public var automaticUpdate:Boolean;
 
         /* ------------- Constructor ------------- */
         public function InfrastructureEvent(type:String, bubbles:Boolean = true,

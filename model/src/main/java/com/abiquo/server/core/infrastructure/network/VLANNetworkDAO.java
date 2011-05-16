@@ -61,6 +61,14 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return result;
     }
 
+    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualDatacenter,
+        Integer vlanId)
+    {
+        return findUniqueByCriterions(
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
+    }
+
     private static Criterion sameNetwork(VirtualDatacenter virtualDatacenter)
     {
         return sameNetwork(virtualDatacenter.getNetwork());
@@ -76,6 +84,12 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         assert !StringUtils.isEmpty(name);
 
         return existsAnyByCriterions(sameNetwork(network), nameEqual(name));
+    }
+
+    public VLANNetwork findByDefault(VirtualDatacenter virtualDatacenter)
+    {
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
     }
 
     private Criterion nameEqual(String name)
@@ -99,11 +113,11 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<Integer> getVLANsIdUsedInRack(Rack rack)
+    public List<Integer> getVLANTagsUsedInRack(Rack rack)
     {
         String idRack = String.valueOf(rack.getId());
 
-        Query query = getSession().createQuery("SELECT vn.id FROM " //
+        Query query = getSession().createQuery("SELECT vn.tag FROM " //
             + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
             + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
             + "WHERE vn.id = vna.vlanNetwork.id " + //
@@ -136,7 +150,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     private final String GET_VLAN_DATACENTER =
         "SELECT dc " //
-            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " // 
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
             + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
             + "WHERE net.id = vlan.network.id AND vlan.id = :id";
 
@@ -147,4 +161,5 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
         return query.uniqueResult() != null;
     }
+
 }

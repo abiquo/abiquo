@@ -22,6 +22,7 @@
 package com.abiquo.server.core.appslibrary;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -38,7 +39,7 @@ public class OVFPackageListDto extends SingleResourceTransportDto implements Ser
 
     private String name;
 
-    private List<OVFPackageDto> ovfPackages;
+    private List<OVFPackageDto> ovfPackages = new LinkedList<OVFPackageDto>();
     
     @XmlElement(name = "ovfPackage")
     public List<OVFPackageDto> getOvfPackages()

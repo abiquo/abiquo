@@ -67,6 +67,8 @@ package net.undf.abicloud.vo.virtualimage
         public var diskFileSize:Number;
         
         public var shared:int;
+        
+        public var cost_code:String;
 
         /* ------------- Constructor ------------- */
         public function VirtualImage()
@@ -89,6 +91,7 @@ package net.undf.abicloud.vo.virtualimage
             stateful = TYPE_STATELESS;
             diskFileSize = 0;
             shared = 0;
+            cost_code = "";
         }
 
     }

@@ -41,6 +41,7 @@ public class RESTLinkBuilder extends SingleLinkBuilderImpl
 
     public RESTLink buildRestLink(Class< ? > resource, String rel, Map<String, String> params)
     {
+        
         List<SyndLink> links = setResource(resource).rel(rel).pathParams(params).build(null);
         SyndLink first = links.get(0);
         return new RESTLink(first);
@@ -72,10 +73,10 @@ public class RESTLinkBuilder extends SingleLinkBuilderImpl
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-                if (!pathParams.containsKey(entry.getKey()))
-                {
+//                if (!pathParams.containsKey(entry.getKey()))
+//                {
                     pathParam(entry.getKey(), entry.getValue());
-                }
+//                }
             }
         }
         return this;

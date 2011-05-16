@@ -264,7 +264,7 @@ package net.undf.abicloud.controller.virtualappliance
             if (result.success)
             {
                 //Announcing that a virtual appliance has been edited
-                AbiCloudModel.getInstance().virtualApplianceManager.editVirtualAppliance(this._virtualApplianceReturnedByServer);
+                //AbiCloudModel.getInstance().virtualApplianceManager.editVirtualAppliance(this._virtualApplianceReturnedByServer);
             }
             else
             {
@@ -389,7 +389,7 @@ package net.undf.abicloud.controller.virtualappliance
             if (result.success)
             {
                 //Announcing that the state of a Virtual Appliance has been changed
-                AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
+                //AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
             }
             else
             {
@@ -439,6 +439,29 @@ package net.undf.abicloud.controller.virtualappliance
                                                                                     "ALERT_CLOUD_LIMITS_EXCEEDED_HEADER"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                     "ALERT_CLOUD_LIMITS_EXCEEDED_TEXT") + '\n' + result.message,
+                                            Alert.OK);
+
+                    if (this._virtualApplianceReturnedByServer)
+                    {
+                        //Update the VirtualAppliance with the one returned by server
+                        AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
+
+                    }
+                    else
+                    {
+                        //We try to make a local change to not block user
+                        AbiCloudModel.getInstance().virtualApplianceManager.setVirtualAppliancePoweredOff(virtualAppliance);
+                    }
+                }
+                else if (result.resultCode == BasicResult.EMPTY_VIRTUAL_APPLIANCE)
+                {
+                    //Can't start an empty virtual appliance
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_EMPTY_VIRTUAL_APP_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_EMPTY_VIRTUAL_APP_TEXT"),
                                             Alert.OK);
 
                     if (this._virtualApplianceReturnedByServer)

@@ -56,8 +56,10 @@ import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
@@ -65,6 +67,7 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
+import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -80,6 +83,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -96,13 +100,12 @@ import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFDiskUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
-import com.abiquo.server.core.enumerator.HypervisorType;
 
 public class OVFModelFromVirtualAppliance
 {
 
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFModelFromVirtualAppliance.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFModelFromVirtualAppliance.class);
 
     // /////////// InfrastructureWS
 
@@ -166,10 +169,21 @@ public class OVFModelFromVirtualAppliance
             ReferencesType diskReferences =
                 createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
 
+            
+            final String virtualImageId = String.valueOf(virtualImage.getId());
+            String diskId = virtualImageId;
+            CIMResourceAllocationSettingDataType cimDisk =
+                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
+                    "Harddisk" + virtualImageId + "'", virtualImageId,
+                    CIMResourceTypeEnum.Disk_Drive);
+            CIMResourceAllocationSettingDataUtils.addHostResourceToRASD(cimDisk,
+                OVFVirtualHadwareSectionUtils.OVF_DISK_URI + diskId);
+            
+            
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
-                createAnnotationMachineStateAndRDPPort(machineState, String.valueOf(virtualMachine
-                    .getVdrpPort()));
+                createAnnotationMachineStateAndRDPPort(machineState,
+                    String.valueOf(virtualMachine.getVdrpPort()));
 
             // creating Virtual hardware section (containing hypervisor information)
             VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
@@ -177,6 +191,9 @@ public class OVFModelFromVirtualAppliance
             // Setting the RAM and CPU from machine
             hardwareSection.getItem().add(createCPU(virtualMachine));
             hardwareSection.getItem().add(createMemory(virtualMachine));
+            hardwareSection.getItem().add(
+                CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(cimDisk));
+            
 
             // adding virtual system sections
             // OVFEnvelopeUtils.addSection(virtualSystem, diskSectionSystem);
@@ -557,8 +574,8 @@ public class OVFModelFromVirtualAppliance
                 // Adding the virtual disks to references
                 try
                 {
-                    OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage, bundling));
+                    OVFReferenceUtils.addFile(references,
+                        createFileFromVirtualImage(nodeVirtualImage, bundling));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -602,9 +619,11 @@ public class OVFModelFromVirtualAppliance
     {
         DAOFactory factory = HibernateDAOFactory.instance();
         VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
+        VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
 
         factory.beginConnection();
         VirtualDataCenterHB vdc = vdcDAO.findById(virtualAppliance.getVirtualDataCenter().getId());
+        VirtualappHB persistedVapp = vappDAO.findByIdNamedExtended(virtualAppliance.getId());
 
         AbicloudNetworkType network = vdc.getNetwork();
         AbicloudNetworkType networkToDeploy = new AbicloudNetworkType();
@@ -612,8 +631,9 @@ public class OVFModelFromVirtualAppliance
         VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
 
         List<Integer> listOfVLANidentifiers = new ArrayList<Integer>();
-        for (Node node : virtualAppliance.getNodes())
+        for (NodeHB nodeHB : persistedVapp.getNodesHB())
         {
+            Node node = nodeHB.toPojo();
             NodeVirtualImageHB nvi = ((NodeVirtualImage) node).toPojoHB();
             VirtualmachineHB vmHB = vmDAO.findById(nvi.getVirtualMachineHB().getIdVm());
             for (ResourceManagementHB rasman : vmHB.getResman())
@@ -645,7 +665,8 @@ public class OVFModelFromVirtualAppliance
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
             for (IpPoolManagementHB man : service.getIpPoolManagement())
             {
-                if (man.getVirtualMachine() != null)
+                if (man.getVirtualMachine() != null
+                    && man.getVirtualApp().getIdVirtualApp() == virtualAppliance.getId())
                 {
                     IpPoolType rule = new IpPoolType();
                     rule.setConfigureGateway(man.getConfigureGateway());
@@ -925,16 +946,16 @@ public class OVFModelFromVirtualAppliance
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
         String virtualImageId = String.valueOf(node.getId());
         String diskId = "disk_" + virtualImageId;

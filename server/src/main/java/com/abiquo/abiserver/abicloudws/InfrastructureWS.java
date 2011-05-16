@@ -101,6 +101,23 @@ public class InfrastructureWS implements IInfrastructureWS
 
     private final ErrorManager errorManager =
         ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    
+    private static Integer bugTimeout;
+
+    static {
+        
+        try
+        {           
+            bugTimeout = Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "10000"));
+        }
+        catch (Exception e) {
+            bugTimeout = 10000;
+        }
+        
+        System.setProperty("wink.client.connectTimeout", String.valueOf(0));
+        System.setProperty("wink.client.readTimeout", String.valueOf(0));
+    }
+
 
     /*
      * public InfrastructureWS() throws JAXBException { binding = new XmlBinding(null,
@@ -136,6 +153,9 @@ public class InfrastructureWS implements IInfrastructureWS
                     errorManager.reportError(InfrastructureWS.resourceManager, result,
                         "resourceNotFound", virtualMachine.getName());
                 }
+                
+                Thread.sleep(bugTimeout);
+                
                 resource.put(doc);
             }
             else

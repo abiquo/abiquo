@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.tracer.hierarchy.AbstractHierarchyProcessor;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 /**
  * Processes the hierarchy to extract {@link Datacenter} data.
@@ -39,7 +39,7 @@ public class DatacenterProcessor extends AbstractHierarchyProcessor<Datacenter>
 {
     /** The DAO used to get the resource information. */
     @Autowired
-    private DatacenterRep dao;
+    private InfrastructureRep dao;
 
     @Override
     protected String getIdentifierPrefix()

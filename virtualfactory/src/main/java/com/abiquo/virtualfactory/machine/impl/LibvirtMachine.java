@@ -119,7 +119,7 @@ public class LibvirtMachine extends AbsVirtualMachine
     private String domainXml;
 
     private final String kvmemulation;
-    
+
     private String targetDatstore;
 
     /**
@@ -179,7 +179,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         return conn;
     }
 
-    private Connect disconnect(Connect conn) throws LibvirtException
+    private Connect disconnect(final Connect conn) throws LibvirtException
     {
         if (conn != null)
         {
@@ -189,7 +189,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         return conn;
     }
 
-    private Domain freeDomain(Domain dom) throws LibvirtException
+    private Domain freeDomain(final Domain dom) throws LibvirtException
     {
         if (dom != null)
         {
@@ -199,7 +199,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         return dom;
     }
 
-    private void disconnectAndThrowError(Connect conn) throws VirtualMachineException
+    private void disconnectAndThrowError(final Connect conn) throws VirtualMachineException
     {
         try
         {
@@ -212,7 +212,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         }
     }
 
-    private void disconnectAndThrowError(Connect conn, Domain... doms)
+    private void disconnectAndThrowError(final Connect conn, final Domain... doms)
         throws VirtualMachineException
     {
         try
@@ -231,7 +231,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         }
     }
 
-    private void disconnectAndLogError(Connect conn, Domain... doms)
+    private void disconnectAndLogError(final Connect conn, final Domain... doms)
     {
         try
         {
@@ -591,13 +591,15 @@ public class LibvirtMachine extends AbsVirtualMachine
 
             // Removes the domain
             conn = connect(conn);
+
             dom = conn.domainLookupByName(getMachineName());
             dom.undefine();
 
-            //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-            //{
+            // [ABICLOUDPREMIUM-1459] Should not be executed in stateful images
+            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            {
                 removeImage();
-            //}
+            }
 
             detachExtendedDisksFromConfig(config);
         }
@@ -1154,6 +1156,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             // TODO Attaching other STANDARD extended disks
             if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)
             {
+                vdisk.setFormat("raw");
                 attachIscsiDisk(vdisk, doc, null, "ide");
             }
         }
@@ -1318,7 +1321,8 @@ public class LibvirtMachine extends AbsVirtualMachine
 
         Iface aimclient =
             TTransportProxy.getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-        aimclient.copyFromRepositoryToDatastore(imagePath, targetDatstore, getMachineName().toString());
+        aimclient.copyFromRepositoryToDatastore(imagePath, targetDatstore, getMachineName()
+            .toString());
 
         logger.debug("Cloning success, at [{}] ", targetDatstore + getMachineName().toString());
     }
@@ -1328,17 +1332,21 @@ public class LibvirtMachine extends AbsVirtualMachine
      */
     protected void removeImage() throws VirtualMachineException
     {
-        if(targetDatstore != null)
+        VirtualDisk diskBase = config.getVirtualDiskBase();
+        targetDatstore = getDatastore(diskBase);
+
+        if (targetDatstore != null)
         {
             String hypervisorLocation = libvirtHyper.getAddress().getHost();
-            
+
             try
             {
                 Iface aimclient =
-                    TTransportProxy
-                        .getInstance(hypervisorLocation, libvirtHyper.getAddress().getPort());
-            
-                aimclient.deleteVirtualImageFromDatastore(targetDatstore, getMachineName().toString());
+                    TTransportProxy.getInstance(hypervisorLocation, libvirtHyper.getAddress()
+                        .getPort());
+
+                aimclient.deleteVirtualImageFromDatastore(targetDatstore, getMachineName()
+                    .toString());
             }
             catch (Exception e)
             {

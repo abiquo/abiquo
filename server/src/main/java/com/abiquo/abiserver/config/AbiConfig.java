@@ -103,6 +103,11 @@ public class AbiConfig
         return System.getProperty("abiquo.server.api.location");
     }
 
+    public String getCostCode()
+    {
+        return System.getProperty("abiquo.server.costCode");
+    }
+
     private LimitHB createLimit(String type)
     {
         long hard =

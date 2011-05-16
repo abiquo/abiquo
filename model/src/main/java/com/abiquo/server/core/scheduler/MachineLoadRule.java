@@ -235,8 +235,9 @@ public class MachineLoadRule extends DefaultEntityBase implements
     {
 
         final boolean passCPU =
-            pass(machine.getVirtualCpusUsed(), image.getCpuRequired(), machine.getVirtualCpuCores()
-                * machine.getVirtualCpusPerCore(), cpuLoadPercentage);
+            pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image.getCpuRequired()),
+                Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
+                cpuLoadPercentage);
 
         // if (!passCPU)
         // {
@@ -244,8 +245,9 @@ public class MachineLoadRule extends DefaultEntityBase implements
         // }
 
         final boolean passRAM =
-            pass(machine.getVirtualRamUsedInMb(), image.getRamRequired(),
-                machine.getVirtualRamInMb(), ramLoadPercentage);
+            pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
+                Long.valueOf(image.getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()),
+                ramLoadPercentage);
 
         return passCPU && passRAM;
     }
@@ -253,7 +255,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
     /**
      * TODO use Long for used on physical machine DDBB schema
      */
-    public static boolean pass(final Integer used, final Integer required, final Integer allowed,
+    public static boolean pass(final Long used, final Long required, final Long allowed,
         final Integer oversubscription)
     {
         return (used + required) <= (oversubscription * allowed / 100);

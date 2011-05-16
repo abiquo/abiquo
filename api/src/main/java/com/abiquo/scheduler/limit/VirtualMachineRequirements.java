@@ -78,6 +78,20 @@ public class VirtualMachineRequirements
         this.publicVLAN = 0l;
     }
 
+    
+    public VirtualMachineRequirements(Long cpu, Long ram, Long hd, Long repository, Long storage,
+        Long publicVLAN, Long publicIP)
+    {
+        super();
+        this.cpu = cpu;
+        this.ram = ram;
+        this.hd = hd;
+        this.repository = repository;
+        this.storage = storage;
+        this.publicVLAN = publicVLAN;
+        this.publicIP = publicIP;
+    }
+
     public Long getCpu()
     {
         return cpu;

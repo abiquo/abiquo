@@ -48,12 +48,6 @@ import com.abiquo.server.core.enterprise.User;
 public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise");
-    }
-
     private String enterprisesURI = resolveEnterprisesURI();
 
     private Resource enterpriseResource =
@@ -136,7 +130,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
 
         response = postEnterprise(e);
-        assertErrors(response, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
+        assertErrors(response, 409, APIError.ENTERPRISE_DUPLICATED_NAME.getCode());
     }
 
     @Test

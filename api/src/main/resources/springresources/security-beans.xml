@@ -11,6 +11,8 @@
         <security:intercept-url pattern="/**/appslib/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
         <security:intercept-url pattern="/admin/enterprises" access="ROLE_SYS_ADMIN" method="POST" />
 		<security:intercept-url pattern="/admin/enterprises" access="ROLE_SYS_ADMIN" method="DELETE" />		
+		<security:intercept-url pattern="/admin/enterprises/**/users/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" method="GET"/>
+		<security:intercept-url pattern="/admin/enterprises/**/users/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" method="PUT"/>
         <security:intercept-url pattern="/admin/enterprises/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
         <security:intercept-url pattern="/admin/roles/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN" />
         <security:intercept-url pattern="/admin/statistics/**" access="ROLE_SYS_ADMIN,ROLE_ENTERPRISE_ADMIN,ROLE_USER" />

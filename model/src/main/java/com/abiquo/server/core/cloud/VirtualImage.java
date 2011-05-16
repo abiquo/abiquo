@@ -40,9 +40,9 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -519,6 +519,31 @@ public class VirtualImage extends DefaultEntityBase
         this.idIcon = idIcon;
     }
 
+    public final static String COST_CODE_PROPERTY = "costCode";
+
+    private final static boolean COST_CODE_REQUIRED = false;
+
+    final static int COST_CODE_LENGTH_MIN = 0;
+
+    final static int COST_CODE_LENGTH_MAX = 50;
+
+    private final static String COST_CODE_COLUMN = "cost_code";
+
+    @Column(name = COST_CODE_COLUMN, nullable = !COST_CODE_REQUIRED, length = COST_CODE_LENGTH_MAX)
+    private String costCode;
+
+    @Required(value = COST_CODE_REQUIRED)
+    @Length(min = COST_CODE_LENGTH_MIN, max = COST_CODE_LENGTH_MAX)
+    public String getCostCode()
+    {
+        return costCode;
+    }
+
+    public void setCostCode(String costCode)
+    {
+        this.costCode = costCode;
+    }
+
     public final static String ID_REPOSITORY_PROPERTY = "repository";
 
     private final static String ID_REPOSITORY_COLUMN = "idRepository";
@@ -581,7 +606,8 @@ public class VirtualImage extends DefaultEntityBase
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "image")
-    private List<VirtualImageConversion> conversions = new ArrayList<VirtualImageConversion>();
+    private final List<VirtualImageConversion> conversions =
+        new ArrayList<VirtualImageConversion>();
 
     protected void addConversion(VirtualImageConversion conversion)
     {

@@ -23,9 +23,9 @@ package com.abiquo.virtualfactory.machine.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.ws.WebServiceException;
 
@@ -37,7 +37,6 @@ import org.virtualbox_4_0.CleanupMode;
 import org.virtualbox_4_0.DeviceType;
 import org.virtualbox_4_0.IMachine;
 import org.virtualbox_4_0.IMedium;
-import org.virtualbox_4_0.IMediumAttachment;
 import org.virtualbox_4_0.INetworkAdapter;
 import org.virtualbox_4_0.IProgress;
 import org.virtualbox_4_0.ISession;
@@ -50,9 +49,10 @@ import org.virtualbox_4_0.NetworkAdapterType;
 import org.virtualbox_4_0.SessionState;
 import org.virtualbox_4_0.StorageBus;
 
+import com.abiquo.aimstub.Aim.Iface;
+import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.RimpException;
 import com.abiquo.aimstub.TTransportProxy;
-import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.VirtualBoxHypervisor;
@@ -189,7 +189,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         catch (Exception e)
         {
             logger.error("Failed to deploy machine :{}", e);
-            // The roll back in the virtual machine is done in top level when rolling back the
+            // The roll back in the virtual machine is done in top level when
+            // rolling back the
             // virtual appliance
             rollBackVirtualMachine();
             state = State.CANCELLED;
@@ -561,22 +562,82 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     protected void cloneVirtualDisk() throws Exception
     {
         VirtualDisk diskBase = config.getVirtualDiskBase();
-        String imagePath = diskBase.getImagePath();
-        String repository = diskBase.getRepository();
-        String destinationPath = repository + imagePath;
 
+        String repository = extractRepository(diskBase.getLocation());
+
+        if (repository == null)
+        {
+            throw new Exception("Not valid repository " + diskBase.getLocation());
+        }
+
+        String datastorePath = getDatastorePathFromRepository(repository);
+
+        if (datastorePath == null)
+        {
+            throw new Exception("Not valid datastore path " + diskBase.getLocation());
+        }
+
+        String imagePath = diskBase.getImagePath();
+        String sourcePath = datastorePath + imagePath;
         String destinationRepository = getDatastore(diskBase);
 
-        logger.info("Assigning the virtual disk [{}] from repository[{}]", destinationPath,
+        logger.info("Assigning the virtual disk [{}] from repository[{}]", sourcePath,
             destinationRepository);
 
         String clonedImagePath = destinationRepository + machineName;
 
-        cloneThroughAPI(destinationPath, clonedImagePath);
-
-        // clonethroughAIM();
+        cloneThroughAPI(sourcePath, clonedImagePath);
 
         logger.debug("Image cloned at [{}]", clonedImagePath);
+    }
+
+    private String getDatastorePathFromRepository(final String repository) throws RimpException,
+        TException
+    {
+        String aimLocation = vBoxHyper.getAddress().getHost();
+        int aimPort = vBoxHyper.getAddress().getPort();
+
+        Iface aim = TTransportProxy.getInstance(aimLocation, aimPort);
+        List<Datastore> datastores = aim.getDatastores();
+        String path = null;
+
+        for (Datastore datastore : datastores)
+        {
+            if (datastore.device.contains(repository))
+            {
+                path = datastore.path;
+            }
+        }
+
+        if (path == null)
+        {
+            return null;
+        }
+        return path.endsWith("/") ? path : path + "/";
+    }
+
+    private String extractRepository(final String input)
+    {
+        Pattern pattern = Pattern.compile("\\[(.*?)\\]");
+        Matcher matcher = pattern.matcher(input);
+        String repo = null;
+
+        if (matcher.find())
+        {
+            repo = new String(matcher.group(1));
+        }
+
+        if (repo == null)
+        {
+            return null;
+        }
+
+        if (repo.endsWith("/"))
+        {
+            repo = repo.substring(0, repo.length() - 1);
+        }
+
+        return repo.equalsIgnoreCase("null") ? null : repo;
     }
 
     private String getDatastore(final VirtualDisk disk)
@@ -587,37 +648,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             datastore += "/";
         }
         return datastore;
-    }
-
-    /**
-     * Clones the image through AIM
-     * 
-     * @throws RimpException
-     * @throws TException
-     */
-    private void clonethroughAIM() throws RimpException, TException
-    {
-        String hypervisorLocation = vBoxHyper.getAddress().getHost();
-        VirtualDisk diskBase = config.getVirtualDiskBase();
-        String imagePath = diskBase.getImagePath();
-
-        String datastore = getDatastore(diskBase);
-
-        logger.debug("Cloning image[{}]", imagePath);
-
-        Iface aimclient =
-            TTransportProxy.getInstance(hypervisorLocation, vBoxHyper.getAddress().getPort());
-        aimclient.copyFromRepositoryToDatastore(imagePath, datastore, config.getMachineName());
-
-        logger.debug("Cloning success, at [{}] ", datastore + config.getMachineName());
-
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
-
-        String destinationPath = datastore + config.getMachineName();
-
-        newVDI = vbox.openMedium(destinationPath, DeviceType.HardDisk, AccessMode.ReadWrite);
-
-        newVDI.setIDs(true, UUID.randomUUID().toString(), true, UUID.randomUUID().toString());
     }
 
     /**
@@ -667,6 +697,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         waitOperation(progress, 15 * 60000); // 15 minutes
 
+        diskVDI.close();
+
         logger.info("Cloning success, at [{}] ", clonedImagePath);
     }
 
@@ -691,7 +723,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         waitOperation(oProgress, 10000); // 10 seconds
 
-        // This hacks are necesarry since state synchronization does not work well in Vbox
+        // This hacks are necesarry since state synchronization does not work
+        // well in Vbox
         try
         {
             Thread.sleep(5000);
@@ -752,8 +785,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
             waitOperation(oProgress, 10000);
 
-            if(vBoxHyper.getSession().getState() == SessionState.Locked)
-            {                
+            if (vBoxHyper.getSession().getState() == SessionState.Locked)
+            {
                 vBoxHyper.getSession().unlockMachine();
             }
         }
@@ -881,7 +914,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             machine = vbox.findMachine(config.getMachineId().toString());
         }
-        // TODO Waits for a seconds to be sure that the session is in the right state
+        // TODO Waits for a seconds to be sure that the session is in the right
+        // state
         try
         {
             Thread.sleep(3000);
@@ -900,7 +934,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         // machine.saveSettings();
         // oSession.unlockMachine();
         //
-        // if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+        // if (config.getVirtualDiskBase().getDiskType() ==
+        // VirtualDiskType.STANDARD)
         // {
         // // Deleting from the rimp
         // // removeImage();
@@ -926,25 +961,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         // Closing the sessions
         vBoxHyper.logout();
-    }
-
-    /**
-     * Private helper to detach the basic disks attached to the SCSCI controller.
-     * 
-     * @param machine2
-     */
-    private void detachDisks(IMachine machine)
-    {
-        List<IMediumAttachment> attachments =
-            machine.getMediumAttachmentsOfController(scsiStorageControllerName);
-        for (IMediumAttachment hdAttachement : attachments)
-        {
-            IMedium hardDisk = hdAttachement.getMedium();
-            machine.detachDevice(scsiStorageControllerName, hdAttachement.getPort(),
-                hdAttachement.getDevice());
-            machine.saveSettings();
-            hardDisk.close();
-        }
     }
 
     @Override
@@ -1006,80 +1022,9 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
     }
 
-    /**
-     * Detach extended disks.
-     * 
-     * @param machine the machine
-     */
-    private void detachExtendedDisks(IMachine machine)
-    {
-        List<IMediumAttachment> attachments =
-            machine.getMediumAttachmentsOfController(sataStorageControllerName);
-        for (IMediumAttachment hdAttachement : attachments)
-        {
-            IMedium hardDisk = hdAttachement.getMedium();
-            machine.detachDevice(sataStorageControllerName, hdAttachement.getPort(),
-                hdAttachement.getDevice());
-            machine.saveSettings();
-            hardDisk.close();
-        }
-    }
-
-    /**
-     * Detaches extended disks contained in the Virtual disk list.
-     * 
-     * @param list the list containing the virtual extended disks to remove
-     * @param vbox the vbox object
-     * @param machine the machine where the disks will be detached
-     * @de
-     */
-    private void detachExtendedDisks(List<VirtualDisk> list, IVirtualBox vbox, IMachine machine)
-    {
-
-        for (VirtualDisk vdisk : list)
-        {
-            // TODO Detaching other STANDARD extended disks
-            if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)
-            {
-                int tempPortUsed = lastControllerPortUsed;
-                for (int i = 0; i < tempPortUsed; i++)
-                {
-                    IMedium hardDisk = machine.getMedium(sataStorageControllerName, i, 0);
-                    machine.detachDevice(sataStorageControllerName, i, 0);
-                    machine.saveSettings();
-                    hardDisk.close();
-                    lastControllerPortUsed--;
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes a virtual machine disk through AIM if vbox call does not work
-     * 
-     * @throws VirtualMachineException
-     */
-    private void removeImage() throws VirtualMachineException
-    {
-        String hypervisorLocation = vBoxHyper.getAddress().getHost();
-        VirtualDisk diskBase = config.getVirtualDiskBase();
-        String datastore = getDatastore(diskBase);
-
-        try
-        {
-            Iface aimclient =
-                TTransportProxy.getInstance(hypervisorLocation, vBoxHyper.getAddress().getPort());
-            aimclient.deleteVirtualImageFromDatastore(datastore, config.getMachineName());
-        }
-        catch (Exception e)
-        {
-            throw new VirtualMachineException(e);
-        }
-    }
-
     /*
      * (non-Javadoc)
-     * @seecom.abiquo.abicloud.model.AbsVirtualMachine#reconfigVM(com.abiquo.abicloud.model.config.
+     * @seecom.abiquo.abicloud.model.AbsVirtualMachine#reconfigVM(com.abiquo. abicloud.model.config.
      * VirtualMachineConfiguration)
      */
     @Override
@@ -1123,123 +1068,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             logger
                 .warn("The reconfiguration could not be done since the virtual machine must be powered off");
         }
-    }
-
-    /**
-     * Reconfig the new extended disk list added.
-     * 
-     * @param newConfiguration the new configuration with the new extended disks added
-     * @param config the present configuration
-     * @throws VirtualMachineException
-     */
-    private void reconfigDisks(VirtualMachineConfiguration newConfiguration,
-        VirtualMachineConfiguration config) throws VirtualMachineException
-    {
-        List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
-        List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
-        // If there are no more extended disks, I remove the existent ones
-        if ((newExtendedDiskList.size() == 0)
-            && (newExtendedDiskList.size() < oldExtendedDiskList.size()))
-        {
-            removeVirtualDisksFromConfig(newConfiguration);
-        }
-        else if ((newExtendedDiskList.size() > 0))
-        {
-            addVirtualDiskFromConfig(newConfiguration);
-
-        }
-    }
-
-    /**
-     * Adds the virtual disk to config.
-     * 
-     * @param newConfiguration the new configuration containing the extended disks to add
-     * @throws VirtualMachineException
-     */
-    private void addVirtualDiskFromConfig(VirtualMachineConfiguration newConfiguration)
-        throws VirtualMachineException
-    {
-        // Getting the session
-        vBoxHyper.reconnect();
-        // IMachine targetMachine;
-        // Getting the virtualBox hypervisor
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
-        ISession oSession = vBoxHyper.getSession();
-        machine.lockMachine(oSession, LockType.Write);
-        machine = vBoxHyper.getConsole().getMachine();
-        List<VirtualDisk> newExtendedDiskList =
-            addNewVirtualDisks(newConfiguration.getExtendedVirtualDiskList(),
-                config.getExtendedVirtualDiskList());
-        attachExtendedDisks(newExtendedDiskList, vbox, machine);
-        machine.saveSettings();
-
-        // Closing the sessions
-        if (machine != null)
-        {
-            machine.releaseRemote();
-        }
-        if (oSession != null)
-        {
-            oSession.releaseRemote();
-        }
-
-    }
-
-    /**
-     * Adds the new virtual disks.
-     * 
-     * @param newExtendedVirtualDisk the new extended virtual disk
-     * @param oldExtendedVirtualDisk the old extended virtual disk
-     * @return the list< virtual disk>
-     */
-    private List<VirtualDisk> addNewVirtualDisks(List<VirtualDisk> newExtendedVirtualDisk,
-        List<VirtualDisk> oldExtendedVirtualDisk)
-    {
-        List<VirtualDisk> newExtendedDiskList = new ArrayList<VirtualDisk>();
-        for (VirtualDisk vdisk : newExtendedVirtualDisk)
-        {
-            for (VirtualDisk oldVdisk : oldExtendedVirtualDisk)
-            {
-                if (!vdisk.equals(oldVdisk))
-                {
-                    newExtendedDiskList.add(vdisk);
-                }
-            }
-        }
-        return newExtendedDiskList;
-    }
-
-    /**
-     * Removes the virtual disks from configuration.
-     * 
-     * @param configuration the configuration containing the extended disks to remove
-     */
-    private void removeVirtualDisksFromConfig(VirtualMachineConfiguration configuration)
-    {
-        // Getting the session
-        vBoxHyper.reconnect();
-        // IMachine targetMachine;
-        // Getting the virtualBox hypervisor
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
-        ISession oSession = vBoxHyper.getSession();
-        machine.lockMachine(oSession, LockType.Write);
-        machine = vBoxHyper.getConsole().getMachine();
-        List<VirtualDisk> disksToRemove =
-            new ArrayList<VirtualDisk>(config.getExtendedVirtualDiskList());
-        disksToRemove.removeAll(configuration.getExtendedVirtualDiskList());
-        detachExtendedDisks(disksToRemove, vbox, machine);
-        machine.saveSettings();
-
-        // Closing the sessions
-        if (machine != null)
-        {
-            machine.releaseRemote();
-        }
-        if (oSession != null)
-        {
-            oSession.releaseRemote();
-        }
-
     }
 
     @Override

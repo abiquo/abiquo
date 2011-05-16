@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.persistence.impl.AppsLibraryDAO;
 import com.abiquo.api.persistence.impl.OVFPackageListDAO;
 import com.abiquo.api.services.DefaultApiService;
@@ -81,8 +81,8 @@ public class OVFPackageListService extends DefaultApiService
 
         if (prevlist != null) // TODO name unique on BBDD
         {
-            throw new ExtendedAPIException(Status.PRECONDITION_FAILED,
-                APIError.OVF_PACKAGE_LIST_NAME_ALREADY_EXIST);
+            addConflictErrors(APIError.OVF_PACKAGE_LIST_NAME_ALREADY_EXIST);
+            flushErrors();
         }
 
         AppsLibrary appsLibrary = appsLibraryDao.findByEnterprise(idEnterprise);

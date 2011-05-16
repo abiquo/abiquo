@@ -21,6 +21,8 @@
 
 package com.abiquo.vsm.redis.dao;
 
+import org.apache.commons.pool.impl.GenericObjectPool.Config;
+
 import redis.clients.jedis.JedisPool;
 import redis.clients.johm.JOhm;
 
@@ -58,7 +60,10 @@ public class RedisDaoFactory
         }
 
         VSMManager manager = VSMManager.getInstance();
-        jedisPool = new JedisPool(manager.getRedisHost(), manager.getRedisPort());
+        Config config = new Config();
+        config.testOnBorrow = true;
+
+        jedisPool = new JedisPool(config, manager.getRedisHost(), manager.getRedisPort());
         JOhm.setPool(jedisPool);
     }
 }

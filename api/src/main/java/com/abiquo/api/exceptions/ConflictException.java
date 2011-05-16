@@ -21,7 +21,10 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
+
 
 public class ConflictException extends APIException
 {
@@ -29,6 +32,16 @@ public class ConflictException extends APIException
 
     public ConflictException(APIError error)
     {
-        super(Status.CONFLICT, error);
+        super(error);
+    }
+    
+    public ConflictException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public ConflictException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

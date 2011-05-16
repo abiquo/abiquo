@@ -58,14 +58,6 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         datacenter = datacenterGenerator.createUniqueInstance();
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ip_pool_management", "rasd_management", "virtualapp", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "hypervisor", "physicalmachine", "rack", "datacenter", "network", "enterprise");
-    }
-
     /**
      * Check a 'get virtual appliances' call after creating the instances in DB. Creating two
      * virtual datacenters. The first one will have two virtual appliances, the second one will have

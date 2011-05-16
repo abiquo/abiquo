@@ -119,7 +119,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="createVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.network.networkId, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -651,4 +651,38 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+     <!-- VirtualApplianceEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER _________________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getPrivateNetworksByVirtualDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateNetworksByVirtualDatacenter"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>   
+    
 </EventMap>

@@ -100,4 +100,9 @@ public class Limit implements Serializable, IPojo<LimitHB>
         return String.format("[Hard: %d, Soft: %d]", hard, soft);
     }
 
+    public boolean isEqual(Limit otherlimit)
+    {
+        return otherlimit != null && hard == otherlimit.hard && soft == otherlimit.soft;
+    }
+
 }

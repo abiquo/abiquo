@@ -31,10 +31,4 @@ public class ResourceUpgradeUseException extends AllocatorException
     {
         super(message);
     }
-
-    public ResourceUpgradeUseException(Throwable cause)
-    {
-        super("Can not upgrade resource utilization", cause);
-    }
-
 }

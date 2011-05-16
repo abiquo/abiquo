@@ -23,6 +23,7 @@ package com.abiquo.model.validation;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -40,13 +41,13 @@ import com.abiquo.server.core.util.network.IPAddress;
 
 @Documented
 @Constraint(validatedBy = Ip.Validator.class)
-@Target( {METHOD, FIELD})
+@Target( {METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Ip
 {
     boolean required() default true;
 
-    String message() default "invalid ip";
+    String message() default "must be an IP address";
 
     Class< ? >[] groups() default {};
 
@@ -57,13 +58,13 @@ public @interface Ip
         Ip ip;
 
         @Override
-        public void initialize(Ip constraintAnnotation)
+        public void initialize(final Ip constraintAnnotation)
         {
             this.ip = constraintAnnotation;
         }
 
         @Override
-        public boolean isValid(String value, ConstraintValidatorContext context)
+        public boolean isValid(final String value, final ConstraintValidatorContext context)
         {
             if (!ip.required() && StringUtils.isEmpty(value))
             {
@@ -75,8 +76,7 @@ public @interface Ip
             if (!valid)
             {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("invalid ip: " + value)
-                    .addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(ip.message()).addConstraintViolation();
             }
 
             return valid;

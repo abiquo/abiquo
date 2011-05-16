@@ -41,13 +41,13 @@ import com.abiquo.api.persistence.impl.IconDAO;
 import com.abiquo.api.persistence.impl.OVFPackageDAO;
 import com.abiquo.api.persistence.impl.OVFPackageListDAO;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 
 @Service
 @Transactional

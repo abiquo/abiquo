@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.apache.wink.server.handlers.MessageContext;
+import org.apache.wink.server.internal.contexts.RequestImpl;
 import org.apache.wink.server.internal.handlers.CheckLocationHeaderHandler;
 import org.apache.wink.server.internal.handlers.SearchResult;
 import org.apache.wink.server.utils.LinkBuilders;
@@ -71,8 +72,10 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 }
             }
         }
-        searchResult.setInvocationParameters(newParameters
-            .toArray(new Object[newParameters.size()]));
+        org.apache.wink.server.internal.handlers.SearchResult a =
+            context.getAttribute(org.apache.wink.server.internal.handlers.SearchResult.class);
+        searchResult
+            .setInvocationParameters(newParameters.toArray(new Object[newParameters.size()]));
 
         context.setAttribute(SearchResult.class, searchResult);
         createRESTBuilder(context, builder);
@@ -116,7 +119,6 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 IRESTBuilder.class);
 
         IRESTBuilder builder = Iterables.get(beans.values(), 0);
-
         context.setAttribute(REST_BUILDER_INTERFACE, builder.injectProcessor(linksProcessor));
     }
 }

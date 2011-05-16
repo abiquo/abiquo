@@ -46,6 +46,7 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UsersDto;
+import com.vmware.vim25.UserNotFound;
 
 public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResourceStub
 {
@@ -136,7 +137,6 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         {
             orderBy = "nick";
         }
-
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (!StringUtils.isEmpty(userListOptions.getFilter()))
         {
@@ -144,6 +144,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
         queryParams.put("orderBy", new String[] {orderBy});
         queryParams.put("desc", new String[] {String.valueOf(desc)});
+
         if (userListOptions.getLoggedOnly() != null)
         {
             queryParams.put("connected", new String[] {userListOptions.getLoggedOnly().toString()});
@@ -159,6 +160,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         {
             UsersDto usersDto = response.getEntity(UsersDto.class);
             Collection<User> users = new ArrayList<User>();
+            Collection<User> normalUsers = new ArrayList<User>();
             Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
             Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
 
@@ -167,14 +169,41 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 RoleDto role = getRole(dto.searchLink("role").getHref(), catchedRoles);
                 EnterpriseDto enterprise =
                     getEnterprise(dto.searchLink("enterprise").getHref(), catchedEnterprises);
-
-                users.add(User.create(dto, Enterprise.create(enterprise), Role.create(role)));
+                if (role.getShortDescription().equalsIgnoreCase("USER")
+                    && orderBy.equalsIgnoreCase("role"))
+                {
+                    normalUsers.add(User.create(dto, Enterprise.create(enterprise), Role
+                        .create(role)));
+                }
+                else
+                {
+                    users.add(User.create(dto, Enterprise.create(enterprise), Role.create(role)));
+                }
             }
-
+            Collection<User> usersWithoutVDC = new ArrayList<User>();
             Integer total =
                 usersDto.getTotalSize() != null ? usersDto.getTotalSize() : usersDto
                     .getCollection().size();
 
+            for (User user : normalUsers)
+            {
+                if (user.getAvailableVirtualDatacenters().length == 0)
+                {
+                    usersWithoutVDC.add(user);
+                }
+            }
+            normalUsers.removeAll(usersWithoutVDC);
+            if (orderBy.equalsIgnoreCase("role") && !desc)
+            {
+                usersWithoutVDC.addAll(normalUsers);
+                usersWithoutVDC.addAll(users);
+                users = usersWithoutVDC;
+            }
+            else
+            {
+                users.addAll(normalUsers);
+                users.addAll(usersWithoutVDC);
+            }
             userListResult.setTotalUsers(total);
             userListResult.setUsersList(users);
 

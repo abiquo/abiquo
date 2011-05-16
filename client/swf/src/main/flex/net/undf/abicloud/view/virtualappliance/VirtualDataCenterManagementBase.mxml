@@ -139,8 +139,6 @@
                                                       askVirtualApplianceDeletion);
                 virtualApplianceList.addEventListener("virtualApplianceSelected",
                                                       showVirtualAppliance);
-
-
                 //NetworkManagement
                 vdcNetworkManagement = new NetworkManagement();
                 vdcNetworkManagement.addEventListener("selectedPrivateVLANChange",
@@ -168,6 +166,9 @@
                 //Listening for checks in VirtualDatacenters and VirtualAppliances
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTERS_AND_APPLIANCES_CHECKED,
                                                                                      onVirtualDatacentersAndAppliancesChecked);
+                //refresh the list of virtual datacenters when one has been edited
+				AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_EDITED,
+                                                                                     checkVirtualDatacentersAndAppliances); 
 
                 //Listening for VirtualAppliances deletion petitions from view
                 addEventListener(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE, onDeleteVirtualAppliance);
@@ -333,7 +334,7 @@
                 	AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER"),
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER")+" "+VirtualAppliance(virtualApplianceList.selectedVirtualAppliance).name,
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
                                         Alert.YES | Alert.NO, virtualApplianceDeletionResponseHandler);

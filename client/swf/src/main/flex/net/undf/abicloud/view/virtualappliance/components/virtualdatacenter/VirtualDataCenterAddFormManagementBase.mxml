@@ -26,7 +26,8 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='VirtualAppliance', key='POPUP_TITLE_VIRTUALDATACENTER_ADD')"
-    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*">
+    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createVdc.value}">
 
     <mx:Script>
         <![CDATA[
@@ -76,12 +77,15 @@
             {
                 //Cleaning view
                 toggledContainer.selectedIndex = 0;
-                this._virtualDataCenterAdd.virtualDatacenter = this._virtualDataCenter;
+                this._virtualDataCenterAdd.virtualDatacenter = virtualDatacenter;
                 this._virtualDataCenterAdd.init();
+                
+                //Registering Keyboard events, for standard application behaivor
+                this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
                 
                 //Registering when a VirtualDatacenter has been created
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                     onVirtualDataCenterAdded);
+                                                                                     onVirtualDataCenterAdded);                                                                                     
                 //Registering when a VirtualDatacenter has been edited
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_EDITED,
                                                                                      onVirtualDataCenterAdded);
@@ -168,7 +172,7 @@
             private function closeForm():void
             {
                 AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_DATACENTER_ADDED,
-                                                                                        onVirtualDataCenterAdded);
+                                                                                        onVirtualDataCenterAdded);                                                                                       
                 AbiCloudModel.getInstance().virtualApplianceManager.removeEventListener(VirtualApplianceEvent.VIRTUAL_APPLIANCE_EDITED,
                                                                                         onVirtualDataCenterAdded);
                 dispatchEvent(new Event("VirtualDatacenterFormAddClose"));
@@ -227,6 +231,20 @@
             private function onResizeEffectEnd():void
             {
                 toggledContainer.visible = true;
+            }
+            
+             /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+       			if (keyboardEvent.keyCode == 13){
+       				if(saveButton.enabled){
+                        onClickButtonSave();       					
+       				}
+                }
             }
         ]]>
     </mx:Script>

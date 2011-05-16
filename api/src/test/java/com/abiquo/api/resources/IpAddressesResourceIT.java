@@ -22,7 +22,6 @@ package com.abiquo.api.resources;
 
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetIPsURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -31,10 +30,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -45,8 +44,8 @@ import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
 /**
- * Acceptance tests not only for the resource {@link IpAddressesResource} but all the resources that need an used/declared 
- * {@link IpPoolManagement} info.
+ * Acceptance tests not only for the resource {@link IpAddressesResource} but all the resources that
+ * need an used/declared {@link IpPoolManagement} info.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -71,35 +70,28 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
 
         invalidNetworkURI = resolvePrivateNetworkURI(vdc.getId(), 12);
         invalidVDCURI = resolvePrivateNetworkURI(12, 32452);
-
-    }
-
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "datacenter", "network", "user", "role", "enterprise");
     }
 
     /**
      * Check a correct VLAN creation.
      */
-    @Test
+    @Test(enabled = false)
     public void createAndGetPrivateNetworkIPsByVLAN()
     {
-        // The mask indicates the number of 
+        // The mask indicates the number of
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool);
+            setup(ippool.getRasd(), ippool);
             ip = ip.nextIPAddress();
         }
 
@@ -114,17 +106,14 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 25);
-
     }
-    
-    
+
     /**
      * Create a network without IPs and check the 'HTTP Conflict' error
      */
-    @Test
+    @Test(enabled = false)
     public void createVLANRaisesErrorWhenWithoutIPs()
     {
-
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
         validURI = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
@@ -134,5 +123,5 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
     }
-    
+
 }

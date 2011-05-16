@@ -126,7 +126,7 @@ public class TraceFilter implements Filter
             (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
 
-        // Creatate the tracer context
+        // Create the tracer context
         TracerContext context = new TracerContext();
         context.setHierarchy(resource);
         context.setUserId(userDetails.getUserId());
@@ -134,7 +134,7 @@ public class TraceFilter implements Filter
         context.setEnterpriseId(userDetails.getEnterpriseId());
         context.setEnterpriseName(userDetails.getEnterpriseName());
 
-        // Publish teh context the context
+        // Publish the context the context
         TracerContextHolder.initialize(context);
     }
 

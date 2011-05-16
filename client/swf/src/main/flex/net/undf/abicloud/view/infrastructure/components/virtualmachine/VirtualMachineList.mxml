@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.utils.ObjectUtil;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.resources.ResourceBundle;
@@ -66,6 +67,19 @@
             {
                 this._selectedVirtualMachine = value;
                 dispatchEvent(new Event("selectedVirtualMachineChange"));
+            }
+            
+            //The index of selected virtual machine
+            private var _selectedIndex:int = -1;
+
+            public function get selectedIndex():int
+            {
+                return this._selectedIndex;
+            }
+
+            public function set selectedIndex(index:int):void
+            {
+                this._selectedIndex = index;
             }
 
             //The Array of VirtualMachines
@@ -168,8 +182,9 @@
                     }
 
                     //Showing the filtered virtual machines
-                    this._virtualMachinesFiltered = virtualMachinesFiltered;
+                    this._virtualMachinesFiltered = virtualMachinesFiltered;                    
                 }
+                virtualMachinesDataGrid.selectedIndex = this._selectedIndex;
             }
 
             /**
@@ -184,6 +199,7 @@
                 if (virtualMachinesDataGrid.selectedIndex > -1)
                 {
                     selectedVirtualMachine = virtualMachinesDataGrid.selectedItem as VirtualMachine;
+                    this._selectedIndex = virtualMachinesDataGrid.selectedIndex;
                     dispatchEvent(new Event("virtualMachineSelected"));
 
                     if (virtualMachinesTile)
@@ -199,6 +215,7 @@
                 if (virtualMachinesTile.selectedIndex > -1)
                 {
                     selectedVirtualMachine = virtualMachinesTile.selectedItem as VirtualMachine;
+                    this._selectedIndex = virtualMachinesTile.selectedIndex;
                     dispatchEvent(new Event("virtualMachineSelected"));
 
                     virtualMachinesDataGrid.selectedIndex = virtualMachinesTile.selectedIndex;
@@ -303,6 +320,30 @@
                 DragManager.doDrag(UIComponent(Application.application), dragSource,
                                    mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
             }
+            
+            private function compareVirtualImageName(virtualImg1:Object, virtualImg2:Object):int{
+            	var virtImg1:String;
+            	var virtImg2:String;
+            	
+            	if (VirtualMachine(virtualImg1).virtualImage)
+                    virtImg1 = VirtualMachine(virtualImg1).virtualImage.name;
+                else
+                    virtImg1 = "-";
+                
+                if (VirtualMachine(virtualImg2).virtualImage)
+                    virtImg2 = VirtualMachine(virtualImg2).virtualImage.name;
+                else
+                    virtImg2 = "-";
+                    
+            	return ObjectUtil.stringCompare(virtImg1,virtImg2);
+            }
+            
+            private function compareVirtualImageState(virtualImg1:VirtualMachine, virtualImg2:VirtualMachine):int{
+            	var virtualMachineState1:Number = virtualImg1.state.id;
+            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	
+            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            }
         ]]>
     </mx:Script>
 
@@ -393,6 +434,7 @@
                     <mx:DataGridColumn 
                         width="150"
                         labelFunction="vmDataGridVirtualImageLabel"
+                        sortCompareFunction="compareVirtualImageName"
                         headerText="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')"/>
 
                     <mx:DataGridColumn 
@@ -412,6 +454,7 @@
                         headerText="{ResourceManager.getInstance().getString('Infrastructure', 'TEXTINPUT_LABEL_HD') + ' (GB)'}"/>
 
                     <mx:DataGridColumn 
+                    	sortCompareFunction="compareVirtualImageState"
                         width="36"
                         headerText=""
                         itemRenderer="net.undf.abicloud.view.infrastructure.components.virtualmachine.VirtualMachineListStateItemRenderer"

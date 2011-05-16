@@ -41,10 +41,14 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
@@ -59,7 +63,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter);
 
-    public List<RESTLink> buildRackLinks(Integer datacenterId, RackDto rack);
+    public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
     public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, MachineDto machine);
 
@@ -104,8 +108,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty);
 
-    @SuppressWarnings("unchecked")
-    public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList list);
+    public List<RESTLink> buildPaggingLinks(String absolutePath, PagedList< ? > list);
 
     public RESTLink buildEnterpriseLink(Integer enterpriseId);
 
@@ -118,6 +121,14 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildStorageDeviceLinks(final Integer datacenterId, final Integer deviceId);
 
+    public List<RESTLink> buildRasdLinks(RasdManagement ip);
+
+    public List<RESTLink> buildIpRasdLinks(IpPoolManagement ip);
+
+    public List<RESTLink> buildVolumeInfrastructureLinks(final VolumeManagement volume);
+
+    public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
+
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         EnterpriseExclusionRule enterpriseExclusion);
@@ -126,4 +137,5 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
 }

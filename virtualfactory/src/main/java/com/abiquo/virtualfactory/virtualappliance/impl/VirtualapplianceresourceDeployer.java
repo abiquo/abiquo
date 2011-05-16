@@ -277,7 +277,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         }
     }
 
-    private void deleteVirtualAppliance(EnvelopeType envelope) throws EmptyEnvelopeException,
+    protected void deleteVirtualAppliance(EnvelopeType envelope) throws EmptyEnvelopeException,
         IdNotFoundException, SectionException, MalformedURLException, VirtualMachineException,
         PluginException, HypervisorException
     {
@@ -410,13 +410,15 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
             {
                 try
                 {
+                    Map<String, VirtualDisk> virtualDiskMap =
+                        ovfconvert.createVirtualDisks(envelope);
                     virtualMachine =
                         VirtualSystemModel.getModel()
                             .getMachine(
                                 ovfconvert
                                     .getHypervisorConfigurationFromVirtualSystem(contentInstance),
                                 ovfconvert.getVirtualMachineConfigurationFromVirtualSystem(
-                                    (VirtualSystemType) contentInstance, null, envelope));
+                                    (VirtualSystemType) contentInstance, virtualDiskMap, envelope));
                     ovfconvert.configureVirtualSystem(virtualMachine, contentInstance, false);
 
                 }

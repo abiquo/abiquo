@@ -73,7 +73,7 @@
 
             //The Datacenter to manage its physical infrastructure
             protected var _dataCenter:DataCenter;
-
+            
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
 
@@ -165,7 +165,7 @@
              * When this component loads for the first time
              */
             private function onCreationComplete():void
-            {
+            {               
                 //Listening for new Infrastructure available in model
                 BindingUtils.bindSetter(setInfrastructure, AbiCloudModel.getInstance().infrastructureManager,
                                         "infrastructure");
@@ -270,11 +270,18 @@
             /**
              * When an InfrastructureElement has been selected
              */
-            private function infrastructureElementSelected():void
+            private function infrastructureElementSelected(event:InfrastructureEvent):void
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
                 	
+                    //remove the selected virtual machine reference
+                    if(!event.automaticUpdate){
+                        virtualMachineList.selectedVirtualMachine = null;
+	                    virtualMachineList.selectedIndex = -1;                    	
+                    }
+                    
+                    
                     showPhysicalMachine();
                     
                     //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
@@ -380,8 +387,17 @@
              */
             private function showPhysicalMachine():void
             {
-                physicalMachineRenderer.init();
-                showMoreInfoContainer(0);
+                //Need to preserve the state when the background process update data
+                if(virtualMachineList.selectedVirtualMachine){
+                	virtualMachineList.virtualMachinesDataGrid.selectedIndex = virtualMachineList.selectedIndex;
+                	if(virtualMachineList.virtualMachinesTile){
+	                	virtualMachineList.virtualMachinesTile.selectedIndex = virtualMachineList.selectedIndex;                		
+                	}
+                	
+                }else{
+	                physicalMachineRenderer.init();
+	                showMoreInfoContainer(0);                	
+                }
             }
 
             /////////////////////////////////////////////////////////
@@ -437,7 +453,7 @@
 
                 //Setting the VirtualMachines in the VirtualMachineManagement component
                 virtualMachineList.virtualMachines = virtualMachines;
-                virtualMachineList.selectedVirtualMachine = currentlySelectedVirtualMachine;
+                //virtualMachineList.selectedVirtualMachine = currentlySelectedVirtualMachine;
             }
 
 
@@ -446,7 +462,7 @@
              * Shows a Virtual Machine, using a VirtualMachineRenderer component
              **/
             private function showVirtualMachine():void
-            {
+            {                             
                 virtualMachineRenderer.init();
                 showMoreInfoContainer(1);
             }
@@ -594,7 +610,7 @@
             addPhysicalMachine="addPhysicalMachine()"
             editPhysicalMachine="editPhysicalMachine()"
             searchFilter="{physicalServersFilter.text}"
-            infrastructureElementSelected="infrastructureElementSelected()"
+            infrastructureElementSelected="infrastructureElementSelected(event)"
             refreshDatacenterResources="refreshDatacenterResources()"/>
     </general:GeneralSubPanel>
 

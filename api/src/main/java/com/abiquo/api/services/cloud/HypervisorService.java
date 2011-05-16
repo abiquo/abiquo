@@ -30,7 +30,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 
 @Repository
@@ -38,7 +38,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 public class HypervisorService extends DefaultApiService
 {
     @Autowired
-    DatacenterRep repo;
+    InfrastructureRep repo;
 
     @Autowired
     MachineService machineService;

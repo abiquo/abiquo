@@ -86,6 +86,27 @@ public class Assert extends org.testng.Assert
         }
     }
 
+    public static void assertError(ClientResponse response, APIError error)
+    {
+        assertError(response.getEntity(ErrorsDto.class), error.getCode());
+    }
+
+    public static void assertError(ClientResponse response, int statusCode, APIError error)
+    {
+        assertError(response, statusCode, error.getCode());
+    }
+
+    public static void assertError(ClientResponse response, String errorCode)
+    {
+        assertError(response.getEntity(ErrorsDto.class), errorCode);
+    }
+
+    public static void assertError(ClientResponse response, int statusCode, String errorCode)
+    {
+        assertEquals(response.getStatusCode(), statusCode);
+        assertError(response.getEntity(ErrorsDto.class), errorCode);
+    }
+
     public static void assertError(ErrorsDto errors, String errorCode)
     {
         for (ErrorDto error : errors.getCollection())

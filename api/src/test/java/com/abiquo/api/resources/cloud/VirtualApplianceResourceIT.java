@@ -70,14 +70,6 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         vdc = vdcGenerator.createInstance(datacenter, ent);
     }
     
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ip_pool_management", "rasd_management", "virtualapp", "virtualdatacenter", "vlan_network",
-            "network_configuration", "dhcp_service", "remote_service", "hypervisor",
-            "physicalmachine", "rack", "datacenter", "network", "enterprise");
-    }
-    
     /**
      * Check a 'get virtual appliances' call after creating the instances in DB. 
      * Creating a virtual datacenter with two virtual appliances. Check all of them

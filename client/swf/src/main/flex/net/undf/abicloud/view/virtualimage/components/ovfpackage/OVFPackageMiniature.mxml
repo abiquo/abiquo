@@ -29,7 +29,8 @@
     backgroundAlpha="0"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml"
-    xmlns:utils="net.undf.abicloud.utils.*">
+    xmlns:utils="net.undf.abicloud.utils.*"
+    initialize="initIconStatuses()">
 
     <mx:Script>
         <![CDATA[
@@ -87,6 +88,16 @@
                                                     100);
                 }
 
+            }
+            
+            /**
+             * Called at the preinitialize process to set default icons to invisible
+             */
+            private function initIconStatuses():void{
+            	errorImage.visible = false;
+            	downloadedImage.visible = false;
+            	downloadProgressBar.visible = false;
+            	cancelDownloadButton.visible = false;
             }
 
             /**

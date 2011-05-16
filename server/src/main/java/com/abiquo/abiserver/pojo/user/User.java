@@ -66,7 +66,7 @@ public class User implements IPojo<UserHB>
         return availableVirtualDatacenters;
     }
 
-    public void setAvailableVirtualDatacenters(Integer[] availableVirtualDatacenters)
+    public void setAvailableVirtualDatacenters(final Integer[] availableVirtualDatacenters)
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
@@ -76,7 +76,7 @@ public class User implements IPojo<UserHB>
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -86,7 +86,7 @@ public class User implements IPojo<UserHB>
         return role;
     }
 
-    public void setRole(Role role)
+    public void setRole(final Role role)
     {
         this.role = role;
     }
@@ -96,7 +96,7 @@ public class User implements IPojo<UserHB>
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
@@ -106,7 +106,7 @@ public class User implements IPojo<UserHB>
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -116,7 +116,7 @@ public class User implements IPojo<UserHB>
         return surname;
     }
 
-    public void setSurname(String surname)
+    public void setSurname(final String surname)
     {
         this.surname = surname;
     }
@@ -126,7 +126,7 @@ public class User implements IPojo<UserHB>
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -136,7 +136,7 @@ public class User implements IPojo<UserHB>
         return email;
     }
 
-    public void setEmail(String email)
+    public void setEmail(final String email)
     {
         this.email = email;
     }
@@ -146,7 +146,7 @@ public class User implements IPojo<UserHB>
         return pass;
     }
 
-    public void setPass(String pass)
+    public void setPass(final String pass)
     {
         this.pass = pass;
     }
@@ -156,7 +156,7 @@ public class User implements IPojo<UserHB>
         return active;
     }
 
-    public void setActive(Boolean active)
+    public void setActive(final Boolean active)
     {
         this.active = active;
     }
@@ -166,7 +166,7 @@ public class User implements IPojo<UserHB>
         return locale;
     }
 
-    public void setLocale(String locale)
+    public void setLocale(final String locale)
     {
         this.locale = locale;
     }
@@ -176,7 +176,7 @@ public class User implements IPojo<UserHB>
         return enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -187,6 +187,7 @@ public class User implements IPojo<UserHB>
      * @deprecated all the persistence should be throught the api and we don't need this method any
      *             more
      */
+    @Deprecated
     public UserHB toPojoHB()
     {
         UserHB userHB = new UserHB();
@@ -214,7 +215,7 @@ public class User implements IPojo<UserHB>
     }
 
     @SuppressWarnings("unchecked")
-    public static User create(UserDto dto, Enterprise enterprise, Role role)
+    public static User create(final UserDto dto, final Enterprise enterprise, final Role role)
     {
         User user = new User();
 
@@ -228,7 +229,7 @@ public class User implements IPojo<UserHB>
         user.setEmail(dto.getEmail());
         user.setLocale(dto.getLocale());
         user.setPass(dto.getPassword());
-        user.setActive(true);
+        user.setActive(dto.isActive());
 
         if (!StringUtils.isEmpty(dto.getAvailableVirtualDatacenters()))
         {
@@ -237,7 +238,7 @@ public class User implements IPojo<UserHB>
                 CollectionUtils.collect(Arrays.asList(ids), new Transformer()
                 {
                     @Override
-                    public Object transform(Object input)
+                    public Object transform(final Object input)
                     {
                         return Integer.valueOf(input.toString());
                     }

@@ -24,7 +24,9 @@ package com.abiquo.api.resources;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -34,6 +36,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -68,6 +72,8 @@ public class EnterpriseResource extends AbstractResource
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
+
     public static final String ENTERPRISE1 = "enterprise1";
 
     public static final String ENTERPRISE2 = "enterprise2";
@@ -85,8 +91,8 @@ public class EnterpriseResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) Integer enterpriseId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
@@ -94,8 +100,8 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @PUT
-    public EnterpriseDto modifyEnterprise(EnterpriseDto enterprise,
-        @PathParam(ENTERPRISE) Integer enterpriseId, @Context IRESTBuilder restBuilder)
+    public EnterpriseDto modifyEnterprise(final EnterpriseDto enterprise,
+        @PathParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         Enterprise e = service.modifyEnterprise(enterpriseId, enterprise);
@@ -104,7 +110,7 @@ public class EnterpriseResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteEnterprise(@PathParam(ENTERPRISE) Integer enterpriseId)
+    public void deleteEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId)
     {
         service.removeEnterprise(enterpriseId);
     }
@@ -112,15 +118,24 @@ public class EnterpriseResource extends AbstractResource
     @SuppressWarnings("unchecked")
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
-    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) Integer id,
-        @QueryParam(PAGE) Integer page, @Context IRESTBuilder restBuilder) throws Exception
+    public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("ip") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
+
+        // Set query Params by default if they are not informed
+
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, (page == null) ? 0 : page,
-                DEFAULT_PAGE_LENGTH);
+            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy,
+                desc_or_asc);
 
         if (all == null)
         {
+            LOGGER.error("Unexpected null value getting the list of ip pools by enterprise.");
             throw new InternalServerErrorException(APIError.INTERNAL_SERVER_ERROR);
         }
 
@@ -130,8 +145,8 @@ public class EnterpriseResource extends AbstractResource
         {
             ips.add(IpAddressesResource.createTransferObject(ip, restBuilder));
         }
-
-        ips.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+        ips.setTotalSize(((PagedList) all).getTotalResults());
+        ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
             (PagedList) all));
 
         return ips;
@@ -148,16 +163,11 @@ public class EnterpriseResource extends AbstractResource
     @GET
     @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES)
     public VirtualMachinesDto getVirtualMachines(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer enterpriseId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
-
-        if (enterprise == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-        }
 
         Collection<VirtualMachine> vms = vmService.findByEnterprise(enterprise);
 
@@ -165,15 +175,16 @@ public class EnterpriseResource extends AbstractResource
 
     }
 
-    private static EnterpriseDto addLinks(IRESTBuilder restBuilder, EnterpriseDto enterprise)
+    private static EnterpriseDto addLinks(final IRESTBuilder restBuilder,
+        final EnterpriseDto enterprise)
     {
         enterprise.setLinks(restBuilder.buildEnterpriseLinks(enterprise));
 
         return enterprise;
     }
 
-    public static EnterpriseDto createTransferObject(Enterprise e, IRESTBuilder restBuilder)
-        throws Exception
+    public static EnterpriseDto createTransferObject(final Enterprise e,
+        final IRESTBuilder restBuilder) throws Exception
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setId(e.getId());
@@ -192,6 +203,7 @@ public class EnterpriseResource extends AbstractResource
         dto.setStorageSoft(e.getStorageSoft());
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
+        dto.setIsReservationRestricted(e.getIsReservationRestricted());
 
         dto = addLinks(restBuilder, dto);
         return dto;

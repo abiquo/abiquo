@@ -21,6 +21,7 @@
 
 package com.abiquo.api.handlers;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +34,15 @@ public class RESTHandlerFactory extends HandlersFactory
     @Override
     public List< ? extends RequestHandler> getRequestHandlers()
     {
-        return Collections.singletonList(new RESTHandler());
+        List<RequestHandler> listOfHandlers = new ArrayList<RequestHandler>();
+        
+        // Check the input constraints 
+        listOfHandlers.add(new InputParamConstraintHandler());
+        
+        // Injects the IRESTLinkBuilder object to all the methods.
+        listOfHandlers.add(new RESTHandler());
+        
+        return listOfHandlers;
     }
 
     @Override
