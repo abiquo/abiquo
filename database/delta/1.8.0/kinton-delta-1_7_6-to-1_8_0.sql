@@ -415,3 +415,5 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
     END IF;
     END;
 
+-- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
+update volume_management set state = 1 where state = 2;
