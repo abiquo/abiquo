@@ -45,9 +45,9 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDAO;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -100,23 +100,20 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
-
     @Override
     public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
         throws ResourceUpgradeUseException
     {
-        updateUse(virtualApplianceId, virtualMachine, true);
+        updateUse(virtualApplianceId, virtualMachine, false);
     }
 
-    
     @Override
     public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine)
     {
-        updateUse(virtualApplianceId, virtualMachine, false);
+        updateUse(virtualApplianceId, virtualMachine, true);
     }
-    
-    
-    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean updateDatastore)
+
+    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
     {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
@@ -128,11 +125,17 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         try
         {
-            updateUsageDatastore(virtualMachine, false);
-
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, false);
 
-            updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
+            if (!isHA)
+            {
+                updateUsageDatastore(virtualMachine, false);
+                updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
+            }
+            else
+            {
+                updateNewtorkingResourcesHA(physicalMachine, virtualMachine);
+            }
 
             virtualMachine.setState(State.IN_PROGRESS);
             vmachineDao.flush();
@@ -155,13 +158,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
-            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
+            throw new ResourceUpgradeUseException("Can not update resource utilization"
+                + e.getMessage());
         }
     }
-    
-    
-    
-    
+
     @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {
@@ -182,8 +183,33 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         catch (final Exception e) // HibernateException NotEnoughResourcesException
         // NoSuchObjectException
         {
-            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
+            throw new ResourceUpgradeUseException("Can not update resource utilization"
+                + e.getMessage());
         }
+    }
+
+    /**
+     * Updates the ''vswitch'' of the RASD associated to the current Virtual Machine's
+     * IpPoolManagements.
+     */
+    private void updateNewtorkingResourcesHA(final Machine haPhysicalTarget,
+        final VirtualMachine virtualMachine) throws NotEnoughResourcesException,
+        NoSuchObjectException
+    {
+        final String vswitch = haPhysicalTarget.getVirtualSwitch();
+
+        List<IpPoolManagement> ippoolManagementList =
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
+
+        log.debug("Update the vswitch to {}", vswitch);
+        for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
+        {
+            // already assigned VLAN TAG if (vlanNetwork.getTag() == null)
+            Rasd rasd = ipPoolManagement.getRasd();
+            rasd.setConnection(vswitch);
+            rasdDao.flush();
+        }// iterate over VlanNetwork
+
     }
 
     /**
@@ -226,8 +252,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
 
                     vlanNetworkDao.flush();
@@ -246,8 +272,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
         else
         {
-            log
-                .debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
+            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
             for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
             {
                 VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
@@ -260,8 +285,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                         .findPublicVLANNetworksByRack(rack)));
                     Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
 
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                        .getId(), freeTag);
+                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                        vlanNetwork.getId(), freeTag);
                     vlanNetwork.setTag(freeTag);
                     final NetworkAssignment nb =
                         new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -336,13 +361,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed()
-                + used.getCpu());
+                .getVirtualCpusUsed() + used.getCpu());
 
         final int newRam =
             (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb()
-                + used.getRam());
+                .getVirtualRamUsedInMb() + used.getRam());
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -351,8 +374,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes()
-                + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
@@ -375,7 +397,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     /**
-     * Updates the datastore with the used size by the virtual machine
+     * Updates the datastore with the used size by the virtual machine (if a shared datastore update
+     * all its references).
      * 
      * @param virtual the virtual machine that contains the datastore to update
      * @param session the hibernate session
@@ -383,23 +406,39 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     private void updateUsageDatastore(final VirtualMachine virtual, final boolean isRollback)
     {
 
+        if (virtual.getVirtualImage().getStateful() == 1)
+        {
+            // statefull images doesn't update the datastore utilization.
+            return;
+        }
+
         Datastore datastore = virtual.getDatastore();
 
-        final Long actualSize = datastore.getUsedSize();
-        final Long required =
-            virtual.getVirtualImage().getStateful() == 1 ? 0 : virtual.getHdInBytes();
-        // stateful virtual images doesn't use the datastores
+        // updates the datastore utilization for all the shared datastores.
+        List<Datastore> datastoresShared = datastoreDao.findShares(datastore);
 
-        final Long newUsed = isRollback ? actualSize - required : actualSize + required;
+        for (Datastore dstore : datastoresShared)
+        {
+            updateDatastore(dstore, virtual.getHdInBytes(), isRollback);
+        }
+
+        datastoreDao.flush();
+    }
+
+    private void updateDatastore(Datastore datastore, Long requestSize, boolean isRollback)
+    {
+        final Long actualSize = datastore.getUsedSize();
+
+        final Long newUsed = isRollback ? actualSize - requestSize : actualSize + requestSize;
 
         if (newUsed > datastore.getSize())
         {
-            log.error("Target datastore usage is over capacity !!!!! machine : %s datastore : %s",
-                virtual.getHypervisor().getMachine().getName(), virtual.getDatastore().getName());
+
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
+                datastore.getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
-        datastoreDao.flush();
     }
 
     /**
@@ -471,7 +510,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)
     {
 
-        Collection<Integer> vlans_avoided_collection = new HashSet();
+        Collection<Integer> vlans_avoided_collection = new HashSet<Integer>();
         String avoidedVLANs = rack.getVlansIdAvoided();
 
         if (avoidedVLANs == null || avoidedVLANs.isEmpty())
