@@ -35,6 +35,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Rack;
 
 @Repository
@@ -130,22 +131,13 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<VLANNetwork> findPublicVLANNetworksByRack(Rack rack)
+    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(Datacenter datacenter)
     {
+        
+        Criterion inNetwork = Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
+        Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
 
-        String idRack = String.valueOf(rack.getId());
-
-        Query query = getSession().createQuery("SELECT vn FROM " //
-            + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
-            + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
-            + "WHERE vn.id = vna.vlanNetwork.id " + //
-            "AND vna.rack.id = " + idRack);
-
-        // FIXME
-        // Query query = getSession().createQuery(VLAN_TAG_USED);
-        // query.setParameter("idRack", rack.getId());
-
-        return query.list();
+        return criteria.list();
     }
 
     private final String GET_VLAN_DATACENTER =

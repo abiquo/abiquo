@@ -210,7 +210,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // Discover the tag of the vlan if it is the first address to be deployed
             if (vlanNetwork.getTag() == null)
             {
-                List<VLANNetwork> publicVLANs = vlanNetworkDao.findPublicVLANNetworksByRack(rack);
+                List<VLANNetwork> publicVLANs = vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
                 List<Integer> vlansTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlansTagsUsed.addAll(getPublicVLANTagssFROMVLANNetworkList(publicVLANs));
                 
@@ -371,14 +371,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
         Integer candidatePort = rack.getVlanIdMin();
 
+        // Adding Vlans Id not to add
+
+        vlanTags.addAll(getVlansIdAvoidAsCollection(rack));
         if (vlanTags.isEmpty())
         {
             return candidatePort;
         }
-        
-        // Adding Vlans Id not to add
-
-        vlanTags.addAll(getVlansIdAvoidAsCollection(rack));
 
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanTags);
