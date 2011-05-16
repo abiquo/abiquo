@@ -68,6 +68,11 @@ public class RoleLdap extends DefaultEntityBase
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     public final static String ROLE_PROPERTY = "role";
 
     private final static boolean ROLE_REQUIRED = true;

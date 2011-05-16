@@ -137,7 +137,7 @@ public class TestDataAccessManager
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
-            Session.class, User.class, Role.class, Privilege.class, RoleLdap.class,
+            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
             EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
             Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
             RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
