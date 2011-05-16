@@ -221,7 +221,7 @@ public enum APIError
         "TIER-6", "Can not disable a Tier with associated Storage Pools"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED(
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
         "DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS

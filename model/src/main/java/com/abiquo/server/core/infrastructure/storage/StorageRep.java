@@ -81,7 +81,7 @@ public class StorageRep extends DefaultRepBase
     public StorageDevice findDeviceByManagementIP(final Integer datacenterId,
         final String managementIp)
     {
-        return deviceDAO.findDeviceById(datacenterId, managementIp);
+        return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
     public Tier findTierById(final Integer datacenterId, final Integer tierId)
