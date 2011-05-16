@@ -72,9 +72,10 @@
 
 	.UserRendererLabel1
 	{
-		font-size:"14";
-		font-weight:"bold";
-		padding-top:"4";
+		font-size: 14 ;
+		font-weight: bold;
+		padding-top: 4;
+		padding-bottom: 0;
 
 	}
 
