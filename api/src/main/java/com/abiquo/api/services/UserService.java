@@ -44,6 +44,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
+import com.abiquo.api.spring.security.AbiquoUserDetails;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -79,9 +80,24 @@ public class UserService extends DefaultApiService
      */
     public User getCurrentUser()
     {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
+        {
+            AbiquoUserDetails details =
+                (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
 
-        return repo.getUserByUserName(userName);
+            AuthType authType =
+                AuthType.valueOf(details.getAuthType() != null ? details.getAuthType()
+                    : AuthType.ABIQUO.name());
+            return repo.getUserByAuth(details.getUsername(), authType);
+        }
+        else
+        { // Backward compatibility and bzngine
+
+            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            return repo.getUserByAuth(userName, AuthType.ABIQUO);
+        }
     }
 
     // TODO: Remove unused method

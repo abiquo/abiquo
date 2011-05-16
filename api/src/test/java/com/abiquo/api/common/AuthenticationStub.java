@@ -24,16 +24,24 @@ package com.abiquo.api.common;
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 
-public class AuthenticationStub implements Authentication {
+import com.abiquo.api.spring.security.AbiquoUserDetails;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
-	private String name;
-	
-	public AuthenticationStub(String username)
-	{
-		this.name = username;
-	}
-	
-	@Override
+public class AuthenticationStub implements Authentication
+{
+
+    private String name;
+
+    private AbiquoUserDetails details = new AbiquoUserDetails();
+
+    public AuthenticationStub(String username)
+    {
+        this.name = username;
+        details.setUsername(username);
+        details.setAuthType(AuthType.ABIQUO.name());
+    }
+
+    @Override
     public String getName()
     {
         return name;
@@ -63,14 +71,14 @@ public class AuthenticationStub implements Authentication {
     public Object getDetails()
     {
         // TODO Auto-generated method stub
-        return null;
+        return details;
     }
 
     @Override
     public Object getPrincipal()
     {
         // TODO Auto-generated method stub
-        return null;
+        return details;
     }
 
     @Override
