@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
@@ -59,8 +58,6 @@ public class InfrastructureService
 
     public InfrastructureService()
     {
-        infrastructureCommand = new InfrastructureCommandImpl();
-
         try
         {
             infrastructureCommand =
@@ -74,7 +71,7 @@ public class InfrastructureService
         }
     }
 
-    private InfrastructureCommand proxyCommand(UserSession userSession)
+    private InfrastructureCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, infrastructureCommand,
             InfrastructureCommand.class);
@@ -156,7 +153,7 @@ public class InfrastructureService
                 command.getPhysicalMachinesByRack(session, rackId, filters);
 
             result.setData(commandResult);
-            
+
             result.setSuccess(Boolean.TRUE);
 
         }
@@ -698,7 +695,7 @@ public class InfrastructureService
      * @return a BasicResult containing the Physical machine state
      */
     public BasicResult checkVirtualInfrastructureState(final UserSession userSession,
-        Integer idPhysicalMachine)
+        final Integer idPhysicalMachine)
     {
         BasicResult basicResult = new BasicResult();
         basicResult.setSuccess(true);
@@ -707,8 +704,8 @@ public class InfrastructureService
         return basicResult;
     }
 
-    protected BasicResult deleteNotManagerVirtualMachines(UserSession userSession,
-        PhysicalMachine machine)
+    protected BasicResult deleteNotManagerVirtualMachines(final UserSession userSession,
+        final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),

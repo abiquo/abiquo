@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.eventing.EventingException;
@@ -101,36 +103,50 @@ public class InfrastructureWS implements IInfrastructureWS
 
     private final ErrorManager errorManager =
         ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
-    
+
     private static Integer bugTimeout;
 
-    static {
-        
+    static
+    {
+
         try
-        {           
-            bugTimeout = Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "10000"));
+        {
+            bugTimeout =
+                Integer.valueOf(System.getProperty("abiquo.virtualfactory.sleepTimeout", "10000"));
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             bugTimeout = 10000;
         }
-        
+
         System.setProperty("wink.client.connectTimeout", String.valueOf(0));
         System.setProperty("wink.client.readTimeout", String.valueOf(0));
     }
 
+    @Override
+    public BasicResult setVirtualMachineState(final VirtualMachine virtualMachine,
+        final String actionState) throws Exception
+    {
+        return setVirtualMachineState(virtualMachine, actionState, null);
+    }
 
-    /*
-     * public InfrastructureWS() throws JAXBException { binding = new XmlBinding(null,
-     * "org.dmtf.schemas.ovf.envelope._1"); }
+    /**
+     * Update the VM configuration without changing the VM state.
+     * 
+     * @param virtualMachine The VM to update
+     * @param additionalRasds The additionsl resources to consider
+     * @return
+     * @throws Exception
      */
+    @Override
+    public BasicResult updateVirtualMachineConfiguration(final VirtualMachine virtualMachine,
+        final List<ResourceAllocationSettingData> additionalRasds) throws Exception
+    {
+        return setVirtualMachineState(virtualMachine, null, additionalRasds);
+    }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.abicloudws.IInfrastructureWS#setVirtualMachineState(com.abiquo.abiserver
-     * .pojo.infrastructure.VirtualMachine, java.lang.String)
-     */
-    public BasicResult setVirtualMachineState(VirtualMachine virtualMachine, String actionState)
+    private BasicResult setVirtualMachineState(final VirtualMachine virtualMachine,
+        final String actionState, final List<ResourceAllocationSettingData> additionalRasds)
         throws Exception
     {
         BasicResult result = new BasicResult();
@@ -142,7 +158,7 @@ public class InfrastructureWS implements IInfrastructureWS
 
             if (checkResult)
             {
-                Document doc = changeMachineState(virtualMachine, actionState);
+                Document doc = changeMachineState(virtualMachine, actionState, additionalRasds);
                 Resource resource = findResource(virtualMachine);
                 if (resource != null)
                 {
@@ -153,9 +169,9 @@ public class InfrastructureWS implements IInfrastructureWS
                     errorManager.reportError(InfrastructureWS.resourceManager, result,
                         "resourceNotFound", virtualMachine.getName());
                 }
-                
+
                 Thread.sleep(bugTimeout);
-                
+
                 resource.put(doc);
             }
             else
@@ -179,7 +195,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @return a basic result
      */
     @Deprecated
-    private BasicResult createVirtualMachine(VirtualMachine virtualMachine)
+    private BasicResult createVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = null;
         try
@@ -207,7 +223,6 @@ public class InfrastructureWS implements IInfrastructureWS
                 .reportError(InfrastructureWS.resourceManager, result, "operationFailed", e);
         }
         return result;
-
     }
 
     /**
@@ -216,7 +231,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @param virtualMachine the virtual machine to delete
      * @return a basic result
      */
-    public BasicResult deleteVirtualMachine(VirtualMachine virtualMachine)
+    public BasicResult deleteVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = null;
         try
@@ -248,7 +263,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#editVirtualMachine(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
-    public BasicResult editVirtualMachine(VirtualMachine virtualMachine)
+    public BasicResult editVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
         try
@@ -293,19 +308,24 @@ public class InfrastructureWS implements IInfrastructureWS
      * @throws ParserConfigurationException, if the virtual machien can not be mapped to a OVF
      *             envelope document.
      */
-    private Document createEnvelopeDocument(VirtualMachine virtualMachine) throws JAXBException,
-        ParserConfigurationException
+    private Document createEnvelopeDocument(final VirtualMachine virtualMachine)
+        throws JAXBException, ParserConfigurationException
     {
         EnvelopeType envelope;
 
         try
         {
             // Creates an OVF envelope from the virtual machine parameters
+            // [ABICLOUDPREMIUM-1491] When editing a VM we do not perform a state change
             envelope =
                 OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
-                    virtualMachine,
-                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
-                        virtualMachine));
+                    virtualMachine, null, null);
+
+            // envelope =
+            // OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
+            // virtualMachine,
+            // OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
+            // virtualMachine), null);
         }
         catch (Exception e)
         {
@@ -326,13 +346,14 @@ public class InfrastructureWS implements IInfrastructureWS
      * @return the document to submit
      * @throws Exception
      */
-    private Document changeMachineState(VirtualMachine virtualMachine, String machineState)
+    private Document changeMachineState(final VirtualMachine virtualMachine,
+        final String machineState, final List<ResourceAllocationSettingData> additionalRasds)
         throws Exception
     {
 
         EnvelopeType envelope =
             OVFModelFactory.createOVFModelFromVirtualAppliance().changeMachineState(virtualMachine,
-                machineState);
+                machineState, additionalRasds);
 
         Document doc = ovfSerializer.bindToDocument(envelope, false); // TODO not namespaceaware
 
@@ -345,7 +366,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @param machineName
      * @return
      */
-    private SelectorSetType createSelectorId(String machineName)
+    private SelectorSetType createSelectorId(final String machineName)
     {
         // Creating a selector passing as the id the machine name
         SelectorType nameSelectorType = managementFactory.createSelectorType();
@@ -368,7 +389,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @throws DatatypeConfigurationException
      * @throws PersistenceException
      */
-    Resource findResource(VirtualMachine virtualMachine) throws SOAPException, JAXBException,
+    Resource findResource(final VirtualMachine virtualMachine) throws SOAPException, JAXBException,
         IOException, FaultException, DatatypeConfigurationException, PersistenceException
     {
         // Creating a selector passing as the id the machine name
@@ -389,7 +410,8 @@ public class InfrastructureWS implements IInfrastructureWS
      * @return the address destination
      * @throws PersistenceException
      */
-    private String getDestinationFromVM(VirtualMachine virtualMachine) throws PersistenceException
+    private String getDestinationFromVM(final VirtualMachine virtualMachine)
+        throws PersistenceException
     {
         String destination = null;
 
@@ -421,7 +443,8 @@ public class InfrastructureWS implements IInfrastructureWS
      */
     @Deprecated
     private BasicResult refreshVirtualAppliance(final VirtualAppliance virtualAppliance,
-        VirtualApplianceWS virtualApplianceWs, final boolean mustChangeState) throws Exception
+        final VirtualApplianceWS virtualApplianceWs, final boolean mustChangeState)
+        throws Exception
     {
         // Launching the refreshing operation for the virtual appliance
 
@@ -452,7 +475,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#forceRefreshVirtualMachineState(com.abiquo
      * .abiserver.pojo.infrastructure.VirtualMachine)
      */
-    public BasicResult forceRefreshVirtualMachineState(VirtualMachine virtualMachine)
+    public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
         logger.info("Refreshing the virtual machine state: {}", virtualMachine.getId());
         BasicResult result = new BasicResult();
@@ -499,7 +522,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#checkVirtualSystem(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
-    public Boolean checkVirtualSystem(VirtualMachine virtualMachine)
+    public Boolean checkVirtualSystem(final VirtualMachine virtualMachine)
     {
         return true;
     }
@@ -517,7 +540,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @throws VirtualApplianceFaultException The encapsulated exception.
      */
     private void encapsulateAndRethrowFault(final VirtualMachine vm, final FaultException ex,
-        final EventType event, String message) throws VirtualApplianceFaultException
+        final EventType event, final String message) throws VirtualApplianceFaultException
     {
         String exceptionMessage = null;
         try
@@ -622,7 +645,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @param actionState the VM action to translate
      * @return the trace Event
      */
-    private EventType translateActionToEvent(String actionState)
+    private EventType translateActionToEvent(final String actionState)
     {
         if (actionState == AbiCloudConstants.POWERUP_ACTION)
         {
@@ -649,7 +672,7 @@ public class InfrastructureWS implements IInfrastructureWS
      */
     @Override
     @Deprecated
-    public BasicResult addVirtualSystem(VirtualMachine virtualMachine) throws SOAPException,
+    public BasicResult addVirtualSystem(final VirtualMachine virtualMachine) throws SOAPException,
         JAXBException, IOException, FaultException, DatatypeConfigurationException,
         ParserConfigurationException
     {
@@ -670,9 +693,9 @@ public class InfrastructureWS implements IInfrastructureWS
     }
 
     @Override
-    public BasicResult removeVirtualSystem(VirtualMachine virtualMachine) throws JAXBException,
-        ParserConfigurationException, PersistenceException, SOAPException, IOException,
-        FaultException, DatatypeConfigurationException
+    public BasicResult removeVirtualSystem(final VirtualMachine virtualMachine)
+        throws JAXBException, ParserConfigurationException, PersistenceException, SOAPException,
+        IOException, FaultException, DatatypeConfigurationException
     {
         BasicResult result = new BasicResult();
         result.setSuccess(true);

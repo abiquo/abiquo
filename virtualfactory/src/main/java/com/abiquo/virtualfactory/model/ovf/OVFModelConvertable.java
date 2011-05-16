@@ -75,14 +75,12 @@ public interface OVFModelConvertable
      * @param virtualMachine
      * @param virtualSystem
      * @param configureDisks
-     * @return
      * @throws VirtualMachineException
      * @throws SectionException
      * @throws Exception
      */
-    public VirtualMachineConfiguration configureVirtualSystem(AbsVirtualMachine virtualMachine,
-        ContentType virtualSystem, boolean configureDisks) throws VirtualMachineException,
-        SectionException, Exception;
+    public void reconfigureVirtualSystem(AbsVirtualMachine virtualMachine, ContentType virtualSystem)
+        throws VirtualMachineException, SectionException, Exception;
 
     /**
      * NOTE: In the future certain measures would have to be taken if the Hypervisor crashes and all

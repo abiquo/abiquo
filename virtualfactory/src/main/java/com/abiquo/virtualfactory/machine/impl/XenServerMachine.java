@@ -327,6 +327,9 @@ public class XenServerMachine extends AbsVirtualMachine
                     vm.setVCPUsAtStartup(hypervisor.getConn(), Long.valueOf(newConfiguration
                         .getCpuNumber()));
                 }
+
+                // Reconfigure disks
+                reconfigDisks(vm, newConfiguration, config);
             }
             catch (Exception ex)
             {
@@ -1010,5 +1013,19 @@ public class XenServerMachine extends AbsVirtualMachine
             throw new VirtualMachineException("Could not get the state of Virtual Machine: "
                 + config.getMachineName(), ex);
         }
+    }
+
+    /**
+     * Reconfigure the disks of the given virtual machine.
+     * 
+     * @param vm The virtual machine to reconfigure.
+     * @param newConfig The new disk configuration.
+     * @param config The current disk configuration.
+     * @throws Exception If the disks cannot be reconfigured.
+     */
+    protected void reconfigDisks(final VM vm, final VirtualMachineConfiguration newConfig,
+        final VirtualMachineConfiguration config) throws Exception
+    {
+        // Do nothing
     }
 }

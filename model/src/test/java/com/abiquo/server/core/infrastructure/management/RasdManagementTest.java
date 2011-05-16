@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure.management;
 
+import org.testng.annotations.Test;
+
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -31,5 +33,29 @@ public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
     protected InstanceTester<RasdManagement> createEntityInstanceGenerator()
     {
         return new RasdManagementGenerator(getSeed());
+    }
+
+    @Test
+    public void testGenerationValues()
+    {
+        RasdManagement rasdm = createUniqueEntity();
+
+        rasdm.setAttachmentOrder(-1L);
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
+
+        rasdm.setAttachmentOrder(0L);
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
+
+        rasdm.setAttachmentOrder(1L);
+        assertEquals(rasdm.getAttachmentOrder(), 1L);
+    }
+
+    @Test
+    public void testNullPropertyAccess()
+    {
+        RasdManagement rasdm = createUniqueEntity();
+
+        assertNull(rasdm.getRasd().getGeneration());
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
     }
 }
