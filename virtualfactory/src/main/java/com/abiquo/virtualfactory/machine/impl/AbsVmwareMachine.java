@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.util.ExtendedAppUtil;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.VmwareHypervisor;
+import com.abiquo.virtualfactory.machine.impl.vcenter.VCenterBridge;
 import com.abiquo.virtualfactory.model.AbiCloudModel;
 import com.abiquo.virtualfactory.model.AbsVirtualMachine;
 import com.abiquo.virtualfactory.model.State;
@@ -218,6 +219,21 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         for (VirtualNIC vnic : config.getVnicList())
         {
             String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
+
+            // Create the port group in the vCenter and attach it to a dvSwitch
+            // <DVS>
+            Boolean dvsEnabled =
+                Boolean.valueOf(System.getProperty("abiquo.experimentaldvs.enabled"));
+            if (dvsEnabled && vnic.getVSwitchName().toLowerCase().startsWith("dvs"))
+            {
+                VCenterBridge vcenterBridge =
+                    VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
+                vcenterBridge.createPortGroupInVCenter(vnic.getVSwitchName(),
+                    vnic.getNetworkName(), vnic.getVlanTag());
+                continue;
+            }
+            // </DVS>
+
             // Try to find if a group corresponding the network name is found. If not create it.
             ManagedObjectReference networkMor = utils.getNetwork(portGroupName);
             ManagedObjectReference hostmor = utils.getHostSystemMOR();
