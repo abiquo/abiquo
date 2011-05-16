@@ -39,6 +39,7 @@ import com.abiquo.abiserver.pojo.main.MainResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * This command collects all actions related to Main Application actions
@@ -66,15 +67,20 @@ public class MainCommandImpl extends BasicCommand implements MainCommand
 
             // Getting the user that called this method
             UserHB userHB =
-                (UserHB) session.createCriteria(UserHB.class).add(
-                    Restrictions.eq("user", userSession.getUser())).uniqueResult();
+                (UserHB) session
+                    .createCriteria(UserHB.class)
+                    .add(Restrictions.eq("user", userSession.getUser()))
+                    .add(
+                        Restrictions.eq("authType",
+                            userSession.getAuthType() != null ? userSession.getAuthType()
+                                : AuthType.ABIQUO.name())).uniqueResult();
 
             // 2 - Retrieving the list of Roles
             // Only the Roles with a security level equal or less than the user who called this
             // method will be returned
             ArrayList<RoleHB> rolesHB =
-                (ArrayList<RoleHB>) session.createCriteria(RoleHB.class).addOrder(
-                    Order.asc("shortDescription")).list();
+                (ArrayList<RoleHB>) session.createCriteria(RoleHB.class)
+                    .addOrder(Order.asc("shortDescription")).list();
 
             for (RoleHB roleHB : rolesHB)
             {

@@ -27,6 +27,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * @author slizardo
@@ -44,6 +45,19 @@ public class SessionUtil
     @Deprecated
     public static UserHB findUserHBByName(String name)
     {
+        return findUserHBByName(name, AuthType.ABIQUO.name());
+    }
+
+    /**
+     * use the method in UserDAO instead of this to avoid Hibernate Session issues
+     * 
+     * @param name
+     * @deprecated
+     * @return
+     */
+    @Deprecated
+    public static UserHB findUserHBByName(String name, String authType)
+    {
         Session session = HibernateUtil.getSession();
         Transaction transaction = null;
 
@@ -52,8 +66,9 @@ public class SessionUtil
         transaction = session.beginTransaction();
 
         userHB =
-            (UserHB) HibernateUtil.getSession().createCriteria(UserHB.class).add(
-                Restrictions.eq("user", name)).uniqueResult();
+            (UserHB) HibernateUtil.getSession().createCriteria(UserHB.class)
+                .add(Restrictions.eq("user", name)).add(Restrictions.eq("authType", authType))
+                .uniqueResult();
 
         transaction.commit();
 
