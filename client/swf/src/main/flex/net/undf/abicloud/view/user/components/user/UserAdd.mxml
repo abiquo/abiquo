@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -68,6 +69,9 @@
             
             [Bindable]
             private var _restrict:Boolean;
+            
+            [Bindable]
+            private var _vdcAllowed:Boolean;
 
             /**
              * Initializes this form to create a new user
@@ -85,7 +89,7 @@
                 passwordRepeatInput.text = "";
                 emailInput.text = "";
                 descriptionInput.text = "";
-                activeInput.selected = true;0
+                activeInput.selected = true;
 
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
@@ -100,6 +104,8 @@
                 //this._restrict = false;
                 
                 BindingUtils.bindSetter(updateVirtualDataCenter,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
+                
+                requestRoles();
             }
             
             /**
@@ -254,6 +260,20 @@
             	
             }
             
+            private function requestRoles():void{
+            	var roleListOptions:ListRequest = new ListRequest();
+                roleListOptions.offset = 0;
+                roleListOptions.numberOfNodes = 10000;
+                roleListOptions.filterLike = "";
+                roleListOptions.asc = true;
+                roleListOptions.orderBy = "enterprise";            	
+            	
+            	var roleEvent:UserEvent = new UserEvent(UserEvent.GET_ROLES);
+           		roleEvent.enterprise = this._enterprise;
+            	roleEvent.roleListOptions = roleListOptions;
+            	dispatchEvent(roleEvent);
+            }
+            
             private function requestPrivilege():void{
             	var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_PRIVILEGE);
             	event.role = roleInput.selectedItem as Role;
@@ -264,7 +284,7 @@
             }
             
             private function setRestrictedVDC(value:Boolean):void{
-            	this._restrict = value;	
+            	this._vdcAllowed = value;	
             }
             
         ]]>
@@ -328,7 +348,9 @@
         <mx:FormItem 
         	id="vdcFormItem"
         	direction="horizontal"
-            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')">
+            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
+            visible="{this._vdcAllowed}"
+            includeInLayout="{this._vdcAllowed}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">

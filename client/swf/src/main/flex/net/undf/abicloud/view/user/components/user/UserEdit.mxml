@@ -37,6 +37,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
@@ -83,16 +84,17 @@
             
             [Bindable]
             private var _restrict:Boolean;
+            
+            [Bindable]
+            private var _vdcAllowed:Boolean;
 
 
             private function onCreationComplete():void{
-            	//SecuredPrivilegeAccess.checkElementAccess(
-            	
-            	//TO DO -> Role and Privileges
+
                 //Retrieve the list of virtual datacenter if you are not a Simple User
-                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION)){	                
+                /* if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION)){	                
 	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");             	
-               	}
+               	} */
             }
             /**
              * Initializes this form to create a new user
@@ -108,6 +110,7 @@
                 roleInput.selectedIndex = -1;
                 roleInput.prompt = this._userToEdit.role.name;
                 userInput.text = this._userToEdit.user;
+                requestPrivilege(this._userToEdit.role);
                 //Now user will be able to modify all the information without changing the pass
                 //passwordInput.text = this._userToEdit.pass;
                 //passwordRepeatInput.text = this._userToEdit.pass;
@@ -142,6 +145,8 @@
                 
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
+                
+                requestRoles();
             }
             
             /**
@@ -401,6 +406,37 @@
             	}
             	PopUpManager.centerPopUp(this);
             }
+            
+            private function requestRoles():void{
+            	var roleListOptions:ListRequest = new ListRequest();
+                roleListOptions.offset = 0;
+                roleListOptions.numberOfNodes = 10000;
+                roleListOptions.filterLike = "";
+                roleListOptions.asc = true;
+                roleListOptions.orderBy = "enterprise";            	
+            	
+            	var roleEvent:UserEvent = new UserEvent(UserEvent.GET_ROLES);
+           		roleEvent.enterprise = this._userToEdit.enterprise;
+            	roleEvent.roleListOptions = roleListOptions;
+            	dispatchEvent(roleEvent);
+            }
+            
+            private function requestPrivilege(role:Role = null):void{
+            	var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_PRIVILEGE);
+            	if(role){
+            		event.role = role;
+            	}else{
+            		event.role = roleInput.selectedItem as Role;
+            	}            	
+            	event.privilege = PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION;
+            	event.callback = setRestrictedVDC;
+            	dispatchEvent(event);
+            	validateForm();
+            }
+            
+            private function setRestrictedVDC(value:Boolean):void{
+            	this._vdcAllowed = value;	
+            }
         ]]>
     </mx:Script>
     
@@ -447,6 +483,7 @@
         	includeInLayout="{!this._isUserEditing}">
             <mx:ComboBox id="roleInput"
                 height="18"
+                change="requestPrivilege()"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
                 labelField="name" enabled="{this._roleEditable}"/>
         </mx:FormItem>
@@ -454,9 +491,9 @@
 		 <mx:FormItem 
         	id="vdcFormItem"
         	direction="horizontal"
-            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{!this._isUserEditing}"
-            includeInLayout="{!this._isUserEditing}">
+            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"            
+            visible="{this._vdcAllowed}"
+            includeInLayout="{this._vdcAllowed}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">
