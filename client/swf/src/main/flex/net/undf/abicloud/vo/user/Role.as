@@ -30,26 +30,22 @@ package net.undf.abicloud.vo.user
         /* ------------- Public atributes ------------- */
         public var id:int;
 
-        public var shortDescription:String;
-
-        public var largeDescription:String;
-
-        public var securityLevel:Number;
+        public var name:String;
         
-        /* ------------- CONSTANTS ------------- */
-        public static const SYS_ADMIN_ROLE:int = 1;
-       
-        public static const USER_ROLE:int = 2; 
-       
-        public static const ENTERPRISE_ROLE:int = 3;
+        public var idEnterprise:int;
+
+        public var ldap:String;
+
+        public var blocked:Boolean;
 
         /* ------------- Constructor ------------- */
         public function Role()
         {
             id = 0;
-            shortDescription = '';
-            largeDescription = '';
-            securityLevel = 0;
+            name = '';
+            idEnterprise = 0;
+            ldap = '';
+            blocked = false;
         }
 
     }

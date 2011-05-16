@@ -425,11 +425,8 @@
             	//if the virtualImage is shared, everyone can download it
             	if(_virtualImage.shared == 1){
             		downloadEnable = true;
-        		//else if the user is a sysadmin, he can download the image
-            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
-            		downloadEnable = true;
         		//else if the user enterprise id == virtualImage enterprise id
-            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            	} else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
             		downloadEnable = true;
             	}                
                 

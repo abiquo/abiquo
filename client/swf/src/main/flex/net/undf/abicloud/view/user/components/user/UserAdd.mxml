@@ -36,6 +36,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.managers.PopUpManager;
         	import mx.controls.Alert;
@@ -252,6 +254,19 @@
             	
             }
             
+            private function requestPrivilege():void{
+            	var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_PRIVILEGE);
+            	event.role = roleInput.selectedItem as Role;
+            	event.privilege = PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION;
+            	event.callback = setRestrictedVDC;
+            	dispatchEvent(event);
+            	validateForm();
+            }
+            
+            private function setRestrictedVDC(value:Boolean):void{
+            	this._restrict = value;	
+            }
+            
         ]]>
     </mx:Script>
     
@@ -306,7 +321,7 @@
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
                 labelField="name"
-                change="validateForm()"
+                change="requestPrivilege()"
                 prompt="@Resource(bundle='User', key='COMBOBOX_PROMPT_ROLE')"/>
         </mx:FormItem>
         

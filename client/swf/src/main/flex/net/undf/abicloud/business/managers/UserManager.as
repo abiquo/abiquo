@@ -229,6 +229,19 @@ package net.undf.abicloud.business.managers
             dispatchEvent(new Event(ROLES_UPDATED, true));
         }
         
+        private var _totalRoles:int;
+
+        [Bindable(event="totalRolesUpdated_UserManager")]
+        public function get totalRoles():int
+        {
+            return this._totalRoles;
+        }
+
+        public function set totalRoles(total:int):void
+        {
+            this._totalRoles = total;
+        }
+        
         ///////////////////////////////////
         //RELATED TO PRIVILEGES
 
