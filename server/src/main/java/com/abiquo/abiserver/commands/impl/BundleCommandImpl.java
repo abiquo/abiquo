@@ -73,7 +73,6 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
-
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.UserInfo;
 import com.abiquo.tracer.client.TracerFactory;
