@@ -145,7 +145,9 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 3);
         RoleDto r = entity.getCollection().iterator().next();
+
         assertEquals(r.getName(), "sysRole");
+
     }
 
 }

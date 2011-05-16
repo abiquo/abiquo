@@ -70,12 +70,12 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdapDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -715,6 +715,12 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildRoleLdapLinks(final Integer roleId, final RoleLdapDto roleLdap)
     {
         return null;
     }

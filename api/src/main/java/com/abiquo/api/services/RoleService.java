@@ -36,6 +36,7 @@ import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleLdap;
 
 @Service
 @Transactional(readOnly = true)
@@ -72,6 +73,17 @@ public class RoleService extends DefaultApiService
             flushErrors();
         }
         return role;
+    }
+
+    public RoleLdap getRoleLdap(final Integer id)
+    {
+        RoleLdap roleLdap = enterpriseRep.findRoleLdapById(id);
+        if (roleLdap == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
+            flushErrors();
+        }
+        return roleLdap;
     }
 
     private Enterprise findEnterprise(final Integer enterpriseId)

@@ -126,7 +126,19 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-    
+
+    protected void update(final Object... entities)
+    {
+        EntityManager em = getEntityManager();
+        rollbackActiveTransaction(em);
+        em.getTransaction().begin();
+        for (Object entity : entities)
+        {
+            em.merge(entity);
+        }
+        em.getTransaction().commit();
+    }
+
     @BeforeMethod
     public void setup()
     {
@@ -135,7 +147,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         // system property in the jetty runtime!!!
         System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
     }
-    
+
     @AfterMethod
     public void tearDown()
     {
@@ -150,11 +162,12 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
             "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
-            "role_ldap", "role", "privilege", "enterprise","enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
-            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
-            "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
-            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register"};
+            "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
+            "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
+            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
+            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
+            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
+            "alerts", "heartbeatlog", "icon", "register"};
 
         tearDown(entities);
     }
