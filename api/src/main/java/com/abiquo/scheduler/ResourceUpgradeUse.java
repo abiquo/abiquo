@@ -210,7 +210,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // Discover the tag of the vlan if it is the first address to be deployed
             if (vlanNetwork.getTag() == null)
             {
-                List<VLANNetwork> publicVLANs = vlanNetworkDao.findPublicVLANNetworksByRack(rack);
+                List<VLANNetwork> publicVLANs = vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
                 List<Integer> vlansTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlansTagsUsed.addAll(getPublicVLANTagssFROMVLANNetworkList(publicVLANs));
                 
