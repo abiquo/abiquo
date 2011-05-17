@@ -104,6 +104,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * machine name
      */
     private String machineName;
+    
+  
 
     /**
      * Instantiates a new Hyper-v machine.

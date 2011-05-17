@@ -47,6 +47,7 @@ import com.hyper9.jwbem.SWbemServices;
 
 public class HyperVMachineTest extends AbsMachineTest
 {
+   
     @Override
     protected VirtualMachineConfiguration createConfiguration()
     {
@@ -62,6 +63,7 @@ public class HyperVMachineTest extends AbsMachineTest
                 "",
                 DiskFormat.VHD_FLAT.getDiskFormatUri()); // XXX: Disk format ?
         // normal disk type
+        virtualDisk.setHa();
 
         List<VirtualDisk> disks = new LinkedList<VirtualDisk>();
         disks.add(virtualDisk);
@@ -95,7 +97,7 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         // HYPERVISOR configuration properties
         // hvURL = "http://10.60.1.152";
-        hvURL = "http://10.60.1.121";
+        hvURL = "http://10.60.1.122";
         hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
 
@@ -103,7 +105,7 @@ public class HyperVMachineTest extends AbsMachineTest
         deployVirtualMachine = true;
         // id = UUID.fromString("10000000-1000-1000-1000-100000000000");
         id = UUID.randomUUID();
-        name = UUID.randomUUID().toString();
+        name = UUID.randomUUID().toString(); // Name should come from Server if we are deploying without copying disk?
         rdPort = 3390;
         ramAllocationUnits = 256 * 1024 * 1024;
         cpuNumber = 1;
@@ -111,8 +113,10 @@ public class HyperVMachineTest extends AbsMachineTest
         macAddress2 = "00155D929001";
 
         // DISK configuration properties
-        diskRepository = "192.168.1.45:/opt/vm_repository/";
-        diskImagePath = "1/httprs.bcn.abiquo.com/centos_vhd/centos.vhd";
+        diskRepository = "10.60.1.72:/opt/vm_repository/";
+        
+        diskImagePath = "1/rs.bcn.abiquo.com/nostalgia/formats/Nostalgia-flat.vmdk-VHD_SPARSE.vhd";        
+//        diskImagePath = "1/httprs.bcn.abiquo.com/centos_vhd/centos.vhd";
         diskId = "50000000-5000-5000-5000-500000000000";
         diskCapacity = Long.parseLong("2147483648");
 
@@ -120,6 +124,11 @@ public class HyperVMachineTest extends AbsMachineTest
         iscsiTestLocation =
             "192.168.1.222/iqn.1986-03.com.sun:02:f0ad49ea-0767-409c-9b82-b86650fd1e5f";
         iscsiUUID = "80000000-8000-8000-8000-800000000000";
+        
+        // From dev-nix.properties
+        // hypervisors.hyperv.repositoryLocation=//nfs-devel.bcn.abiquo.com/vm_repository/        
+        System
+        .setProperty("abiquo.virtualfactory.hyperv.repositoryLocation","//10.60.1.72/vm_repository/");
     }
 
     @Override
@@ -631,8 +640,9 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         HyperVMachineTest test = new HyperVMachineTest();
         // test.testExecuteRemoteProcess();
-        // test.setUp();
-        // test.tearDown();
+        test.configureTestForDeployInHA();
+         test.setUp();
+         test.tearDown();
         // test.testInitiator();
         // test.testDeleteFile();
         // test.testAddRemoveISCSI();
@@ -647,13 +657,21 @@ public class HyperVMachineTest extends AbsMachineTest
 //        test.detectFolderInNetworkDrive("abq.datastoreuuid.toma", "Z:");
 //        test.detectNetworkDrives();
         
-        test.testWQL();
+//        test.testWQL();
         
 //        test.createFolder("Z:\\fistropecadordelapradera");
         
 //        test.createFileAsVHD("Z:\\fistrovhd");
         
 //        test.copyFolder();
+    }
+    
+    /**
+     * for HA we already have a name and a vdisk for the vmachine
+     */
+    private void configureTestForDeployInHA(){
+        name = "ABQ_deploynocopy";
+        
     }
     
     /**
