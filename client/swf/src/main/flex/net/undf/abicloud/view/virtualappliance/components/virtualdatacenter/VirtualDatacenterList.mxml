@@ -48,7 +48,6 @@
         <![CDATA[
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
-        	import net.undf.abicloud.security.SecurableResource;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.binding.utils.ChangeWatcher;
             import mx.collections.ArrayCollection;

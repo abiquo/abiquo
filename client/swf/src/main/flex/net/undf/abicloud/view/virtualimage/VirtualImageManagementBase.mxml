@@ -39,7 +39,6 @@
         <![CDATA[
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
-        	import net.undf.abicloud.security.SecurableResource;
         	import net.undf.abicloud.vo.user.Role;
         	import mx.effects.Resize;
         	import mx.events.EffectEvent;
@@ -89,7 +88,6 @@
             
             private var _resizeEffect:Resize;
             
-            private var _categoriesButtons:SecurableResource;
 
             //The selected Datacenter
             [Bindable]
@@ -114,19 +112,16 @@
                 
                 BindingUtils.bindSetter(showHideBundleContainer,this,"hasSlaveImage");
                 
-                //Secure buttons to manage categories
-                 this._categoriesButtons = new SecurableResource("MANAGE_CATEGORIES_BUTTONS","APPLIANCE_LIBRARY");
+              
                  makeUnavailable();
             }
             
             private function makeUnavailable():void{
-            	if (!_categoriesButtons || !_categoriesButtons.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
-                {
-                	this.addCategoryButton.visible = false;
-                	this.addCategoryButton.includeInLayout = false;
-                	this.deleteCategoryButton.visible = false;
-                	this.deleteCategoryButton.includeInLayout = false;	
-                }            
+            	this.addCategoryButton.visible = false;
+            	this.addCategoryButton.includeInLayout = false;
+            	this.deleteCategoryButton.visible = false;
+            	this.deleteCategoryButton.includeInLayout = false;	
+           
             }
             
             private function showHideBundleContainer(value:Boolean):void{
