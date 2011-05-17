@@ -183,11 +183,28 @@ public class VirtualMachineService extends DefaultApiService
     {
         if (vm.getState() == State.IN_PROGRESS)
         {
-            throw new PreconditionFailedException(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
+            flushErrors();
         }
 
         vm.setState(State.IN_PROGRESS);
         updateVirtualMachine(vm);
+    }
+
+    public void validMachineStateChange(State oldState, State newState)
+    {
+        if (oldState == State.NOT_DEPLOYED)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
+            flushErrors();
+        }
+        if(((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
+            || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
+            || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
+            flushErrors();
+        }
     }
 
     /**
@@ -206,7 +223,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
         Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
-        
+
         VirtualAppliance vapp = contanerVirtualAppliance(vm);
         EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
