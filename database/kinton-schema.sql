@@ -1595,7 +1595,7 @@ CREATE TABLE  `kinton`.`volume_management` (
   `idManagement` int(10) unsigned NOT NULL,
   `usedSize` bigint(20) unsigned NOT NULL default 0,
   `idSCSI` varchar(256) NOT NULL,
-  `state` int(11) NOT NULL,
+  `state` int(11) NOT NULL COMMENT 'possible states: 0 (detached) and 1 (attached).',
   `idStorage` varchar(40) NOT NULL,
   `idImage` int(4) unsigned default NULL,
   `version_c` int(11) default 0,
@@ -2862,7 +2862,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 		IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NOT NULL AND OLD.idVirtualDataCenter != NEW.idVirtualDataCenter AND OLD.idVirtualApp = NEW.idVirtualApp THEN
 			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1, volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1, volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
-			IF idState = 2 THEN
+			IF idState = 1 THEN
 				UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 				UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			END IF;
@@ -2876,7 +2876,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			IF OLD.idVirtualApp IS NULL AND NEW.idVirtualApp IS NOT NULL THEN       
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualApp = NEW.idVirtualApp;      
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
-			    IF idState = 2 THEN
+			    IF idState = 1 THEN
 			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = NEW.idVirtualApp;
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    END IF;                         
@@ -2885,7 +2885,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			IF OLD.idVirtualApp IS NOT NULL AND NEW.idVirtualApp IS NULL THEN
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
-			    IF idState = 2 THEN
+			    IF idState = 1 THEN
 			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			    END IF;                 
@@ -2895,7 +2895,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    -- Stateful are always Attached 
-			    IF idState = 2 THEN
+			    IF idState = 1 THEN
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;                     
 			    END IF;
 			END IF;
@@ -2904,7 +2904,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;   
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    -- Stateful are always Attached
-			    IF idState = 2 THEN
+			    IF idState = 1 THEN
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;                     
 			    END IF;
 			END IF;                         
@@ -3024,7 +3024,7 @@ CREATE TRIGGER `kinton`.`update_rasd_update_stats` AFTER UPDATE ON `kinton`.`ras
                 FROM volume_management vm, rasd_management rm
                 WHERE vm.idManagement  = rm.idManagement
                 AND NEW.instanceID = rm.idResource
-                AND (vm.state = 1 OR vm.state = 2);
+                AND (vm.state = 1);
                 UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal+ NEW.limitResource - OLD.limitResource WHERE idDataCenter = idDataCenterObj;                
                 IF isReserved != 0 THEN
                 -- si hay volAttached se debe actualizar el storageUsed
@@ -3526,7 +3526,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     AND vm.idManagement = rm.idManagement
     AND r.instanceID = rm.idResource
     AND rm.idResourceType = 8
-    AND (vm.state = 1 OR vm.state = 2)
+    AND (vm.state = 1)
     AND sd.idDataCenter = idDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsTotal
@@ -3711,7 +3711,7 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     WHERE rm.idManagement = vm.idManagement
     AND vdc.idVirtualDataCenter = rm.idVirtualDataCenter
     AND r.instanceID = rm.idResource
-    AND (vm.state = 1 OR vm.state = 2)
+    AND (vm.state = 1)
     AND vdc.idEnterprise = idEnterpriseObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsReserved
@@ -3822,7 +3822,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     WHERE rm.idManagement = vm.idManagement
     AND rm.idVirtualApp IS NOT NULL
     AND rm.idVirtualDataCenter = idVirtualDataCenterObj
-    AND state = 2;
+    AND state = 1;
     --
     SELECT IF (SUM(cpuHard) IS NULL, 0, SUM(cpuHard)), IF (SUM(ramHard) IS NULL, 0, SUM(ramHard)), IF (SUM(hdHard) IS NULL, 0, SUM(hdHard)), IF (SUM(storageHard) IS NULL, 0, SUM(storageHard)), IF (SUM(vlanHard) IS NULL, 0, SUM(vlanHard)) INTO vCpuReserved, memoryReserved, localStorageReserved, extStorageReserved, vlanReserved
     FROM virtualdatacenter 
@@ -3841,7 +3841,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     FROM rasd_management rm, rasd r, volume_management vm
     WHERE rm.idManagement = vm.idManagement    
     AND r.instanceID = rm.idResource
-    AND (vm.state = 1 OR vm.state = 2)
+    AND (vm.state = 1)
     AND rm.idVirtualDataCenter = idVirtualDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsUsed
@@ -3944,7 +3944,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     FROM volume_management vm, rasd_management rm
     WHERE rm.idManagement = vm.idManagement
     AND rm.idVirtualApp = idVirtualAppObj
-    AND state = 2;
+    AND state = 1;
 
     -- Inserts stats row
     INSERT INTO vapp_enterprise_stats (idVirtualApp,idEnterprise,idVirtualDataCenter,vappName,vdcName,vmCreated,vmActive,volAssociated,volAttached)
