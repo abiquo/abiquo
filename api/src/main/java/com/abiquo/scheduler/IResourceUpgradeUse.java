@@ -46,8 +46,10 @@ public interface IResourceUpgradeUse
     
     /**
      * Do not update the datastore utilization.
+     * @param sourceMachineId, the machine id of the source (where the HA vmachine were deployed)
+     * 
      * */
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine);
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceMachineId);
     
     
     /**

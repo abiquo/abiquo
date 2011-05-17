@@ -38,6 +38,7 @@ import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 
@@ -64,6 +65,10 @@ public class VirtualMachineFactory
 
     @Autowired
     HypervisorDAO hypervisorDao;
+
+    @Autowired
+    // TODO move to InfastructureRep
+    DatastoreDAO datastoreDao;
 
     @Autowired
     SystemPropertyService systemPropertyService;
@@ -101,13 +106,22 @@ public class VirtualMachineFactory
         final Hypervisor hypervisor = machine.getHypervisor();
         virtualMachine.setHypervisor(hypervisor);
 
-        // if (virtualMachine.getDatastore() == null)
-        // {
-        final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
-        final Datastore datastore = selectDatastore(machine, datastoreRequ);
-        virtualMachine.setDatastore(datastore);
-        // }
-        // else its an HA reallocation, the datastore was already
+        if (virtualMachine.getDatastore() == null)
+        {
+            final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
+            final Datastore datastore = selectDatastore(machine, datastoreRequ);
+            virtualMachine.setDatastore(datastore);
+        }
+        else
+        // its an HA reallocation, the datastore was already
+        {
+            final String currentDatastoreUuid = virtualMachine.getDatastore().getDatastoreUUID();
+
+            // find the shared datastore on the target machine
+            Datastore datastore = datastoreDao.findDatastore(currentDatastoreUuid, machine);
+
+            virtualMachine.setDatastore(datastore);
+        }
 
         final int vdrpPort = selectVrdpPort(machine);
         virtualMachine.setVdrpIP(hypervisor.getIpService());
