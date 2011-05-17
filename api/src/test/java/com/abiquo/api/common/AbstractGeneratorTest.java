@@ -124,6 +124,18 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         em.getTransaction().commit();
     }
 
+    protected void update(final Object... entities)
+    {
+        EntityManager em = getEntityManager();
+        closeActiveTransaction(em);
+        em.getTransaction().begin();
+        for (Object entity : entities)
+        {
+            em.merge(entity);
+        }
+        em.getTransaction().commit();
+    }
+
     @BeforeMethod
     public void setup()
     {

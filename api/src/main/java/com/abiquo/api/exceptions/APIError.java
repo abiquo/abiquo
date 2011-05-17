@@ -236,11 +236,16 @@ public enum APIError
 
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
 
-    VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
+    VOLUME_SSM_CREATE_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume"),
+        "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
+        "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
+        "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
+        "VOL-7", "The volume cannot be deleted because it is in a stateful process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
+        "VOL-8",
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(

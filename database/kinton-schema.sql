@@ -1668,7 +1668,7 @@ CREATE TABLE  `kinton`.`vappstateful_conversions` (
   `idVirtualApp` int(10) unsigned NOT NULL,
   `state` varchar(50) NOT NULL,
   `subState` varchar(50) NOT NULL,
-  `idUser` int(1) unsigned NOT NULL,
+  `idUser` int(10) unsigned NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApp_FK3` (`idVirtualApp`),

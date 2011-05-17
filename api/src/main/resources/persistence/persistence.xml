@@ -36,6 +36,12 @@
 		<class>com.abiquo.server.core.cloud.NodeVirtualImage</class>		
 		<!-- end: cloud infrastructure -->
 
+	    <!-- stateful -->
+	    <class>com.abiquo.server.core.cloud.stateful.DiskStatefulConversion</class>
+	    <class>com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion</class>
+	    <class>com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion</class>
+	    <!-- end: stateful -->
+    
 		<!-- enterprise -->
     	<class>com.abiquo.server.core.enterprise.Enterprise</class>
 		<class>com.abiquo.server.core.enterprise.Role</class>

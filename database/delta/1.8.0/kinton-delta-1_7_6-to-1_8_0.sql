@@ -1,3 +1,6 @@
+-- [ABICLOUDPREMIUM-1502]
+-- Fix int precision
+ALTER TABLE `kinton`.`vappstateful_conversions` MODIFY COLUMN `idUser` int(10) unsigned NOT NULL;
 
 -- [ABICLOUDPREMIUM-1598]
 -- ALTER TABLE `kinton`.`enterprise` ADD `isReservationRestricted` tinyint(1) DEFAULT 0;
@@ -1115,4 +1118,3 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
    END;
 |
 DELIMITER ;
-

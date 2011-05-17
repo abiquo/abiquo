@@ -31,7 +31,12 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
@@ -56,6 +61,12 @@ public class StorageRep extends DefaultRepBase
     private VolumeManagementDAO volumeDAO;
 
     @Autowired
+    private DiskStatefulConversionDAO diskStatefulConversionDAO;
+
+    @Autowired
+    private NodeVirtualImageDAO nodeVirtualImageDAO;
+
+    @Autowired
     private RasdDAO rasdDAO;
 
     @Autowired
@@ -76,6 +87,7 @@ public class StorageRep extends DefaultRepBase
         this.poolDAO = new StoragePoolDAO(entityManager);
         this.volumeDAO = new VolumeManagementDAO(entityManager);
         this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
+        this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -175,6 +187,16 @@ public class StorageRep extends DefaultRepBase
         final FilterOptions filters)
     {
         return volumeDAO.getVolumesByEnterprise(id, filters);
+    }
+
+    public DiskStatefulConversion getDiskStatefulConversionByVolume(final VolumeManagement volume)
+    {
+        return diskStatefulConversionDAO.getByVolume(volume.getId());
+    }
+
+    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualImage virtualImage)
+    {
+        return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
     }
 
     public Tier insertTier(final Tier tier)

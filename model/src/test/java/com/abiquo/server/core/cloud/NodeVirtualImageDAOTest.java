@@ -21,9 +21,13 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -33,16 +37,32 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class NodeVirtualImageDAOTest extends
     DefaultDAOTestBase<NodeVirtualImageDAO, NodeVirtualImage>
 {
+    private VirtualMachineGenerator virtualMachineGenerator;
+
+    private VirtualApplianceGenerator virtualApplianceGenerator;
+
+    private VirtualAppliance vapp;
+
+    private VirtualMachine vmachine;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+
+        virtualMachineGenerator = new VirtualMachineGenerator(getSeed());
+        virtualApplianceGenerator = new VirtualApplianceGenerator(getSeed());
+
+        vapp = virtualApplianceGenerator.createUniqueInstance();
+        vmachine = virtualMachineGenerator.createUniqueInstance();
+
+        saveVirtualAppliance(vapp);
+        saveVirtualMachine(vmachine);
     }
 
     @Override
-    protected NodeVirtualImageDAO createDao(EntityManager entityManager)
+    protected NodeVirtualImageDAO createDao(final EntityManager entityManager)
     {
         return new NodeVirtualImageDAO(entityManager);
     }
@@ -65,4 +85,91 @@ public class NodeVirtualImageDAOTest extends
         return (NodeVirtualImageGenerator) super.eg();
     }
 
+    @Test
+    public void testFindVirtualAppliance()
+    {
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine);
+        ds().persistAll(nodeVirtualImage);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        VirtualAppliance result = nodeVirtualImageDAO.findVirtualAppliance(vmachine);
+
+        assertNotNull(result);
+        virtualApplianceGenerator.assertAllPropertiesEqual(result, vapp);
+    }
+
+    @Test
+    public void testFindVirtualApplianceWithUnexistentVirtualMachine()
+    {
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine);
+        ds().persistAll(nodeVirtualImage);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        VirtualMachine vmachineUnexisting = virtualMachineGenerator.createUniqueInstance();
+        VirtualAppliance result = nodeVirtualImageDAO.findVirtualAppliance(vmachineUnexisting);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testFindByVirtualMachine()
+    {
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine);
+        ds().persistAll(nodeVirtualImage);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        NodeVirtualImage result = nodeVirtualImageDAO.findByVirtualMachine(vmachine);
+
+        assertNotNull(result);
+        assertAllEntityPropertiesEqual(result, nodeVirtualImage);
+    }
+
+    @Test
+    public void testFindByUnexistingVirtualMachine()
+    {
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine);
+        ds().persistAll(nodeVirtualImage);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        VirtualMachine vmachineUnexisting = virtualMachineGenerator.createUniqueInstance();
+        NodeVirtualImage result = nodeVirtualImageDAO.findByVirtualMachine(vmachineUnexisting);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testFindByVirtualImage()
+    {
+        NodeVirtualImage nvi1 = eg().createInstance(vapp, vmachine);
+        NodeVirtualImage nvi2 = eg().createInstance(vapp, vmachine);
+        NodeVirtualImage nvi3 = eg().createInstance(vapp, vmachine);
+
+        ds().persistAll(nvi1, nvi2, nvi3);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        List<NodeVirtualImage> result =
+            nodeVirtualImageDAO.findByVirtualImage(vmachine.getVirtualImage());
+
+        assertNotNull(result);
+        assertEquals(result.size(), 3);
+    }
+
+    private void saveVirtualAppliance(final VirtualAppliance vapp)
+    {
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        virtualApplianceGenerator.addAuxiliaryEntitiesToPersist(vapp, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vapp);
+    }
+
+    private void saveVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        virtualMachineGenerator.addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, virtualMachine);
+    }
 }

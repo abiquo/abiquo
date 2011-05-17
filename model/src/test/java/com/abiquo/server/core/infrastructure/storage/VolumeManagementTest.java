@@ -24,6 +24,7 @@ package com.abiquo.server.core.infrastructure.storage;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -110,4 +111,14 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         volume.disassociate();
     }
 
+    @Test
+    public void testIsStateful()
+    {
+        VolumeManagement volume = createUniqueEntity();
+        volume.setVirtualImage(null);
+        assertFalse(volume.isStateful());
+
+        volume.setVirtualImage(new VirtualImage(null));
+        assertTrue(volume.isStateful());
+    }
 }

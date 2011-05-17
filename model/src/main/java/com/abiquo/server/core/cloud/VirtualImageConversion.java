@@ -35,6 +35,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.Required;
@@ -51,14 +52,14 @@ public class VirtualImageConversion extends DefaultEntityBase
 
     }
 
-    protected VirtualImageConversion(VirtualImage image, DiskFormatType targetType,
-        String targetPath)
+    protected VirtualImageConversion(final VirtualImage image, final DiskFormatType targetType,
+        final String targetPath)
     {
         setImage(image);
         setTargetType(targetType);
         setTargetPath(targetPath);
         setTimestamp(new Date());
-        setState(State.ENQUEUED);
+        setState(ConversionState.ENQUEUED);
     }
 
     @Id
@@ -83,7 +84,7 @@ public class VirtualImageConversion extends DefaultEntityBase
         return image;
     }
 
-    public void setImage(VirtualImage virtualImage)
+    public void setImage(final VirtualImage virtualImage)
     {
         this.image = virtualImage;
     }
@@ -104,7 +105,7 @@ public class VirtualImageConversion extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(nullable = false)
-    private State state;
+    private ConversionState state;
 
     @Column(nullable = false)
     private Date timestamp;
@@ -117,7 +118,7 @@ public class VirtualImageConversion extends DefaultEntityBase
         return sourceType;
     }
 
-    public void setSourceType(DiskFormatType sourceType)
+    public void setSourceType(final DiskFormatType sourceType)
     {
         this.sourceType = sourceType;
     }
@@ -127,7 +128,7 @@ public class VirtualImageConversion extends DefaultEntityBase
         return targetType;
     }
 
-    public void setTargetType(DiskFormatType targetType)
+    public void setTargetType(final DiskFormatType targetType)
     {
         this.targetType = targetType;
     }
@@ -137,7 +138,7 @@ public class VirtualImageConversion extends DefaultEntityBase
         return sourcePath;
     }
 
-    public void setSourcePath(String sourcePath)
+    public void setSourcePath(final String sourcePath)
     {
         this.sourcePath = sourcePath;
     }
@@ -147,19 +148,19 @@ public class VirtualImageConversion extends DefaultEntityBase
         return targetPath;
     }
 
-    public void setTargetPath(String targetPath)
+    public void setTargetPath(final String targetPath)
     {
         this.targetPath = targetPath;
     }
 
-    public State getState()
+    public ConversionState getState()
     {
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final ConversionState enqueued)
     {
-        this.state = state;
+        this.state = enqueued;
     }
 
     public Date getTimestamp()
@@ -167,7 +168,7 @@ public class VirtualImageConversion extends DefaultEntityBase
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp)
+    public void setTimestamp(final Date timestamp)
     {
         this.timestamp = timestamp;
     }
@@ -177,13 +178,8 @@ public class VirtualImageConversion extends DefaultEntityBase
         return size;
     }
 
-    public void setSize(Long size)
+    public void setSize(final Long size)
     {
         this.size = size;
-    }
-
-    public static enum State
-    {
-        ENQUEUED, FINISHED, FAILED;
     }
 }

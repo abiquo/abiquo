@@ -22,6 +22,8 @@ package com.abiquo.api.tracer.hierarchy;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Base class for all {@link HierarchyProcessor}.
  * 
@@ -39,7 +41,10 @@ public abstract class AbstractHierarchyProcessor<T> implements HierarchyProcesso
         if (resourceId != null && !resourceId.isEmpty())
         {
             String resourceName = getResourceName(resourceId);
-            resourceData.put(resourcePrefix, resourceId + "|" + resourceName);
+            if (resourceName != null && !StringUtils.isBlank(resourceName))
+            {
+                resourceData.put(resourcePrefix, resourceId + "|" + resourceName);
+            }
         }
     }
 
