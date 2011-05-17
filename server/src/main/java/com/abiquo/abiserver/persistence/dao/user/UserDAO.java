@@ -69,6 +69,12 @@ public interface UserDAO extends DAO<UserHB, Integer>
      */
     List<UserHB> getUsersByUserRol(String rol, Integer enterprise);
 
+    /**
+     * @param name
+     * @return UserHB
+     * @deprecated use {@link #findUserHBByName(String, String)} which included the authType.
+     */
+    @Deprecated
     public UserHB findUserHBByName(String name);
 
     /**
