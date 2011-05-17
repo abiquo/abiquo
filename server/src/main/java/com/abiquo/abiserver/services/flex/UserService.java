@@ -332,4 +332,27 @@ public class UserService
             return e.getResult();
         }
     }
+
+    /**
+     * Checks if a Role has a Privilege
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @param String namePrivilege the name of a Privilege to check
+     * @return A DataResult object containing a Boolean if Role has a Privilege
+     */
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        final String namePrivilege)
+    {
+        UserCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.checkRolePrivilege(userSession, idRole, namePrivilege);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
 }

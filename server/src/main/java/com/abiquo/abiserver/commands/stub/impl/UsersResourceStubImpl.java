@@ -484,4 +484,32 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         return dataResult;
     }
+
+    @Override
+    public DataResult<Boolean> checkRolePrivilege(final Integer idRole, final String namePrivilege)
+    {
+        DataResult<Boolean> basicResult = new DataResult<Boolean>();
+
+        DataResult<Role> dr = getRole(idRole);
+
+        Boolean hasPrivilege = false;
+
+        if (dr.getData().getPrivileges() != null && dr.getData().getPrivileges().isEmpty())
+        {
+            for (Privilege p : dr.getData().getPrivileges())
+            {
+                if (p.getName().equals(namePrivilege))
+                {
+                    hasPrivilege = true;
+                    break;
+                }
+            }
+        }
+
+        basicResult.setData(hasPrivilege);
+        basicResult.setSuccess(true);
+
+        return basicResult;
+    }
+
 }
