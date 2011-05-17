@@ -45,13 +45,13 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
 
     @PersistenceContext
     @Override
-    protected void setEntityManager(EntityManager entityManager)
+    protected void setEntityManager(final EntityManager entityManager)
     {
         super.setEntityManager(entityManager);
     }
 
     /* default constructor for Spring */
-    protected DefaultDAOBase(Class<T> persistentClass)
+    protected DefaultDAOBase(final Class<T> persistentClass)
     {
         super(persistentClass);
         this.managed = true;
@@ -61,13 +61,13 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
      * @SuppressWarnings("deprecation") public Connection getConnection() { return
      * getSession().connection(); }
      */
-    protected DefaultDAOBase(Class<T> persistentClass, EntityManager entityManager)
+    protected DefaultDAOBase(final Class<T> persistentClass, final EntityManager entityManager)
     {
         super(persistentClass, entityManager);
     }
 
     // TODO: PAG, fix this by changing parameter type for base class isManaged
-    public boolean isManaged2(PersistentEntity< ? > entity)
+    public boolean isManaged2(final PersistentEntity< ? > entity)
     {
         assert entity != null;
         assert isOpen();
@@ -103,26 +103,27 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         return !TransactionSynchronizationManager.isSynchronizationActive();
     }
 
-    public T findUniqueByProperty(String propertyName, String value)
+    public T findUniqueByProperty(final String propertyName, final String value)
     {
         Criterion criterion = Restrictions.eq(propertyName, value);
         return findUniqueByCriterions(criterion);
     }
 
-    protected Criteria createNestedCriteria(String... propertyNames)
+    protected Criteria createNestedCriteria(final String... propertyNames)
     {
         Criteria crit = getSession().createCriteria(getPersistentClass());
         return createNestedCriteria(crit, propertyNames);
     }
 
-    protected Criteria createNestedCriteria(Order order, String... propertyNames)
+    protected Criteria createNestedCriteria(final Order order, final String... propertyNames)
     {
         Criteria crit = getSession().createCriteria(getPersistentClass());
         crit.addOrder(order);
         return createNestedCriteria(crit, propertyNames);
     }
 
-    private Criteria createNestedCriteria(Criteria baseCriteria, String... propertyNames)
+    private Criteria createNestedCriteria(final Criteria baseCriteria,
+        final String... propertyNames)
     {
         Criteria crit = baseCriteria;
         for (String property : propertyNames)
@@ -138,7 +139,7 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         return count(criteria);
     }
 
-    protected Long count(Criteria criteria)
+    protected Long count(final Criteria criteria)
     {
         criteria.setProjection(Projections.rowCount());
 

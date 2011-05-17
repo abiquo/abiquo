@@ -21,24 +21,16 @@
 
 package com.abiquo.server.core.cloud.stateful;
 
-import javax.persistence.EntityManager;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-import org.springframework.stereotype.Repository;
-
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-
-@Repository("jpaNodeVirtualImageStatefulConversionDAO")
-public class NodeVirtualImageStatefulConversionDAO extends
-    DefaultDAOBase<Integer, NodeVirtualImageStatefulConversion>
+public class VirtualApplianceStatefulConversionTest extends
+    DefaultEntityTestBase<VirtualApplianceStatefulConversion>
 {
-    public NodeVirtualImageStatefulConversionDAO()
-    {
-        super(NodeVirtualImageStatefulConversion.class);
-    }
 
-    public NodeVirtualImageStatefulConversionDAO(final EntityManager entityManager)
+    @Override
+    protected InstanceTester<VirtualApplianceStatefulConversion> createEntityInstanceGenerator()
     {
-        super(NodeVirtualImageStatefulConversion.class, entityManager);
+        return new VirtualApplianceStatefulConversionGenerator(getSeed());
     }
-
 }

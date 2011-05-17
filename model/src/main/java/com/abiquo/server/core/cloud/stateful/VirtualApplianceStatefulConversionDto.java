@@ -24,11 +24,12 @@ package com.abiquo.server.core.cloud.stateful;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.State;
 
-@XmlRootElement(name = "nodeVirtualImageStatefulConversion")
-public class NodeVirtualImageStatefulConversionDto extends SingleResourceTransportDto
+@XmlRootElement(name = "virtualApplianceStatefulConversion")
+public class VirtualApplianceStatefulConversionDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = -7925016301617309142L;
+    private static final long serialVersionUID = -7434980341091937089L;
 
     private Integer id;
 
@@ -42,16 +43,40 @@ public class NodeVirtualImageStatefulConversionDto extends SingleResourceTranspo
         this.id = id;
     }
 
-    private String newName;
+    private int idUser;
 
-    public String getNewName()
+    public int getIdUser()
     {
-        return newName;
+        return idUser;
     }
 
-    public void setNewName(final String newName)
+    public void setIdUser(final int idUser)
     {
-        this.newName = newName;
+        this.idUser = idUser;
+    }
+
+    private State subState;
+
+    public State getSubState()
+    {
+        return subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
+
+    private State state;
+
+    public State getState()
+    {
+        return state;
+    }
+
+    public void setState(final State state)
+    {
+        this.state = state;
     }
 
 }

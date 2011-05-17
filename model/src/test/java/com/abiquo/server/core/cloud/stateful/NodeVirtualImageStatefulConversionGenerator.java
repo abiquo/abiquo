@@ -1,3 +1,24 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.server.core.cloud.stateful;
 
 import java.util.List;
@@ -13,22 +34,23 @@ import com.softwarementors.commons.testng.AssertEx;
 public class NodeVirtualImageStatefulConversionGenerator extends
     DefaultEntityGenerator<NodeVirtualImageStatefulConversion>
 {
-    VirtualApplicanceStatefulConversionGenerator virtualApplicanceStatefulConversionGenerator;
 
-    NodeVirtualImageGenerator nodeVirtualImageGenerator;
+    private NodeVirtualImageGenerator nodeVirtualImageGenerator;
 
-    TierGenerator tierGenerator;
+    private TierGenerator tierGenerator;
+
+    private VirtualApplianceStatefulConversionGenerator virtualApplianceStatefulConversionGenerator;
 
     public NodeVirtualImageStatefulConversionGenerator(final SeedGenerator seed)
     {
         super(seed);
 
-        virtualApplicanceStatefulConversionGenerator =
-            new VirtualApplicanceStatefulConversionGenerator(seed);
-
         nodeVirtualImageGenerator = new NodeVirtualImageGenerator(seed);
 
         tierGenerator = new TierGenerator(seed);
+
+        virtualApplianceStatefulConversionGenerator =
+            new VirtualApplianceStatefulConversionGenerator(seed);
     }
 
     @Override
@@ -36,27 +58,29 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         final NodeVirtualImageStatefulConversion obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2,
-            NodeVirtualImageStatefulConversion.DISK_STATEFUL_CONVERSION_PROPERTY,
-            NodeVirtualImageStatefulConversion.NEW_NAME_PROPERTY,
-            NodeVirtualImageStatefulConversion.TIER_PROPERTY,
-            NodeVirtualImageStatefulConversion.VIRTUAL_APPLIANCE_STATEFUL_CONVERSION_PROPERTY,
-            NodeVirtualImageStatefulConversion.ID_PROPERTY,
-            NodeVirtualImageStatefulConversion.NODE_VIRTUAL_IMAGE_PROPERTY,
-            NodeVirtualImageStatefulConversion.VIRTUAL_IMAGE_CONVERSION_PROPERTY);
+            NodeVirtualImageStatefulConversion.NEW_NAME_PROPERTY);
+
+        nodeVirtualImageGenerator.assertAllPropertiesEqual(obj1.getNodeVirtualImage(), obj2
+            .getNodeVirtualImage());
+        tierGenerator.assertAllPropertiesEqual(obj1.getTier(), obj2.getTier());
+        virtualApplianceStatefulConversionGenerator.assertAllPropertiesEqual(obj1
+            .getVirtualApplianceStatefulConversion(), obj2.getVirtualApplianceStatefulConversion());
     }
 
     @Override
     public NodeVirtualImageStatefulConversion createUniqueInstance()
     {
-        String newName = newString(nextSeed(), 0, 255);
-        VirtualApplicanceStatefulConversion vappStatefulConversion =
-            virtualApplicanceStatefulConversionGenerator.createUniqueInstance();
+        String newName =
+            newString(nextSeed(), NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MIN,
+                NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MAX);
         NodeVirtualImage nodeVirtualImage = nodeVirtualImageGenerator.createUniqueInstance();
+        VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
+            virtualApplianceStatefulConversionGenerator.createUniqueInstance();
         Tier tier = tierGenerator.createUniqueInstance();
 
         NodeVirtualImageStatefulConversion nodeVirtualImageStatefulConversion =
             new NodeVirtualImageStatefulConversion(newName,
-                vappStatefulConversion,
+                virtualApplianceStatefulConversion,
                 nodeVirtualImage,
                 tier);
 
@@ -69,12 +93,6 @@ public class NodeVirtualImageStatefulConversionGenerator extends
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualApplicanceStatefulConversion vappStatefulConversion =
-            entity.getVirtualApplianceStatefulConversion();
-        virtualApplicanceStatefulConversionGenerator.addAuxiliaryEntitiesToPersist(
-            vappStatefulConversion, entitiesToPersist);
-        entitiesToPersist.add(vappStatefulConversion);
-
         NodeVirtualImage nodeVirtualImage = entity.getNodeVirtualImage();
         nodeVirtualImageGenerator
             .addAuxiliaryEntitiesToPersist(nodeVirtualImage, entitiesToPersist);
@@ -83,6 +101,12 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         Tier tier = entity.getTier();
         tierGenerator.addAuxiliaryEntitiesToPersist(tier, entitiesToPersist);
         entitiesToPersist.add(tier);
+
+        VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
+            entity.getVirtualApplianceStatefulConversion();
+        virtualApplianceStatefulConversionGenerator.addAuxiliaryEntitiesToPersist(
+            virtualApplianceStatefulConversion, entitiesToPersist);
+        entitiesToPersist.add(virtualApplianceStatefulConversion);
     }
 
 }

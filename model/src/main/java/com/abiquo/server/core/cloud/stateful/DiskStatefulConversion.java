@@ -1,15 +1,42 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.server.core.cloud.stateful;
 
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -30,49 +57,63 @@ public class DiskStatefulConversion extends DefaultEntityBase
     }
 
     public DiskStatefulConversion(final String imagePath, final VolumeManagement volume,
-        final State state, final Date timestamp)
+        final ConversionState state, final Date timestamp)
     {
         setImagePath(imagePath);
         setVolume(volume);
         setState(state);
-        setTimestamp(timestamp);
+        // setTimestamp(timestamp);
     }
 
-    public final static String TIMESTAMP_PROPERTY = "timestamp";
+    private final static String ID_COLUMN = "id";
 
-    private final static boolean TIMESTAMP_REQUIRED = true;
+    @Id
+    @Column(name = ID_COLUMN, nullable = false)
+    @GeneratedValue
+    private Integer id;
 
-    private final static int TIMESTAMP_LENGTH_MIN = 0;
-
-    private final static int TIMESTAMP_LENGTH_MAX = 255;
-
-    private final static boolean TIMESTAMP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    private final static String TIMESTAMP_COLUMN = "convertionTimestamp";
-
-    @Column(name = TIMESTAMP_COLUMN, nullable = !TIMESTAMP_REQUIRED, length = TIMESTAMP_LENGTH_MAX)
-    private Date timestamp;
-
-    @Required(value = TIMESTAMP_REQUIRED)
-    @Length(min = TIMESTAMP_LENGTH_MIN, max = TIMESTAMP_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = TIMESTAMP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public Date getTimestamp()
+    @Override
+    public Integer getId()
     {
-        return this.timestamp;
+        return this.id;
     }
 
-    private void setTimestamp(final Date timestamp)
-    {
-        this.timestamp = timestamp;
-    }
+    // public final static String TIMESTAMP_PROPERTY = "timestamp";
+    //
+    // private final static boolean TIMESTAMP_REQUIRED = true;
+    //
+    // private final static int TIMESTAMP_LENGTH_MIN = 0;
+    //
+    // private final static int TIMESTAMP_LENGTH_MAX = 255;
+    //
+    // private final static boolean TIMESTAMP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    //
+    // private final static String TIMESTAMP_COLUMN = "convertionTimestamp";
+    //
+    // @Column(name = TIMESTAMP_COLUMN, nullable = !TIMESTAMP_REQUIRED, length =
+    // TIMESTAMP_LENGTH_MAX)
+    // private Date timestamp;
+    //
+    // @Required(value = TIMESTAMP_REQUIRED)
+    // @Length(min = TIMESTAMP_LENGTH_MIN, max = TIMESTAMP_LENGTH_MAX)
+    // @LeadingOrTrailingWhitespace(allowed = TIMESTAMP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // public Date getTimestamp()
+    // {
+    // return this.timestamp;
+    // }
+    //
+    // private void setTimestamp(final Date timestamp)
+    // {
+    // this.timestamp = timestamp;
+    // }
 
     public final static String IMAGE_PATH_PROPERTY = "imagePath";
 
     private final static boolean IMAGE_PATH_REQUIRED = true;
 
-    private final static int IMAGE_PATH_LENGTH_MIN = 0;
+    /* package */final static int IMAGE_PATH_LENGTH_MIN = 0;
 
-    private final static int IMAGE_PATH_LENGTH_MAX = 255;
+    /* package */final static int IMAGE_PATH_LENGTH_MAX = 255;
 
     private final static boolean IMAGE_PATH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -89,83 +130,49 @@ public class DiskStatefulConversion extends DefaultEntityBase
         return this.imagePath;
     }
 
-    private void setImagePath(final String imagePath)
+    public void setImagePath(final String imagePath)
     {
         this.imagePath = imagePath;
-    }
-
-    public final static String ID_PROPERTY = "id";
-
-    private final static boolean ID_REQUIRED = true;
-
-    private final static String ID_COLUMN = "id";
-
-    private final static int ID_MIN = Integer.MIN_VALUE;
-
-    private final static int ID_MAX = Integer.MAX_VALUE;
-
-    @Column(name = ID_COLUMN, nullable = !ID_REQUIRED)
-    @Range(min = ID_MIN, max = ID_MAX)
-    private Integer id;
-
-    public Integer getId()
-    {
-        return this.id;
-    }
-
-    private void setId(final Integer id)
-    {
-        this.id = id;
     }
 
     public final static String STATE_PROPERTY = "state";
 
     private final static boolean STATE_REQUIRED = true;
 
-    private final static int STATE_LENGTH_MIN = 0;
-
-    private final static int STATE_LENGTH_MAX = 255;
-
-    private final static boolean STATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
     private final static String STATE_COLUMN = "state";
 
-    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED, length = STATE_LENGTH_MAX)
-    private State state;
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
+    private ConversionState state;
 
-    @Required(value = STATE_REQUIRED)
-    @Length(min = STATE_LENGTH_MIN, max = STATE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = STATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public State getState()
+    public ConversionState getState()
     {
         return this.state;
     }
 
-    private void setState(final State state)
+    public void setState(final ConversionState state)
     {
         this.state = state;
     }
 
-    public final static String MANAGEMENT_PROPERTY = "volumeManagement";
+    public final static String VOLUME_PROPERTY = "volume";
 
-    private final static boolean MANAGEMENT_REQUIRED = true;
+    private final static boolean VOLUME_REQUIRED = true;
 
-    private final static String MANAGEMENT_COLUMN = "idManagement";
+    private final static String VOLUME_ID_COLUMN = "idManagement";
 
-    private final static int MANAGEMENT_MIN = Integer.MIN_VALUE;
-
-    private final static int MANAGEMENT_MAX = Integer.MAX_VALUE;
-
-    @Column(name = MANAGEMENT_COLUMN, nullable = !MANAGEMENT_REQUIRED)
-    @Range(min = MANAGEMENT_MIN, max = MANAGEMENT_MAX)
+    @JoinColumn(name = VOLUME_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_volume")
     private VolumeManagement volume;
 
+    @Required(value = VOLUME_REQUIRED)
     public VolumeManagement getVolume()
     {
         return this.volume;
     }
 
-    private void setVolume(final VolumeManagement volume)
+    public void setVolume(final VolumeManagement volume)
     {
         this.volume = volume;
     }

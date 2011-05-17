@@ -27,18 +27,18 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaNodeVirtualImageStatefulConversionDAO")
-public class NodeVirtualImageStatefulConversionDAO extends
-    DefaultDAOBase<Integer, NodeVirtualImageStatefulConversion>
+@Repository("jpaVirtualApplianceStatefulConversionDAO")
+public class VirtualApplianceStatefulConversionDAO extends
+    DefaultDAOBase<Integer, VirtualApplianceStatefulConversion>
 {
-    public NodeVirtualImageStatefulConversionDAO()
+    public VirtualApplianceStatefulConversionDAO()
     {
-        super(NodeVirtualImageStatefulConversion.class);
+        super(VirtualApplianceStatefulConversion.class);
     }
 
-    public NodeVirtualImageStatefulConversionDAO(final EntityManager entityManager)
+    public VirtualApplianceStatefulConversionDAO(final EntityManager entityManager)
     {
-        super(NodeVirtualImageStatefulConversion.class, entityManager);
+        super(VirtualApplianceStatefulConversion.class, entityManager);
     }
 
 }

@@ -30,8 +30,8 @@ import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class NodeVirtualImageStatefulConversionDAOTest extends
-    DefaultDAOTestBase<NodeVirtualImageStatefulConversionDAO, NodeVirtualImageStatefulConversion>
+public class VirtualApplianceStatefulConversionDAOTest extends
+    DefaultDAOTestBase<VirtualApplianceStatefulConversionDAO, VirtualApplianceStatefulConversion>
 {
 
     @Override
@@ -42,15 +42,15 @@ public class NodeVirtualImageStatefulConversionDAOTest extends
     }
 
     @Override
-    protected NodeVirtualImageStatefulConversionDAO createDao(final EntityManager entityManager)
+    protected VirtualApplianceStatefulConversionDAO createDao(final EntityManager entityManager)
     {
-        return new NodeVirtualImageStatefulConversionDAO(entityManager);
+        return new VirtualApplianceStatefulConversionDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<NodeVirtualImageStatefulConversion> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<VirtualApplianceStatefulConversion> createEntityInstanceGenerator()
     {
-        return new NodeVirtualImageStatefulConversionGenerator(getSeed());
+        return new VirtualApplianceStatefulConversionGenerator(getSeed());
     }
 
     @Override
@@ -60,9 +60,9 @@ public class NodeVirtualImageStatefulConversionDAOTest extends
     }
 
     @Override
-    public NodeVirtualImageStatefulConversionGenerator eg()
+    public VirtualApplianceStatefulConversionGenerator eg()
     {
-        return (NodeVirtualImageStatefulConversionGenerator) super.eg();
+        return (VirtualApplianceStatefulConversionGenerator) super.eg();
     }
 
 }

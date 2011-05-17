@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -110,6 +111,17 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         checkInvalidStateTransition(volume, "associate");
         checkInvalidStateTransition(volume, "disassociate");
         checkInvalidStateTransition(volume, "mount");
+    }
+
+    @Test
+    public void testIsStateful()
+    {
+        VolumeManagement volume = createUniqueEntity();
+        volume.setVirtualImage(null);
+        assertFalse(volume.isStateful());
+
+        volume.setVirtualImage(new VirtualImage(null));
+        assertTrue(volume.isStateful());
     }
 
     private void checkInvalidStateTransition(final VolumeManagement volume, final String method)

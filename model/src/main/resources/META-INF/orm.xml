@@ -56,6 +56,12 @@
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.VolumeManagement"></orm:entity>
     <!-- end: storage -->
     
+    <!-- stateful -->
+    <orm:entity class="com.abiquo.server.core.cloud.stateful.DiskStatefulConversion"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion"></orm:entity>
+    <!-- end: stateful -->
+    
     <!-- workload -->
     <orm:entity class="com.abiquo.server.core.scheduler.EnterpriseExclusionRule"></orm:entity>
     <orm:entity class="com.abiquo.server.core.scheduler.FitPolicyRule"></orm:entity>

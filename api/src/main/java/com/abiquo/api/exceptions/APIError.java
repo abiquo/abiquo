@@ -243,7 +243,10 @@ public enum APIError
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
         "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
         "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
-        "VOL-6", "Could not physically delete the volume from the target storage device")
+        "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
+        "VOL-7", "The volume cannot be deleted because it is in a stateful process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
+        "VOL-8",
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance")
 
     ;
 

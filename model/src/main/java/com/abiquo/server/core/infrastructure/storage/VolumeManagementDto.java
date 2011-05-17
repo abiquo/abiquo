@@ -28,7 +28,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "volume")
 @XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
-"availableSizeInMB", "usedSizeInMB", "idScsi"})
+"availableSizeInMB", "usedSizeInMB", "idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
@@ -50,6 +50,9 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     private long usedSizeInMB;
 
     private String idScsi;
+
+    // TODO: vmahe. Replace this field by a link when the VirtualImage Resource is created
+    private Integer idImage;
 
     public Integer getId()
     {
@@ -139,6 +142,16 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = description;
+    }
+
+    public Integer getIdImage()
+    {
+        return idImage;
+    }
+
+    public void setIdImage(final Integer idImage)
+    {
+        this.idImage = idImage;
     }
 
 }
