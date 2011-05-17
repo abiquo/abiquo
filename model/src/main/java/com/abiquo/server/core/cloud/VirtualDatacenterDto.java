@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.cloud;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.HypervisorType;
@@ -41,6 +42,7 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
 
     private HypervisorType hypervisorType;
 
+    
     private VLANNetworkDto vlan;
 
     public Integer getId()
@@ -78,6 +80,7 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
         this.vlan = vlan;
     }
 
+    @XmlElement(name = "network")
     public VLANNetworkDto getVlan()
     {
         return vlan;

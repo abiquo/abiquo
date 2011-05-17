@@ -37,7 +37,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -55,7 +55,7 @@ import com.softwarementors.commons.test.SeedGenerator;
 public class PopulateInfrastructure extends PopulateConstants
 {
     @Autowired
-    private DatacenterRep dcRep;
+    private InfrastructureRep dcRep;
 
     @Autowired
     private DatacenterLimitsDAO dcLimitsDao;

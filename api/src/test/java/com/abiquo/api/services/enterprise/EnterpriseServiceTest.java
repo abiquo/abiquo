@@ -32,7 +32,7 @@ import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthenticationStub;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ExtendedAPIException;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -121,7 +121,7 @@ public class EnterpriseServiceTest extends AbstractGeneratorTest
             service.removeEnterprise(e.getId());
             Assert.fail("");
         }
-        catch (ExtendedAPIException e)
+        catch (APIException e)
         {
             Assert.assertEquals(e.getErrors().iterator().next(),
                 APIError.ENTERPRISE_DELETE_OWN_ENTERPRISE);

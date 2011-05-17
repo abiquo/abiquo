@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -47,7 +48,13 @@ public class SystemPropertyService extends DefaultApiService
 
     public SystemProperty getSystemProperty(Integer id)
     {
-        return repo.findById(id);
+        SystemProperty property = repo.findById(id);
+        if (property == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_SYSTEM_PROPERTY);
+            flushErrors();
+        }
+        return property;        
     }
 
     public SystemProperty findByName(String name)
@@ -65,7 +72,7 @@ public class SystemPropertyService extends DefaultApiService
     {
         if (repo.existsAnyWithName(dto.getName()))
         {
-            errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+            addValidationErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -85,7 +92,7 @@ public class SystemPropertyService extends DefaultApiService
 
         if (repo.existsAnyOtherWithName(old, dto.getName()))
         {
-            errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+            addConflictErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
             flushErrors();
         }
 
@@ -106,7 +113,7 @@ public class SystemPropertyService extends DefaultApiService
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
         {
-            validationErrors.addAll(property.getValidationErrors());
+            addValidationErrors(property.getValidationErrors());
         }
         flushErrors();
 
@@ -129,7 +136,7 @@ public class SystemPropertyService extends DefaultApiService
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
         {
-            validationErrors.addAll(property.getValidationErrors());
+            addValidationErrors(property.getValidationErrors());
         }
         flushErrors();
 
@@ -159,7 +166,7 @@ public class SystemPropertyService extends DefaultApiService
             // Check that there are no duplicate properties
             if (repo.existsAnyWithName(property.getName()))
             {
-                errors.add(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
+                addConflictErrors(APIError.SYSTEM_PROPERTIES_DUPLICATED_NAME);
                 flushErrors();
             }
 
@@ -171,7 +178,7 @@ public class SystemPropertyService extends DefaultApiService
     {
         if (!systemProperty.isValid())
         {
-            validationErrors.addAll(systemProperty.getValidationErrors());
+            addValidationErrors(systemProperty.getValidationErrors());
         }
         flushErrors();
     }

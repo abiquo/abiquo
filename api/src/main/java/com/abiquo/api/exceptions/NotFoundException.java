@@ -21,14 +21,26 @@
 
 package com.abiquo.api.exceptions;
 
-import javax.ws.rs.core.Response.Status;
+import java.util.Set;
+
+import com.abiquo.model.transport.error.CommonError;
 
 public class NotFoundException extends APIException
 {
     private static final long serialVersionUID = -6673459980522505070L;
 
-    public NotFoundException(APIError error)
+    public NotFoundException(APIError apiError)
     {
-        super(Status.NOT_FOUND, error);
+        super(apiError);
+    }
+    
+    public NotFoundException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public NotFoundException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

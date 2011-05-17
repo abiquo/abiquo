@@ -40,6 +40,7 @@ import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkConfigurationType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType;
+import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
@@ -48,7 +49,6 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.CIMResourceAllocationSettingDataType;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.Caption;
 import org.slf4j.Logger;
@@ -60,9 +60,9 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
-import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.ChangeableTypeEnum;
+import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -84,8 +84,8 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -101,7 +101,7 @@ public class OVFGeneratorService
     VirtualDatacenterRep vdcRepo;
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     VirtualMachineRep vmRepo;

@@ -118,7 +118,7 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
         createDatastore(dto1);
         ClientResponse response = createDatastore(dto2);
 
-        assertEquals(response.getStatusCode(), 400);
+        assertEquals(response.getStatusCode(), 409);
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
         Assert.assertError(errors, errorCode);

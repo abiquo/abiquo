@@ -45,7 +45,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -75,7 +75,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     DatastoreDAO datastoreDao;
@@ -147,7 +147,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
-            throw new ResourceUpgradeUseException(e);
+            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
         }
     }
 
@@ -171,7 +171,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         catch (final Exception e) // HibernateException NotEnoughResourcesException
         // NoSuchObjectException
         {
-            throw new ResourceUpgradeUseException(e);
+            throw new ResourceUpgradeUseException("Can not update resource utilization" + e.getMessage());
         }
     }
 

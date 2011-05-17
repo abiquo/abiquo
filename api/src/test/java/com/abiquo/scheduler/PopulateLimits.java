@@ -35,7 +35,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 @Component
 @Transactional
@@ -49,7 +49,7 @@ public class PopulateLimits extends PopulateConstants
     VirtualDatacenterRep vdcRep;
 
     @Autowired
-    DatacenterRep dcRep;
+    InfrastructureRep dcRep;
 
     @Autowired
     DatacenterLimitsDAO dcLimitDao;
