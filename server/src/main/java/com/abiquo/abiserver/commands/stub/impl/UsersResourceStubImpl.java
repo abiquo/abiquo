@@ -279,7 +279,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         RoleDto dto = null;
         if (!cache.containsKey(roleUri))
         {
-            dto = get(roleUri).getEntity(RoleDto.class);
+            dto = get(roleUri, LINK_MEDIA_TYPE).getEntity(RoleDto.class);
             cache.put(roleUri, dto);
         }
         else
@@ -342,7 +342,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         String uri = createRoleLink(roleId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
@@ -484,4 +484,32 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         return dataResult;
     }
+
+    @Override
+    public DataResult<Boolean> checkRolePrivilege(final Integer idRole, final String namePrivilege)
+    {
+        DataResult<Boolean> basicResult = new DataResult<Boolean>();
+
+        DataResult<Role> dr = getRole(idRole);
+
+        Boolean hasPrivilege = false;
+
+        if (dr.getData().getPrivileges() != null && dr.getData().getPrivileges().isEmpty())
+        {
+            for (Privilege p : dr.getData().getPrivileges())
+            {
+                if (p.getName().equals(namePrivilege))
+                {
+                    hasPrivilege = true;
+                    break;
+                }
+            }
+        }
+
+        basicResult.setData(hasPrivilege);
+        basicResult.setSuccess(true);
+
+        return basicResult;
+    }
+
 }

@@ -31,8 +31,6 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
@@ -83,7 +81,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(resolveRoleURI(12345));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(RoleResource.LINK_MEDIA_TYPE).get();
         assertEquals(404, response.getStatusCode());
     }
 
@@ -103,7 +101,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(resolveRoleURI(role.getId()));
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = resource.accept(RoleResource.LINK_MEDIA_TYPE).get();
 
         RoleDto dto = response.getEntity(RoleDto.class);
 
@@ -133,7 +131,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
         Resource resource = client.resource(href);
 
-        RoleDto dto = resource.accept(MediaType.APPLICATION_XML).get(RoleDto.class);
+        RoleDto dto = resource.accept(RoleResource.LINK_MEDIA_TYPE).get(RoleDto.class);
 
         assertNotNull(dto.getLinks());
 

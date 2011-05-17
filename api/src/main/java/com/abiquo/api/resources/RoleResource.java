@@ -48,6 +48,8 @@ import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdap;
+import com.abiquo.server.core.enterprise.RoleWithLdapDto;
 
 @Parent(RolesResource.class)
 @Path(RoleResource.ROLE_PARAM)
@@ -70,6 +72,7 @@ public class RoleResource extends AbstractResource
     RoleService service;
 
     @GET
+    @Produces(RolesResource.LINK_MEDIA_TYPE)
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -171,6 +174,30 @@ public class RoleResource extends AbstractResource
             dto = addLinks(restBuilder, dto);
         }
         return dto;
+    }
+
+    public static RoleWithLdapDto createTransferObject(final Role role, final RoleLdap ldap,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        RoleDto dto = ModelTransformer.transportFromPersistence(RoleDto.class, role);
+
+        if (role.getEnterprise() != null)
+        {
+            dto = addLinks(restBuilder, dto, role.getEnterprise().getId());
+        }
+        else
+        {
+            dto = addLinks(restBuilder, dto);
+        }
+
+        RoleWithLdapDto rwlDto = new RoleWithLdapDto(dto);
+        if (ldap != null)
+        {
+            rwlDto.setLdap(ldap.getRoleLdap());
+            rwlDto.setIdLdap(ldap.getId());
+        }
+
+        return rwlDto;
     }
 
     public static Role createPersistenceObject(final RoleDto role) throws Exception

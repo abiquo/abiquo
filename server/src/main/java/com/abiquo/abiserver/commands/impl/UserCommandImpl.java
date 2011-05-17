@@ -496,4 +496,29 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         return proxy.getPrivilegesByRole(roleId);
     }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.com.abiquo.abiserver.commands.UserCommandPremium#checkRolePrivilege
+     * (com.abiquo.abiserver.pojo.authentication.UserSession, java.lang.Integer, java.lang.String)
+     */
+    @Override
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        final String namePrivilege)
+    {
+        BasicResult basicResult = new BasicResult();
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        basicResult = proxy.checkRolePrivilege(idRole, namePrivilege);
+        if (basicResult.getSuccess())
+        {
+            basicResult.setMessage(resourceManager.getMessage("checkRolePrivilege.success"));
+        }
+
+        return basicResult;
+    }
 }

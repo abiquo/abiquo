@@ -80,7 +80,7 @@ public class RoleDto extends SingleResourceTransportDto
         this.blocked = blocked;
     }
 
-    private String ldap;
+    protected String ldap;
 
     public String getLdap()
     {
