@@ -108,9 +108,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine)
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceMachineId)
     {
-        updateUse(virtualApplianceId, virtualMachine, true);
+        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
+
+        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources on the original hypervisor       
+        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+
     }
 
     private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)

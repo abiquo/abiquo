@@ -109,14 +109,20 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
      */
     public Datastore findDatastore(final String uuid, final Machine machine)
     {
-        Criteria criteria = inMachine(machine).add(sharedUuid(uuid));
-
+        Criteria criteria = inMachine(machine, uuid);
         return getSingleResult(criteria);
     }
 
     private Criteria inMachine(Machine machine)
     {
         return createCriteria().createCriteria(Datastore.MACHINES_PROPERTY).add(
+            Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+
+    }
+    
+    private Criteria inMachine(Machine machine, String uuid)
+    {
+        return createCriteria(sharedUuid(uuid)).createCriteria(Datastore.MACHINES_PROPERTY).add(
             Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
 
     }
