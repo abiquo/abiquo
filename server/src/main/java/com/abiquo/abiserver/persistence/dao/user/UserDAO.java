@@ -88,4 +88,13 @@ public interface UserDAO extends DAO<UserHB, Integer>
      * @return UserHB.
      */
     String getEmailByUserName(String username, String authType);
+
+    /**
+     * Users uniqueness is username + authType.
+     * 
+     * @param name login.
+     * @param authType {@link AuthType} value.
+     * @return UserHB
+     */
+    public UserHB findUserHBByName(String name, String authType);
 }

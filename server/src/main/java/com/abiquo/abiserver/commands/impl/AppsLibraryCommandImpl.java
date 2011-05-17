@@ -730,7 +730,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             factory.beginConnection();
 
             vimage = factory.getVirtualImageDAO().findById(idVirtualImage);
-            user = factory.getUserDAO().findUniqueByProperty("user", userSession.getUser());
+            String[] parameters = {"user", "authType"};
+            Object[] values = {userSession.getUser(), userSession.getAuthType()};
+            user = factory.getUserDAO().findUniqueByProperties(parameters, values);
 
             factory.endConnection();
         }

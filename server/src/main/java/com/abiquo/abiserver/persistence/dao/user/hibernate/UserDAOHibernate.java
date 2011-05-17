@@ -114,8 +114,15 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
 
     public UserHB findUserHBByName(String name)
     {
+        return findUserHBByName(name, AuthType.ABIQUO.name());
+    }
+
+    public UserHB findUserHBByName(String name, String authType)
+    {
         return (UserHB) getSession().createCriteria(UserHB.class)
-            .add(Restrictions.eq("user", name)).uniqueResult();
+            .add(Restrictions.eq("user", name))
+            .add(Restrictions.eq("authType", authType != null ? authType : AuthType.ABIQUO.name()))
+            .uniqueResult();
     }
 
     @SuppressWarnings("unchecked")

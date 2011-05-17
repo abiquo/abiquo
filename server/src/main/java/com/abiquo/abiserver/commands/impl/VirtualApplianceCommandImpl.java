@@ -619,7 +619,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         try
         {
-            UserHB owner = SessionUtil.findUserHBByName(userSession.getUser());
+            UserHB owner =
+                SessionUtil.findUserHBByName(userSession.getUser(), userSession.getAuthType());
 
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
@@ -1986,7 +1987,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             daoFactory.beginConnection();
 
             UserDAO userDAO = daoFactory.getUserDAO();
-            UserHB userHB = userDAO.findUserHBByName(userSession.getUser());
+            UserHB userHB =
+                userDAO.findUserHBByName(userSession.getUser(), userSession.getAuthType());
             userId = userHB.getIdUser();
 
             daoFactory.endConnection();
