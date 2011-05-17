@@ -1053,7 +1053,7 @@ public class OVFGeneratorService
         Hypervisor hypervisor = vmachine.getHypervisor();        
         Machine pm = hypervisor.getMachine();
         
-        Integer datacenterId = pm.getId();
+        Integer datacenterId = pm.getDatacenter().getId();
         
         Datacenter dc = datacenterRepo.findById(datacenterId);
         

@@ -37,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.State;
@@ -67,10 +69,12 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
  * <li>network resources on the virtual datacenter</li>
  * </ul>
  */
-@Component
 // @Transactional(readOnly = false, propagation = Propagation.REQUIRED, isolation =
 // Isolation.READ_UNCOMMITTED)
 // @Transactional//(readOnly=false)
+
+@Component
+//@Transactional(readOnly=false, propagation=Propagation.REQUIRED)
 public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
 
@@ -135,13 +139,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             {
                 updateUsageDatastore(virtualMachine, false);
                 updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
+
+                virtualMachine.setState(State.IN_PROGRESS);
             }
             else
             {
                 updateNewtorkingResourcesHA(physicalMachine, virtualMachine);
             }
 
-            virtualMachine.setState(State.IN_PROGRESS);
             vmachineDao.flush();
         }
         catch (final ConstraintViolationException cve)

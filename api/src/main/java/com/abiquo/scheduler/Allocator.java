@@ -101,6 +101,11 @@ public class Allocator implements IAllocator
     /** All the entities to check its limits. Premium adds */
     @Autowired
     EnterpriseLimitChecker checkEnterpirse;
+    
+    /** Only used on the HA reallocate.*/
+    @Autowired
+    ResourceUpgradeUse upgradeUse;
+    
 
     /** If the check machine fails, how many times the allocator try a new target machine. */
     protected final static Integer RETRIES_AFTER_CHECK = 5;
@@ -270,6 +275,9 @@ public class Allocator implements IAllocator
                     + "(do not have original datastore, can't be moved)", vmachine.getName()));
         }
 
+        final Integer originalHypervisrorId = vmachine.getHypervisor().getId();
+        
+        
         final VirtualAppliance vapp = virtualAppRep.findVirtualApplianceByVirtualMachine(vmachine);
         final VirtualImage vimage = getVirtualImageWithVirtualMachineResourceRequirements(vmachine);
 
@@ -348,9 +356,17 @@ public class Allocator implements IAllocator
 
         log.info("Selected physical machine [{}] to perform HA over VirtualMachine [{}]",
             targetMachine.getName(), vmachine.getName());
+        
+        
+        // upgrade the resource utilization on the target HA hypervisor
+        upgradeUse.updateUseHa(vapp.getId(), vmachine, originalHypervisrorId);
+        
+        
 
         return vmachine;
     }
+    
+    
 
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)
