@@ -314,6 +314,12 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
+    protected String createRoleLdapLink(final int roleLdapId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+    }
+
     protected String createUsersLink(final String enterpriseId)
     {
         return createUsersLink(enterpriseId, null, null);
