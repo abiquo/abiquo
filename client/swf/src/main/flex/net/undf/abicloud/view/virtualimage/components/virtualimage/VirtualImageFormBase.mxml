@@ -221,7 +221,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
-                    costInput.text = this._virtualImage.cost_code;
+                    costInput.text = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -280,7 +280,7 @@
                     else
                         updatedValues.shared = 0; 
                         
-                    updatedValues.cost_code = costInput.text;                   
+                    updatedValues.costCode = costInput.text;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
