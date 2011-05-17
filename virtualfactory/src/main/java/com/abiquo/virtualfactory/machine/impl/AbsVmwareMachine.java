@@ -21,6 +21,7 @@
 package com.abiquo.virtualfactory.machine.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -85,7 +86,10 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
     /** Hold all the disk (HD and iSCSI targets) related logic. */
     protected VmwareMachineDisk disks;
-
+    
+    /** Check if the DVS feature is enabled; */
+    protected Boolean dvsEnabled;
+    
     /** Tasks to be required for a VM to change its state. */
     enum VMTasks
     {
@@ -132,6 +136,9 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         // Gets the VMWare API main interface
         utils = new VmwareMachineUtils(vmwareHyper);
         disks = new VmwareMachineDisk(utils, vmConfig, vmwareConfig);
+        
+        // Get if the DVS experimental feature is enabled.
+        dvsEnabled = Boolean.valueOf(System.getProperty("abiquo.experimentaldvs.enabled"));
     }
 
     @Override
@@ -164,7 +171,34 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 configureNetwork();
 
                 // Create the template vdestPathirtual machine
+                // <DVS>
+                List<VirtualNIC> dvNIClist = new ArrayList<VirtualNIC>();
+                if (dvsEnabled)
+                {
+                    // if any of the vnics have a "dvs" as switch, then all of them will have.
+                    // because it refeers a target machine property, not a NIC-specific property
+                    if (config.getVnicList().get(0).getVSwitchName().toLowerCase().startsWith("dvs"))
+                    {
+                        dvNIClist.addAll(config.getVnicList());
+                        config.getVnicList().clear();
+                    }
+                }
+                // </DVS>
                 createVirtualMachine();
+                // <DVS>
+                // Once the machine is defined and created, attach its vnics which refeers a dvs
+                // to a vcenter.
+                if (dvsEnabled)
+                {
+                    VCenterBridge vcenterBridge =
+                        VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
+                    vcenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
+
+                }
+                // </DVS>
+                
+                
+                
 
                 // Stateless image located on the Enterprise Repository require to be copy on the
                 // local fs.
@@ -465,11 +499,26 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             executeTaskOnVM(VMTasks.DELETE);
 
             // Deconfigure networking resources
-
             try
             {
                 utils.reconnect();
-                deconfigureNetwork();
+                // <DVS>
+                // if any of the vnics have a "dvs" as switch, then all of them will have.
+                // because it refers a target machine property, not a NIC-specific property
+                if (dvsEnabled && config.getVnicList().get(0).getVSwitchName().toLowerCase().startsWith("dvs"))
+                {
+                    VCenterBridge vcenterBridge =
+                        VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
+                    
+                    // Since the machine has been deleted, the vcenter needs to unregister it before delete the port group.
+                    vcenterBridge.unregisterVM(config.getMachineName());
+                    vcenterBridge.deconfigureNetwork(config.getVnicList());
+                    
+                }
+                else
+                {
+                    deconfigureNetwork();
+                }
             }
             catch (Exception e)
             {
@@ -579,7 +628,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             VirtualMachine vm =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", machineName);
-
+            
+            
             if (vm == null)
             {
                 throw new VirtualMachineException("Error while " + task.name()

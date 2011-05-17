@@ -10,12 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
-import com.abiquo.virtualfactory.machine.impl.vcenter.VCenterDVSCreation;
+import com.abiquo.virtualfactory.machine.impl.vcenter.DistrubutedPortGroupActions;
+import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.ServiceInstance;
 
 /**
- * Class that test the {@link VCenterDVSCreation} class.
+ * Class that test the {@link DistrubutedPortGroupActions} class.
  * In order to check this class you need.
  * 
  * 1. Have a vCenter remote, with correct license and enough permissions.
@@ -40,7 +41,7 @@ public class VCenterVDSCreationTest
 
     private ServiceInstance serviceInstance;
 
-    private VCenterDVSCreation vcenterDVS;
+    private DistrubutedPortGroupActions vcenterDVS;
 
     /**
      * Open the connection
@@ -54,7 +55,7 @@ public class VCenterVDSCreationTest
         serviceInstance =
             new ServiceInstance(new URL("https://" + vcIPAddress + "/sdk"), user, password, true);
 
-        vcenterDVS = new VCenterDVSCreation(serviceInstance);
+        vcenterDVS = new DistrubutedPortGroupActions(serviceInstance);
     }
 
     /**
@@ -167,7 +168,6 @@ public class VCenterVDSCreationTest
         {
             fail("Creation should not fail!");
         }
-        Thread.sleep(1000);
         try
         {
             // This is what we are testing!
@@ -183,6 +183,13 @@ public class VCenterVDSCreationTest
             
         }
         fail("Failed because it should raise an exception!");
+    }
+    
+    @Test
+    public void testAttachNicToVM() throws VirtualMachineException
+    {
+        VirtualNIC niic = new VirtualNIC(dvSwitchName, "00:50:56:a4:00:03", 2, "default_network", 1);
+        vcenterDVS.attachVirtualMachineToPortGroup("vm_name", niic);
     }
 
 }

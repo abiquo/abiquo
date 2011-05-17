@@ -9,9 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
+import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.DVPortgroupConfigInfo;
 import com.vmware.vim25.DVPortgroupConfigSpec;
 import com.vmware.vim25.DistributedVirtualPortgroupPortgroupType;
+import com.vmware.vim25.DistributedVirtualSwitchPortConnection;
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
@@ -21,12 +23,19 @@ import com.vmware.vim25.PropertySpec;
 import com.vmware.vim25.VMwareDVSPortSetting;
 import com.vmware.vim25.VMwareDVSPortgroupPolicy;
 import com.vmware.vim25.VimPortType;
+import com.vmware.vim25.VirtualDeviceConfigSpec;
+import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
+import com.vmware.vim25.VirtualEthernetCardDistributedVirtualPortBackingInfo;
+import com.vmware.vim25.VirtualMachineConfigSpec;
+import com.vmware.vim25.VirtualVmxnet3;
 import com.vmware.vim25.VmwareDistributedVirtualSwitchVlanIdSpec;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.DistributedVirtualSwitch;
 import com.vmware.vim25.mo.Folder;
 import com.vmware.vim25.mo.InventoryNavigator;
 import com.vmware.vim25.mo.ServiceInstance;
+import com.vmware.vim25.mo.Task;
+import com.vmware.vim25.mo.VirtualMachine;
 
 /**
  * This class manages the creation, retrieve and deletion (edition not yet) of port groups into a
@@ -35,10 +44,10 @@ import com.vmware.vim25.mo.ServiceInstance;
  * 
  * @author jdevesa@abiquo.com
  */
-public class VCenterDVSCreation
+public class DistrubutedPortGroupActions
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VCenterDVSCreation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistrubutedPortGroupActions.class);
 
     private ServiceInstance serviceInstance;
 
@@ -47,7 +56,7 @@ public class VCenterDVSCreation
      * 
      * @param serviceInstance serviceInstance connection to a VDC.
      */
-    public VCenterDVSCreation(ServiceInstance serviceInstance)
+    public DistrubutedPortGroupActions(ServiceInstance serviceInstance)
     {
         this.serviceInstance = serviceInstance;
     }
@@ -214,6 +223,83 @@ public class VCenterDVSCreation
         }
     }
 
+    public void attachVirtualMachineToPortGroup(String nameVM, VirtualNIC vnic) throws VirtualMachineException
+    {
+        Folder fold = serviceInstance.getRootFolder();
+        String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
+
+        try
+        {
+            InventoryNavigator navigator = new InventoryNavigator(fold);
+            // Get the VirtualMachine
+            VirtualMachine vm;
+            do
+            {
+                // retrieve the virtual machine while the vcenter refreshes the state.
+                vm = (VirtualMachine) navigator.searchManagedEntity("VirtualMachine", nameVM);
+            } while (vm == null);
+            
+            // Get the information we need to create the binding to a DVS.
+            DistributedVirtualPortgroup dvPortGroup =
+                (DistributedVirtualPortgroup) new InventoryNavigator(fold).searchManagedEntity(
+                    "DistributedVirtualPortgroup", portGroupName);
+            ManagedObjectReference dvSwitch = dvPortGroup.getConfig().distributedVirtualSwitch;
+            ObjectContent dvSwitchContent = getObjectProperties(null, dvSwitch, new String[] {})[0];
+            String dvSwitchUUID = (String) getDynamicProperty(dvSwitchContent, "uuid");
+
+            // Stablish the switch connection.
+            DistributedVirtualSwitchPortConnection switchConnection =
+                new DistributedVirtualSwitchPortConnection();
+            switchConnection.setPortgroupKey(dvPortGroup.getKey());
+            switchConnection.setSwitchUuid(dvSwitchUUID);
+
+            VirtualEthernetCardDistributedVirtualPortBackingInfo nicBacking =
+                new VirtualEthernetCardDistributedVirtualPortBackingInfo();
+            nicBacking.setPort(switchConnection);
+
+            // Define the
+            VirtualVmxnet3 virtualNICSpec = new VirtualVmxnet3();
+            virtualNICSpec.setAddressType("manual");
+            virtualNICSpec.setMacAddress(vnic.getMacAddress());
+            virtualNICSpec.setBacking(nicBacking);
+
+            VirtualDeviceConfigSpec nicSpec = new VirtualDeviceConfigSpec();
+            nicSpec.setOperation(VirtualDeviceConfigSpecOperation.add);
+            nicSpec.setDevice(virtualNICSpec);
+
+            VirtualMachineConfigSpec vmConfig = new VirtualMachineConfigSpec();
+            vmConfig.setDeviceChange(new VirtualDeviceConfigSpec[] {nicSpec});
+
+            Task task = vm.reconfigVM_Task(vmConfig);
+            
+            if (task.waitForMe() == Task.SUCCESS)
+            {
+                String message =
+                    "Virtual machine with name '" + nameVM + "' associated to distributed port group '"
+                        + portGroupName + "'";
+                
+                LOGGER.info(message);
+            }
+            else
+            {
+                String message =
+                    "Could not associate virtual machine with name '" + nameVM + "' to port group '"
+                        + portGroupName + "'";
+                throw new VirtualMachineException(message);
+            }
+            
+
+        }
+        catch (RemoteException e)
+        {
+            String message =
+                "Could not associate virtual machine with name '" + nameVM + "' to port group '"
+                    + portGroupName + "'";
+            LOGGER.error(message);
+            throw new VirtualMachineException(message);
+        }
+    }
+    
     private ObjectContent[] getObjectProperties(final ManagedObjectReference collector,
         final ManagedObjectReference mobj, final String[] properties) throws RemoteException
     {
