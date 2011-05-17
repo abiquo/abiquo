@@ -116,6 +116,11 @@ public abstract class AbsMachineTest extends TestCase
     protected String iscsiTestLocation;
 
     protected String iscsiUUID;
+    
+    /**
+     * Sets test ready for deploy without copying disk (HA)
+     */
+    protected boolean isHA = false;
 
     public abstract IHypervisor instantiateHypervisor();
 
@@ -138,8 +143,9 @@ public abstract class AbsMachineTest extends TestCase
         disks.add(virtualDisk);
 
         List<VirtualNIC> vnicList = new ArrayList<VirtualNIC>();
-        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
-        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
+        // FIXME: Uncomment This!
+//        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
+//        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
 
         VirtualMachineConfiguration conf =
             new VirtualMachineConfiguration(id,
