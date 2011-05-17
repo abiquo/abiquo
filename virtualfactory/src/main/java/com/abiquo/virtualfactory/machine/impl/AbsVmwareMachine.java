@@ -88,7 +88,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     /** Tasks to be required for a VM to change its state. */
     enum VMTasks
     {
-        PAUSE, POWER_OFF, POWER_ON, RESET, RESUME, DELETE
+        PAUSE, POWER_OFF, POWER_ON, RESET, RESUME, DELETE, UNREGISTER
     };
 
     /**
@@ -453,12 +453,19 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             Folder rootFolder = si.getRootFolder();
 
-            executeTaskOnVM(VMTasks.DELETE);
-
-            // Deconfigure networking resources
+            
+            if (vmConfig.getVirtualDiskBase().isHa())
+            {
+                executeTaskOnVM(VMTasks.UNREGISTER);
+            }
+            else
+            {                
+                executeTaskOnVM(VMTasks.DELETE);
+            }
 
             try
             {
+                // Deconfigure networking resources
                 utils.reconnect();
                 deconfigureNetwork();
             }
@@ -598,11 +605,15 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 case DELETE:
                     taskMOR = vm.destroy_Task();
                     break;
+                case UNREGISTER:
+                    taskMOR = null;
+                    vm.unregisterVM();
+                    break;
                 default:
                     throw new Exception("Invalid task action " + task.name());
             }
 
-            if (taskMOR.waitForMe() == Task.SUCCESS)
+            if (taskMOR == null ||taskMOR.waitForMe() == Task.SUCCESS)
             {
                 logger.info("[" + task.name() + "] successfuly for VM [{}]", machineName);
             }
