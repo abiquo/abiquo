@@ -1046,7 +1046,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             {
                 // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
                 final String cause =
-                    String.format("There is not enough resources in datacenter "
+                    String.format("There are not enough resources in datacenter "
                         + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
 
                 dataResult =
@@ -2174,7 +2174,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
-                String.format("There is not enough resources in datacenter "
+                String.format("There are not enough resources in datacenter "
                     + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
 
             dataResult =
@@ -3331,7 +3331,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             for (ResourceManagementHB resm : resmans)
             {
                 int resourceType = Integer.valueOf(resm.getIdResourceType());
-                
+
                 if (resourceType == CIMResourceTypeEnum.Ethernet_Adapter.getNumericResourceType())
                 {
                     deleteNetworkRasd(session, resm);
@@ -3341,7 +3341,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     deleteStorageRasd(session, resm);
                 }
             }
-            
+
             node.getVirtualMachineHB().getResman().clear();
         }
     }
