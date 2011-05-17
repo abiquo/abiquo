@@ -279,7 +279,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         RoleDto dto = null;
         if (!cache.containsKey(roleUri))
         {
-            dto = get(roleUri).getEntity(RoleDto.class);
+            dto = get(roleUri, LINK_MEDIA_TYPE).getEntity(RoleDto.class);
             cache.put(roleUri, dto);
         }
         else
@@ -342,7 +342,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         String uri = createRoleLink(roleId);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
