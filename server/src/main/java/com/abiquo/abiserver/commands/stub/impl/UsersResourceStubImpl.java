@@ -494,7 +494,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         Boolean hasPrivilege = false;
 
-        if (dr.getData().getPrivileges() != null && dr.getData().getPrivileges().isEmpty())
+        if (dr.getData().getPrivileges() != null && !dr.getData().getPrivileges().isEmpty())
         {
             for (Privilege p : dr.getData().getPrivileges())
             {
