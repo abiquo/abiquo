@@ -173,7 +173,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.type;
     }
 
-    private void setType(final HypervisorType type)
+    public void setType(final HypervisorType type)
     {
         this.type = type;
     }
