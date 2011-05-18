@@ -471,6 +471,115 @@ public class VirtualMachine extends DefaultEntityBase
         this.state = state;
     }
 
+    public final static String IPMI_IP_PROPERTY = "ipmiIP";
+
+    private final static boolean IPMI_IP_REQUIRED = false;
+
+    private final static int IPMI_IP_LENGTH_MIN = 0;
+
+    private final static int IPMI_IP_LENGTH_MAX = 39;
+
+    private final static boolean IPMI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_IP_COLUMN = "ipmiIP";
+
+    @Column(name = IPMI_IP_COLUMN, nullable = !IPMI_IP_REQUIRED, length = IPMI_IP_LENGTH_MAX)
+    private String ipmiIP;
+
+    @Required(value = IPMI_IP_REQUIRED)
+    @Length(min = IPMI_IP_LENGTH_MIN, max = IPMI_IP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiIP()
+    {
+        return this.ipmiIP;
+    }
+
+    public void setIpmiIP(String ipmiIP)
+    {
+        this.ipmiIP = ipmiIP;
+    }
+    
+    public final static String IPMI_PORT_PROPERTY = "ipmiPort";
+
+    private final static String IPMI_PORT_COLUMN = "ipmiPort";
+    
+    private final static boolean IPMI_PORT_REQUIRED = false;
+
+    private final static int IPMI_PORT_MIN = Integer.MIN_VALUE;
+
+    private final static int IPMI_PORT_MAX = Integer.MAX_VALUE;
+
+    @Required(value = IPMI_PORT_REQUIRED)
+    @Column(name = IPMI_PORT_COLUMN, nullable = true)
+    @Range(min = IPMI_PORT_MIN, max = IPMI_PORT_MAX)
+    private Integer ipmiPort;
+
+    public Integer getIpmiPort()
+    {
+        return this.ipmiPort;
+    }
+
+    public void setIpmiPort(Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+    
+    public final static String IPMI_USER_PROPERTY = "ipmiUser";
+
+    private final static boolean IPMI_USER_REQUIRED = false;
+
+    private final static int IPMI_USER_LENGTH_MIN = 0;
+
+    private final static int IPMI_USER_LENGTH_MAX = 255;
+
+    private final static boolean IPMI_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_USER_COLUMN = "ipmiUser";
+
+    @Column(name = IPMI_USER_COLUMN, nullable = !IPMI_USER_REQUIRED, length = IPMI_USER_LENGTH_MAX)
+    private String ipmiUser;
+
+    @Required(value = IPMI_USER_REQUIRED)
+    @Length(min = IPMI_USER_LENGTH_MIN, max = IPMI_USER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiUser()
+    {
+        return this.ipmiUser;
+    }
+
+    public void setIpmiUser(String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+    
+    public final static String IPMI_PASSWORD_PROPERTY = "ipmiPassword";
+
+    private final static boolean IPMI_PASSWORD_REQUIRED = false;
+
+    private final static int IPMI_PASSWORD_LENGTH_MIN = 0;
+
+    private final static int IPMI_PASSWORD_LENGTH_MAX = 255;
+
+    private final static boolean IPMI_PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_PASSWORD_COLUMN = "ipmiPassword";
+
+    @Column(name = IPMI_PASSWORD_COLUMN, nullable = !IPMI_PASSWORD_REQUIRED, length = IPMI_PASSWORD_LENGTH_MAX)
+    private String ipmiPassword;
+
+    @Required(value = IPMI_PASSWORD_REQUIRED)
+    @Length(min = IPMI_PASSWORD_LENGTH_MIN, max = IPMI_PASSWORD_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiPassword()
+    {
+        return this.ipmiPassword;
+    }
+
+    public void setIpmiPassword(String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
+    }
+    
     public VirtualMachine(String name, Enterprise enterprise, User user, Hypervisor hypervisor,
         VirtualImage virtualImage, UUID uuid, Integer typeId)
     {

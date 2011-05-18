@@ -14,3 +14,9 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT 
 
 -- Racks can be HA enabled
 ALTER TABLE `kinton`.`datastore` ADD COLUMN `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.';
+
+-- IPMI
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `ipmiIP` VARCHAR(39)  DEFAULT NULL AFTER `version_c`,
+ ADD COLUMN `ipmiPort` INT(5) UNSIGNED DEFAULT NULL AFTER `ipmiIP`,
+ ADD COLUMN `ipmiUser` VARCHAR(255)  DEFAULT NULL AFTER `ipmiPort`,
+ ADD COLUMN `ipmiPassword` VARCHAR(255)  DEFAULT NULL AFTER `ipmiUser`;

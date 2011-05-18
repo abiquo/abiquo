@@ -1039,6 +1039,12 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
   `idDatastore` int(10) unsigned default NULL,
   `version_c` int(11) default 0,
+  `ipmiIP` varchar(39) default NULL,
+  `ipmiPort` int(5) unsigned default NULL,
+  `ipmiUser` varchar(255) default NULL,
+  `ipmiPassword` varchar(255) default NULL,
+
+
   PRIMARY KEY  (`idVM`),
   KEY `VirtualMachine_FK1` (`idHypervisor`),
   KEY `virtualMachine_datastore_FK` (`idDatastore`),
