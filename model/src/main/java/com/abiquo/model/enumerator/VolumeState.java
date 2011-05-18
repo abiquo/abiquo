@@ -21,7 +21,10 @@
 package com.abiquo.model.enumerator;
 
 /**
- * Sets the States of a Volume Storage can live in AbiCloud
+ * The volume state.
+ * <p>
+ * <b>IMPORTANT:</b> Do not change the order of the elements of the enum. If more values need to be
+ * added they must be added at the end.
  * 
  * @author abiquo
  */
@@ -29,12 +32,6 @@ public enum VolumeState
 {
     /** The volume is not attached to a virtual machine. */
     DETACHED,
-
-    /** When a volume storage is reserved but we don't want to mount to any Virtual Machine. */
-    NOT_MOUNTED_RESERVED,
-
-    /** When a volume is reserved and ready to mount to a given Virtual Machine. */
-    MOUNTED_RESERVED,
 
     /** The volume is attached to a virtual machine. */
     ATTACHED
