@@ -161,7 +161,6 @@ public interface UserCommand
      *            of users
      * @return A DataResult object containing an RoleListResult object
      */
-    @SuppressWarnings("unchecked")
     public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
         final ListRequest roleListOptions, Enterprise enterprise);
 
@@ -174,5 +173,16 @@ public interface UserCommand
      */
     public DataResult<PrivilegeListResult> getPrivilegesByRole(final UserSession userSession,
         final int roleId);
+
+    /**
+     * Checks if a Role has a Privilege
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @param String namePrivilege the name of a Privilege to check
+     * @return Boolean if Role has a Privilege
+     */
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        String namePrivilege);
 
 }

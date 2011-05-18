@@ -102,9 +102,21 @@ public class AbstractAPIStub
         return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
+    protected ClientResponse put(final String uri, final Object dto, final String user,
+        final String password, final String mediaType)
+    {
+        return resource(uri, user, password).accept(mediaType).contentType(mediaType).put(dto);
+    }
+
     protected ClientResponse delete(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).delete();
+    }
+
+    protected ClientResponse delete(final String uri, final String user, final String password,
+        final String mediaType)
+    {
+        return resource(uri, user, password).accept(mediaType).delete();
     }
 
     protected ClientResponse get(final String uri)
@@ -147,10 +159,24 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML).put(dto);
     }
 
+    protected ClientResponse put(final String uri, final Object dto, final String mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).put(dto);
+    }
+
     protected ClientResponse delete(final String uri)
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).delete();
+    }
+
+    protected ClientResponse delete(final String uri, final String mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -312,6 +338,12 @@ public class AbstractAPIStub
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createRoleLdapLink(final int roleLdapId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)

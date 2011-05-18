@@ -65,10 +65,8 @@
 			import mx.resources.ResourceBundle;
 			import mx.resources.ResourceManager;
 			
-			import net.undf.abicloud.business.managers.AuthorizationManager;
 			import net.undf.abicloud.events.LoginEvent;
 			import net.undf.abicloud.model.AbiCloudModel;
-			import net.undf.abicloud.security.SecurableResource;
 			import net.undf.abicloud.view.general.AbiCloudAlert;
 			import net.undf.abicloud.view.main.components.HeaderButton;
 			import net.undf.abicloud.view.user.components.user.UserEdit;
@@ -127,10 +125,6 @@
 				
 			}           
 			
-			public function set authorizationManager(auth:AuthorizationManager):void
-			{
-				
-			}
 			
 			/**
 			 * Shows a Pop Up for user who has logged in can modify his data

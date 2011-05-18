@@ -366,7 +366,7 @@
                 	this._userEdit.roleEditable = false;
                 }else{
                 	this._userEdit.activeEditable = true;
-                	this._userEdit.roleEditable = false;
+                	this._userEdit.roleEditable = true;
                 }
                 PopUpManager.addPopUp(this._userEdit, this, true);
                 PopUpManager.centerPopUp(this._userEdit);

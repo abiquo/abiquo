@@ -48,4 +48,5 @@ public interface UsersResourceStub
 
     public DataResult<PrivilegeListResult> getPrivilegesByRole(int roleId);
 
+    public DataResult<Boolean> checkRolePrivilege(final Integer idRole, final String namePrivilege);
 }

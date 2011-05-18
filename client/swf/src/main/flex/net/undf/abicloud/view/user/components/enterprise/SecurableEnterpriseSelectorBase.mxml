@@ -54,7 +54,6 @@
             import net.undf.abicloud.business.managers.LoginManager;
             import net.undf.abicloud.events.UserEvent;
             import net.undf.abicloud.model.AbiCloudModel;
-            import net.undf.abicloud.security.SecurableResource;
             import net.undf.abicloud.view.general.AbiCloudAlert;
             import net.undf.abicloud.vo.result.ListRequest;
             import net.undf.abicloud.vo.user.Enterprise;
