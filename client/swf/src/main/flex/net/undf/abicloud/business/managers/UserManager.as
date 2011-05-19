@@ -289,6 +289,9 @@ package net.undf.abicloud.business.managers
             dispatchEvent(new Event(PRIVILEGES_UPDATED, true));
         }
         
+        /**
+         * Function which check if a user has a privilege
+         **/
         public function roleHasPrivilege(privilege:String):Boolean{
         	for(var i:int = 0 ; i < this._rolePrivileges.length ; i++){
         		if(Privilege(this._rolePrivileges.getItemAt(i)).name == privilege){
@@ -299,10 +302,19 @@ package net.undf.abicloud.business.managers
         }        
         
         
-        public function getPrivilege(privilege:String):Privilege{
-        	for(var i:int = 0 ; i < this._privileges.length ; i++){
-        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
-        			return Privilege(this._privileges.getItemAt(i));
+        /**
+         * Function which return a privilege from role or user privileges 
+         **/
+        public function getPrivilege(privilege:String,type:String):Privilege{
+        	var list:ArrayCollection;
+        	if(type == "role"){
+        		list = this._rolePrivileges;
+        	}else{
+        		list = this._privileges;
+        	}
+        	for(var i:int = 0 ; i < list.length ; i++){
+        		if(Privilege(list.getItemAt(i)).name == privilege){
+        			return Privilege(list.getItemAt(i));
         		}
         	}
         	return null;
