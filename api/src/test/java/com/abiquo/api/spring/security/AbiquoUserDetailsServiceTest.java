@@ -59,35 +59,35 @@ public class AbiquoUserDetailsServiceTest extends AbstractGeneratorTest
     }
 
     @Test
-    public void testLoadUserAuthoritiesWithMultipleRoles() throws Exception
+    public void testLoadUserAuthoritiesWithMultiplePrivileges() throws Exception
     {
         Role role = roleGenerator.createInstance(p1, p2);
         User user = userGenerator.createInstance(role);
         setup(role, user.getEnterprise(), user);
 
         GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-        assertEquals(privileges.length, 2);
+        assertEquals(privileges.length, 2 + 1); // 2 real privileges + ROLE_AUTHENTICATED
     }
 
     @Test
-    public void testLoadUserAuthoritiesWithSingleRole() throws Exception
+    public void testLoadUserAuthoritiesWithSinglePrivilege() throws Exception
     {
         Role role = roleGenerator.createInstance(p3);
         User user = userGenerator.createInstance(role);
         setup(role, user.getEnterprise(), user);
 
         GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-        assertEquals(privileges.length, 1);
+        assertEquals(privileges.length, 1 + 1);// 1 real privilege + ROLE_AUTHENTICATED
     }
 
     @Test
-    public void testLoadUserAuthoritiesWithoutRoles() throws Exception
+    public void testLoadUserAuthoritiesWithoutPrivileges() throws Exception
     {
         Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(role);
         setup(role, user.getEnterprise(), user);
 
         GrantedAuthority[] privileges = userDetailsService.loadUserAuthorities(user);
-        assertEquals(privileges.length, 0);
+        assertEquals(privileges.length, 0 + 1);// 0 real privileges + ROLE_AUTHENTICATED
     }
 }
