@@ -51,6 +51,9 @@ public class AbiquoUserDetailsService implements UserDetailsService
     /** The default role prefix to use. */
     protected static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
+    /** The default role. */
+    protected static final String DEFAULT_ROLE = DEFAULT_ROLE_PREFIX + "AUTHENTICATED";
+
     /** The Enterprise DAO repository. */
     @Autowired
     protected EnterpriseRep enterpriseRep;
@@ -101,17 +104,19 @@ public class AbiquoUserDetailsService implements UserDetailsService
         List<Privilege> privileges = user.getRole().getPrivileges();
         ArrayList<String> grantedAuthority = new ArrayList<String>();
 
-        if (privileges == null)
+        // Adding default role
+        grantedAuthority.add(DEFAULT_ROLE);
+
+        if (privileges != null)
         {
-            return new GrantedAuthority[0];
-        }
-        for (Privilege privilege : privileges)
-        {
-            grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
+            for (Privilege privilege : privileges)
+            {
+                grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
+            }
         }
 
         return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
-            .toArray(new String[privileges.size()]));
+            .toArray(new String[grantedAuthority.size()]));
     }
 
 }
