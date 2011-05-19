@@ -104,7 +104,7 @@ public enum EventType implements Serializable
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), 
     VI_ADD(501, "VI_ADD", "Virtual Image added to the Appliance Library"), 
     VI_DELETE(502, "VI_DELETE", "Virtual Image deleted from the Appliance Library"), 
-    DISK_CONVERSION(503, "DISK_CONVERSION", "Disc conversion started"), 
+    DISK_CONVERSION(503, "DISK_CONVERSION", "Disk conversion started"), 
     RAW_IMPORT_CONVERSION(504, "RAW_IMPORT_CONVERSION", "Raw import conversion started"), 
 
     // Stateful related events
@@ -122,7 +122,7 @@ public enum EventType implements Serializable
     LICENSE_REMOVED(701, "LICENSE_REMOVED", "A license has been removed"), 
     LICENSE_CORRUPT(702, "LICENSE_CORRUPT", "The license is corrupted and cannot be used"), 
     LICENSE_EXCEEDED(703, "LICENSE_EXCEEDED", "Current license capabilities had been exceeded"), 
-    LICENSE_CONFIGURATION(704, "LICENSE_CONFIGURATION", "An unexpected error occured in license managing services"),
+    LICENSE_CONFIGURATION(704, "LICENSE_CONFIGURATION", "An unexpected error occurred in license managing services"),
 
     // Networking events
     VLAN_CREATED(800, "VLAN_CREATED", "New VLAN created"), 
@@ -151,7 +151,11 @@ public enum EventType implements Serializable
 
     // Client-related events
     THEME_UPDATE(1100, "THEME_UPDATE", "Theme updated"),
-    UPDATE_PROPERTIES(1101, "UPDATE_PROPERTIES", "Client properties updated");
+    UPDATE_PROPERTIES(1101, "UPDATE_PROPERTIES", "Client properties updated"),
+    
+    // Allocation rules
+    ALLOCATION_RULES_ADDED(1200, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"),
+    ALLOCATION_RULES_REMOVED(1201, "ALLOCATION_RULE_REMOVED", "Allocation rule removed");
     
 
     private final int event;
