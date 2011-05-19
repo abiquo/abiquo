@@ -99,10 +99,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getEnterpriseDoesntExist() throws ClientWebException
     {
-        Resource resource = client.resource(resolveEnterpriseURI(12345));
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        ClientResponse response =
+            get(resolveEnterpriseURI(12345), "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test

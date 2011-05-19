@@ -31,9 +31,12 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
+import com.abiquo.server.core.enterprise.User;
 
 @Parent(PrivilegesResource.class)
 @Path(PrivilegeResource.PRIVILEGE_PARAM)
@@ -47,11 +50,39 @@ public class PrivilegeResource extends AbstractResource
     @Autowired
     private EnterpriseService service;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    SecurityService securityService;
+
     @GET
-    public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer propertyId,
+    public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer privilegeId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        Privilege privilege = service.getPrivilege(propertyId);
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES))
+        {
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.getRole().getPrivileges() != null)
+            {
+                for (Privilege p : currentUser.getRole().getPrivileges())
+                {
+                    if (p.getId().equals(privilegeId))
+                    {
+                        Privilege privilege = service.getPrivilege(privilegeId);
+                        return createTransferObject(privilege, restBuilder);
+                    }
+                }
+            }
+            else
+            {
+                // throws access denied exception
+                securityService.requirePrivilege(SecurityService.USERS_VIEW_PRIVILEGES);
+            }
+
+        }
+
+        Privilege privilege = service.getPrivilege(privilegeId);
 
         return createTransferObject(privilege, restBuilder);
     }

@@ -33,7 +33,6 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -79,10 +78,9 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        Resource resource = client.resource(resolveRoleURI(12345));
-
-        ClientResponse response = resource.accept(RoleResource.LINK_MEDIA_TYPE).get();
-        assertEquals(404, response.getStatusCode());
+        ClientResponse response =
+            get(resolveRoleURI(12345), "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test
@@ -99,9 +97,8 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        Resource resource = client.resource(resolveRoleURI(role.getId()));
-
-        ClientResponse response = resource.accept(RoleResource.LINK_MEDIA_TYPE).get();
+        ClientResponse response =
+            get(resolveRoleURI(role.getId()), "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE);
 
         RoleDto dto = response.getEntity(RoleDto.class);
 
@@ -129,9 +126,10 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
         String href = resolveRoleURI(role.getId());
         String enterpriseUri = resolveEnterpriseURI(role.getEnterprise().getId());
         String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
-        Resource resource = client.resource(href);
 
-        RoleDto dto = resource.accept(RoleResource.LINK_MEDIA_TYPE).get(RoleDto.class);
+        RoleDto dto =
+            get(href, "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE)
+                .getEntity(RoleDto.class);
 
         assertNotNull(dto.getLinks());
 

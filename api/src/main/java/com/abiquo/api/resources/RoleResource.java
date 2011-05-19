@@ -40,6 +40,8 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.services.RoleService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
@@ -50,6 +52,7 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.RoleWithLdapDto;
+import com.abiquo.server.core.enterprise.User;
 
 @Parent(RolesResource.class)
 @Path(RoleResource.ROLE_PARAM)
@@ -71,11 +74,33 @@ public class RoleResource extends AbstractResource
     @Autowired
     RoleService service;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    SecurityService securityService;
+
     @GET
     @Produces(RolesResource.LINK_MEDIA_TYPE)
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES))
+        {
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.getRole().getId().equals(roleId))
+            {
+                Role role = service.getRole(roleId);
+                return createTransferObject(role, restBuilder);
+            }
+            else
+            {
+                // throws access denied exception
+                securityService.requirePrivilege(SecurityService.USERS_VIEW_PRIVILEGES);
+            }
+
+        }
+
         Role role = service.getRole(roleId);
 
         return createTransferObject(role, restBuilder);
