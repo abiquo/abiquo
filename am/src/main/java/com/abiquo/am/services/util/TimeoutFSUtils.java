@@ -82,6 +82,7 @@ public class TimeoutFSUtils
 
         boolean exist;
         boolean canWrite;
+
         final Future<Boolean> futureExist =
             executor.submit(new FileExistTimeout(REPOSITORY_FILE_MARK));
 
