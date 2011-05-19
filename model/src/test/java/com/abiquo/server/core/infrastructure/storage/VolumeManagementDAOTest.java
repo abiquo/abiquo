@@ -124,7 +124,7 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(vdc);
+        List<VolumeManagement> results = dao.getStatefulCandidates(vdc, 0L);
 
         assertEmpty(results);
     }
@@ -141,7 +141,8 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+        List<VolumeManagement> results =
+            dao.getStatefulCandidates(volume.getVirtualDatacenter(), volume.getSizeInMB());
 
         assertEmpty(results);
     }
@@ -160,7 +161,7 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(other);
+        List<VolumeManagement> results = dao.getStatefulCandidates(other, volume.getSizeInMB());
 
         assertEmpty(results);
     }
@@ -179,7 +180,8 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+        List<VolumeManagement> results =
+            dao.getStatefulCandidates(volume.getVirtualDatacenter(), volume.getSizeInMB());
 
         assertEmpty(results);
     }
@@ -198,7 +200,8 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+        List<VolumeManagement> results =
+            dao.getStatefulCandidates(volume.getVirtualDatacenter(), volume.getSizeInMB());
 
         assertSize(results, 1);
         assertAllEntityPropertiesEqual(results.iterator().next(), volume);
@@ -219,8 +222,30 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagementDAO dao = createDaoForRollbackTransaction();
 
-        List<VolumeManagement> results = dao.getStatefulCandidates(volume1.getVirtualDatacenter());
+        List<VolumeManagement> results =
+            dao.getStatefulCandidates(volume1.getVirtualDatacenter(), 0L);
 
         assertSize(results, 2);
     }
+
+    @Test
+    public void testGetStatefulCandidatesWithSmallVolume()
+    {
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        VolumeManagement volume = eg().createInstance(pool);
+
+        pool.getDevice().setStorageTechnology(StorageTechnologyType.GENERIC_ISCSI);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results =
+            dao.getStatefulCandidates(volume.getVirtualDatacenter(), volume.getSizeInMB() + 10L);
+
+        assertEmpty(results);
+    }
+
 }

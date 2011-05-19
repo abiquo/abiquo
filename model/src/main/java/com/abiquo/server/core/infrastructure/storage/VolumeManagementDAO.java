@@ -38,6 +38,7 @@ import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
@@ -115,19 +116,22 @@ import com.abiquo.server.core.util.PagedList;
         return (VolumeManagement) criteria.uniqueResult();
     }
 
-    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc,
+        final long imageSizeInMB)
     {
         // Filters on the VolumeManagement entity
-        Criteria base = createCriteria();
-        base.add(sameVirtualDatacenter(vdc));
-        base.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
-        base.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY,
+        Criteria crit = createCriteria();
+        crit.createAlias(VolumeManagement.RASD_PROPERTY, "rasd");
+        crit.createAlias(VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+
+        crit.add(sameVirtualDatacenter(vdc));
+        crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
+        crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY,
             VolumeState.NOT_MOUNTED_NOT_RESERVED));
 
-        // Filters on the storage device
-        Criteria crit = base.createCriteria(VolumeManagement.STORAGE_POOL_PROPERTY);
-        crit = crit.createCriteria(StoragePool.DEVICE_PROPERTY);
-        crit.add(Restrictions.eq(StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
+        crit.add(Restrictions.ge("rasd." + Rasd.LIMIT_PROPERTY, imageSizeInMB));
+        crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
             StorageTechnologyType.GENERIC_ISCSI));
 
         return getResultList(crit);

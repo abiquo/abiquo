@@ -60,7 +60,7 @@
     <orm:entity class="com.abiquo.server.core.scheduler.EnterpriseExclusionRule"></orm:entity>
     <orm:entity class="com.abiquo.server.core.scheduler.FitPolicyRule"></orm:entity>
     <orm:entity class="com.abiquo.server.core.scheduler.MachineLoadRule"></orm:entity>
-    <!-- end:workload -->
+    <!-- end: workload -->
     
     <!-- statistics -->
     <orm:entity class="com.abiquo.server.core.statistics.CloudUsage"></orm:entity>
@@ -68,7 +68,7 @@
     <orm:entity class="com.abiquo.server.core.statistics.VirtualAppResources"></orm:entity>
     <orm:entity class="com.abiquo.server.core.statistics.VirtualDatacenterResources"></orm:entity>
     <orm:entity class="com.abiquo.server.core.statistics.DatacenterResources"></orm:entity>
-    <!-- end : statistics -->   
+    <!-- end: statistics -->   
     
     <!-- appliance manager -->
     <orm:entity class="com.abiquo.server.core.appslibrary.AppsLibrary"></orm:entity>
@@ -76,9 +76,10 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.Icon"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
-    <!-- end : appliance manager -->
+    <!-- end: appliance manager -->
     
     <!-- tasks -->
     <orm:entity class="com.abiquo.server.core.tasks.Task"/>
+    <!-- end: tasks -->
 
 </orm:entity-mappings>
