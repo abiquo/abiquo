@@ -146,6 +146,11 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
     }
 
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getStatefulCandidates(vdc);
+    }
+
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);

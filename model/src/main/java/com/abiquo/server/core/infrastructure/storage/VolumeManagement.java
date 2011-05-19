@@ -50,7 +50,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC)})
+@NamedQueries( {@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC_QUERY, query = VolumeManagement.BY_VDC)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -60,6 +60,8 @@ public class VolumeManagement extends RasdManagement
     public static final String TABLE_NAME = "volume_management";
 
     // Queries
+
+    public static final String VOLUMES_BY_VDC_QUERY = "VOLUMES_BY_VDC";
 
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "

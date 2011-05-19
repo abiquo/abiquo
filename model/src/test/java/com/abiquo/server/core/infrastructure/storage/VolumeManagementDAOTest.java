@@ -29,6 +29,9 @@ import javax.persistence.EntityManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
@@ -37,11 +40,17 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class VolumeManagementDAOTest extends
     DefaultDAOTestBase<VolumeManagementDAO, VolumeManagement>
 {
+    private VirtualDatacenterGenerator vdcGenerator;
+
+    private StoragePoolGenerator poolGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        vdcGenerator = new VirtualDatacenterGenerator(getSeed());
+        poolGenerator = new StoragePoolGenerator(getSeed());
     }
 
     @Override
@@ -81,8 +90,8 @@ public class VolumeManagementDAOTest extends
 
         List<VolumeManagement> results = dao.getVolumesByPool(volume.getStoragePool());
 
-        assertEquals(results.size(), 1);
-        eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+        assertSize(results, 1);
+        assertAllEntityPropertiesEqual(results.iterator().next(), volume);
     }
 
     @Test
@@ -100,7 +109,118 @@ public class VolumeManagementDAOTest extends
         List<VolumeManagement> results =
             dao.getVolumesByVirtualDatacenter(volume.getVirtualDatacenter());
 
-        assertEquals(results.size(), 1);
-        eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+        assertSize(results, 1);
+        assertAllEntityPropertiesEqual(results.iterator().next(), volume);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesWithoutVolumes()
+    {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vdc);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(vdc);
+
+        assertEmpty(results);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesWithAssociatedState()
+    {
+        VolumeManagement volume = eg().createUniqueInstance();
+        volume.associate();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+
+        assertEmpty(results);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesWithDifferentVirtualDatacenter()
+    {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        VirtualDatacenter other =
+            vdcGenerator.createInstance(vdc.getDatacenter(), vdc.getEnterprise());
+        VolumeManagement volume = eg().createInstance(vdc);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume, other);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(other);
+
+        assertEmpty(results);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesWithNormalPool()
+    {
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        VolumeManagement volume = eg().createInstance(pool);
+
+        pool.getDevice().setStorageTechnology(StorageTechnologyType.NEXENTA);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+
+        assertEmpty(results);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesInISCSIPool()
+    {
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        VolumeManagement volume = eg().createInstance(pool);
+
+        pool.getDevice().setStorageTechnology(StorageTechnologyType.GENERIC_ISCSI);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(volume.getVirtualDatacenter());
+
+        assertSize(results, 1);
+        assertAllEntityPropertiesEqual(results.iterator().next(), volume);
+    }
+
+    @Test
+    public void testGetStatefulCandidatesInISCSIPoolWithMultipleVolumes()
+    {
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        VolumeManagement volume1 = eg().createInstance(pool);
+        VolumeManagement volume2 = eg().createInstance(pool, volume1.getVirtualDatacenter());
+
+        pool.getDevice().setStorageTechnology(StorageTechnologyType.GENERIC_ISCSI);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume1, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume1, volume2.getRasd(), volume2);
+
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> results = dao.getStatefulCandidates(volume1.getVirtualDatacenter());
+
+        assertSize(results, 2);
     }
 }
