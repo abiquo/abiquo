@@ -70,7 +70,7 @@ public class VirtualMachineRequirements
         this.cpu = Long.valueOf(vmachine.getCpu());
         this.ram = Long.valueOf(vmachine.getRam());
         this.hd =
-            vmachine.getVirtualImage().isStateful() ? 0 : Long.valueOf(vmachine.getHdInBytes());
+            vmachine.getVirtualImage().getStateful() == 1 ? 0 : Long.valueOf(vmachine.getHdInBytes());
 
         this.repository = vmachine.getVirtualImage().getDiskFileSize();
 
