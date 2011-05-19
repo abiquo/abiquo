@@ -110,6 +110,46 @@ import com.abiquo.server.core.util.PagedList;
         return getResultList(criteria);
     }
 
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp, final FilterOptions filters)
+        throws Exception
+    {
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.getMessage());
+        }
+
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
+
+        Query query = getSession().getNamedQuery("VOLUMES_BY_POOL");
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setString("poolId", sp.getId());
+        queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
+    }
+
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
         final FilterOptions filters) throws Exception
     {
