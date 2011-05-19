@@ -173,8 +173,10 @@ public class VirtualMachineResource extends AbstractResource
 
         service.deallocateVirtualMachine(virtualMachineId);
     }
+
     /**
-     *  Power on the VirtualMachine
+     * Power on the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -197,8 +199,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.RUNNING);
         }
     }
+
     /**
      * Power off the virtual machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -221,8 +225,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.POWERED_OFF);
         }
     }
+
     /**
      * Resume the Virtual Machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -245,8 +251,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.REBOOTED);
         }
     }
+
     /**
-     *  Pause the VirtualMachine
+     * Pause the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -268,5 +276,12 @@ public class VirtualMachineResource extends AbstractResource
 
             vmService.changeVirtualMachineState(vappId, vdcId, State.PAUSED);
         }
+    }
+
+    @GET
+    @Path("chefrecipes")
+    public String getChefRecipes() throws Exception
+    {
+        return "chef";
     }
 }
