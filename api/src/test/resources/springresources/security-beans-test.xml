@@ -42,5 +42,14 @@
         <property name="cookieName" value="auth" />
         <property name="tokenValiditySeconds" value="1800" />
     </bean>
-    
+    <bean id="oneTimeTokenFilter"
+	   class="com.abiquo.api.spring.security.onetimetoken.filter.OneTimeTokenFilter">
+	   <security:custom-filter before="BASIC_PROCESSING_FILTER" />
+	   <property name="authenticationManager" ref="_authenticationManager" />
+    </bean>
+	<bean id="oneTimeTokenProvider"
+		class="com.abiquo.api.spring.security.onetimetoken.provider.OneTimeTokenAuthenticationProvider">
+		<security:custom-authentication-provider />
+		<property name="oneTimeTokenDetailsService" ref="oneTimeTokenDetailsService" />
+	</bean>
 </beans>

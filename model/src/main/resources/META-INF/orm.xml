@@ -11,6 +11,7 @@
     <orm:entity class="com.abiquo.server.core.enterprise.User"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.DatacenterLimits"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Session"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.OneTimeTokenSession"/>
     <!-- end: enterprise -->
 
     <!-- physical infrastructure -->
