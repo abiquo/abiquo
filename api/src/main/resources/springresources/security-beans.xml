@@ -25,7 +25,7 @@
         <security:intercept-url pattern="/config/properties/*" access="ROLE_SYS_ADMIN" method="PUT"/>
         <security:intercept-url pattern="/config/properties/*" access="ROLE_SYS_ADMIN" method="DELETE"/>
         <security:intercept-url pattern="/console" access="ROLE_SYS_ADMIN" />
-        <security:intercept-url pattern="/**/chefrecipes" access="ROLE_ONE_TIME,ROLE_SYS_ADMIN" />
+        <security:intercept-url pattern="/**/chefrecipes" access="ROLE_ONE_TIME,ROLE_SYS_ADMIN" method="GET" />
         <security:intercept-url pattern="/**" access="ROLE_NOBODY" />
         <security:http-basic />
         <security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
