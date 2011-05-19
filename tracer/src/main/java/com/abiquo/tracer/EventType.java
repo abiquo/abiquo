@@ -138,8 +138,9 @@ public enum EventType implements Serializable
         "UPDATE_PROPERTIES", "Client properties updated"),
 
     // HA Engine Events
-    MACHINE_DISABLED_BY_HA(1200, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."),
-    VAPP_BLOCKED_BY_HA(1201, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine");
+    MACHINE_DISABLED_BY_HA(1200, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
+        1201, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1201,
+        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine");
 
     private final int event;
 
