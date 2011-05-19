@@ -93,6 +93,21 @@ package net.undf.abicloud.controller.user
                 super.handleResult(result);
             }
         }
+        
+        public function handleCheckRolePrivilege(result:BasicResult, callback:Function):void{
+        	if (result.success)
+            {          	
+               	var roleHasPrivilege:Boolean = DataResult(result).data as Boolean;
+            	 
+            	callback(roleHasPrivilege);            	
+            }
+            else
+            {
+                //There was a problem retrieving the enterprise's resource allocation limits
+                super.handleResult(result);
+            }
+        }       
+        
 
 
         public function handleDeleteUser(result:BasicResult, deletedUser:User):void
