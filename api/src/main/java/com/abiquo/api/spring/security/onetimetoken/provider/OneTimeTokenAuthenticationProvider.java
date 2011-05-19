@@ -47,10 +47,10 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
     {
         this.oneTimeTokenDetailsService = oneTimeTokenDetailsService;
     }
-/**
- * 
- * @see org.springframework.security.providers.AuthenticationProvider#authenticate(org.springframework.security.Authentication)
- */
+
+    /**
+     * @see org.springframework.security.providers.AuthenticationProvider#authenticate(org.springframework.security.Authentication)
+     */
     @Override
     public Authentication authenticate(Authentication authentication)
         throws AuthenticationException
@@ -66,7 +66,7 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
         {
             AbiquoUserDetails userDetails = new AbiquoUserDetails();
             userDetails.setActive(false);
-            userDetails.setAuthType("ONE_TIME");
+            // userDetails.setAuthType("ONE_TIME");
 
             OneTimeTokenToken auth =
                 new OneTimeTokenToken(((OneTimeTokenToken) authentication).getToken(),
