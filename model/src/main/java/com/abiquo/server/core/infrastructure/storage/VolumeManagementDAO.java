@@ -38,7 +38,6 @@ import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
 
@@ -116,12 +115,10 @@ import com.abiquo.server.core.util.PagedList;
         return (VolumeManagement) criteria.uniqueResult();
     }
 
-    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc,
-        final long imageSizeInMB)
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
     {
         // Filters on the VolumeManagement entity
         Criteria crit = createCriteria();
-        crit.createAlias(VolumeManagement.RASD_PROPERTY, "rasd");
         crit.createAlias(VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
 
@@ -130,7 +127,6 @@ import com.abiquo.server.core.util.PagedList;
         crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY,
             VolumeState.NOT_MOUNTED_NOT_RESERVED));
 
-        crit.add(Restrictions.ge("rasd." + Rasd.LIMIT_PROPERTY, imageSizeInMB));
         crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
             StorageTechnologyType.GENERIC_ISCSI));
 
