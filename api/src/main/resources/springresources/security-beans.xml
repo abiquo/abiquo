@@ -28,16 +28,7 @@
 <!--         <security:intercept-url pattern="/**" access="ROLE_NOBODY" /> -->
         
         <!-- / -->
-        <security:intercept-url pattern="/"
-			access="ROLE_ENTERPRISE_ENUMERATE,ROLE_ENTERPRISE_ADMINISTER_ALL,ROLE_ENTERPRISE_RESOURCE_SUMMARY_ENT,ROLE_PHYS_DC_ENUMERATE,
-		        ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE,ROLE_PHYS_DC_MANAGE,ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS,ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK,
-		        ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE,ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION,ROLE_VDC_ENUMERATE,ROLE_VDC_MANAGE,ROLE_VDC_MANAGE_VAPP,ROLE_VDC_MANAGE_NETWORK,
-		        ROLE_VDC_MANAGE_STORAGE,ROLE_VAPP_CUSTOMISE_SETTINGS,ROLE_VAPP_DEPLOY_UNDEPLOY,ROLE_VAPP_ASSIGN_NETWORK,ROLE_VAPP_ASSIGN_VOLUME,ROLE_VAPP_PERFORM_ACTIONS,
-		        ROLE_VAPP_CREATE_STATEFUL,ROLE_VAPP_CREATE_INSTANCE,ROLE_APPLIB_VIEW,ROLE_APPLIB_ALLOW_MODIFY,ROLE_APPLIB_VM_COST_CODE,ROLE_APPLIB_UPLOAD_IMAGE,ROLE_APPLIB_MANAGE_REPOSITORY,
-		        ROLE_APPLIB_DOWNLOAD_IMAGE,ROLE_APPLIB_MANAGE_CATEGORIES,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_ENTERPRISE,ROLE_USERS_MANAGE_ENTERPRISE_BRANDING,ROLE_USERS_MANAGE_USERS,
-		        ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_USERS_PROHIBIT_VDC_RESTRICTION,ROLE_USERS_VIEW_PRIVILEGES,ROLE_USERS_MANAGE_ROLES,ROLE_USERS_MANAGE_ROLES_OTHER_ENTERPRISES,
-		        ROLE_USERS_MANAGE_SYSTEM_ROLES,ROLE_USERS_MANAGE_LDAP_GROUP,ROLE_USERS_ENUMERATE_CONNECTED,ROLE_SYSCONFIG_VIEW,ROLE_SYSCONFIG_ALLOW_MODIFY,ROLE_EVENTLOG_VIEW_ENTERPRISE,
-	            ROLE_EVENTLOG_VIEW_ALL" />
+        <security:intercept-url pattern="/" access="ROLE_AUTHENTICATED" />
         
         <!--===================================-->
         <!--============== ADMIN ==============-->
@@ -47,17 +38,17 @@
         <security:intercept-url pattern="/admin/roles" method="POST" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES" />
         <security:intercept-url pattern="/admin/roles" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/roles/*" method="GET" access="ROLE_USERS_MANAGE_ROLES" />
+        <security:intercept-url pattern="/admin/roles/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles/*" method="DELETE" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles/*" method="OPTIONS" access="ROLE_USERS_MANAGE_ROLES"/>
         <security:intercept-url pattern="/admin/roles/*" method="PUT" access="ROLE_USERS_MANAGE_ROLES" />
-        <security:intercept-url pattern="/admin/roles/*/action/privileges" method="GET" access="ROLE_USERS_VIEW_PRIVILEGES" />
+        <security:intercept-url pattern="/admin/roles/*/action/privileges" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES" />
         
         <!-- ENTERPRISES -->
         <security:intercept-url pattern="/admin/enterprises" method="POST" access="ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
@@ -67,9 +58,9 @@
         
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="GET" access="ROLE_USERS_VIEW" />
+        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="DELETE" access="ROLE_USERS_MANAGE_USERS" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="PUT" access="ROLE_USERS_MANAGE_USERS" />
@@ -294,7 +285,7 @@
 
 		<security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW" />
 		<security:intercept-url pattern="/config/privileges" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-		<security:intercept-url pattern="/config/privileges/*" method="GET" access="ROLE_USERS_VIEW_PRIVILEGES" />
+		<security:intercept-url pattern="/config/privileges/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES" />
 		<security:intercept-url pattern="/config/privileges/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 
 		<!-- PROPERTIES -->

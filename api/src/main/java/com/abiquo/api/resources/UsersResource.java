@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
@@ -57,12 +58,15 @@ public class UsersResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    @Autowired
+    SecurityService securityService;
+
     @GET
-    public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) String enterpriseId,
-        @QueryParam("filter") String filter, @QueryParam("orderBy") String orderBy,
-        @QueryParam("desc") boolean desc, @QueryParam("connected") boolean connected,
+    public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
+        @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
+        @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
         @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         if (page == null)
         {
@@ -79,6 +83,33 @@ public class UsersResource extends AbstractResource
                 numResults);
         UsersDto users = new UsersDto();
 
+        // Can only get my user
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
+        {
+            User currentUser = service.getCurrentUser();
+            if (all != null && !all.isEmpty())
+            {
+                for (User u : all)
+                {
+                    if (currentUser.getId().equals(u.getId()))
+                    {
+                        users.add(createTransferObject(u, restBuilder));
+                        break;
+                    }
+                }
+
+                if (all instanceof PagedList< ? >)
+                {
+                    PagedList<User> list = (PagedList<User>) all;
+                    users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
+                        .toString(), list));
+                    users.setTotalSize(list.getTotalResults());
+                }
+            }
+            return users;
+        }
+
+        // Can get all users
         if (all != null && !all.isEmpty())
         {
             for (User u : all)
@@ -99,8 +130,8 @@ public class UsersResource extends AbstractResource
     }
 
     @POST
-    public UserDto postUser(@PathParam(EnterpriseResource.ENTERPRISE) Integer enterpriseId,
-        UserDto user, @Context IRESTBuilder restBuilder) throws Exception
+    public UserDto postUser(@PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        final UserDto user, @Context final IRESTBuilder restBuilder) throws Exception
     {
         User u = service.addUser(user, enterpriseId);
 

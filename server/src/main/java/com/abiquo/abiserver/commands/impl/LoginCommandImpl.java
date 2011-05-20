@@ -59,7 +59,6 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
      */
 
     @Override
-    @SuppressWarnings("unchecked")
     public DataResult<LoginResult> login(final Login loginData)
     {
         DataResult<LoginResult> resultResponse = AuthService.getInstance().doLogin(loginData);

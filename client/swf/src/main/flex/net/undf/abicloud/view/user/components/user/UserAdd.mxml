@@ -97,6 +97,8 @@
 
                 nameInput.setFocus();
                 
+                this._vdcAllowed = false;
+                
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
@@ -140,7 +142,11 @@
                 newUser.locale = ResourceManager.getInstance().localeChain[0];
                 newUser.enterprise = this._enterprise;
                 
-                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
+                if(this._vdcAllowed){
+	                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();                	
+                }else{
+                	newUser.availableVirtualDatacenters = new Array();
+                }
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)
