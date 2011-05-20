@@ -52,14 +52,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
 
     private State state;
 
-    private String ipmiIp;
-
-    private Integer ipmiPort;
-
-    private String ipmiUser;
-
-    private String ipmiPassword;
-
     private boolean highDisponibility;
 
     private int idType;
@@ -177,46 +169,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
-    public String getIpmiIp()
-    {
-        return ipmiIp;
-    }
-
-    public void setIpmiIp(String ipmiIp)
-    {
-        this.ipmiIp = ipmiIp;
-    }
-
-    public Integer getIpmiPort()
-    {
-        return ipmiPort;
-    }
-
-    public void setIpmiPort(Integer ipmiPort)
-    {
-        this.ipmiPort = ipmiPort;
-    }
-
-    public String getIpmiUser()
-    {
-        return ipmiUser;
-    }
-
-    public void setIpmiUser(String ipmiUser)
-    {
-        this.ipmiUser = ipmiUser;
-    }
-
-    public String getIpmiPassword()
-    {
-        return ipmiPassword;
-    }
-
-    public void setIpmiPassword(String ipmiPassword)
-    {
-        this.ipmiPassword = ipmiPassword;
-    }
-
     public boolean isHighDisponibility()
     {
         return highDisponibility;
@@ -298,10 +250,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         virtualMachineHB.setHd(hd);
         virtualMachineHB.setVdrpIp(vdrpIP);
         virtualMachineHB.setVdrpPort(vdrpPort);
-        virtualMachineHB.setIpmiIp(ipmiIp);
-        virtualMachineHB.setIpmiPort(ipmiPort);
-        virtualMachineHB.setIpmiUser(ipmiUser);
-        virtualMachineHB.setIpmiPassword(ipmiPassword);
         virtualMachineHB.setHighDisponibility(highDisponibility ? 1 : 0);
         virtualMachineHB.setUserHB((user == null) ? null : user.toPojoHB());
         virtualMachineHB.setEnterpriseHB((enterprise == null) ? null : enterprise.toPojoHB());

@@ -75,8 +75,16 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     private Set<Datastore> datastores;
 
     private Integer idEnterprise;
-    
+
     private HyperVisor hypervisor;
+
+    private String ipmiIp;
+
+    private Integer ipmiPort;
+
+    private String ipmiUser;
+
+    private String ipmiPassword;
 
     public PhysicalMachine()
     {
@@ -96,6 +104,10 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         hdUsed = 0;
         setVswitchName("");
         idEnterprise = null;
+        ipmiIp = null;
+        ipmiPort = null;
+        ipmiUser = null;
+        ipmiPassword = null;
     }
 
     public DataCenter getDataCenter()
@@ -298,18 +310,58 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     {
         return idEnterprise;
     }
-    
-    
 
-    public HyperVisor getHypervisor() {
-		return hypervisor;
-	}
+    public String getIpmiIp()
+    {
+        return ipmiIp;
+    }
 
-	public void setHypervisor(HyperVisor hypervisor) {
-		this.hypervisor = hypervisor;
-	}
+    public void setIpmiIp(String ipmiIp)
+    {
+        this.ipmiIp = ipmiIp;
+    }
 
-	public PhysicalmachineHB toPojoHB()
+    public Integer getIpmiPort()
+    {
+        return ipmiPort;
+    }
+
+    public void setIpmiPort(Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+
+    public String getIpmiUser()
+    {
+        return ipmiUser;
+    }
+
+    public void setIpmiUser(String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+
+    public String getIpmiPassword()
+    {
+        return ipmiPassword;
+    }
+
+    public void setIpmiPassword(String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
+    }
+
+    public HyperVisor getHypervisor()
+    {
+        return hypervisor;
+    }
+
+    public void setHypervisor(HyperVisor hypervisor)
+    {
+        this.hypervisor = hypervisor;
+    }
+
+    public PhysicalmachineHB toPojoHB()
     {
         PhysicalmachineHB physicalMachineHB = new PhysicalmachineHB();
 
@@ -348,6 +400,10 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachineHB.setIdState(getIdState());
         physicalMachineHB.setVswitchName(vswitchName);
         physicalMachineHB.setInitiatorIQN(initiatorIQN);
+        physicalMachineHB.setIpmiIp(ipmiIp);
+        physicalMachineHB.setIpmiPort(ipmiPort);
+        physicalMachineHB.setIpmiUser(ipmiUser);
+        physicalMachineHB.setIpmiPassword(ipmiPassword);
         Set<DatastoreHB> datastoresHB = new HashSet<DatastoreHB>();
         if (datastores != null)
         {
@@ -361,10 +417,10 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         {
             physicalMachineHB.setIdEnterprise((idEnterprise.intValue() != 0) ? idEnterprise : null);
         }
-        
+
         if (hypervisor != null)
         {
-        	physicalMachineHB.setHypervisor(hypervisor.toPojoHB(physicalMachineHB));
+            physicalMachineHB.setHypervisor(hypervisor.toPojoHB(physicalMachineHB));
         }
 
         return physicalMachineHB;
@@ -401,6 +457,10 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setRamUsed(dto.getVirtualRamUsedInMb());
         physicalMachine.setIdState(dto.getState().ordinal());
         physicalMachine.setVswitchName(dto.getVirtualSwitch());
+        physicalMachine.setIpmiIp(dto.getIpmiIp());
+        physicalMachine.setIpmiPort(dto.getIpmiPort());
+        physicalMachine.setIpmiUser(dto.getIpmiUser());
+        physicalMachine.setIpmiPassword(dto.getIpmiPassword());
 
         // FIXME: where is initiatorIQN?
         // physicalMachine.setInitiatorIQN(dto.get);

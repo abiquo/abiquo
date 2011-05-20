@@ -173,10 +173,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 // Create the virtual machine
                 createVirtualMachine();
 
-                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+                VirtualDisk diskBase = config.getVirtualDiskBase();
+
+                if (diskBase.getDiskType() == VirtualDiskType.STANDARD && !diskBase.isHa())
                 {
                     // Just clones the image if the virtual disk is standard
                     // Cloning the virtual disk
+
                     cloneVirtualDisk();
                 }
 
@@ -947,16 +950,20 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             machine.unregister(CleanupMode.DetachAllReturnHardDisksOnly);
 
         // Deleting mediums
-        IProgress oProgress = machine.delete(mediumsToDelete);
+        if (!config.getVirtualDiskBase().isHa())
+        {
+            IProgress oProgress = machine.delete(mediumsToDelete);
 
-        try
-        {
-            waitOperation(oProgress, OPERATION_TIMEOUT);
-        }
-        catch (VirtualMachineException e)
-        {
-            logger.error("An error was found when deleting the hard disk from the virtual machine"
-                + oProgress.getErrorInfo());
+            try
+            {
+                waitOperation(oProgress, OPERATION_TIMEOUT);
+            }
+            catch (VirtualMachineException e)
+            {
+                logger
+                    .error("An error was found when deleting the hard disk from the virtual machine"
+                        + oProgress.getErrorInfo());
+            }
         }
 
         // Closing the sessions
