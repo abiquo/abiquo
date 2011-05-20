@@ -73,12 +73,28 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
     }
 
+    private Criterion managed()
+    {
+        return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.MANAGED);
+    }
+
     public List<VirtualMachine> findVirtualMachines(Hypervisor hypervisor)
     {
         assert hypervisor != null;
         assert isManaged2(hypervisor);
 
         Criteria criteria = createCriteria(sameHypervisor(hypervisor));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualMachine> result = getResultList(criteria);
+        return result;
+    }
+
+    public List<VirtualMachine> findManagedVirtualMachines(Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        assert isManaged2(hypervisor);
+
+        Criteria criteria = createCriteria(sameHypervisor(hypervisor), managed());
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachine> result = getResultList(criteria);
         return result;
@@ -107,13 +123,11 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     {
         return findUniqueByProperty(VirtualMachine.NAME_PROPERTY, name);
     }
-    
+
     public VirtualMachine findByUUID(String uuid)
     {
         return findUniqueByProperty(VirtualMachine.UUID_PROPERTY, uuid);
     }
-    
-    
 
     public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(Integer vappId)
     {

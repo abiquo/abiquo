@@ -66,6 +66,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findVirtualMachines(hypervisor);
     }
 
+    public Collection<VirtualMachine> findManagedByHypervisor(Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+        return dao.findManagedVirtualMachines(hypervisor);
+    }
+
     public Collection<VirtualMachine> findByEnterprise(Enterprise enterprise)
     {
         assert enterprise != null;
@@ -81,12 +87,12 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return dao.findVirtualMachinesByVirtualAppliance(vappId);
     }
-    
+
     public VirtualMachine findByUUID(String uuid)
     {
         return dao.findByUUID(uuid);
-    }    
-    
+    }
+
     public VirtualMachine findVirtualMachineById(Integer vmId)
     {
         return dao.findById(vmId);
