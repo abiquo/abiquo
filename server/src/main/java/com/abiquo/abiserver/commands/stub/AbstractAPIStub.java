@@ -216,6 +216,7 @@ public class AbstractAPIStub
                 new ResourceManager(BasicCommand.class), result,
                 "onFaultAuthorization.noPermission", methodName);
             result.setMessage(response.getMessage());
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
             throw new UserSessionException(result);
         }
         else
