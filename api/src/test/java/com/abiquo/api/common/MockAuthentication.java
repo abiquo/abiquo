@@ -52,12 +52,7 @@ public class MockAuthentication implements Authentication
     @Override
     public GrantedAuthority[] getAuthorities()
     {
-        String[] authorityStrings =
-            new String[] {SecurityService.OTHER_ENTERPRISES_PRIVILEGE,
-            SecurityService.OTHER_USERS_PRIVILEGE,
-            SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES,
-            SecurityService.USERS_MANAGE_SYSTEM_ROLES, SecurityService.USERS_MANAGE_USERS,
-            SecurityService.USERS_VIEW, SecurityService.USERS_VIEW_PRIVILEGES};
+        String[] authorityStrings = SecurityService.getAllPrivileges();
         GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
 
         for (int i = 0; i < authorityStrings.length; i++)

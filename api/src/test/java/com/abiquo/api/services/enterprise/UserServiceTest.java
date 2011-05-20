@@ -57,8 +57,8 @@ public class UserServiceTest extends AbstractGeneratorTest
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        Privilege p1 = new Privilege(SecurityService.OTHER_ENTERPRISES_PRIVILEGE);
-        Privilege p2 = new Privilege(SecurityService.OTHER_USERS_PRIVILEGE);
+        Privilege p1 = new Privilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(SecurityService.USERS_MANAGE_OTHER_USERS);
         r = roleGenerator.createInstance(p1, p2);
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 

@@ -157,7 +157,15 @@ public class UserService extends DefaultApiService
                 dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
-        user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
+
+        if (securityService.hasPrivilege(SecurityService.USERS_PROHIBIT_VDC_RESTRICTION, user))
+        {
+            user.setAvailableVirtualDatacenters(null);
+        }
+        else
+        {
+            user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
+        }
 
         if (!user.isValid())
         {
@@ -226,9 +234,16 @@ public class UserService extends DefaultApiService
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());
 
-        if (user.getAvailableVirtualDatacenters() != null)
+        if (securityService.hasPrivilege(SecurityService.USERS_PROHIBIT_VDC_RESTRICTION, old))
         {
-            old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            user.setAvailableVirtualDatacenters(null);
+        }
+        else
+        {
+            if (user.getAvailableVirtualDatacenters() != null)
+            {
+                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            }
         }
 
         if (!emailIsValid(user.getEmail()))
@@ -240,9 +255,22 @@ public class UserService extends DefaultApiService
         {
             old.setRole(findRole(user));
         }
-        if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+        if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
-            old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+            if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+            {
+                old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+            }
+        }
+        else if (securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
+        {
+            if (getCurrentUser().getId().equals(user.getId()))
+            {
+                if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+                {
+                    old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+                }
+            }
         }
 
         if (!old.isValid())

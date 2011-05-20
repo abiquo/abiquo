@@ -34,13 +34,17 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     EnterpriseGenerator enterpriseGenerator;
 
-    public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
+    public static final String ENTRPRISE_ADMINISTER_ALL = "ENTRPRISE_ADMINISTER_ALL";
 
-    public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
+    public static final String USERS_MANAGE_OTHER_ENTERPRISES = "USERS_MANAGE_OTHER_ENTERPRISES";
+
+    public static final String USERS_MANAGE_OTHER_USERS = "USERS_MANAGE_OTHER_USERS";
 
     public static final String USERS_VIEW = "USERS_VIEW";
 
     public static final String USERS_VIEW_PRIVILEGES = "USERS_VIEW_PRIVILEGES";
+
+    public static final String USERS_MANAGE_LDAP_GROUP = "USERS_MANAGE_LDAP_GROUP";
 
     public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
 
@@ -48,6 +52,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_SYSTEM_ROLES = "USERS_MANAGE_SYSTEM_ROLES";
+
+    public static final String USERS_PROHIBIT_VDC_RESTRICTION = "USERS_PROHIBIT_VDC_RESTRICTION";
 
     public RoleGenerator(final SeedGenerator seed)
     {
@@ -73,34 +79,41 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public Role createInstanceSysAdmin()
     {
-        Privilege p1 = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
-        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        Privilege p1 = new Privilege(USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(USERS_MANAGE_OTHER_USERS);
         Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
         Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
         Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
-        return createInstance(p1, p2, p3, p4, p5, p6, p7);
+        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
+        Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
+        Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
+        return createInstance(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
     }
 
     public Role createInstanceSysAdmin(final String name)
     {
-        Privilege p1 = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
-        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        Privilege p1 = new Privilege(USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(USERS_MANAGE_OTHER_USERS);
         Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
         Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
         Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
-        return createInstance(name, p1, p2, p3, p4, p5, p6, p7);
+        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
+        Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
+        Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
+        return createInstance(name, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
     }
 
     public Role createInstanceEnterprisAdmin()
     {
-        Privilege p2 = new Privilege(OTHER_USERS_PRIVILEGE);
+        Privilege p2 = new Privilege(USERS_MANAGE_OTHER_USERS);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        return createInstance(p2, p4, p5);
+        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
+        return createInstance(p2, p4, p5, p8);
     }
 
     public Role createInstance(final Enterprise enterprise)

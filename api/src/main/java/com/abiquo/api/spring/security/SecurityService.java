@@ -38,26 +38,30 @@ import com.abiquo.server.core.enterprise.User;
 @Service
 public class SecurityService
 {
-    public static final String OTHER_ENTERPRISES_PRIVILEGE =
-        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_OTHER_ENTERPRISES";
+    public static final String DRP = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX;
 
-    public static final String OTHER_USERS_PRIVILEGE = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-        + "USERS_MANAGE_OTHER_USERS";
+    public static final String ENTRPRISE_ADMINISTER_ALL = DRP + "ENTRPRISE_ADMINISTER_ALL";
 
-    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
-        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
+    public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
+        + "USERS_MANAGE_OTHER_ENTERPRISES";
 
-    public static final String USERS_MANAGE_SYSTEM_ROLES =
-        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_SYSTEM_ROLES";
+    public static final String USERS_MANAGE_OTHER_USERS = DRP + "USERS_MANAGE_OTHER_USERS";
 
-    public static final String USERS_MANAGE_USERS = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-        + "USERS_MANAGE_USERS";
+    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES = DRP
+        + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
 
-    public static final String USERS_VIEW = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-        + "USERS_VIEW";
+    public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
 
-    public static final String USERS_VIEW_PRIVILEGES = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-        + "USERS_VIEW_PRIVILEGES";
+    public static final String USERS_MANAGE_USERS = DRP + "USERS_MANAGE_USERS";
+
+    public static final String USERS_VIEW = DRP + "USERS_VIEW";
+
+    public static final String USERS_VIEW_PRIVILEGES = DRP + "USERS_VIEW_PRIVILEGES";
+
+    public static final String USERS_PROHIBIT_VDC_RESTRICTION = DRP
+        + "USERS_PROHIBIT_VDC_RESTRICTION";
+
+    public static final String USERS_MANAGE_LDAP_GROUP = DRP + "USERS_MANAGE_LDAP_GROUP";
 
     public boolean hasPrivilege(final String privilege)
     {
@@ -89,22 +93,22 @@ public class SecurityService
 
     public boolean canManageOtherEnterprises()
     {
-        return hasPrivilege(OTHER_ENTERPRISES_PRIVILEGE);
+        return hasPrivilege(USERS_MANAGE_OTHER_ENTERPRISES);
     }
 
     public boolean canManageOtherUsers()
     {
-        return hasPrivilege(OTHER_USERS_PRIVILEGE);
+        return hasPrivilege(USERS_MANAGE_OTHER_USERS);
     }
 
     public boolean canManageOtherEnterprises(final User user)
     {
-        return hasPrivilege(OTHER_ENTERPRISES_PRIVILEGE, user);
+        return hasPrivilege(USERS_MANAGE_OTHER_ENTERPRISES, user);
     }
 
     public boolean canManageOtherUsers(final User user)
     {
-        return hasPrivilege(OTHER_USERS_PRIVILEGE, user);
+        return hasPrivilege(USERS_MANAGE_OTHER_USERS, user);
     }
 
     public boolean isCloudAdmin()
@@ -136,6 +140,14 @@ public class SecurityService
         }
 
         return false;
+    }
+
+    public static String[] getAllPrivileges()
+    {
+        return new String[] {ENTRPRISE_ADMINISTER_ALL, USERS_MANAGE_OTHER_ENTERPRISES,
+        USERS_MANAGE_OTHER_USERS, USERS_MANAGE_ROLES_OTHER_ENTERPRISES, USERS_MANAGE_SYSTEM_ROLES,
+        USERS_MANAGE_USERS, USERS_VIEW, USERS_VIEW_PRIVILEGES, USERS_PROHIBIT_VDC_RESTRICTION,
+        USERS_MANAGE_LDAP_GROUP};
     }
 
 }
