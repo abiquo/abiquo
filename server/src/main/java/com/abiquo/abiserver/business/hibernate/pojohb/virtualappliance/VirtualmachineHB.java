@@ -89,14 +89,6 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
 
     private int highDisponibility;
 
-    private String ipmiIp;
-
-    private Integer ipmiPort;
-
-    private String ipmiUser;
-
-    private String ipmiPassword;
-
     private VirtualImageConversionsHB conversion;
 
     private final List<ResourceAllocationSettingData> rasds =
@@ -149,46 +141,6 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
     public String getName()
     {
         return name;
-    }
-
-    public String getIpmiIp()
-    {
-        return ipmiIp;
-    }
-
-    public void setIpmiIp(final String ipmiIp)
-    {
-        this.ipmiIp = ipmiIp;
-    }
-
-    public Integer getIpmiPort()
-    {
-        return ipmiPort;
-    }
-
-    public void setIpmiPort(final Integer ipmiPort)
-    {
-        this.ipmiPort = ipmiPort;
-    }
-
-    public String getIpmiUser()
-    {
-        return ipmiUser;
-    }
-
-    public void setIpmiUser(final String ipmiUser)
-    {
-        this.ipmiUser = ipmiUser;
-    }
-
-    public String getIpmiPassword()
-    {
-        return ipmiPassword;
-    }
-
-    public void setIpmiPassword(final String ipmiPassword)
-    {
-        this.ipmiPassword = ipmiPassword;
     }
 
     public List<ResourceAllocationSettingData> getRasds()
@@ -385,10 +337,6 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         virtualMachine.setVdrpIP(vdrpIp);
         virtualMachine.setVdrpPort(vdrpPort);
         virtualMachine.setState(new State(state));
-        virtualMachine.setIpmiIp(ipmiIp);
-        virtualMachine.setIpmiPort(ipmiPort);
-        virtualMachine.setIpmiUser(ipmiUser);
-        virtualMachine.setIpmiPassword(ipmiPassword);
         virtualMachine.setHighDisponibility(highDisponibility == 1 ? true : false);
         virtualMachine.setUser(userHB == null ? null : userHB.toPojo());
         virtualMachine.setEnterprise(enterpriseHB == null ? null : enterpriseHB.toPojo());

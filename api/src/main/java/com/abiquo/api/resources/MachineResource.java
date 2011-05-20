@@ -179,6 +179,11 @@ public class MachineResource extends AbstractResource
         dto.setType(machine.getHypervisor().getType());
         dto.setUser(machine.getHypervisor().getUser());
         dto.setPassword(machine.getHypervisor().getPassword());
+        dto.setIpmiIp(machine.getIpmiIP());
+        dto.setIpmiPort(machine.getIpmiPort());
+        dto.setIpmiUser(machine.getIpmiUser());
+        dto.setIpmiPassword(machine.getIpmiPassword());
+        
 
         dto =
             addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
