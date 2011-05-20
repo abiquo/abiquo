@@ -199,6 +199,12 @@ public class StorageRep extends DefaultRepBase
         return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
     }
 
+    public List<VolumeManagement> findVolumesByPool(final StoragePool pool,
+        final FilterOptions filters) throws Exception
+    {
+        return volumeDAO.getVolumesByPool(pool, filters);
+    }
+
     public Tier insertTier(final Tier tier)
     {
         tierDAO.persist(tier);
