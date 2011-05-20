@@ -571,6 +571,11 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
+    
+    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+    {
+        return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
+    }
 
     public void createRepository(final Datacenter datacenter, final String repositoryLocation)
     {
