@@ -44,20 +44,20 @@ public class SecurityService
     public static final String OTHER_USERS_PRIVILEGE = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
         + "USERS_MANAGE_OTHER_USERS";
 
+    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
+        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
+
+    public static final String USERS_MANAGE_SYSTEM_ROLES =
+        AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX + "USERS_MANAGE_SYSTEM_ROLES";
+
+    public static final String USERS_MANAGE_USERS = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
+        + "USERS_MANAGE_USERS";
+
     public static final String USERS_VIEW = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
         + "USERS_VIEW";
 
     public static final String USERS_VIEW_PRIVILEGES = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
         + "USERS_VIEW_PRIVILEGES";
-
-    public static final String USERS_MANAGE_USERS = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
-        + "USERS_MANAGE_USERS";
-
-    /*
-     * public static final String ROLES_PRIVILEGE = "USERS_MANAGE_ROLES"; public static final String
-     * OTHER_ENTERPRISES_ROLES_PRIVILEGE = "USERS_MANAGE_ROLES_OTHER_ENTERPRISES"; public static
-     * final String SYSTEM_ROLES_PRIVILEGE = "USERS_MANAGE_SYSTEM_ROLES";
-     */
 
     public boolean hasPrivilege(final String privilege)
     {

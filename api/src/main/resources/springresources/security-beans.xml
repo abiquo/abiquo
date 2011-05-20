@@ -44,6 +44,15 @@
         <security:intercept-url pattern="/admin/roles/*" method="PUT" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles/*/action/privileges" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES" />
         
+        <!-- ROLES LDAP -->
+        <security:intercept-url pattern="/admin/rolesldap" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap" method="POST" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/rolesldap/*" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap/*" method="PUT" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap/*" method="DELETE" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        
         <!-- ENTERPRISES -->
         <security:intercept-url pattern="/admin/enterprises" method="POST" access="ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />

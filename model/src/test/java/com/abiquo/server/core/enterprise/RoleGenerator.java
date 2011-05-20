@@ -44,6 +44,11 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
 
+    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
+        "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
+
+    public static final String USERS_MANAGE_SYSTEM_ROLES = "USERS_MANAGE_SYSTEM_ROLES";
+
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -73,7 +78,9 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        return createInstance(p1, p2, p3, p4, p5);
+        Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
+        Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
+        return createInstance(p1, p2, p3, p4, p5, p6, p7);
     }
 
     public Role createInstanceSysAdmin(final String name)
@@ -83,7 +90,9 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        return createInstance(name, p1, p2, p3, p4, p5);
+        Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
+        Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
+        return createInstance(name, p1, p2, p3, p4, p5, p6, p7);
     }
 
     public Role createInstanceEnterprisAdmin()
