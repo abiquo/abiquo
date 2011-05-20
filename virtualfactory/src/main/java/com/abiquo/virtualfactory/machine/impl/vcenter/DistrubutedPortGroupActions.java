@@ -126,14 +126,15 @@ public class DistrubutedPortGroupActions
             serviceInstance.getServerConnection().getVimService()
                 .addDVPortgroup_Task(dvs.getMOR(), portGroups);
 
-            LOGGER.info("Port group '" + portGroupName + "' created into dvSwitch with name '" + dvsName + "'.");
+            LOGGER.info("Port group '" + portGroupName + "' created into dvSwitch with name '"
+                + dvsName + "'.");
             return portGroupName;
         }
         catch (Exception e)
         {
             String message =
-                "Could not create the port group '" + portGroupName + "' into dvSwitch with name '" + dvsName
-                    + "' because of:" + e.getMessage();
+                "Could not create the port group '" + portGroupName + "' into dvSwitch with name '"
+                    + dvsName + "' because of:" + e.getMessage();
 
             LOGGER.error(message);
             throw new VirtualMachineException(message, e);
@@ -178,8 +179,8 @@ public class DistrubutedPortGroupActions
             {
                 String message =
                     "The port group with name '" + portGroupName
-                        + "' does not exist into the dvSwitch '" + dvsName + "' but in the dvSwitch with name '"
-                        + dvSwitchName +"'.";
+                        + "' does not exist into the dvSwitch '" + dvsName
+                        + "' but in the dvSwitch with name '" + dvSwitchName + "'.";
                 LOGGER.error(message);
                 throw new VirtualMachineException(message);
             }
@@ -189,8 +190,8 @@ public class DistrubutedPortGroupActions
         catch (Exception e)
         {
             String message =
-                "Could not retrieve the port group '" + portGroupName + "' into dvSwitch with name '" + dvsName
-                    + "' because of: " + e.getMessage();
+                "Could not retrieve the port group '" + portGroupName
+                    + "' into dvSwitch with name '" + dvsName + "' because of: " + e.getMessage();
 
             LOGGER.error(message);
             throw new VirtualMachineException(message, e);
@@ -223,10 +224,18 @@ public class DistrubutedPortGroupActions
         }
     }
 
-    public void attachVirtualMachineToPortGroup(String nameVM, VirtualNIC vnic) throws VirtualMachineException
+    /**
+     * Create a binding from a virtual machine NIC to a port group.
+     * 
+     * @param nameVM name of the virtual machine to use.
+     * @param portGroupName port group name to associate
+     * @param macAddress mac address of the NIC
+     * @throws VirtualMachineException encapsulate any exception
+     */
+    public void attachVirtualMachineNICToPortGroup(String nameVM, String portGroupName,
+        String macAddress) throws VirtualMachineException
     {
         Folder fold = serviceInstance.getRootFolder();
-        String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
 
         try
         {
@@ -235,10 +244,13 @@ public class DistrubutedPortGroupActions
             VirtualMachine vm;
             do
             {
+                // TODO: This is dangerous!!! Think in something else.
                 // retrieve the virtual machine while the vcenter refreshes the state.
                 vm = (VirtualMachine) navigator.searchManagedEntity("VirtualMachine", nameVM);
-            } while (vm == null);
-            
+
+            }
+            while (vm == null);
+
             // Get the information we need to create the binding to a DVS.
             DistributedVirtualPortgroup dvPortGroup =
                 (DistributedVirtualPortgroup) new InventoryNavigator(fold).searchManagedEntity(
@@ -260,7 +272,7 @@ public class DistrubutedPortGroupActions
             // Define the
             VirtualVmxnet3 virtualNICSpec = new VirtualVmxnet3();
             virtualNICSpec.setAddressType("manual");
-            virtualNICSpec.setMacAddress(vnic.getMacAddress());
+            virtualNICSpec.setMacAddress(macAddress);
             virtualNICSpec.setBacking(nicBacking);
 
             VirtualDeviceConfigSpec nicSpec = new VirtualDeviceConfigSpec();
@@ -271,23 +283,22 @@ public class DistrubutedPortGroupActions
             vmConfig.setDeviceChange(new VirtualDeviceConfigSpec[] {nicSpec});
 
             Task task = vm.reconfigVM_Task(vmConfig);
-            
+
             if (task.waitForMe() == Task.SUCCESS)
             {
                 String message =
-                    "Virtual machine with name '" + nameVM + "' associated to distributed port group '"
-                        + portGroupName + "'";
-                
+                    "Virtual machine with name '" + nameVM
+                        + "' associated to distributed port group '" + portGroupName + "'";
+
                 LOGGER.info(message);
             }
             else
             {
                 String message =
-                    "Could not associate virtual machine with name '" + nameVM + "' to port group '"
-                        + portGroupName + "'";
+                    "Could not associate virtual machine with name '" + nameVM
+                        + "' to port group '" + portGroupName + "'";
                 throw new VirtualMachineException(message);
             }
-            
 
         }
         catch (RemoteException e)
@@ -299,7 +310,7 @@ public class DistrubutedPortGroupActions
             throw new VirtualMachineException(message);
         }
     }
-    
+
     private ObjectContent[] getObjectProperties(final ManagedObjectReference collector,
         final ManagedObjectReference mobj, final String[] properties) throws RemoteException
     {

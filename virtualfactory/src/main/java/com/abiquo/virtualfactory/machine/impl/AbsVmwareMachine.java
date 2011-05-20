@@ -86,10 +86,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
     /** Hold all the disk (HD and iSCSI targets) related logic. */
     protected VmwareMachineDisk disks;
-    
+
     /** Check if the DVS feature is enabled; */
     protected Boolean dvsEnabled;
-    
+
+    /** vCenter Bridge <DVS> */
+    protected VCenterBridge vCenterBridge;
+
     /** Tasks to be required for a VM to change its state. */
     enum VMTasks
     {
@@ -136,9 +139,11 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         // Gets the VMWare API main interface
         utils = new VmwareMachineUtils(vmwareHyper);
         disks = new VmwareMachineDisk(utils, vmConfig, vmwareConfig);
-        
+
         // Get if the DVS experimental feature is enabled.
-        dvsEnabled = Boolean.valueOf(System.getProperty("abiquo.experimentaldvs.enabled"));
+        dvsEnabled = Boolean.valueOf(System.getProperty("abiquo.dvs.enabled"));
+        utils.reconnect();
+        vCenterBridge = VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
     }
 
     @Override
@@ -168,7 +173,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             if (!isVMAlreadyCreated())
             {
-                configureNetwork();
 
                 // Create the template vdestPathirtual machine
                 // <DVS>
@@ -177,28 +181,50 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 {
                     // if any of the vnics have a "dvs" as switch, then all of them will have.
                     // because it refeers a target machine property, not a NIC-specific property
-                    if (config.getVnicList().get(0).getVSwitchName().toLowerCase().startsWith("dvs"))
+                    if (config.getVnicList().get(0).getVSwitchName().toLowerCase()
+                        .startsWith("dvs"))
                     {
+                        // Ensure the HOST is associated to vCenter
+                        if (vCenterBridge == null)
+                        {
+                            String message =
+                                "Could not configure network. Port groups "
+                                    + "' should be created into "
+                                    + " DVS with name '"
+                                    + config.getVnicList().get(0).getVSwitchName()
+                                    + "' in a remote vCenter. However your ESXi Host is not associated to any vCenter.";
+                            logger.error(message);
+                            throw new VirtualMachineException(message);
+                        }
+
+                        // Fill the dvNIClist and clear the common NIC list
                         dvNIClist.addAll(config.getVnicList());
                         config.getVnicList().clear();
+
+                        // Configure the dvNIClist
+                        for (VirtualNIC vnic : dvNIClist)
+                        {
+                            vCenterBridge.createPortGroupInVCenter(vnic.getVSwitchName(),
+                                vnic.getNetworkName(), vnic.getVlanTag());
+                        }
+
                     }
                 }
-                // </DVS>
+
+                // Configure the port group in the common way. If a DVS is used, the internal loop,
+                // will not do anything because the list of vnics is empty.
+                configureNetwork();
+
                 createVirtualMachine();
+
                 // <DVS>
                 // Once the machine is defined and created, attach its vnics which refeers a dvs
                 // to a vcenter.
                 if (dvsEnabled)
                 {
-                    VCenterBridge vcenterBridge =
-                        VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
-                    vcenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
-
+                    vCenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
                 }
                 // </DVS>
-                
-                
-                
 
                 // Stateless image located on the Enterprise Repository require to be copy on the
                 // local fs.
@@ -211,12 +237,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 // Attach the initial extended disks
                 initDisks();
 
-                // reconfigureNetwork();
-
             }
-
-            // TODO The method areDisksAlreadyDeployed is not used to check if the disks are already
-            // deployed
 
             checkIsCancelled();
         }
@@ -254,20 +275,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         {
             String portGroupName = vnic.getNetworkName() + "_" + vnic.getVlanTag();
 
-            // Create the port group in the vCenter and attach it to a dvSwitch
-            // <DVS>
-            Boolean dvsEnabled =
-                Boolean.valueOf(System.getProperty("abiquo.experimentaldvs.enabled"));
-            if (dvsEnabled && vnic.getVSwitchName().toLowerCase().startsWith("dvs"))
-            {
-                VCenterBridge vcenterBridge =
-                    VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
-                vcenterBridge.createPortGroupInVCenter(vnic.getVSwitchName(),
-                    vnic.getNetworkName(), vnic.getVlanTag());
-                continue;
-            }
-            // </DVS>
-
             // Try to find if a group corresponding the network name is found. If not create it.
             ManagedObjectReference networkMor = utils.getNetwork(portGroupName);
             ManagedObjectReference hostmor = utils.getHostSystemMOR();
@@ -290,7 +297,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     String msg =
                         "The Virtual Switch "
                             + vnic.getVSwitchName()
-                            + " couln't be found in the hypervisor. The virtual machine networking resources can't be configured";
+                            + " couln't be found in the hypervisor. The virtual machine networking resources can't be configured. ";
+
+                    if (vnic.getVSwitchName().toLowerCase().startsWith("dvs"))
+                    {
+                        msg +=
+                            "Maybe you have the Distributed Virtual Switch funtionallity disabled?";
+                    }
                     throw new VirtualMachineException(msg);
                 }
                 portgrp.setPolicy(new HostNetworkPolicy());
@@ -418,7 +431,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         ArrayList<ManagedObjectReference> crmors;// all computer resources on host folder
         ManagedObjectReference crmor; // computer resource
         VirtualMachineConfigSpec vmConfigSpec; // virtual machine configuration
-        VirtualDeviceConfigSpec[] vdiskSpec; // disk configuration
 
         try
         {
@@ -488,13 +500,24 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         try
         {
             utils.reconnect();
+
             // Force to power off the machine before deleting
             powerOffMachine();
 
-            // affect all the VM for the given machine name
-            ServiceInstance si = utils.getAppUtil().getServiceInstance();
-
-            Folder rootFolder = si.getRootFolder();
+            // if we have connection with the vCenter, unregister the 'orphaned' machine.
+            // Do nothing
+            if (vCenterBridge != null)
+            {
+                try
+                {
+                    vCenterBridge.unregisterVM(config.getMachineName());
+                }
+                catch (VirtualMachineException e)
+                {
+                    logger.warn("Could not unregister Virtual Machine '" + config.getMachineName()
+                        + "' and it will be 'orphaned'");
+                }
+            }
 
             executeTaskOnVM(VMTasks.DELETE);
 
@@ -505,15 +528,32 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 // <DVS>
                 // if any of the vnics have a "dvs" as switch, then all of them will have.
                 // because it refers a target machine property, not a NIC-specific property
-                if (dvsEnabled && config.getVnicList().get(0).getVSwitchName().toLowerCase().startsWith("dvs"))
+                if (dvsEnabled
+                    && config.getVnicList().get(0).getVSwitchName().toLowerCase().startsWith("dvs"))
                 {
-                    VCenterBridge vcenterBridge =
-                        VCenterBridge.createVCenterBridge(utils.getAppUtil().getServiceInstance());
-                    
-                    // Since the machine has been deleted, the vcenter needs to unregister it before delete the port group.
-                    vcenterBridge.unregisterVM(config.getMachineName());
-                    vcenterBridge.deconfigureNetwork(config.getVnicList());
-                    
+                    if (vCenterBridge != null)
+                    {
+                        // Since the machine has been deleted, the vcenter needs to unregister it
+                        // before
+                        // delete the port group.
+                        try
+                        {
+                            vCenterBridge.deconfigureNetwork(config.getVnicList());
+                            return;
+                        }
+                        catch (VirtualMachineException e)
+                        {
+                            // do nothing if the vCenter goes ok.
+                        }
+                    }
+
+                    // if arribes here it means something has been going wrong
+                    String message =
+                        "Could not deconfigure networks related to DVS in vm with name '"
+                            + config.getMachineName()
+                            + "' because your ESXi Host is not associated to any vCenter.";
+                    logger.error(message);
+
                 }
                 else
                 {
@@ -628,8 +668,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             VirtualMachine vm =
                 (VirtualMachine) new InventoryNavigator(rootFolder).searchManagedEntity(
                     "VirtualMachine", machineName);
-            
-            
+
             if (vm == null)
             {
                 throw new VirtualMachineException("Error while " + task.name()

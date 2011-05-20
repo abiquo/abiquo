@@ -188,8 +188,7 @@ public class VCenterVDSCreationTest
     @Test
     public void testAttachNicToVM() throws VirtualMachineException
     {
-        VirtualNIC niic = new VirtualNIC(dvSwitchName, "00:50:56:a4:00:03", 2, "default_network", 1);
-        vcenterDVS.attachVirtualMachineToPortGroup("vm_name", niic);
+        vcenterDVS.attachVirtualMachineNICToPortGroup("vm_name", "default_network", "00:50:56:a4:00:03");
     }
 
 }
