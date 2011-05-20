@@ -228,26 +228,24 @@ public class AuthenticationManagerApi implements IAuthenticationManager
 
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
-
-        ClientConfig clientConfig = new ClientConfig();
-        BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
-        clientConfig.handlers(basicAuthHandler);
-
-        UserHB userHB = null;
+        UserDto userDto = null;
         try
         {
-            // We perform this call to a secure location. If success then the credentials are valid
-            LoginResourceStub proxy = getLoginStubProxy();
-            DataResult<UserDto> dataResultDto =
-                proxy.getUserByName(login.getUser(), login.getPassword(), basicAuthHandler);
-            UserDto userDto = dataResultDto.getData();
-            // Old DB login needs a Md5 password
-            String passwordHash = createMd5encodedPassword(login);
-            basicAuthHandler.setPassword(passwordHash);
-            login.setPassword(passwordHash);
+            if (StringUtils.isBlank(login.getAuthToken()))
+            {
 
-            userHB = getUserToPersistSession(login, userDto);
-            dataResult = persistLogin(userHB);
+                BasicAuthSecurityHandler basicAuthHandler = createAuthenticationToken(login);
+                // We perform this call to a secure location. If success then the credentials are
+                // valid
+                DataResult<UserDto> dataResultDto = apiLoginCall(login, basicAuthHandler);
+                userDto = dataResultDto.getData();
+                // Old DB login needs a Md5 password
+                String passwordHash = createMd5encodedPassword(login);
+                basicAuthHandler.setPassword(passwordHash);
+                login.setPassword(passwordHash);
+            }
+
+            dataResult = login(login, userDto);
         }
 
         catch (BadCredentialsException e)
@@ -272,6 +270,30 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             dataResult.setResultCode(BasicResult.USER_INVALID);
         }
 
+        return dataResult;
+    }
+
+    /**
+     * @param login login.
+     * @param basicAuthHandler handler.
+     * @return DataResult<UserDto>
+     */
+    private DataResult<UserDto> apiLoginCall(Login login, BasicAuthSecurityHandler basicAuthHandler)
+    {
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.handlers(basicAuthHandler);
+        LoginResourceStub proxy = getLoginStubProxy();
+        DataResult<UserDto> dataResultDto =
+            proxy.getUserByName(login.getUser(), login.getPassword(), basicAuthHandler);
+        return dataResultDto;
+    }
+
+    private DataResult<LoginResult> login(Login login, UserDto userDto) throws Exception
+    {
+        DataResult<LoginResult> dataResult;
+        UserHB userHB;
+        userHB = getUserToPersistSession(login, userDto);
+        dataResult = persistLogin(userHB);
         return dataResult;
     }
 
@@ -497,7 +519,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             // Validate credentials with the token
             String signature =
                 TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
-                    userHB.getPassword());
+                    userHB.getPassword())
+                    + userHB.getAuthType();
 
             if (!signature.equals(tokenSignature))
             {
