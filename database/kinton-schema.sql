@@ -1930,17 +1930,6 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`enterprise_theme` (
 )ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
 
---
--- LDAP TABLE
---
-DROP  TABLE IF EXISTS `kinton`.`role_ldap`;
-CREATE  TABLE `kinton`.`role_ldap` (`idLdapRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
-  `idRole` INT(10) UNSIGNED NOT NULL ,
-  `role_ldap` VARCHAR(128) NOT NULL ,
-  `version_c` int(11) default 0,
-  INDEX `fk_role_ldap_role` (`idRole` ASC) ,
-  PRIMARY KEY (`idLdapRole`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-
 -- The idRole values are taken from the above role table.
 /*!40000 ALTER TABLE `role_ldap` DISABLE KEYS */;
 LOCK TABLES `kinton`.`role_ldap` WRITE;
