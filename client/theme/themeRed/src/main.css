@@ -506,7 +506,7 @@
 .CommonAssetsAlertIconAlert
  {
 	/**custom property**/
-	source:Embed("/assets/customcomponents/abicloudalert/icon_alert.png");
+	source:Embed("/assets/application/icons/alert.png");
  }
 
 .CommonAssetsAlertIconError
