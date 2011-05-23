@@ -248,7 +248,14 @@ public class UserService extends DefaultApiService
 
         if (user.getAvailableVirtualDatacenters() != null)
         {
-            old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            if (user.getAvailableVirtualDatacenters().isEmpty())
+            {
+                old.setAvailableVirtualDatacenters(null);
+            }
+            else
+            {
+                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            }
         }
 
         if (!emailIsValid(user.getEmail()))
