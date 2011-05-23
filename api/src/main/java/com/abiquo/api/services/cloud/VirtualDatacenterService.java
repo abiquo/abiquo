@@ -32,8 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
@@ -48,9 +48,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -75,12 +72,15 @@ public class VirtualDatacenterService extends DefaultApiService
 
     @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
-    
+
     @Autowired
     PrivateNetworkService networkService;
 
     @Autowired
     SecurityService securityService;
+
+    @Autowired
+    ConfigService configService;
 
     public VirtualDatacenterService()
     {
@@ -97,6 +97,7 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         securityService = new SecurityService();
         networkService = new PrivateNetworkService(em);
+        configService = new ConfigService();
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
@@ -305,7 +306,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     private boolean isValidVlanHardLimitPerVdc(final long vlansHard)
     {
-        String limitS = System.getProperty("abiquo.server.networking.vlanPerVdc", "0");
+        String limitS = configService.getVlanPerVdc();
         int limit = Integer.valueOf(limitS);
 
         return limit == 0 || limit >= vlansHard;

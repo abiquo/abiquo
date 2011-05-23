@@ -52,7 +52,9 @@ public class SecurityService
 
     public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
 
-    public static final String USERS_MANAGE_USERS = DRP + "USERS_MANAGE_USERS";
+    public static final String USERS_MANAGE_USERS_PRIV = "USERS_MANAGE_USERS";
+
+    public static final String USERS_MANAGE_USERS = DRP + USERS_MANAGE_USERS_PRIV;
 
     public static final String USERS_VIEW = DRP + "USERS_VIEW";
 

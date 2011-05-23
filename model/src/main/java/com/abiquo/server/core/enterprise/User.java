@@ -61,6 +61,7 @@ public class User extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -89,7 +90,7 @@ public class User extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -111,7 +112,7 @@ public class User extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -139,7 +140,7 @@ public class User extends DefaultEntityBase
         return this.nick;
     }
 
-    public void setNick(String nick)
+    public void setNick(final String nick)
     {
         this.nick = nick;
     }
@@ -161,7 +162,7 @@ public class User extends DefaultEntityBase
         return this.role;
     }
 
-    public void setRole(Role role)
+    public void setRole(final Role role)
     {
         this.role = role;
     }
@@ -189,7 +190,7 @@ public class User extends DefaultEntityBase
         return this.locale;
     }
 
-    public void setLocale(String locale)
+    public void setLocale(final String locale)
     {
         this.locale = locale;
     }
@@ -217,7 +218,7 @@ public class User extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -245,7 +246,7 @@ public class User extends DefaultEntityBase
         return this.surname;
     }
 
-    public void setSurname(String surname)
+    public void setSurname(final String surname)
     {
         this.surname = surname;
     }
@@ -267,7 +268,7 @@ public class User extends DefaultEntityBase
         return this.active;
     }
 
-    public void setActive(int active)
+    public void setActive(final int active)
     {
         this.active = active;
     }
@@ -295,7 +296,7 @@ public class User extends DefaultEntityBase
         return this.email;
     }
 
-    public void setEmail(String email)
+    public void setEmail(final String email)
     {
         this.email = email;
     }
@@ -323,7 +324,7 @@ public class User extends DefaultEntityBase
         return this.description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -340,13 +341,14 @@ public class User extends DefaultEntityBase
         return this.availableVirtualDatacenters;
     }
 
-    public void setAvailableVirtualDatacenters(String availableVirtualDatacenters)
+    public void setAvailableVirtualDatacenters(final String availableVirtualDatacenters)
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
 
-    public User(Enterprise enterprise, Role role, String name, String surname, String email,
-        String nick, String password, String locale)
+    public User(final Enterprise enterprise, final Role role, final String name,
+        final String surname, final String email, final String nick, final String password,
+        final String locale)
     {
         setEnterprise(enterprise);
         setRole(role);
@@ -361,8 +363,19 @@ public class User extends DefaultEntityBase
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "user")
     private List<Session> sessions = new ArrayList<Session>();
 
-    protected void addSession(Session session)
+    protected void addSession(final Session session)
     {
         sessions.add(session);
+    }
+
+    /**
+     * Which system this user signed up. This also indicates to which system this user will
+     * authenticate.
+     * 
+     * @author ssedano
+     */
+    public static enum AuthType
+    {
+        ABIQUO, LDAP;
     }
 }

@@ -41,6 +41,8 @@ public class SecurityService
 
     public static final String OTHER_USERS_PRIVILEGE = "USERS_MANAGE_OTHER_USERS";
 
+    public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
+
     public static final String USERS_MANAGE_ENTERPRISE_BRANDING =
         "USERS_MANAGE_ENTERPRISE_BRANDING";
 

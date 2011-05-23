@@ -152,7 +152,8 @@ public enum APIError
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"),
+        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In Ldap mode can not create user"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
