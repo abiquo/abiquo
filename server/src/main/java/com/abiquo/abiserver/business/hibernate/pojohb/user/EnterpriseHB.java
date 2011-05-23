@@ -56,6 +56,10 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     private Collection<PhysicalmachineHB> reservedMachines;
 
+    private String chefURL;
+
+    private String chefCertificate;
+
     /** List of limits established by Datacenter */
     private Set<DatacenterLimitHB> dcLimits;
 
@@ -88,6 +92,26 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String URL)
+    {
+        this.chefURL = URL;
+    }
+
+    public String getChefCertificate()
+    {
+        return chefCertificate;
+    }
+
+    public void setChefCertificate(final String certificate)
+    {
+        this.chefCertificate = certificate;
     }
 
     /**
