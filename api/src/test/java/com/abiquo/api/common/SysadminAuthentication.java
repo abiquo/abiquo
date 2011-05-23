@@ -20,16 +20,15 @@
  */
 package com.abiquo.api.common;
 
-
 /**
  * Stub to inject an authenticated user called `sysadmin` for service tests.
  * 
  * @author dcalavera
  */
-public class SysadminAuthenticationStub extends AuthenticationStub
+public class SysadminAuthentication extends MockAuthentication
 {
-	public SysadminAuthenticationStub()
-	{
-		super("sysadmin");
-	}
+    public SysadminAuthentication()
+    {
+        super("sysadmin");
+    }
 }

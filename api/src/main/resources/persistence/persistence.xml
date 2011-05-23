@@ -45,6 +45,8 @@
 		<!-- enterprise -->
     	<class>com.abiquo.server.core.enterprise.Enterprise</class>
 		<class>com.abiquo.server.core.enterprise.Role</class>
+		<class>com.abiquo.server.core.enterprise.RoleLdap</class>
+		<class>com.abiquo.server.core.enterprise.Privilege</class>
 		<class>com.abiquo.server.core.enterprise.User</class>
 		<class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
 		<class>com.abiquo.server.core.enterprise.Session</class>

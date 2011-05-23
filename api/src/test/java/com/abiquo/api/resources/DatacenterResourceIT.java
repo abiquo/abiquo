@@ -39,7 +39,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -86,7 +85,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     public void existHypervisorsLink()
     {
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()), DatacenterResource.HYPERVISORS_PATH);
+        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()),
+            DatacenterResource.HYPERVISORS_PATH);
     }
 
     @Test
@@ -94,7 +94,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     {
 
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()), RemoteServicesResource.REMOTE_SERVICES_PATH);
+        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()),
+            RemoteServicesResource.REMOTE_SERVICES_PATH);
     }
 
     @Test
@@ -226,7 +227,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(datacenter);
 
         String href = resolveDatacenterURI(datacenter.getId());
-        
+
         return get(href).getEntity(DatacenterDto.class);
     }
 }

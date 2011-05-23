@@ -21,7 +21,9 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -45,7 +47,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     }
 
     @Override
-    protected UserDAO createDao(EntityManager entityManager)
+    protected UserDAO createDao(final EntityManager entityManager)
     {
         return new UserDAO(entityManager);
     }
@@ -73,7 +75,18 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     {
         User user = eg().createUserWithSession();
         User userWithoutSession = eg().createInstance(user.getEnterprise(), user.getRole());
-        ds().persistAll(user.getEnterprise(), user.getRole(), user, userWithoutSession);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        for (Privilege privilege : user.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(privilege);
+        }
+        entitiesToPersist.add(user.getEnterprise());
+        entitiesToPersist.add(user.getRole());
+        entitiesToPersist.add(user);
+        entitiesToPersist.add(userWithoutSession);
+
+        ds().persistAll(entitiesToPersist.toArray());
 
         UserDAO dao = createDaoForRollbackTransaction();
 

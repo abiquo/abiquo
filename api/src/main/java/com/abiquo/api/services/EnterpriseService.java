@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -49,7 +50,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
-import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -74,6 +76,9 @@ public class EnterpriseService extends DefaultApiService
     @Autowired
     DatacenterService datacenterService;
 
+    @Autowired
+    SecurityService securityService;
+
     public EnterpriseService()
     {
 
@@ -88,6 +93,28 @@ public class EnterpriseService extends DefaultApiService
         datacenterService = new DatacenterService(em);
     }
 
+    /**
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
+
     public Enterprise getCurrentEnterprise()
     {
         return userService.getCurrentUser().getEnterprise();
@@ -97,7 +124,8 @@ public class EnterpriseService extends DefaultApiService
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (securityService.isEnterpriseAdmin())
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -429,6 +457,44 @@ public class EnterpriseService extends DefaultApiService
         }
 
         flushErrors();
+    }
+
+    public Collection<Privilege> findAllPrivileges()
+    {
+        return repo.findAllPrivileges();
+    }
+
+    public Privilege getPrivilege(final Integer id)
+    {
+        Privilege privilege = repo.findPrivilegeById(id);
+        if (privilege == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRIVILEGE);
+            flushErrors();
+        }
+
+        return privilege;
+    }
+
+    public Collection<Privilege> getAllPrivileges()
+    {
+        return repo.findAllPrivileges();
+    }
+
+    public RoleLdap getRoleLdap(final String role_ldap)
+    {
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        if (list == null || list.isEmpty())
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
+            flushErrors();
+        }
+        else if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+        return list.get(0);
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)

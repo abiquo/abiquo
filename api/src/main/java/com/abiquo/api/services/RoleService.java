@@ -23,47 +23,48 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
-import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdap;
 
 @Service
 @Transactional(readOnly = true)
 public class RoleService extends DefaultApiService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleService.class);
+
     @Autowired
     EnterpriseRep enterpriseRep;
+
+    public RoleService()
+    {
+
+    }
+
+    // use this to initialize it for tests
+    public RoleService(final EntityManager em)
+    {
+        enterpriseRep = new EnterpriseRep(em);
+        tracer = new TracerLogger();
+    }
 
     public Collection<Role> getRoles()
     {
         return enterpriseRep.findAllRoles();
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Role addRole(RoleDto dto)
-    {
-        Role role =
-            new Role(dto.getType(), dto.getShortDescription(), dto.getLargeDescription(), dto
-                .getSecurityLevel());
-
-        if (!role.isValid())
-        {
-            addValidationErrors(role.getValidationErrors());
-            flushErrors();
-        }
-
-        enterpriseRep.insertRole(role);
-        return role;
-    }
-
-    public Role getRole(Integer id)
+    public Role getRole(final Integer id)
     {
         Role role = enterpriseRep.findRoleById(id);
         if (role == null)
@@ -74,34 +75,44 @@ public class RoleService extends DefaultApiService
         return role;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Role modifyRole(Integer roleId, RoleDto dto)
+    public RoleLdap getRoleLdap(final Integer id)
     {
-        Role old = getRole(roleId);
-        if (old == null)
+        RoleLdap roleLdap = enterpriseRep.findRoleLdapById(id);
+        if (roleLdap == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
             flushErrors();
         }
+        return roleLdap;
+    }
 
-        old.setShortDescription(dto.getShortDescription());
-        old.setLargeDescription(dto.getLargeDescription());
-        old.setSecurityLevel(dto.getSecurityLevel());
-
-        if (!old.isValid())
+    private Enterprise findEnterprise(final Integer enterpriseId)
+    {
+        Enterprise enterprise = enterpriseRep.findById(enterpriseId);
+        if (enterprise == null)
         {
-            addValidationErrors(old.getValidationErrors());
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
             flushErrors();
         }
-
-        enterpriseRep.updateRole(old);
-        return old;
+        return enterprise;
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeRole(Integer id)
+    public Collection<Role> getRolesByEnterprise(final int enterpriseId, final String filter,
+        final String order, final boolean desc)
     {
-        Role role = getRole(id);
-        enterpriseRep.deleteRole(role);
+        return getRolesByEnterprise(enterpriseId, filter, order, desc, 0, 25);
     }
+
+    public Collection<Role> getRolesByEnterprise(final int enterpriseId, final String filter,
+        final String order, final boolean desc, final Integer page, final Integer numResults)
+    {
+
+        Enterprise enterprise = null;
+        if (enterpriseId != 0)
+        {
+            enterprise = findEnterprise(enterpriseId);
+        }
+        return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, 0, 25);
+    }
+
 }

@@ -44,7 +44,11 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
+<<<<<<< HEAD
 import com.abiquo.api.spring.security.AbiquoUserDetails;
+=======
+import com.abiquo.api.spring.security.SecurityService;
+>>>>>>> roles
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -62,6 +66,9 @@ public class UserService extends DefaultApiService
     @Autowired
     EnterpriseRep repo;
 
+    @Autowired
+    SecurityService securityService;
+
     public UserService()
     {
 
@@ -71,6 +78,7 @@ public class UserService extends DefaultApiService
     public UserService(final EntityManager em)
     {
         repo = new EnterpriseRep(em);
+        securityService = new SecurityService();
     }
 
     /**
@@ -100,18 +108,6 @@ public class UserService extends DefaultApiService
         }
     }
 
-    // TODO: Remove unused method
-    // public Collection<User> getUsers()
-    // {
-    // return repo.findAllUsers();
-    // }
-
-    // TODO: Remove Unused method
-    // public Collection<User> getUsersByEnterprise(final Integer enterpriseId)
-    // {
-    // return repo.findUsersByEnterprise(findEnterprise(enterpriseId));
-    // }
-
     public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
         final String order, final boolean desc)
     {
@@ -139,7 +135,8 @@ public class UserService extends DefaultApiService
             // [ABICLOUDPREMIUM-1310] Cloud admin can view all. Enterprise admin and users can only
             // view their enterprise, so force it if necessary. Here we won't fail, because no id
             // was provided in the request
-            if (user.getRole().getType() != Role.Type.SYS_ADMIN)
+            // if (user.getRole().getType() != Role.Type.SYS_ADMIN)
+            if (!securityService.isCloudAdmin())
             {
                 enterprise = user.getEnterprise();
             }
@@ -147,7 +144,8 @@ public class UserService extends DefaultApiService
 
         // [ABICLOUDPREMIUM-1310] If all the checks are valid, we still need to restrict to the
         // current user if the role of the requestes is a standard user
-        if (user.getRole().getType() == Role.Type.USER)
+        // if (user.getRole().getType() == Role.Type.USER)
+        if (securityService.isStandardUser())
         {
             return Collections.singletonList(user);
         }
@@ -179,7 +177,15 @@ public class UserService extends DefaultApiService
                 dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
-        user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
+
+        if (securityService.hasPrivilege(SecurityService.USERS_PROHIBIT_VDC_RESTRICTION, user))
+        {
+            user.setAvailableVirtualDatacenters(null);
+        }
+        else
+        {
+            user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
+        }
 
         if (!user.isValid())
         {
@@ -230,8 +236,10 @@ public class UserService extends DefaultApiService
         checkUserCredentialsForSelfUser(old, old.getEnterprise());
 
         // Cloud Admins should only be editable by other Cloud Admins
-        if (old.getRole().getType() == Role.Type.SYS_ADMIN
-            && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        // if (old.getRole().getType() == Role.Type.SYS_ADMIN
+        // && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        if (securityService.canManageOtherEnterprises(old)
+            && !securityService.canManageOtherEnterprises())
         {
             addConflictErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
@@ -246,15 +254,19 @@ public class UserService extends DefaultApiService
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());
 
-        if (user.getAvailableVirtualDatacenters() != null)
+        if (securityService.hasPrivilege(SecurityService.USERS_PROHIBIT_VDC_RESTRICTION, old))
         {
-            if (user.getAvailableVirtualDatacenters().isEmpty())
-            {
-                old.setAvailableVirtualDatacenters(null);
-            }
-            else
-            {
-                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            user.setAvailableVirtualDatacenters(null);
+        }
+        else
+        {
+            if (user.getAvailableVirtualDatacenters()!=null){
+                if (user.getAvailableVirtualDatacenters().isEmpty())
+                {
+                    old.setAvailableVirtualDatacenters(null);
+                }else{
+                    old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+                }
             }
         }
 
@@ -267,9 +279,22 @@ public class UserService extends DefaultApiService
         {
             old.setRole(findRole(user));
         }
-        if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+        if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
-            old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+            if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+            {
+                old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+            }
+        }
+        else if (securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
+        {
+            if (getCurrentUser().getId().equals(user.getId()))
+            {
+                if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+                {
+                    old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+                }
+            }
         }
 
         if (!old.isValid())
@@ -301,8 +326,10 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(user.getEnterprise());
 
         // Cloud Admins should only be editable by other Cloud Admins
-        if (user.getRole().getType() == Role.Type.SYS_ADMIN
-            && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        // if (user.getRole().getType() == Role.Type.SYS_ADMIN
+        // && getCurrentUser().getRole().getType() != Role.Type.SYS_ADMIN)
+        if (securityService.canManageOtherEnterprises(user)
+            && !securityService.canManageOtherEnterprises())
         {
             addForbiddenErrors(APIError.NOT_ENOUGH_PRIVILEGES);
             flushErrors();
@@ -385,10 +412,14 @@ public class UserService extends DefaultApiService
     public void checkEnterpriseAdminCredentials(final Enterprise enterprise)
     {
         User user = getCurrentUser();
-        Role.Type role = user.getRole().getType();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+        // Role.Type role = user.getRole().getType();
+        //
+        // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+        // || role == Role.Type.USER)
 
-        if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
-            || role == Role.Type.USER)
+        if ((securityService.isEnterpriseAdmin() && !sameEnterprise)
+            || securityService.isStandardUser())
         {
             throw new AccessDeniedException("");
         }
@@ -397,10 +428,16 @@ public class UserService extends DefaultApiService
     private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)
     {
         User user = getCurrentUser();
-        Role.Type role = user.getRole().getType();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+        boolean sameUser = user.getId().equals(selfUser.getId());
 
-        if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
-            || (role == Role.Type.USER && user.getId() != selfUser.getId()))
+        // Role.Type role = user.getRole().getType();
+        //
+        // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
+        // || (role == Role.Type.USER && user.getId() != selfUser.getId()))
+
+        if ((securityService.isEnterpriseAdmin() && !sameEnterprise)
+            || (securityService.isStandardUser() && !sameUser))
         {
             throw new AccessDeniedException("");
         }
@@ -409,10 +446,12 @@ public class UserService extends DefaultApiService
     public void checkCurrentEnterprise(final Enterprise enterprise)
     {
         User user = getCurrentUser();
-        Role.Type role = user.getRole().getType();
-        boolean sameEnterprise = enterprise.equals(user.getEnterprise());
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
 
-        if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
+        // Role.Type role = user.getRole().getType();
+        // if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
+        if ((securityService.isEnterpriseAdmin() || securityService.isStandardUser())
+            && !sameEnterprise)
         {
             throw new AccessDeniedException("");
         }
