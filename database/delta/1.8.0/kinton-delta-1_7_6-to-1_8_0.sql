@@ -1,4 +1,18 @@
 --
+-- Drop table `kinton`.`auth_clientresource`
+--
+
+DROP TABLE IF EXISTS `kinton`.`auth_clientresource`;
+
+--
+-- Drop table `kinton`.`auth_clientresource_exception`
+--
+
+DROP TABLE IF EXISTS `kinton`.`auth_clientresource_exception`;
+
+
+
+--
 -- Definition of table `kinton`.`role`
 --
 
