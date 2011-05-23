@@ -40,8 +40,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
@@ -160,8 +158,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
-                .getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
+                dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
         user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
@@ -233,7 +231,14 @@ public class UserService extends DefaultApiService
 
         if (user.getAvailableVirtualDatacenters() != null)
         {
-            old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            if (user.getAvailableVirtualDatacenters().isEmpty())
+            {
+                old.setAvailableVirtualDatacenters(null);
+            }
+            else
+            {
+                old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+            }
         }
 
         if (!emailIsValid(user.getEmail()))
