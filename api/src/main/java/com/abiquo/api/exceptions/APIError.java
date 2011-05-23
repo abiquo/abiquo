@@ -116,6 +116,7 @@ public enum APIError
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
         "MACHINE-1", "The machine is not assigned to the datacenter or rack"),
     INVALID_STATE_CHANGE("MACHINE-2", "The requested state transaction is not valid"),
+    MACHINE_NOT_ACCESIBLE("MACHINE-3", "The requested machine could not be contacted"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
