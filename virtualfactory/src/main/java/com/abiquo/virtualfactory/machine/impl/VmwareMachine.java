@@ -21,12 +21,15 @@
 
 package com.abiquo.virtualfactory.machine.impl;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
+import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.OptionValue;
 import com.vmware.vim25.VirtualMachineConfigSpec;
@@ -72,6 +75,11 @@ public class VmwareMachine extends AbsVmwareMachine
                 vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
                     .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
                     computerResMOR, hostMOR, config.getVnicList(), rdmIQN, disks);
+            
+          vmConfigSpec =
+          vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
+              .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
+              computerResMOR, hostMOR, new ArrayList<VirtualNIC>(), rdmIQN, disks);
 
             vmConfigSpec.setName(machineName);
             vmConfigSpec.setAnnotation("VirtualMachine Annotation");
