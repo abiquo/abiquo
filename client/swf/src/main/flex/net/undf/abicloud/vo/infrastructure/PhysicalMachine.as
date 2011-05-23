@@ -65,7 +65,7 @@ package net.undf.abicloud.vo.infrastructure
         
         public var initiatorIQN:String;
 
-	public var hypervisor:HyperVisor;
+		public var hypervisor:HyperVisor;
 
         /* ------------- Constants ------------- */
         public static const STATE_STOPPED:int = 0;
@@ -80,7 +80,9 @@ package net.undf.abicloud.vo.infrastructure
         
         public static const STATE_UNLICENSED:int = 5;
         
-        public static const STATE_DISABLED_BY_HA:int = 6;
+        public static const STATE_HA_IN_PROGRESS:int = 6;
+        
+        public static const STATE_DISABLED_BY_HA:int = 7;
 
         /* ------------- Constructor ------------- */
         public function PhysicalMachine()
