@@ -37,6 +37,9 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.config.ConfigService;
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
@@ -60,6 +63,9 @@ public class UsersResource extends AbstractResource
 
     @Autowired
     SecurityService securityService;
+
+    @Autowired
+    ConfigService configService;
 
     @GET
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
@@ -133,6 +139,14 @@ public class UsersResource extends AbstractResource
     public UserDto postUser(@PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         final UserDto user, @Context final IRESTBuilder restBuilder) throws Exception
     {
+
+        String authMode = configService.getSecurityMode();
+
+        if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
+        {
+            // In ldap mode it is noto possible to create user
+            throw new ConflictException(APIError.NOT_USER_CREACION_LDAP_MODE);
+        }
         User u = service.addUser(user, enterpriseId);
 
         return createTransferObject(u, restBuilder);
