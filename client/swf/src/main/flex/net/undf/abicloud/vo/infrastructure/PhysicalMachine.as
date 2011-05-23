@@ -64,6 +64,15 @@ package net.undf.abicloud.vo.infrastructure
         public var idEnterprise:int;
         
         public var initiatorIQN:String;
+    
+    	public var ipmiIp:String;
+    	
+    	public var ipmiPort:int;
+    	
+		public var ipmiUser:String;
+
+    	public var ipmiPassword:String;
+        
 
 	public var hypervisor:HyperVisor;
 
@@ -103,6 +112,10 @@ package net.undf.abicloud.vo.infrastructure
             vswitchName = "";
             initiatorIQN = "";
             datastores = new ArrayCollection();
+            ipmiIp = "";
+			ipmiPort = 0;
+			ipmiUser = "";
+			ipmiPassword = "";    
         }
 
         override public function set assignedTo(iE:InfrastructureElement):void
