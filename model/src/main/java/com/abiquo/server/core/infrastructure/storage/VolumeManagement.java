@@ -236,7 +236,7 @@ public class VolumeManagement extends RasdManagement
 
     public long getSizeInMB()
     {
-        return getRasd().getLimit();
+        return getRasd().getLimit() == null ? 0L : getRasd().getLimit();
     }
 
     public void setSizeInMB(final long sizeInMB)
@@ -246,7 +246,7 @@ public class VolumeManagement extends RasdManagement
 
     public long getAvailableSizeInMB()
     {
-        return getRasd().getReservation();
+        return getRasd().getReservation() == null ? 0L : getRasd().getReservation();
     }
 
     public void setAvailableSizeInMB(final long availableSizeInMB)
