@@ -114,8 +114,7 @@ package net.undf.abicloud.vo.infrastructure
             vswitchName = "";
             initiatorIQN = "";
             datastores = new ArrayCollection();
-            ipmiIp = "";
-			ipmiPort = 0;
+            ipmiIp = "";			
 			ipmiUser = "";
 			ipmiPassword = "";    
         }
