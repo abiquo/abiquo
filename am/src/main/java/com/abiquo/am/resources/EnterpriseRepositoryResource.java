@@ -24,6 +24,7 @@ package com.abiquo.am.resources;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.stereotype.Controller;
@@ -42,21 +43,25 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     public static final String ENTERPRISE_REPOSITORY_PARAM = "{" + ENTERPRISE_REPOSITORY + "}";
 
-    private static final String REPOSITORY_LOCATION =
-        AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryLocation();
+    private static final String REPOSITORY_LOCATION = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getRepositoryLocation();
 
     @GET
-    public EnterpriseRepositoryDto getEnterpriseRepository(@PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise)
+    public EnterpriseRepositoryDto getEnterpriseRepository(
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @QueryParam("checkCanWrite") final boolean checkCanWrite)
     {
         CheckResource.validate();
 
-        EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(idEnterprise);
+        // boolean check = Boolean.parseBoolean(checkCanWrite);
+
+        EnterpriseRepositoryService erepo =
+            EnterpriseRepositoryService.getRepo(idEnterprise, checkCanWrite);
 
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 
         repo.setId(Integer.valueOf(idEnterprise));
         repo.setName("Repository :" + REPOSITORY_LOCATION);
-      
 
         repo.setRepositoryCapacityMb(EnterpriseRepositoryService.getCapacityMb());
         repo.setRepositoryEnterpriseUsedMb(erepo.getUsedMb());

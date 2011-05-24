@@ -81,7 +81,6 @@ public class TimeoutFSUtils
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         boolean exist;
-        boolean canWrite;
 
         final Future<Boolean> futureExist =
             executor.submit(new FileExistTimeout(REPOSITORY_FILE_MARK));
@@ -120,6 +119,13 @@ public class TimeoutFSUtils
             throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
         }
 
+        return null;
+    }
+
+    public Void canWriteRepository()
+    {
+        boolean canWrite;
+
         try
         {
             canWrite = REPOSITORY_FILE_MARK.canWrite();
@@ -137,7 +143,6 @@ public class TimeoutFSUtils
 
             throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
         }
-
         return null;
     }
 
