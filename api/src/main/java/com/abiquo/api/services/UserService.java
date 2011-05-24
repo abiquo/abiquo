@@ -459,13 +459,17 @@ public class UserService extends DefaultApiService
 
     private Boolean emailIsValid(final String email)
     {
-        final Pattern pattern;
-        final Matcher matchers;
-        final String EMAIL_PATTERN =
-            "[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@"
-                + "(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
-        pattern = Pattern.compile(EMAIL_PATTERN);
-        matchers = pattern.matcher(email);
-        return matchers.matches();
+        if (!email.isEmpty())
+        {
+            final Pattern pattern;
+            final Matcher matchers;
+            final String EMAIL_PATTERN =
+                "[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9A-Z!#$%&'*+/=?^_`{|}~-]+)*@"
+                    + "(?:[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?\\.)+[a-z0-9A-Z](?:[a-z0-9A-Z-]*[a-z0-9A-Z])?";
+            pattern = Pattern.compile(EMAIL_PATTERN);
+            matchers = pattern.matcher(email);
+            return matchers.matches();
+        }
+        else return true;
     }
 }

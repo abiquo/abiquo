@@ -81,12 +81,14 @@ public class TimeoutFSUtils
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         boolean exist;
+
         final Future<Boolean> futureExist =
             executor.submit(new FileExistTimeout(REPOSITORY_FILE_MARK));
 
         try
         {
             exist = futureExist.get(FILE_EXIST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
         }
         catch (InterruptedException e)
         {
@@ -117,6 +119,30 @@ public class TimeoutFSUtils
             throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
         }
 
+        return null;
+    }
+
+    public Void canWriteRepository()
+    {
+        boolean canWrite;
+
+        try
+        {
+            canWrite = REPOSITORY_FILE_MARK.canWrite();
+
+        }
+        catch (Exception e)
+        {
+            canWrite = false;
+        }
+
+        if (!canWrite)
+        {
+            final String cause =
+                String.format("Can not write on the repository at [%s].", CONF.getRepositoryPath());
+
+            throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
+        }
         return null;
     }
 
