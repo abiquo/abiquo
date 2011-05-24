@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
@@ -58,7 +57,6 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
-
 
 @Repository
 @Transactional(readOnly = true)
@@ -201,13 +199,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
-    public void changeVirtualMachineState(final Integer vappId, final Integer vdcId,
-        final State state) throws Exception
+    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final State state) throws Exception
     {
         VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
-        VirtualAppliance vapp = contanerVirtualAppliance(vm); 
+        VirtualAppliance vapp = contanerVirtualAppliance(vm);
         EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
@@ -226,7 +224,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Deprecated
-    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    private VirtualAppliance contanerVirtualAppliance(final VirtualMachine vmachine)
     {
 
         VirtualDatacenter vdc =

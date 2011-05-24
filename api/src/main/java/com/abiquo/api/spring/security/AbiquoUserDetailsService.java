@@ -20,12 +20,10 @@
  */
 package com.abiquo.api.spring.security;
 
-<<<<<<< HEAD
-import javax.annotation.PostConstruct;
-=======
 import java.util.ArrayList;
 import java.util.List;
->>>>>>> roles
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -76,7 +74,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
      * 
      * @param authType a {@link AuthType} value.
      */
-    public void setAuthType(AuthType authType)
+    public void setAuthType(final AuthType authType)
     {
         this.authType = authType;
     }

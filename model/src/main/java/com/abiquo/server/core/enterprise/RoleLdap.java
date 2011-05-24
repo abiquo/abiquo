@@ -80,7 +80,7 @@ public class RoleLdap extends DefaultEntityBase
     private final static String ROLE_ID_COLUMN = "idRole";
 
     @JoinColumn(name = ROLE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "fk_" + TABLE_NAME + "_role")
     private Role role;
 
@@ -101,7 +101,7 @@ public class RoleLdap extends DefaultEntityBase
 
     public final static int ROLE_LDAP_LENGTH_MIN = 0;
 
-    public final static int ROLE_LDAP_LENGTH_MAX = 255;
+    public final static int ROLE_LDAP_LENGTH_MAX = 128;
 
     private final static boolean ROLE_LDAP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 

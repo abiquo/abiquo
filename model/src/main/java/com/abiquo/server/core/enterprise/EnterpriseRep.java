@@ -249,6 +249,11 @@ public class EnterpriseRep extends DefaultRepBase
         roleDAO.remove(role);
     }
 
+    public List<Privilege> findPrivilegesByRole(final Role role)
+    {
+        return roleDAO.findPrivilegesByIdRole(role.getId());
+    }
+
     public Collection<Privilege> findAllPrivileges()
     {
         return privilegeDAO.findAll();
@@ -384,7 +389,7 @@ public class EnterpriseRep extends DefaultRepBase
     /**
      * {@see UserDAO#getAbiquoUserByLogin(String)}
      */
-    public User getAbiquoUserByUserName(String nick)
+    public User getAbiquoUserByUserName(final String nick)
     {
         return userDAO.getAbiquoUserByLogin(nick);
     }
@@ -392,7 +397,7 @@ public class EnterpriseRep extends DefaultRepBase
     /**
      * {@see UserDAO#getUserByAuth(String, authType)}
      */
-    public User getUserByAuth(String nick, AuthType authType)
+    public User getUserByAuth(final String nick, final AuthType authType)
     {
         return userDAO.getUserByAuth(nick, authType);
     }
@@ -404,7 +409,7 @@ public class EnterpriseRep extends DefaultRepBase
      * @param authType an {@link AuthType} value.
      * @return boolean false if there is no other user with same nick + authType. False otherwise.
      */
-    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }

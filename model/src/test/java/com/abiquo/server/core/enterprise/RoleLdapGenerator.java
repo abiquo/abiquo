@@ -65,6 +65,13 @@ public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
         return roleLdap;
     }
 
+    public RoleLdap createInstance(final String name)
+    {
+        RoleLdap roleLdap = new RoleLdap(name, roleGenerator.createUniqueInstance());
+
+        return roleLdap;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final RoleLdap entity,
         final List<Object> entitiesToPersist)

@@ -26,18 +26,12 @@ import java.util.ArrayList;
 import com.abiquo.abiserver.business.AuthService;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
-import com.abiquo.abiserver.commands.stub.APIStubFactory;
-import com.abiquo.abiserver.commands.stub.UsersResourceStub;
-import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Privilege;
-import com.abiquo.abiserver.pojo.user.UserListOptions;
-import com.abiquo.abiserver.pojo.user.UserListResult;
-import com.abiquo.server.core.enterprise.User;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -71,27 +65,34 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             try
             {
 
-                UsersResourceStub proxy =
-                    APIStubFactory.getInstance(resultResponse.getData().getSession(),
-                        new UsersResourceStubImpl(), UsersResourceStub.class);
+                com.abiquo.abiserver.pojo.user.User u = resultResponse.getData().getUser();
 
-                UserListOptions userListOptions = new UserListOptions();
-                userListOptions.setFilter(resultResponse.getData().getUser().getUser());
-                userListOptions.setOrderBy(User.NICK_PROPERTY);
-                DataResult<UserListResult> user = proxy.getUsers(userListOptions);
-
-                if (user.getSuccess() && user.getData().getTotalUsers() == 1)
+                for (Privilege p : u.getRole().getPrivileges())
                 {
-                    // Getting the list of user privileges
-                    for (com.abiquo.abiserver.pojo.user.User u : user.getData().getUsersList())
-                    {
-                        for (Privilege p : u.getRole().getPrivileges())
-                        {
-                            privileges.add(p.toPojoHB().toPojo());
-                        }
-
-                    }
+                    privileges.add(p.toPojoHB().toPojo());
                 }
+
+                // UsersResourceStub proxy =
+                // APIStubFactory.getInstance(resultResponse.getData().getSession(),
+                // new UsersResourceStubImpl(), UsersResourceStub.class);
+                //
+                // UserListOptions userListOptions = new UserListOptions();
+                // userListOptions.setFilter(resultResponse.getData().getUser().getName());
+                // userListOptions.setOrderBy(User.NICK_PROPERTY);
+                // DataResult<UserListResult> user = proxy.getUsers(userListOptions);
+                //
+                // if (user.getSuccess() && user.getData().getTotalUsers() == 1)
+                // {
+                // // Getting the list of user privileges
+                // for (com.abiquo.abiserver.pojo.user.User u : user.getData().getUsersList())
+                // {
+                // for (Privilege p : u.getRole().getPrivileges())
+                // {
+                // privileges.add(p.toPojoHB().toPojo());
+                // }
+                //
+                // }
+                // }
 
                 // log the event
                 traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGIN,

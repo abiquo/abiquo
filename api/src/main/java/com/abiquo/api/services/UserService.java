@@ -44,11 +44,8 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
-<<<<<<< HEAD
 import com.abiquo.api.spring.security.AbiquoUserDetails;
-=======
 import com.abiquo.api.spring.security.SecurityService;
->>>>>>> roles
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -260,11 +257,14 @@ public class UserService extends DefaultApiService
         }
         else
         {
-            if (user.getAvailableVirtualDatacenters()!=null){
+            if (user.getAvailableVirtualDatacenters() != null)
+            {
                 if (user.getAvailableVirtualDatacenters().isEmpty())
                 {
                     old.setAvailableVirtualDatacenters(null);
-                }else{
+                }
+                else
+                {
                     old.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
                 }
             }

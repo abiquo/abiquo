@@ -22,6 +22,7 @@
 package com.abiquo.server.core.enterprise;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -39,12 +40,15 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
 
     private EnterpriseGenerator enterpriseGenerator;
 
+    private PrivilegeGenerator privilegeGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
         this.enterpriseGenerator = new EnterpriseGenerator(getSeed());
+        this.privilegeGenerator = new PrivilegeGenerator(getSeed());
     }
 
     @Override
@@ -90,4 +94,18 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
 
     }
 
+    @Test
+    public void findPrivilegesByRole()
+    {
+        Privilege p1 = this.privilegeGenerator.createInstance();
+        Privilege p2 = this.privilegeGenerator.createInstance();
+        Role role = eg().createInstance(p1, p2);
+
+        ds().persistAll(p1, p2, role);
+
+        RoleDAO dao = createDaoForRollbackTransaction();
+
+        List<Privilege> privileges = dao.findPrivilegesByIdRole(role.getId());
+        AssertEx.assertSize(privileges, 2);
+    }
 }

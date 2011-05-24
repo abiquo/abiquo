@@ -64,6 +64,10 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 
     public List<RoleLdap> findByRoleLdap(final String roleLdap)
     {
+        if (roleLdap == null)
+        {
+            return null;
+        }
         return findByCriterions(sameRoleLdap(roleLdap));
     }
 
