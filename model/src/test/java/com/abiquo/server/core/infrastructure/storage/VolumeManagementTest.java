@@ -43,6 +43,12 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     public void testSizeValues()
     {
         VolumeManagement volume = createUniqueEntity();
+        volume.getRasd().setLimit(null);
+        volume.getRasd().setReservation(null);
+
+        assertEquals(volume.getSizeInMB(), 0L);
+        assertEquals(volume.getUsedSizeInMB(), 0L);
+        assertEquals(volume.getAvailableSizeInMB(), 0L);
 
         volume.setSizeInMB(-1L);
         assertEquals(volume.getSizeInMB(), 0L);
