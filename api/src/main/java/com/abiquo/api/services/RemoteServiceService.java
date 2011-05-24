@@ -169,8 +169,11 @@ public class RemoteServiceService extends DefaultApiService
                     configurationErrors.add(new ErrorDto(error.getCode(), error.getMessage()));
                     return configurationErrors;
                 }
-
-                datacenterRepo.createRepository(datacenter, repositoryLocation);
+                
+                if(!datacenterRepo.existRepositoryInSameDatacenter(datacenter,repositoryLocation))
+                {
+                    datacenterRepo.createRepository(datacenter, repositoryLocation);
+                }
             }
             catch (WebApplicationException e)
             {

@@ -168,9 +168,13 @@ public class OVFModelFromVirtualAppliance
             // Set the network section on the envelope
             OVFEnvelopeUtils.addSection(envelope, netSection);
 
-            // Add the custom network;
+            // Add the custom network. Can be null if we are deleting the node from the VirtualApp
+            // with an update nodes operation
             AbicloudNetworkType customNetwork = createCustomNetwork(virtualMachine.getId());
-            OVFEnvelopeUtils.addSection(envelope, customNetwork);
+            if (customNetwork != null)
+            {
+                OVFEnvelopeUtils.addSection(envelope, customNetwork);
+            }
 
             // The Id of the virtualSystem is used for machine name
             VirtualSystemType virtualSystem =
@@ -618,11 +622,20 @@ public class OVFModelFromVirtualAppliance
 
         factory.beginConnection();
 
+        VirtualmachineHB vmHB = vmDAO.findById(idVirtualMachine);
+
+        // [ABICLOUDPREMIUM-1731] If we are removing the VM with an update nodes operation, the VM
+        // will not exist in DB. We return null to ignore the network section (it is not needed to
+        // delete the node).
+        if (vmHB == null)
+        {
+            return null;
+        }
+
         Map<Integer, List<IpPoolManagementHB>> vlansConfig =
             new HashMap<Integer, List<IpPoolManagementHB>>();
 
         AbicloudNetworkType networkType = new AbicloudNetworkType();
-        VirtualmachineHB vmHB = vmDAO.findById(idVirtualMachine);
 
         // Build the Map of vlans with the IPs used by the VM
         for (ResourceManagementHB rasman : vmHB.getResman())
@@ -1062,7 +1075,15 @@ public class OVFModelFromVirtualAppliance
 
             factory.beginConnection();
             VirtualmachineHB virtualMachineHB = vmDAO.findById(virtualMachine.getId());
-            rads = virtualMachineHB.getRasds();
+
+            // [ABICLOUDPREMIUM-1731] If we are removing the VM with an update nodes operation, the
+            // VM will not exist in DB. We return the empty list to ignore the rasd section (it is
+            // not needed to delete the node).
+            if (virtualMachineHB != null)
+            {
+                rads = virtualMachineHB.getRasds();
+            }
+
             factory.endConnection();
 
         }
