@@ -65,9 +65,9 @@ public class VirtualMachinesResource extends AbstractResource
 
     @GET
     public VirtualMachinesDto getVirtualMachines(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
 
@@ -78,16 +78,16 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (VirtualMachine v : all)
             {
-                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(), vapp
-                    .getId(), restBuilder));
+                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(),
+                    vapp.getId(), restBuilder));
             }
         }
 
         return vappsDto;
     }
 
-    public static VirtualMachinesDto createAdminTransferObjects(Collection<VirtualMachine> vms,
-        IRESTBuilder restBuilder) throws Exception
+    public static VirtualMachinesDto createAdminTransferObjects(
+        final Collection<VirtualMachine> vms, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachinesDto machines = new VirtualMachinesDto();
         for (VirtualMachine vm : vms)
@@ -120,11 +120,14 @@ public class VirtualMachinesResource extends AbstractResource
      * @return the generate {@link VirtualMachineDto} object.
      * @throws Exception
      */
-    public static VirtualMachineDto createCloudTransferObject(VirtualMachine v, Integer vdcId,
-        Integer vappId, IRESTBuilder restBuilder) throws Exception
+    public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineDto vmDto =
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, v);
+        // TODO ALESSIA cambiar VirtualMachineDto idState por state + ahora cojer la string de la
+        // enum, ej 0
+        // == running
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId()));
 
         return vmDto;

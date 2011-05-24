@@ -43,7 +43,6 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.EnterpriseService;
@@ -167,7 +166,12 @@ public class EnterpriseResource extends AbstractResource
 
         Collection<VirtualMachine> vms = vmService.findByEnterprise(enterprise);
 
-        return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+        // VirtualMachinesDto vmDto = VirtualMachinesResource.createAdminTransferObjects(vms,
+        // restBuilder);
+        VirtualMachinesDto vmDto =
+            VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+
+        return vmDto;
 
     }
 
