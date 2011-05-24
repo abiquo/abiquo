@@ -138,7 +138,7 @@
                 customAlert._responseHandler = responseHandler;
                 customAlert._flags = flags;
                 //The name of the style from wich the Alert will take the icon
-                customAlert._customAlertIconPath = "CommonAssetsAlertIconAlert";
+                customAlert._customAlertIconPath = "CommonAssetsAlert";
                 customAlert._allowCopyClipboard = allowClipboard;
                 
                 if(additionalObject){
