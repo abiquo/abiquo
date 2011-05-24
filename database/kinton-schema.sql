@@ -1675,8 +1675,7 @@ CREATE TABLE  `kinton`.`vappstateful_conversions` (
   KEY `idUser_FK3` (`idUser`),
   CONSTRAINT `idVirtualApp_FK3` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE,
   CONSTRAINT `idUser_FK3` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
-
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -1692,18 +1691,21 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idDiskStatefulConversion` int(1) unsigned,
   `version_c` int(11) default 0,
   `idTier` int(10) unsigned NOT NULL,
+  `idManagement` int(10) unsigned,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
   KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
   KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
   KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
   KEY `idTier_FK4` (`idTier`),
+  KEY `idManagement_FK4` (`idManagement`),
   CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
   CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --

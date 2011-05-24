@@ -1,3 +1,4 @@
+<<<<<<< HEAD:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 -- [ABICLOUDPREMIUM-1502]
 -- Fix int precision
 ALTER TABLE `kinton`.`vappstateful_conversions` MODIFY COLUMN `idUser` int(10) unsigned NOT NULL;
@@ -290,6 +291,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 
 
 -- DELTA 1.7.6 to 1.8.0
+=======
+-- [ABICLOUDPREMIUM-1487] The stateful can be done to a pre-selected volume
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idManagement` int(10) unsigned;
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
+>>>>>>> ABICLOUDPREMIUM-1485:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;

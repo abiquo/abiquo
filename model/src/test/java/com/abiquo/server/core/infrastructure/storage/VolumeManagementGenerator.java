@@ -76,9 +76,20 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     public VolumeManagement createInstance(final StoragePool pool)
     {
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        return createInstance(pool, vdc);
+    }
+
+    public VolumeManagement createInstance(final VirtualDatacenter vdc)
+    {
+        StoragePool pool = poolGenerator.createUniqueInstance();
+        return createInstance(pool, vdc);
+    }
+
+    public VolumeManagement createInstance(final StoragePool pool, final VirtualDatacenter vdc)
+    {
         String name =
             newString(nextSeed(), Rasd.ELEMENT_NAME_LENGTH_MIN, Rasd.ELEMENT_NAME_LENGTH_MAX);
-        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
 
         return createInstance(name, vdc, pool);
     }

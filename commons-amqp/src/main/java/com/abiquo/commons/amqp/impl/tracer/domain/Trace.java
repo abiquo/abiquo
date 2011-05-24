@@ -168,12 +168,19 @@ public class Trace implements Queuable
     {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Severity: ").append(getSeverity());
+        builder.append(getMessage());
+        builder.append(" [Severity: ").append(getSeverity());
         builder.append(" Component: ").append(getComponent());
         builder.append(" Event: ").append(getEvent());
-        builder.append(" Hierarchy: ").append(getHierarchy());
+
+        if (getHierarchy() != null)
+        {
+            builder.append(" Hierarchy: ").append(getHierarchy());
+        }
+
         builder.append(" Performed by ").append(getUsername());
         builder.append(" from enterprise ").append(getEnterpriseName());
+        builder.append("]");
 
         return builder.toString();
     }
