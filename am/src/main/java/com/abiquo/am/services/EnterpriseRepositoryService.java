@@ -108,6 +108,16 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
      */
     public static synchronized EnterpriseRepositoryService getRepo(final String idEnterprise)
     {
+        return getRepo(idEnterprise, false);
+    }
+
+    public static synchronized EnterpriseRepositoryService getRepo(final String idEnterprise,
+        final boolean checkCanWrite)
+    {
+        if (checkCanWrite)
+        {
+            TimeoutFSUtils.getInstance().canWriteRepository();
+        }
         if (!enterpriseHandlers.containsKey(idEnterprise))
         {
             enterpriseHandlers.put(idEnterprise, new EnterpriseRepositoryService(idEnterprise));
@@ -137,6 +147,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
      * 
      * @throws RepositoryException, if it can not create the ''reposioryPath''.
      */
+
     private void validateEnterpirseRepositoryPathFile() throws RepositoryException
     {
         TimeoutFSUtils.getInstance().canUseRepository();
@@ -182,15 +193,15 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
      * 
      * @throws MalformedURLException
      */
-    public String createFileInfo(FileType fileType, String ovfId) throws DownloadException,
-        MalformedURLException
+    public String createFileInfo(final FileType fileType, final String ovfId)
+        throws DownloadException, MalformedURLException
     {
         String packagePath = getOVFPackagePath(ovfId);
 
         return packagePath + normalizeFileHref(fileType.getHref());
     }
 
-    private String normalizeFileHref(String filehref) throws MalformedURLException
+    private String normalizeFileHref(final String filehref) throws MalformedURLException
     {
         if (filehref.startsWith("http://"))
         {
@@ -359,7 +370,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     private class BundleImageFileFilter implements FilenameFilter
     {
         @Override
-        public boolean accept(File dir, String name)
+        public boolean accept(final File dir, final String name)
         {
             return name.contains(OVF_BUNDLE_PATH_IDENTIFIER);
         }
@@ -426,13 +437,13 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
             throw new RepositoryException(stBuffer.toString());
         }
     }
-    
 
     public void deleteImportedBundle(final String ovfId) throws IdNotFoundException
     {
         final String path =
             ovfId.substring(OVF_BUNDLE_IMPORTED_PREFIX.length(), ovfId.lastIndexOf('/'));
-        final String absPath = BASE_REPO_PATH + path;  // imported bundles do not use the ''enterpriserepopath''
+        final String absPath = BASE_REPO_PATH + path; // imported bundles do not use the
+                                                      // ''enterpriserepopath''
 
         File importBundleDir = new File(absPath);
 
@@ -459,7 +470,6 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         }
 
     }
-    
 
     public void deleteBundle(final String ovfId) throws IdNotFoundException
     {
@@ -543,7 +553,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         }
 
         @Override
-        public boolean accept(File dir, String name)
+        public boolean accept(final File dir, final String name)
         {
             return name.startsWith(baseFile);
         }
@@ -765,7 +775,8 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
      * @throws RepositoryException
      */
     public synchronized void createOVFStatusMarks(final String ovfId,
-        OVFPackageInstanceStatusType status, final String errorMsg) throws RepositoryException
+        final OVFPackageInstanceStatusType status, final String errorMsg)
+        throws RepositoryException
     {
         assert status != OVFPackageInstanceStatusType.ERROR || errorMsg != null;
 
@@ -871,7 +882,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         return errorMarkReader.next();
     }
 
-    public String prepareBundle(String name)
+    public String prepareBundle(final String name)
     {
         TimeoutFSUtils.getInstance().canUseRepository();
 
@@ -898,7 +909,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
      * @throws RepositoryException, if can not create any of the required folders on the Enterprise
      *             Repository.
      */
-    public EnvelopeType createOVFPackageFolder(final String ovfId, EnvelopeType envelope)
+    public EnvelopeType createOVFPackageFolder(final String ovfId, final EnvelopeType envelope)
         throws RepositoryException
     {
         final String envelopePath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId); // XXX
@@ -1033,7 +1044,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
 
     }
 
-    public void copyFileToOVFPackagePath(String ovfid, File file) throws IOException
+    public void copyFileToOVFPackagePath(final String ovfid, final File file) throws IOException
     {
         // Transfer the upload content into the repository file system
         final String filePath = getOVFPackagePath(ovfid) + file.getName();
@@ -1170,9 +1181,9 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         {
             File[] fs = f.listFiles();
             Long acum = 0l;
-            for (int i = 0; i < fs.length; i++)
+            for (File element : fs)
             {
-                acum += sizeOfDirectory(fs[i]);
+                acum += sizeOfDirectory(element);
             }
 
             return acum;

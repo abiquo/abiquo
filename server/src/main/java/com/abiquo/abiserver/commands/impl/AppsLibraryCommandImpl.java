@@ -1129,7 +1129,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(amServiceUri);
 
-        amStub.getRepository(idEnterpriseSt);
+        boolean checkCanWrite = true;
+        amStub.getRepository(idEnterpriseSt, checkCanWrite);
 
         for (final String ovfId : idsOvfpackage)
         {
