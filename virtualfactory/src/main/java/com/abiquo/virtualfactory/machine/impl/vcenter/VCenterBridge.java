@@ -92,6 +92,10 @@ public class VCenterBridge
 
             HostListSummary summary = host.getSummary();
             String serverIp = summary.getManagementServerIp();
+            if (serverIp == null)
+            {
+                return null;
+            }
             return new VCenterBridge(serverIp);
         }
         catch (RemoteException e)

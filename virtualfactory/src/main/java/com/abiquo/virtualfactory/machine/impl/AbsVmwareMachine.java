@@ -176,6 +176,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
                 // Create the template vdestPathirtual machine
                 // <DVS>
+                Boolean shouldAttachToDVSPortGroup = Boolean.FALSE;
                 List<VirtualNIC> dvNIClist = new ArrayList<VirtualNIC>();
                 if (dvsEnabled)
                 {
@@ -185,6 +186,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                         .startsWith("dvs"))
                     {
                         // Ensure the HOST is associated to vCenter
+                        shouldAttachToDVSPortGroup = Boolean.TRUE;
                         if (vCenterBridge == null)
                         {
                             String message =
@@ -220,7 +222,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 // <DVS>
                 // Once the machine is defined and created, attach its vnics which refeers a dvs
                 // to a vcenter.
-                if (dvsEnabled)
+                if (dvsEnabled && shouldAttachToDVSPortGroup)
                 {
                     vCenterBridge.attachVMToPortGroup(config.getMachineName(), dvNIClist);
                 }
