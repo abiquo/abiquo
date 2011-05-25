@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
@@ -30,9 +32,8 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
-import com.softwarementors.commons.testng.AssertEx;
 
-public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
+public class PrivilegeDAOTest extends DefaultDAOTestBase<PrivilegeDAO, Privilege>
 {
 
     @Override
@@ -47,15 +48,15 @@ public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
     }
 
     @Override
-    protected LdapRoleDAO createDao(EntityManager entityManager)
+    protected PrivilegeDAO createDao(final EntityManager entityManager)
     {
-        return new LdapRoleDAO(entityManager);
+        return new PrivilegeDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<LdapRole> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<Privilege> createEntityInstanceGenerator()
     {
-        return new LdapRoleGenerator(getSeed());
+        return new PrivilegeGenerator(getSeed());
     }
 
     @Override
@@ -65,47 +66,20 @@ public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
     }
 
     @Override
-    public LdapRoleGenerator eg()
+    public PrivilegeGenerator eg()
     {
-        return (LdapRoleGenerator) super.eg();
-    }
-
-    @Test(enabled = false)
-    public void findByType()
-    {
-        LdapRole ldapRole = eg().createUniqueInstance();
-        ds().persistAll(ldapRole);
-        LdapRoleDAO dao = createDaoForReadWriteTransaction();
-
-        LdapRole role = dao.findByType(ldapRole.getLdapRole());
-        try
-        {
-            AssertEx.assertPropertiesEqual(ldapRole, role, LdapRole.ROLE_PROPERTY);
-        }
-        catch (Exception e)
-        {
-            AssertEx.fail(e.getMessage());
-        }
+        return (PrivilegeGenerator) super.eg();
     }
 
     @Test
-    @Override
-    public void test_findAll()
+    public void test_findAllPrivileges()
     {
-        // LdapRole entity = createUniqueEntity();
-        // LdapRole entityB = createUniqueEntity();
-        // List<Object> auxiliaryEntitiesToSaveBefore = new ArrayList<Object>();
-        // eg().addAuxiliaryEntitiesToPersist(entity, auxiliaryEntitiesToSaveBefore);
-        // eg().addAuxiliaryEntitiesToPersist(entityB, auxiliaryEntitiesToSaveBefore);
-        // persistAll(ds(), auxiliaryEntitiesToSaveBefore, entity, entityB);
-        //
-        // LdapRoleDAO dao = createDaoForRollbackTransaction();
-        //
-        // List<LdapRole> all = dao.findAll();
-        // List<LdapRole> entitiesToCheck = new ArrayList();
-        // entitiesToCheck.add(entity);
-        // entitiesToCheck.add(entityB);
-        // PersistentEntityTestHelper.assertEqualCollectionsById(all, entitiesToCheck);
+        PrivilegeDAO dao = createDaoForReadWriteTransaction();
+        Privilege priv = eg().createUniqueInstance();
+        dao.persist(priv);
+        List<Privilege> privs = dao.findAll();
+
+        eg().assertAllPropertiesEqual(privs.iterator().next(), priv);
     }
 
 }

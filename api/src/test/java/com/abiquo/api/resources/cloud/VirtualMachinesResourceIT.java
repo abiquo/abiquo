@@ -25,12 +25,13 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,6 +42,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
@@ -63,18 +65,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         vapp = vappGenerator.createInstance(vdc);
     }
 
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("ip_pool_management", "rasd_management", "nodevirtualimage", "virtualmachine",
-            "virtualimage", "virtualapp", "virtualdatacenter", "vlan_network", 
-            "network_configuration", "dhcp_service", "remote_service", "hypervisor",
-            "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
-    }
-
     /**
-     * Create a virtual appliance. Insert tow virtual machines in the virtual appliance and check it.
-     * Check also an 'empty' virtual appliance result
+     * Create a virtual appliance. Insert tow virtual machines in the virtual appliance and check
+     * it. Check also an 'empty' virtual appliance result
      */
     @Test
     public void getVirtualMachinesTest()
@@ -82,15 +75,44 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
         VirtualMachine vm2 = vmGenerator.createInstance(ent);
-        
+
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc);
 
         // Asociate it to the created virtual appliance
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
-        setup(ent, datacenter, vdc, vapp, vapp2, vm.getUser().getRole(), vm2.getUser().getRole(), vm.getUser(), vm2.getUser(), vm
-            .getVirtualImage(), vm2.getVirtualImage(), vm, vm2, nvi, nvi2);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(vapp2);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        for (Privilege p : vm2.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm2.getUser().getRole());
+        entitiesToSetup.add(vm2.getUser());
+        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2);
+        entitiesToSetup.add(nvi2);
+
+        setup(entitiesToSetup.toArray());
 
         // Check for vapp
         ClientResponse response = get(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()));
@@ -99,7 +121,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vms);
         assertNotNull(vms.getCollection());
         assertEquals(vms.getCollection().size(), 2);
-        
+
         // Check for vapp2
         response = get(resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
@@ -109,33 +131,32 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vms.getCollection().size(), 0);
 
     }
-    
+
     /**
-     * Check the virtual machines of invalid vitual appliance id.
-     * 
-     * Server response should return a 404 NOT FOUND status code
+     * Check the virtual machines of invalid vitual appliance id. Server response should return a
+     * 404 NOT FOUND status code
      */
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualApplianceId()
     {
         setup(ent, datacenter, vdc, vapp);
-        
-        ClientResponse response = get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()));
+
+        ClientResponse response =
+            get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
-    
+
     /**
-     * Check the virtual machines list of an invalid virtualdatacenter 
-     * for a valid virtual appliance id.
-     * 
-     * Server response should return a 404 NOT FOUND status code
+     * Check the virtual machines list of an invalid virtualdatacenter for a valid virtual appliance
+     * id. Server response should return a 404 NOT FOUND status code
      */
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualDatacenterId()
     {
         setup(ent, datacenter, vdc, vapp);
-        
-        ClientResponse response = get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
+
+        ClientResponse response =
+            get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 

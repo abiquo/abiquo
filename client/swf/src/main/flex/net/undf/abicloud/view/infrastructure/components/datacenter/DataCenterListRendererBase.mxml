@@ -31,10 +31,13 @@
     xmlns:utils="net.undf.abicloud.utils.*"
     backgroundAlpha="0"
     rollOver="onRollOver()"
-    rollOut="onRollOut()">
+    rollOut="onRollOut()"
+    creationComplete="onCreationComplete()">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
             import net.undf.abicloud.vo.service.RemoteService;
             import net.undf.abicloud.vo.service.RemoteServiceType;
             import net.undf.abicloud.vo.infrastructure.DataCenter;
@@ -50,6 +53,10 @@
 
             [Bindable]
             protected var _hasRemoteServices:Boolean = false;
+            
+            private function onCreationComplete():void{
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS,"removeChild",accessButton,this);
+            }
 
             private function onClickDataCenter(event:Event):void
             {

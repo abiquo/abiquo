@@ -19,37 +19,45 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.enterprise;
+package com.abiquo.abiserver.pojo.user;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
-@XmlRootElement(name = "")
-public class LdapRoleDto extends SingleResourceTransportDto
+public class RoleListResult
 {
-    private Integer id;
+    // The List of Role (limited by a length) that match the RoleListOptions given to
+    // retrieve the list of Roles
+    private Collection<Role> rolesList;
 
-    public Integer getId()
+    // The total number of roles that match the RoleListOptions given to
+    // retrieve the list of Roles
+    private int totalRoles;
+
+    public RoleListResult()
     {
-        return id;
+        rolesList = new ArrayList<Role>();
+        totalRoles = 0;
     }
 
-    public void setId(Integer id)
+    public Collection<Role> getRolesList()
     {
-        this.id = id;
+        return rolesList;
     }
 
-    private String ldapRole;
-
-    public String getLdapRole()
+    public void setRolesList(final Collection<Role> rolesList)
     {
-        return ldapRole;
+        this.rolesList = rolesList;
     }
 
-    public void setLdapRole(String ldapRole)
+    public int getTotalRoles()
     {
-        this.ldapRole = ldapRole;
+        return totalRoles;
+    }
+
+    public void setTotalRoles(final int totalRoles)
+    {
+        this.totalRoles = totalRoles;
     }
 
 }

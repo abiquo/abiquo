@@ -31,6 +31,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.binding.utils.ChangeWatcher;
             import mx.utils.ObjectUtil;
 
@@ -49,6 +51,9 @@
 
             private function onCreationComplete():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",acceptButton,buttonAction);
+                
                 //Listening for when the Datacenter list is available
                 ChangeWatcher.watch(physicalDataCenterInput, "dataProvider", setPhysicalDataCenterFieldOnEditing);
             }
@@ -196,7 +201,7 @@
                     super.keyboardHandler(keyboardEvent);
                 else
                 {
-                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
+                    if (keyboardEvent.keyCode == 13 && acceptButton.enabled && SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE))
                         onAccept();
                 }
             }
@@ -243,7 +248,7 @@
         </mx:FormItem>
 
         <!-- BUTTONS -->
-        <mx:FormItem direction="horizontal">
+        <mx:FormItem direction="horizontal" id="buttonAction">
             <mx:Button id="acceptButton"
                 height="18"
                 label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"

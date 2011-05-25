@@ -31,6 +31,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.events.InfrastructureEvent;
         	import net.undf.abicloud.vo.virtualhardware.ResourceAllocationLimit;
         	import net.undf.abicloud.vo.infrastructure.HyperVisorType;
@@ -70,7 +72,8 @@
                 toggledContainer.addContent(this._virtualDataCenterAdd, ResourceManager.getInstance().getString("User",
                                                                                 "LABEL_GENERAL_INFO"));
                 
-               
+               //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE,"removeChild",saveButton,buttonAction);
             }
 
             public function init():void
@@ -241,7 +244,7 @@
             override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
             {
        			if (keyboardEvent.keyCode == 13){
-       				if(saveButton.enabled){
+       				if(saveButton.enabled && SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_MANAGE)){
                         onClickButtonSave();       					
        				}
                 }
@@ -263,7 +266,7 @@
 
     <mx:HBox 
         width="100%" height="20"
-        horizontalAlign="center">
+        horizontalAlign="center" id="buttonAction">
         <mx:Button id="saveButton"
             height="18"
             enabled="{this._virtualDataCenterAdd.isFormValid}"

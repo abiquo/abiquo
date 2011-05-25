@@ -42,8 +42,9 @@ import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enterprise.LdapRoleGenerator;
+import com.abiquo.server.core.enterprise.PrivilegeGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
+import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
@@ -98,8 +99,6 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected RoleGenerator roleGenerator = new RoleGenerator(seed);
 
-    protected LdapRoleGenerator ldapRoleGenerator = new LdapRoleGenerator(seed);
-
     protected UserGenerator userGenerator = new UserGenerator(seed);
 
     protected VirtualMachineGenerator vmGenerator = new VirtualMachineGenerator(seed);
@@ -112,10 +111,14 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 
     protected SystemPropertyGenerator systemPropertyGenerator = new SystemPropertyGenerator(seed);
 
+    protected PrivilegeGenerator privilegeGenerator = new PrivilegeGenerator(seed);
+
+    protected RoleLdapGenerator roleLdapGenerator = new RoleLdapGenerator(seed);
+
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
         for (Object entity : entities)
         {
@@ -127,7 +130,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected void update(final Object... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
         for (Object entity : entities)
         {
@@ -158,12 +161,13 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
-            "workload_fit_policy_rule", "network", "session", "user", "role",
-            "workload_enterprise_exclusion_rule", "enterprise_limits_by_datacenter", "enterprise",
-            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
-            "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
-            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register", "role_ldap"};
+            "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
+            "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
+            "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
+            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
+            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
+            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
+            "alerts", "heartbeatlog", "icon", "register"};
 
         tearDown(entities);
     }
@@ -171,7 +175,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected void tearDown(final String... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
 
         for (String entity : entities)
@@ -205,6 +209,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         {
             EntityManagerHolder emHolder = unbind(emf);
             em = emHolder.getEntityManager();
+
             if (!em.isOpen())
             {
                 em = emf.createEntityManager();
@@ -215,20 +220,29 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             em = emf.createEntityManager();
             TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
         }
+
         return em;
     }
 
-    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    protected void commitActiveTransaction(final EntityManager em)
     {
-        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+        if (em.getTransaction().isActive())
+        {
+            em.getTransaction().commit();
+        }
     }
 
-    private void closeActiveTransaction(final EntityManager em)
+    protected void rollbackActiveTransaction(final EntityManager em)
     {
         if (em.getTransaction().isActive())
         {
             em.getTransaction().rollback();
         }
+    }
+
+    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    {
+        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
     }
 
 }

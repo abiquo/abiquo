@@ -21,27 +21,38 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
 {
+
+    private EnterpriseGenerator enterpriseGenerator;
+
+    private PrivilegeGenerator privilegeGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        this.enterpriseGenerator = new EnterpriseGenerator(getSeed());
+        this.privilegeGenerator = new PrivilegeGenerator(getSeed());
     }
 
     @Override
-    protected RoleDAO createDao(EntityManager entityManager)
+    protected RoleDAO createDao(final EntityManager entityManager)
     {
         return new RoleDAO(entityManager);
     }
@@ -64,4 +75,37 @@ public class RoleDAOTest extends DefaultDAOTestBase<RoleDAO, Role>
         return (RoleGenerator) super.eg();
     }
 
+    @Test
+    public void findRoles()
+    {
+        Role role1 = eg().createInstance();
+        Enterprise enterprise = this.enterpriseGenerator.createUniqueInstance();
+        Role role2 = eg().createInstance(enterprise);
+
+        ds().persistAll(role1, enterprise, role2);
+
+        RoleDAO dao = createDaoForRollbackTransaction();
+
+        Collection<Role> roles = dao.find(enterprise, null, null, false, 0, 25);
+        AssertEx.assertSize(roles, 2);
+
+        roles = dao.find(null, null, null, false, 0, 25);
+        AssertEx.assertSize(roles, 1);
+
+    }
+
+    @Test
+    public void findPrivilegesByRole()
+    {
+        Privilege p1 = this.privilegeGenerator.createInstance();
+        Privilege p2 = this.privilegeGenerator.createInstance();
+        Role role = eg().createInstance(p1, p2);
+
+        ds().persistAll(p1, p2, role);
+
+        RoleDAO dao = createDaoForRollbackTransaction();
+
+        List<Privilege> privileges = dao.findPrivilegesByIdRole(role.getId());
+        AssertEx.assertSize(privileges, 2);
+    }
 }

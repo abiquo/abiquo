@@ -36,7 +36,7 @@
 		<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.workload.engine.core.FitPolicy</param>
 	</typedef>
 	
-	<typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-		<param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param>
-	</typedef>
+<!-- 	<typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType"> -->
+<!-- 		<param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param> -->
+<!-- 	</typedef> -->
 </hibernate-mapping>
