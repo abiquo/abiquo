@@ -70,21 +70,8 @@ public class TracerLogger
     {
         try
         {
-            TracerContext tracerContext = TracerContextHolder.getContext();
-            Trace trace = new Trace();
-
-            trace.setSeverity(severity.name());
-            trace.setComponent(component.name());
-            trace.setEvent(event.name());
-            trace.setHierarchy(tracerContext.getHierarchy());
-            trace.setEnterpriseId(tracerContext.getEnterpriseId());
-            trace.setEnterpriseName(tracerContext.getEnterpriseName());
-            trace.setUserId(tracerContext.getUserId());
-            trace.setUsername(tracerContext.getUsername());
-            trace.setMessage(message);
-
+            Trace trace = getTrace(severity, component, event, message);
             LOGGER.info(trace.toString());
-
             processHierarchy(trace);
             publishTrace(trace);
         }
@@ -110,25 +97,30 @@ public class TracerLogger
     public void systemLog(final SeverityType severity, final ComponentType component,
         final EventType event, final String message)
     {
-        try
-        {
-            Trace trace = new Trace();
-            trace.setSeverity(severity.name());
-            trace.setComponent(component.name());
-            trace.setEvent(event.name());
-            trace.setEnterpriseName(Enterprise.SYSTEM_ENTERPRISE.getName());
-            trace.setUsername(User.SYSTEM_USER.getName());
-            trace.setMessage(message);
+        Trace trace = getSystemTrace(severity, component, event, message);
+        LOGGER.info(trace.toString());
+        publishTrace(trace);
+    }
 
-            LOGGER.info(trace.toString());
-
-            publishTrace(trace);
-        }
-        catch (IllegalStateException ex)
-        {
-            // Just ignore this error for the moment; it appears if the method is invoked outside
-            // the servlet container and the TracerFilter has not been invoked. E.g. In unit tests
-        }
+    /**
+     * Log a system error message to the event system.
+     * <p>
+     * This method should only be used to log system tasks such as infrastructure check, etc.
+     * Actions performed by a user must be logged using the
+     * {@link #log(SeverityType, ComponentType, EventType, String)} method.
+     * 
+     * @param severity The severity of the trace.
+     * @param component The component that generated the trace.
+     * @param event The event being traced.
+     * @param message The message to trace.
+     * @param ex The error.
+     */
+    public void systemError(final SeverityType severity, final ComponentType component,
+        final EventType event, final String message, final Exception error)
+    {
+        Trace trace = getSystemTrace(severity, component, event, message);
+        LOGGER.error(trace.toString(), error);
+        publishTrace(trace);
     }
 
     /**
@@ -160,5 +152,39 @@ public class TracerLogger
         {
             LOGGER.error("Could not publish the trace.", e);
         }
+    }
+
+    private Trace getTrace(final SeverityType severity, final ComponentType component,
+        final EventType event, final String message)
+    {
+        TracerContext tracerContext = TracerContextHolder.getContext();
+        Trace trace = new Trace();
+
+        trace.setSeverity(severity.name());
+        trace.setComponent(component.name());
+        trace.setEvent(event.name());
+        trace.setHierarchy(tracerContext.getHierarchy());
+        trace.setEnterpriseId(tracerContext.getEnterpriseId());
+        trace.setEnterpriseName(tracerContext.getEnterpriseName());
+        trace.setUserId(tracerContext.getUserId());
+        trace.setUsername(tracerContext.getUsername());
+        trace.setMessage(message);
+
+        return trace;
+    }
+
+    private Trace getSystemTrace(final SeverityType severity, final ComponentType component,
+        final EventType event, final String message)
+    {
+        Trace trace = new Trace();
+
+        trace.setSeverity(severity.name());
+        trace.setComponent(component.name());
+        trace.setEvent(event.name());
+        trace.setEnterpriseName(Enterprise.SYSTEM_ENTERPRISE.getName());
+        trace.setUsername(User.SYSTEM_USER.getName());
+        trace.setMessage(message);
+
+        return trace;
     }
 }

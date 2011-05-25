@@ -50,8 +50,9 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC),
-@NamedQuery(name = "VOLUMES_BY_POOL", query = VolumeManagement.BY_POOL)})
+@NamedQueries( {
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -61,6 +62,10 @@ public class VolumeManagement extends RasdManagement
     public static final String TABLE_NAME = "volume_management";
 
     // Queries
+
+    public static final String VOLUMES_BY_VDC = "VOLUMES_BY_VDC";
+
+    public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
 
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
@@ -103,10 +108,6 @@ public class VolumeManagement extends RasdManagement
         setIdScsi(idScsi);
         setState(VolumeState.DETACHED);
         setSizeInMB(sizeInMB);
-
-        // TODO: Remove these fields?
-        setUsedSizeInMB(0);
-        setAvailableSizeInMB(sizeInMB);
     }
 
     public final static String STORAGE_POOL_PROPERTY = "storagePool";
