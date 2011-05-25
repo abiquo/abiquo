@@ -160,8 +160,9 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
 
         // If unable to find a username and password, just abort as TokenBasedRememberMeServices is
         // unable to construct a valid token in this case.
-        if (!StringUtils.hasLength(username) || !StringUtils.hasLength(password)
-            || !StringUtils.hasLength(authType))
+        if (!StringUtils.hasLength(username)
+            || (!StringUtils.hasLength(password) && AuthType.ABIQUO.name().equalsIgnoreCase(
+                authType)) || !StringUtils.hasLength(authType))
         {
             return;
         }
@@ -197,13 +198,14 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
         {
             return null;
         }
-    } 
-/**Actual {@link AbiquoUserDetails.} or not.
- * 
- * @param authentication login.
- * @return true if is an instance of {@link AbiquoUserDetails }. False otherwise.
- * 
- */
+    }
+
+    /**
+     * Actual {@link AbiquoUserDetails.} or not.
+     * 
+     * @param authentication login.
+     * @return true if is an instance of {@link AbiquoUserDetails }. False otherwise.
+     */
     private boolean isInstanceOfAbiquoUserDetails(Authentication authentication)
     {
         return authentication.getPrincipal() instanceof AbiquoUserDetails;
