@@ -98,7 +98,7 @@ public class StorageRep extends DefaultRepBase
     public StorageDevice findDeviceByManagementIP(final Integer datacenterId,
         final String managementIp)
     {
-        return deviceDAO.findDeviceById(datacenterId, managementIp);
+        return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
     public Tier findTierById(final Integer datacenterId, final Integer tierId)
@@ -126,8 +126,9 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.findById(volumeId);
     }
-    
-    public VolumeManagement findVolumeByRasd(final Rasd rasd) {
+
+    public VolumeManagement findVolumeByRasd(final Rasd rasd)
+    {
         return volumeDAO.getVolumeByRasd(rasd);
     }
 
@@ -172,10 +173,15 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
     }
-    
+
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
         return volumeDAO.getVolumeFromImage(idImage);
+    }
+
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getStatefulCandidates(vdc);
     }
 
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)

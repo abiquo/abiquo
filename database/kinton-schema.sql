@@ -1300,8 +1300,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.dashboard.abiquoURL","http://www.abiquo.org","URL of Abiquo web page"),
  ("client.dashboard.allowUsersAccess","1","Allow (1) or deny (0) access to the \'Users\' section"),
  ("client.dashboard.showStartUpAlert","0","Set to 1 to show an Alert with the text found in Startup_Alert.txt file"),
- ("client.infra.googleMapsDefaultLatitude","90","Google Maps will be centered by default at this longitude value"),
- ("client.infra.googleMapsDefaultLongitude","42","Google Maps will be centered by default at this latitude value"),
+ ("client.infra.googleMapsDefaultLatitude","41.3825","Google Maps will be centered by default at this longitude value"),
+ ("client.infra.googleMapsDefaultLongitude","2.176944","Google Maps will be centered by default at this latitude value"),
  ("client.infra.googleMapsDefaultZoom","4","Google Maps will be centered by default with this zoom level value"),
  ("client.infra.googleMapskey","0","The map\'s Google key used in infrastructure section"),
  ("client.infra.googleMapsLadTimeOut","10","Time, in seconds, that applications waits Google Maps to load. After that, application considers that Google Maps service is temporarily unavailable, and is not used"),
@@ -1722,8 +1722,7 @@ CREATE TABLE  `kinton`.`vappstateful_conversions` (
   KEY `idUser_FK3` (`idUser`),
   CONSTRAINT `idVirtualApp_FK3` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE,
   CONSTRAINT `idUser_FK3` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
-
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -1739,18 +1738,21 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idDiskStatefulConversion` int(1) unsigned,
   `version_c` int(11) default 0,
   `idTier` int(10) unsigned NOT NULL,
+  `idManagement` int(10) unsigned,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
   KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
   KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
   KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
   KEY `idTier_FK4` (`idTier`),
+  KEY `idManagement_FK4` (`idManagement`),
   CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
   CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --

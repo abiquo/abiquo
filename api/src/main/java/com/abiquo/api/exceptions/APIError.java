@@ -196,7 +196,9 @@ public enum APIError
         "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
         "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
-        "Tier is disabled"),
+        "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
+        "SP-12", "Storage device param in storage pool link not found"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -239,7 +241,7 @@ public enum APIError
         "TIER-6", "Can not disable a Tier with associated Storage Pools"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED(
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
         "DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS
@@ -259,16 +261,18 @@ public enum APIError
         "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
         "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
         "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
-        "VOL-7", "The volume cannot be deleted because it is in a stateful process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
+        "VOL-7",
+        "The volume cannot be deleted because it is in a being used in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
         "VOL-8",
-        "The stateful volume cannot be deleted because it is being used in a virtual appliance"),
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
+        "VOL-9", "The idScsi of the volume is required"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
         "RULE-2", "The requested fit policy rule does not exist"), NON_EXISTENT_MLR("RULE-3",
         "The requeste machine load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one fit policy rule is required"), ONE_LINK_REQUIRED("RULE-5",
-        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)")
+        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)"),
 
     ;
 
@@ -321,8 +325,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

@@ -22,6 +22,7 @@
 package com.abiquo.server.core.common.persistence;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -144,5 +145,11 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         criteria.setProjection(Projections.rowCount());
 
         return (Long) criteria.uniqueResult();
+    }
+
+    protected T getSingleResultOrNull(final Criteria criteria)
+    {
+        List<T> results = getResultList(criteria);
+        return (results == null || results.isEmpty()) ? null : results.get(0);
     }
 }

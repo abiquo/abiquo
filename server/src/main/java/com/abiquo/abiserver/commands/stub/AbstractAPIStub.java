@@ -195,7 +195,7 @@ public class AbstractAPIStub
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
         String[] tokens;
-        if (this.currentSession != null && currentSession.getAuthType() != null)
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
         {
             tokens =
                 new String[] {user, valueOf(tokenExpiration), signature,
@@ -505,7 +505,7 @@ public class AbstractAPIStub
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
         String[] tokens;
-        if (this.currentSession != null && currentSession.getAuthType() != null)
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
         {
             tokens =
                 new String[] {user, valueOf(tokenExpiration), signature,

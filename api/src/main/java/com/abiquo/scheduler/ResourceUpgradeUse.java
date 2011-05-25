@@ -236,7 +236,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 netAssignDao.persist(nb);
             }
         }
-
     }
 
     /**
@@ -378,7 +377,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             return candidatePort;
         }
-
+        
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanTags);
 
@@ -396,6 +395,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanTagsOrdered.remove(vlanId);
             }
         }
+
 
         if (vlanTagsOrdered.isEmpty())
         {
