@@ -79,17 +79,22 @@ package net.undf.abicloud.utils
 		 */
 		public static function formatMac(macAddress:String):String{
 			
-			//This is a non formated MAC
-			if(macAddress.length != 17){
-				return macAddress.slice(0,2)
-				+":"+macAddress.slice(2,4)
-				+":"+macAddress.slice(4,6)
-				+":"+macAddress.slice(6,8)
-				+":"+macAddress.slice(8,10)
-				+":"+macAddress.slice(10,12);
+			if(macAddress){
+				//This is a non formated MAC
+				if(macAddress.length != 17){
+					return macAddress.slice(0,2)
+					+":"+macAddress.slice(2,4)
+					+":"+macAddress.slice(4,6)
+					+":"+macAddress.slice(6,8)
+					+":"+macAddress.slice(8,10)
+					+":"+macAddress.slice(10,12);
+				}else{
+					return macAddress;
+				}
 			}else{
-				return macAddress;
+				return "-";
 			}
+			
 		}
     }
 }
