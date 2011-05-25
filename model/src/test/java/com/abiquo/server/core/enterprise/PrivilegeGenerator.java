@@ -27,52 +27,45 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class LdapRoleGenerator extends DefaultEntityGenerator<LdapRole>
+public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
 {
 
-    private RoleGenerator roleGenerator = null;
+    private static final String OTHER_ENTERPRISES_PRIVILEGE = "OTHER_ENTERPRISES_PRIVILEGE";
 
-    public LdapRoleGenerator(SeedGenerator seed)
+    public PrivilegeGenerator(final SeedGenerator seed)
     {
         super(seed);
-        roleGenerator = new RoleGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(LdapRole obj1, LdapRole obj2)
+    public void assertAllPropertiesEqual(final Privilege obj1, final Privilege obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2);
-        roleGenerator.assertAllPropertiesEqual(obj1.getRole(), obj2.getRole());
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Privilege.NAME_PROPERTY);
     }
 
     @Override
-    public LdapRole createUniqueInstance()
+    public Privilege createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
+        String name = newString(nextSeed(), Privilege.NAME_LENGTH_MIN, Privilege.NAME_LENGTH_MAX);
 
-        return createInstance(newString(nextSeed(), 1, 128));
+        Privilege privilege = new Privilege(name);
+
+        return privilege;
     }
 
-    public LdapRole createUniqueInstance(String type)
+    public Privilege createInstance()
     {
-        return createInstance(type);
-    }
 
-    private LdapRole createInstance(String type)
-    {
-        LdapRole ldapRole = new LdapRole(type, roleGenerator.createUniqueInstance());
+        Privilege privilege = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
 
-        return ldapRole;
+        return privilege;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(LdapRole entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Privilege entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
-        Role role = entity.getRole();
-        roleGenerator.addAuxiliaryEntitiesToPersist(role, entitiesToPersist);
-        entitiesToPersist.add(role);
 
     }
 

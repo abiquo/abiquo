@@ -19,21 +19,49 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.security
-{
+package com.abiquo.server.core.enterprise;
 
-    /**
-     * Interface for an Authorization Manager
-     * Defines the methods that a SecurableResource needs to know if it is authorized
-     **/
-    public interface IAuthorizationManager
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "privilege")
+public class PrivilegeDto extends SingleResourceTransportDto
+{
+    public PrivilegeDto()
     {
-        /**
-         * Tests a SecurableResource for authorization
-         * @param securableResourceToCheck
-         * @return True if  the SecurableResource is authorized to be used
-         *
-         */
-        function isAuthorized(securableResourceToCheck:SecurableResource):Boolean;
+
     }
+
+    public PrivilegeDto(final Integer id, final String name)
+    {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
 }

@@ -28,6 +28,7 @@
 
 <mx:Canvas 
     width="100%" height="100%"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:repositoryspace="net.undf.abicloud.view.virtualimage.components.repositoryspace.*"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -36,6 +37,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.controls.Alert;
             import mx.events.CloseEvent;
             import mx.managers.PopUpManager;
@@ -49,6 +52,11 @@
 
             //Form to create RepositorySpaces
             private var ovfPackageListForm:OVFPackageListForm;
+            
+            private function onCreationComplete():void{
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", addRepoButton);
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_REPOSITORY, "visible", deleteRepoButton);
+            }
 
             override protected function createChildren():void
             {

@@ -27,6 +27,7 @@ package net.undf.abicloud.events
     
     import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
+    import net.undf.abicloud.vo.user.Role;
     import net.undf.abicloud.vo.user.User;
     import net.undf.abicloud.vo.user.UserListOptions;
 
@@ -65,6 +66,12 @@ package net.undf.abicloud.events
         public static const ENTERPRISE_DELETED:String = "enterpriseDeletedUserEvent";
 
         public static const USERS_SESSION_CLOSED:String = "usersSessionClosedUserEvent";
+        
+        public static const CHECK_ROLE_PRIVILEGE:String = "checkRolePrivilegeUserEvent";
+        
+        public static const GET_ROLES:String = "getRolesUserEvent";
+                
+        public static const ROLE_RETRIEVED:String = "roleRetrievedUserEvent";
 
         /* ------------- Public atributes ------------- */
         public var user:User;
@@ -82,6 +89,12 @@ package net.undf.abicloud.events
         public var listRequest:ListRequest;
         
         public var callback:Function;
+        
+        public var role:Role;
+        
+        public var privilege:String;
+        
+       	public var roleListOptions:ListRequest;
         
         /* ------------- Constructor ------------- */
         public function UserEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

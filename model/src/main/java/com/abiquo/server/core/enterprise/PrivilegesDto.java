@@ -21,16 +21,20 @@
 
 package com.abiquo.server.core.enterprise;
 
-import com.abiquo.server.core.common.DefaultEntityTestBase;
-import com.softwarementors.bzngine.entities.test.InstanceTester;
+import java.util.List;
 
-public class LdapRoleTest extends DefaultEntityTestBase<LdapRole>
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "privileges")
+public class PrivilegesDto extends WrapperDto<PrivilegeDto>
 {
-
     @Override
-    protected InstanceTester<LdapRole> createEntityInstanceGenerator()
+    @XmlElement(name = "privilege")
+    public List<PrivilegeDto> getCollection()
     {
-        return new LdapRoleGenerator(getSeed());
+        return collection;
     }
-
 }

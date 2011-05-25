@@ -116,7 +116,13 @@ package net.undf.abicloud.controller
                         break;
 
                     case BasicResult.NOT_AUTHORIZED:
-                        //Not used yet
+                        //The resource is not allowed
+                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_ERROR_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
+                                                basicResult.message,
+                                                Alert.OK);
                         break;
 
                     case BasicResult.VIRTUAL_IMAGE_IN_USE:

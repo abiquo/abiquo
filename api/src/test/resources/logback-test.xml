@@ -10,17 +10,6 @@
 		</filter>
 	</appender>
 
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${catalina.base}/logs/api.log</file>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
-		</layout>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      		<fileNamePattern>${catalina.base}/logs/api-%d{yyyy-MM-dd}.log</fileNamePattern>
-			<maxHistory>5</maxHistory>
-    	</rollingPolicy>
-	</appender>
-	
 	<logger name="com.abiquo">
 		<level value="DEBUG" />
 	</logger>
@@ -42,8 +31,7 @@
 	</logger>
 	
 	<root>
-		<level value="INFO" />
-		<appender-ref ref="FILE" />
+		<level value="WARN" />
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

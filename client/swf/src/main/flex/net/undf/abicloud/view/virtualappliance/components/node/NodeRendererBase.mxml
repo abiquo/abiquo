@@ -27,7 +27,8 @@
     borderColor="#cccccc"
     borderStyle="none"
     borderThickness="1"
-    verticalScrollPolicy="off" horizontalScrollPolicy="off"
+    verticalScrollPolicy="off"
+    creationComplete="onCreationComplete()" horizontalScrollPolicy="off"
     styleName="NodeRenderer" toolTip="{this._infoToolTip}"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
@@ -39,6 +40,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.states.State;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.controls.Alert;
@@ -96,6 +99,15 @@
             private var _pendingStatus:String;
 
 
+            
+            private function onCreationComplete():void{
+            	//Checking privilege
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_NETWORK)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)){
+                	SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",showConfigurationButton,buttonsContainer);
+                }
+            }
+            
             /**
              * Register a Connector for this NodeRenderer, so Connections
              * can be created from and to this NodeRenderer

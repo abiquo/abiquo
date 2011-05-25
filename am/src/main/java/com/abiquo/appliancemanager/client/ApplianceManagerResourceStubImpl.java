@@ -41,7 +41,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
     public class ApplianceManagerStubException extends RuntimeException
     {
-        public ApplianceManagerStubException(String statusMsg)
+        public ApplianceManagerStubException(final String statusMsg)
         {
             super(statusMsg);
         }
@@ -51,12 +51,12 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
     public final static String FORAMT = "format";
 
-    public ApplianceManagerResourceStubImpl(String baseUrl)
+    public ApplianceManagerResourceStubImpl(final String baseUrl)
     {
         super(baseUrl);
     }
 
-    private void checkResponse(ClientResponse response)
+    private void checkResponse(final ClientResponse response)
     {
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus / 200 != 1)
@@ -164,7 +164,14 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     public EnterpriseRepositoryDto getRepository(final String idEnterprise)
 
     {
-        Resource resource = repository(idEnterprise);
+        return getRepository(idEnterprise, false);
+    }
+
+    public EnterpriseRepositoryDto getRepository(final String idEnterprise,
+        final boolean checkCanWrite)
+
+    {
+        Resource resource = repository(idEnterprise, checkCanWrite);
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
@@ -215,7 +222,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * @throws ApplianceManagerStubException
      */
     public String bundleOVFPackage(final String idEnterprise, final String snapshot,
-        OVFPackageInstanceDto diskInfo)
+        final OVFPackageInstanceDto diskInfo)
     {
 
         Resource resource = ovfPackage(idEnterprise, snapshot);

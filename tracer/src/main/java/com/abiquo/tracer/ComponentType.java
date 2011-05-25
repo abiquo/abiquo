@@ -62,7 +62,15 @@ public enum ComponentType implements Serializable
     API(131072, "API"),
 
     // Workload Engine
-    WORKLOAD(262144, "Workload Engine");
+    WORKLOAD(262144, "Workload Engine"),
+
+    // Roles
+    ROLE(524288, "Role"),
+
+    // Roles
+    ROLE_LDAP(1048576, "Role LDAP"),
+
+    ;
 
     private final int component;
 

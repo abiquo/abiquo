@@ -36,6 +36,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.managers.PopUpManager;
         	import mx.controls.Alert;
@@ -66,6 +69,9 @@
             
             [Bindable]
             private var _restrict:Boolean;
+            
+            [Bindable]
+            private var _vdcAllowed:Boolean;
 
             /**
              * Initializes this form to create a new user
@@ -84,8 +90,6 @@
                 emailInput.text = "";
                 descriptionInput.text = "";
                 activeInput.selected = true;
-                vdcFormItem.visible = false;
-                vdcFormItem.includeInLayout = false;
 
                 _listenerRegistered = false;
                 labelPasswordInvalid.visible = false;
@@ -93,13 +97,17 @@
 
                 nameInput.setFocus();
                 
+                this._vdcAllowed = false;
+                
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
-                this._restrict = false;
+                //this._restrict = false;
                 
                 BindingUtils.bindSetter(updateVirtualDataCenter,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");
+                
+                requestRoles();
             }
             
             /**
@@ -134,7 +142,11 @@
                 newUser.locale = ResourceManager.getInstance().localeChain[0];
                 newUser.enterprise = this._enterprise;
                 
-                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();
+                if(this._vdcAllowed){
+	                newUser.availableVirtualDatacenters = virtualDatacenterList.listOfSelectedVirtualDatacenter.toArray();                	
+                }else{
+                	newUser.availableVirtualDatacenters = new Array();
+                }
 
                 //Registering listener, if it is not, to know when the user has been created
                 if (!this._listenerRegistered)
@@ -254,6 +266,33 @@
             	
             }
             
+            private function requestRoles():void{
+            	var roleListOptions:ListRequest = new ListRequest();
+                roleListOptions.offset = 0;
+                roleListOptions.numberOfNodes = 10000;
+                roleListOptions.filterLike = "";
+                roleListOptions.asc = true;
+                roleListOptions.orderBy = "enterprise";            	
+            	
+            	var roleEvent:UserEvent = new UserEvent(UserEvent.GET_ROLES);
+           		roleEvent.enterprise = this._enterprise;
+            	roleEvent.roleListOptions = roleListOptions;
+            	dispatchEvent(roleEvent);
+            }
+            
+            private function requestPrivilege():void{
+            	var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_PRIVILEGE);
+            	event.role = roleInput.selectedItem as Role;
+            	event.privilege = PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION;
+            	event.callback = setRestrictedVDC;
+            	dispatchEvent(event);
+            	validateForm();
+            }
+            
+            private function setRestrictedVDC(value:Boolean):void{
+            	this._vdcAllowed = value;	
+            }
+            
         ]]>
     </mx:Script>
     
@@ -307,8 +346,8 @@
             <mx:ComboBox id="roleInput"
                 height="18"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
-                labelField="shortDescription"
-                change="validateForm()"
+                labelField="name"
+                change="requestPrivilege()"
                 prompt="@Resource(bundle='User', key='COMBOBOX_PROMPT_ROLE')"/>
         </mx:FormItem>
         
@@ -316,8 +355,8 @@
         	id="vdcFormItem"
         	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{Role(roleInput.selectedItem).id == Role.USER_ROLE}"
-            includeInLayout="{Role(roleInput.selectedItem).id == Role.USER_ROLE}">
+            visible="{this._vdcAllowed}"
+            includeInLayout="{this._vdcAllowed}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">

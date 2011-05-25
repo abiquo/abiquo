@@ -28,6 +28,9 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
+import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
@@ -144,7 +147,42 @@ public interface UserCommand
      */
     public abstract BasicResult deleteEnterprise(final UserSession userSession,
         final Enterprise enterprise);
-    
-    public DataResult<Enterprise> getEnterprise(final UserSession userSession, final Integer enterpriseId);
+
+    public DataResult<Enterprise> getEnterprise(final UserSession userSession,
+        final Integer enterpriseId);
+
+    public DataResult<Role> getRole(final UserSession userSession, final Integer roleId);
+
+    /**
+     * Returns a list of roles stored in the Data Base.
+     * 
+     * @param userSession
+     * @param roleListOptions an RoleListOptions object containing the options to retrieve the list
+     *            of users
+     * @return A DataResult object containing an RoleListResult object
+     */
+    public abstract DataResult<RoleListResult> getRoles(final UserSession userSession,
+        final ListRequest roleListOptions, Enterprise enterprise);
+
+    /**
+     * Returns a list of privileges from a role
+     * 
+     * @param userSession
+     * @param roleId role id owner of privileges
+     * @return a DataResult object containing an PrivilegeListResult
+     */
+    public DataResult<PrivilegeListResult> getPrivilegesByRole(final UserSession userSession,
+        final int roleId);
+
+    /**
+     * Checks if a Role has a Privilege
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @param String namePrivilege the name of a Privilege to check
+     * @return Boolean if Role has a Privilege
+     */
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        String namePrivilege);
 
 }
