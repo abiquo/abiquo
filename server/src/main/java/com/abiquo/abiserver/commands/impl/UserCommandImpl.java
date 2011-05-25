@@ -378,6 +378,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         finally
         {
             transaction.commit();
+            enterpriseHB = null;
         }
 
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);

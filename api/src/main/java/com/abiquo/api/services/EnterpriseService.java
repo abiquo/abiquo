@@ -163,6 +163,7 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(enterprise);
+        
 
         repo.insert(enterprise);
         return enterprise;

@@ -122,7 +122,8 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
             + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
             + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
             + "WHERE vn.id = vna.vlanNetwork.id " + //
-            "AND vna.rack.id = " + idRack);
+            "AND vna.rack.id = " + idRack +
+            " AND vn.tag IS NOT NULL");
 
         // FIXME
         // Query query = getSession().createQuery(VLAN_ID_TAG_USED);

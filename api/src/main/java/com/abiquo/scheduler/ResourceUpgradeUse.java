@@ -236,7 +236,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 netAssignDao.persist(nb);
             }
         }
-
     }
 
     /**
@@ -378,7 +377,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             return candidatePort;
         }
-
+        
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanTags);
 
@@ -396,6 +395,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanTagsOrdered.remove(vlanId);
             }
         }
+        
+        if (vlanIdsOrdered.isEmpty())
+        {
+            return candidatePort;
+        }
+
 
         if (vlanTagsOrdered.isEmpty())
         {
@@ -489,7 +494,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return vlans_avoided_collection;
     }
 
+<<<<<<< HEAD
     public List<Integer> getPublicVLANTagssFROMVLANNetworkList(final List<VLANNetwork> vlanNetworkList)
+=======
+    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(List<VLANNetwork> vlanNetworkList)
+>>>>>>> ABICLOUDPREMIUM-1577-bundleTracer
     {
         List<Integer> publicTagsList = new ArrayList<Integer>();
         for (VLANNetwork vlanNetwork : vlanNetworkList)
