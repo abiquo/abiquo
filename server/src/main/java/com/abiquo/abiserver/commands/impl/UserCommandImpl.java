@@ -25,11 +25,8 @@ import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -49,7 +46,6 @@ import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
-import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -366,6 +362,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         finally
         {
             transaction.commit();
+            enterpriseHB = null;
         }
 
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
