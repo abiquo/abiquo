@@ -113,13 +113,14 @@ import com.abiquo.server.core.util.PagedList;
         final Integer volumeId)
     {
         Criteria criteria = createCriteria(sameId(volumeId), sameVirtualDatacenter(vdc));
-        return getSingleResult(criteria);
+
+        return getSingleResultOrNull(criteria);
     }
 
     public VolumeManagement getVolumeByRasd(final Rasd rasd)
     {
         Criteria criteria = createCriteria(sameRasd(rasd));
-        return getSingleResult(criteria);
+        return getSingleResultOrNull(criteria);
     }
 
     public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)

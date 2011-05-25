@@ -66,8 +66,7 @@ public class StorageDeviceGenerator extends DefaultEntityGenerator<StorageDevice
 
     public StorageDevice createInstance(final Datacenter datacenter)
     {
-        StorageTechnologyType storageTechnology = newEnum(StorageTechnologyType.class, nextSeed());
-        return createInstance(datacenter, storageTechnology);
+        return createInstance(datacenter, StorageTechnologyType.NETAPP);
     }
 
     public StorageDevice createInstance(final Datacenter datacenter,

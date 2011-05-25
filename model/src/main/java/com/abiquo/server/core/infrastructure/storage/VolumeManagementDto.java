@@ -28,7 +28,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "volume")
 @XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
-/* "availableSizeInMB", "usedSizeInMB", */"idScsi"})
+/* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
