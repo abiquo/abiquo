@@ -29,13 +29,12 @@ import javax.persistence.EntityManager;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
@@ -59,7 +58,6 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
-
 @Repository
 @Transactional(readOnly = true)
 public class VirtualMachineService extends DefaultApiService
@@ -79,40 +77,46 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     OVFGeneratorService ovfService;
 
+    @Autowired
+    ConfigService configService;
+
     public VirtualMachineService()
     {
 
     }
 
-    public VirtualMachineService(EntityManager em)
+    public VirtualMachineService(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
+        this.configService = new ConfigService();
     }
 
-    public Collection<VirtualMachine> findByHypervisor(Hypervisor hypervisor)
+    public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         return repo.findByHypervisor(hypervisor);
     }
 
-    public Collection<VirtualMachine> findByEnterprise(Enterprise enterprise)
+    public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
         return repo.findByEnterprise(enterprise);
     }
 
-    public Collection<VirtualMachine> findVirtualMachinesByUser(Enterprise enterprise, User user)
+    public Collection<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
+        final User user)
     {
         return repo.findVirtualMachinesByUser(enterprise, user);
     }
 
-    public List<VirtualMachine> findByVirtualAppliance(VirtualAppliance vapp)
+    public List<VirtualMachine> findByVirtualAppliance(final VirtualAppliance vapp)
     {
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
 
-    public VirtualMachine getVirtualMachine(Integer vdcId, Integer vappId, Integer vmId)
+    public VirtualMachine getVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
@@ -127,8 +131,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public VirtualMachine updateVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
-        VirtualMachineDto dto)
+    public VirtualMachine updateVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final VirtualMachineDto dto)
     {
         VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
 
@@ -140,7 +144,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void updateVirtualMachine(VirtualMachine vm)
+    public void updateVirtualMachine(final VirtualMachine vm)
     {
         repo.update(vm);
     }
@@ -152,7 +156,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vappId identifier of the virtual appliance
      * @return True if it is, false otherwise.
      */
-    public boolean isAssignedTo(Integer vmId, Integer vappId)
+    public boolean isAssignedTo(final Integer vmId, final Integer vappId)
     {
         List<VirtualMachine> vms = repo.findVirtualMachinesByVirtualAppliance(vappId);
         for (VirtualMachine vm : vms)
@@ -166,7 +170,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(Hypervisor hypervisor)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         repo.deleteNotManagedVirtualMachines(hypervisor);
     }
@@ -176,7 +180,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param vm VirtualMachine to be blocked
      */
-    public void blockVirtualMachine(VirtualMachine vm)
+    public void blockVirtualMachine(final VirtualMachine vm)
     {
         if (vm.getState() == State.IN_PROGRESS)
         {
@@ -195,13 +199,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
-    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
-        throws Exception
+    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final State state) throws Exception
     {
         VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
-        VirtualAppliance vapp = contanerVirtualAppliance(vm); 
+        VirtualAppliance vapp = contanerVirtualAppliance(vm);
         EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
@@ -209,7 +213,7 @@ public class VirtualMachineService extends DefaultApiService
         RemoteService vf =
             remoteService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
 
-        long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+        long timeout = Long.valueOf(configService.getServerTimeout());
 
         Resource resource =
             ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
@@ -220,7 +224,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Deprecated
-    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    private VirtualAppliance contanerVirtualAppliance(final VirtualMachine vmachine)
     {
 
         VirtualDatacenter vdc =
@@ -253,7 +257,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param state a valid VirtualMachine state
      * @return true if its the same state, false otherwise
      */
-    public Boolean sameState(VirtualMachine vm, State state)
+    public Boolean sameState(final VirtualMachine vm, final State state)
     {
         String actual = vm.getState().toOVF();// OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);

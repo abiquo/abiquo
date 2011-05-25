@@ -34,7 +34,6 @@
     initialize="onInitialize()"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
-    implements="net.undf.abicloud.security.ISecurableComponent"
     xmlns:components="net.undf.abicloud.view.main.components.*"
     xmlns:utils="net.undf.abicloud.utils.*"
     alpha="0">
@@ -46,6 +45,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+			import net.undf.abicloud.vo.user.PrivilegeType;
 			import mx.binding.utils.ChangeWatcher;
 			import mx.binding.utils.BindingUtils;
 			import mx.utils.ObjectUtil;
@@ -64,10 +65,8 @@
 			import mx.resources.ResourceBundle;
 			import mx.resources.ResourceManager;
 			
-			import net.undf.abicloud.business.managers.AuthorizationManager;
 			import net.undf.abicloud.events.LoginEvent;
 			import net.undf.abicloud.model.AbiCloudModel;
-			import net.undf.abicloud.security.SecurableResource;
 			import net.undf.abicloud.view.general.AbiCloudAlert;
 			import net.undf.abicloud.view.main.components.HeaderButton;
 			import net.undf.abicloud.view.user.components.user.UserEdit;
@@ -98,8 +97,7 @@
 			private function onInitialize():void
 			{
 				this._isUserEditing = true;
-				
-				defineSecurableResources();
+
 				checkSecurableResources();
 				
 				//Creating Pop Up
@@ -127,10 +125,6 @@
 				
 			}           
 			
-			public function set authorizationManager(auth:AuthorizationManager):void
-			{
-				this._authorizationManager = auth;
-			}
 			
 			/**
 			 * Shows a Pop Up for user who has logged in can modify his data
@@ -165,40 +159,8 @@
 			
 			/////////////////////////////////////////////////////////////////////////////
 			//ISecurableComponent implementation
-			
-			//Securable Resources of this Securable Component
-			private var startButton:SecurableResource;
-			
-			private var infrastructureButton:SecurableResource;
-			
-			private var userButton:SecurableResource;
-			
-			private var virtualApplianceButton:SecurableResource;
-			
-			private var virtualImageButton:SecurableResource;
-			
-			private var meteringButton:SecurableResource;
-			
-			private var configurationButtonSecRes:SecurableResource;
-			
-			//Auhorization Manager that this Securable Component will use
-			private var _authorizationManager:AuthorizationManager = AbiCloudModel.getInstance().authorizationManager;
-			
-			public function defineSecurableResources():void
-			{
-				startButton = new SecurableResource("DASHBOARD_BUTTON", "MAIN");
-				userButton = new SecurableResource("USER_BUTTON", "MAIN");
-				infrastructureButton = new SecurableResource("INFRASTRUCTURE_BUTTON",
-					"MAIN");
-				virtualApplianceButton = new SecurableResource("VIRTUALAPP_BUTTON",
-					"MAIN");
-				virtualImageButton = new SecurableResource("VIRTUALIMAGE_BUTTON",
-					"MAIN");
-				meteringButton = new SecurableResource("METERING_BUTTON", "MAIN");
-				configurationButtonSecRes = new SecurableResource("CONFIG_BUTTON",
-					"MAIN");
-			}
-			
+	
+
 			
 			/**
 			 * Checks that the current user is authorized to use each SecurableResource, and if so, creates the
@@ -212,17 +174,15 @@
 				var menuOptions:ArrayCollection = new ArrayCollection();
 				var menuOption:HeaderButton;
 				
-				if (startButton.applyAuthorization(_authorizationManager))
-				{
-					//Making available this resource
-					menuOption = new HeaderButton(0);
-					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
-					menuOption.height = 61;
-					menuOption.label = ResourceManager.getInstance().getString("Main",
-						"HEADER_MENU_START");
-					menuOption.styleName = "MainHeaderStartButton";
-					menuOptions.addItem(menuOption);
-				}
+				//Making available this resource
+				menuOption = new HeaderButton(0);
+				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+				menuOption.height = 61;
+				menuOption.label = ResourceManager.getInstance().getString("Main",
+					"HEADER_MENU_START");
+				menuOption.styleName = "MainHeaderStartButton";
+				menuOptions.addItem(menuOption);
+				
 				
 				var o:Object = new Object();
 				o.source = "";
@@ -239,7 +199,7 @@
 				
 				menuOptions.addItem(headerSpacer);
 				
-				if (infrastructureButton.applyAuthorization(_authorizationManager))
+				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.PHYS_DC_ENUMERATE))
 				{
 					//Making available this resource
 					menuOption = new HeaderButton(1);
@@ -251,7 +211,7 @@
 					menuOptions.addItem(menuOption);
 				}
 				
-				if (virtualApplianceButton.applyAuthorization(_authorizationManager))
+				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VDC_ENUMERATE))
 				{
 					//Making available this resource
 					menuOption = new HeaderButton(2);
@@ -263,7 +223,7 @@
 					menuOptions.addItem(menuOption);
 				}
 				
-				if (virtualImageButton.applyAuthorization(_authorizationManager))
+				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_VIEW))
 				{
 					//Making available this resource
 					menuOption = new HeaderButton(3);
@@ -276,7 +236,7 @@
 				}
 				
 				
-				if (userButton.applyAuthorization(_authorizationManager))
+				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_VIEW))
 				{
 					//New feature
 					//Allow or deny access to 'users' section
@@ -302,17 +262,16 @@
 				}
 				
 				
-				if (meteringButton.applyAuthorization(_authorizationManager))
-				{
-					//Making available this resource
-					menuOption = new HeaderButton(5);
-					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
-					menuOption.height = 61;
-					menuOption.label = ResourceManager.getInstance().getString("Main",
-						"HEADER_MENU_METERING");
-					menuOption.styleName = "MainHeaderMeteringButton";
-					menuOptions.addItem(menuOption);
-				}
+				
+				//Making available this resource
+				menuOption = new HeaderButton(5);
+				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+				menuOption.height = 61;
+				menuOption.label = ResourceManager.getInstance().getString("Main",
+					"HEADER_MENU_METERING");
+				menuOption.styleName = "MainHeaderMeteringButton";
+				menuOptions.addItem(menuOption);
+				
 				
 				//Adding another separator
 				var headerSpacer2:Image = new Image();
@@ -322,7 +281,7 @@
 				
 				menuOptions.addItem(headerSpacer2);
 				
-				if (configurationButtonSecRes.applyAuthorization(_authorizationManager))
+				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.SYSCONFIG_VIEW))
 				{
 					//Making available this resource
 					configurationButton.visible = true;

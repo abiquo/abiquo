@@ -78,6 +78,9 @@
 	      
 	      <!-- Login -->
 	      <ref bean="loginResource" />
+	      
+	      <ref bean="privilegesResource"/>
+	      <ref bean="privilegeResource"/>
 	    </set>
 	  </property>
 	</bean>

@@ -99,7 +99,7 @@
                 color="{labelActiveColor(this._user.active)}"
                 text="{labelActiveText(this._user.active)}"/>
 
-            <mx:Label text="{this._user.role.shortDescription}"/>
+            <mx:Label text="{this._user.role.name}"/>
 
         </mx:VBox>
 

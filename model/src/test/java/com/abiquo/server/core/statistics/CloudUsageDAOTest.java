@@ -36,12 +36,13 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class CloudUsageDAOTest extends DefaultDAOTestBase<CloudUsageDAO, CloudUsage>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
     }
-    
+
     @AfterMethod
     protected void tearDown()
     {
@@ -49,7 +50,7 @@ public class CloudUsageDAOTest extends DefaultDAOTestBase<CloudUsageDAO, CloudUs
     }
 
     @Override
-    protected CloudUsageDAO createDao(EntityManager entityManager)
+    protected CloudUsageDAO createDao(final EntityManager entityManager)
     {
         return new CloudUsageDAO(entityManager);
     }

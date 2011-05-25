@@ -55,7 +55,7 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
      * @see com.abiquo.abiserver.persistence.dao.user.UserDAO#getUserByUserName(java.lang.String)
      */
     @Override
-    public UserHB getUserByUserName(String username)
+    public UserHB getUserByUserName(final String username)
     {
         return getUserByLoginAuth(username, AuthType.ABIQUO.name());
     }
@@ -82,7 +82,7 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
     }
 
     @Override
-    public String getEmailByUserName(String username)
+    public String getEmailByUserName(final String username)
     {
         return getEmailByUserName(username, AuthType.ABIQUO.name());
     }
@@ -99,20 +99,21 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<UserHB> getUsersByUserPrivileges(String privileges, Integer enterprise)
+    public List<UserHB> getUsersByUserPrivileges(final String privileges, final Integer enterprise)
     {
         List<UserHB> requestedUser = new ArrayList<UserHB>();
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query userQuery = session.getNamedQuery(GET_USERS_BY_PRIVILEGE);
-        userQuery.setString("security", privileges);
-        userQuery.setInteger("enterprise", enterprise);
+        // userQuery.setString("security", privileges);
+        // userQuery.setInteger("enterprise", enterprise);
         requestedUser = userQuery.list();
 
         return requestedUser;
     }
 
-    public UserHB findUserHBByName(String name)
+    @Override
+    public UserHB findUserHBByName(final String name)
     {
         return findUserHBByName(name, AuthType.ABIQUO.name());
     }
@@ -127,14 +128,14 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<UserHB> getUsersByUserRol(String role, Integer enterprise)
+    public List<UserHB> getUsersByUserRol(final String role, final Integer enterprise)
     {
         List<UserHB> requestedUser = new ArrayList<UserHB>();
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query userQuery = session.getNamedQuery(GET_USERS_BY_ROLE_DESC);
-        userQuery.setString("roleDescription", role);
-        userQuery.setInteger("enterprise", enterprise);
+        // userQuery.setString("roleDescription", role);
+        // userQuery.setInteger("enterprise", enterprise);
         requestedUser = userQuery.list();
 
         return requestedUser;

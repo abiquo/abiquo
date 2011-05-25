@@ -37,8 +37,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
@@ -85,17 +85,21 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
-    
+
+    @Autowired
+    ConfigService configService;
+
     public VirtualApplianceService()
     {
-    	
+
     }
-    
-    public VirtualApplianceService(EntityManager em)
+
+    public VirtualApplianceService(final EntityManager em)
     {
-    	this.repo = new VirtualDatacenterRep(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.remoteService = new RemoteServiceService(em);
+        this.repo = new VirtualDatacenterRep(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.remoteService = new RemoteServiceService(em);
+        this.configService = new ConfigService();
     }
 
     /**
@@ -104,7 +108,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
-    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(Integer vdcId)
+    public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
@@ -117,7 +121,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
-    public VirtualAppliance getVirtualAppliance(Integer vdcId, Integer vappId)
+    public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         if (vappId == 0)
         {
@@ -135,7 +139,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void startVirtualAppliance(Integer vdcId, Integer vappId)
+    public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
         Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
@@ -161,7 +165,7 @@ public class VirtualApplianceService extends DefaultApiService
                     remoteService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
-                long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+               long timeout = Long.valueOf(configService.getServerTimeout());
 
                 Resource resource =
                     ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
@@ -180,13 +184,13 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void addImage(Integer virtualDatacenterId, Integer virtualApplianceId,
-        VirtualImageDto image)
+    public void addImage(final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final VirtualImageDto image)
     {
 
     }
 
-    private void allocate(VirtualAppliance virtualAppliance)
+    private void allocate(final VirtualAppliance virtualAppliance)
     {
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
@@ -206,7 +210,8 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualAppliance createVirtualAppliance(Integer vdcId, VirtualApplianceDto dto)
+    public VirtualAppliance createVirtualAppliance(final Integer vdcId,
+        final VirtualApplianceDto dto)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
 
@@ -231,16 +236,17 @@ public class VirtualApplianceService extends DefaultApiService
 
         return vapp;
     }
-    
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualAppliance updateVirtualAppliance(Integer vdcId, Integer vappId, VirtualApplianceDto dto)
+    public VirtualAppliance updateVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final VirtualApplianceDto dto)
     {
-    	VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-    	
-    	vapp.setName(dto.getName());
-    	
-    	repo.updateVirtualAppliance(vapp);
-    	
-    	return vapp;
+        VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+
+        vapp.setName(dto.getName());
+
+        repo.updateVirtualAppliance(vapp);
+
+        return vapp;
     }
 }

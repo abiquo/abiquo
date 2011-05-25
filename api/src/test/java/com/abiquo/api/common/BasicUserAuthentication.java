@@ -18,28 +18,32 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.common;
 
-package net.undf.abicloud.security
+import org.springframework.security.GrantedAuthority;
+
+/**
+ * Mock to inject an authenticated user called `user` for service tests.
+ * 
+ * @author scastro
+ */
+public class BasicUserAuthentication extends MockAuthentication
 {
 
-    /**
-     * This interface defines how to make a Flex component securable
-     *
-     * A Securable component must define the resources that must be securable externally, for example from a server
-     *
-     * A Securable Component needs an Authorization Manager to check the authorization in its Securable Resources
-     **/
-
-
-    public interface ISecurableComponent
+    public BasicUserAuthentication()
     {
-
-        function defineSecurableResources():void
-
-
-        function checkSecurableResources():void
-
-
-        function makeUnavailable():void
+        super("basicUser");
     }
+
+    public BasicUserAuthentication(final String name)
+    {
+        super(name);
+    }
+
+    @Override
+    public GrantedAuthority[] getAuthorities()
+    {
+        return null;
+    }
+
 }

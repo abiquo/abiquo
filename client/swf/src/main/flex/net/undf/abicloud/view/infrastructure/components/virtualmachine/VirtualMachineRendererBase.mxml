@@ -28,10 +28,13 @@
     styleName="VirtualMachineRenderer"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
+    creationComplete="onCreationComplete()"
     xmlns:virtualmachine="net.undf.abicloud.view.networking.virtualmachine.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -64,10 +67,16 @@
             [Bindable]
             public var nodeName:String;
             
+            private function onCreationComplete():void{
+            	//Checking privilege
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
+            }
+
             [Bindable]
             private var _vncIconEnable:Boolean;
             
-
             [Bindable(event="virtualMachineChange")]
             public function get virtualMachine():VirtualMachine
             {
@@ -410,6 +419,7 @@
 
     <!-- Virtual Machine state -->
     <mx:HBox 
+    	id="vmActions"
         height="100%"
         left="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
@@ -500,7 +510,7 @@
             verticalGap="0"
             minWidth="275">
 
-            <mx:HBox width="100%">
+            <mx:HBox width="100%" id="infoBox">
                 <mx:Label 
 					styleName="VirtualMachineLabel1"
                     maxWidth="300" truncateToFit="true"
@@ -723,6 +733,7 @@
 
     <!-- Virtual Machine actions -->
     <mx:VBox 
+    	id="actionTool"
         width="57" height="100%"
         right="0"
         verticalAlign="middle"
