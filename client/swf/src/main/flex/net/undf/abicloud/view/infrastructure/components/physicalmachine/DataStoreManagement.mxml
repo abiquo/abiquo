@@ -54,6 +54,9 @@
 
             private var datastoreForm:DatastoreForm;
             
+            //Use to update a datastore
+            public var selectedDatastore:Datastore;
+            
             [Bindable]
             private var _editableButton:Boolean;
 
@@ -90,16 +93,6 @@
             private function sharedColumnLabelFunction(item:Object, column:DataGridColumn):String
             {
                 if (Datastore(item).shared)
-                    return ResourceManager.getInstance().getString('Infrastructure',
-                                                                   'LABEL_YES');
-                else
-                    return ResourceManager.getInstance().getString('Infrastructure',
-                                                                   'LABEL_NO');
-            }
-
-            private function enabledColumnLabelFunction(item:Object, column:DataGridColumn):String
-            {
-                if (Datastore(item).enabled)
                     return ResourceManager.getInstance().getString('Infrastructure',
                                                                    'LABEL_YES');
                 else
@@ -193,17 +186,25 @@
                 closeForm();
             }
 
-            private function editDatastore(event:Event = null):void
+            public function editDatastore(event:Event = null):void
             {
+            	if(event){
+            		selectedDatastore = datastoreForm.datastoreyCopy;
+            	}
+            	
+                //On Physical Machine Creation
                 if (_physicalMachine.id == 0)
                 {
                     //Just assign the new values to the existing Datastore
-                    var datastoreEdited:Datastore = datastoreForm.datastore;
+                    if(event){
+	            		var datastoreEdited:Datastore = datastoreForm.datastore;
+	            	}
+                    
                 }
-                else
+                else //On Physical Machine Edition
                 {
                     var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_DATASTORE);
-                    infrastructureEvent.datastore = datastoreForm.datastoreyCopy;
+                    infrastructureEvent.datastore = selectedDatastore;
                     infrastructureEvent.infrastructureElement = _physicalMachine;
                     dispatchEvent(infrastructureEvent);
                 }
@@ -269,9 +270,27 @@
                 headerText="@Resource(bundle='Infrastructure', key='LABEL_USED')"/>
             <mx:DataGridColumn id="enabledColumn"
                 width="60"
-                labelFunction="enabledColumnLabelFunction"
                 dataField="enabled"
-                headerText="@Resource(bundle='Infrastructure', key='LABEL_ENABLED')"/>
+                headerText="@Resource(bundle='Infrastructure', key='LABEL_ENABLED')">
+            	<mx:itemRenderer>
+            		<mx:Component>            			
+            			<mx:HBox width="100%" horizontalAlign="center">
+	            			<mx:Script>
+	            				<![CDATA[
+	            					import mx.controls.CheckBox;
+	            					import net.undf.abicloud.vo.infrastructure.Datastore;
+	            					private function enableDatastore(event:Event):void{
+	            						Datastore(data).enabled = CheckBox(event.currentTarget).selected;
+	            						DataStoreManagement(parentDocument).selectedDatastore = data as Datastore;
+	            						DataStoreManagement(parentDocument).editDatastore();
+	            					}
+	            				]]>
+	            			</mx:Script>
+            				<mx:CheckBox selected="{Datastore(data).enabled}" click="enableDatastore(event)"/>
+            			</mx:HBox>
+            		</mx:Component>
+            	</mx:itemRenderer>
+            </mx:DataGridColumn>
         </mx:columns>
     </mx:DataGrid>
 
