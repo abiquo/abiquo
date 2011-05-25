@@ -13,6 +13,7 @@
     <!--  responses                           -->
     <!--                                      -->
     <xs:element name="Host" type="nc:HostDto" />
+    <xs:element name="Hosts" type="nc:HostsDto" />
     <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
     <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
     <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
@@ -41,6 +42,17 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="HostsDto">
+    	<xs:annotation>
+    		<xs:documentation>
+    			Wrapper class to get a list of Hosts.
+    		</xs:documentation>
+    	</xs:annotation>
+    		<xs:sequence>
+    		    <xs:element name="host" type="nc:HostDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+    		</xs:sequence>
+    </xs:complexType>
+    
     <xs:complexType name="VirtualSystemDto">
         <xs:complexContent>
             <xs:extension base="nc:ComputerSystemType" >
