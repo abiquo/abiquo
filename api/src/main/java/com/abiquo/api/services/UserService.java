@@ -39,7 +39,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.RoleResource;
@@ -64,6 +66,9 @@ public class UserService extends DefaultApiService
     @Autowired
     SecurityService securityService;
 
+    @Autowired
+    ConfigService configService;
+
     public UserService()
     {
 
@@ -74,6 +79,7 @@ public class UserService extends DefaultApiService
     {
         repo = new EnterpriseRep(em);
         securityService = new SecurityService();
+        configService = new ConfigService();
     }
 
     /**
@@ -251,15 +257,45 @@ public class UserService extends DefaultApiService
             addValidationErrors(APIError.EMAIL_IS_INVALID);
             flushErrors();
         }
+
+        String authMode = configService.getSecurityMode();
         if (user.searchLink(RoleResource.ROLE) != null)
         {
-            old.setRole(findRole(user));
+
+            Role newRole = findRole(user);
+            if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
+            {
+                if (!old.getRole().getId().equals(newRole.getId()))
+                {
+
+                    // In ldap mode it is not possible to edit user's role
+                    throw new ConflictException(APIError.NOT_EDIT_USER_ROLE_LDAP_MODE);
+                }
+            }
+            old.setRole(newRole);
         }
+
+        Enterprise newEnt = null;
+        if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
+        {
+            newEnt = findEnterprise(getEnterpriseID(user));
+        }
+        if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
+        {
+            if ((old.getEnterprise() == null && newEnt != null)
+                || (old.getEnterprise() != null && newEnt == null)
+                || (!old.getEnterprise().getId().equals(newEnt.getId())))
+            {
+                // In ldap mode it is not possible to edit user's enterprise
+                throw new ConflictException(APIError.NOT_EDIT_USER_ENTERPRISE_LDAP_MODE);
+            }
+        }
+
         if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
             {
-                old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+                old.setEnterprise(newEnt);
             }
         }
         else if (securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
@@ -268,7 +304,7 @@ public class UserService extends DefaultApiService
             {
                 if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
                 {
-                    old.setEnterprise(findEnterprise(getEnterpriseID(user)));
+                    old.setEnterprise(newEnt);
                 }
             }
         }
