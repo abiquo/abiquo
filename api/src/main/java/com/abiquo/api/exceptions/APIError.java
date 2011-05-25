@@ -153,7 +153,9 @@ public enum APIError
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
         "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
-        "In Ldap mode can not create user"),
+        "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In Ldap mode can not modify user's enterprise"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
