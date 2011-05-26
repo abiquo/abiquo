@@ -95,6 +95,9 @@
                     <plugin>
                         <groupId>org.jvnet.jaxb2.maven2</groupId>
                         <artifactId>maven-jaxb2-plugin</artifactId>
+			<configuration>
+				<strict>false</strict>
+			</configuration>
                         <executions>
                             <execution>
                                 <goals>
