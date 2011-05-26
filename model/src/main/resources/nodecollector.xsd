@@ -260,6 +260,8 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="managed" />
             <xs:enumeration value="not_managed" />
+            <xs:enumeration value="provisioned" />
+            <xs:enumeration value="stopped" />
         </xs:restriction>
     </xs:simpleType>
 
