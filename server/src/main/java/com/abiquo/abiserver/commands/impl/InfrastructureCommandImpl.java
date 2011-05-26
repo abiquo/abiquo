@@ -1390,6 +1390,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
+            physicalMachineHb.setIpmiIp(pm.getIpmiIp());
+            physicalMachineHb.setIpmiPort(pm.getIpmiPort());
+            physicalMachineHb.setIpmiUser(pm.getIpmiUser());
+            physicalMachineHb.setIpmiPassword(pm.getIpmiPassword());
 
             // Updating virtual machines
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
