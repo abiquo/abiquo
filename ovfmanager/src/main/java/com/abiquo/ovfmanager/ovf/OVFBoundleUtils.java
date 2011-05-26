@@ -26,6 +26,10 @@ import org.dmtf.schemas.ovf.envelope._1.StringsType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 
+/**
+ * unused
+ * */
+@Deprecated
 public class OVFBoundleUtils
 {
     
@@ -39,7 +43,7 @@ public class OVFBoundleUtils
             throw new RequiredAttributeException("Lang for Strings");
         }
         
-        strings.setLang(lang);      // TODO from xml:lang namespace creates an enumeration ?¿?
+        // strings.setLang(lang);      // TODO from xml:lang namespace creates an enumeration ?¿?
         strings.setFileRef(fileRef); // TODO file exist ???
         
         return strings;

@@ -308,6 +308,15 @@ public class XenServerMachine extends AbsVirtualMachine
 
             try
             {
+                // Reconfigure CPU
+                if (newConfiguration.isCpu_number_set())
+                {
+                    LOGGER.info("Reconfiguring CPU for virtual machine " + config.getMachineName());
+
+                    // Virtual Machine will be stopped, so use this methods to set cpu number
+                    setCPU(vm, Long.valueOf(newConfiguration.getCpuNumber()));
+                }
+
                 // Reconfigure Memory
                 if (newConfiguration.isRam_set())
                 {
@@ -316,16 +325,6 @@ public class XenServerMachine extends AbsVirtualMachine
 
                     // Virtual Machine will be stopped, so use this method to set memory
                     setMemory(vm, newConfiguration.getMemoryRAM());
-                }
-
-                // Reconfigure CPU
-                if (newConfiguration.isCpu_number_set())
-                {
-                    LOGGER.info("Reconfiguring CPU for virtual machine " + config.getMachineName());
-
-                    // Virtual Machine will be stopped, so use this methods to set cpu number
-                    vm.setVCPUsAtStartup(hypervisor.getConn(), Long.valueOf(newConfiguration
-                        .getCpuNumber()));
                 }
 
                 // Reconfigure disks
@@ -566,7 +565,6 @@ public class XenServerMachine extends AbsVirtualMachine
         vm.powerStateReset(hypervisor.getConn()); // Necessary to reset the allowed operations
         vm.setNameDescription(hypervisor.getConn(), DEFAULT_MACHINE_DESCRIPTION);
 
-        // TODO: Verify this to force the preferred host
         Host host = hypervisor.getHost();
         vm.setAffinity(hypervisor.getConn(), host);
 
@@ -587,8 +585,8 @@ public class XenServerMachine extends AbsVirtualMachine
     protected void configureBasicResources(final VM vm) throws Exception
     {
         // CPU number and Memory size
+        setCPU(vm, Long.valueOf(config.getCpuNumber()));
         setMemory(vm, config.getMemoryRAM());
-        vm.setVCPUsAtStartup(hypervisor.getConn(), Long.valueOf(config.getCpuNumber()));
 
         // Default behaviors
         vm.setActionsAfterCrash(hypervisor.getConn(), OnCrashBehaviour.DESTROY);
@@ -596,6 +594,37 @@ public class XenServerMachine extends AbsVirtualMachine
         // Boot parameters: boot from disk (c = disk, d = CD/DVD)
         vm.removeFromHVMBootParams(hypervisor.getConn(), "order");
         vm.addToHVMBootParams(hypervisor.getConn(), "order", "c");
+    }
+
+    /**
+     * Sets the virtual CPUs for the given {@link VM}.
+     * 
+     * @param vm The Virtual Machine.
+     * @param cpu The amount of virtual CPUs.
+     * @throws Exception If an error occurs.
+     */
+    protected void setCPU(final VM vm, final long cpuNumber) throws Exception
+    {
+        VM.Record vmRecord = vm.getRecord(hypervisor.getConn());
+
+        LOGGER.debug("Setting CPU number for VM {} to {}. Current CPU values are:",
+            vmRecord.nameLabel, cpuNumber);
+
+        LOGGER.debug(" - CPUs at startup: {}", vmRecord.VCPUsAtStartup);
+        LOGGER.debug(" - CPUs max: {}", vmRecord.VCPUsMax);
+
+        // CPU number must always satisfy: 0 < CPU at startup <= CPU max
+
+        if (cpuNumber > vmRecord.VCPUsMax)
+        {
+            vm.setVCPUsMax(hypervisor.getConn(), cpuNumber);
+            vm.setVCPUsAtStartup(hypervisor.getConn(), cpuNumber);
+        }
+        else
+        {
+            vm.setVCPUsAtStartup(hypervisor.getConn(), cpuNumber);
+            vm.setVCPUsMax(hypervisor.getConn(), cpuNumber);
+        }
     }
 
     /**
