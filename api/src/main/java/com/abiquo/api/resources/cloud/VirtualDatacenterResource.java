@@ -116,11 +116,11 @@ public class VirtualDatacenterResource extends AbstractResource
 
         List<IpPoolManagement> all =
             ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
-
+        /*
         if (all == null || all.isEmpty())
         {
             throw new ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS);
-        }
+        }*/
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 

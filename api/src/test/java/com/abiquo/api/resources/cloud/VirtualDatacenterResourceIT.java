@@ -207,7 +207,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
      * ======= Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
      */
     @Test
-    public void getVirtualDatacenterRaises409ErrorWhenHasVLANsWithoutIPs()
+    public void getVirtualDatacenterEmptyListWhenHasVLANsWithoutIPs()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
@@ -219,7 +219,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(validURI);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
+        assertEquals(200, response.getStatusCode());
     }
 
     /**
