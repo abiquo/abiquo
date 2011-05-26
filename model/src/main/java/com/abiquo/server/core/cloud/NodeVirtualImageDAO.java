@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
@@ -28,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository("jpaNodeVirtualImageDAO")
 public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImage>
@@ -37,26 +40,47 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         super(NodeVirtualImage.class);
     }
 
-    public NodeVirtualImageDAO(EntityManager entityManager)
+    public NodeVirtualImageDAO(final EntityManager entityManager)
     {
         super(NodeVirtualImage.class, entityManager);
     }
 
-    private Criteria sameVirtualMachine(VirtualMachine vmachine)
+    private Criteria sameVirtualMachine(final VirtualMachine vmachine)
     {
         Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY);
         crit.add(Restrictions.eq(VirtualMachine.ID_PROPERTY, vmachine.getId()));
         return crit;
     }
 
-    public VirtualAppliance findVirtualAppliance(VirtualMachine vmachine)
+    public VirtualAppliance findVirtualAppliance(final VirtualMachine vmachine)
     {
         return findByVirtualMachine(vmachine).getVirtualAppliance();
     }
 
-    public NodeVirtualImage findByVirtualMachine(VirtualMachine vmachine)
+    public NodeVirtualImage findByVirtualMachine(final VirtualMachine vmachine)
     {
         Criteria criteria = sameVirtualMachine(vmachine);
         return (NodeVirtualImage) criteria.uniqueResult();
     }
+
+    //
+    private Criteria sameEnterprise(final Enterprise enterprise)
+    {
+        Criteria crit =
+            createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY,
+                VirtualMachine.ENTERPRISE_PROPERTY);
+        crit.add(Restrictions.eq(Enterprise.ID_PROPERTY, enterprise.getId()));
+        return crit;
+    }
+
+    // select nvi.* from nodevirtualimage nvi where nvi.idVM in
+    // (Select vm.idVM from virtualmachine vm where vm.idEnterprise=entID);
+    public List<NodeVirtualImage> findByEnterprise(final Enterprise enterprise)
+    {
+        Criteria criteria = sameEnterprise(enterprise);
+        List<NodeVirtualImage> result = getResultList(criteria);
+        return result;
+
+    }
+
 }

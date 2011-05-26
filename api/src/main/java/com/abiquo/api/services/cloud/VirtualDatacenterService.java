@@ -33,11 +33,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -48,9 +48,6 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -75,7 +72,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
-    
+
     @Autowired
     PrivateNetworkService networkService;
 
@@ -241,8 +238,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
@@ -301,6 +301,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter)
     {
         return datacenterRepo.findHypervisors(datacenter).contains(type);
+    }
+
+    public Collection<NodeVirtualImage> getNodeVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return repo.findNodeVirtualImageByEnterprise(enterprise);
     }
 
 }

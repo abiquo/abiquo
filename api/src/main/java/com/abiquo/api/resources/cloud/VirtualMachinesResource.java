@@ -125,10 +125,24 @@ public class VirtualMachinesResource extends AbstractResource
     {
         VirtualMachineDto vmDto =
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, v);
-        // TODO ALESSIA cambiar VirtualMachineDto idState por state + ahora cojer la string de la
-        // enum, ej 0
-        // == running
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId()));
+
+        return vmDto;
+    }
+
+    public static VirtualMachineDto createCloudAdminTransferObject(final VirtualMachine vm,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachineDto vmDto =
+            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+        Hypervisor hypervisor = vm.getHypervisor();
+        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
+        Rack rack = (machine == null) ? null : machine.getRack();
+
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
+            (rack == null) ? null : rack.getDatacenter().getId(),
+            (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(), vm
+                .getEnterprise().getId(), vm.getUser().getId()));
 
         return vmDto;
     }
