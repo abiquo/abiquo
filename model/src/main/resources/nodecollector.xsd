@@ -86,6 +86,17 @@
             <xs:enumeration value="xenserver" />
         </xs:restriction>
     </xs:simpleType>
+    
+    <xs:simpleType name="RackEnumTypeDto">
+    	<xs:annotation>
+    		<xs:documentation>
+    			Parametrizes the type of Rack
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:enumeration value="UCS" />
+    	</xs:restriction>
+    </xs:simpleType>
 
 
     <xs:complexType name="ErrorResponseDto">
