@@ -85,11 +85,13 @@ public enum EventType implements Serializable
         413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
 
     // Image-related events
-    VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,
-        "VI_ADD", "Virtual Image added to the Appliance Library"), VI_DELETE(502, "VI_DELETE",
-        "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
-        "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
-        "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
+
+    VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), 
+    VI_ADD(501, "VI_ADD", "Virtual Image added to the Appliance Library"), 
+    VI_DELETE(502, "VI_DELETE", "Virtual Image deleted from the Appliance Library"), 
+    DISK_CONVERSION(503, "DISK_CONVERSION", "Disk conversion started"), 
+    RAW_IMPORT_CONVERSION(504, "RAW_IMPORT_CONVERSION", "Raw import conversion started"), 
+
 
     // Stateful related events
     STATEFUL_PROCESS_START(600, "PERSISTENT_PROCESS_START", "A Persistent conversion process has started"), 
@@ -102,11 +104,12 @@ public enum EventType implements Serializable
     STATEFUL_INITIATOR_ADDED(607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
 
     // License related events
-    LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), LICENSE_REMOVED(
-        701, "LICENSE_REMOVED", "A license has been removed"), LICENSE_CORRUPT(702,
-        "LICENSE_CORRUPT", "The license is corrupted and cannot be used"), LICENSE_EXCEEDED(703,
-        "LICENSE_EXCEEDED", "Current license capabilities had been exceeded"), LICENSE_CONFIGURATION(
-        704, "LICENSE_CONFIGURATION", "An unexpected error occured in license managing services"),
+    LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), 
+    LICENSE_REMOVED(701, "LICENSE_REMOVED", "A license has been removed"), 
+    LICENSE_CORRUPT(702, "LICENSE_CORRUPT", "The license is corrupted and cannot be used"), 
+    LICENSE_EXCEEDED(703, "LICENSE_EXCEEDED", "Current license capabilities had been exceeded"), 
+    LICENSE_CONFIGURATION(704, "LICENSE_CONFIGURATION", "An unexpected error occurred in license managing services"),
+
 
     // Networking events
     VLAN_CREATED(800, "VLAN_CREATED", "New VLAN created"), VLAN_EDITED(801, "VLAN_EDITED",
@@ -132,6 +135,7 @@ public enum EventType implements Serializable
         "HARD_LIMIT_EXCEEDED", "Hard limits exceeded"),
 
     // Client-related events
+
     THEME_UPDATE(1100, "THEME_UPDATE", "Theme updated"), UPDATE_PROPERTIES(1101,
         "UPDATE_PROPERTIES", "Client properties updated"),
 
@@ -145,7 +149,11 @@ public enum EventType implements Serializable
         "ROLE_LDAP_MODIFIED", "Role ldap updated"), ROLE_LDAP_DELETED(1302, "ROLE_LDAP_DELETED",
         "Role ldap deleted"),
 
-    ;
+ 
+    // Allocation rules
+    ALLOCATION_RULES_ADDED(1400, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"),
+    ALLOCATION_RULES_REMOVED(1401, "ALLOCATION_RULE_REMOVED", "Allocation rule removed");
+    
 
     private final int event;
 
