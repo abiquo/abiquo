@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
@@ -127,6 +126,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
 
         old.setName(dto.getName());
+        old.setDescription(dto.getDescription());
+        old.setCpu(dto.getCpu());
+        old.setRam(dto.getRam());
+        old.setPassword(dto.getPassword());
 
         updateVirtualMachine(old);
 
@@ -167,6 +170,7 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Block the virtual by changing its state to IN_PROGRESS
+     * 
      * @param vm VirtualMachine to be blocked
      */
     public void blockVirtualMachine(VirtualMachine vm)
@@ -182,9 +186,10 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Changes the state of the VirtualMachine to the state passed
+     * 
      * @param vappId Virtual Appliance Id
      * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change 
+     * @param state The state to which change
      * @throws Exception
      */
     public void changeVirtualMachineState(Integer vappId, Integer vdcId, State state)
