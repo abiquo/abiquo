@@ -212,9 +212,9 @@ public class VirtualDisk
             repository = location.substring(1, indexFinRepository);
             imagePath = location.substring(indexFinRepository + 1, location.length());
 
-            int indexRepositoryPath = location.indexOf(":"); // This is not valid for Hyper-V : check for repository == null is required
+            int indexRepositoryPath = location.indexOf(":"); // This is not valid for imported Hyper-V machines : repository == "null" in this case
 
-            if (indexRepositoryPath != -1 && repository != null) // FIXES call when using an imported VMachine
+            if (indexRepositoryPath != -1 && repository.length() > indexRepositoryPath) // FIXES call when using an imported VMachine -> Windows unit i.e. C:\ is detected
             {
                 repository = repository.substring(indexRepositoryPath, repository.length());
                 logger.debug("Using imagePath [{}] at repository [{}]", imagePath, repository);
