@@ -492,8 +492,8 @@
         	id="vdcFormItem"
         	direction="horizontal"
             label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"            
-            visible="{this._vdcAllowed}"
-            includeInLayout="{this._vdcAllowed}">
+            visible="{!this._vdcAllowed}"
+            includeInLayout="{!this._vdcAllowed}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">
