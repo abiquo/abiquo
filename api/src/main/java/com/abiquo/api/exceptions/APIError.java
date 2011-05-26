@@ -44,13 +44,15 @@ public enum APIError
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4", "Not enough permissions to perform this action"),
-        INVALID_CREDENTIALS("GEN-5", "Invalid credentials"),
-        
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
+        "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
+        "Invalid credentials"),
+
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
-        "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
+        "GEN-7", "Unexpected error"), GENERIC_OPERATION_ERROR("GEN-8",
+        "The operation could not be performed. Please, contact the Administrator."), NOT_ENOUGH_PRIVILEGES(
+        "GEN-9", "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
         "The paramter ID is different from the Entity ID"),
 
     // DATACENTER
@@ -230,7 +232,8 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR("NODECOLLECTOR-1","Nodecollector has raised an error"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
+        "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
@@ -254,7 +257,7 @@ public enum APIError
     String message;
 
     String cause;
-    
+
     private APIError(final String code, final String message)
     {
         this.code = code;
@@ -271,7 +274,7 @@ public enum APIError
         return this.message;
     }
 
-    public void addCause(String cause)
+    public void addCause(final String cause)
     {
         this.cause = cause;
     }
