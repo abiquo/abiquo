@@ -127,8 +127,10 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         finalQuery.setParameter("datacenter_id", datacenter.getId());
         Integer totalResults = finalQuery.list().size();
 
+        Integer Start = firstElem;
+        if(totalResults < firstElem) Start = totalResults-numElem;
         // Get the list of elements
-        finalQuery.setFirstResult(firstElem);
+        finalQuery.setFirstResult(Start);
         finalQuery.setMaxResults(numElem);
 
         PagedList<Enterprise> entList = new PagedList<Enterprise>(finalQuery.list());

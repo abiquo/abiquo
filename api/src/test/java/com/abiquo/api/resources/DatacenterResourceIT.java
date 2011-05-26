@@ -190,7 +190,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String uri0 = resolveEnterprisesByDatacenterURI(datacenterId);
         String uri1 = uri0 + "?network=true";
-        String uri2 = uri0 + "?network=true&startwith=2";
+        String uri2 = uri0 + "?network=true&startwith=2&limit=1";
         ClientResponse response0 = get(uri0);
         ClientResponse response1 = get(uri1);
         ClientResponse response2 = get(uri2);
@@ -204,7 +204,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(enterprises0);
         assertEquals(enterprises0.getCollection().size(), 2);
         assertEquals(enterprises1.getCollection().size(), 1);
-        assertEquals(enterprises2.getCollection().size(), 0);
+        assertEquals(enterprises2.getCollection().size(), 1);
         assertEquals(enterprises1.getCollection().get(0).getName(),vdc.getEnterprise().getName());
     }
 
