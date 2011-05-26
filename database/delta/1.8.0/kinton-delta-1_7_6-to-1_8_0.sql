@@ -1,3 +1,5 @@
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
+
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`

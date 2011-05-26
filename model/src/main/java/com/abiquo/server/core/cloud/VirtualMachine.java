@@ -49,20 +49,19 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP =
-        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
-            + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
+        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
 
-    public static final String BY_DC =
-        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-            + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC = "SELECT vm "
+        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+        + " AND pm.datacenter.id = :datacenterId";
 
     public static final int MANAGED = 1;
 
@@ -193,7 +192,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
-    //private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    // private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String DESCRIPTION_COLUMN = "Description";
 
@@ -202,7 +201,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Required(value = DESCRIPTION_REQUIRED)
     @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
-    //@LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getDescription()
     {
         return this.description;
@@ -469,6 +468,34 @@ public class VirtualMachine extends DefaultEntityBase
     public void setState(State state)
     {
         this.state = state;
+    }
+
+    public final static String PASSWORD_PROPERTY = "password";
+
+    private final static boolean PASSWORD_REQUIRED = false;
+
+    private final static int PASSWORD_LENGTH_MIN = 0;
+
+    private final static int PASSWORD_LENGTH_MAX = 255;
+
+    private final static boolean PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String PASSWORD_COLUMN = "password";
+
+    @Column(name = PASSWORD_COLUMN, nullable = !PASSWORD_REQUIRED, length = PASSWORD_LENGTH_MAX)
+    private String password;
+
+    @Required(value = PASSWORD_REQUIRED)
+    @Length(min = PASSWORD_LENGTH_MIN, max = PASSWORD_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getPassword()
+    {
+        return this.password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 
     public VirtualMachine(String name, Enterprise enterprise, User user, Hypervisor hypervisor,
