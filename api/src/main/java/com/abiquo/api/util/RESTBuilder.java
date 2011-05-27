@@ -473,14 +473,22 @@ public class RESTBuilder implements IRESTBuilder
                 .add(builder.buildRestLink(MachineResource.class, MachineResource.MACHINE, params));
         }
 
-        params = new HashMap<String, String>();
-        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
-        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
-            params));
+        if (enterpriseId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params));
 
-        params = new HashMap<String, String>();
-        params.put(UserResource.USER, userId.toString());
-        links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+        }
+
+        if (userId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(UserResource.USER, userId.toString());
+            links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+
+        }
 
         return links;
     }

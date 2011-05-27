@@ -44,6 +44,9 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 
@@ -92,21 +95,34 @@ public class VirtualMachinesResource extends AbstractResource
         VirtualMachinesDto machines = new VirtualMachinesDto();
         for (VirtualMachine vm : vms)
         {
-            VirtualMachineDto vmDto =
-                ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
-
-            Hypervisor hypervisor = vm.getHypervisor();
-            Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
-            Rack rack = (machine == null) ? null : machine.getRack();
-
-            vmDto.addLinks(restBuilder.buildVirtualMachineAdminLinks((rack == null) ? null : rack
-                .getDatacenter().getId(), (rack == null) ? null : rack.getId(), (machine == null)
-                ? null : machine.getId(), vm.getEnterprise().getId(), vm.getUser().getId()));
-
-            machines.add(vmDto);
+            machines.add(createAdminTransferObjects(vm, restBuilder));
         }
 
         return machines;
+    }
+
+    public static VirtualMachineDto createAdminTransferObjects(final VirtualMachine vm,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+
+        VirtualMachineDto vmDto =
+            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+
+        Hypervisor hypervisor = vm.getHypervisor();
+        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
+        Rack rack = (machine == null) ? null : machine.getRack();
+        Datacenter dc = (rack == null) ? null : rack.getDatacenter();
+
+        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
+        User user = (vm.getUser() == null) ? null : vm.getUser();
+
+        vmDto
+            .addLinks(restBuilder.buildVirtualMachineAdminLinks((dc == null) ? null : dc.getId(),
+                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
+                (enterprise == null) ? null : enterprise.getId(),
+                (user == null) ? null : user.getId()));
+
+        return vmDto;
     }
 
     /**
@@ -139,11 +155,17 @@ public class VirtualMachinesResource extends AbstractResource
         Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
         Rack rack = (machine == null) ? null : machine.getRack();
 
-        vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
-            (rack == null) ? null : rack.getDatacenter().getId(),
-            (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(), vm
-                .getEnterprise().getId(), vm.getUser().getId()));
+        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
+        User user = (vm.getUser() == null) ? null : vm.getUser();
+
+        vmDto
+            .addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
+                (rack == null) ? null : rack.getDatacenter().getId(),
+                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
+                (enterprise == null) ? null : enterprise.getId(),
+                (user == null) ? null : user.getId()));
 
         return vmDto;
     }
+
 }

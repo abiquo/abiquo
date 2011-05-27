@@ -39,13 +39,15 @@ import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -59,6 +61,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
     private Machine validMachine;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -72,8 +75,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         validMachine = machine;
         validMachineUri =
-            resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(), machine
-                .getId());
+            resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(),
+                machine.getId());
     }
 
     @Test
@@ -120,11 +123,13 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void machineContainsLink() throws ClientWebException
     {
         assertLinkExist(getValidMachine(), validMachineUri, "edit");
-        assertLinkExist(getValidMachine(), resolveRackURI(validMachine.getDatacenter().getId(),
-            validMachine.getRack().getId()), "rack");
-        assertLinkExist(getValidMachine(), resolveDatastoresURI(validMachine.getDatacenter()
-            .getId(), validMachine.getRack().getId(), validMachine.getId()),
-            DatastoresResource.DATASTORES_PATH);
+        assertLinkExist(getValidMachine(),
+            resolveRackURI(validMachine.getDatacenter().getId(), validMachine.getRack().getId()),
+            "rack");
+        assertLinkExist(
+            getValidMachine(),
+            resolveDatastoresURI(validMachine.getDatacenter().getId(), validMachine.getRack()
+                .getId(), validMachine.getId()), DatastoresResource.DATASTORES_PATH);
     }
 
     @Test
@@ -136,8 +141,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         machine.setName("dummy_name");
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
         assertEquals(200, response.getStatusCode());
 
         MachineDto modified = response.getEntity(MachineDto.class);
@@ -153,8 +158,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(resolveMachineURI(1, 1, 123));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
     }
@@ -168,12 +173,12 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         machine.setName("dummy_name");
 
         Resource resource =
-            client.resource(resolveMachineURI(123, validMachine.getRack().getId(), validMachine
-                .getId()));
+            client.resource(resolveMachineURI(123, validMachine.getRack().getId(),
+                validMachine.getId()));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
 
@@ -198,8 +203,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
                 validMachine.getId()));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
 
@@ -235,8 +240,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void removeMachineWrongDatacenter() throws ClientWebException
     {
         Resource resource =
-            client.resource(resolveMachineURI(1234, validMachine.getRack().getId(), validMachine
-                .getId()));
+            client.resource(resolveMachineURI(1234, validMachine.getRack().getId(),
+                validMachine.getId()));
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
         assertEquals(404, response.getStatusCode());
@@ -272,11 +277,18 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineActionVirtualMachines()
     {
+
         VirtualMachine vm = vmGenerator.createUniqueInstance();
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
         setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
             .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
             .getHypervisor().getMachine(), vm.getHypervisor(),
-            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm);
+            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm, vdc, vapp, nvi);
 
         Machine m = vm.getHypervisor().getMachine();
 
@@ -295,8 +307,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(vmDto, resolveEnterpriseURI(vm.getEnterprise().getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(vm.getEnterprise().getId(), vm.getUser().getId()),
             "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test
@@ -307,11 +319,24 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm2 = vmGenerator.createInstance(vm.getHypervisor());
         vm.setIdType(VirtualMachine.MANAGED);
 
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        VirtualDatacenter vdc2 =
+            vdcGenerator.createInstance(vm2.getHypervisor().getMachine().getDatacenter(),
+                vm2.getEnterprise());
+        VirtualAppliance vapp2 = vappGenerator.createInstance(vdc2);
+        NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp2, vm2);
+
         setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
             .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
             .getHypervisor().getMachine(), vm.getHypervisor(),
             vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm, vm2.getEnterprise(),
-            vm2.getUser().getRole(), vm2.getUser(), vm2.getVirtualImage(), vm2);
+            vm2.getUser().getRole(), vm2.getUser(), vm2.getVirtualImage(), vm2, vdc, vapp, nvi,
+            vdc2, vapp2, nvi2);
 
         Machine m = vm.getHypervisor().getMachine();
 
