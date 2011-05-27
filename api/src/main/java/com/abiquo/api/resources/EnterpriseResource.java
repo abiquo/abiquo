@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.List;
 
@@ -152,10 +153,10 @@ public class EnterpriseResource extends AbstractResource
     {
 
         // Set query Params by default if they are not informed
-
+        String filterwith = URLDecoder.decode(filter, "UTF-8");
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filter, orderBy,
-                desc_or_asc);
+            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filterwith,
+                orderBy, desc_or_asc);
 
         if (all == null)
         {

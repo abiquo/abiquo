@@ -24,6 +24,8 @@
  */
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,14 +85,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return result;
     }
-    
+
     @Override
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto)
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
+        VLANNetworkDto dto)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPrivateNetworksLink(vdcId);
         ClientResponse response = post(uri, dto);
-        
+
         if (response.getStatusCode() == 201)
         {
             VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
@@ -100,8 +103,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         else
         {
             populateErrors(response, result, "createPrivateVLANNetwork");
-        }       
-        
+        }
+
         return result;
     }
 
@@ -119,12 +122,22 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
-        if (!filterLike.isEmpty())
+        String filter = filterLike;
+        try
         {
-            buildRequest.append("&has=" + filterLike);
+            filter = URLEncoder.encode(filterLike, "UTF-8");
         }
+        catch (UnsupportedEncodingException e)
+        {
 
-        ClientResponse response = get(buildRequest.toString());
+        }
+        if (!filter.isEmpty())
+        {
+            buildRequest.append("&has=" + filter);
+        }
+        String request = buildRequest.toString();
+
+        ClientResponse response = get(request);
 
         if (response.getStatusCode() == 200)
         {
