@@ -25,12 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,7 @@ import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
@@ -70,6 +73,9 @@ public class DatacenterResource extends AbstractResource
     @Autowired
     IpAddressService ipService;
 
+    @Context
+    UriInfo uriInfo;
+
     @GET
     public DatacenterDto getDatacenter(@PathParam(DATACENTER) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -94,9 +100,9 @@ public class DatacenterResource extends AbstractResource
     @GET
     @Path(ENTERPRISES_PATH)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
-        @QueryParam(START_WITH) final Integer startwith, @QueryParam(NETWORK) Boolean network,
-        @QueryParam(LIMIT) final Integer limit, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(START_WITH) @Min(0) final Integer startwith,
+        @QueryParam(NETWORK) Boolean network, @QueryParam(LIMIT) @Min(0) final Integer limit,
+        @Context final IRESTBuilder restBuilder) throws Exception
 
     {
         Integer firstElem = (startwith == null) ? 0 : startwith;
@@ -114,6 +120,8 @@ public class DatacenterResource extends AbstractResource
             enterprisesDto.add(EnterpriseResource.createTransferObject(e, restBuilder));
         }
         enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
+        enterprisesDto.addLinks(buildEnterprisesLinks(uriInfo.getAbsolutePath().toString(),
+            (PagedList) enterprises, network,numElem));
         return enterprisesDto;
 
     }
@@ -161,5 +169,37 @@ public class DatacenterResource extends AbstractResource
         throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Datacenter.class, datacenter);
+    }
+
+    private List<RESTLink> buildEnterprisesLinks(final String Path, final PagedList< ? > list,
+        Boolean network, Integer numElem)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        links.add(new RESTLink("first", Path));
+
+        if (list.getCurrentElement() != 0)
+        {
+            Integer previous = list.getCurrentElement() - list.getPageSize();
+            previous = (previous < 0) ? 0 : previous;
+
+            links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
+                + AbstractResource.START_WITH + "=" + previous + '&' +AbstractResource.LIMIT +"=" + numElem ));
+        }
+        Integer next = list.getCurrentElement() + list.getPageSize();
+        if (next < list.getTotalResults())
+        {
+            links.add(new RESTLink("next", Path + "?" + NETWORK + "=" + network.toString() + '&'
+                + AbstractResource.START_WITH + "=" + next + '&' +AbstractResource.LIMIT +"=" + numElem ));
+        }
+
+        Integer last = list.getTotalResults() - list.getPageSize();
+        if (last < 0)
+        {
+            last = 0;
+        }
+        links.add(new RESTLink("last", Path + "?" + NETWORK + "=" + network.toString() + '&'
+            + AbstractResource.START_WITH + "=" + last + '&' +AbstractResource.LIMIT +"=" + numElem));
+        return links;
     }
 }
