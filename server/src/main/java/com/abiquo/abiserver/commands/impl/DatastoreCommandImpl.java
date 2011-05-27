@@ -152,7 +152,6 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
             dataHB.setEnabled(datastore.getEnabled());
             dataHB.setName(datastore.getName());
             dataHB.setSize(datastore.getSize());
-            dataHB.setShared(datastore.getShared());
             dataHB.setUsedSize(datastore.getUsedSize());
             dataHB.setDatastoreUUID(datastore.getDatastoreUUID());
             dataHB = dataDAO.makePersistent(dataHB);
