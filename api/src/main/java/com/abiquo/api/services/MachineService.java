@@ -67,7 +67,7 @@ public class MachineService extends DefaultApiService
     private VSMStub vsm;
 
     @Autowired
-    private RemoteServiceService remoteServiceService;
+    private InfrastructureService infrastructureService;
 
     @Autowired
     private VirtualMachineService virtualMachineService;
@@ -85,7 +85,7 @@ public class MachineService extends DefaultApiService
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VSMStubImpl();
-        remoteServiceService = new RemoteServiceService(em);
+        infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
     }
@@ -123,7 +123,7 @@ public class MachineService extends DefaultApiService
 
         // Monitoring machine
         RemoteService vsmRS =
-            remoteServiceService.getRemoteService(datacenter.getId(),
+            infrastructureService.getRemoteService(datacenter.getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
@@ -245,7 +245,7 @@ public class MachineService extends DefaultApiService
     {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
-            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
+            infrastructureService.getRemoteService(machine.getDatacenter().getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();

@@ -26,6 +26,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -41,6 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = Rack.TABLE_NAME, uniqueConstraints = {})
+@Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Table(appliesTo = Rack.TABLE_NAME, indexes = {})
 public class Rack extends DefaultEntityBase
 {

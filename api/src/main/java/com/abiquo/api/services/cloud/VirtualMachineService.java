@@ -34,10 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
@@ -68,7 +67,7 @@ public class VirtualMachineService extends DefaultApiService
     VirtualApplianceService vappService;
 
     @Autowired
-    RemoteServiceService remoteService;
+    InfrastructureService infrastructureService;
 
     @Autowired
     OVFGeneratorService ovfService;
@@ -82,6 +81,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(Hypervisor hypervisor)
@@ -198,7 +198,7 @@ public class VirtualMachineService extends DefaultApiService
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
         RemoteService vf =
-            remoteService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
+            infrastructureService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
 
         long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 

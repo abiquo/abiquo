@@ -38,9 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
@@ -81,7 +80,7 @@ public class VirtualApplianceService extends DefaultApiService
     OVFGeneratorService ovfService;
 
     @Autowired
-    RemoteServiceService remoteService;
+    InfrastructureService infrastructureService;
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
@@ -95,7 +94,7 @@ public class VirtualApplianceService extends DefaultApiService
     {
     	this.repo = new VirtualDatacenterRep(em);
     	this.vdcService = new VirtualDatacenterService(em);
-    	this.remoteService = new RemoteServiceService(em);
+    	this.infrastructureService = new InfrastructureService(em);
     }
 
     /**
@@ -154,11 +153,11 @@ public class VirtualApplianceService extends DefaultApiService
                 Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
                 RemoteService vsm =
-                    remoteService.getRemoteService(datacenter.getId(),
+                    infrastructureService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
                 RemoteService vf =
-                    remoteService.getRemoteService(datacenter.getId(),
+                    infrastructureService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
                 long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));

@@ -16,6 +16,7 @@
     <!-- physical infrastructure -->
     <orm:entity class="com.abiquo.server.core.infrastructure.Datacenter"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.Rack"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.UcsRack"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.Machine"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.RemoteService"></orm:entity> 
     <orm:entity class="com.abiquo.server.core.infrastructure.Datastore"></orm:entity>

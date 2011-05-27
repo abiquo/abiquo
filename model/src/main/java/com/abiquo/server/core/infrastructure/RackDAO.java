@@ -49,7 +49,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     {
         super(Rack.class, entityManager);
     }
-
+    
     private static Criterion sameDatacenter(Datacenter datacenter)
     {
         assert datacenter != null;
