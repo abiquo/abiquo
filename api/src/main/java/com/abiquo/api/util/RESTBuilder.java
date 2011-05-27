@@ -518,14 +518,22 @@ public class RESTBuilder implements IRESTBuilder
                 .add(builder.buildRestLink(MachineResource.class, MachineResource.MACHINE, params));
         }
 
-        params = new HashMap<String, String>();
-        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
-        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
-            params));
+        if (enterpriseId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params));
 
-        params = new HashMap<String, String>();
-        params.put(UserResource.USER, userId.toString());
-        links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+        }
+
+        if (userId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(UserResource.USER, userId.toString());
+            links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+
+        }
 
         return links;
     }
@@ -585,6 +593,25 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE,
             "pause", params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer enterpriseId, final Integer userId)
+    {
+
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.addAll(buildVirtualMachineAdminLinks(datacenterId, rackId, machineId, enterpriseId,
+            userId));
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId));
 
         return links;
     }

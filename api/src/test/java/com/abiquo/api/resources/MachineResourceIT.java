@@ -48,10 +48,12 @@ import org.testng.annotations.Test;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
-import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -62,6 +64,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
     private Machine validMachine;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -277,7 +280,13 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineActionVirtualMachines()
     {
+
         VirtualMachine vm = vmGenerator.createUniqueInstance();
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -295,6 +304,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
 
@@ -327,6 +339,18 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm2 = vmGenerator.createInstance(vm.getHypervisor());
         vm.setIdType(VirtualMachine.MANAGED);
 
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        VirtualDatacenter vdc2 =
+            vdcGenerator.createInstance(vm2.getHypervisor().getMachine().getDatacenter(),
+                vm2.getEnterprise());
+        VirtualAppliance vapp2 = vappGenerator.createInstance(vdc2);
+        NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp2, vm2);
+
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -352,6 +376,12 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(vm2);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
+        entitiesToSetup.add(vdc2);
+        entitiesToSetup.add(vapp2);
+        entitiesToSetup.add(nvi2);
 
         setup(entitiesToSetup.toArray());
 

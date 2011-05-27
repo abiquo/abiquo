@@ -30,6 +30,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository("jpaNodeVirtualImageDAO")
 public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImage>
@@ -75,4 +76,23 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         crit.add(Restrictions.eq(VirtualImage.ID_PROPERTY, virtualImage.getId()));
         return crit;
     }
+
+    //
+    private Criteria sameEnterprise(final Enterprise enterprise)
+    {
+        Criteria crit =
+            createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY,
+                VirtualMachine.ENTERPRISE_PROPERTY);
+        crit.add(Restrictions.eq(Enterprise.ID_PROPERTY, enterprise.getId()));
+        return crit;
+    }
+
+    public List<NodeVirtualImage> findByEnterprise(final Enterprise enterprise)
+    {
+        Criteria criteria = sameEnterprise(enterprise);
+        List<NodeVirtualImage> result = getResultList(criteria);
+        return result;
+
+    }
+
 }

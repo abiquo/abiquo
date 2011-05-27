@@ -35,9 +35,7 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
-import com.abiquo.server.core.enterprise.RoleLdapDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -145,4 +143,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
 
+    public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer enterpriseId, final Integer userId);
 }
