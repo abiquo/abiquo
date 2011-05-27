@@ -171,7 +171,7 @@ public enum APIError
         "AM-0",
         "The repository exported by the current appliance manager is being used on other datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
-        "The current repository holds virtual images being used on some virtual appliance, appliance manager only can be modified if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
+        "The current repository holds virtual images being used on some virtual appliances, so it's not possible to remove this Remote Service. You can modify the Appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-8", "Cannot delete a Storage Manager with associated Storage Pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-9",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
