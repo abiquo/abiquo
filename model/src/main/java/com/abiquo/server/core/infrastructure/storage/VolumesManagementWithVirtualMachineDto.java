@@ -29,14 +29,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "volumesManagementWithVirtualMachine")
+@XmlRootElement(name = "volumes")
 public class VolumesManagementWithVirtualMachineDto extends
     WrapperDto<VolumeManagementWithVirtualMachineDto>
 {
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "volumeManagementWithVirtualMachine")
+    @XmlElement(name = "volume")
     public List<VolumeManagementWithVirtualMachineDto> getCollection()
     {
         if (collection == null)

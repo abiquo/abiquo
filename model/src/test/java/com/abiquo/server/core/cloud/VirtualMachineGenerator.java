@@ -22,7 +22,6 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -44,7 +43,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
 
     VirtualImageGenerator vImageGenerator;
 
-    public VirtualMachineGenerator(SeedGenerator seed)
+    public VirtualMachineGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -55,7 +54,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     }
 
     @Override
-    public void assertAllPropertiesEqual(VirtualMachine obj1, VirtualMachine obj2)
+    public void assertAllPropertiesEqual(final VirtualMachine obj1, final VirtualMachine obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualMachine.NAME_PROPERTY,
             VirtualMachine.DESCRIPTION_PROPERTY, VirtualMachine.RAM_PROPERTY,
@@ -70,68 +69,58 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     public VirtualMachine createUniqueInstance()
     {
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
-
         return createInstance(hypervisor);
     }
 
-    public VirtualMachine createInstance(Hypervisor hypervisor)
+    public VirtualMachine createInstance(final Hypervisor hypervisor)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        User user = userGenerator.createInstance(enterprise);
-
         VirtualImage vimage = vImageGenerator.createInstance(enterprise);
+        String name =
+            newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
 
-        return new VirtualMachine("" + new Random().nextInt(),
-            enterprise,
-            user,
-            hypervisor,
-            vimage,
-            UUID.randomUUID(),
-            0);
+        return createInstance(vimage, enterprise, hypervisor, name);
     }
 
-    public VirtualMachine createInstance(VirtualImage vimage)
+    public VirtualMachine createInstance(final VirtualImage vimage)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        User user = userGenerator.createInstance(enterprise);
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        String name =
+            newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
 
-        return new VirtualMachine("" + new Random().nextInt(),
-            enterprise,
-            user,
-            hypervisor,
-            vimage,
-            UUID.randomUUID(),
-            0);
+        return createInstance(vimage, enterprise, hypervisor, name);
     }
 
-    public VirtualMachine createInstance(Enterprise enterprise)
+    public VirtualMachine createInstance(final Enterprise enterprise)
     {
         User user = userGenerator.createInstance(enterprise);
-        VirtualImage vi = vImageGenerator.createInstance(enterprise);
-
-        return new VirtualMachine("" + new Random().nextInt(),
-            enterprise,
-            user,
-            vi,
-            UUID.randomUUID(),
-            0);
+        return createInstance(enterprise, user);
     }
 
-    public VirtualMachine createInstance(VirtualImage vimage, Enterprise enterprise,
-        Hypervisor hypervisor, String name)
+    public VirtualMachine createInstance(final Enterprise enterprise, final User user)
+    {
+        VirtualImage vimage = vImageGenerator.createInstance(enterprise);
+        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        String name =
+            newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
+
+        return createInstance(vimage, enterprise, hypervisor, user, name);
+    }
+
+    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+        final Hypervisor hypervisor, final String name)
     {
         User user = userGenerator.createInstance(enterprise);
+        return createInstance(vimage, enterprise, hypervisor, user, name);
+    }
 
+    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+        final Hypervisor hypervisor, final User user, final String name)
+    {
         VirtualMachine virtualMachine =
-            new VirtualMachine("" + new Random().nextInt(),
-                enterprise,
-                user,
-                vimage,
-                UUID.randomUUID(),
-                0);
+            new VirtualMachine(name, enterprise, user, vimage, UUID.randomUUID(), 0);
 
-        virtualMachine.setName(name);
         virtualMachine.setHypervisor(hypervisor);
 
         // by default set the virtual image requirements
@@ -142,17 +131,13 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         return virtualMachine;
     }
 
-    public VirtualMachine createInstance(VirtualImage vimage, Enterprise enterprise, String name)
+    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+        final String name)
     {
         User user = userGenerator.createInstance(enterprise);
 
         VirtualMachine virtualMachine =
-            new VirtualMachine("" + new Random().nextInt(),
-                enterprise,
-                user,
-                vimage,
-                UUID.randomUUID(),
-                0);
+            new VirtualMachine(name, enterprise, user, vimage, UUID.randomUUID(), 0);
         // Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
 
         virtualMachine.setName(name);
@@ -167,7 +152,8 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VirtualMachine entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final VirtualMachine entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

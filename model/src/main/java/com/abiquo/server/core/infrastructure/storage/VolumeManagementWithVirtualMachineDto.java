@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
-@XmlRootElement(name = "volumeManagementWithVirtualMachine")
+@XmlRootElement(name = "volume")
 public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
 {
     private static final long serialVersionUID = 1L;

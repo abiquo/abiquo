@@ -21,16 +21,49 @@
 
 package com.abiquo.server.core.cloud;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "State")
+@XmlEnum(String.class)
 public enum State
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN;
+    RUNNING,
+
+    PAUSED,
+
+    POWERED_OFF,
+
+    REBOOTED,
+
+    NOT_DEPLOYED,
+
+    IN_PROGRESS,
+
+    APPLY_CHANGES_NEEDED,
+
+    UPDATING_NODES,
+
+    FAILED,
+
+    COPYING,
+
+    MOVING,
+
+    CHECKING,
+
+    BUNDLING,
+
+    STATEFUL,
+
+    UNKNOWN;
 
     public int id()
     {
         return ordinal() + 1;
     }
 
-    public static State fromId(int id)
+    public static State fromId(final int id)
     {
         return State.values()[id - 1];
     }
