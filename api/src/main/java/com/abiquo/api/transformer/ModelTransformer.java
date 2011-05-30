@@ -25,7 +25,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 @SuppressWarnings("unchecked")
 public class ModelTransformer
@@ -53,6 +56,12 @@ public class ModelTransformer
         T target) throws Exception
     {
         Field[] transportFields = sourceClass.getDeclaredFields();
+        Class superClass = sourceClass.getSuperclass();
+        while (!superClass.getSimpleName().equalsIgnoreCase("SingleResourceTransportDto"))
+        {
+            transportFields = (Field[]) ArrayUtils.addAll(transportFields, superClass.getDeclaredFields());
+            superClass = superClass.getSuperclass();
+        }
 
         for (Field field : transportFields)
         {

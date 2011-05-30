@@ -50,6 +50,7 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.UcsRackGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
@@ -75,6 +76,8 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         new DatacenterLimitsGenerator(seed);
 
     protected RackGenerator rackGenerator = new RackGenerator(seed);
+    
+    protected UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(seed);
 
     protected MachineGenerator machineGenerator = new MachineGenerator(seed);
 

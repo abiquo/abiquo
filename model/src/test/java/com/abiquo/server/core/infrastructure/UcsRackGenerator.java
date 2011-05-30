@@ -30,8 +30,12 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     @Override
     public UcsRack createUniqueInstance()
     {
-        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();
-        
+        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();   
+        return createInstance(datacenter);
+    }
+    
+    public UcsRack createInstance(Datacenter datacenter)
+    {
         int seed = nextSeed();
         final String shortDescription =
             newString(seed, Rack.SHORT_DESCRIPTION_LENGTH_MIN, Rack.SHORT_DESCRIPTION_LENGTH_MAX);

@@ -41,12 +41,6 @@ import com.abiquo.server.core.infrastructure.RacksDto;
 
 public class RacksResourceIT extends AbstractJpaGeneratorIT
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("rack", "datacenter");
-    }
-
     private String validRacksUri;
 
     @BeforeMethod
