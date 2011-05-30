@@ -1784,7 +1784,17 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     }
                 }
 
-                basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                VirtualMachine vmPojo = virtualMachineHB.toPojo();
+
+                try
+                {
+                    ignoreVSMEventsIfNecessary(virtualMachineHB, vmPojo);
+                    basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                }
+                finally
+                {
+                    listenAgainToVSMIfNecessary(virtualMachineHB, vmPojo);
+                }
             }
 
             if (basicResult.getSuccess())
@@ -2560,6 +2570,37 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         factory.endConnection();
 
         return updateUsedResourcesByDatacenter(dataCenter);
+    }
+
+    public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        // In XEN and KVM, we need to redefine the domain again, so to void receiving
+        // invalid destruction events, we unsubscribe from the VSM while the operation
+        // is in progress
+        HypervisorType targetHypervisor = vmHB.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
+                    .getPhysicalMachine().getDataCenter().getIdDataCenter());
+
+            EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
+    }
+
+    public static void listenAgainToVSMIfNecessary(final VirtualmachineHB vm,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        HypervisorType targetHypervisor = vm.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
+                    .getDataCenter().getIdDataCenter());
+
+            EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
     }
 
 }

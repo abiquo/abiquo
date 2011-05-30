@@ -24,6 +24,7 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -102,8 +103,8 @@ public class VirtualDatacenterResource extends AbstractResource
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
-        @QueryParam(START_WITH) final Integer startwith, @QueryParam(BY) final String orderBy,
-        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) final Integer limit,
+        @QueryParam(START_WITH) @Min(0) final Integer startwith, @QueryParam(BY) final String orderBy,
+        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) @Min(0)final Integer limit,
         @QueryParam(ASC) final Boolean desc_or_asc, @Context final IRESTBuilder restBuilder)
         throws Exception
     {

@@ -13,6 +13,30 @@
         <!--============== ADMIN ==============-->
         <!--===================================-->
         
+        <!-- RULES -->
+        <security:intercept-url pattern="/admin/rules" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/rules" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/rules" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        
+        
         <!-- ROLES -->
         <security:intercept-url pattern="/admin/roles" method="POST" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES" />
@@ -150,6 +174,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/addInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/removeInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+		<security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/volumes" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         
 		<!-- REMOTE SERVICES -->
 		<security:intercept-url pattern="/admin/datacenters/*/remoteServices" method="POST" access="ROLE_PHYS_DC_MANAGE" />
@@ -229,6 +254,7 @@
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/statefulcandidates" method="GET" access="ROLE_VAPP_CREATE_STATEFUL" />
 		
 		<!-- PRIVATE NETWORKS -->
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="POST" access="ROLE_MANAGE_NETWORK" />

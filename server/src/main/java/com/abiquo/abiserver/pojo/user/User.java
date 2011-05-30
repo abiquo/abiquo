@@ -29,8 +29,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -69,7 +69,7 @@ public class User implements IPojo<UserHB>
         return authType;
     }
 
-    public void setAuthType(AuthType authType)
+    public void setAuthType(final AuthType authType)
     {
         this.authType = authType;
     }
@@ -215,6 +215,7 @@ public class User implements IPojo<UserHB>
         userHB.setLocale(locale);
         userHB.setPassword(pass);
         userHB.setActive(active ? 1 : 0);
+        userHB.setAuthType(authType.name());
         if (enterprise != null)
         {
             userHB.setEnterpriseHB(enterprise.toPojoHB());

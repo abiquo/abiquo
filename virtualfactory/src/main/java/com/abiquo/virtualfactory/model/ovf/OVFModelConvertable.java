@@ -79,7 +79,8 @@ public interface OVFModelConvertable
      * @throws SectionException
      * @throws Exception
      */
-    public void reconfigureVirtualSystem(AbsVirtualMachine virtualMachine, ContentType virtualSystem)
+    public void reconfigureVirtualSystem(final AbsVirtualMachine virtualMachine,
+        final ContentType virtualSystem, final HypervisorConfiguration hvConfig)
         throws VirtualMachineException, SectionException, Exception;
 
     /**

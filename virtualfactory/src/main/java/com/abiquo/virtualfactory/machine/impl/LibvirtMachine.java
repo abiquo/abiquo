@@ -621,50 +621,51 @@ public class LibvirtMachine extends AbsVirtualMachine
     public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
         throws VirtualMachineException
     {
-        Connect conn = null;
-        Domain dom = null;
+        updateDomain(newConfiguration);
 
-        try
-        {
-            conn = connect(conn);
-            dom = conn.domainLookupByName(getMachineName());
-
-            // Setting the new Ram value
-            if (newConfiguration.isRam_set())
-            {
-                logger.info("Libvirt: Reconfiguring The Virtual Machine For Memory Update "
-                    + getMachineName());
-                // the memory is set in kilobytes
-                dom.setMaxMemory((newConfiguration.getMemoryRAM() / 1024));
-                dom.setMemory((newConfiguration.getMemoryRAM() / 1024));
-                memoryRam = newConfiguration.getMemoryRAM();
-            }
-
-            // Setting the number cpu value
-            if (newConfiguration.isCpu_number_set())
-            {
-                logger.info("Libvirt: Reconfiguring The Virtual Machine For CPU Update "
-                    + getMachineName());
-                dom.setVcpus(newConfiguration.getCpuNumber());
-                cpuNumbers = newConfiguration.getCpuNumber();
-            }
-
-            // Setting the disk cpu value
-            logger.info("Libvirt: Reconfiguring The Virtual Machine For disk Update "
-                + getMachineName());
-
-            reconfigDisks(newConfiguration, config);
-
-        }
-        catch (Exception e)
-        {
-            logger.error("Libvirt reconfigure error:" + e);
-            throw new VirtualMachineException(e);
-        }
-        finally
-        {
-            disconnectAndThrowError(conn, dom);
-        }
+        // Connect conn = null;
+        // Domain dom = null;
+        //
+        // try
+        // {
+        // conn = connect(conn);
+        // dom = conn.domainLookupByName(getMachineName());
+        //
+        // // Setting the new Ram value
+        // if (newConfiguration.isRam_set())
+        // {
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For Memory Update "
+        // + getMachineName());
+        // // the memory is set in kilobytes
+        // dom.setMaxMemory((newConfiguration.getMemoryRAM() / 1024));
+        // dom.setMemory((newConfiguration.getMemoryRAM() / 1024));
+        // memoryRam = newConfiguration.getMemoryRAM();
+        // }
+        //
+        // // Setting the number cpu value
+        // if (newConfiguration.isCpu_number_set())
+        // {
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For CPU Update "
+        // + getMachineName());
+        // dom.setVcpus(newConfiguration.getCpuNumber());
+        // cpuNumbers = newConfiguration.getCpuNumber();
+        // }
+        //
+        // // Setting the disk cpu value
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For disk Update "
+        // + getMachineName());
+        //
+        // reconfigDisks(newConfiguration, config);
+        // }
+        // catch (Exception e)
+        // {
+        // logger.error("Libvirt reconfigure error:" + e);
+        // throw new VirtualMachineException(e);
+        // }
+        // finally
+        // {
+        // disconnectAndThrowError(conn, dom);
+        // }
     }
 
     /**
@@ -677,25 +678,25 @@ public class LibvirtMachine extends AbsVirtualMachine
     private void reconfigDisks(final VirtualMachineConfiguration newConfiguration,
         final VirtualMachineConfiguration config) throws VirtualMachineException
     {
-        throw new VirtualMachineException("Cannot reconfigure the extended disks in "
-            + "KVM and XEN guests wihout undeploying.");
+        // throw new VirtualMachineException("Cannot reconfigure the extended disks in "
+        // + "KVM and XEN guests wihout undeploying.");
 
-        // List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
-        // List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
-        //
-        // // If there are no more extended disks, I remove the existent ones
-        // if (newExtendedDiskList.isEmpty()
-        // && newExtendedDiskList.size() < oldExtendedDiskList.size())
-        // {
-        // // It deteches all the storage pools
-        // // detachExtendedDisksFromConfig(newConfiguration);
-        //
-        // // Updates the domain definition
-        // // As the attach configuration does not work properly we are just adding the storage
-        // // pools and modifying the xml definition
-        // // Updates the domain definition
-        // updateDomain(newConfiguration);
-        // }
+        List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
+        List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
+
+        // If there are no more extended disks, I remove the existent ones
+        if (newExtendedDiskList.isEmpty()
+            && newExtendedDiskList.size() < oldExtendedDiskList.size())
+        {
+            // It detaches all the storage pools
+            // detachExtendedDisksFromConfig(newConfiguration);
+
+            // Updates the domain definition
+            // As the attach configuration does not work properly we are just adding the storage
+            // pools and modifying the xml definition
+            // Updates the domain definition
+            updateDomain(newConfiguration);
+        }
     }
 
     /**
