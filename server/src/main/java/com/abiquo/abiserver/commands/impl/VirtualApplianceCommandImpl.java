@@ -2611,6 +2611,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         virtualMachineHB.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         virtualMachineHB.setIdType(virtualMachine.getIdType());
         virtualMachineHB.setDatastore(virtualMachine.getDatastore().toPojoHB());
+        virtualMachineHB.setPassword(virtualMachine.getPassword());
     }
 
     // Creates the virtual machine - helper method to startVirtualAppliance

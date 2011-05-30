@@ -123,7 +123,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     private IInfrastructureWS infrastructureWS;
 
     // TODO autowire
-    private RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
+    private final RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
 
     public InfrastructureCommandImpl()
     {
@@ -452,40 +452,35 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            
 
-			try {
-				if (dataCenter.getName() != null
-						&& dataCenter.getName().trim().length() == 0) {
+            try
+            {
+                if (dataCenter.getName() != null && dataCenter.getName().trim().length() == 0)
+                {
 
-					dataResult.setSuccess(false);
-					errorManager.reportError(
-							InfrastructureCommandImpl.resourceManager,
-							dataResult, "createDataCenter_noname");
-					// Log the event
-					traceLog(SeverityType.MINOR, ComponentType.DATACENTER,
-							EventType.DC_CREATE, userSession, dataCenter, null,
-							"Datacenter  without name", null, null, null, null,
-							userSession.getEnterpriseName());
+                    dataResult.setSuccess(false);
+                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                        "createDataCenter_noname");
+                    // Log the event
+                    traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                        userSession, dataCenter, null, "Datacenter  without name", null, null,
+                        null, null, userSession.getEnterpriseName());
 
-					return dataResult;
-				}
-			} 
-			catch (Exception e) 
-			{
-				errorManager.reportError(
-						InfrastructureCommandImpl.resourceManager, dataResult,
-						"createDataCenter_noname", e);
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.DATACENTER,
-						EventType.DC_CREATE, userSession, dataCenter, null,
-						e.getMessage(), null, null, null, null,
-						userSession.getEnterpriseName());
+                    return dataResult;
+                }
+            }
+            catch (Exception e)
+            {
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createDataCenter_noname", e);
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                    userSession, dataCenter, null, e.getMessage(), null, null, null, null,
+                    userSession.getEnterpriseName());
 
-			}
+            }
 
-    		
-            // Checks for existing DataCenters with the same name 
+            // Checks for existing DataCenters with the same name
             try
             {
                 if (checkExistingDataCenterNames(dataCenter.getName()))
@@ -805,29 +800,32 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         Session session = null;
         Transaction transaction = null;
- 
-		
+
         try
         {
-        	if (rack.getName()!=null && rack.getName().trim().length()==0) {
-				
-				dataResult.setSuccess(false);
-				errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,"createRack_noname");
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-	                null, null, "Rack without name", null,rack, null, null, null);
-				return dataResult;
-			}
+            if (rack.getName() != null && rack.getName().trim().length() == 0)
+            {
+
+                dataResult.setSuccess(false);
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createRack_noname");
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
+                    userSession, null, null, "Rack without name", null, rack, null, null, null);
+                return dataResult;
+            }
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
-			errorManager.reportError(InfrastructureCommandImpl.resourceManager,dataResult, "_noname", e);
-			// Log the event
-			traceLog(SeverityType.MINOR, ComponentType.RACK,EventType.RACK_CREATE, userSession,
-					null, null, e.getMessage(),null,rack, null, null, null);
-		}
-        
-        try{
+            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                "_noname", e);
+            // Log the event
+            traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+                null, null, e.getMessage(), null, rack, null, null, null);
+        }
+
+        try
+        {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
@@ -864,7 +862,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
 
         }
-        
+
         return dataResult;
     }
 
@@ -1035,28 +1033,32 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         Session session = null;
         Transaction transaction = null;
         PhysicalMachine pm = physicalMachineCreation.getPhysicalMachine();
-       
-		try {
-			if (pm.getName() != null && pm.getName().trim().length() == 0) {
 
-				dataResult.setSuccess(false);
-				errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-										"createPhysicalMachine_noname");
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-			                userSession, pm.getDataCenter(), null, "Physical machine  without name",
-			                  null, (Rack) pm.getAssignedTo(), pm, null, null);
-				return dataResult;
-			}
-		} catch (Exception e) {
-			errorManager.reportError(InfrastructureCommandImpl.resourceManager,
-					dataResult, "createPhysicalMachine_noname", e);
-			// Log the event
-			traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+        try
+        {
+            if (pm.getName() != null && pm.getName().trim().length() == 0)
+            {
+
+                dataResult.setSuccess(false);
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createPhysicalMachine_noname");
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                    userSession, pm.getDataCenter(), null, "Physical machine  without name", null,
+                    (Rack) pm.getAssignedTo(), pm, null, null);
+                return dataResult;
+            }
+        }
+        catch (Exception e)
+        {
+            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                "createPhysicalMachine_noname", e);
+            // Log the event
+            traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, pm.getDataCenter(), null, e.getMessage(), null,
                 (Rack) pm.getAssignedTo(), pm, null, null);
-			
-		}
+
+        }
 
         String virtualSystemMonitorAddress = null;
         try
@@ -1072,7 +1074,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             PhysicalMachine physicalMachine = physicalMachineCreation.getPhysicalMachine();
 
             // Log the event
-            
+
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, physicalMachine.getDataCenter(), null, e.getMessage(), null,
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
@@ -1790,20 +1792,22 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             if (basicResult.getSuccess())
             {
 
-                session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
-                virtualMachineHB =
-                    (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine.getId());
-                // Updating the other attributes
-                virtualMachineHB.setName(virtualMachine.getName());
-                virtualMachineHB.setDescription(virtualMachine.getDescription());
-                virtualMachineHB.setCpu(virtualMachine.getCpu());
-                virtualMachineHB.setRam(virtualMachine.getRam());
-                virtualMachineHB.setHd(virtualMachine.getHd());
-                virtualMachineHB
-                    .setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
-                session.update(virtualMachineHB);
-                transaction.commit();
+                VirtualMachineResourceStub vmachineResource =
+                    APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
+                        VirtualMachineResourceStub.class);
+
+                DAOFactory daoF = HibernateDAOFactory.instance();
+
+                VirtualappHB vapp =
+                    daoF.getVirtualMachineDAO().findVirtualAppFromVM(virtualMachineHB.getIdVm());
+
+                final int virtualDatacenterId =
+                    vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
+                final int virtualApplianceId = vapp.getIdVirtualApp();
+
+                vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
+                    virtualMachine);
+
             }
             else
             {
@@ -2470,6 +2474,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#checkPhysicalMachineData(com.abiquo.abiserver
      * .pojo.infrastructure.PhysicalMachine)
      */
+    @Override
     public void checkPhysicalMachineData(final PhysicalMachine physicalMachine)
         throws InfrastructureCommandException
     {
@@ -2489,6 +2494,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#forceRefreshVirtualMachineState(com.abiquo
      * .abiserver.pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
         BasicResult basicResult = null;
@@ -2503,6 +2509,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#validateRemoteService(com.abiquo.abiserver
      * .business.hibernate.pojohb.service.RemoteServiceHB)
      */
+    @Override
     public boolean validateRemoteService(final RemoteServiceHB remoteService)
     {
         return remoteService.getURI() != null;
@@ -2514,6 +2521,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#checkExistingDataCenterNames(java.lang
      * .String)
      */
+    @Override
     public boolean checkExistingDataCenterNames(final String name) throws PersistenceException
     {
         DataCenterDAO dao = factory.getDataCenterDAO();
@@ -2547,6 +2555,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * @param physicalMachineId the physical machine identifier to check the virtual infrastructure
      * @return
      */
+    @Override
     public BasicResult checkVirtualInfrastructureState(final Integer physicalMachineId,
         final UserSession userSession, final Boolean isAutomaticCheck)
     {

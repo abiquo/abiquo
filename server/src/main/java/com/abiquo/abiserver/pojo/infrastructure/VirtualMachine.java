@@ -79,6 +79,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         vdrpPort = 0;
         vdrpIP = "";
         highDisponibility = false;
+        password = "";
     }
 
     public VirtualImage getVirtualImage()
