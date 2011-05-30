@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.util.URIResolver;
@@ -89,27 +88,28 @@ public class EnterpriseService extends DefaultApiService
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
-    
+
     /**
-    * Based on the spring authentication context.
-    * 
-    * @see SecurityContextHolder
-    */
-//   public Enterprise getCurrentEnterprise()
-//   {
-//       // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication();
-//       
-//       User user = userService.getCurrentUser();
-//       
-//       return user.getEnterprise();
-//       
-////       Enterprise enterprise = repo.findById(id);
-////       if (enterprise == null)
-////       {
-////           throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-////       }
-//
-//   }
+     * Based on the spring authentication context.
+     * 
+     * @see SecurityContextHolder
+     */
+    // public Enterprise getCurrentEnterprise()
+    // {
+    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
+    // SecurityContextHolder.getContext().getAuthentication();
+    //
+    // User user = userService.getCurrentUser();
+    //
+    // return user.getEnterprise();
+    //
+    // // Enterprise enterprise = repo.findById(id);
+    // // if (enterprise == null)
+    // // {
+    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
+    // // }
+    //
+    // }
 
     public Enterprise getCurrentEnterprise()
     {
@@ -157,7 +157,6 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(enterprise);
-        
 
         repo.insert(enterprise);
         return enterprise;
@@ -172,7 +171,7 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
-//        userService.checkEnterpriseAdminCredentials(enterprise);
+        // userService.checkEnterpriseAdminCredentials(enterprise);
         userService.checkCurrentEnterprise(enterprise);
         return enterprise;
     }
@@ -236,6 +235,16 @@ public class EnterpriseService extends DefaultApiService
         {
             addConflictErrors(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
             flushErrors();
+        }
+
+        // Release reserved machines
+        List<Machine> reservedMachines = findReservedMachines(id);
+        if (reservedMachines != null && !reservedMachines.isEmpty())
+        {
+            for (Machine m : reservedMachines)
+            {
+                releaseMachine(m.getId(), id);
+            }
         }
 
         repo.delete(enterprise);
