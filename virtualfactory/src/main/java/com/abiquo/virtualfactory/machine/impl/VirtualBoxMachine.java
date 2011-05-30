@@ -592,8 +592,9 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         if (config.getVirtualDiskBase().isHa())
         {
             newVDI =
-                vBoxHyper.getVirtualBox().openMedium(sourcePath, DeviceType.HardDisk,
+                vBoxHyper.getVirtualBox().openMedium(clonedImagePath, DeviceType.HardDisk,
                     AccessMode.ReadWrite);
+            
             // newVDI = vBoxHyper.getVirtualBox().createHardDisk(diskVDI.getFormat(),
             // clonedImagePath);
         }
