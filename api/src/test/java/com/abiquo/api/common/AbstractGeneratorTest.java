@@ -120,7 +120,19 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-    
+
+    protected void update(final Object... entities)
+    {
+        EntityManager em = getEntityManager();
+        closeActiveTransaction(em);
+        em.getTransaction().begin();
+        for (Object entity : entities)
+        {
+            em.merge(entity);
+        }
+        em.getTransaction().commit();
+    }
+
     @BeforeMethod
     public void setup()
     {
@@ -129,7 +141,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         // system property in the jetty runtime!!!
         System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
     }
-    
+
     @AfterMethod
     public void tearDown()
     {
