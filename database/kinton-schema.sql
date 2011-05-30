@@ -634,6 +634,11 @@ CREATE TABLE  `kinton`.`rack` (
   CONSTRAINT `Rack_FK1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
+/*!40000 ALTER TABLE `rack` DISABLE KEYS */;
+LOCK TABLES `rack` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `rack` ENABLE KEYS */;
+
 --
 -- Definition of table `kinton`.`ucs_rack`
 --
@@ -651,11 +656,6 @@ CREATE TABLE  `kinton`.`ucs_rack` (
 --
 -- Dumping data for table `kinton`.`rack`
 --
-
-/*!40000 ALTER TABLE `rack` DISABLE KEYS */;
-LOCK TABLES `rack` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `rack` ENABLE KEYS */;
 
 --
 -- Definition of table `kinton`.`datastore`
