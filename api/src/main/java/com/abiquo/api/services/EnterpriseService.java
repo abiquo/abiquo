@@ -163,7 +163,6 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
         isValidEnterprise(enterprise);
-        
 
         repo.insert(enterprise);
         return enterprise;
@@ -243,6 +242,16 @@ public class EnterpriseService extends DefaultApiService
         {
             addConflictErrors(APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS);
             flushErrors();
+        }
+
+        // Release reserved machines
+        List<Machine> reservedMachines = findReservedMachines(id);
+        if (reservedMachines != null && !reservedMachines.isEmpty())
+        {
+            for (Machine m : reservedMachines)
+            {
+                releaseMachine(m.getId(), id);
+            }
         }
 
         repo.delete(enterprise);
