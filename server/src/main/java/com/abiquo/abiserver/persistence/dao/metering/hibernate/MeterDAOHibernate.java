@@ -169,22 +169,25 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         // if (role != Role.SYS_ADMIN)
         if (!SecurityService.isCloudAdmin(role.toPojo()))
         {
-            // performedby filter
-            stringQuery.append(" and performedby in (");
-            boolean firstentry = true;
-            for (String currentString : performedbyList)
+            if (performedbyList != null && !performedbyList.isEmpty())
             {
-                if (firstentry == false)
+                // performedby filter
+                stringQuery.append(" and performedby in (");
+                boolean firstentry = true;
+                for (String currentString : performedbyList)
                 {
-                    stringQuery.append(",");
+                    if (firstentry == false)
+                    {
+                        stringQuery.append(",");
+                    }
+                    stringQuery.append("'" + currentString + "'");
+                    if (firstentry == true)
+                    {
+                        firstentry = false;
+                    }
                 }
-                stringQuery.append("'" + currentString + "'");
-                if (firstentry == true)
-                {
-                    firstentry = false;
-                }
+                stringQuery.append(")");
             }
-            stringQuery.append(")");
         }
         // delete last ','
         stringQuery.append(" order by timestamp desc");
