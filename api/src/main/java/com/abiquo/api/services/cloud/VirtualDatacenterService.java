@@ -174,8 +174,10 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // if (currentUser.getRole().getType() == Role.Type.USER
         // && currentUser.getAvailableVirtualDatacenters() != null)
-        if (!securityService.canManageOtherEnterprises() && !securityService.canManageOtherUsers()
-            && currentUser.getAvailableVirtualDatacenters() != null)
+        if (!securityService.canManageOtherEnterprises()
+            && !securityService.canManageOtherUsers()
+            && org.springframework.util.StringUtils.hasText(currentUser
+                .getAvailableVirtualDatacenters()))
         {
             String availableVirtualDatacenters =
                 currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
