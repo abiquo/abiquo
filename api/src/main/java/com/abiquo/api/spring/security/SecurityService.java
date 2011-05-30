@@ -52,9 +52,7 @@ public class SecurityService
 
     public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
 
-    public static final String USERS_MANAGE_USERS_PRIV = "USERS_MANAGE_USERS";
-
-    public static final String USERS_MANAGE_USERS = DRP + USERS_MANAGE_USERS_PRIV;
+    public static final String USERS_MANAGE_USERS = DRP + "USERS_MANAGE_USERS";
 
     public static final String USERS_VIEW = DRP + "USERS_VIEW";
 
@@ -64,6 +62,8 @@ public class SecurityService
         + "USERS_PROHIBIT_VDC_RESTRICTION";
 
     public static final String USERS_MANAGE_LDAP_GROUP = DRP + "USERS_MANAGE_LDAP_GROUP";
+
+    public static final String VDC_ENUMERATE = DRP + "VDC_ENUMERATE";
 
     public boolean hasPrivilege(final String privilege)
     {
@@ -149,7 +149,7 @@ public class SecurityService
         return new String[] {ENTRPRISE_ADMINISTER_ALL, USERS_MANAGE_OTHER_ENTERPRISES,
         USERS_MANAGE_OTHER_USERS, USERS_MANAGE_ROLES_OTHER_ENTERPRISES, USERS_MANAGE_SYSTEM_ROLES,
         USERS_MANAGE_USERS, USERS_VIEW, USERS_VIEW_PRIVILEGES, USERS_PROHIBIT_VDC_RESTRICTION,
-        USERS_MANAGE_LDAP_GROUP};
+        USERS_MANAGE_LDAP_GROUP, VDC_ENUMERATE};
     }
 
 }
