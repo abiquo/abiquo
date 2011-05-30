@@ -22,7 +22,6 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.List;
-import java.util.Random;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -62,9 +61,8 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     {
         VirtualAppliance vAppliance = vApplianceGenerator.createUniqueInstance();
         VirtualImage vImage = vImageGenerator.createUniqueInstance();
-        VirtualMachine vMachine = vMachineGenerator.createInstance(vImage);
 
-        return new NodeVirtualImage("" + new Random().nextInt(), vAppliance, vImage, vMachine);
+        return createInstance(vAppliance, vImage);
     }
 
     public NodeVirtualImage createInstance(final VirtualMachine vMachine)
@@ -77,15 +75,17 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         final VirtualImage vimage)
     {
         VirtualMachine vMachine = vMachineGenerator.createInstance(vimage);
-
-        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vimage, vMachine);
+        return createInstance(virtualAppliance, vMachine);
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine)
     {
-        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vMachine
-            .getVirtualImage(), vMachine);
+        String name =
+            newString(nextSeed(), NodeVirtualImage.NAME_LENGTH_MIN,
+                NodeVirtualImage.NAME_LENGTH_MAX);
+
+        return new NodeVirtualImage(name, virtualAppliance, vMachine.getVirtualImage(), vMachine);
     }
 
     @Override

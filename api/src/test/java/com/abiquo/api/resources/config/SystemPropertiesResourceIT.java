@@ -29,7 +29,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
@@ -39,13 +38,6 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 
 public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
 {
-    @Override
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise", "system_properties");
-    }
-
     @Test
     public void test_getSystemProperties() throws Exception
     {

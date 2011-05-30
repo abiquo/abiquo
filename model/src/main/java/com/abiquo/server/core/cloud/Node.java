@@ -56,7 +56,7 @@ class Node extends DefaultEntityBase
         setType(NodeVirtualImage.DISCRIMINATOR); // node virtual image
     }
 
-    public Node(String type)
+    public Node(final String type)
     {
         setType(type);
     }
@@ -95,7 +95,7 @@ class Node extends DefaultEntityBase
         return this.modified;
     }
 
-    protected void setModified(int modified)
+    protected void setModified(final int modified)
     {
         this.modified = modified;
     }
@@ -122,7 +122,7 @@ class Node extends DefaultEntityBase
         return type;
     }
 
-    protected void setType(String type)
+    protected void setType(final String type)
     {
         this.type = type;
     }
@@ -131,9 +131,9 @@ class Node extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = false;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -150,7 +150,7 @@ class Node extends DefaultEntityBase
         return this.name;
     }
 
-    protected void setName(String name)
+    protected void setName(final String name)
     {
         this.name = name;
     }
@@ -172,7 +172,7 @@ class Node extends DefaultEntityBase
         return this.virtualAppliance;
     }
 
-    public void setVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void setVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         this.virtualAppliance = virtualAppliance;
     }
