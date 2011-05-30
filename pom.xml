@@ -24,7 +24,7 @@
 
         <!-- Dependences versions -->
         <spring.version>3.0.5.RELEASE</spring.version>
-        <cxf.version>2.2.6</cxf.version>
+        <cxf.version>2.2.12</cxf.version>
         <netty.version>3.2.0.BETA1</netty.version>
         <wink.version>1.1-incubating</wink.version> <!-- TODO move to 1.1.2 -->
         <hibernate.version>3.5.1-Final</hibernate.version>

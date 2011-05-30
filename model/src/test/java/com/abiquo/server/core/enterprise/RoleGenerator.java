@@ -55,6 +55,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public static final String USERS_PROHIBIT_VDC_RESTRICTION = "USERS_PROHIBIT_VDC_RESTRICTION";
 
+    public static final String VDC_ENUMERATE = "VDC_ENUMERATE";
+
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -89,7 +91,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
         Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
         Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
-        return createInstance(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+        Privilege p11 = new Privilege(VDC_ENUMERATE);
+        return createInstance(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
     }
 
     public Role createInstanceSysAdmin(final String name)
@@ -104,7 +107,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
         Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
         Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
-        return createInstance(name, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
+        Privilege p11 = new Privilege(VDC_ENUMERATE);
+        return createInstance(name, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
     }
 
     public Role createInstanceEnterprisAdmin()
@@ -113,7 +117,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
         Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
-        return createInstance(p2, p4, p5, p8);
+        Privilege p11 = new Privilege(VDC_ENUMERATE);
+        return createInstance(p2, p4, p5, p8, p11);
     }
 
     public Role createInstance(final Enterprise enterprise)
