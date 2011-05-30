@@ -600,7 +600,7 @@ public class Machine extends DefaultEntityBase
 
     // *************************** Mandatory constructors
     // ***********************
-    /* package */Machine(Datacenter datacenter, String name, String description,
+    public Machine(Datacenter datacenter, String name, String description,
         int virtualRamInMb, int realRamInMb, int virtualRamUsedInMb, long virtualHardDiskInMb,
         long realHardDiskInMb, long virtualHardDiskUsed, int realCpuCores, int virtualCpuCores,
         int virtualCpusUsed, int virtualCpusPerCore, State state, String virtualSwitch)
