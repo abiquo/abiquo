@@ -175,7 +175,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
                 VirtualDisk diskBase = config.getVirtualDiskBase();
 
-                if (diskBase.getDiskType() == VirtualDiskType.STANDARD && !diskBase.isHa())
+                if (diskBase.getDiskType() == VirtualDiskType.STANDARD)
                 {
                     // Just clones the image if the virtual disk is standard
                     // Cloning the virtual disk
@@ -589,7 +589,18 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         String clonedImagePath = destinationRepository + machineName;
 
-        cloneThroughAPI(sourcePath, clonedImagePath);
+        if (config.getVirtualDiskBase().isHa())
+        {
+            newVDI =
+                vBoxHyper.getVirtualBox().openMedium(clonedImagePath, DeviceType.HardDisk,
+                    AccessMode.ReadWrite);
+            // newVDI = vBoxHyper.getVirtualBox().createHardDisk(diskVDI.getFormat(),
+            // clonedImagePath);
+        }
+        else
+        {
+            cloneThroughAPI(sourcePath, clonedImagePath);
+        }
 
         logger.debug("Image cloned at [{}]", clonedImagePath);
     }

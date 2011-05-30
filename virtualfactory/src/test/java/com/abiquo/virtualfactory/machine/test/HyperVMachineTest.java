@@ -53,7 +53,9 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         String diskLocation = "[" + diskRepository + "]" + diskImagePath;
 
-        targetDatastore = "C:\\localRepository\\";
+//        targetDatastore = "C:\\localRepository\\";
+//        targetDatastore = "C:\\";
+        targetDatastore = "Z:\\";
 
         VirtualDisk virtualDisk =
             new VirtualDisk(diskId,
@@ -69,8 +71,8 @@ public class HyperVMachineTest extends AbsMachineTest
         disks.add(virtualDisk);
 
         List<VirtualNIC> vnicList = new ArrayList<VirtualNIC>();
-        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
-        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
+//        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
+//        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
 
         VirtualMachineConfiguration conf =
             new VirtualMachineConfiguration(id,
@@ -97,7 +99,7 @@ public class HyperVMachineTest extends AbsMachineTest
     {
         // HYPERVISOR configuration properties
         // hvURL = "http://10.60.1.152";
-        hvURL = "http://10.60.1.122";
+        hvURL = "http://10.60.1.121";
         hvUser = "Administrator";
         hvPassword = "Windowssucks0!";
 
@@ -497,7 +499,7 @@ public class HyperVMachineTest extends AbsMachineTest
      * 
      * TODO: It doesn't work with mapped network drives, even if user is logged on.
      */
-    public void createFolder(String folder) throws Exception
+    public void createFile(String file) throws Exception
     {
 //         if (detectFile(folder)) {
 //             log.info("Folder " + folder + " already exists. ");
@@ -642,7 +644,7 @@ public class HyperVMachineTest extends AbsMachineTest
         // test.testExecuteRemoteProcess();
         test.configureTestForDeployInHA();
          test.setUp();
-         test.tearDown();
+//         test.tearDown();
         // test.testInitiator();
         // test.testDeleteFile();
         // test.testAddRemoveISCSI();
@@ -659,18 +661,18 @@ public class HyperVMachineTest extends AbsMachineTest
         
 //        test.testWQL();
         
-//        test.createFolder("Z:\\fistropecadordelapradera");
+//        test.createFile("Z:\\fistropecadordelapradera");
         
 //        test.createFileAsVHD("Z:\\fistrovhd");
         
 //        test.copyFolder();
+     
     }
-    
     /**
      * for HA we already have a name and a vdisk for the vmachine
      */
     private void configureTestForDeployInHA(){
-        name = "ABQ_deploynocopy";
+        name = "aquimismo";
         
     }
     

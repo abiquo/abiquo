@@ -661,7 +661,6 @@ CREATE TABLE  `kinton`.`datastore` (
   `name` varchar(255) NOT NULL,
   `rootPath` varchar(36) NOT NULL,
   `directory` varchar(255) NOT NULL,
-  `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
   `size` bigint(40) unsigned NOT NULL,
   `usedSize` bigint(40) unsigned NOT NULL,

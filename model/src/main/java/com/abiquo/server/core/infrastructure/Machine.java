@@ -472,11 +472,11 @@ public class Machine extends DefaultEntityBase
     {
         this.ipmiIP = ipmiIP;
     }
-    
+
     public final static String IPMI_PORT_PROPERTY = "ipmiPort";
 
     private final static String IPMI_PORT_COLUMN = "ipmiPort";
-    
+
     private final static boolean IPMI_PORT_REQUIRED = false;
 
     private final static int IPMI_PORT_MIN = Integer.MIN_VALUE;
@@ -497,7 +497,7 @@ public class Machine extends DefaultEntityBase
     {
         this.ipmiPort = ipmiPort;
     }
-    
+
     public final static String IPMI_USER_PROPERTY = "ipmiUser";
 
     private final static boolean IPMI_USER_REQUIRED = false;
@@ -525,7 +525,7 @@ public class Machine extends DefaultEntityBase
     {
         this.ipmiUser = ipmiUser;
     }
-    
+
     public final static String IPMI_PASSWORD_PROPERTY = "ipmiPassword";
 
     private final static boolean IPMI_PASSWORD_REQUIRED = false;
@@ -553,6 +553,7 @@ public class Machine extends DefaultEntityBase
     {
         this.ipmiPassword = ipmiPassword;
     }
+
     // ********************************* Associations
     // ***************************
     public final static String DATACENTER_PROPERTY = "datacenter";
@@ -737,10 +738,15 @@ public class Machine extends DefaultEntityBase
     // ********************************** Others
     // ********************************
 
-    public Hypervisor createHypervisor(HypervisorType type, String ip,
-        String ipService, int port, String user, String password)
+    public Hypervisor createHypervisor(HypervisorType type, String ip, String ipService, int port,
+        String user, String password)
     {
         return new Hypervisor(this, type, ip, ipService, port, user, password);
+    }
+
+    public boolean hasFencingCapabilities()
+    {
+        return (getIpmiIP() != null && getIpmiUser() != null && getIpmiPassword() != null);
     }
 
     @Override
@@ -748,5 +754,4 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
 }

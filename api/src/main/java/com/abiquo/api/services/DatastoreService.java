@@ -102,7 +102,6 @@ public class DatastoreService extends DefaultApiService
 
             datastore =
                 new Datastore(machine, dto.getName(), dto.getRootPath(), dto.getDirectory());
-            datastore.setShared(dto.isShared());
             datastore.setEnabled(dto.isEnabled());
 
             checkValidDatastore(datastore);
@@ -128,7 +127,7 @@ public class DatastoreService extends DefaultApiService
         old.setName(dto.getName());
         old.setDirectory(dto.getDirectory());
         old.setEnabled(dto.isEnabled());
-        old.setShared(dto.isShared());
+        old.setDatastoreUUID(dto.getDatastoreUUID());
 
         checkValidDatastore(old);
 

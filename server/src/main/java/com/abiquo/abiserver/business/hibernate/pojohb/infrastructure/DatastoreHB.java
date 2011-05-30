@@ -42,8 +42,6 @@ public class DatastoreHB implements IPojoHB<Datastore>
 
     private Boolean enabled;
 
-    private Boolean shared;
-
     private String directory;
 
     private Long size;
@@ -113,27 +111,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
     {
         this.enabled = enabled;
     }
-
-    /**
-     * Checks if is shared
-     * 
-     * @return the shared
-     */
-    public Boolean getShared()
-    {
-        return shared;
-    }
-
-    /**
-     * Sets the shared flags
-     * 
-     * @param shared the shared to set
-     */
-    public void setShared(Boolean shared)
-    {
-        this.shared = shared;
-    }
-
+    
     /**
      * Gets the mounted point
      * 
@@ -239,7 +217,6 @@ public class DatastoreHB implements IPojoHB<Datastore>
         ds.setDirectory(directory);
         ds.setId(getIdDatastore());
         ds.setName(name);
-        ds.setShared(shared);
         ds.setUUID(getRootPath());
         ds.setSize(size);
         ds.setUsedSize(usedSize);

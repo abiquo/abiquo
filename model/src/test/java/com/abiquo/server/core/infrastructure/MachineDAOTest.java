@@ -281,6 +281,8 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Machine machine6 = machineGenerator.createMachine(datacenter);
         Machine machine7 = machineGenerator.createMachine(datacenter);
         Machine machine8 = machineGenerator.createMachine(datacenter);
+        Machine machine9 = machineGenerator.createMachine(datacenter);
+        Machine machine10 = machineGenerator.createMachine(datacenter);
 
         machine1.setState(State.DISABLED_FOR_HA);
         machine2.setState(State.HA_IN_PROGRESS);
@@ -290,18 +292,29 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine6.setState(State.PROVISIONED);
         machine7.setState(State.STOPPED);
         machine8.setState(State.UNLICENSED);
+        machine9.setState(State.MANAGED);
+        machine10.setState(State.MANAGED);
 
         machine1.setRack(rack);
         machine2.setRack(rack);
-        machine2.setRack(rack);
+        machine3.setRack(rack);
         machine4.setRack(rack);
         machine5.setRack(rack);
         machine6.setRack(rack);
         machine7.setRack(rack);
         machine8.setRack(rack);
+        machine9.setRack(rack);
+        machine10.setRack(rack);
+
+        machine9.setIpmiIP("10.60.1.205");
+        machine9.setIpmiUser("earl.hickey");
+        machine9.setIpmiPassword("karma");
+
+        machine10.setIpmiIP("10.60.1.205");
+        machine10.setIpmiUser("earl.hickey");
 
         ds().persistAll(datacenter, rack, machine1, machine2, machine3, machine4, machine5,
-            machine6, machine7, machine8);
+            machine6, machine7, machine8, machine9, machine10);
 
         MachineDAO dao = createDaoForRollbackTransaction();
 

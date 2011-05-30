@@ -64,8 +64,17 @@ package net.undf.abicloud.vo.infrastructure
         public var idEnterprise:int;
         
         public var initiatorIQN:String;
+    
+    	public var ipmiIp:String;
+    	
+    	public var ipmiPort:int;
+    	
+		public var ipmiUser:String;
 
-	public var hypervisor:HyperVisor;
+    	public var ipmiPassword:String;
+        
+
+		public var hypervisor:HyperVisor;
 
         /* ------------- Constants ------------- */
         public static const STATE_STOPPED:int = 0;
@@ -80,7 +89,9 @@ package net.undf.abicloud.vo.infrastructure
         
         public static const STATE_UNLICENSED:int = 5;
         
-        public static const STATE_DISABLED_BY_HA:int = 6;
+        public static const STATE_HA_IN_PROGRESS:int = 6;
+        
+        public static const STATE_DISABLED_BY_HA:int = 7;
 
         /* ------------- Constructor ------------- */
         public function PhysicalMachine()
@@ -103,6 +114,9 @@ package net.undf.abicloud.vo.infrastructure
             vswitchName = "";
             initiatorIQN = "";
             datastores = new ArrayCollection();
+            ipmiIp = "";			
+			ipmiUser = "";
+			ipmiPassword = "";    
         }
 
         override public function set assignedTo(iE:InfrastructureElement):void

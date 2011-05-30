@@ -23,6 +23,7 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -163,6 +164,10 @@ public class MachineService extends DefaultApiService
         {
             for (DatastoreDto dataDto : machineDto.getDatastores().getCollection())
             {
+                // FIXME: All Datastores need to have an UUID in DB
+                if (dataDto.getDatastoreUUID() == null){
+                    dataDto.setDatastoreUUID(UUID.randomUUID().toString());
+                }
                 dataService.addDatastore(dataDto, machine.getId());
             }
         }
