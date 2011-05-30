@@ -37,8 +37,8 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
-import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -130,7 +130,7 @@ public class MachineResource extends AbstractResource
         vmService.deleteNotManagedVirtualMachines(hypervisor);
     }
 
-    private Hypervisor getHypervisor(Integer datacenterId, Integer rackId, Integer machineId)
+    protected Hypervisor getHypervisor(Integer datacenterId, Integer rackId, Integer machineId)
     {
         if (!service.isAssignedTo(datacenterId, rackId, machineId))
         {
@@ -146,7 +146,7 @@ public class MachineResource extends AbstractResource
         return hypervisor;
     }
 
-    private static MachineDto addLinks(IRESTBuilder restBuilder, Integer datacenterId,
+    protected static MachineDto addLinks(IRESTBuilder restBuilder, Integer datacenterId,
         Integer rackId, MachineDto machine)
     {
         machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, machine));
@@ -186,7 +186,7 @@ public class MachineResource extends AbstractResource
         return dto;
     }
 
-    private void validatePathParameters(final Integer datacenterId, final Integer rackId,
+    protected void validatePathParameters(final Integer datacenterId, final Integer rackId,
         final Integer machineId) throws NotFoundException
     {
         if (!service.isAssignedTo(datacenterId, rackId, machineId))
