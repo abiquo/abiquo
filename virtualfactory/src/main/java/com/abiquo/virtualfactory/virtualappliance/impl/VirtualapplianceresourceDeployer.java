@@ -213,7 +213,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 OVFEnvelopeUtils.createVirtualSystemCollection("collection_"
                     + virtualAppliance.getVirtualApplianceId(),
                     "Collection for a complex VirtualAppliance",
-                    "collection to wrap a virtual appliance with more than one machien");
+                    "collection to wrap a virtual appliance with more than one machine");
 
             for (AbsVirtualMachine machine : virtualAppliance.getMachines())
             {
