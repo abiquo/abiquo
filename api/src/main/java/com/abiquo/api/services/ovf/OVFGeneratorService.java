@@ -110,8 +110,6 @@ public class OVFGeneratorService
 
     @Autowired
     VirtualMachineRep vmRepo;
-    
-    
 
     private final static Logger logger = LoggerFactory.getLogger(OVFGeneratorService.class);
 
@@ -183,8 +181,10 @@ public class OVFGeneratorService
 
             DiskSectionType diskSectionEnvelope = createEnvelopeDisk(virtualImage);
 
+            Datastore targetDatastore = virtualMachine.getDatastore();
             ReferencesType diskReferences =
-                createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
+                createDiskFileReferences(virtualImage, targetDatastore.getRootPath()
+                    + targetDatastore.getDirectory());
 
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
@@ -526,10 +526,11 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            final String id = nodeVirtualImage.getId() == null? "10" : nodeVirtualImage.getId().toString();
-            
-            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(id, nodeVirtualImage.getVirtualImage()));
+            final String id =
+                nodeVirtualImage.getId() == null ? "10" : nodeVirtualImage.getId().toString();
 
+            OVFDiskUtils.addDisk(envelope,
+                createDiskFromVirtualImage(id, nodeVirtualImage.getVirtualImage()));
 
             OVFReferenceUtils.addFileOrIgnore(references,
                 createFileFromVirtualImage(nodeVirtualImage, bundling, ha));
@@ -664,9 +665,11 @@ public class OVFGeneratorService
 
         FileType virtualDiskImageFile =
             OVFReferenceUtils.createFileType(fileId, absolutePath, fileSize, null, null);
-        insertTargetDataStore(virtualDiskImageFile, nodeVirtualImage.getVirtualMachine()
-            .getDatastore().getName()
-            + nodeVirtualImage.getVirtualMachine().getDatastore().getDirectory());
+
+        Datastore targetDatastore = nodeVirtualImage.getVirtualMachine().getDatastore();
+
+        insertTargetDataStore(virtualDiskImageFile,
+            targetDatastore.getRootPath() + targetDatastore.getDirectory());
 
         if (ha)
         {
@@ -849,7 +852,7 @@ public class OVFGeneratorService
         CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
             new Long(virtualMachine.getCpu()));
 
-        String virtualImageId = node.getId() == null? "10" : node.getId().toString();
+        String virtualImageId = node.getId() == null ? "10" : node.getId().toString();
 
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
@@ -1046,17 +1049,17 @@ public class OVFGeneratorService
     }
 
     private String getRepositoryManagerAddress(NodeVirtualImage nvi)
-    {       
+    {
         VirtualMachine vmachine = vmRepo.findVirtualMachineById(nvi.getVirtualMachine().getId());
-        
+
         // Get Virtual Datacenter
-        Hypervisor hypervisor = vmachine.getHypervisor();        
+        Hypervisor hypervisor = vmachine.getHypervisor();
         Machine pm = hypervisor.getMachine();
-        
+
         Integer datacenterId = pm.getDatacenter().getId();
-        
+
         Datacenter dc = datacenterRepo.findById(datacenterId);
-        
+
         List<RemoteService> am =
             datacenterRepo.findRemoteServiceWithTypeInDatacenter(dc,
                 RemoteServiceType.APPLIANCE_MANAGER);
