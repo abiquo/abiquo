@@ -32,7 +32,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -45,13 +44,6 @@ import com.abiquo.server.core.enterprise.User;
 
 public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
 {
-
-    @Override
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("user", "role", "enterprise", "system_properties");
-    }
 
     @Test
     public void getUnexistingSystemProperty() throws ClientWebException
