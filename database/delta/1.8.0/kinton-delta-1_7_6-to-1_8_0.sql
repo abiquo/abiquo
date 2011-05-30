@@ -1,3 +1,6 @@
+-- TODO: Rename to kinton-delta-1_7_5-to-1_8_0.sql
+
+
 -- Racks can be HA enabled
 ALTER TABLE `kinton`.`rack` ADD COLUMN `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality';
 
@@ -14,6 +17,7 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT 
 
 -- Racks can be HA enabled
 ALTER TABLE `kinton`.`datastore` ADD COLUMN `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.';
+ALTER TABLE `kinton`.`datastore` DROP COLUMN `shared`;
 
 -- ipmi
 ALTER TABLE `kinton`.`physicalmachine` ADD COLUMN `ipmiIP` VARCHAR(39)  DEFAULT NULL AFTER `version_c`,
