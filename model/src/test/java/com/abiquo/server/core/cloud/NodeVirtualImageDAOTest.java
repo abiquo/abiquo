@@ -225,6 +225,14 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm1.getVirtualImage());
         entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine());
+        entitiesToSetup.add(vm1.getHypervisor());
+        entitiesToSetup.add(vm2.getHypervisor());
         entitiesToSetup.add(vm1);
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(vdc.getNetwork());

@@ -37,14 +37,17 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import junit.framework.Assert;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.testng.Assert;
+import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -54,7 +57,10 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -81,6 +87,21 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         validMachineUri =
             resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId());
+
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
@@ -310,6 +331,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
 
         Machine m = vm.getHypervisor().getMachine();
 
@@ -317,8 +339,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             resolveMachineActionGetVirtualMachinesURI(m.getDatacenter().getId(), m.getRack()
                 .getId(), m.getId());
 
-        Resource resource = client.resource(uri);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        // Resource resource = client.resource(uri);
+        // ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
 
         Assert.assertEquals(response.getStatusCode(), 200);
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
@@ -392,14 +416,14 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             resolveMachineActionGetVirtualMachinesURI(m.getDatacenter().getId(), m.getRack()
                 .getId(), m.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 2);
 
         response = delete(uri);
         Assert.assertEquals(response.getStatusCode(), 204);
 
-        response = get(uri);
+        response = get(uri, "sysadmin", "sysadmin");
         vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 1);
     }
