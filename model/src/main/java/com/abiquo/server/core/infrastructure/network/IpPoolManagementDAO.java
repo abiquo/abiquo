@@ -152,7 +152,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             getEntityManager().createNamedQuery("IP_POOL_MANAGEMENT.BY_VLAN",
                 IpPoolManagement.class);
         query.setParameter("vlan_id", vlanId);
-        if(firstElement > totalResults) firstElement = totalResults-numElem;
+        if(firstElement >= totalResults) firstElement = totalResults-numElem;
         if (numElem != -1)
         {
 
@@ -189,7 +189,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
 
-        if(firstElem > totalResults) firstElem = totalResults-numElem;
+        if(firstElem >= totalResults) firstElem = totalResults-numElem;
         finalQuery.setFirstResult(firstElem);
         finalQuery.setMaxResults(numElem);
 
@@ -213,7 +213,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
-        if(firstElem > totalResults) firstElem = totalResults-numElem;
+        if(firstElem >= totalResults) firstElem = totalResults-numElem;
 
         // Get the list of elements
         finalQuery.setFirstResult(firstElem);
