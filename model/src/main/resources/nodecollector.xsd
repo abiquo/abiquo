@@ -17,7 +17,6 @@
     <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
     <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
     <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
-    <xs:element name="ErrorResponse" type="nc:ErrorResponseDto" />
 
     <!--                                      -->
     <!-- Definition of the main complex types -->
@@ -97,14 +96,6 @@
     		<xs:enumeration value="UCS" />
     	</xs:restriction>
     </xs:simpleType>
-
-
-    <xs:complexType name="ErrorResponseDto">
-        <xs:sequence>
-            <xs:element name="httpStatus" type="xs:int" />
-            <xs:element name="messageResponse" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
 
 
     <!--                                      -->
