@@ -64,6 +64,8 @@
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceUploadDTO;
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
             import net.undf.abicloud.vo.virtualimage.VirtualImage;
+            import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+            import net.undf.abicloud.vo.user.PrivilegeType;
 
             [ResourceBundle("Common")]
             private var rb:ResourceBundle;
@@ -107,6 +109,9 @@
 			
             private function onCreationComplete():void
             {
+                //Check privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ROLES,"removeChild",costCodeFormItem,virtualImageFormContainer);
+                
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -747,6 +752,7 @@
             </mx:FormItem>
             
             <mx:FormItem 
+            	id="costCodeFormItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
                 includeInLayout="{this._virtualImage != null}"
                 visible="{this._virtualImage != null}">
