@@ -58,9 +58,9 @@
         
         <!-- ENTERPRISES -->
         <security:intercept-url pattern="/admin/enterprises" method="POST" access="ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_ENTERPRISE_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
@@ -69,8 +69,8 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         
         <!-- USERS -->
-        <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="DELETE" access="ROLE_USERS_MANAGE_USERS" />
@@ -83,7 +83,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/limits" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
-        <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="DELETE" access="ROLE_ USERS_MANAGE_ENTERPRISE" />
+        <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>  
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         
@@ -237,7 +237,7 @@
         
         <!-- VIRTUAL DATACENTERS -->
 		<security:intercept-url pattern="/cloud/virtualdatacenters" method="POST" access="ROLE_VDC_MANAGE" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters" method="GET" access="ROLE_VDC_ENUMERATE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters" method="GET" access="ROLE_AUTHENTICATED,ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="GET" access="ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="DELETE" access="ROLE_VDC_MANAGE" />

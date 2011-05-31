@@ -194,8 +194,8 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * boolean)
      */
     public void reconfigureVirtualSystem(final AbsVirtualMachine virtualMachine,
-        final ContentType virtualSystem) throws VirtualMachineException, SectionException,
-        Exception
+        final ContentType virtualSystem, final HypervisorConfiguration hvConfig)
+        throws VirtualMachineException, SectionException, Exception
     {
         // We will change the state or reconfigure the machine depending on the state field value
         String machineState = getMachineStateFromAnnotation(virtualSystem);
@@ -207,23 +207,22 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         }
         else
         {
-            // Get the njew virtual machine configuration
+            // Get the new virtual machine configuration
             VirtualMachineConfiguration newConfig =
-                buildUpdateConfiguration(virtualMachine, virtualSystem);
+                buildUpdateConfiguration(virtualMachine.getConfiguration(), virtualSystem);
+
+            AbsVirtualMachine newVirtualMachine =
+                VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
 
             // Apply the new configuration to the machine in the hypervisor
-            virtualMachine.reconfigVM(newConfig);
+            newVirtualMachine.reconfigVM(newConfig);
         }
     }
 
     private VirtualMachineConfiguration buildUpdateConfiguration(
-        final AbsVirtualMachine virtualMachine, final ContentType virtualSystem)
+        final VirtualMachineConfiguration newConfig, final ContentType virtualSystem)
         throws SectionException
     {
-        // Get the list of new disks
-        VirtualMachineConfiguration newConfig =
-            new VirtualMachineConfiguration(virtualMachine.getConfiguration());
-
         // TODO the default value should be 0, but to avoid errors 256MB is assigned
         long newRam = 256 * 1024 * 1024;
         int newCPUNumber = 1;

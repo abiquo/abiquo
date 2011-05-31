@@ -82,13 +82,13 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     }
 
     @Override
-    public VirtualappHB findByIdNamed(Integer id)
+    public VirtualappHB findByIdNamed(final Integer id)
     {
         return (VirtualappHB) getSession().get(BASIC, id);
     }
 
     @Override
-    public VirtualappHB findByIdNamedExtended(Integer id)
+    public VirtualappHB findByIdNamedExtended(final Integer id)
     {
         return (VirtualappHB) getSession().get(EXTENDED, id);
     }
@@ -96,7 +96,7 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     @Override
     @SuppressWarnings("unchecked")
     // generic Hibernate query list cast
-    public List<VirtualappHB> findByUsingVirtualImage(String virtualImageId)
+    public List<VirtualappHB> findByUsingVirtualImage(final String virtualImageId)
         throws PersistenceException
     {
         List<VirtualappHB> apps;
@@ -160,7 +160,8 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     }
 
     @Override
-    public VirtualappHB getVirtualAppByVirtualMachine(Integer vmId) throws PersistenceException
+    public VirtualappHB getVirtualAppByVirtualMachine(final Integer vmId)
+        throws PersistenceException
     {
         try
         {
@@ -190,8 +191,9 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
      *         node list!)
      * @throws Exception An Exception is thrown if there was a problem connecting to the Data base
      */
+    @Override
     public DataResult<VirtualAppliance> checkVirtualApplianceState(
-        VirtualAppliance virtualAppliance, StateEnum subState) throws Exception
+        final VirtualAppliance virtualAppliance, final StateEnum subState) throws Exception
     {
 
         DataResult<VirtualAppliance> currentStateAndAllow = new DataResult<VirtualAppliance>();
@@ -231,8 +233,9 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
         return currentStateAndAllow;
     }
 
-    public VirtualappHB blockVirtualAppliance(VirtualappHB virtualApp, StateEnum subState)
-        throws PersistenceException
+    @Override
+    public VirtualappHB blockVirtualAppliance(final VirtualappHB virtualApp,
+        final StateEnum subState) throws PersistenceException
     {
         if (virtualApp.getState() != StateEnum.IN_PROGRESS)
         {
@@ -251,20 +254,21 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     }
 
     @Override
-    public VirtualappHB makePersistentBasic(VirtualappHB entity) throws PersistenceException
+    public VirtualappHB makePersistentBasic(final VirtualappHB entity) throws PersistenceException
     {
         return makePersistent(BASIC, entity);
     }
 
     @Override
-    public VirtualappHB makePersistentExtended(VirtualappHB entity) throws PersistenceException
+    public VirtualappHB makePersistentExtended(final VirtualappHB entity)
+        throws PersistenceException
     {
         return makePersistent(EXTENDED, entity);
     }
 
     @Override
-    public Collection<VirtualappHB> getVirtualAppliancesByEnterprise(UserHB user,
-        Integer enterpriseId)
+    public Collection<VirtualappHB> getVirtualAppliancesByEnterprise(final UserHB user,
+        final Integer enterpriseId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -289,8 +293,8 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     }
 
     @Override
-    public Collection<VirtualappHB> getVirtualAppliancesByEnterpriseAndDatacenter(UserHB user,
-        Integer enterpriseId, Integer datacenteId)
+    public Collection<VirtualappHB> getVirtualAppliancesByEnterpriseAndDatacenter(
+        final UserHB user, final Integer enterpriseId, final Integer datacenteId)
     {
         String query =
             "from VirtualappHB app where app.enterpriseHB.idEnterprise = :enterpriseId"
@@ -303,8 +307,8 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query namedQuery =
-            session.createQuery(query).setParameter("enterpriseId", enterpriseId).setParameter(
-                "datacenterId", datacenteId);
+            session.createQuery(query).setParameter("enterpriseId", enterpriseId)
+                .setParameter("datacenterId", datacenteId);
 
         if (!StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
         {
@@ -316,13 +320,16 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
         return namedQuery.list();
     }
 
-    private Collection<Integer> getAvailableVdcs(UserHB user)
+    private Collection<Integer> getAvailableVdcs(final UserHB user)
     {
         String[] ids = user.getAvailableVirtualDatacenters().split(",");
         Collection<Integer> vdcs = new LinkedHashSet<Integer>();
         for (String id : ids)
         {
-            vdcs.add(Integer.parseInt(id));
+            if (org.springframework.util.StringUtils.hasText(id))
+            {
+                vdcs.add(Integer.parseInt(id));
+            }
         }
         return vdcs;
     }

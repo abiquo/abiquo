@@ -213,7 +213,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 OVFEnvelopeUtils.createVirtualSystemCollection("collection_"
                     + virtualAppliance.getVirtualApplianceId(),
                     "Collection for a complex VirtualAppliance",
-                    "collection to wrap a virtual appliance with more than one machien");
+                    "collection to wrap a virtual appliance with more than one machine");
 
             for (AbsVirtualMachine machine : virtualAppliance.getMachines())
             {
@@ -417,7 +417,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                             (VirtualSystemType) contentInstance, virtualDiskMap, envelope);
 
                     virtualMachine = VirtualSystemModel.getModel().getMachine(hvConfig, vmConfig);
-                    ovfconvert.reconfigureVirtualSystem(virtualMachine, contentInstance);
+                    ovfconvert.reconfigureVirtualSystem(virtualMachine, contentInstance, hvConfig);
 
                 }
                 catch (Exception e)
@@ -752,11 +752,14 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
 
                 // create the virtualDisks
                 Map<String, VirtualDisk> virtualDiskMap = ovfconvert.createVirtualDisks(envelope);
+                HypervisorConfiguration hvConfig =
+                    ovfconvert.getHypervisorConfigurationFromVirtualSystem(subVirtualSystem);
+                VirtualMachineConfiguration vmConfig =
+                    ovfconvert.getVirtualMachineConfigurationFromVirtualSystem(
+                        (VirtualSystemType) subVirtualSystem, virtualDiskMap, envelope);
+
                 AbsVirtualMachine virtualMachineNew =
-                    virtualSystemFactory.getMachine(ovfconvert
-                        .getHypervisorConfigurationFromVirtualSystem(subVirtualSystem), ovfconvert
-                        .getVirtualMachineConfigurationFromVirtualSystem(
-                            (VirtualSystemType) subVirtualSystem, virtualDiskMap, envelope));
+                    virtualSystemFactory.getMachine(hvConfig, vmConfig);
 
                 // If the machine does not exist, includes all the new machines
                 if (virtualMachineNew == null)
@@ -780,12 +783,12 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 try
                 {
                     // using virtual system configuration
-                    ovfconvert.reconfigureVirtualSystem(virtualMachineNew, subVirtualSystem);
+                    ovfconvert.reconfigureVirtualSystem(virtualMachineNew, subVirtualSystem,
+                        hvConfig);
 
                     // TODO updateFromAnnotations
                     // TODO assure not only the annotation section can be accessed
                     // TODO assure the virtual machines can be reconfigurated
-
                 }
                 catch (SectionException se)
                 {
@@ -796,7 +799,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
 
                     try
                     {
-                        ovfconvert.reconfigureVirtualSystem(virtualMachineNew, vscollection);
+                        ovfconvert.reconfigureVirtualSystem(virtualMachineNew, vscollection,
+                            hvConfig);
                     }
                     catch (Exception e)
                     {

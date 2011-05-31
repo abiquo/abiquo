@@ -57,9 +57,9 @@ public class RimpStubTest extends TestCase
     // 1Gb
     private static Long viSize = 1024 * 1024 * 100l;// 1024 * 1024 * 1024 * 1l;
 
-    private static String vmachienUUID = "XXXX-UUID-XXXX";
+    private static String vmachineUUID = "XXXX-UUID-XXXX";
 
-    private static String vmachienUUID2 = "XXXX-UUID2-XXXX";
+    private static String vmachineUUID2 = "XXXX-UUID2-XXXX";
 
     private static String snapshot = "XXXX-snapshot-XXXX";
 
@@ -130,40 +130,40 @@ public class RimpStubTest extends TestCase
 
     public void testCopyToDatastoreAndDelete() throws RimpException, TException
     {
-        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachienUUID);
+        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachineUUID);
 
-        String viDatastorePath = datastore + '/' + vmachienUUID;
+        String viDatastorePath = datastore + '/' + vmachineUUID;
         File viDatastore = new File(viDatastorePath);
         assertTrue(viDatastore.exists());
         Long viDatastoreSize = viDatastore.length();
         assertEquals(viSize, viDatastoreSize);
 
-        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachienUUID);
+        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachineUUID);
         assertFalse(viDatastore.exists());
     }
 
     public void testDoubleCopyToDatastoreAndDelete() throws RimpException, TException
     {
-        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachienUUID);
+        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachineUUID);
 
-        String viDatastorePath = datastore + '/' + vmachienUUID;
+        String viDatastorePath = datastore + '/' + vmachineUUID;
         File viDatastore = new File(viDatastorePath);
         assertTrue(viDatastore.exists());
         Long viDatastoreSize = viDatastore.length();
         assertEquals(viSize, viDatastoreSize);
 
-        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachienUUID2);
+        aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachineUUID2);
 
-        String viDatastorePath2 = datastore + '/' + vmachienUUID2;
+        String viDatastorePath2 = datastore + '/' + vmachineUUID2;
         File viDatastore2 = new File(viDatastorePath2);
         assertTrue(viDatastore2.exists());
         Long viDatastoreSize2 = viDatastore2.length();
         assertEquals(viSize, viDatastoreSize2);
 
-        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachienUUID);
+        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachineUUID);
         assertFalse(viDatastore.exists());
 
-        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachienUUID2);
+        aimclient.deleteVirtualImageFromDatastore(datastoreDefault, vmachineUUID2);
         assertFalse(viDatastore2.exists());
     }
 

@@ -125,6 +125,94 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     }
 
     @Override
+    public DataResult<UserListResult> getOnlyUsers(final UserListOptions userListOptions)
+    {
+        DataResult<UserListResult> dataResult = new DataResult<UserListResult>();
+        UserListResult userListResult = new UserListResult();
+
+        String enterpriseWildcard = "_";
+        if (userListOptions.getByEnterprise() != null)
+        {
+            enterpriseWildcard = String.valueOf(userListOptions.getByEnterprise().getId());
+        }
+
+        UserHB currentUser = getCurrentUser();
+
+        if (SecurityService.isEnterpriseAdmin(currentUser.getRoleHB().toPojo()))
+        {
+            enterpriseWildcard = String.valueOf(currentUser.getEnterpriseHB().getIdEnterprise());
+        }
+
+        boolean desc = !userListOptions.getAsc();
+        String orderBy = userListOptions.getOrderBy();
+        if (orderBy.equals("user"))
+        {
+            orderBy = "nick";
+        }
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (!StringUtils.isEmpty(userListOptions.getFilter()))
+        {
+            queryParams.put("filter", new String[] {userListOptions.getFilter()});
+        }
+        queryParams.put("orderBy", new String[] {orderBy});
+        queryParams.put("desc", new String[] {String.valueOf(desc)});
+
+        if (userListOptions.getLoggedOnly() != null)
+        {
+            queryParams.put("connected", new String[] {userListOptions.getLoggedOnly().toString()});
+        }
+
+        String uri =
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
+                userListOptions.getLength());
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            UsersDto usersDto = response.getEntity(UsersDto.class);
+            Collection<User> users = new ArrayList<User>();
+            Collection<User> normalUsers = new ArrayList<User>();
+
+            Collection<User> usersWithoutVDC = new ArrayList<User>();
+            Integer total =
+                usersDto.getTotalSize() != null ? usersDto.getTotalSize() : usersDto
+                    .getCollection().size();
+
+            for (User user : normalUsers)
+            {
+                if (user.getAvailableVirtualDatacenters().length == 0)
+                {
+                    usersWithoutVDC.add(user);
+                }
+            }
+            normalUsers.removeAll(usersWithoutVDC);
+            if (orderBy.equalsIgnoreCase("role") && !desc)
+            {
+                usersWithoutVDC.addAll(normalUsers);
+                usersWithoutVDC.addAll(users);
+                users = usersWithoutVDC;
+            }
+            else
+            {
+                users.addAll(normalUsers);
+                users.addAll(usersWithoutVDC);
+            }
+            userListResult.setTotalUsers(total);
+            userListResult.setUsersList(users);
+
+            dataResult.setData(userListResult);
+            dataResult.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getUsers");
+        }
+
+        return dataResult;
+    }
+
+    @Override
     public DataResult<UserListResult> getUsers(final UserListOptions userListOptions)
     {
         DataResult<UserListResult> dataResult = new DataResult<UserListResult>();
@@ -279,8 +367,12 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         RoleDto dto = null;
         if (!cache.containsKey(roleUri))
         {
-            dto = get(roleUri, LINK_MEDIA_TYPE).getEntity(RoleDto.class);
-            cache.put(roleUri, dto);
+            ClientResponse response = get(roleUri, LINK_MEDIA_TYPE);
+            if (response.getStatusCode() == 200)
+            {
+                dto = response.getEntity(RoleDto.class);
+                cache.put(roleUri, dto);
+            }
         }
         else
         {

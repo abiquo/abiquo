@@ -91,10 +91,6 @@
 
             private function onCreationComplete():void{
 
-                //Retrieve the list of virtual datacenter if you are not a Simple User
-                /* if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION)){	                
-	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");             	
-               	} */
             }
             /**
              * Initializes this form to create a new user
@@ -152,14 +148,13 @@
             /**
              * Retrieves the list of available VirtualDatacenters
              */
-            private function createVirtualDataCenterList(value:ArrayCollection):void{
+            private function createVirtualDataCenterList(value:ArrayCollection = null):void{
         		if(this._firstRetrieve){
             		var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
             		event.enterprise = this._userToEdit.enterprise;
             		dispatchEvent(event);            		
             		this._firstRetrieve = false;           		
             	}else{
-            		_virtualDatacenterWatcher.unwatch();
             		populateSelectedRestrictedVirtualDatacenters(value);
             	}
             }  
@@ -267,7 +262,9 @@
                 if (this._listenerRegistered)
                     AbiCloudModel.getInstance().userManager.removeEventListener(UserEvent.USERS_EDITED,
                                                                                 onUserEdited);
-
+				if(_virtualDatacenterWatcher)
+					_virtualDatacenterWatcher.unwatch();
+				
                 dispatchEvent(new Event("userEditClose"));
             }
 
@@ -457,6 +454,15 @@
             
             private function setRestrictedVDC(value:Boolean):void{
             	this._vdcAllowed = value;	
+            	if(!this._vdcAllowed){
+            		this._firstRetrieve = true;
+            		if( !_virtualDatacenterWatcher || !_virtualDatacenterWatcher.isWatching()){
+	            		//Retrieve the list of virtual datacenter if you are not a Simple User
+	                	_virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");	
+            		}else{
+            			createVirtualDataCenterList();
+            		}            		
+            	}
             }
         ]]>
     </mx:Script>
