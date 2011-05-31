@@ -1159,7 +1159,7 @@ ADD COLUMN `blocked` TINYINT(1)  NOT NULL DEFAULT 0  AFTER `idEnterprise` ,
   ON UPDATE NO ACTION
 , ADD INDEX `fk_role_enterprise` (`idEnterprise` ASC) ;
 
-UPDATE  `kinton`.`role`  Set name ='SYS_ADMIN', blocked=1 where idRole=1;
+UPDATE  `kinton`.`role`  Set name ='CLOUD_ADMIN', blocked=1 where idRole=1;
 UPDATE  `kinton`.`role`  Set name ='USER' where idRole=2;
 UPDATE  `kinton`.`role`  Set name ='ENTERPRISE_ADMIN'where idRole=3;
 

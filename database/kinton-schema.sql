@@ -754,7 +754,7 @@ CREATE TABLE  `kinton`.`role` (
 -- These values are used by the ldap_role table.
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
-	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'SYS_ADMIN',1,0);
+	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'CLOUD_ADMIN',1,0);
 	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
 	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
 UNLOCK TABLES;
