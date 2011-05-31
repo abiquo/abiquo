@@ -545,6 +545,7 @@ public class RESTBuilder implements IRESTBuilder
         {
             // Previous using the page size avoiding to be less than 0.
             Integer previous = list.getCurrentElement() - list.getPageSize();
+            previous = (previous > list.getTotalResults()) ? (list.getTotalResults()-2*list.getPageSize()): previous;
             previous = (previous < 0) ? 0 : previous;
 
             links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
