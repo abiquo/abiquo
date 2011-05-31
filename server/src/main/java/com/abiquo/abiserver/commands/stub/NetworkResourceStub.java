@@ -24,6 +24,8 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import java.io.UnsupportedEncodingException;
+
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -47,16 +49,18 @@ public interface NetworkResourceStub
     public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
-    
+
     /**
      * Creates a new Private vlan network
+     * 
      * @param userSession user who performs the action
      * @param vdcId identifier of the virtualdatacenter
      * @param vlanDto object to create.
      * @return BasicResult
      */
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
-    
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
+        VLANNetworkDto dto);
+
     /**
      * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
      * 
