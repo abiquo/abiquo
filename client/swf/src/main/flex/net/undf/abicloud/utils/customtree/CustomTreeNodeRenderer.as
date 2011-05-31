@@ -87,7 +87,8 @@ package net.undf.abicloud.utils.customtree
             this._nodeIcon.scaleContent = false;
             this._nodeIcon.setStyle("verticalAlign", "middle");
             this._nodeIcon.setStyle("horizontalAlign", "center");
-            this._nodeIcon.addEventListener(MouseEvent.CLICK, clickHandler);
+            //this._nodeIcon.addEventListener(MouseEvent.CLICK, clickHandler);
+            addEventListener(MouseEvent.CLICK, clickHandler);
 
             addChild(this._nodeIcon);
 
