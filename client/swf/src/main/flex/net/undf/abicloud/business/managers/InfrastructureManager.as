@@ -872,14 +872,7 @@ package net.undf.abicloud.business.managers
                 for (var i:int = 0; i < length; i++)
                 {
                     //If VirtualBox is supported
-                    if(AbiCloudModel.getInstance().configurationManager.config.client_infra_useVirtualBox.value == 1){
-                    	_hypervisorTypesInUse.addItem(_hypervisorTypes.getItemAt(i));
-                    }else{
-	                    if (HyperVisorType(_hypervisorTypes.getItemAt(i)).id != HyperVisorType.VIRTUAL_BOX)
-	                    {
-	                    	_hypervisorTypesInUse.addItem(_hypervisorTypes.getItemAt(i));
-	                    }                    	
-                    }
+                    _hypervisorTypesInUse.addItem(_hypervisorTypes.getItemAt(i));	                
                 }
             }
         }
