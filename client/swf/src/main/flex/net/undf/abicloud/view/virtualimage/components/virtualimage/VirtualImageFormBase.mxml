@@ -110,7 +110,7 @@
             private function onCreationComplete():void
             {
                 //Check privileges
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ROLES,"removeChild",costCodeFormItem,virtualImageFormContainer);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_VM_COST_CODE,"removeChild",costCodeFormItem,virtualImageFormContainer);
                 
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
