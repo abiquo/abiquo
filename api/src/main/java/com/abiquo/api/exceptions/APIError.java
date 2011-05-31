@@ -139,7 +139,7 @@ public enum APIError
         "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME("ROLE-6",
-        "Cannot create a role with a same name of exiting role for the same enterprise"),
+        "Cannot create a role with a same name of existing role for the same enterprise"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
