@@ -83,14 +83,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return result;
     }
-    
+
     @Override
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId, VLANNetworkDto dto)
+    public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
+        final VLANNetworkDto dto)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPrivateNetworksLink(vdcId);
         ClientResponse response = post(uri, dto);
-        
+
         if (response.getStatusCode() == 201)
         {
             VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
@@ -100,8 +101,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         else
         {
             populateErrors(response, result, "createPrivateVLANNetwork");
-        }       
-        
+        }
+
         return result;
     }
 
@@ -191,7 +192,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, dataResult, "getListNetworkPoolByEnterprise");
+            populateErrors(response, dataResult, "getListNetworkPoolByVirtualDatacenter");
         }
 
         return dataResult;
@@ -239,6 +240,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     }
 
+    @Override
     public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
         throws NetworkCommandException
     {
@@ -256,7 +258,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");
+            populateErrors(response, dataResult, "getInfoDHCPServer");
         }
         return dataResult;
     }
