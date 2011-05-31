@@ -17,7 +17,7 @@
         
         <!-- ROLES -->
         <security:intercept-url pattern="/admin/roles" method="POST" access="ROLE_USERS_MANAGE_ROLES" />
-        <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES" />
+        <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES" />
         <security:intercept-url pattern="/admin/roles" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/roles/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles/*" method="DELETE" access="ROLE_USERS_MANAGE_ROLES" />

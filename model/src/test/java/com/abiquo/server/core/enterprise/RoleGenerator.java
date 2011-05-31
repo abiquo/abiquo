@@ -48,6 +48,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
 
+    public static final String USERS_MANAGE_ROLES = "USERS_MANAGE_ROLES";
+
     public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
         "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
 
@@ -92,7 +94,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
         Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
         Privilege p11 = new Privilege(VDC_ENUMERATE);
-        return createInstance(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
+        Privilege p12 = new Privilege(USERS_MANAGE_ROLES);
+        return createInstance(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
     }
 
     public Role createInstanceSysAdmin(final String name)

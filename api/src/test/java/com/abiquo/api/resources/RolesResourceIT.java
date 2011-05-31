@@ -29,10 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,6 +43,8 @@ import com.abiquo.server.core.enterprise.User;
 
 public class RolesResourceIT extends AbstractJpaGeneratorIT
 {
+    private static final String SYSADMIN = "sysadmin";
+
     protected String rolesURI = resolveRolesURI();
 
     @BeforeMethod
@@ -84,9 +83,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
         entitiesToPersist.add(r3);
         setup(entitiesToPersist.toArray());
 
-        Resource resource = client.resource(rolesURI).accept(MediaType.APPLICATION_XML);
-
-        ClientResponse response = resource.get();
+        ClientResponse response = get(rolesURI, SYSADMIN, SYSADMIN);
         assertEquals(200, response.getStatusCode());
 
         RolesDto entity = response.getEntity(RolesDto.class);
@@ -100,7 +97,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
             UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
                 new String[] {Integer.toString(e1.getId())}), false);
 
-        response = get(uri);
+        response = get(uri, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -135,7 +132,7 @@ public class RolesResourceIT extends AbstractJpaGeneratorIT
             UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("idEnterprise",
                 new String[] {Integer.toString(e1.getId())}), false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
