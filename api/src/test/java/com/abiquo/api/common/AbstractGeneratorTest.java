@@ -145,7 +145,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
             "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
-            "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
+            "workload_machine_load_rule", "physicalmachine", "ucs_rack", "rack", "datacenter", "repository",
             "workload_fit_policy_rule", "network", "session", "user", "role", "enterprise",
             "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
             "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
