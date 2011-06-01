@@ -20,7 +20,7 @@
 			<column name="idDataCenter" not-null="true" />
 		</many-to-one>
 		<property name="name" type="string">
-			<column length="30" name="name" not-null="true" />
+			<column length="128" name="name" not-null="true" />
 		</property>
 		<property name="description" type="string">
 			<column length="100" name="description" />
