@@ -31,7 +31,12 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.util.FilterOptions;
@@ -55,6 +60,12 @@ public class StorageRep extends DefaultRepBase
     private VolumeManagementDAO volumeDAO;
 
     @Autowired
+    private DiskStatefulConversionDAO diskStatefulConversionDAO;
+
+    @Autowired
+    private NodeVirtualImageDAO nodeVirtualImageDAO;
+
+    @Autowired
     private RasdDAO rasdDAO;
 
     public StorageRep()
@@ -71,6 +82,7 @@ public class StorageRep extends DefaultRepBase
         this.deviceDAO = new StorageDeviceDAO(entityManager);
         this.poolDAO = new StoragePoolDAO(entityManager);
         this.volumeDAO = new VolumeManagementDAO(entityManager);
+        this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -157,6 +169,16 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByEnterprise(id, filters);
     }
 
+    public DiskStatefulConversion getDiskStatefulConversionByVolume(final VolumeManagement volume)
+    {
+        return diskStatefulConversionDAO.getByVolume(volume.getId());
+    }
+
+    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualImage virtualImage)
+    {
+        return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
+    }
+
     public Tier insertTier(final Tier tier)
     {
         tierDAO.persist(tier);
@@ -204,8 +226,8 @@ public class StorageRep extends DefaultRepBase
 
     public void removeVolume(final VolumeManagement volume)
     {
-        // volumeDAO.remove(volume);
-        // volumeDAO.flush();
+        volumeDAO.remove(volume);
+        volumeDAO.flush();
     }
 
     public void updateDevice(final StorageDevice sd)

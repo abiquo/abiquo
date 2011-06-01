@@ -112,7 +112,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
-        closeActiveTransaction(em);
+        rollbackActiveTransaction(em);
         em.getTransaction().begin();
         for (Object entity : entities)
         {
@@ -120,7 +120,19 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         }
         em.getTransaction().commit();
     }
-    
+
+    protected void update(final Object... entities)
+    {
+        EntityManager em = getEntityManager();
+        rollbackActiveTransaction(em);
+        em.getTransaction().begin();
+        for (Object entity : entities)
+        {
+            em.merge(entity);
+        }
+        em.getTransaction().commit();
+    }
+
     @BeforeMethod
     public void setup()
     {
@@ -129,7 +141,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         // system property in the jetty runtime!!!
         System.setProperty("abiquo.server.networking.vlanPerVdc", "4");
     }
-    
+
     @AfterMethod
     public void tearDown()
     {
@@ -206,6 +218,14 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
     private EntityManagerHolder unbind(final EntityManagerFactory emf)
     {
         return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+    }
+
+    protected void rollbackActiveTransaction(final EntityManager em)
+    {
+        if (em.getTransaction().isActive())
+        {
+            em.getTransaction().rollback();
+        }
     }
 
     private void closeActiveTransaction(final EntityManager em)
