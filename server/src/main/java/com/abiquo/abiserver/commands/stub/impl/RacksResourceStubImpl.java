@@ -19,31 +19,22 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.commands.stub;
+package com.abiquo.abiserver.commands.stub.impl;
 
-import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
+import com.abiquo.abiserver.commands.stub.RacksResourceStub;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.server.core.infrastructure.UcsRack;
 
-public interface MachineResourceStub
+public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResourceStub
 {
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine);
-
     /**
-     * Changes the operPower state to down. Actually turns the blade associated to the provided
-     * logic server off.
-     * 
-     * @param machine machine to shutdown.
-     * @return BasicResult
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
      */
-    public BasicResult powerOff(PhysicalMachine machine);
+    public DataResult<UcsRack> createUcsRack(UcsRack ucsRack)
+    {
+        // PREMIUM
 
-    /**
-     * Changes the operPower state to up. Actually turns the blade associated to the provided logic
-     * server on.
-     * 
-     * @param machine to power on.
-     * @return BasicResult
-     */
-    public BasicResult powerOn(PhysicalMachine machine);
-
+        return null;
+    }
 }

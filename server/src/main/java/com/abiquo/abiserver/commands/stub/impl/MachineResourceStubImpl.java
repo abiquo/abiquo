@@ -74,4 +74,24 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         return dto;
     }
 
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public BasicResult powerOff(PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public BasicResult powerOn(PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }
