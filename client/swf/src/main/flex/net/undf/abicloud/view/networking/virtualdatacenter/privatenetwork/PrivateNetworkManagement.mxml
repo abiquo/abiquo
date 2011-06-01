@@ -184,7 +184,7 @@
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Networking",
-                                                                                    "ALERT_VLAN_DELETE_HEADER"),
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
                                             ResourceManager.getInstance().getString("Networking",
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
                                             Alert.OK);
@@ -195,7 +195,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Networking",
-                                                                                    "ALERT_VLAN_DELETE_HEADER"),
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
                                             ResourceManager.getInstance().getString("Networking",
                                                                                     "ALERT_VLAN_DELETE_TEXT"),
                                             Alert.YES | Alert.NO, deleteVLAN);

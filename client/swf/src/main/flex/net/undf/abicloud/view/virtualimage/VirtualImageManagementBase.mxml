@@ -345,7 +345,7 @@
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualImage",
-                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER")+" '"+Category(categoriesCombo.selectedItem).name+"'",
                                             ResourceManager.getInstance().getString("VirtualImage",
                                                                                     "ALERT_UNABLE_DELETE_CATEGORY_TEXT"),
                                             Alert.OK, null);
@@ -353,7 +353,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualImage",
-                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER")+" '"+Category(categoriesCombo.selectedItem).name+"'",
                                             ResourceManager.getInstance().getString("VirtualImage",
                                                                                     "ALERT_DELETE_CATEGORY_TEXT"),
                                             Alert.YES | Alert.NO,

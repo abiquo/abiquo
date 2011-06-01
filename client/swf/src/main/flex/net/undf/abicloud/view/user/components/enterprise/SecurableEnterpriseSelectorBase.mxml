@@ -251,7 +251,7 @@
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
-                                                                                    "ALERT_DELETE_OWN_ENTERPRISE_HEADER"),
+                                                                                    "ALERT_DELETE_OWN_ENTERPRISE_HEADER")+" '"+this._selectedEnterprise.name+"'",
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_DELETE_OWN_ENTERPRISE_TEXT"),
                                             Alert.OK);
@@ -261,7 +261,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
-                                                                                    "ALERT_DELETE_ENTERPRISE_HEADER"),
+                                                                                    "ALERT_DELETE_ENTERPRISE_HEADER")+" '"+this._selectedEnterprise.name+"'",
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_DELETE_ENTERPRISE_TEXT"),
                                             Alert.YES | Alert.NO,

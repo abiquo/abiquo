@@ -266,7 +266,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_DATACENTER_HEADER"),
+                                                                                "ALERT_DELETE_DATACENTER_HEADER")+" '"+DataCenter(dataCenterList.selectedItem).name+"'",
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_DATACENTER_TEXT"),
                                         Alert.YES | Alert.NO, deleteDataCenter);
