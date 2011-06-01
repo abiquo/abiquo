@@ -67,6 +67,8 @@ public class SecurityService
 
     public static final String VDC_ENUMERATE = DRP + "VDC_ENUMERATE";
 
+    public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
+
     public boolean hasPrivilege(final String privilege)
     {
         return AuthorityUtils.userHasAuthority(privilege);
