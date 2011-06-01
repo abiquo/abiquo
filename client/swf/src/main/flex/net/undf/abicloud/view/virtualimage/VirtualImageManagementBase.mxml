@@ -111,19 +111,8 @@
                 this._resizeEffect.heightTo = 230;
                 
                 BindingUtils.bindSetter(showHideBundleContainer,this,"hasSlaveImage");
-                
-              
-                 makeUnavailable();
-            }
-            
-            private function makeUnavailable():void{
-            	this.addCategoryButton.visible = false;
-            	this.addCategoryButton.includeInLayout = false;
-            	this.deleteCategoryButton.visible = false;
-            	this.deleteCategoryButton.includeInLayout = false;	
-           
-            }
-            
+            }           
+         
             private function showHideBundleContainer(value:Boolean):void{
             	if(datacenterList.selectedIndex != -1){
             		if(value){

@@ -75,7 +75,6 @@ package net.undf.abicloud.vo.configuration
 		public var client_virtual_moreInfoAboutUploadLimitations:SystemProperty;
 		public var client_infra_vlanIdMin:SystemProperty;
 		public var client_infra_vlanIdMax:SystemProperty;
-		public var client_infra_useVirtualBox:SystemProperty;
 		public var client_virtual_virtualImagesRefreshConversionsInterval:SystemProperty; 
 		public var client_main_enterpriseLogoURL:SystemProperty;
 		

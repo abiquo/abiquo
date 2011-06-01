@@ -21,13 +21,21 @@
 
 package com.abiquo.appliancemanager.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.apache.wink.common.internal.uri.UriEncoder;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.appliancemanager.util.URIResolver;
@@ -53,16 +61,24 @@ public class ApplianceManagerResourceStub
 
     Resource ovfPackage(final String idEnterprise, final String idOVF)
     {
-        Map<String, String> params = new HashMap<String, String>()
+        Map<String, String> params;
+        try
         {
+            params = new HashMap<String, String>()
             {
-                put("erepo", idEnterprise);
-                put("ovfpi", idOVF);
-            }
-        };
+                {
+                    // FIXME ABICLOUDPREMIUM-1798
+                    put("erepo", idEnterprise);
+                    put("ovfpi", URLEncoder.encode(idOVF, "UTF-8"));
+                }
+            };
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Can not encode", e);
+        }
 
-        final String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovfpi}", params);
+        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovfpi}", params);
 
         Resource resource = client.resource(url);
 

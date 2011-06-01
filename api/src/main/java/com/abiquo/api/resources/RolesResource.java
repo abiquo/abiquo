@@ -38,9 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.RoleService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RolesDto;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.util.PagedList;
 
 @Path(RolesResource.ROLES_PATH)
@@ -54,6 +57,12 @@ public class RolesResource extends AbstractResource
 
     @Autowired
     private RoleService service;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Context
     UriInfo uriInfo;
@@ -85,6 +94,35 @@ public class RolesResource extends AbstractResource
             service.getRolesByEnterprise(entId, filter, orderBy, desc, page, numResults);
         RolesDto roles = new RolesDto();
 
+        // Can only get my role
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES))
+        {
+            User currentUser = userService.getCurrentUser();
+            if (all != null && !all.isEmpty())
+            {
+                for (Role r : all)
+                {
+                    if (currentUser.getRole().getId().equals(r.getId()))
+                    {
+                        roles.add(createTransferObject(r, restBuilder));
+                        break;
+                    }
+                }
+
+                if (all instanceof PagedList< ? >)
+                {
+                    PagedList<Role> list = (PagedList<Role>) all;
+                    roles.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
+                        .toString(), list));
+                    roles.setTotalSize(list.getTotalResults());
+                }
+            }
+
+            return roles;
+        }
+
+        // Can get all roles
         if (all != null && !all.isEmpty())
         {
             for (Role r : all)

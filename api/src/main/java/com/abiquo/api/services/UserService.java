@@ -495,7 +495,7 @@ public class UserService extends DefaultApiService
 
     private Boolean emailIsValid(final String email)
     {
-        if (!email.isEmpty())
+        if ((email != null) && (!email.isEmpty()))
         {
             final Pattern pattern;
             final Matcher matchers;

@@ -275,27 +275,6 @@ public class OVFModelFromVirtualAppliance
         return state;
     }
 
-    private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
-    {
-        // from the image
-        String diskfileId = image.getName() + "." + image.getId();
-        String diskId = String.valueOf(image.getId());
-        Long capacity = image.getHdRequired();// TODO set capacity !!! (using fileId? )
-
-        DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().getUri());
-
-        // TODO (also capacityUnit and parentRef (populateSize on an empty disk do not matter))
-
-        // Setting the virtual Disk package level element
-        DiskSectionType diskSection = new DiskSectionType();
-        VirtualDiskDescType virtualDescType =
-            OVFDiskUtils.createDiskDescription(diskId, diskfileId, format, capacity, null, null,
-                null);
-
-        diskSection.getDisk().add(virtualDescType);
-
-        return diskSection;
-    }
 
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
     {
@@ -864,8 +843,20 @@ public class OVFModelFromVirtualAppliance
             VirtualImageDecorator decorator = (VirtualImageDecorator) virtualImage;
             fileRef += "." + decorator.getPath();
         }
-
-        DiskFormat format = DiskFormat.fromValue(virtualImage.getDiskFormatType().getUri());
+        
+        DiskFormat format;
+        
+        if(virtualMachine.getConversion() != null)
+        {
+            format =
+                DiskFormat.fromValue(virtualMachine.getConversion().getDiskTargetFormatType().getUri());
+        }
+        else
+        {
+            format = DiskFormat.fromValue(virtualImage.getDiskFormatType().getUri());    
+        }
+        
+        
         Long capacity = virtualImage.getHdRequired();
         Long populate = virtualImage.getHdRequired(); // TODO required (using the fileSize + disk
         // format it can be computed)
