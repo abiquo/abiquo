@@ -119,11 +119,19 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
     }
 
     public List<Enterprise> findEnterprisesByDatacenters(final Datacenter datacenter,
-        final Integer firstElem, final Integer numElem)
+        final Integer firstElem, final Integer numElem, final Boolean network)
     {
 
         // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_ENT);
+        Query finalQuery;
+        if (network)
+        {
+            finalQuery = getSession().createQuery(BY_ENT_WITH_NETWORK);
+        }
+        else
+        {
+            finalQuery = getSession().createQuery(BY_ENT);
+        }
         finalQuery.setParameter("datacenter_id", datacenter.getId());
         Integer totalResults = finalQuery.list().size();
 
@@ -139,12 +147,15 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         return entList;
     }
 
-    public static final String BY_ENT =
+    public static final String BY_ENT_WITH_NETWORK =
         " select distinct ent from  VirtualDatacenter vdc, " + " VLANNetwork vn, "
             + " DatacenterLimits dcl join dcl.enterprise ent join dcl.datacenter dc"
             + " WHERE vn.network.id = vdc.network.id" + " and vdc.enterprise.id = ent.id"
-            + " and vdc.datacenter.id = dc.id " 
-            + " and dc.id = :datacenter_id ";
+            + " and vdc.datacenter.id = dc.id " + " and dc.id = :datacenter_id ";
+
+    public static final String BY_ENT =
+        " select distinct ent from DatacenterLimits dcl join dcl.enterprise ent join dcl.datacenter dc"
+            + " WHERE dc.id = :datacenter_id ";
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "

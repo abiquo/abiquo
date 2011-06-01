@@ -431,6 +431,12 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         {
             if (!virtualApp.getNodes().isEmpty())
             {
+                for(Node node:virtualApp.getNodes())
+                {
+                    String message = "Bundle process started in "+ node.getName();
+                    TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                        EventType.VAPP_BUNDLE, message, user, platform);
+                }
                 BasicResult result = virtualApplianceWs.bundleVirtualAppliance(virtualApp);
                 done = result.getSuccess();
             }
@@ -438,7 +444,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            traceBundleError("Error bundling virtual pppliance " + virtualApp.getName() + "("
+            traceBundleError("Error bundling virtual appliance " + virtualApp.getName() + "("
                 + virtualApp.getId() + "). " + e.getMessage());
             done = false;
         }
