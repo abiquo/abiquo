@@ -313,7 +313,8 @@ public class VolumeManagement extends RasdManagement
             "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname",
             "vol.virtualMachine.name"), VIRTUALAPPLIANCE("vaname", "vapp.name"), TIER("tier",
             "vol.storagePool.tier.name"), TOTALSIZE("size", "vol.rasd.limit"), AVAILABLESIZE(
-            "available", "vol.rasd.reservation"), USEDSIZE("used", "vol.usedSizeInMB");
+            "available", "vol.rasd.reservation"), USEDSIZE("used", "vol.usedSizeInMB"), STATE(
+            "state", "vol.state");
 
         private String columnSQL;
 
