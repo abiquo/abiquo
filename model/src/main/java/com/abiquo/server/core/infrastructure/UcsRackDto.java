@@ -7,14 +7,14 @@ public class UcsRackDto extends RackDto
 {
     private static final long serialVersionUID = 1L;
     
-    private int port;
+    private Integer port;
 
-    public int getPort()
+    public Integer getPort()
     {
         return port;
     }
 
-    public void setPort(int port)
+    public void setPort(Integer port)
     {
         this.port = port;
     }
