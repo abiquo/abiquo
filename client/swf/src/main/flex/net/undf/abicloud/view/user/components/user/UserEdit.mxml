@@ -97,6 +97,7 @@
              **/
             public function init(user:User, role:Boolean):void
             {
+            	this._vdcAllowed = true;
                 this._userToEdit = user;
                 this._isUserEditing = role;
 
@@ -106,7 +107,7 @@
                 roleInput.selectedIndex = -1;
                 roleInput.prompt = this._userToEdit.role.name;
                 userInput.text = this._userToEdit.user;
-                requestPrivilege(this._userToEdit.role);
+                
                 //Now user will be able to modify all the information without changing the pass
                 //passwordInput.text = this._userToEdit.pass;
                 //passwordRepeatInput.text = this._userToEdit.pass;
@@ -134,6 +135,7 @@
                     oldPasswordInput.text = _userToEdit.pass;
                     labelOldPasswordInvalid.visible = false;
                     currentPassword.enabled = false;
+                    requestPrivilege(this._userToEdit.role);
                 }
 
                 nameInput.setFocus();
