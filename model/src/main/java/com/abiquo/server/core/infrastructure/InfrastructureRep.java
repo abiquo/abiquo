@@ -291,8 +291,7 @@ public class InfrastructureRep extends DefaultRepBase
     
     public UcsRack findUcsRackById(Integer rackId)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return ucsRackDao.findById(rackId);
     }
 
     public void insertRack(final Rack rack)

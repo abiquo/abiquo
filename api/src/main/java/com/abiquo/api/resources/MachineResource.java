@@ -174,12 +174,16 @@ public class MachineResource extends AbstractResource
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());
         dto.setVirtualSwitch(machine.getVirtualSwitch());
-        dto.setIp(machine.getHypervisor().getIp());
-        dto.setIpService(machine.getHypervisor().getIpService());
-        dto.setType(machine.getHypervisor().getType());
-        dto.setUser(machine.getHypervisor().getUser());
-        dto.setPassword(machine.getHypervisor().getPassword());
-
+        
+        if (machine.getHypervisor() != null)
+        {
+            dto.setIp(machine.getHypervisor().getIp());
+            dto.setIpService(machine.getHypervisor().getIpService());
+            dto.setType(machine.getHypervisor().getType());
+            dto.setUser(machine.getHypervisor().getUser());
+            dto.setPassword(machine.getHypervisor().getPassword());
+        }
+        
         dto =
             addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
 
