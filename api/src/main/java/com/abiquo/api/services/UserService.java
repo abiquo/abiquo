@@ -398,7 +398,7 @@ public class UserService extends DefaultApiService
 
     private Boolean emailIsValid(final String email)
     {
-        if (!email.isEmpty())
+        if ((email != null) && (!email.isEmpty()))
         {
             final Pattern pattern;
             final Matcher matchers;
@@ -409,6 +409,7 @@ public class UserService extends DefaultApiService
             matchers = pattern.matcher(email);
             return matchers.matches();
         }
-        else return true;
+        else
+            return true;
     }
 }
