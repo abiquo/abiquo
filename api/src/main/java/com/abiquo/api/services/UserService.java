@@ -430,8 +430,8 @@ public class UserService extends DefaultApiService
         // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
         // || role == Role.Type.USER)
 
-        if (((securityService.isEnterpriseAdmin() && !sameEnterprise) || securityService
-            .isStandardUser()) && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
+        if ((securityService.isEnterpriseAdmin() && !sameEnterprise)
+            || securityService.isStandardUser())
         {
             throw new AccessDeniedException("");
         }
