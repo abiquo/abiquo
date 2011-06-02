@@ -131,7 +131,10 @@ public class UserService extends DefaultApiService
         // [ABICLOUDPREMIUM-1310] If all the checks are valid, we still need to restrict to the
         // current user if the role of the requestes is a standard user
         // if (user.getRole().getType() == Role.Type.USER)
-        if (securityService.isStandardUser())
+
+        // [ROLES & PRIVILEGES] User response depends on current user's privileges)
+
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
         {
             return Collections.singletonList(user);
         }

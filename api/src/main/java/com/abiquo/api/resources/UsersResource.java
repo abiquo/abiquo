@@ -90,30 +90,30 @@ public class UsersResource extends AbstractResource
         UsersDto users = new UsersDto();
 
         // Can only get my user
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
-        {
-            User currentUser = service.getCurrentUser();
-            if (all != null && !all.isEmpty())
-            {
-                for (User u : all)
-                {
-                    if (currentUser.getId().equals(u.getId()))
-                    {
-                        users.add(createTransferObject(u, restBuilder));
-                        break;
-                    }
-                }
-
-                if (all instanceof PagedList< ? >)
-                {
-                    PagedList<User> list = (PagedList<User>) all;
-                    users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
-                        .toString(), list));
-                    users.setTotalSize(list.getTotalResults());
-                }
-            }
-            return users;
-        }
+        // if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        // {
+        // User currentUser = service.getCurrentUser();
+        // if (all != null && !all.isEmpty())
+        // {
+        // for (User u : all)
+        // {
+        // if (currentUser.getId().equals(u.getId()))
+        // {
+        // users.add(createTransferObject(u, restBuilder));
+        // break;
+        // }
+        // }
+        //
+        // if (all instanceof PagedList< ? >)
+        // {
+        // PagedList<User> list = (PagedList<User>) all;
+        // users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
+        // .toString(), list));
+        // users.setTotalSize(list.getTotalResults());
+        // }
+        // }
+        // return users;
+        // }
 
         // Can get all users
         if (all != null && !all.isEmpty())
