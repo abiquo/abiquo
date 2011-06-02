@@ -162,8 +162,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -446,6 +446,16 @@ public class UserService extends DefaultApiService
         {
             throw new AccessDeniedException("");
         }
+    }
+
+    public String enterpriseWithBlockedRoles(final Enterprise enterprise)
+    {
+        Collection<User> users =repo.findUsersByEnterprise(enterprise);
+        for(User user:users)
+        {
+            if(user.getRole().isBlocked()) return user.getRole().getName().toString();
+        }
+        return "";
     }
 
     private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)

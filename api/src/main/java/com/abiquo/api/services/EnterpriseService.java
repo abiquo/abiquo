@@ -43,6 +43,7 @@ import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -243,6 +244,17 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
+        if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
+        {
+            String message =
+                "Cannot delete enterprise because some users have roles with super privileges ("
+                    + userService.enterpriseWithBlockedRoles(enterprise)
+                    + "), please change their enterprise before continuing";
+            addConflictErrors(new CommonError(APIError.ENTERPRISE_WITH_BLOCKED_USER.getCode(),
+                message));
+            flushErrors();
+        }
+
         repo.delete(enterprise);
     }
 
@@ -348,20 +360,11 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise,
-                datacenter,
-                dto.getRamSoftLimitInMb(),
-                dto.getCpuCountSoftLimit(),
-                dto.getHdSoftLimitInMb(),
-                dto.getRamHardLimitInMb(),
-                dto.getCpuCountHardLimit(),
-                dto.getHdHardLimitInMb(),
-                dto.getStorageSoft(),
-                dto.getStorageHard(),
-                dto.getPublicIpsSoft(),
-                dto.getPublicIpsHard(),
-                dto.getVlansSoft(),
-                dto.getVlansHard());
+            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
+                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
+                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
+                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
+                .getVlansSoft(), dto.getVlansHard());
 
         if (!limit.isValid())
         {
