@@ -39,6 +39,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import net.undf.abicloud.events.MeteringEvent;
             import net.undf.abicloud.model.AbiCloudModel;
             import mx.resources.ResourceManager;
@@ -46,6 +48,13 @@
 
             private function onInitialize():void
             {
+                //Check for privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.EVENTLOG_VIEW_ALL,"editable",enterpriseInput);
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ALL)){
+                	enterpriseInput.text = AbiCloudModel.getInstance().loginManager.user.enterprise.name;
+                }
+                
                 //Requesting the list of Severity Types and Event Typs
                 var meteringEvent:MeteringEvent = new MeteringEvent(MeteringEvent.GET_EVENT_TYPES);
                 dispatchEvent(meteringEvent);
