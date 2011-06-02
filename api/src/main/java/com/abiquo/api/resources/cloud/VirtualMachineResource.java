@@ -60,14 +60,6 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
     public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
-    
-    public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
-    
-    public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
-    
-    public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
-    
-    public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
     public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
 
@@ -239,7 +231,7 @@ public class VirtualMachineResource extends AbstractResource
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
             vmService.validMachineStateChange(vm.getState(), State.POWERED_OFF);
-           
+
             vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
@@ -267,7 +259,7 @@ public class VirtualMachineResource extends AbstractResource
         if (!vmService.sameState(vm, State.REBOOTED))
         {
             vmService.validMachineStateChange(vm.getState(), State.REBOOTED);
-            
+
             vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
@@ -295,7 +287,7 @@ public class VirtualMachineResource extends AbstractResource
         if (!vmService.sameState(vm, State.PAUSED))
         {
             vmService.validMachineStateChange(vm.getState(), State.PAUSED);
-            
+
             vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);

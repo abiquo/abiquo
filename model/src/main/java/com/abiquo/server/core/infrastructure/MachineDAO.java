@@ -38,6 +38,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Machine.State;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -121,7 +122,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         List<Machine> result = getResultList(criteria);
         return result;
     }
-    
+
     public List<Machine> findRackEnabledForHAMachines(Rack rack)
     {
         Criteria criteria = createCriteria(sameRack(rack));
@@ -140,7 +141,6 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         List<Machine> result = getResultList(criteria);
         return result;
     }
-    
 
     public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
     {
@@ -326,9 +326,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             query.setInteger("idRack", idRack);
             query
                 .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-            query.setParameterList("reserveds", reserveds);            
+            query.setParameterList("reserveds", reserveds);
             query.setInteger("originalHypervisorId", originalHypervisorId);
-             
 
             machines = query.list();
 

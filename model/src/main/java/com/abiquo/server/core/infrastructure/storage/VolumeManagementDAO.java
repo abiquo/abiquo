@@ -233,26 +233,6 @@ import com.abiquo.server.core.util.PagedList;
         return volumesList;
     }
 
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
-    {
-        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
-        return getResultList(criteria);
-    }
-
-    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer volumeId)
-    {
-        Criteria criteria =
-            createCriteria(Restrictions.eq("virtualDatacenter", vdc)).add(
-                Restrictions.eq("id", volumeId));
-        return (VolumeManagement) criteria.uniqueResult();
-    }
-    
-    public VolumeManagement getVolumeByRasd(final Rasd rasd)
-    {
-        Criteria criteria = createCriteria(Restrictions.eq("rasd", rasd));
-        return (VolumeManagement) criteria.uniqueResult();
-    }
     public List<VolumeManagement> getVolumesByEnterprise(final Integer id,
         final FilterOptions filters)
     {
@@ -274,8 +254,8 @@ import com.abiquo.server.core.util.PagedList;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
-            + filters.getFilter() + "%");
+        query.setParameter("filterLike",
+            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 
