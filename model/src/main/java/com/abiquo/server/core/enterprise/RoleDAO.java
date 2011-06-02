@@ -76,6 +76,15 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         return filterDisjunction;
     }
 
+    private Criterion filterExactlyBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(Role.NAME_PROPERTY, filter));
+
+        return filterDisjunction;
+    }
+
     public Collection<Role> find(final Enterprise enterprise, final String filter,
         final String orderBy, final boolean desc)
     {
@@ -90,6 +99,29 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         Long total = count(criteria);
 
         criteria = createCriteria(enterprise, filter, orderBy, desc);
+
+        criteria.setFirstResult(offset * numResults);
+        criteria.setMaxResults(numResults);
+
+        List<Role> result = getResultList(criteria);
+
+        PagedList<Role> page = new PagedList<Role>();
+        page.addAll(result);
+        page.setCurrentElement(offset);
+        page.setPageSize(numResults);
+        page.setTotalResults(total.intValue());
+
+        return page;
+    }
+
+    public Collection<Role> findExactly(final Enterprise enterprise, final String filter,
+        final String orderBy, final boolean desc, final Integer offset, final Integer numResults)
+    {
+        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc);
+
+        Long total = count(criteria);
+
+        criteria = createCriteriaExactly(enterprise, filter, orderBy, desc);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -151,4 +183,37 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         "  SELECT r.privileges FROM " + //
             "com.abiquo.server.core.enterprise.Role r " + //
             "WHERE r.id = :idRole";
+
+    private Criteria createCriteriaExactly(final Enterprise enterprise, final String filter,
+        final String orderBy, final boolean desc)
+    {
+        Criteria criteria = createCriteria();
+
+        if (enterprise != null)
+        {
+            criteria.add(sameEnterprise(enterprise));
+        }
+        else
+        {
+            criteria.add(genericRole());
+        }
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterExactlyBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderBy))
+        {
+            Order order = Order.asc(orderBy);
+            if (desc)
+            {
+                order = Order.desc(orderBy);
+            }
+            criteria.addOrder(order);
+            criteria.addOrder(Order.asc(Role.NAME_PROPERTY));
+        }
+
+        return criteria;
+    }
 }
