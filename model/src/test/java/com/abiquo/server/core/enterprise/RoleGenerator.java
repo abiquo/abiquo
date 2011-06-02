@@ -117,11 +117,12 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     public Role createInstanceEnterprisAdmin()
     {
         Privilege p2 = new Privilege(USERS_MANAGE_OTHER_USERS);
+        Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
         Privilege p5 = new Privilege(USERS_MANAGE_USERS);
         Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
         Privilege p11 = new Privilege(VDC_ENUMERATE);
-        return createInstance(p2, p4, p5, p8, p11);
+        return createInstance(p2, p3, p4, p5, p8, p11);
     }
 
     public Role createInstance(final Enterprise enterprise)

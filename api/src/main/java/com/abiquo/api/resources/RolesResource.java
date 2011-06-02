@@ -96,7 +96,8 @@ public class RolesResource extends AbstractResource
 
         // Can only get my role
         if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES))
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES)
+            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (all != null && !all.isEmpty())
