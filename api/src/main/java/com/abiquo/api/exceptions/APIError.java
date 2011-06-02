@@ -273,7 +273,8 @@ public enum APIError
         "The volume cannot be deleted because it is in a being used in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
         "VOL-8",
         "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
-        "VOL-9", "The idScsi of the volume is required"),
+        "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-10", "The size of the volume cannot be decreased"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
