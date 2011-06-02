@@ -30,7 +30,7 @@ import com.hyper9.jwbem.SWbemObject;
 import com.hyper9.jwbem.SWbemServices;
 
 /**
- * Represents a process on an operating system
+ * Represents a process on an Win32 operating system
  * 
  * @author pnavarro
  */
@@ -55,6 +55,8 @@ public class Win32Process extends SWbemObject
      */
     public void create(String command) throws JIException
     {
+        // TODO: Do we need to get this Create method this way?
+        // Tip: check MsvmImageManagementService.convertVirtualHardDisk 2 methods
         if (this.create == null)
         {
             for (final SWbemMethod m : super.getMethods())
@@ -69,28 +71,18 @@ public class Win32Process extends SWbemObject
         // Get the IN parameters.
         SWbemObject inParams = this.create.getInParameters();
         inParams.getObjectDispatcher().put("CommandLine", new JIVariant(new JIString(command)));
-        inParams.getObjectDispatcher().put("CurrentDirectory", new JIVariant(new JIString("C:\\")));
-        // inParams.getObjectDispatcher().put("ProcessStartupInformation",
-        // JIVariant.OPTIONAL_PARAM());
+// "CurrentDirectory" and "ProcessStartupInformation" are optional params        
+//        inParams.getObjectDispatcher().put("CurrentDirectory", new JIVariant(new JIString("C:\\")));
+//        inParams.getObjectDispatcher().put("CurrentDirectory", JIVariant.NULL());
+//         inParams.getObjectDispatcher().put("ProcessStartupInformation", JIVariant.NULL());
 
         Object[] methodParams =
             new Object[] {new JIString("Create"), new JIVariant(inParams.getObjectDispatcher()),
             new Integer(0), JIVariant.NULL(),};
 
         JIVariant[] results = dispatch.callMethodA("ExecMethod_", methodParams);
-
-        int result = results[0].getObjectAsInt();
-    }
-
-    public int create2(String command) throws JIException
-    {
-        // JIVariant[] resultsCreate =
-        // dispatch.callMethodA("Create", new Object[] {new JIVariant(command),
-        // new JIVariant("C:\\"), JIVariant.EMPTY_BYREF(), JIVariant.EMPTY_BYREF()});
-        JIVariant[] resultsCreate =
-            dispatch.callMethodA("Create", new Object[] {new JIVariant(command),
-            JIVariant.EMPTY_BYREF(), JIVariant.EMPTY_BYREF()});
-        int error = resultsCreate[0].getObjectAsInt();
-        return error;
+        
+// TODO: Get result actually returned; it's not an Integer
+//        int result = results[0].getObjectAsInt();
     }
 }

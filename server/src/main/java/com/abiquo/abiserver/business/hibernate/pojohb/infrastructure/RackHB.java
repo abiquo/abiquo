@@ -47,6 +47,8 @@ public class RackHB implements java.io.Serializable, IPojoHB<Rack>
     private String shortDescription;
 
     private String largeDescription;
+    
+    private Boolean haEnabled;
 
     private Set<PhysicalmachineHB> physicalmachines = new HashSet<PhysicalmachineHB>(0);
 
@@ -234,6 +236,16 @@ public class RackHB implements java.io.Serializable, IPojoHB<Rack>
     {
         NRSQ = nRSQ;
     }
+    
+    public void setHaEnabled(Boolean haEnabled)
+    {
+        this.haEnabled = haEnabled;
+    }
+
+    public Boolean getHaEnabled()
+    {
+        return haEnabled;
+    }
 
     public Rack toPojo()
     {
@@ -251,7 +263,8 @@ public class RackHB implements java.io.Serializable, IPojoHB<Rack>
                 getVlan_per_vdc_expected());
         vlanNetworkParameters.setVlans_id_avoided(getVlans_id_avoided());
         rack.setVlanNetworkParameters(vlanNetworkParameters);
+        rack.setHaEnabled(haEnabled);
         return rack;
     }
-
+  
 }

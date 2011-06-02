@@ -64,7 +64,7 @@ public class DatastoreGenerator extends DefaultEntityGenerator<Datastore>
     public void assertAllPropertiesEqual(Datastore obj1, Datastore obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Datastore.NAME_PROPERTY,
-            Datastore.DIRECTORY_PROPERTY, Datastore.ROOT_PATH_PROPERTY, Datastore.SHARED_PROPERTY);
+            Datastore.DIRECTORY_PROPERTY, Datastore.ROOT_PATH_PROPERTY);
     }
 
     @Override

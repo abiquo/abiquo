@@ -317,6 +317,26 @@ public class Rack extends DefaultEntityBase
     {
         this.vlansIdAvoided = vlansIdAvoided;
     }
+    
+    public final static String HAENABLED_PROPERTY = "haEnabled";
+
+    private final static String HAENABLED_COLUMN = "haEnabled";
+
+    private final static boolean HAENABLED_REQUIRED = true;
+
+    @Column(name = HAENABLED_COLUMN, nullable = false)
+    private boolean haEnabled = false;
+
+    @Required(value = HAENABLED_REQUIRED)
+    public boolean isHaEnabled()
+    {
+        return this.haEnabled;
+    }
+
+    public void setHaEnabled(boolean haEnabled)
+    {
+        this.haEnabled = haEnabled;
+    }
 
     // ********************************** Others
     // ********************************

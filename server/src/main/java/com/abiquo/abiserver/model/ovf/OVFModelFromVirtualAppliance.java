@@ -506,6 +506,18 @@ public class OVFModelFromVirtualAppliance
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling) throws Exception
     {
+        return createVirtualApplication(virtualAppliance, bundling, false);
+    }
+
+    public EnvelopeType createVirtualApplicationHA(final VirtualAppliance virtualAppliance)
+        throws Exception
+    {
+        return createVirtualApplication(virtualAppliance, false, true);
+    }
+
+    private EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
+        final boolean bundling, final boolean isHa) throws Exception
+    {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
 
@@ -560,9 +572,8 @@ public class OVFModelFromVirtualAppliance
                 // Adding the virtual disks to references
                 try
                 {
-                    OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage.getVirtualMachine(), nodeVirtualImage.getVirtualImage(),
-                        bundling));
+                    OVFReferenceUtils.addFile(references,
+                        createFileFromVirtualImage(nodeVirtualImage, bundling, isHa));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -683,47 +694,8 @@ public class OVFModelFromVirtualAppliance
         return networkType;
     }
 
-    /**
-     * Helper method to createVirtualApplication - Adds the CustomNetwork to the EnvelopeType
-     * 
-     * @param envelope a reference to an EnvelopeType object to which the CustomNetwork section will
-     *            be added
-     * @param virtualAppliance a VirtualAppliance object which may or may not have a network
-     * @throws Exception
-     */
-    private static AbicloudNetworkType createCustomNetwork(final VirtualAppliance virtualAppliance)
-        throws Exception
-    {
-        DAOFactory factory = HibernateDAOFactory.instance();
-
-        factory.beginConnection();
-
-        VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
-        VirtualappHB persistedVapp = vappDAO.findByIdNamedExtended(virtualAppliance.getId());
-
-        factory.endConnection();
-
-        AbicloudNetworkType networkType = new AbicloudNetworkType();
-
-        for (NodeHB< ? > nodeHB : persistedVapp.getNodesHB())
-        {
-            NodeVirtualImageHB nvi = (NodeVirtualImageHB) nodeHB;
-            AbicloudNetworkType vmNetwork =
-                createCustomNetwork(nvi.getVirtualMachineHB().getIdVm());
-
-            if (networkType.getUuid() == null)
-            {
-                networkType.setUuid(vmNetwork.getUuid());
-            }
-
-            networkType.getNetworks().addAll(vmNetwork.getNetworks());
-        }
-
-        return networkType;
-    }
-
-    private FileType createFileFromVirtualImage(final VirtualMachine virtualMachine,
-        final VirtualImage virtualImage, final boolean bundling) throws RequiredAttributeException
+    private FileType createFileFromVirtualImage(final NodeVirtualImage nodeVirtualImage,
+        final boolean bundling, final boolean isHa) throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -773,6 +745,11 @@ public class OVFModelFromVirtualAppliance
         insertTargetDataStore(virtualDiskImageFile, virtualMachine.getDatastore().getUUID()
             + virtualMachine.getDatastore().getDirectory());
 
+        if (isHa)
+        {
+            setHA(virtualDiskImageFile);
+        }
+
         // compression
         // chunk
         VirtualImageDecorator decorator =
@@ -806,6 +783,16 @@ public class OVFModelFromVirtualAppliance
         insertRepositoryManager(virtualDiskImageFile, virtualMachine);
 
         return virtualDiskImageFile;
+    }
+
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(AbiCloudConstants.HA_DISK,
+            Boolean.TRUE.toString());
     }
 
     /**

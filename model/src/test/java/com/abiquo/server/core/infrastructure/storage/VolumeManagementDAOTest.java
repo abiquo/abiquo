@@ -259,4 +259,16 @@ public class VolumeManagementDAOTest extends
         assertSize(results, 2);
     }
 
+    @Test
+    public void testGetVolumesByRasd()
+    {
+        // Test without filtering
+        VolumeManagement volume = eg().createUniqueInstance();
+        Rasd rasd = volume.getRasd();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        VolumeManagement vol = dao.getVolumeByRasd(rasd);
+
+        eg().assertAllPropertiesEqual(vol,volume);
+    }
 }

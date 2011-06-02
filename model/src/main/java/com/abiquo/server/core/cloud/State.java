@@ -56,7 +56,9 @@ public enum State
 
     STATEFUL,
 
-    UNKNOWN;
+    UNKNOWN,
+
+    HA_IN_PROGRESS;
 
     public int id()
     {

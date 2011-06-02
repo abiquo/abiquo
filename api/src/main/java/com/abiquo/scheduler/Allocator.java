@@ -40,6 +40,7 @@ import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
@@ -79,6 +80,9 @@ public class Allocator implements IAllocator
     VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
+    VirtualApplianceRep virtualAppRep;
+
+    @Autowired
     NetworkAssignmentDAO networkAssignmentDao;
 
     // ///////
@@ -97,59 +101,62 @@ public class Allocator implements IAllocator
     /** All the entities to check its limits. Premium adds */
     @Autowired
     EnterpriseLimitChecker checkEnterpirse;
+    
+    /** Only used on the HA reallocate.*/
+    @Autowired
+    ResourceUpgradeUse upgradeUse;
+    
 
     /** If the check machine fails, how many times the allocator try a new target machine. */
     protected final static Integer RETRIES_AFTER_CHECK = 5;
 
-
-    
-    
-    public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
-        boolean foreceEnterpriseSoftLimits) throws AllocatorException
+    public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId,
+        VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
+        throws AllocatorException, ResourceAllocationException
     {
 
         final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         final Machine machine = vmachine.getHypervisor().getMachine();
 
-        
-        final VirtualMachineRequirements increaseRequirements = getVirtualMachineRequirements(vmachine, newVmRequirements);
+        final VirtualMachineRequirements increaseRequirements =
+            getVirtualMachineRequirements(vmachine, newVmRequirements);
 
-        
         checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
 
         final VirtualImage increaseVirtualImage = getVirtualImage(increaseRequirements);
-        
+
         boolean check =
             allocationService.checkVirtualMachineResourceIncrease(machine, increaseVirtualImage,
                 idVirtualApp);
-        
-        if(!check)
+
+        if (!check)
         {
-            final String cause = String.format("Current workload rules (RAM and CPU oversubscription) " +
-            		"on the target machine: %s disallow the required resources increment.", machine.getName());
-            throw new AllocatorException(cause);             
-        }        
+            final String cause =
+                String.format("Current workload rules (RAM and CPU oversubscription) "
+                    + "on the target machine: %s disallow the required resources increment.",
+                    machine.getName());
+            throw new AllocatorException(cause);
+        }
     }
-    
-    
-    
-    private VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine vmachine, VirtualMachineDto newVmRequirements)
+
+    private VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine vmachine,
+        VirtualMachineDto newVmRequirements)
     {
         Integer cpu = newVmRequirements.getCpu() - vmachine.getCpu();
         Integer ram = newVmRequirements.getRam() - vmachine.getRam();
-        
+
         cpu = cpu > 0 ? cpu : 0;
         ram = ram > 0 ? ram : 0;
-        
-        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);       
+
+        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);
     }
-    
+
     private VirtualImage getVirtualImage(VirtualMachineRequirements increaseRequirements)
     {
         VirtualImage vimage = new VirtualImage(null); // doesn't care about the enterprise
         vimage.setCpuRequired(increaseRequirements.getCpu().intValue());
-        vimage.setRamRequired(increaseRequirements.getRam().intValue());        
+        vimage.setRamRequired(increaseRequirements.getRam().intValue());
         return vimage;
     }
 
@@ -161,7 +168,7 @@ public class Allocator implements IAllocator
         VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
 
-        VirtualImage vi = vmachine.getVirtualImage();
+        // VirtualImage vi = vmachine.getVirtualImage();
 
         final VirtualImage vimage = getVirtualImageWithVirtualMachineResourceRequirements(vmachine);
 
@@ -243,6 +250,123 @@ public class Allocator implements IAllocator
 
         return vmachine;
     }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    public VirtualMachine allocateHAVirtualMachine(Integer vmId)
+        throws AllocatorException, ResourceAllocationException
+    {
+
+        VirtualMachine vmachine = virtualMachineDao.findById(vmId);
+        
+        
+        
+        if (vmachine.getHypervisor() == null)
+        {
+            // XXX check also is on HA ???
+            throw new ResourceAllocationException(String.format(
+                "The virtual machine isn't allocated "
+                    + "(do not have original hypervisor, can't be moved)", vmachine.getName()));
+        }
+
+        if (vmachine.getDatastore() == null)
+        {
+            throw new ResourceAllocationException(String.format(
+                "The virtual machine isn't allocated "
+                    + "(do not have original datastore, can't be moved)", vmachine.getName()));
+        }
+
+        final Integer originalHypervisrorId = vmachine.getHypervisor().getId();
+        
+        
+        final VirtualAppliance vapp = virtualAppRep.findVirtualApplianceByVirtualMachine(vmachine);
+        final VirtualImage vimage = getVirtualImageWithVirtualMachineResourceRequirements(vmachine);
+
+        final Integer idEnterprise = vapp.getEnterprise().getId();
+        final Integer idVirtualDatacenter = vapp.getVirtualDatacenter().getId();
+        final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
+
+        // HA specific
+        final Integer idRack = vmachine.getHypervisor().getMachine().getRack().getId();
+        final String datastoreUuid = vmachine.getDatastore().getDatastoreUUID();
+        final Integer originalHypervisorId = vmachine.getHypervisor().getId();
+
+        final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
+
+        /*
+         * PHYSICAL MACHINE ALLOCATION
+         */
+
+        Machine targetMachine = null;
+
+        int retry = 0;
+        String errorCause = null;
+        while (targetMachine == null && retry < RETRIES_AFTER_CHECK)
+        {
+            retry++;
+
+            // BEST MACHINE
+            targetMachine =
+                allocationService.findBestTarget(vimage, fitPolicy, vapp.getId(), datastoreUuid,
+                    originalHypervisorId, idRack);
+
+            // BEST REAL MACHINE
+            if (checkMachine(targetMachine, idVirtualDatacenter, idDatacenter, idEnterprise))
+            {
+                // CREATE THE VIRTUAL MACHINE
+                try
+                {
+                    vmachine = vmFactory.createVirtualMachine(targetMachine, vmachine);
+                    
+                    // refresh vmachine with the information added on the VirtualMachineFactory
+                    virtualMachineDao.flush();
+                }
+                catch (final NotEnoughResourcesException e)
+                {
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                        targetMachine.getName(), e);
+
+                    errorCause =
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
+                    targetMachine = null;
+                }
+            }
+            else
+            {
+                log.error("Machine [{}] is not MANAGED", targetMachine.getName());
+                errorCause =
+                    String.format("Machine : %s error: %s", targetMachine.getName(),
+                        "is not MANAGED");
+                targetMachine = null;
+
+            }
+        }// retry until check
+
+        // SOME CANDIDATE ?
+        if (targetMachine == null)
+        {
+            final String cause =
+                String.format(
+                    "Allocator can not select a machine on the current virtual datacenter "
+                        + "and rack with the required datastore (HA). "
+                        + "Last candidate error : %s.", errorCause != null ? errorCause
+                        : "can not be confirmed as MANAGED.");
+            throw new NotEnoughResourcesException(cause);
+        }
+
+        log.info("Selected physical machine [{}] to perform HA over VirtualMachine [{}]",
+            targetMachine.getName(), vmachine.getName());
+        
+        
+        // upgrade the resource utilization on the target HA hypervisor
+        upgradeUse.updateUseHa(vapp.getId(), vmachine, originalHypervisrorId);
+        
+        
+
+        return vmachine;
+    }
+    
+    
 
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)

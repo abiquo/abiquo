@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
@@ -58,24 +59,24 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
-@Repository
-@Transactional(readOnly = true)
+@Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService extends DefaultApiService
 {
     private static final String RESOURCE_URI =
         "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
 
     @Autowired
-    VirtualMachineRep repo;
+    protected VirtualMachineRep repo;
 
     @Autowired
-    VirtualApplianceService vappService;
+    protected VirtualApplianceService vappService;
 
     @Autowired
-    RemoteServiceService remoteService;
+    protected RemoteServiceService remoteService;
 
     @Autowired
-    OVFGeneratorService ovfService;
+    protected OVFGeneratorService ovfService;
 
     @Autowired
     ConfigService configService;
@@ -184,11 +185,28 @@ public class VirtualMachineService extends DefaultApiService
     {
         if (vm.getState() == State.IN_PROGRESS)
         {
-            throw new PreconditionFailedException(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
+            flushErrors();
         }
 
         vm.setState(State.IN_PROGRESS);
         updateVirtualMachine(vm);
+    }
+
+    public void validMachineStateChange(State oldState, State newState)
+    {
+        if (oldState == State.NOT_DEPLOYED)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
+            flushErrors();
+        }
+        if(((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
+            || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
+            || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
+            flushErrors();
+        }
     }
 
     /**
@@ -202,16 +220,16 @@ public class VirtualMachineService extends DefaultApiService
     public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
         final Integer vdcId, final State state) throws Exception
     {
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
-        Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
+
+        Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
         VirtualAppliance vapp = contanerVirtualAppliance(vm);
         EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
         Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
         RemoteService vf =
-            remoteService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
+            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
 
         long timeout = Long.valueOf(configService.getServerTimeout());
 
@@ -263,7 +281,7 @@ public class VirtualMachineService extends DefaultApiService
         return state.toOVF().equalsIgnoreCase(actual);
     }
 
-    private void changeState(final Resource resource, final EnvelopeType envelope,
+    public void changeState(final Resource resource, final EnvelopeType envelope,
         final String machineState) throws Exception
     {
         EnvelopeType envelopeRunning = ovfService.changeStateVirtualMachine(envelope, machineState);

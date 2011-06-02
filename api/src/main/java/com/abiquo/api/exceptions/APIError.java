@@ -116,11 +116,13 @@ public enum APIError
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
         "MACHINE-1", "The machine is not assigned to the datacenter or rack"),
+    INVALID_STATE_CHANGE("MACHINE-2", "The requested state transaction is not valid"),
+    MACHINE_NOT_ACCESIBLE("MACHINE-3", "The requested machine could not be contacted"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),               
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -130,7 +132,9 @@ public enum APIError
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
-        "VM-2", "The virtual machine is already in progress"),
+        "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
+        "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
+        "The virtual machine cannot change the state to the required state"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

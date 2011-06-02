@@ -121,6 +121,26 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         List<Machine> result = getResultList(criteria);
         return result;
     }
+    
+    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    {
+        Criteria criteria = createCriteria(sameRack(rack));
+
+        // Is a managed one
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
+
+        // Has fencing capabilities
+        criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
+        criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
+        criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        List<Machine> result = getResultList(criteria);
+        return result;
+    }
+    
 
     public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
     {
@@ -306,8 +326,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             query.setInteger("idRack", idRack);
             query
                 .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-            query.setParameterList("reserveds", reserveds);
-            query.setParameter("originalHypervisorId", originalHypervisorId);
+            query.setParameterList("reserveds", reserveds);            
+            query.setInteger("originalHypervisorId", originalHypervisorId);
+             
 
             machines = query.list();
 
@@ -706,7 +727,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
-            "AND h.id != :originalHypervisorId";
+            "AND h.id <> :originalHypervisorId";
 
     private final static String QUERY_CANDIDATE_MACHINES_RESERVED = //
         "SELECT m FROM " + //
@@ -736,7 +757,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
-            "AND h.id != :originalHypervisorId";
+            "AND h.id <> :originalHypervisorId";
 
     // "AND m.enterprise is null"; //"AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
 

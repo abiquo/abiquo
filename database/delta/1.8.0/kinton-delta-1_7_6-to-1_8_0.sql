@@ -1,4 +1,3 @@
-<<<<<<< HEAD:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 -- [ABICLOUDPREMIUM-1502]
 -- Fix int precision
 ALTER TABLE `kinton`.`vappstateful_conversions` MODIFY COLUMN `idUser` int(10) unsigned NOT NULL;
@@ -291,11 +290,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 
 
 -- DELTA 1.7.6 to 1.8.0
-=======
 -- [ABICLOUDPREMIUM-1487] The stateful can be done to a pre-selected volume
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idManagement` int(10) unsigned;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
->>>>>>> ABICLOUDPREMIUM-1485:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
@@ -1339,3 +1336,27 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.config.registration","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-ProductRegistration","Registration wiki");
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;
+
+-- Racks can be HA enabled
+ALTER TABLE `kinton`.`rack` ADD COLUMN `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality';
+
+-- PhysicalMachine can have 2 new states
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `idState` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - STOPPED
+1 - NOT PROVISIONED
+2 - NOT MANAGED
+3 - MANAGED
+4 - HALTED
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA';
+
+
+-- Racks can be HA enabled
+ALTER TABLE `kinton`.`datastore` ADD COLUMN `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.';
+ALTER TABLE `kinton`.`datastore` DROP COLUMN `shared`;
+
+-- ipmi
+ALTER TABLE `kinton`.`physicalmachine` ADD COLUMN `ipmiIP` VARCHAR(39)  DEFAULT NULL AFTER `version_c`,
+ ADD COLUMN `ipmiPort` INT(5) UNSIGNED DEFAULT NULL AFTER `ipmiIP`,
+ ADD COLUMN `ipmiUser` VARCHAR(255)  DEFAULT NULL AFTER `ipmiPort`,
+ ADD COLUMN `ipmiPassword` VARCHAR(255)  DEFAULT NULL AFTER `ipmiUser`;

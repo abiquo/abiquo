@@ -514,11 +514,18 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 1 - NOT PROVISIONED
 2 - NOT MANAGED
 3 - MANAGED
-4 - HALTED',
+4 - HALTED
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA',
   `vswitchName` VARCHAR(30)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
   `version_c` int(11) default 0,
+  `ipmiIP` varchar(39) default NULL,
+  `ipmiPort` int(5) unsigned default NULL,
+  `ipmiUser` varchar(255) default NULL,
+  `ipmiPassword` varchar(255) default NULL,
   PRIMARY KEY  (`idPhysicalMachine`),
   KEY `PhysicalMachine_FK1` (`idRack`),
   KEY `PhysicalMachine_FK5` (`idDataCenter`),
@@ -557,6 +564,7 @@ CREATE TABLE  `kinton`.`rack` (
   `vlans_id_avoided` varchar(255) default '',
   `vlan_per_vdc_expected` int(15) unsigned default 8,
   `nrsq` int(15) unsigned default 10,
+  `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRack`),
   KEY `Rack_FK1` (`idDataCenter`),
@@ -580,10 +588,10 @@ CREATE TABLE  `kinton`.`datastore` (
   `name` varchar(255) NOT NULL,
   `rootPath` varchar(36) NOT NULL,
   `directory` varchar(255) NOT NULL,
-  `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
   `size` bigint(40) unsigned NOT NULL,
   `usedSize` bigint(40) unsigned NOT NULL,
+  `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1087,6 +1095,8 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
   `idDatastore` int(10) unsigned default NULL,
   `version_c` int(11) default 0,
+
+
   PRIMARY KEY  (`idVM`),
   KEY `VirtualMachine_FK1` (`idHypervisor`),
   KEY `virtualMachine_datastore_FK` (`idDatastore`),
@@ -1767,7 +1777,6 @@ CREATE TABLE  `kinton`.`license` (
   `version_c` int(11) default 0,
   PRIMARY KEY (`idLicense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 --
 -- THE WONDERFUL WORLD OF TRIGGERS

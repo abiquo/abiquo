@@ -99,7 +99,7 @@
         ]]>
     </mx:Script>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" id="basicInfoForm">
         <mx:FormItem 
             label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
             required="true">
