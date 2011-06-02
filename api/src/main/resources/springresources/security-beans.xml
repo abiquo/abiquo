@@ -75,7 +75,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="DELETE" access="ROLE_USERS_MANAGE_USERS" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="PUT" access="ROLE_USERS_MANAGE_USERS" />
+        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="PUT" access="ROLE_USERS_MANAGE_USERS, ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         
         <!-- LIMITS -->

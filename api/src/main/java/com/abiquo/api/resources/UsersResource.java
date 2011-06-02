@@ -144,7 +144,7 @@ public class UsersResource extends AbstractResource
 
         if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
         {
-            // In ldap mode it is noto possible to create user
+            // In ldap mode it is not possible to create user
             throw new ConflictException(APIError.NOT_USER_CREACION_LDAP_MODE);
         }
         User u = service.addUser(user, enterpriseId);

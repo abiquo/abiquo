@@ -91,7 +91,8 @@ public class VirtualDatacentersResource extends AbstractResource
         throws Exception
     {
 
-        if (!securityService.hasPrivilege(SecurityService.VDC_ENUMERATE))
+        if (!securityService.hasPrivilege(SecurityService.VDC_ENUMERATE)
+            && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE))
         {
             if (enterpriseId != null
                 && !enterpriseId.equals(userService.getCurrentUser().getEnterprise().getId()))

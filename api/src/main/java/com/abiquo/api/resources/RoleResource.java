@@ -85,7 +85,8 @@ public class RoleResource extends AbstractResource
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES))
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getRole().getId().equals(roleId))
