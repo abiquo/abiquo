@@ -65,7 +65,9 @@ public enum APIError
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
-        "Missing link to the enterprise"),
+        "Missing link to the enterprise"), ENTERPRISE_WITH_BLOCKED_USER(
+        "ENTERPRISE-9",
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -115,14 +117,14 @@ public enum APIError
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
-        "MACHINE-1", "The machine is not assigned to the datacenter or rack"),
-    INVALID_STATE_CHANGE("MACHINE-2", "The requested state transaction is not valid"),
-    MACHINE_NOT_ACCESIBLE("MACHINE-3", "The requested machine could not be contacted"),
+        "MACHINE-1", "The machine is not assigned to the datacenter or rack"), INVALID_STATE_CHANGE(
+        "MACHINE-2", "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE(
+        "MACHINE-3", "The requested machine could not be contacted"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),               
+        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
