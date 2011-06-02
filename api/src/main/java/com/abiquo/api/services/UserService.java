@@ -465,8 +465,8 @@ public class UserService extends DefaultApiService
 
         // Role.Type role = user.getRole().getType();
         // if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
-        if ((securityService.isEnterpriseAdmin() || securityService.isStandardUser())
-            && !sameEnterprise)
+        if (((securityService.isEnterpriseAdmin() || securityService.isStandardUser()) && !sameEnterprise)
+            && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE))
         {
             throw new AccessDeniedException("");
         }
