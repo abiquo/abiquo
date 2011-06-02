@@ -55,6 +55,8 @@ package net.undf.abicloud.vo.user
         
         public var availableVirtualDatacenters:Array;
 
+	public var authType:String;
+
         public function User()
         {
             id = 0;
@@ -70,7 +72,7 @@ package net.undf.abicloud.vo.user
             locale = "";
             enterprise = new Enterprise();
             availableVirtualDatacenters = new Array();
-
+	    authType = "ABIQUO";
         }
 
     }
