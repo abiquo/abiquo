@@ -48,6 +48,7 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -384,4 +385,12 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/", params);
     }
 
+    protected String createMachinesLink(final Rack rack)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", valueOf(rack.getDataCenter().getId()));
+        params.put("rack", rack.getId().toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
+    }
 }
