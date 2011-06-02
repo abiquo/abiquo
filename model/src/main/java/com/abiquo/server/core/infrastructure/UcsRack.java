@@ -28,6 +28,8 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.validation.Ip;
+import com.abiquo.model.validation.Port;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -67,20 +69,22 @@ public class UcsRack extends Rack
 
     private final static String PORT_COLUMN = "port";
 
-    private final static int PORT_MIN = Integer.MIN_VALUE;
+    private final static int PORT_MIN = 0;
 
     private final static int PORT_MAX = Integer.MAX_VALUE;
 
     @Column(name = PORT_COLUMN, nullable = !PORT_REQUIRED)
     @Range(min = PORT_MIN, max = PORT_MAX)
-    private int port;
+    @Required(value = PORT_REQUIRED)
+    @Port
+    private Integer port;
 
-    public int getPort()
+    public Integer getPort()
     {
         return this.port;
     }
 
-    public void setPort(int port)
+    public void setPort(Integer port)
     {
         this.port = port;
     }
@@ -103,6 +107,7 @@ public class UcsRack extends Rack
     @Required(value = IP_REQUIRED)
     @Length(min = IP_LENGTH_MIN, max = IP_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @Ip
     public String getIp()
     {
         return this.ip;

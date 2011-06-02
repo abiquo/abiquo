@@ -53,17 +53,17 @@ public class MachinesResource extends AbstractResource
     public static final String MACHINES_PATH = "machines";
 
     @Autowired
-    private MachineService machineService;
+    protected MachineService machineService;
 
     @Autowired
-    private InfrastructureService rackService;
+    protected InfrastructureService infrastructureService;
 
     @GET
     public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
         @PathParam(RackResource.RACK) Integer rackId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
-        if (!rackService.isAssignedTo(datacenterId, rackId))
+        if (!infrastructureService.isAssignedTo(datacenterId, rackId))
         {
             throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
         }
@@ -78,7 +78,7 @@ public class MachinesResource extends AbstractResource
         @PathParam(RackResource.RACK) Integer rackId, MachineDto machine,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        if (!rackService.isAssignedTo(datacenterId, rackId))
+        if (!infrastructureService.isAssignedTo(datacenterId, rackId))
         {
             throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
         }

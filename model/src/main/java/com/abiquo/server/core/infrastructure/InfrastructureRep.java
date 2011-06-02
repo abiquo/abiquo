@@ -76,6 +76,9 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private RackDAO rackDao;
+    
+    @Autowired
+    private UcsRackDAO ucsRackDao;
 
     @Autowired
     private MachineDAO machineDao;
@@ -118,6 +121,7 @@ public class InfrastructureRep extends DefaultRepBase
 
         this.dao = new DatacenterDAO(entityManager);
         this.rackDao = new RackDAO(entityManager);
+        this.ucsRackDao = new UcsRackDAO(entityManager);
         this.machineDao = new MachineDAO(entityManager);
         this.hypervisorDao = new HypervisorDAO(entityManager);
         this.datastoreDao = new DatastoreDAO(entityManager);
@@ -283,6 +287,11 @@ public class InfrastructureRep extends DefaultRepBase
         assert id != null;
 
         return this.rackDao.findById(id);
+    }
+    
+    public UcsRack findUcsRackById(Integer rackId)
+    {
+        return ucsRackDao.findById(rackId);
     }
 
     public void insertRack(final Rack rack)
@@ -595,4 +604,5 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
+
 }
