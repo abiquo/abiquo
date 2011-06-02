@@ -28,7 +28,6 @@ import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +35,6 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -53,7 +51,6 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
@@ -114,6 +111,16 @@ public class VirtualMachineService extends DefaultApiService
     public List<VirtualMachine> findByVirtualAppliance(final VirtualAppliance vapp)
     {
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
+    }
+
+    public VirtualMachine findByUUID(String uuid)
+    {
+        return repo.findByUUID(uuid);
+    }
+
+    public VirtualMachine findByName(String name)
+    {
+        return repo.findByName(name);
     }
 
     public VirtualMachine getVirtualMachine(final Integer vdcId, final Integer vappId,
@@ -200,7 +207,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if(((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
+        if (((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
             || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
             || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
         {
