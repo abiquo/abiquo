@@ -215,6 +215,14 @@ public class UserService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public User modifyUser(final Integer userId, final UserDto user)
     {
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
+        {
+            if (!getCurrentUser().getId().equals(userId))
+            {
+                securityService.requirePrivilege(SecurityService.USERS_MANAGE_USERS);
+            }
+        }
+
         User old = repo.findUserById(userId);
         if (old == null)
         {
