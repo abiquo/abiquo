@@ -108,7 +108,7 @@ public class AbiConfig
         return System.getProperty("abiquo.server.costCode");
     }
 
-    private LimitHB createLimit(String type)
+    private LimitHB createLimit(final String type)
     {
         long hard =
             Long.valueOf(System.getProperty("abiquo.server.resourcelimits." + type + ".hard", "0"));
@@ -128,6 +128,6 @@ public class AbiConfig
      */
     public String getAbiquoSecurityMode()
     {
-        return System.getProperty("abiquo.security.mode");
+        return System.getProperty("abiquo.auth.module");
     }
 }

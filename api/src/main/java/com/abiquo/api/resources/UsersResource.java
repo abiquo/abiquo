@@ -90,30 +90,30 @@ public class UsersResource extends AbstractResource
         UsersDto users = new UsersDto();
 
         // Can only get my user
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
-        {
-            User currentUser = service.getCurrentUser();
-            if (all != null && !all.isEmpty())
-            {
-                for (User u : all)
-                {
-                    if (currentUser.getId().equals(u.getId()))
-                    {
-                        users.add(createTransferObject(u, restBuilder));
-                        break;
-                    }
-                }
-
-                if (all instanceof PagedList< ? >)
-                {
-                    PagedList<User> list = (PagedList<User>) all;
-                    users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
-                        .toString(), list));
-                    users.setTotalSize(list.getTotalResults());
-                }
-            }
-            return users;
-        }
+        // if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        // {
+        // User currentUser = service.getCurrentUser();
+        // if (all != null && !all.isEmpty())
+        // {
+        // for (User u : all)
+        // {
+        // if (currentUser.getId().equals(u.getId()))
+        // {
+        // users.add(createTransferObject(u, restBuilder));
+        // break;
+        // }
+        // }
+        //
+        // if (all instanceof PagedList< ? >)
+        // {
+        // PagedList<User> list = (PagedList<User>) all;
+        // users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
+        // .toString(), list));
+        // users.setTotalSize(list.getTotalResults());
+        // }
+        // }
+        // return users;
+        // }
 
         // Can get all users
         if (all != null && !all.isEmpty())
@@ -144,7 +144,7 @@ public class UsersResource extends AbstractResource
 
         if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
         {
-            // In ldap mode it is noto possible to create user
+            // In ldap mode it is not possible to create user
             throw new ConflictException(APIError.NOT_USER_CREACION_LDAP_MODE);
         }
         User u = service.addUser(user, enterpriseId);

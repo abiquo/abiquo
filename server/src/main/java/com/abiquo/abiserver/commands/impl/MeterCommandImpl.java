@@ -88,7 +88,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
             UsersResourceStub proxy =
                 APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
                     UsersResourceStub.class);
-            DataResult<UserListResult> users = proxy.getUsers(new UserListOptions());
+            DataResult<UserListResult> users = proxy.getOnlyUsers(new UserListOptions());
 
             if (users.getData() != null && users.getData().getUsersList() != null
                 && !users.getData().getUsersList().isEmpty())

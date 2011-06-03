@@ -134,7 +134,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
-        dto.setShared(Boolean.TRUE);
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
         

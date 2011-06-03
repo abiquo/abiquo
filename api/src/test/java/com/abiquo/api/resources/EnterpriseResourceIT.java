@@ -53,6 +53,8 @@ import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -412,6 +414,12 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
 
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -430,6 +438,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
 
         setup(entitiesToSetup.toArray());
 

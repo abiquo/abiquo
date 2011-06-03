@@ -50,7 +50,9 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -76,11 +78,30 @@ public class VirtualDatacentersResource extends AbstractResource
     @Autowired
     private EnterpriseService enterpriseService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private SecurityService securityService;
+
     @GET
     public VirtualDatacentersDto getVirtualDatacenters(
-        @QueryParam(ENTERPRISE) Integer enterpriseId, @QueryParam(DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @QueryParam(ENTERPRISE) final Integer enterpriseId,
+        @QueryParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
+
+        if (!securityService.hasPrivilege(SecurityService.VDC_ENUMERATE)
+            && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE))
+        {
+            if (enterpriseId != null
+                && !enterpriseId.equals(userService.getCurrentUser().getEnterprise().getId()))
+            {
+                // throws access denied exception
+                securityService.requirePrivilege(SecurityService.VDC_ENUMERATE);
+            }
+        }
+
         Datacenter datacenter = null;
         if (datacenterId != null)
         {
@@ -105,9 +126,10 @@ public class VirtualDatacentersResource extends AbstractResource
     }
 
     @POST
-    public VirtualDatacenterDto postVirtualDatacenter(VirtualDatacenterDto dto,
-        @QueryParam(DATACENTER) Integer datacenterId, @QueryParam(ENTERPRISE) Integer enterpriseId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public VirtualDatacenterDto postVirtualDatacenter(final VirtualDatacenterDto dto,
+        @QueryParam(DATACENTER) final Integer datacenterId,
+        @QueryParam(ENTERPRISE) final Integer enterpriseId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Datacenter datacenter = null;
         Enterprise enterprise = null;
@@ -137,7 +159,7 @@ public class VirtualDatacentersResource extends AbstractResource
         return response;
     }
 
-    private Datacenter getDatacenter(RESTLink datacenterLink)
+    private Datacenter getDatacenter(final RESTLink datacenterLink)
     {
         Integer datacenterId =
             getLinkId(datacenterLink, DatacentersResource.DATACENTERS_PATH,
@@ -146,7 +168,7 @@ public class VirtualDatacentersResource extends AbstractResource
         return getDatacenter(datacenterId);
     }
 
-    private Datacenter getDatacenter(Integer datacenterId)
+    private Datacenter getDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
         if (datacenter == null)
@@ -157,7 +179,7 @@ public class VirtualDatacentersResource extends AbstractResource
         return datacenter;
     }
 
-    private Enterprise getEnterprise(RESTLink enterpriseLink)
+    private Enterprise getEnterprise(final RESTLink enterpriseLink)
     {
         Integer enterpriseId =
             getLinkId(enterpriseLink, EnterprisesResource.ENTERPRISES_PATH,
@@ -166,15 +188,15 @@ public class VirtualDatacentersResource extends AbstractResource
         return getEnterprise(enterpriseId);
     }
 
-    private Enterprise getEnterprise(Integer enterpriseId)
+    private Enterprise getEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
 
         return enterprise;
     }
-    
 
-    private Integer getLinkId(RESTLink link, String path, String param, String key, APIError error)
+    private Integer getLinkId(final RESTLink link, final String path, final String param,
+        final String key, final APIError error)
     {
         if (link == null)
         {

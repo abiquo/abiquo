@@ -514,16 +514,25 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 1 - NOT PROVISIONED
 2 - NOT MANAGED
 3 - MANAGED
-4 - HALTED',
+4 - HALTED
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA',
   `vswitchName` VARCHAR(30)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
   `version_c` int(11) default 0,
+  `ipmiIP` varchar(39) default NULL,
+  `ipmiPort` int(5) unsigned default NULL,
+  `ipmiUser` varchar(255) default NULL,
+  `ipmiPassword` varchar(255) default NULL,
   PRIMARY KEY  (`idPhysicalMachine`),
   KEY `PhysicalMachine_FK1` (`idRack`),
   KEY `PhysicalMachine_FK5` (`idDataCenter`),
-  CONSTRAINT `PhysicalMachine_FK1` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE,
-  CONSTRAINT `PhysicalMachine_FK5` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
+  KEY `PhysicalMachine_FK6` (`idEnterprise`),
+  CONSTRAINT `PhysicalMachine_FK1` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE,  
+  CONSTRAINT `PhysicalMachine_FK5` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE,
+  CONSTRAINT `PhysicalMachine_FK6` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
@@ -555,6 +564,7 @@ CREATE TABLE  `kinton`.`rack` (
   `vlans_id_avoided` varchar(255) default '',
   `vlan_per_vdc_expected` int(15) unsigned default 8,
   `nrsq` int(15) unsigned default 10,
+  `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRack`),
   KEY `Rack_FK1` (`idDataCenter`),
@@ -578,10 +588,10 @@ CREATE TABLE  `kinton`.`datastore` (
   `name` varchar(255) NOT NULL,
   `rootPath` varchar(36) NOT NULL,
   `directory` varchar(255) NOT NULL,
-  `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
   `size` bigint(40) unsigned NOT NULL,
   `usedSize` bigint(40) unsigned NOT NULL,
+  `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -752,7 +762,7 @@ CREATE TABLE  `kinton`.`role` (
 -- These values are used by the ldap_role table.
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
-	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'SYS_ADMIN',1,0);
+	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'CLOUD_ADMIN',1,0);
 	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
 	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
 UNLOCK TABLES;
@@ -1085,6 +1095,8 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
   `idDatastore` int(10) unsigned default NULL,
   `version_c` int(11) default 0,
+
+
   PRIMARY KEY  (`idVM`),
   KEY `VirtualMachine_FK1` (`idHypervisor`),
   KEY `virtualMachine_datastore_FK` (`idDatastore`),
@@ -1317,7 +1329,6 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.virtual.moreInfoAboutUploadLimitations","http://community.abicloud.org/display/ABI16/Appliance+Library+view#ApplianceLibraryview-Uploadingfromourlocalfilesystem","URL of Abiquo virtual image upload limitations web page"),
  ("client.infra.vlanIdMin","2","Minimum value for vlan ID"),
  ("client.infra.vlanIdMax","4094","Maximum value for vlan ID"),
- ("client.infra.useVirtualBox","0","Support (1) or not (0) Virtual Box"),
  ("client.dashboard.dashboardUpdateInterval","30","Time interval in seconds"),
  ("client.infra.defaultHypervisorPassword","temporal","Default Hypervisor password used when creating Physical Machines"),
  ("client.infra.defaultHypervisorPort","8889","Default Hypervisor port used when creating Physical Machines"),
@@ -1765,7 +1776,6 @@ CREATE TABLE  `kinton`.`license` (
   `version_c` int(11) default 0,
   PRIMARY KEY (`idLicense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 --
 -- THE WONDERFUL WORLD OF TRIGGERS

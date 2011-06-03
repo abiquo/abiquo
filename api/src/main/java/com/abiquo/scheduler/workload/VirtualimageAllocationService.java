@@ -123,16 +123,16 @@ public class VirtualimageAllocationService
     private final static Logger log = LoggerFactory.getLogger(VirtualimageAllocationService.class);
 
     @Autowired
-    InfrastructureRep datacenterRepo;
+    private InfrastructureRep datacenterRepo;
 
     @Autowired
-    VirtualApplianceDAO virtualApplianceDao;
+    private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
-    NetworkAssignmentDAO networkAssignmentDao;
+    private NetworkAssignmentDAO networkAssignmentDao;
 
     /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */
-    SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
+    private SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
 
     @Resource(name = "physicalmachineRuleFinder")
     // premium impl by replacements
@@ -198,6 +198,33 @@ public class VirtualimageAllocationService
                 + sbErrorRacks.toString();
 
         throw new NotEnoughResourcesException(msg);
+    }
+
+    /**
+     * Finds the targets that best fits a given resource. If there is no target that can accept the
+     * resource, then null will be returned.
+     * 
+     * @param datastoreUuid, the selected machine should have this datastore enabled.
+     * @param originalHypervisorId, the selected machine IS NOT this provided hypervisor.
+     * @param rackId, the rack is already defined.
+     * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
+     *             target.
+     */
+    public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
+        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
+        Integer rackId) throws ResourceAllocationException
+    {
+
+        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
+        final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
+
+        final Collection<Machine> firstPassCandidates =
+
+            datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
+                datastoreUuid, originalHypervisorId);
+
+        return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
+
     }
 
     /**
@@ -269,10 +296,9 @@ public class VirtualimageAllocationService
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
-            throw new NotEnoughResourcesException(String
-                .format(
-                    "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
-                    rack.getName()));
+            throw new NotEnoughResourcesException(String.format(
+                "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
+                rack.getName()));
         }
 
         // log.debug("The network assigned to the VM, VLAN network ID: {},  "
@@ -305,13 +331,15 @@ public class VirtualimageAllocationService
         {
 
             final boolean passCPU =
-                pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image
-                    .getCpuRequired()), Long.valueOf(machine.getVirtualCpuCores()
-                    * machine.getVirtualCpusPerCore()), 100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()),
+                    Long.valueOf(image.getCpuRequired()),
+                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
+                    100);
 
             final boolean passRAM =
-                pass(Long.valueOf(machine.getVirtualRamUsedInMb()), Long.valueOf(image
-                    .getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()), 100);
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
+                    Long.valueOf(image.getRamRequired()),
+                    Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
@@ -395,9 +423,7 @@ public class VirtualimageAllocationService
             }
             else
             {
-                log
-                    .error(String
-                        .format("Machine %s rejected by some load rule.", target.getName()));
+                log.error(String.format("Machine %s rejected by some load rule.", target.getName()));
             }
         }
 

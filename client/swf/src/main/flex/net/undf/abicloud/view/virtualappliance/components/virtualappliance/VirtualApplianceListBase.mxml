@@ -148,9 +148,11 @@
             {
                 if (virtualApplianceDataGrid.selectedIndex > -1)
                 {
-                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
-                    dispatchEvent(virtualApplianceEvent);
+                	if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
+	                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+	                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+	                    dispatchEvent(virtualApplianceEvent);                		
+                	}
                 }
             }
 

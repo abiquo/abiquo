@@ -324,7 +324,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
-                                                                                    "ALERT_DELETE_USER_HEADER"),
+                                                                                    "ALERT_DELETE_USER_HEADER")+" '"+User(usersDataGrid.selectedItem).name+" "+User(usersDataGrid.selectedItem).surname+"'",
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_DELETE_USER_TEXT"),
                                             Alert.YES | Alert.NO,

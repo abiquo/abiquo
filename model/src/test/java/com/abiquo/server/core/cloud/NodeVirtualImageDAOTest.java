@@ -26,11 +26,16 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import junit.framework.Assert;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -171,5 +176,80 @@ public class NodeVirtualImageDAOTest extends
         List<Object> entitiesToPersist = new ArrayList<Object>();
         virtualMachineGenerator.addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, virtualMachine);
+    }
+
+    public void findByEnterprise()
+    {
+        EnterpriseGenerator enterpriseGenerator = new EnterpriseGenerator(getSeed());
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        Enterprise enterprise2 = enterpriseGenerator.createUniqueInstance();
+
+        VirtualMachineGenerator vMachineGenerator = new VirtualMachineGenerator(getSeed());
+        VirtualMachine vm1 = vMachineGenerator.createInstance(enterprise);
+        VirtualMachine vm2 = vMachineGenerator.createInstance(enterprise);
+
+        VirtualDatacenterGenerator vdcGenerator = new VirtualDatacenterGenerator(getSeed());
+        VirtualDatacenter vdc = vdcGenerator.createInstance(enterprise);
+        VirtualDatacenter vdc2 = vdcGenerator.createInstance(enterprise2);
+
+        VirtualApplianceGenerator vApplianceGenerator = new VirtualApplianceGenerator(getSeed());
+        VirtualAppliance vAppliance = vApplianceGenerator.createInstance(vdc);
+        VirtualAppliance vAppliance2 = vApplianceGenerator.createInstance(vdc2);
+
+        NodeVirtualImageGenerator nodeVImageGenerator = new NodeVirtualImageGenerator(getSeed());
+        NodeVirtualImage nvi = nodeVImageGenerator.createInstance(vAppliance, vm1);
+        NodeVirtualImage nvi2 = nodeVImageGenerator.createInstance(vAppliance, vm2);
+
+        // ds().persistAll(enterprise, enterprise2, vm1.getUser().getRole(), vm1.getUser(),
+        // vm1.getVirtualImage(), vm1, vm2.getUser().getRole(), vm2.getUser(),
+        // vm2.getVirtualImage(), vm2, vdc.getNetwork(), vdc.getDatacenter(), vdc,
+        // vdc2.getNetwork(), vdc2.getDatacenter(), vdc2, vAppliance, vAppliance2, nvi, nvi2);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(enterprise2);
+
+        for (Privilege p : vm1.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        for (Privilege p : vm2.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm1.getUser().getRole());
+        entitiesToSetup.add(vm1.getUser());
+        entitiesToSetup.add(vm2.getUser().getRole());
+        entitiesToSetup.add(vm2.getUser());
+        entitiesToSetup.add(vm1.getVirtualImage());
+        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm1.getHypervisor().getMachine());
+        entitiesToSetup.add(vm2.getHypervisor().getMachine());
+        entitiesToSetup.add(vm1.getHypervisor());
+        entitiesToSetup.add(vm2.getHypervisor());
+        entitiesToSetup.add(vm1);
+        entitiesToSetup.add(vm2);
+        entitiesToSetup.add(vdc.getNetwork());
+        entitiesToSetup.add(vdc.getDatacenter());
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vdc2.getNetwork());
+        entitiesToSetup.add(vdc2.getDatacenter());
+        entitiesToSetup.add(vdc2);
+        entitiesToSetup.add(vAppliance);
+        entitiesToSetup.add(nvi);
+        entitiesToSetup.add(vAppliance2);
+        entitiesToSetup.add(nvi2);
+
+        ds().persistAll(entitiesToSetup.toArray());
+
+        NodeVirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<NodeVirtualImage> list = dao.findByEnterprise(enterprise);
+        Assert.assertEquals(list.size(), 2);
     }
 }

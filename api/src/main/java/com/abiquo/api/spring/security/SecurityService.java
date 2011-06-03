@@ -45,16 +45,14 @@ public class SecurityService
     public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
         + "USERS_MANAGE_OTHER_ENTERPRISES";
 
-    public static final String USERS_MANAGE_OTHER_USERS = DRP + "USERS_MANAGE_OTHER_USERS";
+    public static final String USERS_MANAGE_ROLES = DRP + "USERS_MANAGE_ROLES";
 
     public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES = DRP
         + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
 
-    public static final String USERS_MANAGE_USERS_PRIV = "USERS_MANAGE_USERS";
-
-    public static final String USERS_MANAGE_USERS = DRP + USERS_MANAGE_USERS_PRIV;
+    public static final String USERS_MANAGE_USERS = DRP + "USERS_MANAGE_USERS";
 
     public static final String USERS_VIEW = DRP + "USERS_VIEW";
 
@@ -64,6 +62,10 @@ public class SecurityService
         + "USERS_PROHIBIT_VDC_RESTRICTION";
 
     public static final String USERS_MANAGE_LDAP_GROUP = DRP + "USERS_MANAGE_LDAP_GROUP";
+
+    public static final String VDC_ENUMERATE = DRP + "VDC_ENUMERATE";
+
+    public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
 
     public boolean hasPrivilege(final String privilege)
     {
@@ -100,7 +102,7 @@ public class SecurityService
 
     public boolean canManageOtherUsers()
     {
-        return hasPrivilege(USERS_MANAGE_OTHER_USERS);
+        return hasPrivilege(USERS_MANAGE_USERS);
     }
 
     public boolean canManageOtherEnterprises(final User user)
@@ -110,7 +112,7 @@ public class SecurityService
 
     public boolean canManageOtherUsers(final User user)
     {
-        return hasPrivilege(USERS_MANAGE_OTHER_USERS, user);
+        return hasPrivilege(USERS_MANAGE_USERS, user);
     }
 
     public boolean isCloudAdmin()
@@ -147,9 +149,9 @@ public class SecurityService
     public static String[] getAllPrivileges()
     {
         return new String[] {ENTRPRISE_ADMINISTER_ALL, USERS_MANAGE_OTHER_ENTERPRISES,
-        USERS_MANAGE_OTHER_USERS, USERS_MANAGE_ROLES_OTHER_ENTERPRISES, USERS_MANAGE_SYSTEM_ROLES,
-        USERS_MANAGE_USERS, USERS_VIEW, USERS_VIEW_PRIVILEGES, USERS_PROHIBIT_VDC_RESTRICTION,
-        USERS_MANAGE_LDAP_GROUP};
+        USERS_MANAGE_ROLES_OTHER_ENTERPRISES, USERS_MANAGE_SYSTEM_ROLES, USERS_MANAGE_USERS,
+        USERS_VIEW, USERS_VIEW_PRIVILEGES, USERS_PROHIBIT_VDC_RESTRICTION, USERS_MANAGE_LDAP_GROUP,
+        VDC_ENUMERATE, USERS_MANAGE_ROLES};
     }
 
 }

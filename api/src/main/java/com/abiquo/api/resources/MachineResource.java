@@ -21,7 +21,9 @@
 
 package com.abiquo.api.resources;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -37,11 +39,15 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
-import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.MachineService;
+import com.abiquo.api.services.cloud.VirtualApplianceService;
+import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -69,10 +75,18 @@ public class MachineResource extends AbstractResource
     @Autowired
     VirtualMachineService vmService;
 
+    @Autowired
+    VirtualDatacenterService vdcService;
+
+    @Autowired
+    VirtualApplianceService vappService;
+
     @GET
-    public MachineDto getMachine(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, @PathParam(MACHINE) Integer machineId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public MachineDto getMachine(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MACHINE) final Integer machineId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
@@ -81,9 +95,11 @@ public class MachineResource extends AbstractResource
     }
 
     @PUT
-    public MachineDto modifyMachine(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, @PathParam(MACHINE) Integer machineId,
-        MachineDto machine, @Context IRESTBuilder restBuilder) throws Exception
+    public MachineDto modifyMachine(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MACHINE) final Integer machineId, final MachineDto machine,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
@@ -93,8 +109,9 @@ public class MachineResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteMachine(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, @PathParam(MACHINE) Integer machineId)
+    public void deleteMachine(@PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MACHINE) final Integer machineId)
     {
         validatePathParameters(datacenterId, rackId, machineId);
         service.removeMachine(machineId);
@@ -103,34 +120,68 @@ public class MachineResource extends AbstractResource
     @GET
     @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
     public VirtualMachinesDto getVirtualMachines(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
         Collection<VirtualMachine> vms = vmService.findByHypervisor(hypervisor);
 
-        VirtualMachinesDto vmDto =
-            VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+        List<VirtualAppliance> vapps = new ArrayList<VirtualAppliance>();
+        VirtualMachinesDto vmDto = new VirtualMachinesDto();
+        for (VirtualMachine vm : vms)
+        {
+            if (vm.getEnterprise() != null)
+            {
+                Collection<VirtualDatacenter> vdcs =
+                    vdcService.getVirtualDatacenters(vm.getEnterprise(), vm.getHypervisor()
+                        .getMachine().getDatacenter());
+                for (VirtualDatacenter vdc : vdcs)
+                {
+                    vapps = vappService.getVirtualAppliancesByVirtualDatacenter(vdc.getId());
+                    for (VirtualAppliance vapp : vapps)
+                    {
+                        List<VirtualMachine> all = vmService.findByVirtualAppliance(vapp);
+
+                        if (all != null && !all.isEmpty())
+                        {
+                            for (VirtualMachine v : all)
+                            {
+                                if (v.equals(vm))
+                                    vmDto.add(VirtualMachinesResource
+                                        .createCloudAdminTransferObject(v, vapp
+                                            .getVirtualDatacenter().getId(), vapp.getId(),
+                                            restBuilder));
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                vmDto.add(VirtualMachinesResource.createAdminTransferObjects(vm, restBuilder));
+            }
+        }
         return vmDto;
     }
 
     @DELETE
     @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
     public void deleteVirtualMachinesNotManaged(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId,
-        @PathParam(MachineResource.MACHINE) Integer machineId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
         vmService.deleteNotManagedVirtualMachines(hypervisor);
     }
 
-    private Hypervisor getHypervisor(Integer datacenterId, Integer rackId, Integer machineId)
+    private Hypervisor getHypervisor(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         if (!service.isAssignedTo(datacenterId, rackId, machineId))
         {
@@ -146,16 +197,16 @@ public class MachineResource extends AbstractResource
         return hypervisor;
     }
 
-    private static MachineDto addLinks(IRESTBuilder restBuilder, Integer datacenterId,
-        Integer rackId, MachineDto machine)
+    private static MachineDto addLinks(final IRESTBuilder restBuilder, final Integer datacenterId,
+        final Integer rackId, final MachineDto machine)
     {
         machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, machine));
 
         return machine;
     }
 
-    public static MachineDto createTransferObject(Machine machine, IRESTBuilder restBuilder)
-        throws Exception
+    public static MachineDto createTransferObject(final Machine machine,
+        final IRESTBuilder restBuilder) throws Exception
     {
         MachineDto dto = new MachineDto();
 
@@ -179,6 +230,11 @@ public class MachineResource extends AbstractResource
         dto.setType(machine.getHypervisor().getType());
         dto.setUser(machine.getHypervisor().getUser());
         dto.setPassword(machine.getHypervisor().getPassword());
+        dto.setIpmiIp(machine.getIpmiIP());
+        dto.setIpmiPort(machine.getIpmiPort());
+        dto.setIpmiUser(machine.getIpmiUser());
+        dto.setIpmiPassword(machine.getIpmiPassword());
+        
 
         dto =
             addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);

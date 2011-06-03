@@ -239,6 +239,7 @@ public abstract class AbsVirtualMachine
      */
     public abstract void deployMachine() throws VirtualMachineException;
 
+    
     /**
      * Starts the virtual machine execution
      * 

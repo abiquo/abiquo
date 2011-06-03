@@ -50,9 +50,11 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
@@ -89,6 +91,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     ConfigService configService;
 
+    @Autowired
+    VirtualApplianceRep virtualApplianceRepo;
+
     public VirtualApplianceService()
     {
 
@@ -100,6 +105,7 @@ public class VirtualApplianceService extends DefaultApiService
         this.vdcService = new VirtualDatacenterService(em);
         this.remoteService = new RemoteServiceService(em);
         this.configService = new ConfigService();
+        this.virtualApplianceRepo = new VirtualApplianceRep(em);
     }
 
     /**
@@ -112,6 +118,11 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
+    }
+
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    {
+        return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
 
     /**

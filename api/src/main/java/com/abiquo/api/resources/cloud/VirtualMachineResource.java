@@ -60,13 +60,13 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
     public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
-    
+
     public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
-    
+
     public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
-    
+
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
-    
+
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
     @Autowired
@@ -181,8 +181,10 @@ public class VirtualMachineResource extends AbstractResource
 
         service.deallocateVirtualMachine(virtualMachineId);
     }
+
     /**
-     *  Power on the VirtualMachine
+     * Power on the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -200,13 +202,15 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.RUNNING))
         {
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
+
         }
     }
+
     /**
      * Power off the virtual machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -224,13 +228,15 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+
         }
     }
+
     /**
      * Resume the Virtual Machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -248,13 +254,15 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.REBOOTED))
         {
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
+
         }
     }
+
     /**
-     *  Pause the VirtualMachine
+     * Pause the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -272,8 +280,6 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.PAUSED))
         {
-            vmService.blockVirtualMachine(vm);
-
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
         }
     }

@@ -60,7 +60,8 @@ public class PrivilegeResource extends AbstractResource
     public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer privilegeId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES))
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getRole().getPrivileges() != null)

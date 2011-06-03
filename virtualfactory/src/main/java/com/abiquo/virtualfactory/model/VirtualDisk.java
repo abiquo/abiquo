@@ -68,6 +68,12 @@ public class VirtualDisk
     private String format;
 
     /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private boolean isha;
+
+    /**
      * Instantiates a new virtual disk.
      */
     public VirtualDisk()
@@ -206,9 +212,9 @@ public class VirtualDisk
             repository = location.substring(1, indexFinRepository);
             imagePath = location.substring(indexFinRepository + 1, location.length());
 
-            int indexRepositoryPath = location.indexOf(":");
+            int indexRepositoryPath = location.indexOf(":"); // This is not valid for imported Hyper-V machines : repository == "null" in this case
 
-            if (indexRepositoryPath != -1)
+            if (indexRepositoryPath != -1 && repository.length() > indexRepositoryPath) // FIXES call when using an imported VMachine -> Windows unit i.e. C:\ is detected
             {
                 repository = repository.substring(indexRepositoryPath, repository.length());
                 logger.debug("Using imagePath [{}] at repository [{}]", imagePath, repository);
@@ -413,4 +419,13 @@ public class VirtualDisk
 
     }
 
+    public void setHa()
+    {
+        isha = true;
+    }
+
+    public boolean isHa()
+    {
+        return isha;
+    }
 }

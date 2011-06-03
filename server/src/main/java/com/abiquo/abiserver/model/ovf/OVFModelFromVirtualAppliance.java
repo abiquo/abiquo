@@ -34,7 +34,6 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
-import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -202,8 +201,8 @@ public class OVFModelFromVirtualAppliance
                 createDiskFromVirtualImage(virtualMachine, virtualImage, "0");
             OVFDiskUtils.addDisk(envelope, virtualDisk);
 
-            OVFReferenceUtils.addFile(references, createFileFromVirtualImage(virtualMachine,
-                virtualImage, false));
+            OVFReferenceUtils.addFile(references, createFileFromVirtualImage(virtualImage,
+                virtualMachine, false, false));
 
             // Setting the virtual system as envelope content
             OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
@@ -273,28 +272,6 @@ public class OVFModelFromVirtualAppliance
                 break;
         }
         return state;
-    }
-
-    private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
-    {
-        // from the image
-        String diskfileId = image.getName() + "." + image.getId();
-        String diskId = String.valueOf(image.getId());
-        Long capacity = image.getHdRequired();// TODO set capacity !!! (using fileId? )
-
-        DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().getUri());
-
-        // TODO (also capacityUnit and parentRef (populateSize on an empty disk do not matter))
-
-        // Setting the virtual Disk package level element
-        DiskSectionType diskSection = new DiskSectionType();
-        VirtualDiskDescType virtualDescType =
-            OVFDiskUtils.createDiskDescription(diskId, diskfileId, format, capacity, null, null,
-                null);
-
-        diskSection.getDisk().add(virtualDescType);
-
-        return diskSection;
     }
 
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
@@ -527,6 +504,18 @@ public class OVFModelFromVirtualAppliance
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling) throws Exception
     {
+        return createVirtualApplication(virtualAppliance, bundling, false);
+    }
+
+    public EnvelopeType createVirtualApplicationHA(final VirtualAppliance virtualAppliance)
+        throws Exception
+    {
+        return createVirtualApplication(virtualAppliance, false, true);
+    }
+
+    private EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
+        final boolean bundling, final boolean isHa) throws Exception
+    {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
 
@@ -553,7 +542,7 @@ public class OVFModelFromVirtualAppliance
         // set the network section on the envelope
         OVFEnvelopeUtils.addSection(envelope, netSection);
 
-        // Add the custom network;
+        // Add the custom network
         AbicloudNetworkType customNetwork = createCustomNetwork(virtualAppliance);
         OVFEnvelopeUtils.addSection(envelope, customNetwork);
 
@@ -582,8 +571,8 @@ public class OVFModelFromVirtualAppliance
                 try
                 {
                     OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage.getVirtualMachine(), nodeVirtualImage.getVirtualImage(),
-                        bundling));
+                        nodeVirtualImage.getVirtualImage(), nodeVirtualImage.getVirtualMachine(),
+                        bundling, isHa));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -743,8 +732,9 @@ public class OVFModelFromVirtualAppliance
         return networkType;
     }
 
-    private FileType createFileFromVirtualImage(final VirtualMachine virtualMachine,
-        final VirtualImage virtualImage, final boolean bundling) throws RequiredAttributeException
+    private FileType createFileFromVirtualImage(final VirtualImage virtualImage,
+        final VirtualMachine virtualMachine, final boolean bundling, final boolean isHa)
+        throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -794,6 +784,11 @@ public class OVFModelFromVirtualAppliance
         insertTargetDataStore(virtualDiskImageFile, virtualMachine.getDatastore().getUUID()
             + virtualMachine.getDatastore().getDirectory());
 
+        if (isHa)
+        {
+            setHA(virtualDiskImageFile);
+        }
+
         // compression
         // chunk
         VirtualImageDecorator decorator =
@@ -827,6 +822,16 @@ public class OVFModelFromVirtualAppliance
         insertRepositoryManager(virtualDiskImageFile, virtualMachine);
 
         return virtualDiskImageFile;
+    }
+
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(AbiCloudConstants.HA_DISK,
+            Boolean.TRUE.toString());
     }
 
     /**
@@ -865,7 +870,19 @@ public class OVFModelFromVirtualAppliance
             fileRef += "." + decorator.getPath();
         }
 
-        DiskFormat format = DiskFormat.fromValue(virtualImage.getDiskFormatType().getUri());
+        DiskFormat format;
+
+        if (virtualMachine.getConversion() != null)
+        {
+            format =
+                DiskFormat.fromValue(virtualMachine.getConversion().getDiskTargetFormatType()
+                    .getUri());
+        }
+        else
+        {
+            format = DiskFormat.fromValue(virtualImage.getDiskFormatType().getUri());
+        }
+
         Long capacity = virtualImage.getHdRequired();
         Long populate = virtualImage.getHdRequired(); // TODO required (using the fileSize + disk
         // format it can be computed)

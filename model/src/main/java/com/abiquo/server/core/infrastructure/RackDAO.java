@@ -75,6 +75,17 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return result;
     }
 
+    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    {
+        Criteria criteria = createCriteria(sameDatacenter(datacenter));
+        criteria.add(Restrictions.eq(Rack.HAENABLED_PROPERTY, true));
+        criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
+
+        List<Rack> result = getResultList(criteria);
+
+        return result;
+    }
+
     public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
     {
         assert datacenter != null;

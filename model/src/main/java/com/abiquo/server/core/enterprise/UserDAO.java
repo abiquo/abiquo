@@ -85,6 +85,11 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return filterDisjunction;
     }
 
+    public Collection<User> findByRole(final Role role)
+    {
+        return find(null, role, null, User.ID_PROPERTY, false, false, 0, 25);
+    }
+
     public Collection<User> findByEnterprise(final Enterprise enterprise)
     {
         return find(enterprise, null, VirtualDatacenter.NAME_PROPERTY, false);
@@ -101,18 +106,18 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     public Collection<User> find(final Enterprise enterprise, final String filter,
         final String orderBy, final boolean desc)
     {
-        return find(enterprise, filter, orderBy, desc, false, 0, 25);
+        return find(enterprise, null, filter, orderBy, desc, false, 0, 25);
     }
 
-    public Collection<User> find(final Enterprise enterprise, final String filter,
+    public Collection<User> find(final Enterprise enterprise, final Role role, final String filter,
         final String orderBy, final boolean desc, final boolean connected, final Integer offset,
         final Integer numResults)
     {
-        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        Criteria criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -128,14 +133,19 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return page;
     }
 
-    private Criteria createCriteria(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc, final boolean connected)
+    private Criteria createCriteria(final Enterprise enterprise, final Role role,
+        final String filter, final String orderBy, final boolean desc, final boolean connected)
     {
         Criteria criteria = createCriteria();
 
         if (enterprise != null)
         {
             criteria.add(sameEnterprise(enterprise));
+        }
+
+        if (role != null)
+        {
+            criteria.add(sameRole(role));
         }
 
         if (!StringUtils.isEmpty(filter))

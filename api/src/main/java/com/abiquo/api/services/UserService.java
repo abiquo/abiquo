@@ -148,7 +148,10 @@ public class UserService extends DefaultApiService
         // [ABICLOUDPREMIUM-1310] If all the checks are valid, we still need to restrict to the
         // current user if the role of the requestes is a standard user
         // if (user.getRole().getType() == Role.Type.USER)
-        if (securityService.isStandardUser())
+
+        // [ROLES & PRIVILEGES] User response depends on current user's privileges)
+
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
         {
             return Collections.singletonList(user);
         }
@@ -176,8 +179,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -229,6 +232,14 @@ public class UserService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public User modifyUser(final Integer userId, final UserDto user)
     {
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
+        {
+            if (!getCurrentUser().getId().equals(userId))
+            {
+                securityService.requirePrivilege(SecurityService.USERS_MANAGE_USERS);
+            }
+        }
+
         User old = repo.findUserById(userId);
         if (old == null)
         {
@@ -461,6 +472,16 @@ public class UserService extends DefaultApiService
         }
     }
 
+    public String enterpriseWithBlockedRoles(final Enterprise enterprise)
+    {
+        Collection<User> users =repo.findUsersByEnterprise(enterprise);
+        for(User user:users)
+        {
+            if(user.getRole().isBlocked()) return user.getRole().getName().toString();
+        }
+        return "";
+    }
+
     private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -486,8 +507,11 @@ public class UserService extends DefaultApiService
 
         // Role.Type role = user.getRole().getType();
         // if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
-        if ((securityService.isEnterpriseAdmin() || securityService.isStandardUser())
-            && !sameEnterprise)
+        if (!sameEnterprise
+            && (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+                && !securityService
+                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES) && !securityService
+                .hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)))
         {
             throw new AccessDeniedException("");
         }
@@ -495,7 +519,7 @@ public class UserService extends DefaultApiService
 
     private Boolean emailIsValid(final String email)
     {
-        if (!email.isEmpty())
+        if ((email != null) && (!email.isEmpty()))
         {
             final Pattern pattern;
             final Matcher matchers;

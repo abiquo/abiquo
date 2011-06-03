@@ -95,11 +95,11 @@ public class HyperVMachine extends AbsHyperVMachine
             {
                 virtualSysteManagementServiceExt.destroyVirtualSystem(vmDispatch);
 
-                // if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-                // {
                 // Just deleted the base disk when the virtual disk is stateless
-                deleteBaseDisk();
-                // }
+                if (!config.getVirtualDiskBase().isHa())
+                {
+                    deleteBaseDisk();
+                }
             }
             else
             {
@@ -150,5 +150,4 @@ public class HyperVMachine extends AbsHyperVMachine
 
         return idePathDispatcher.get("Path").getObjectAsString2();
     }
-
 }

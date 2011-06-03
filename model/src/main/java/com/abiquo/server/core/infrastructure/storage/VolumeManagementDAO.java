@@ -254,8 +254,8 @@ import com.abiquo.server.core.util.PagedList;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
-            + filters.getFilter() + "%");
+        query.setParameter("filterLike",
+            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 

@@ -145,4 +145,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
 
+    public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer enterpriseId, final Integer userId);
 }

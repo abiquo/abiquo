@@ -90,7 +90,7 @@ public class Machine extends DefaultEntityBase
 
     final static int NAME_LENGTH_MIN = 1;
 
-    final static int NAME_LENGTH_MAX = 30;
+    final static int NAME_LENGTH_MAX = 128;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -107,7 +107,7 @@ public class Machine extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -135,7 +135,7 @@ public class Machine extends DefaultEntityBase
         return this.description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -160,7 +160,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualRamInMb;
     }
 
-    public void setVirtualRamInMb(int virtualRamInMb)
+    public void setVirtualRamInMb(final int virtualRamInMb)
     {
         this.virtualRamInMb = virtualRamInMb;
     }
@@ -185,7 +185,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpuCores;
     }
 
-    public void setVirtualCpuCores(int virtualCpuCores)
+    public void setVirtualCpuCores(final int virtualCpuCores)
     {
         this.virtualCpuCores = virtualCpuCores;
     }
@@ -210,7 +210,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualHardDiskInBytes;
     }
 
-    public void setVirtualHardDiskInBytes(long virtualHardDiskInBytes)
+    public void setVirtualHardDiskInBytes(final long virtualHardDiskInBytes)
     {
         this.virtualHardDiskInBytes = virtualHardDiskInBytes;
     }
@@ -235,7 +235,7 @@ public class Machine extends DefaultEntityBase
         return this.realRamInMb;
     }
 
-    public void setRealRamInMb(int realRamInMb)
+    public void setRealRamInMb(final int realRamInMb)
     {
         this.realRamInMb = realRamInMb;
     }
@@ -260,7 +260,7 @@ public class Machine extends DefaultEntityBase
         return this.realCpuCores;
     }
 
-    public void setRealCpuCores(int realCpuCores)
+    public void setRealCpuCores(final int realCpuCores)
     {
         this.realCpuCores = realCpuCores;
     }
@@ -285,7 +285,7 @@ public class Machine extends DefaultEntityBase
         return this.realHardDiskInBytes;
     }
 
-    public void setRealHardDiskInBytes(long realHardDiskInBytes)
+    public void setRealHardDiskInBytes(final long realHardDiskInBytes)
     {
         this.realHardDiskInBytes = realHardDiskInBytes;
     }
@@ -310,7 +310,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualRamUsedInMb;
     }
 
-    public void setVirtualRamUsedInMb(int virtualRamUsedInMb)
+    public void setVirtualRamUsedInMb(final int virtualRamUsedInMb)
     {
         this.virtualRamUsedInMb = virtualRamUsedInMb;
     }
@@ -335,7 +335,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpusUsed;
     }
 
-    public void setVirtualCpusUsed(int virtualCpusUsed)
+    public void setVirtualCpusUsed(final int virtualCpusUsed)
     {
         this.virtualCpusUsed = virtualCpusUsed;
     }
@@ -361,7 +361,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualHardDiskUsedInBytes;
     }
 
-    public void setVirtualHardDiskUsedInBytes(long virtualHardDiskUsedInMb)
+    public void setVirtualHardDiskUsedInBytes(final long virtualHardDiskUsedInMb)
     {
         this.virtualHardDiskUsedInBytes = virtualHardDiskUsedInMb;
     }
@@ -386,14 +386,14 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpusPerCore;
     }
 
-    public void setVirtualCpusPerCore(int virtualCpusPerCore)
+    public void setVirtualCpusPerCore(final int virtualCpusPerCore)
     {
         this.virtualCpusPerCore = virtualCpusPerCore;
     }
 
     public enum State
     {
-        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED;
+        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA;
     }
 
     public final static String STATE_PROPERTY = "state";
@@ -412,7 +412,7 @@ public class Machine extends DefaultEntityBase
         return this.state;
     }
 
-    public void setState(State state)
+    public void setState(final State state)
     {
         this.state = state;
     }
@@ -440,9 +440,118 @@ public class Machine extends DefaultEntityBase
         return this.virtualSwitch;
     }
 
-    private void setVirtualSwitch(String virtualSwitch)
+    private void setVirtualSwitch(final String virtualSwitch)
     {
         this.virtualSwitch = virtualSwitch;
+    }
+
+    public final static String IPMI_IP_PROPERTY = "ipmiIP";
+
+    private final static boolean IPMI_IP_REQUIRED = false;
+
+    private final static int IPMI_IP_LENGTH_MIN = 0;
+
+    private final static int IPMI_IP_LENGTH_MAX = 39;
+
+    private final static boolean IPMI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_IP_COLUMN = "ipmiIP";
+
+    @Column(name = IPMI_IP_COLUMN, nullable = !IPMI_IP_REQUIRED, length = IPMI_IP_LENGTH_MAX)
+    private String ipmiIP;
+
+    @Required(value = IPMI_IP_REQUIRED)
+    @Length(min = IPMI_IP_LENGTH_MIN, max = IPMI_IP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiIP()
+    {
+        return this.ipmiIP;
+    }
+
+    public void setIpmiIP(String ipmiIP)
+    {
+        this.ipmiIP = ipmiIP;
+    }
+
+    public final static String IPMI_PORT_PROPERTY = "ipmiPort";
+
+    private final static String IPMI_PORT_COLUMN = "ipmiPort";
+
+    private final static boolean IPMI_PORT_REQUIRED = false;
+
+    private final static int IPMI_PORT_MIN = Integer.MIN_VALUE;
+
+    private final static int IPMI_PORT_MAX = Integer.MAX_VALUE;
+
+    @Required(value = IPMI_PORT_REQUIRED)
+    @Column(name = IPMI_PORT_COLUMN, nullable = true)
+    @Range(min = IPMI_PORT_MIN, max = IPMI_PORT_MAX)
+    private Integer ipmiPort;
+
+    public Integer getIpmiPort()
+    {
+        return this.ipmiPort;
+    }
+
+    public void setIpmiPort(Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+
+    public final static String IPMI_USER_PROPERTY = "ipmiUser";
+
+    private final static boolean IPMI_USER_REQUIRED = false;
+
+    private final static int IPMI_USER_LENGTH_MIN = 0;
+
+    private final static int IPMI_USER_LENGTH_MAX = 255;
+
+    private final static boolean IPMI_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_USER_COLUMN = "ipmiUser";
+
+    @Column(name = IPMI_USER_COLUMN, nullable = !IPMI_USER_REQUIRED, length = IPMI_USER_LENGTH_MAX)
+    private String ipmiUser;
+
+    @Required(value = IPMI_USER_REQUIRED)
+    @Length(min = IPMI_USER_LENGTH_MIN, max = IPMI_USER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiUser()
+    {
+        return this.ipmiUser;
+    }
+
+    public void setIpmiUser(String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+
+    public final static String IPMI_PASSWORD_PROPERTY = "ipmiPassword";
+
+    private final static boolean IPMI_PASSWORD_REQUIRED = false;
+
+    private final static int IPMI_PASSWORD_LENGTH_MIN = 0;
+
+    private final static int IPMI_PASSWORD_LENGTH_MAX = 255;
+
+    private final static boolean IPMI_PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String IPMI_PASSWORD_COLUMN = "ipmiPassword";
+
+    @Column(name = IPMI_PASSWORD_COLUMN, nullable = !IPMI_PASSWORD_REQUIRED, length = IPMI_PASSWORD_LENGTH_MAX)
+    private String ipmiPassword;
+
+    @Required(value = IPMI_PASSWORD_REQUIRED)
+    @Length(min = IPMI_PASSWORD_LENGTH_MIN, max = IPMI_PASSWORD_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = IPMI_PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getIpmiPassword()
+    {
+        return this.ipmiPassword;
+    }
+
+    public void setIpmiPassword(String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
     }
 
     // ********************************* Associations
@@ -464,7 +573,7 @@ public class Machine extends DefaultEntityBase
         return this.datacenter;
     }
 
-    private void setDatacenter(Datacenter datacenter)
+    public void setDatacenter(final Datacenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -486,12 +595,12 @@ public class Machine extends DefaultEntityBase
         return this.rack;
     }
 
-    public void setRack(Rack rack)
+    public void setRack(final Rack rack)
     {
         this.rack = rack;
     }
 
-    public boolean rackIsInDatacenter(Rack rack)
+    public boolean rackIsInDatacenter(final Rack rack)
     {
         assert rack != null;
 
@@ -509,7 +618,7 @@ public class Machine extends DefaultEntityBase
         return this.hypervisor;
     }
 
-    public void setHypervisor(Hypervisor hypervisor)
+    public void setHypervisor(final Hypervisor hypervisor)
     {
         this.hypervisor = hypervisor;
     }
@@ -532,7 +641,7 @@ public class Machine extends DefaultEntityBase
         return Collections.unmodifiableList(this.datastores);
     }
 
-    /* package */void addToDatastores(Datastore value)
+    /* package */void addToDatastores(final Datastore value)
     {
         assert value != null;
         assert !this.datastores.contains(value);
@@ -540,7 +649,7 @@ public class Machine extends DefaultEntityBase
         this.datastores.add(value);
     }
 
-    /* package */void removeFromDatastores(Datastore value)
+    /* package */void removeFromDatastores(final Datastore value)
     {
         assert value != null;
         assert this.datastores.contains(value);
@@ -563,7 +672,7 @@ public class Machine extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -593,17 +702,19 @@ public class Machine extends DefaultEntityBase
         return this.initiatorIQN;
     }
 
-    public void setInitiatorIQN(String initiatorIQN)
+    public void setInitiatorIQN(final String initiatorIQN)
     {
         this.initiatorIQN = initiatorIQN;
     }
 
     // *************************** Mandatory constructors
     // ***********************
-    /* package */Machine(Datacenter datacenter, String name, String description,
-        int virtualRamInMb, int realRamInMb, int virtualRamUsedInMb, long virtualHardDiskInMb,
-        long realHardDiskInMb, long virtualHardDiskUsed, int realCpuCores, int virtualCpuCores,
-        int virtualCpusUsed, int virtualCpusPerCore, State state, String virtualSwitch)
+    /* package */Machine(final Datacenter datacenter, final String name, final String description,
+        final int virtualRamInMb, final int realRamInMb, final int virtualRamUsedInMb,
+        final long virtualHardDiskInMb, final long realHardDiskInMb,
+        final long virtualHardDiskUsed, final int realCpuCores, final int virtualCpuCores,
+        final int virtualCpusUsed, final int virtualCpusPerCore, final State state,
+        final String virtualSwitch)
     {
         setDatacenter(datacenter);
         setName(name);
@@ -629,10 +740,15 @@ public class Machine extends DefaultEntityBase
     // ********************************** Others
     // ********************************
 
-    public Hypervisor createHypervisor(HypervisorType type, String ip,
-        String ipService, int port, String user, String password)
+    public Hypervisor createHypervisor(final HypervisorType type, final String ip,
+        final String ipService, final int port, final String user, final String password)
     {
         return new Hypervisor(this, type, ip, ipService, port, user, password);
+    }
+
+    public boolean hasFencingCapabilities()
+    {
+        return (getIpmiIP() != null && getIpmiUser() != null && getIpmiPassword() != null);
     }
 
     @Override
@@ -640,5 +756,4 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
 }

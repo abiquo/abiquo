@@ -39,6 +39,7 @@ import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -174,8 +175,10 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // if (currentUser.getRole().getType() == Role.Type.USER
         // && currentUser.getAvailableVirtualDatacenters() != null)
-        if (!securityService.canManageOtherEnterprises() && !securityService.canManageOtherUsers()
-            && currentUser.getAvailableVirtualDatacenters() != null)
+        if (!securityService.canManageOtherEnterprises()
+            && !securityService.canManageOtherUsers()
+            && org.springframework.util.StringUtils.hasText(currentUser
+                .getAvailableVirtualDatacenters()))
         {
             String availableVirtualDatacenters =
                 currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
@@ -317,4 +320,10 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         return datacenterRepo.findHypervisors(datacenter).contains(type);
     }
+
+    public Collection<NodeVirtualImage> getNodeVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return repo.findNodeVirtualImageByEnterprise(enterprise);
+    }
+
 }

@@ -39,51 +39,50 @@
         
         <!-- ROLES -->
         <security:intercept-url pattern="/admin/roles" method="POST" access="ROLE_USERS_MANAGE_ROLES" />
-        <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES" />
+        <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/roles" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/roles/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES" />
+        <security:intercept-url pattern="/admin/roles/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/roles/*" method="DELETE" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles/*" method="OPTIONS" access="ROLE_USERS_MANAGE_ROLES"/>
         <security:intercept-url pattern="/admin/roles/*" method="PUT" access="ROLE_USERS_MANAGE_ROLES" />
-        <security:intercept-url pattern="/admin/roles/*/action/privileges" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES" />
+        <security:intercept-url pattern="/admin/roles/*/action/privileges" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES,ROLE_USERS_VIEW" />
         
         <!-- ROLES LDAP -->
-        <security:intercept-url pattern="/admin/rolesldap" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/rolesldap" method="POST" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
         <security:intercept-url pattern="/admin/rolesldap" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/rolesldap/*" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
+        <security:intercept-url pattern="/admin/rolesldap/*" method="GET" access="ROLE_USERS_MANAGE_LDAP_GROUP,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/rolesldap/*" method="PUT" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
         <security:intercept-url pattern="/admin/rolesldap/*" method="DELETE" access="ROLE_USERS_MANAGE_LDAP_GROUP" />
         <security:intercept-url pattern="/admin/rolesldap/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         
         <!-- ENTERPRISES -->
         <security:intercept-url pattern="/admin/enterprises" method="POST" access="ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises" method="GET" access="ROLE_USERS_VIEW,ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_ENTERPRISE_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
-        <security:intercept-url pattern="/admin/enterprises/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/enterprises/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/volumes" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         
         <!-- USERS -->
-        <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_USERS, ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
+        <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="DELETE" access="ROLE_USERS_MANAGE_USERS" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="PUT" access="ROLE_USERS_MANAGE_USERS" />
-        <security:intercept-url pattern="/admin/enterprises/*/users/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
-        
+        <security:intercept-url pattern="/admin/enterprises/*/users/*" method="PUT" access="ROLE_USERS_MANAGE_USERS, ROLE_ENTERPRISE_ADMINISTER_ALL" /> 
+        <security:intercept-url pattern="/admin/enterprises/*/users/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" /> 
         <!-- LIMITS -->
         <security:intercept-url pattern="/admin/enterprises/*/limits" method="POST" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
-        <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="DELETE" access="ROLE_ USERS_MANAGE_ENTERPRISE" />
+        <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>  
         <security:intercept-url pattern="/admin/enterprises/*/limits/*" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         
@@ -123,7 +122,7 @@
         <security:intercept-url pattern="/admin/datacenters/*" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/hypervisors" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS " />
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-        <security:intercept-url pattern="/admin/datacenters/*/action/enterprises" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/enterprises" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE" />
         
         <!-- RACKS -->
@@ -152,7 +151,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         
         <!-- TIERS -->
-        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
@@ -237,28 +236,28 @@
         
         <!-- VIRTUAL DATACENTERS -->
 		<security:intercept-url pattern="/cloud/virtualdatacenters" method="POST" access="ROLE_VDC_MANAGE" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters" method="GET" access="ROLE_VDC_ENUMERATE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters" method="GET" access="ROLE_AUTHENTICATED,ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="GET" access="ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="DELETE" access="ROLE_VDC_MANAGE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*" method="PUT" access="ROLE_VDC_MANAGE" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/action/dhcpinfo" method="GET" access="ROLE_VDC_ENUMERATE" />
 		
 		<!-- VOLUMES -->
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="POST" access="ROLE_VDC_MANAGE_STORAGE" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE,ROLE_VDC_MANAGE_STORAGE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE,ROLE_VDC_MANAGE_STORAGE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/statefulcandidates" method="GET" access="ROLE_VAPP_CREATE_STATEFUL" />
 		
 		<!-- PRIVATE NETWORKS -->
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="POST" access="ROLE_MANAGE_NETWORK" />
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
@@ -291,22 +290,21 @@
         
 		<!-- LINCENCES -->
 		<security:intercept-url pattern="/config/licenses" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-		<security:intercept-url pattern="/config/licenses" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+		<security:intercept-url pattern="/config/licenses" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_PHYS_DC_MANAGE" />
 		<security:intercept-url pattern="/config/licenses" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/config/licenses/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
 		<security:intercept-url pattern="/config/licenses/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
 		<security:intercept-url pattern="/config/licenses/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 
 		<!-- PRIVILEGES -->
-		<security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+		<security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_USERS_VIEW" />
 		<security:intercept-url pattern="/config/privileges" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
-		<security:intercept-url pattern="/config/privileges/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES" />
+		<security:intercept-url pattern="/config/privileges/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW_PRIVILEGES,ROLE_USERS_VIEW" />
 		<security:intercept-url pattern="/config/privileges/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 
 		<!-- PROPERTIES -->
 		<security:intercept-url pattern="/config/properties" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-		<security:intercept-url pattern="/config/properties" method="GET" access="ROLE_AUTHENTICATED" />
-    <!--<security:intercept-url pattern="/config/properties" method="GET" access="ROLE_SYSCONFIG_VIEW" />-->
+		<security:intercept-url pattern="/config/properties" method="GET" access="ROLE_AUTHENTICATED,ROLE_SYSCONFIG_VIEW" />
 		<security:intercept-url pattern="/config/properties" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/config/properties" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
 		<security:intercept-url pattern="/config/properties/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />

@@ -85,10 +85,11 @@ public class SQLTracerListener implements TracerCallback
 
             Query query =
                 HibernateDAOFactory.getSessionFactory().getCurrentSession().createSQLQuery(insert)
-                    .setParameter("severity", trace.getSeverity()).setParameter("performedBy",
-                        trace.getUsername()).setParameter("actionPerformed", trace.getEvent())
-                    .setParameter("component", trace.getComponent()).setParameter("stacktrace",
-                        trace.getMessage());
+                    .setParameter("severity", trace.getSeverity())
+                    .setParameter("performedBy", trace.getUsername())
+                    .setParameter("actionPerformed", trace.getEvent())
+                    .setParameter("component", trace.getComponent())
+                    .setParameter("stacktrace", trace.getMessage());
 
             // TODO: Remove these parameters. Currently the hierarchy shows the enterprise and user
             // who performs the action. Not the enterprise/user resource where the action happens!
@@ -109,36 +110,33 @@ public class SQLTracerListener implements TracerCallback
 
     private void addTraceParameters(final Trace trace, final Query query)
     {
-        // Only process if we have hierarchy data
-        if (trace.getHierarchyData() != null)
+        Map<String, String> data = trace.getHierarchyData();
+
+        // For each column, check if the values are present in the trace
+        for (Map.Entry<String, String> entry : parameterMappings.entrySet())
         {
-            // For each column, check if the values are present in the trace
-            for (Map.Entry<String, String> entry : parameterMappings.entrySet())
+            String column = entry.getKey();
+            String traceKey = entry.getValue();
+
+            String parameterId = null;
+            String parameterName = null;
+
+            // Can be empty if the processor still does not exist
+            if (!traceKey.equals("") && data != null)
             {
-                String column = entry.getKey();
-                String traceKey = entry.getValue();
+                String parameterData = data.get(traceKey);
 
-                String parameterId = null;
-                String parameterName = null;
-
-                // Can eb empty if the processor still does not exist
-                if (!traceKey.equals(""))
+                // If the parameter is present, parse the info; otherwise set it to null
+                if (parameterData != null)
                 {
-                    String parameterData = trace.getHierarchyData().get(traceKey);
-
-                    // If the parameter is present, parse the info; otherwise set it to null
-                    if (parameterData != null)
-                    {
-                        int separator = parameterData.indexOf('|');
-                        parameterId = parameterData.substring(0, separator);
-                        parameterName = parameterData.substring(separator + 1);
-                    }
+                    int separator = parameterData.indexOf('|');
+                    parameterId = parameterData.substring(0, separator);
+                    parameterName = parameterData.substring(separator + 1);
                 }
-
-                query.setParameter(column + "Id", parameterId);
-                query.setParameter(column, parameterName);
             }
+
+            query.setParameter(column + "Id", parameterId);
+            query.setParameter(column, parameterName);
         }
     }
-
 }

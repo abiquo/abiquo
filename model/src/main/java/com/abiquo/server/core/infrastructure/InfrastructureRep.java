@@ -512,6 +512,13 @@ public class InfrastructureRep extends DefaultRepBase
             enterprise);
     }
 
+    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
+        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    {
+        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
+            datastoreUuid, originalHypervisorId);
+    }
+
     public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
     {
         return rackDao.getRackIdByMinVLANCount(idDatacenter);
@@ -600,4 +607,15 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
+
+    public List<Rack> findRacksWithHAEnabled(Datacenter dc)
+    {
+        return rackDao.findRacksWithHAEnabled(dc);
+    }
+
+    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    {
+        return machineDao.findRackEnabledForHAMachines(rack);
+    }
+
 }
