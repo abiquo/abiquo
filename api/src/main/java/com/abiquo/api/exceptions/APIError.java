@@ -247,7 +247,8 @@ public enum APIError
         "VOL-7",
         "The volume cannot be deleted because it is in a being used in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
         "VOL-8",
-        "The stateful volume cannot be deleted because it is being used in a virtual appliance")
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_DELETE_ERROR(
+        "VOL-9", "Could not delete the volume")
 
     ;
 
