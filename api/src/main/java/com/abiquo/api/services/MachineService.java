@@ -60,7 +60,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class MachineService extends DefaultApiService
 {
     protected static final Logger logger = LoggerFactory.getLogger(MachineService.class);
-    
+
     @Autowired
     protected InfrastructureRep repo;
 
@@ -77,7 +77,7 @@ public class MachineService extends DefaultApiService
     protected VirtualMachineService virtualMachineService;
 
     @Autowired
-    protected VirtualDatacenterRep virtualDatacenterRep;    
+    protected VirtualDatacenterRep virtualDatacenterRep;
 
     public MachineService()
     {
@@ -165,7 +165,8 @@ public class MachineService extends DefaultApiService
             for (DatastoreDto dataDto : machineDto.getDatastores().getCollection())
             {
                 // FIXME: All Datastores need to have an UUID in DB
-                if (dataDto.getDatastoreUUID() == null){
+                if (dataDto.getDatastoreUUID() == null)
+                {
                     dataDto.setDatastoreUUID(UUID.randomUUID().toString());
                 }
                 dataService.addDatastore(dataDto, machine.getId());
@@ -193,6 +194,19 @@ public class MachineService extends DefaultApiService
         }
 
         return machine;
+    }
+
+    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
+
+        if (machine == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return machine;
+
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -318,5 +332,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
-       
+
 }

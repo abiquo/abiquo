@@ -65,7 +65,7 @@ public enum APIError
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
-        "Missing link to the enterprise"), ENTERPRISE_WITH_BLOCKED_USER(
+        "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
 
@@ -136,8 +136,8 @@ public enum APIError
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
         "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
-        "The virtual machine cannot change the state to the required state"),VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR("VM-5",
-        "The virtual machine cannot change the state due to a communication problem"),
+        "The virtual machine cannot change the state to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
+        "VM-5", "The virtual machine cannot change the state due to a communication problem"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -283,7 +283,7 @@ public enum APIError
         "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
-        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)"), INVALID_FPR(
+        "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid")
 
     ;
