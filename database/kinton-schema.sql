@@ -1329,7 +1329,6 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.virtual.moreInfoAboutUploadLimitations","http://community.abicloud.org/display/ABI16/Appliance+Library+view#ApplianceLibraryview-Uploadingfromourlocalfilesystem","URL of Abiquo virtual image upload limitations web page"),
  ("client.infra.vlanIdMin","2","Minimum value for vlan ID"),
  ("client.infra.vlanIdMax","4094","Maximum value for vlan ID"),
- ("client.infra.useVirtualBox","0","Support (1) or not (0) Virtual Box"),
  ("client.dashboard.dashboardUpdateInterval","30","Time interval in seconds"),
  ("client.infra.defaultHypervisorPassword","temporal","Default Hypervisor password used when creating Physical Machines"),
  ("client.infra.defaultHypervisorPort","8889","Default Hypervisor port used when creating Physical Machines"),

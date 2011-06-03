@@ -136,7 +136,8 @@ public enum APIError
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
         "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
-        "The virtual machine cannot change the state to the required state"),
+        "The virtual machine cannot change the state to the required state"),VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR("VM-5",
+        "The virtual machine cannot change the state due to a communication problem"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -273,7 +274,8 @@ public enum APIError
         "The volume cannot be deleted because it is in a being used in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
         "VOL-8",
         "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
-        "VOL-9", "The idScsi of the volume is required"),
+        "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-10", "The size of the volume cannot be decreased"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
@@ -333,8 +335,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

@@ -23,6 +23,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 @XmlRootElement(name = "volume")
@@ -32,6 +33,10 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
 
     private VirtualMachineDto virtualMachine;
 
+    private VirtualDatacenterDto virtualDatacenter;
+
+    private StoragePoolWithDeviceDto storagePoolWithDevice;
+
     public void setVirtualMachine(final VirtualMachineDto virtualMachine)
     {
         this.virtualMachine = virtualMachine;
@@ -40,5 +45,25 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
     public VirtualMachineDto getVirtualMachine()
     {
         return virtualMachine;
+    }
+
+    public void setVirtualDatacenter(final VirtualDatacenterDto virtualDatacenter)
+    {
+        this.virtualDatacenter = virtualDatacenter;
+    }
+
+    public VirtualDatacenterDto getVirtualDatacenter()
+    {
+        return virtualDatacenter;
+    }
+
+    public void setStoragePoolWithDevice(final StoragePoolWithDeviceDto storagePoolWithDevice)
+    {
+        this.storagePoolWithDevice = storagePoolWithDevice;
+    }
+
+    public StoragePoolWithDeviceDto getStoragePoolWithDevice()
+    {
+        return storagePoolWithDevice;
     }
 }

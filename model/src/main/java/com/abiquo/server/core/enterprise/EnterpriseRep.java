@@ -166,6 +166,11 @@ public class EnterpriseRep extends DefaultRepBase
         return userDAO.findAll();
     }
 
+    public Collection<User> findUsersByRole(final Role role)
+    {
+        return userDAO.findByRole(role);
+    }
+
     public Collection<User> findUsersByEnterprise(final Enterprise enterprise)
     {
         return userDAO.findByEnterprise(enterprise);
@@ -175,7 +180,7 @@ public class EnterpriseRep extends DefaultRepBase
         final String order, final boolean desc, final boolean connected, final Integer page,
         final Integer numResults)
     {
-        return userDAO.find(enterprise, filter, order, desc, connected, page, numResults);
+        return userDAO.find(enterprise, null, filter, order, desc, connected, page, numResults);
     }
 
     public User findUserByEnterprise(final Integer userId, final Enterprise enterprise)
@@ -234,11 +239,18 @@ public class EnterpriseRep extends DefaultRepBase
         return roleDAO.find(enterprise, filter, order, desc, page, numResults);
     }
 
+    public Collection<Role> findRolesByEnterpriseNotNull(final Enterprise enterprise,
+        final String filter, final String order, final boolean desc, final Integer page,
+        final Integer numResults)
+    {
+        return roleDAO.find(enterprise, filter, order, desc, page, numResults, true);
+    }
+
     public Collection<Role> findRolesByEnterpriseAndName(final Enterprise enterprise,
         final String filter, final String order, final boolean desc, final Integer page,
         final Integer numResults)
     {
-        return roleDAO.findExactly(enterprise, filter, order, desc, page, numResults);
+        return roleDAO.findExactly(enterprise, filter, order, desc, page, numResults, true);
     }
 
     public void insertRole(final Role role)
