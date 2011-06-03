@@ -178,4 +178,22 @@ public abstract class TestNotifierBase<T extends GenericNotifier>
         notifications = notifier.processEvent(vm, machine, event);
         AssertJUnit.assertTrue(notifications.isEmpty());
     }
+
+    protected boolean containsMovedEvent(final List<VirtualSystemEvent> notifications)
+    {
+        return containsEvent(VMEventType.MOVED, notifications);
+    }
+
+    protected boolean containsEvent(VMEventType event, final List<VirtualSystemEvent> notifications)
+    {
+        for (VirtualSystemEvent notification : notifications)
+        {
+            if (notification.getEventType().equalsIgnoreCase(event.name()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
