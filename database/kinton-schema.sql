@@ -2608,23 +2608,35 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
         END IF;
         IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
         -- Remove VlanUsed
-            SELECT DISTINCT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
-		    FROM vlan_network vn
-		    WHERE vn.network_id = OLD.networktypeID;
-            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
-            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
-                CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
-            END IF;
-            -- Statistics
-            UPDATE IGNORE cloud_usage_stats
-                SET     vlanUsed = vlanUsed - 1
-                WHERE idDataCenter = -1;
-            UPDATE IGNORE enterprise_resources_stats 
-                SET     vlanUsed = vlanUsed - 1
-                WHERE idEnterprise = OLD.idEnterprise;
-            UPDATE IGNORE vdc_enterprise_stats 
-                SET     vlanUsed = vlanUsed - 1
-            WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	    BEGIN
+		DECLARE done INTEGER DEFAULT 0;
+		DECLARE cursorVlan CURSOR FOR SELECT DISTINCT vn.network_id, vn.network_name FROM vlan_network vn WHERE vn.network_id = OLD.networktypeID;
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+		    
+		OPEN cursorVlan;
+		    
+		REPEAT
+		   FETCH cursorVlan into vlanNetworkIdObj, networkNameObj;
+		   IF NOT done THEN
+
+		    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
+			IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+				CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
+			END IF;
+			-- Statistics
+			UPDATE IGNORE cloud_usage_stats
+				SET     vlanUsed = vlanUsed - 1
+				WHERE idDataCenter = -1;
+			UPDATE IGNORE enterprise_resources_stats 
+				SET     vlanUsed = vlanUsed - 1
+				WHERE idEnterprise = OLD.idEnterprise;
+			UPDATE IGNORE vdc_enterprise_stats 
+				SET     vlanUsed = vlanUsed - 1
+			    WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+		   END IF;    
+		UNTIL done END REPEAT;
+		CLOSE cursorVlan;
+	    END;
         END IF;
     END;
 |
