@@ -90,13 +90,14 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
 
         UserDAO dao = createDaoForRollbackTransaction();
 
-        Collection<User> users = dao.find(user.getEnterprise(), null, null, false, true, 0, 25);
+        Collection<User> users =
+            dao.find(user.getEnterprise(), null, null, null, false, true, 0, 25);
         AssertEx.assertSize(users, 1);
 
-        users = dao.find(null, null, null, false, true, 0, 25);
+        users = dao.find(null, null, null, null, false, true, 0, 25);
         AssertEx.assertSize(users, 1);
 
-        users = dao.find(user.getEnterprise(), null, null, false, false, 0, 25);
+        users = dao.find(user.getEnterprise(), null, null, null, false, false, 0, 25);
         AssertEx.assertSize(users, 2);
     }
 }
