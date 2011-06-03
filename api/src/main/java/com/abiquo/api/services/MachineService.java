@@ -23,9 +23,12 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,7 +37,6 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VSMStub;
 import com.abiquo.api.services.stub.VSMStubImpl;
@@ -46,8 +48,8 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -57,6 +59,8 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 @Transactional(readOnly = false)
 public class MachineService extends DefaultApiService
 {
+    protected static final Logger logger = LoggerFactory.getLogger(MachineService.class);
+    
     @Autowired
     protected InfrastructureRep repo;
 
@@ -64,16 +68,16 @@ public class MachineService extends DefaultApiService
     protected DatastoreService dataService;
 
     @Autowired
-    private VSMStub vsm;
+    protected VSMStub vsm;
 
     @Autowired
-    private RemoteServiceService remoteServiceService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
-    private VirtualMachineService virtualMachineService;
+    protected VirtualMachineService virtualMachineService;
 
     @Autowired
-    private VirtualDatacenterRep virtualDatacenterRep;
+    protected VirtualDatacenterRep virtualDatacenterRep;    
 
     public MachineService()
     {
@@ -160,6 +164,10 @@ public class MachineService extends DefaultApiService
         {
             for (DatastoreDto dataDto : machineDto.getDatastores().getCollection())
             {
+                // FIXME: All Datastores need to have an UUID in DB
+                if (dataDto.getDatastoreUUID() == null){
+                    dataDto.setDatastoreUUID(UUID.randomUUID().toString());
+                }
                 dataService.addDatastore(dataDto, machine.getId());
             }
         }
@@ -310,4 +318,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
+       
 }

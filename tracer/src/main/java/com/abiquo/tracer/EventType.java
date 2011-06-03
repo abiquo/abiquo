@@ -145,7 +145,10 @@ public enum EventType implements Serializable
         "ROLE_LDAP_MODIFIED", "Role ldap updated"), ROLE_LDAP_DELETED(1302, "ROLE_LDAP_DELETED",
         "Role ldap deleted"),
 
-    ;
+    // HA Engine Events
+    MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
+        1201, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1201,
+        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine");
 
     private final int event;
 

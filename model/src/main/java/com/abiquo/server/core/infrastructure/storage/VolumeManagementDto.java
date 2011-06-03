@@ -45,7 +45,7 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private long sizeInMB;
 
-    // These fields are deprecated
+    // These fields are deprecated. We are only considering the whole volume size
     // private long availableSizeInMB;
     //
     // private long usedSizeInMB;

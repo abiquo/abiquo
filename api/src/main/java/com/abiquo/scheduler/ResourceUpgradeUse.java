@@ -37,6 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.State;
@@ -45,9 +47,9 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDAO;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -67,10 +69,12 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
  * <li>network resources on the virtual datacenter</li>
  * </ul>
  */
-@Component
 // @Transactional(readOnly = false, propagation = Propagation.REQUIRED, isolation =
 // Isolation.READ_UNCOMMITTED)
 // @Transactional//(readOnly=false)
+
+@Component
+//@Transactional(readOnly=false, propagation=Propagation.REQUIRED)
 public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
 
@@ -100,16 +104,25 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
-    /**
-     * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
-     *             resources to allocate the virtual machine, the virtual appliances is not on any
-     *             virtual datacenter.
-     */
     @Override
     public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
         throws ResourceUpgradeUseException
     {
+        updateUse(virtualApplianceId, virtualMachine, false);
+    }
 
+    @Override
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceMachineId)
+    {
+        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
+
+        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources on the original hypervisor       
+        updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
+
+    }
+
+    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
+    {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
         {
@@ -120,13 +133,20 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         try
         {
-            updateUsageDatastore(virtualMachine, false);
-
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, false);
 
-            updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
+            if (!isHA)
+            {
+                updateUsageDatastore(virtualMachine, false);
+                updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
 
-            virtualMachine.setState(State.IN_PROGRESS);
+                virtualMachine.setState(State.IN_PROGRESS);
+            }
+            else
+            {
+                updateNewtorkingResourcesHA(physicalMachine, virtualMachine);
+            }
+
             vmachineDao.flush();
         }
         catch (final ConstraintViolationException cve)
@@ -175,6 +195,30 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             throw new ResourceUpgradeUseException("Can not update resource utilization"
                 + e.getMessage());
         }
+    }
+
+    /**
+     * Updates the ''vswitch'' of the RASD associated to the current Virtual Machine's
+     * IpPoolManagements.
+     */
+    private void updateNewtorkingResourcesHA(final Machine haPhysicalTarget,
+        final VirtualMachine virtualMachine) throws NotEnoughResourcesException,
+        NoSuchObjectException
+    {
+        final String vswitch = haPhysicalTarget.getVirtualSwitch();
+
+        List<IpPoolManagement> ippoolManagementList =
+            ipPoolManDao.findByVirtualMachine(virtualMachine);
+
+        log.debug("Update the vswitch to {}", vswitch);
+        for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
+        {
+            // already assigned VLAN TAG if (vlanNetwork.getTag() == null)
+            Rasd rasd = ipPoolManagement.getRasd();
+            rasd.setConnection(vswitch);
+            rasdDao.flush();
+        }// iterate over VlanNetwork
+
     }
 
     /**
@@ -330,7 +374,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     /**
-     * Updates the datastore with the used size by the virtual machine
+     * Updates the datastore with the used size by the virtual machine (if a shared datastore update
+     * all its references).
      * 
      * @param virtual the virtual machine that contains the datastore to update
      * @param session the hibernate session
@@ -338,23 +383,39 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     private void updateUsageDatastore(final VirtualMachine virtual, final boolean isRollback)
     {
 
+        if (virtual.getVirtualImage().getStateful() == 1)
+        {
+            // statefull images doesn't update the datastore utilization.
+            return;
+        }
+
         Datastore datastore = virtual.getDatastore();
 
-        final Long actualSize = datastore.getUsedSize();
-        final Long required =
-            virtual.getVirtualImage().getStateful() == 1 ? 0 : virtual.getHdInBytes();
-        // stateful virtual images doesn't use the datastores
+        // updates the datastore utilization for all the shared datastores.
+        List<Datastore> datastoresShared = datastoreDao.findShares(datastore);
 
-        final Long newUsed = isRollback ? actualSize - required : actualSize + required;
+        for (Datastore dstore : datastoresShared)
+        {
+            updateDatastore(dstore, virtual.getHdInBytes(), isRollback);
+        }
+
+        datastoreDao.flush();
+    }
+
+    private void updateDatastore(Datastore datastore, Long requestSize, boolean isRollback)
+    {
+        final Long actualSize = datastore.getUsedSize();
+
+        final Long newUsed = isRollback ? actualSize - requestSize : actualSize + requestSize;
 
         if (newUsed > datastore.getSize())
         {
-            log.error("Target datastore usage is over capacity !!!!! machine : %s datastore : %s",
-                virtual.getHypervisor().getMachine().getName(), virtual.getDatastore().getName());
+
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
+                datastore.getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
-        datastoreDao.flush();
     }
 
     /**
@@ -431,7 +492,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public Collection<Integer> getVlansIdAvoidAsCollection(final Rack rack)
     {
 
-        Collection<Integer> vlans_avoided_collection = new HashSet();
+        Collection<Integer> vlans_avoided_collection = new HashSet<Integer>();
         String avoidedVLANs = rack.getVlansIdAvoided();
 
         if (avoidedVLANs == null || avoidedVLANs.isEmpty())

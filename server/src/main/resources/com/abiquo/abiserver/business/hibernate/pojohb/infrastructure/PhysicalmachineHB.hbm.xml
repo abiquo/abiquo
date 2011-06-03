@@ -64,6 +64,18 @@
 		<property name="initiatorIQN" type="string">
 			<column length="256" name="initiatorIQN" />
 		</property>
+		<property name="ipmiIp" type="string">
+			<column name="ipmiIP" length="39" not-null="false"/>
+		</property>	
+		<property name="ipmiPort" type="int">
+			<column name="ipmiPort"  not-null="false"/>
+		</property>
+		<property name="ipmiUser" type="string">
+			<column name="ipmiUser" length="255" not-null="false"/>
+		</property>	
+		<property name="ipmiPassword" type="string">
+			<column name="ipmiPassword" length="255" not-null="false"/>
+		</property>	
 		<property name="idEnterprise" type="java.lang.Integer">
 			<column name="idEnterprise" not-null="false"/>
 		</property>

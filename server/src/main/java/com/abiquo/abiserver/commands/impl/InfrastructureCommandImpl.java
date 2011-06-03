@@ -978,6 +978,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
+            
+            rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
 
@@ -1388,6 +1390,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
+            physicalMachineHb.setIpmiIp(pm.getIpmiIp());
+            physicalMachineHb.setIpmiPort(pm.getIpmiPort());
+            physicalMachineHb.setIpmiUser(pm.getIpmiUser());
+            physicalMachineHb.setIpmiPassword(pm.getIpmiPassword());
 
             // Updating virtual machines
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();

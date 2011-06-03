@@ -61,4 +61,10 @@ public class AbicloudConstants
     /** Password QNAME */
     public final static QName ADMIN_USER_PASSWORD_QNAME = new QName("adminPassword");
 
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    public final static QName HA_DISK = new QName("ha");
+
 }
