@@ -51,12 +51,21 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
         super(Role.class, entityManager);
     }
 
-    public static Criterion sameEnterprise(final Enterprise enterprise)
+    public static Criterion sameEnterpriseOrNull(final Enterprise enterprise)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
 
         filterDisjunction.add(Restrictions.eq(Role.ENTERPRISE_PROPERTY, enterprise));
         filterDisjunction.add(Restrictions.isNull(Role.ENTERPRISE_PROPERTY));
+
+        return filterDisjunction;
+    }
+
+    public static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.eq(Role.ENTERPRISE_PROPERTY, enterprise));
 
         return filterDisjunction;
     }
@@ -94,11 +103,19 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
     public Collection<Role> find(final Enterprise enterprise, final String filter,
         final String orderBy, final boolean desc, final Integer offset, final Integer numResults)
     {
-        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc);
+        return find(enterprise, filter, orderBy, desc, offset, numResults, false);
+    }
+
+    public Collection<Role> find(final Enterprise enterprise, final String filter,
+        final String orderBy, final boolean desc, final Integer offset, final Integer numResults,
+        final boolean discardNullEnterprises)
+    {
+        Criteria criteria =
+            createCriteria(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(enterprise, filter, orderBy, desc);
+        criteria = createCriteria(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -115,13 +132,15 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
     }
 
     public Collection<Role> findExactly(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc, final Integer offset, final Integer numResults)
+        final String orderBy, final boolean desc, final Integer offset, final Integer numResults,
+        final boolean discardNullEnterprises)
     {
-        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc);
+        Criteria criteria =
+            createCriteriaExactly(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
         Long total = count(criteria);
 
-        criteria = createCriteriaExactly(enterprise, filter, orderBy, desc);
+        criteria = createCriteriaExactly(enterprise, filter, orderBy, desc, discardNullEnterprises);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -138,13 +157,20 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
     }
 
     private Criteria createCriteria(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc)
+        final String orderBy, final boolean desc, final boolean discardNullEnterprises)
     {
         Criteria criteria = createCriteria();
 
         if (enterprise != null)
         {
-            criteria.add(sameEnterprise(enterprise));
+            if (discardNullEnterprises)
+            {
+                criteria.add(sameEnterprise(enterprise));
+            }
+            else
+            {
+                criteria.add(sameEnterpriseOrNull(enterprise));
+            }
         }
         else
         {
@@ -185,13 +211,21 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
             "WHERE r.id = :idRole";
 
     private Criteria createCriteriaExactly(final Enterprise enterprise, final String filter,
-        final String orderBy, final boolean desc)
+        final String orderBy, final boolean desc, final boolean discardNullEnterprises)
     {
         Criteria criteria = createCriteria();
 
         if (enterprise != null)
         {
-            criteria.add(sameEnterprise(enterprise));
+            if (discardNullEnterprises)
+            {
+                criteria.add(sameEnterprise(enterprise));
+            }
+            else
+            {
+                criteria.add(sameEnterpriseOrNull(enterprise));
+            }
+
         }
         else
         {

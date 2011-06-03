@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -51,6 +53,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -254,7 +257,42 @@ public class EnterpriseService extends DefaultApiService
             }
         }
 
+        if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
+        {
+            String message =
+                "Cannot delete enterprise because some users have roles with super privileges ("
+                    + userService.enterpriseWithBlockedRoles(enterprise)
+                    + "), please change their enterprise before continuing";
+            addConflictErrors(new CommonError(APIError.ENTERPRISE_WITH_BLOCKED_USER.getCode(),
+                message));
+            flushErrors();
+        }
+
+        // user with blocked role is checked before
+        Collection<Role> roles =
+            repo.findRolesByEnterpriseNotNull(enterprise, null, null, false, 0, 1000);
+        if (roles != null)
+        {
+            for (Role r : roles)
+            {
+                Collection<User> users = repo.findUsersByRole(r);
+                if (users != null)
+                {
+                    for (User u : users)
+                    {
+                        repo.removeUser(u);
+                    }
+                }
+                deleteRole(r);
+            }
+        }
+
         repo.delete(enterprise);
+    }
+
+    protected void deleteRole(final Role role)
+    {
+        repo.deleteRole(role);
     }
 
     public List<Machine> findReservedMachines(final Integer enterpriseId)
