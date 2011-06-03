@@ -162,8 +162,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
-                .getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
+                dto.getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -215,7 +215,8 @@ public class UserService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public User modifyUser(final Integer userId, final UserDto user)
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS))
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_USERS)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             if (!getCurrentUser().getId().equals(userId))
             {
@@ -450,10 +451,11 @@ public class UserService extends DefaultApiService
 
     public String enterpriseWithBlockedRoles(final Enterprise enterprise)
     {
-        Collection<User> users =repo.findUsersByEnterprise(enterprise);
-        for(User user:users)
+        Collection<User> users = repo.findUsersByEnterprise(enterprise);
+        for (User user : users)
         {
-            if(user.getRole().isBlocked()) return user.getRole().getName().toString();
+            if (user.getRole().isBlocked())
+                return user.getRole().getName().toString();
         }
         return "";
     }

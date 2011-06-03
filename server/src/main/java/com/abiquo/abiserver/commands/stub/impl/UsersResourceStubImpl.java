@@ -524,7 +524,6 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             Collection<Role> roles = new ArrayList<Role>();
             for (RoleDto dto : rolesDto.getCollection())
             {
-                Role role = getRole(dto, false);
                 roles.add(getRole(dto, false));
 
             }
