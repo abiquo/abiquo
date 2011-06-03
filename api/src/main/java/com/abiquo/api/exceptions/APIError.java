@@ -64,7 +64,7 @@ public enum APIError
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
-        "Missing link to the enterprise"),
+        "Missing enterprise link"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -247,7 +247,7 @@ public enum APIError
         "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
-        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)"), INVALID_FPR(
+        "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid")
 
     ;

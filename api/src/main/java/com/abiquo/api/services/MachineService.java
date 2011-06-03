@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VSMStub;
 import com.abiquo.api.services.stub.VSMStubImpl;
@@ -46,8 +45,8 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -187,6 +186,19 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
+    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
+
+        if (machine == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return machine;
+
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
     {
@@ -310,4 +322,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
+
 }

@@ -771,4 +771,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
             + ") AND m.id = :machineId";
 
+    public Machine findByIds(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
+            Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
+    }
+
 }
