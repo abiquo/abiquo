@@ -227,25 +227,53 @@ public class VirtualMachineService extends DefaultApiService
     public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
         final Integer vdcId, final State state) throws Exception
     {
+        // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        // Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
+
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
-        Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
-        VirtualAppliance vapp = contanerVirtualAppliance(vm);
-        EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
+        State old = vm.getState();
 
-        Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
+        validMachineStateChange(old, state);
 
-        RemoteService vf =
-            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+        try
+        {
+            blockVirtualMachine(vm);
 
-        long timeout = Long.valueOf(configService.getServerTimeout());
+            Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
-        Resource resource =
-            ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                ResourceFactory.LATEST);
 
-        changeState(resource, envelop, state.toResourceState());
+            VirtualAppliance vapp = contanerVirtualAppliance(vm);
+            EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
+            Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
+
+            RemoteService vf =
+                remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+
+
+            long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+
+            Resource resource =
+                ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
+                    ResourceFactory.LATEST);
+
+            changeState(resource, envelop, state.toResourceState());
+        }
+        catch (Exception e)
+        {
+            restoreVirtualMachineState(vm, old);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR);
+            flushErrors();
+
+        }
+
+    }
+
+    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    {
+        vm.setState(old);
+        updateVirtualMachine(vm);
     }
 
     @Deprecated

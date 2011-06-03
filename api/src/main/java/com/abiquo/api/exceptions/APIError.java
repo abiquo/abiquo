@@ -136,7 +136,8 @@ public enum APIError
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
         "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
-        "The virtual machine cannot change the state to the required state"),
+        "The virtual machine cannot change the state to the required state"),VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR("VM-5",
+        "The virtual machine cannot change the state due to a communication problem"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

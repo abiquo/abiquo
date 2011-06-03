@@ -202,11 +202,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.RUNNING))
         {
-            vmService.validMachineStateChange(vm.getState(), State.RUNNING);
-
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
+
         }
     }
 
@@ -230,11 +228,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-            vmService.validMachineStateChange(vm.getState(), State.POWERED_OFF);
-
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+
         }
     }
 
@@ -258,11 +254,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.REBOOTED))
         {
-            vmService.validMachineStateChange(vm.getState(), State.REBOOTED);
-
-            vmService.blockVirtualMachine(vm);
 
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
+
         }
     }
 
@@ -286,10 +280,6 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         if (!vmService.sameState(vm, State.PAUSED))
         {
-            vmService.validMachineStateChange(vm.getState(), State.PAUSED);
-
-            vmService.blockVirtualMachine(vm);
-
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
         }
     }
