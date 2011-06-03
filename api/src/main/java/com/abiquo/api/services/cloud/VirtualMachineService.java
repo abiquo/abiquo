@@ -114,7 +114,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         return repo.findByUUID(uuid);
     }
-    
+
     public VirtualMachine findByName(String name)
     {
         return repo.findByName(name);
@@ -203,7 +203,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if(((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
+        if (((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
             || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
             || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
         {
@@ -225,26 +225,49 @@ public class VirtualMachineService extends DefaultApiService
     {
         // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         // Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
+
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
-        Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
+        State old = vm.getState();
 
-        VirtualAppliance vapp = contanerVirtualAppliance(vm);
-        EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
+        validMachineStateChange(old, state);
 
-        Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
+        try
+        {
+            blockVirtualMachine(vm);
 
-        RemoteService vf =
-            remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+            Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
-        long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+            VirtualAppliance vapp = contanerVirtualAppliance(vm);
+            EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
-        Resource resource =
-            ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                ResourceFactory.LATEST);
+            Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
-        changeState(resource, envelop, state.toResourceState());
+            RemoteService vf =
+                remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
 
+            long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
+
+            Resource resource =
+                ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
+                    ResourceFactory.LATEST);
+
+            changeState(resource, envelop, state.toResourceState());
+        }
+        catch (Exception e)
+        {
+            restoreVirtualMachineState(vm, old);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR);
+            flushErrors();
+
+        }
+
+    }
+
+    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    {
+        vm.setState(old);
+        updateVirtualMachine(vm);
     }
 
     @Deprecated
