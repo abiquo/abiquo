@@ -40,47 +40,4 @@ import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
  */
 public class LibvirtNotifier extends GenericNotifier
 {
-    private final static Logger logger = LoggerFactory.getLogger(ESXiNotifier.class);
-
-    @Override
-    public List<VirtualSystemEvent> processEvent(final VirtualMachine virtualMachine,
-        final PhysicalMachine machine, final VMEventType event)
-    {
-        logger.trace(String.format("Processing %s %s event from machine %s", virtualMachine
-            .getName(), event.name(), machine.getAddress()));
-
-        List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
-
-        switch (event)
-        {
-            case CREATED:
-                notifications.addAll(deduceMoveEvent(virtualMachine, machine, event));
-                break;
-
-            case POWER_ON:
-            case POWER_OFF:
-            case PAUSED:
-            case RESUMED:
-            case DESTROYED:
-
-                if (samePhysicalMachineAddress(virtualMachine.getPhysicalMachine(), machine)
-                    && !alreadyNotified(virtualMachine, event))
-                {
-                    notifications.add(buildVirtualSystemEvent(virtualMachine, event));
-                }
-
-                break;
-
-            default:
-                break;
-        }
-
-        return notifications;
-    }
-
-    protected boolean samePhysicalMachineAddress(final PhysicalMachine one,
-        final PhysicalMachine other)
-    {
-        return one.getAddress().equals(other.getAddress());
-    }
 }
