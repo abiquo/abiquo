@@ -211,11 +211,11 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             VirtualMachineConfiguration newConfig =
                 buildUpdateConfiguration(virtualMachine.getConfiguration(), virtualSystem);
 
-            AbsVirtualMachine newVirtualMachine =
-                VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
+            // AbsVirtualMachine newVirtualMachine =
+            // VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
 
             // Apply the new configuration to the machine in the hypervisor
-            newVirtualMachine.reconfigVM(newConfig);
+            virtualMachine.reconfigVM(newConfig);
         }
     }
 
