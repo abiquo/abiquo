@@ -81,14 +81,14 @@ public class KVMNotifier extends GenericNotifier
         }
         else if (mustNotifyMovement.contains(event))
         {
-            return buildMovementNotifications(virtualMachine, machine, event);
+            return buildMovementNotifications(virtualMachine, machine);
         }
 
         return Collections.emptyList();
     }
 
     protected List<VirtualSystemEvent> buildMovementNotifications(VirtualMachine virtualMachine,
-        final PhysicalMachine machine, final VMEventType event)
+        final PhysicalMachine machine)
     {
         List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
 
