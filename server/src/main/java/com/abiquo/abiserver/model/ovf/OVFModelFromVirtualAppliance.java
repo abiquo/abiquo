@@ -86,7 +86,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
-import com.abiquo.ovfmanager.cim.CIMTypesUtils.ChangeableTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -95,7 +94,6 @@ import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
-import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFDiskUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
@@ -185,7 +183,7 @@ public class OVFModelFromVirtualAppliance
 
             // Configure AnnotationSection with the RD port
             AnnotationSectionType annotationSection =
-                createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+                createVirtualSystemRDPortAnnotationSection(virtualMachine);
             if (machineState != null)
             {
                 annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
@@ -210,7 +208,6 @@ public class OVFModelFromVirtualAppliance
         }
         catch (Exception e) // RequiredAttributeException(vs creation) and SectionException
         {
-
             String msg =
                 String
                     .format(
@@ -276,7 +273,6 @@ public class OVFModelFromVirtualAppliance
 
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
     {
-
         // TODO EBS when the path is formed by IP|IQN avoid using the repository and just the path
         String codify = null;
 
@@ -313,175 +309,6 @@ public class OVFModelFromVirtualAppliance
         logger.info("Codify ''{}''", codify);
 
         return codify;
-    }
-
-    /**
-     * Setting the virtualDisk File reference
-     * 
-     * @param targetDatastore the targetDatastore
-     */
-    private static ReferencesType createDiskFileReferences(final VirtualImage virtualImage,
-        final String targetDatastore)
-    {
-        ReferencesType references;
-        FileType fileDisk;
-
-        // Combining the repository path + the virtual machine relative path (TODO AM)
-        String imageRepository = null;
-        if (virtualImage.getRepository() != null)
-        {
-            imageRepository = virtualImage.getRepository().getURL();
-        }
-
-        // from the image
-        String href = codifyRepositoryAndPath(virtualImage.getPath(), imageRepository);// virtualImage.getPath();
-
-        String fileId = virtualImage.getName() + "." + virtualImage.getId();
-        BigInteger fileSize = null; // TODO required size
-
-        fileDisk = OVFReferenceUtils.createFileType(fileId, href, fileSize, null, null);
-        // TODO change datastore from hypervisor
-
-        insertTargetDataStore(fileDisk, targetDatastore);
-
-        references = new ReferencesType();
-        references.getFile().add(fileDisk);
-
-        return references;
-    }
-
-    private static RASDType createMemory(final VirtualMachine virtualMachine)
-    {
-        String elementName = "RAM";
-        String instanceID = "2";
-        CIMResourceTypeEnum resourceType = CIMResourceTypeEnum.Memory;
-        Long virtualQuantity = new Long(virtualMachine.getRam());
-
-        RASDType raMem;
-        CIMResourceAllocationSettingDataType rasd;
-
-        try
-        {
-            rasd =
-                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
-                    elementName, instanceID, resourceType);// TODO parent, description, caption,
-            // generation, subtype
-
-            CIMResourceAllocationSettingDataUtils.setAllocationToRASD(rasd, virtualQuantity); // TODO
-            // units
-
-            raMem = CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(rasd);
-        }
-        catch (RequiredAttributeException e)
-        {
-            // can not happen
-            raMem = null;
-        }
-
-        return raMem;
-    }
-
-    private static RASDType createCPU(final VirtualMachine virtualMachine)
-    {
-        String elementName = "CPU";
-        String instanceID = "1";
-        CIMResourceTypeEnum resourceType = CIMResourceTypeEnum.Processor;
-        Long virtualQuantity = new Long(virtualMachine.getCpu());
-
-        RASDType raCpu;
-        CIMResourceAllocationSettingDataType rasd;
-
-        try
-        {
-            rasd =
-                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
-                    elementName, instanceID, resourceType);// TODO parent, description, caption,
-            // generation, subtype
-
-            CIMResourceAllocationSettingDataUtils.setAllocationToRASD(rasd, virtualQuantity); // TODO
-            // units
-
-            raCpu = CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(rasd);
-        }
-        catch (RequiredAttributeException e)
-        {
-            // can not happen
-            raCpu = null;
-        }
-
-        return raCpu;
-    }
-
-    /**
-     * TODO doc Set the VirtualSystemSettingData on the VirtualHardwareSection from the virutual
-     * machine hypervisor configuration (type, address)
-     */
-    private static VirtualHardwareSectionType createVirtualHardware(
-        final VirtualMachine virtualMachine)
-    {
-        VirtualHardwareSectionType hardwareSection;
-        VSSDType vssd;
-
-        // from the hypervisor
-        HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-        String hypervisorAddress =
-            "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
-        String vsystemType = hypervisor.getType().getName();
-        try
-        {
-            // Setting the virtual machine ID
-            String instanceIdString = virtualMachine.getUUID();
-            String elementName = "Hypervisor";
-
-            String description = null; // TODO
-            Long generation = null;
-            String caption = null;
-            ChangeableTypeEnum changeableType = null;
-
-            vssd =
-                CIMVirtualSystemSettingDataUtils.createVirtualSystemSettingData(elementName,
-                    instanceIdString, description, generation, caption, changeableType);
-
-            insertUserAndPassword(vssd, hypervisor.getUser(), hypervisor.getPassword());
-
-            // Setting the hypervisor address as VirtualSystemIdentifier element
-            String virtualSystemIdentifier = hypervisorAddress;
-
-            // Setting the hypervisor type
-            CIMVirtualSystemSettingDataUtils.setVirtualSystemToVSSettingData(vssd,
-                virtualSystemIdentifier, vsystemType);
-
-            // Creating the VirtualHardware element
-            String info = null; // TODO
-            String transport = null; // TODO
-            hardwareSection =
-                OVFVirtualHadwareSectionUtils.createVirtualHardwareSection(vssd, info, transport);
-
-        }
-        catch (RequiredAttributeException e)
-        {
-            // if the virtual machine do not have UUID
-            hardwareSection = null;
-            // TODO check never occurs (log)
-        }
-
-        return hardwareSection;
-    }
-
-    private static AnnotationSectionType createAnnotationMachineStateAndRDPPort(
-        final String machineState, final String rdpPort)
-    {
-
-        // Creating the Annotation Type
-        AnnotationSectionType annotationSection =
-            OVFAnnotationUtils.createAnnotationSection("Abiquo extension to store machine state",
-                "see OtherAttributes: " + AbiCloudConstants.machineStateQname.toString());
-        annotationSection.getOtherAttributes().put(AbiCloudConstants.remoteDesktopQname, rdpPort);
-
-        annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
-            machineState);
-
-        return annotationSection;
     }
 
     /**************************
@@ -912,8 +739,6 @@ public class OVFModelFromVirtualAppliance
         // setting the network name the name of the virtualAppliance
         String networkName = virtualApplianceName + "_network";
 
-        int rdPort = virtualMachine.getVdrpPort();
-
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
         VirtualSystemType virtualSystem =
@@ -931,9 +756,9 @@ public class OVFModelFromVirtualAppliance
             createVirtualSystemSection(virtualMachine, virtualImage, networkName, nodeVirtualImage
                 .getId(), null);
 
-        // Configure AnnotationSection with the RD port
+        // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
-            createVirtualSystemRDPortAnnotationSection(rdPort);
+            createVirtualSystemRDPortAnnotationSection(virtualMachine);
 
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -942,19 +767,24 @@ public class OVFModelFromVirtualAppliance
         return virtualSystem;
     }
 
-    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(final int rdPort)
+    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(
+        final VirtualMachine virtualMachine)
     {
-
-        AnnotationSectionType annotationSection;
-
-        annotationSection = new AnnotationSectionType(); // TODO
-        // OVFEnvelopeUtils.createSection(AnnotationSectionType.class,
-        // null);
+        // TODO OVFEnvelopeUtils.createSection(AnnotationSectionType.class, null);
+        AnnotationSectionType annotationSection = new AnnotationSectionType();
 
         Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
 
-        otherAttributes.put(AbiCloudConstants.remoteDesktopQname, String.valueOf(rdPort));
-        logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
+        String rdPort = String.valueOf(virtualMachine.getVdrpPort());
+        otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, rdPort);
+        logger.debug("The remote desktop port is: " + String.valueOf(rdPort));
+
+        if (virtualMachine.getVrdpPassword() != null)
+        {
+            String rdPassword = virtualMachine.getVrdpPassword();
+            otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);
+            logger.debug("The remote desktop password is: " + rdPassword);
+        }
 
         return annotationSection;
     }
@@ -1067,7 +897,6 @@ public class OVFModelFromVirtualAppliance
     {
         vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, user);
         vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, password);
-
     }
 
     /**
@@ -1251,7 +1080,6 @@ public class OVFModelFromVirtualAppliance
             virtualDiskImageFile.getOtherAttributes().put(new QName("repositoryManager"),
                 repositoryManagerAddress);
         }
-
     }
 
     private static String getRepositoryManagerAddress(final VirtualMachine virtualMachine)

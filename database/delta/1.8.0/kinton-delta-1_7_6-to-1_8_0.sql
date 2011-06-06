@@ -1,3 +1,4 @@
+<<<<<<< HEAD:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 -- WARNING
 -- Please maintain order of delta when merging or adding new lines
 -- 1st -> alter existing schema tables
@@ -541,6 +542,8 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `i
 
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
 
+=======
+>>>>>>> ABICLOUDPREMIUM-1827:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_update_stats`;
@@ -689,6 +692,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
        	END IF;	 
     END IF;
     END;
+<<<<<<< HEAD:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
 |
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
     FOR EACH ROW BEGIN
@@ -1430,3 +1434,8 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
     END;
 |
 DELIMITER ;
+=======
+
+-- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
+update volume_management set state = 1 where state = 2;
+>>>>>>> ABICLOUDPREMIUM-1827:database/delta/1.8.0/kinton-delta-1_7_6-to-1_8_0.sql
