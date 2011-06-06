@@ -28,18 +28,21 @@
     paddingTop="10"
     verticalScrollPolicy="off"
     horizontalScrollPolicy="off"
+    creationComplete="onCreationComplete()"
     xmlns="net.undf.abicloud.view.general.*"
-    xmlns:mx="http://www.adobe.com/2006/mxml">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:rack="net.undf.abicloud.view.infrastructure.components.rack.*">
 
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
             import mx.utils.ObjectUtil;
             import mx.resources.ResourceBundle;
             import mx.resources.ResourceManager;
             import net.undf.abicloud.events.InfrastructureEvent;
             import net.undf.abicloud.vo.infrastructure.Rack;
             import net.undf.abicloud.vo.infrastructure.DataCenter;
+            import net.undf.abicloud.model.AbiCloudModel;
 
             [ResourceBundle("Infrastructure")]
             private var rb:ResourceBundle;
@@ -51,7 +54,11 @@
             private var _rack:Rack;
             
             [Bindable]
-            public var isValid:Boolean;
+            private var _rackType:Array;
+            
+            private function onCreationComplete():void{
+            	this._rackType = [Rack.TYPE, UcsRack.TYPE];
+            }
 
             /**
              * Initializes this component, with the data center to which the new rack will be assigned
@@ -67,8 +74,6 @@
                     nameInput.text = this._rack.name;
                     shortDescriptionInput.text = this._rack.shortDescription;
                     largeDescriptionInput.text = this._rack.largeDescription;
-
-                    isValid = true;
                 }
                 else
                 {
@@ -76,8 +81,6 @@
                     nameInput.text = "";
                     shortDescriptionInput.text = "";
                     largeDescriptionInput.text = "";
-
-                    isValid = false;
                 }
 
                 nameInput.setFocus();
@@ -89,17 +92,13 @@
              **/
             private function validateForm():void
             {
-                if (nameInput.text.length > 0)
-                    isValid = true;
-
-                else
-                    isValid = false;
+                dispatchEvent(new Event('validForm'));
             }
            
         ]]>
     </mx:Script>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" paddingBottom="0">
         <mx:FormItem 
             label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')"
             required="true">
@@ -114,10 +113,22 @@
                 maxChars="29"/>
         </mx:FormItem>
 
-        <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_LARGEDESCRIPTION')">
+        <mx:FormItem 
+        	includeInLayout="false"
+        	visible="false"
+        	label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_LARGEDESCRIPTION')">
             <mx:TextArea id="largeDescriptionInput"
                 maxChars="99"/>
         </mx:FormItem>
+        
+        <mx:FormItem 
+        	id="rackTypeFormItem"
+        	visible="false"
+        	includeInLayout="false"
+        	label="@Resource(bundle='Infrastructure', key='COMBOBOX_RACK_TYPE')">
+        	<mx:ComboBox 
+        		id="rackTypeCombo"
+        		height="18" dataProvider="{this._rackType}"/>
+        </mx:FormItem>
     </mx:Form>
-
 </mx:VBox>
