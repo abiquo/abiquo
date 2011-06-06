@@ -54,6 +54,7 @@ import com.abiquo.api.resources.cloud.PrivateNetworksResource;
 import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
@@ -310,6 +311,11 @@ public class RESTBuilder implements IRESTBuilder
             .add(builder.buildActionLink(EnterpriseResource.class,
                 EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
                 params));
+
+        // action get virtual datacenters by enterprise
+        links.add(builder.buildActionLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+            VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
     }

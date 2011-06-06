@@ -67,6 +67,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/ips" method="GET" access="ROLE_VDC_ENUMERATE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/volumes" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/admin/enterprises/*/action/virtualdatacenters" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
@@ -256,7 +257,7 @@
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/statefulcandidates" method="GET" access="ROLE_VAPP_CREATE_STATEFUL" />
 		
 		<!-- PRIVATE NETWORKS -->
-		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="POST" access="ROLE_MANAGE_NETWORK" />
+		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="POST" access="ROLE_VDC_MANAGE_NETWORK" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>

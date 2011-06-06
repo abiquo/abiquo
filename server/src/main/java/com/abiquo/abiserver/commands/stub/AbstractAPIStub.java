@@ -455,6 +455,15 @@ public class AbstractAPIStub
             new HashMap<String, String>(), queryParams);
     }
 
+    protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", idEnterprise.toString());
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/action/virtualdatacenters", params);
+    }
+
     protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)
     {
         Map<String, String> params = new HashMap<String, String>();
