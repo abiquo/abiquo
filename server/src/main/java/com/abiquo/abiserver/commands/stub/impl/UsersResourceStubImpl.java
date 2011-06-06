@@ -526,14 +526,19 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             UserHB currentUser = getCurrentUser();
             RolesDto rolesDto = response.getEntity(RolesDto.class);
             Collection<Role> roles = new ArrayList<Role>();
+
             for (RoleDto dto : rolesDto.getCollection())
             {
-                Role role = getRole(dto, false);
+                roles.add(getRole(dto, false));
+
+            }
+
+            for (Role role : roles)
+            {
                 if (currentUser.getRoleHB().toPojo().getId() == role.getId())
                 {
                     role.setBlocked(true);
                 }
-                roles.add(getRole(dto, false));
             }
 
             Integer total =

@@ -153,19 +153,4 @@ public class TestESXiNotifier extends TestNotifierBase<ESXiNotifier>
         notifications = notifier.processEvent(vm, pm1, VMEventType.RESUMED);
         AssertJUnit.assertTrue(notifications.isEmpty());
     }
-
-    private boolean containsMovedEvent(final List<VirtualSystemEvent> notifications)
-    {
-        boolean containsMove = false;
-
-        for (VirtualSystemEvent notification : notifications)
-        {
-            if (notification.getEventType().equalsIgnoreCase(VMEventType.MOVED.name()))
-            {
-                containsMove = true;
-            }
-        }
-
-        return containsMove;
-    }
 }

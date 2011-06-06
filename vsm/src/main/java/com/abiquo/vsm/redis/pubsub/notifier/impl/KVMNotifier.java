@@ -34,15 +34,13 @@ import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
 
 /**
- * Concrete implementation of {@link GenericNotifier} for the ESXi hypervisor. When a VirtualMachine
- * is moved, using VCenter, between PhysicalMachines a CREATED (on destination PhysicalMachine) and
- * a DESTROYED (on origin PhysicalMachine) events are generated.
+ * Concrete implementation of {@link GenericNotifier} for the KVM hypervisor.
  * 
  * @author eruiz@abiquo.com
  */
-public class ESXiNotifier extends GenericNotifier
+public class KVMNotifier extends GenericNotifier
 {
-    private final static Logger logger = LoggerFactory.getLogger(ESXiNotifier.class);
+    private final static Logger logger = LoggerFactory.getLogger(KVMNotifier.class);
 
     @Override
     public List<VirtualSystemEvent> processEvent(final VirtualMachine virtualMachine,
@@ -53,12 +51,35 @@ public class ESXiNotifier extends GenericNotifier
 
         List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
 
+        // Detect possible MOVED event
         switch (event)
         {
-            case CREATED:
-                notifications.addAll(deduceMoveEvent(virtualMachine, machine, event));
+            case RESUMED:
+            case POWER_ON:
+                notifications.addAll(detectMigration(virtualMachine, machine, event));
+
+                if (!notifications.isEmpty())
+                {
+                    return notifications;
+                }
+
                 break;
 
+            case POWER_OFF:
+                if (!samePhysicalMachineAddress(virtualMachine.getPhysicalMachine(), machine))
+                {
+                    return notifications;
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        // No MOVED event detected
+        switch (event)
+        {
             case POWER_ON:
             case POWER_OFF:
             case PAUSED:
@@ -75,6 +96,20 @@ public class ESXiNotifier extends GenericNotifier
 
             default:
                 break;
+        }
+
+        return notifications;
+    }
+
+    protected List<VirtualSystemEvent> detectMigration(VirtualMachine virtualMachine,
+        final PhysicalMachine machine, final VMEventType event)
+    {
+        List<VirtualSystemEvent> notifications = deduceMoveEvent(virtualMachine, machine, event);
+
+        if (!notifications.isEmpty())
+        {
+            notifications.add(buildVirtualSystemEvent(virtualMachine, machine.getAddress(),
+                VMEventType.POWER_ON));
         }
 
         return notifications;

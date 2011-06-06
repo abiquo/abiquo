@@ -43,6 +43,7 @@ import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.ESXiNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.HyperVNotifier;
+import com.abiquo.vsm.redis.pubsub.notifier.impl.KVMNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.LibvirtNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.VirtualBoxNotifier;
 import com.abiquo.vsm.redis.pubsub.notifier.impl.XenServerNotifier;
@@ -80,7 +81,7 @@ public class RedisSubscriberCallback extends JedisPubSub
         notifiers.put(Type.VMX_04.name(), new ESXiNotifier());
         notifiers.put(Type.HYPERV_301.name(), new HyperVNotifier());
         notifiers.put(Type.XENSERVER.name(), new XenServerNotifier());
-        notifiers.put(Type.KVM.name(), new LibvirtNotifier());
+        notifiers.put(Type.KVM.name(), new KVMNotifier());
         notifiers.put(Type.XEN_3.name(), new LibvirtNotifier());
         notifiers.put(Type.VBOX.name(), new VirtualBoxNotifier());
     }
@@ -165,8 +166,8 @@ public class RedisSubscriberCallback extends JedisPubSub
 
         if (notifier == null)
         {
-            logger.error("Unknown type {} for the physical machine {}", machine.getType(), machine
-                .getAddress());
+            logger.error("Unknown type {} for the physical machine {}", machine.getType(),
+                machine.getAddress());
             return virtualMachine;
         }
 
