@@ -221,7 +221,7 @@ public enum APIError
 
     // ALLOCATOR
     LIMIT_EXCEEDED("LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
-        "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
+        "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
     CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",

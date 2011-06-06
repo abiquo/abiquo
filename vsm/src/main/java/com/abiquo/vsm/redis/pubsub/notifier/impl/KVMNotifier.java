@@ -22,7 +22,10 @@
 package com.abiquo.vsm.redis.pubsub.notifier.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +45,26 @@ public class KVMNotifier extends GenericNotifier
 {
     private final static Logger logger = LoggerFactory.getLogger(KVMNotifier.class);
 
+    /** Events that must generate a MOVED when the machine origin is not the same */
+    private final Set<VMEventType> mustNotifyMovement;
+
+    /** Valid events to notify */
+    private final Set<VMEventType> validEvents;
+
+    public KVMNotifier()
+    {
+        mustNotifyMovement = new HashSet<VMEventType>();
+        mustNotifyMovement.add(VMEventType.RESUMED);
+        mustNotifyMovement.add(VMEventType.POWER_ON);
+
+        validEvents = new HashSet<VMEventType>();
+        validEvents.add(VMEventType.POWER_ON);
+        validEvents.add(VMEventType.POWER_OFF);
+        validEvents.add(VMEventType.PAUSED);
+        validEvents.add(VMEventType.RESUMED);
+        validEvents.add(VMEventType.DESTROYED);
+    }
+
     @Override
     public List<VirtualSystemEvent> processEvent(final VirtualMachine virtualMachine,
         final PhysicalMachine machine, final VMEventType event)
@@ -49,68 +72,31 @@ public class KVMNotifier extends GenericNotifier
         logger.trace(String.format("Processing %s %s event from machine %s",
             virtualMachine.getName(), event.name(), machine.getAddress()));
 
-        List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
-
-        // Detect possible MOVED event
-        switch (event)
+        if (samePhysicalMachineAddress(virtualMachine.getPhysicalMachine(), machine))
         {
-            case RESUMED:
-            case POWER_ON:
-                notifications.addAll(detectMigration(virtualMachine, machine, event));
-
-                if (!notifications.isEmpty())
-                {
-                    return notifications;
-                }
-
-                break;
-
-            case POWER_OFF:
-                if (!samePhysicalMachineAddress(virtualMachine.getPhysicalMachine(), machine))
-                {
-                    return notifications;
-                }
-
-                break;
-
-            default:
-                break;
+            if (validEvents.contains(event) && !alreadyNotified(virtualMachine, event))
+            {
+                return Collections.singletonList(buildVirtualSystemEvent(virtualMachine, event));
+            }
+        }
+        else if (mustNotifyMovement.contains(event))
+        {
+            return buildMovementNotifications(virtualMachine, machine);
         }
 
-        // No MOVED event detected
-        switch (event)
-        {
-            case POWER_ON:
-            case POWER_OFF:
-            case PAUSED:
-            case RESUMED:
-            case DESTROYED:
-
-                if (samePhysicalMachineAddress(virtualMachine.getPhysicalMachine(), machine)
-                    && !alreadyNotified(virtualMachine, event))
-                {
-                    notifications.add(buildVirtualSystemEvent(virtualMachine, event));
-                }
-
-                break;
-
-            default:
-                break;
-        }
-
-        return notifications;
+        return Collections.emptyList();
     }
 
-    protected List<VirtualSystemEvent> detectMigration(VirtualMachine virtualMachine,
-        final PhysicalMachine machine, final VMEventType event)
+    protected List<VirtualSystemEvent> buildMovementNotifications(VirtualMachine virtualMachine,
+        final PhysicalMachine machine)
     {
-        List<VirtualSystemEvent> notifications = deduceMoveEvent(virtualMachine, machine, event);
+        List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
 
-        if (!notifications.isEmpty())
-        {
-            notifications.add(buildVirtualSystemEvent(virtualMachine, machine.getAddress(),
-                VMEventType.POWER_ON));
-        }
+        notifications.add(buildVirtualSystemEvent(virtualMachine, machine.getAddress(),
+            VMEventType.MOVED));
+
+        notifications.add(buildVirtualSystemEvent(virtualMachine, machine.getAddress(),
+            VMEventType.POWER_ON));
 
         return notifications;
     }

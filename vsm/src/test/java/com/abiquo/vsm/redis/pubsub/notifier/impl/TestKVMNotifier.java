@@ -21,10 +21,13 @@
 
 package com.abiquo.vsm.redis.pubsub.notifier.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
@@ -82,44 +85,46 @@ public class TestKVMNotifier extends TestNotifierBase<KVMNotifier>
 
         // Live migration
         notifications = notifier.processEvent(vm, pm1, VMEventType.RESUMED);
-        AssertJUnit.assertEquals(notifications.size(), 2);
-        AssertJUnit.assertTrue(containsMovedEvent(notifications));
-        AssertJUnit.assertTrue(containsEvent(VMEventType.POWER_ON, notifications));
+        assertEquals(notifications.size(), 2);
+        assertTrue(containsMovedEvent(notifications));
+        assertTrue(containsEvent(VMEventType.POWER_ON, notifications));
+        assertTrue(notificationsFromMachine(notifications, pm1));
 
         vm.setPhysicalMachine(pm1);
         notifications = notifier.processEvent(vm, pm0, VMEventType.POWER_OFF);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         vm.setPhysicalMachine(pm1);
         notifications = notifier.processEvent(vm, pm1, VMEventType.CREATED);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // Migration
         vm.setPhysicalMachine(pm0);
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_ON);
-        AssertJUnit.assertEquals(notifications.size(), 2);
-        AssertJUnit.assertTrue(containsMovedEvent(notifications));
-        AssertJUnit.assertTrue(containsEvent(VMEventType.POWER_ON, notifications));
+        assertEquals(notifications.size(), 2);
+        assertTrue(containsMovedEvent(notifications));
+        assertTrue(containsEvent(VMEventType.POWER_ON, notifications));
+        assertTrue(notificationsFromMachine(notifications, pm1));
 
         vm.setPhysicalMachine(pm1);
         notifications = notifier.processEvent(vm, pm0, VMEventType.POWER_OFF);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         vm.setPhysicalMachine(pm1);
         notifications = notifier.processEvent(vm, pm1, VMEventType.CREATED);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // Non-movement
         vm.setPhysicalMachine(pm0);
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_OFF);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertFalse(containsMovedEvent(notifications));
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.PAUSED);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertFalse(containsMovedEvent(notifications));
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.CREATED);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertFalse(containsMovedEvent(notifications));
     }
 }
