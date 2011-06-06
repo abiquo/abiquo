@@ -226,7 +226,7 @@ public class RemoteService implements IPojo<RemoteServiceHB>
      * 
      * @param uri the new uri
      */
-    public void setUri(String uri)
+    public void setUri(final String uri)
     {
         this.uri = uri;
         URI u = URI.create(uri);
@@ -236,25 +236,26 @@ public class RemoteService implements IPojo<RemoteServiceHB>
         this.port = u.getPort();
         if (port == -1)
         {
-        	port = 80;
+            port = 80;
         }
         this.serviceMapping = u.getPath();
         if (serviceMapping.startsWith("/"))
             serviceMapping = serviceMapping.replaceFirst("/", "");
     }
 
-    public static String getFullUri(String protocol, String domainName, Integer port,
-        String serviceMapping)
+    public static String getFullUri(final String protocol, final String domainName,
+        final Integer port, final String serviceMapping)
     {
         String domainHost = domainName + (port != null ? ":" + port : "");
 
         String fullURL = StringUtils.join(new String[] {fixProtocol(protocol), domainHost});
 
-        if (!StringUtils.isEmpty(serviceMapping))
+        if (!StringUtils.isEmpty(serviceMapping.trim()))
         {
-        	if(!serviceMapping.equals("bpm") && !serviceMapping.equals("dhcp")){
-        		fullURL = UriHelper.appendPathToBaseUri(fullURL, serviceMapping);
-        	}	
+            if (!serviceMapping.equals("bpm") && !serviceMapping.equals("dhcp"))
+            {
+                fullURL = UriHelper.appendPathToBaseUri(fullURL, serviceMapping);
+            }
         }
 
         return fullURL;
@@ -294,8 +295,8 @@ public class RemoteService implements IPojo<RemoteServiceHB>
             return !fixProtocol(u.getScheme()).equals(fixProtocol(protocol))
                 || !u.getHost().equals(domainName)
                 || u.getPort() != port
-                || (!StringUtils.isEmpty(u.getPath()) && !u.getPath().replaceFirst("/", "").equals(
-                    serviceMapping));
+                || (!StringUtils.isEmpty(u.getPath()) && !u.getPath().replaceFirst("/", "")
+                    .equals(serviceMapping));
         }
         catch (URISyntaxException e)
         {
@@ -303,7 +304,7 @@ public class RemoteService implements IPojo<RemoteServiceHB>
         }
     }
 
-    public static RemoteService create(RemoteServiceDto dto, int datacenterId)
+    public static RemoteService create(final RemoteServiceDto dto, final int datacenterId)
     {
         RemoteService remoteService = new RemoteService();
         remoteService.setIdRemoteService(dto.getId());
