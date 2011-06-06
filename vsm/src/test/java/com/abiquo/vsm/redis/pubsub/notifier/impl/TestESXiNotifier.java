@@ -21,10 +21,13 @@
 
 package com.abiquo.vsm.redis.pubsub.notifier.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
@@ -83,34 +86,36 @@ public class TestESXiNotifier extends TestNotifierBase<ESXiNotifier>
         // Should notify a CREATED event if the vm.getPhysicalMachine is different that the
         // machine where the event was produced.
         notifications = notifier.processEvent(vm, pm1, VMEventType.CREATED);
-        AssertJUnit.assertEquals(notifications.size(), 1);
-        AssertJUnit.assertTrue(containsMovedEvent(notifications));
+        assertEquals(notifications.size(), 1);
+        assertTrue(containsMovedEvent(notifications));
+        assertTrue(notificationsFromMachine(notifications, pm1));
 
         // No notifications of a DESTROYED event if the vm.getPhysicalMachine is different that the
         // machine where the event was produced.
         vm.setPhysicalMachine(pm1);
         notifications = notifier.processEvent(vm, pm0, VMEventType.DESTROYED);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // Should notify a DESTROYED event if the vm.getPhysicalMachine is the same that produced
         // the event.
         vm.setPhysicalMachine(pm0);
         notifications = notifier.processEvent(vm, pm0, VMEventType.DESTROYED);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertFalse(containsMovedEvent(notifications));
+        assertTrue(notificationsFromMachine(notifications, pm0));
 
         // Only detects movement with CREATED events.
         vm.setPhysicalMachine(pm0);
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_ON);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_OFF);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.PAUSED);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.RESUMED);
-        AssertJUnit.assertFalse(containsMovedEvent(notifications));
+        assertTrue(notifications.isEmpty());
     }
 
     @Test
@@ -142,15 +147,15 @@ public class TestESXiNotifier extends TestNotifierBase<ESXiNotifier>
         // Invalid event when vm.getPhysicalMachine is not the same that generated the current
         // event.
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_ON);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.POWER_OFF);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.PAUSED);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         notifications = notifier.processEvent(vm, pm1, VMEventType.RESUMED);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
     }
 }
