@@ -229,6 +229,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         List<VirtualDisk> newDisks = new ArrayList<VirtualDisk>();
 
         VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
+        newConfig.setHypervisor(vmConfig.getHyper());
 
         VirtualHardwareSectionType hardwareSection =
             OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
