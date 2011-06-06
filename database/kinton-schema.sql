@@ -2167,7 +2167,7 @@ CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `k
           vStorageUsed=vStorageUsed-OLD.hdUsed
       WHERE idDataCenter = OLD.idDataCenter;
     END IF;
-    IF OLD.idState !=2 THEN
+    IF OLD.idState NOT IN (2, 6, 7) THEN
       UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = OLD.idDataCenter;
       UPDATE IGNORE cloud_usage_stats
         SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
@@ -2191,8 +2191,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF OLD.idState != NEW.idState THEN
-        IF OLD.idState = 2 THEN
-          -- Machine not managed changes into managed
+        IF OLD.idState IN (2, 7) THEN
+          -- Machine not managed changes into managed; or disabled_by_ha to Managed
           UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1 WHERE idDataCenter = NEW.idDataCenter;
           UPDATE IGNORE cloud_usage_stats
           SET vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
@@ -2200,8 +2200,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
             vStorageTotal=vStorageTotal + NEW.hd
           WHERE idDataCenter = NEW.idDataCenter;
         END IF;
-        IF NEW.idState = 2 THEN
-          -- Machine managed changes into not managed
+        IF NEW.idState IN (2,7) THEN
+          -- Machine managed changes into not managed or DisabledByHA
           UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = NEW.idDataCenter;
           UPDATE IGNORE cloud_usage_stats
           SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
@@ -2228,7 +2228,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
         END IF;
       ELSE
       -- No State Changes
-        IF NEW.idState != 2 THEN
+        IF NEW.idState NOT IN (2, 6, 7) THEN
+	-- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
           UPDATE IGNORE cloud_usage_stats
             SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
               vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram),
