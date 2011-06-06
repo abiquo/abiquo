@@ -212,7 +212,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 EventType.VAPP_POWERON, message, Platform.SYSTEM_PLATFORM);
 
             // the user can't see the details of the detailed error cause.
-            throw new NotEnoughResourcesException("There isn't enough resources to create the virtual machine.");
+            throw new NotEnoughResourcesException("There are not enough resources to create the virtual machine.");
         }
         else
         {
