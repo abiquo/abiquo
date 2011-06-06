@@ -74,6 +74,7 @@ public class KVMMachineTest extends AbsMachineTest
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -128,7 +129,7 @@ public class KVMMachineTest extends AbsMachineTest
      * @param args
      * @throws Exception
      */
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         KVMMachineTest test = new KVMMachineTest();
         test.setUp();

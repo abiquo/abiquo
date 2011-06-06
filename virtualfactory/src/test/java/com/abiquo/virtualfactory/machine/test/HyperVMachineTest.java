@@ -73,6 +73,7 @@ public class HyperVMachineTest extends AbsMachineTest
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -154,7 +155,7 @@ public class HyperVMachineTest extends AbsMachineTest
      * @return an instance of {@link CIMDataFile}
      * @throws Exception
      */
-    public void deleteFile(SWbemServices cimService, String file) throws Exception
+    public void deleteFile(final SWbemServices cimService, final String file) throws Exception
     {
         // Preparing the query
         String query =
@@ -193,7 +194,7 @@ public class HyperVMachineTest extends AbsMachineTest
 
     }
 
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         HyperVMachineTest test = new HyperVMachineTest();
         // test.testExecuteRemoteProcess();
