@@ -98,27 +98,27 @@ public class LibvirtMachine extends AbsVirtualMachine
     private int cpuNumbers;
 
     /** The machine name. */
-    private final String machineName;
+    private String machineName;
 
     /** The machine UUID. */
-    private final UUID machineId;
+    private UUID machineId;
 
     /** The remote desktop port */
-    private final int rdpPort;
+    private int rdpPort;
 
     /** Source virtual image on the remote repository. */
     private String imagePath;
 
-    private final List<String> storagePoolList;
+    private List<String> storagePoolList;
 
     /**
      * Sets containing the devices name used
      */
-    private final CopyOnWriteArraySet<String> hdSet;
+    private CopyOnWriteArraySet<String> hdSet;
 
     private String domainXml;
 
-    private final String kvmemulation;
+    private String kvmemulation;
 
     private String targetDatstore;
 
@@ -131,7 +131,12 @@ public class LibvirtMachine extends AbsVirtualMachine
     public LibvirtMachine(final VirtualMachineConfiguration config) throws VirtualMachineException
     {
         super(config);
+        initConfig(config);
+    }
 
+    private void initConfig(final VirtualMachineConfiguration config)
+        throws VirtualMachineException
+    {
         if (config.isSetHypervisor() && config.getHyper() instanceof AbsLibvirtHypervisor)
         {
             libvirtHyper = (AbsLibvirtHypervisor) config.getHyper();
@@ -621,6 +626,9 @@ public class LibvirtMachine extends AbsVirtualMachine
     public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
         throws VirtualMachineException
     {
+        config = newConfiguration;
+        initConfig(newConfiguration);
+
         updateDomain(newConfiguration);
 
         // Connect conn = null;
