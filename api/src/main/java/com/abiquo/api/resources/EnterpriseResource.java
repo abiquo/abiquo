@@ -118,9 +118,6 @@ public class EnterpriseResource extends AbstractResource
     UserService userService;
 
     @Autowired
-    VirtualDatacenterService vdcService;
-
-    @Autowired
     SecurityService securityService;
 
     @GET
