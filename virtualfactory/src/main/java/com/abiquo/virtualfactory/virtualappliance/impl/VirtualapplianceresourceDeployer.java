@@ -23,9 +23,7 @@ package com.abiquo.virtualfactory.virtualappliance.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,6 +61,7 @@ import com.abiquo.virtualfactory.model.VirtualAppliance;
 import com.abiquo.virtualfactory.model.VirtualApplianceModel;
 import com.abiquo.virtualfactory.model.VirtualDisk;
 import com.abiquo.virtualfactory.model.VirtualSystemModel;
+import com.abiquo.virtualfactory.model.config.HypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.model.ovf.OVFModelConvertable;
 import com.abiquo.virtualfactory.utils.AbicloudConstants;
@@ -74,7 +73,6 @@ import com.sun.ws.management.UnsupportedFeatureFault;
 import com.sun.ws.management.framework.Utilities;
 import com.sun.ws.management.transfer.InvalidRepresentationFault;
 import com.sun.ws.management.transfer.TransferExtensions;
-import com.vmware.vim25.VnicPortArgument;
 
 /**
  * Specific implementations of VirtualApplianceResourceDeployer. This class handles the basic
@@ -113,7 +111,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * VirtualapplianceresourceDeployable#create(com.sun.ws.management.Management,
      * com.sun.ws.management.Management)
      */
-    public void create(Management request, Management response)
+    public void create(final Management request, final Management response)
     {
         VirtualAppliance virtualAppliance = null;
         try
@@ -201,7 +199,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @throws SectionException
      * @throws SectionAlreadyPresentException
      */
-    public EnvelopeType createEnvelopeType(VirtualAppliance virtualAppliance)
+    public EnvelopeType createEnvelopeType(final VirtualAppliance virtualAppliance)
         throws RequiredAttributeException, IdAlreadyExistsException,
         SectionAlreadyPresentException, SectionException
     {
@@ -245,7 +243,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * VirtualapplianceresourceDeployable#delete(com.sun.ws.management.Management,
      * com.sun.ws.management.Management)
      */
-    public void delete(Management request, Management response)
+    public void delete(final Management request, final Management response)
     {
         try
         {
@@ -277,9 +275,9 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         }
     }
 
-    protected void deleteVirtualAppliance(EnvelopeType envelope) throws EmptyEnvelopeException,
-        IdNotFoundException, SectionException, MalformedURLException, VirtualMachineException,
-        PluginException, HypervisorException
+    protected void deleteVirtualAppliance(final EnvelopeType envelope)
+        throws EmptyEnvelopeException, IdNotFoundException, SectionException,
+        MalformedURLException, VirtualMachineException, PluginException, HypervisorException
     {
         ContentType contentInstance = OVFEnvelopeUtils.getTopLevelVirtualSystemContent(envelope);
 
@@ -343,8 +341,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @throws HypervisorException
      * @throws PluginException
      */
-    private void bundleVirtualSystemCollection(VirtualSystemCollectionType contentInstance,
-        EnvelopeType envelope) throws IdNotFoundException, SectionException,
+    private void bundleVirtualSystemCollection(final VirtualSystemCollectionType contentInstance,
+        final EnvelopeType envelope) throws IdNotFoundException, SectionException,
         VirtualMachineException, MalformedURLException, PluginException, HypervisorException
     {
         logger.info("Bundlelling the virtual system collection: {}", contentInstance.getId());
@@ -357,7 +355,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * VirtualapplianceresourceDeployable#get(com.sun.ws.management.Management,
      * com.sun.ws.management.Management)
      */
-    public void get(Management request, Management response)
+    public void get(final Management request, final Management response)
     {
         String id = getIdSelector(request);
 
@@ -385,7 +383,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * VirtualapplianceresourceDeployable#put(com.sun.ws.management.Management,
      * com.sun.ws.management.Management)
      */
-    public void put(Management request, Management response)
+    public void put(final Management request, final Management response)
     {
         // Use name selector to find the right virtualSystem
         String id = getIdSelector(request);
@@ -412,14 +410,14 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 {
                     Map<String, VirtualDisk> virtualDiskMap =
                         ovfconvert.createVirtualDisks(envelope);
-                    virtualMachine =
-                        VirtualSystemModel.getModel()
-                            .getMachine(
-                                ovfconvert
-                                    .getHypervisorConfigurationFromVirtualSystem(contentInstance),
-                                ovfconvert.getVirtualMachineConfigurationFromVirtualSystem(
-                                    (VirtualSystemType) contentInstance, virtualDiskMap, envelope));
-                    ovfconvert.configureVirtualSystem(virtualMachine, contentInstance, false);
+                    HypervisorConfiguration hvConfig =
+                        ovfconvert.getHypervisorConfigurationFromVirtualSystem(contentInstance);
+                    VirtualMachineConfiguration vmConfig =
+                        ovfconvert.getVirtualMachineConfigurationFromVirtualSystem(
+                            (VirtualSystemType) contentInstance, virtualDiskMap, envelope);
+
+                    virtualMachine = VirtualSystemModel.getModel().getMachine(hvConfig, vmConfig);
+                    ovfconvert.reconfigureVirtualSystem(virtualMachine, contentInstance, hvConfig);
 
                 }
                 catch (Exception e)
@@ -470,7 +468,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
 
     }
 
-    public void bundleVirtualAppliance(Management request, Management response)
+    public void bundleVirtualAppliance(final Management request, final Management response)
     {
         try
         {
@@ -499,7 +497,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                         envelope);
                 }
             }
-            
+
             TransferExtensions xferResponse = new TransferExtensions(response);
             xferResponse.setDeleteResponse();
             // Adding a body element in the delete response, since the invoke operation in the
@@ -514,7 +512,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
     }
 
     @Override
-    public void checkVirtualSystem(Management request, Management response)
+    public void checkVirtualSystem(final Management request, final Management response)
     {
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
@@ -587,7 +585,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
     }
 
     @Override
-    public void addVirtualSystem(Management request, Management response)
+    public void addVirtualSystem(final Management request, final Management response)
     {
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
@@ -655,7 +653,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
     }
 
     @Override
-    public void removeVirtualSystem(Management request, Management response)
+    public void removeVirtualSystem(final Management request, final Management response)
     {
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
@@ -722,7 +720,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * 
      * @param ovfconvert
      */
-    public void setOvfconvert(OVFModelConvertable ovfconvert)
+    public void setOvfconvert(final OVFModelConvertable ovfconvert)
     {
         this.ovfconvert = ovfconvert;
     }
@@ -734,11 +732,11 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @param virtualAppliance
      * @param request
      * @param envelope
-     * @throws Exception 
+     * @throws Exception
      */
-    protected void configureVirtualSystemCollection(String vappState,
-        VirtualSystemCollectionType vscollection, VirtualAppliance virtualAppliance,
-        Management request, EnvelopeType envelope) throws Exception
+    protected void configureVirtualSystemCollection(final String vappState,
+        final VirtualSystemCollectionType vscollection, final VirtualAppliance virtualAppliance,
+        final Management request, final EnvelopeType envelope) throws Exception
     {
         // Setting the future state to avoid rolling back when powering off the virtual appliance
         virtualAppliance.setState(State.fromValue(vappState));
@@ -754,11 +752,14 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
 
                 // create the virtualDisks
                 Map<String, VirtualDisk> virtualDiskMap = ovfconvert.createVirtualDisks(envelope);
+                HypervisorConfiguration hvConfig =
+                    ovfconvert.getHypervisorConfigurationFromVirtualSystem(subVirtualSystem);
+                VirtualMachineConfiguration vmConfig =
+                    ovfconvert.getVirtualMachineConfigurationFromVirtualSystem(
+                        (VirtualSystemType) subVirtualSystem, virtualDiskMap, envelope);
+
                 AbsVirtualMachine virtualMachineNew =
-                    virtualSystemFactory.getMachine(ovfconvert
-                        .getHypervisorConfigurationFromVirtualSystem(subVirtualSystem), ovfconvert
-                        .getVirtualMachineConfigurationFromVirtualSystem(
-                            (VirtualSystemType) subVirtualSystem, virtualDiskMap, envelope));
+                    virtualSystemFactory.getMachine(hvConfig, vmConfig);
 
                 // If the machine does not exist, includes all the new machines
                 if (virtualMachineNew == null)
@@ -782,12 +783,12 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 try
                 {
                     // using virtual system configuration
-                    ovfconvert.configureVirtualSystem(virtualMachineNew, subVirtualSystem, true);
+                    ovfconvert.reconfigureVirtualSystem(virtualMachineNew, subVirtualSystem,
+                        hvConfig);
 
                     // TODO updateFromAnnotations
                     // TODO assure not only the annotation section can be accessed
                     // TODO assure the virtual machines can be reconfigurated
-
                 }
                 catch (SectionException se)
                 {
@@ -798,7 +799,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
 
                     try
                     {
-                        ovfconvert.configureVirtualSystem(virtualMachineNew, vscollection, true);
+                        ovfconvert.reconfigureVirtualSystem(virtualMachineNew, vscollection,
+                            hvConfig);
                     }
                     catch (Exception e)
                     {
@@ -809,8 +811,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 }
                 catch (Exception e)
                 {
-                    logger.error("An error was occurred when configuring the virtual machine: " + virtualSystemId
-                        + " Exception: ", e);
+                    logger.error("An error was occurred when configuring the virtual machine: "
+                        + virtualSystemId + " Exception: ", e);
                     throw e;
                 }
             }// a virtual system
@@ -839,7 +841,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @param request wiseman's client request
      * @return OVF's EnvelopeType
      */
-    protected EnvelopeType getEnvelope(Management request)
+    protected EnvelopeType getEnvelope(final Management request)
     {
         JAXBElement<EnvelopeType> resource = getResource(request);
         if (resource == null)
@@ -859,7 +861,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @return returns the id
      * @throws InternalErrorFault
      */
-    protected String getIdSelector(Management request) throws InternalErrorFault
+    protected String getIdSelector(final Management request) throws InternalErrorFault
     {
         Set<SelectorType> selectors;
         try
@@ -889,7 +891,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      */
     @SuppressWarnings("unchecked")
     // the JAXBElement declaredType is checked
-    protected JAXBElement<EnvelopeType> getResource(Management request)
+    protected JAXBElement<EnvelopeType> getResource(final Management request)
     {
         JAXBElement<EnvelopeType> envelopeElement = null;
 
@@ -950,10 +952,10 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
      * @throws HypervisorException
      * @throws PluginException
      */
-    protected void updateVirtualAppliance(VirtualAppliance virtualAppliance, Management request)
-        throws SOAPException, JAXBException, MalformedURLException, VirtualMachineException,
-        IdNotFoundException, SectionException, EmptyEnvelopeException, RequiredAttributeException,
-        PluginException, HypervisorException
+    protected void updateVirtualAppliance(final VirtualAppliance virtualAppliance,
+        final Management request) throws SOAPException, JAXBException, MalformedURLException,
+        VirtualMachineException, IdNotFoundException, SectionException, EmptyEnvelopeException,
+        RequiredAttributeException, PluginException, HypervisorException
     {
         TransferExtensions xferRequest = new TransferExtensions(request);
         Object element = xferRequest.getResource(QNAME_OVF_ENVELOPE);
@@ -1003,7 +1005,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
     /**
      * @param virtualApplianceModel the virtualApplianceModel to set
      */
-    public void setVirtualApplianceModel(VirtualApplianceModel virtualApplianceModel)
+    public void setVirtualApplianceModel(final VirtualApplianceModel virtualApplianceModel)
     {
         this.virtualApplianceModel = virtualApplianceModel;
     }
@@ -1019,7 +1021,7 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
     /**
      * @param virtualSystemFactory the virtualSystemFactory to set
      */
-    public void setVirtualSystemFactory(VirtualSystemModel virtualSystemFactory)
+    public void setVirtualSystemFactory(final VirtualSystemModel virtualSystemFactory)
     {
         this.virtualSystemFactory = virtualSystemFactory;
     }

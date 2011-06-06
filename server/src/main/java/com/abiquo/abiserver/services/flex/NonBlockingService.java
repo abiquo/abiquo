@@ -59,7 +59,17 @@ public class NonBlockingService
      */
     public NonBlockingService()
     {
-        infrastructureCommand = new InfrastructureCommandImpl();
+        try
+        {
+            infrastructureCommand =
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                    .newInstance();
+        }
+        catch (Exception e)
+        {
+            infrastructureCommand = new InfrastructureCommandImpl();
+        }
 
         try
         {

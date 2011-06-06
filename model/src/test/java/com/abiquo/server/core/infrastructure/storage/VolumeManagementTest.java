@@ -21,9 +21,6 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
@@ -67,69 +64,50 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     }
 
     @Test
-    public void testStateTransitions()
+    public void testNullPropertyAccess()
     {
         VolumeManagement volume = createUniqueEntity();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        volume.getRasd().setLimit(null);
+        volume.getRasd().setReservation(null);
 
-        // Volume mount
-        volume.associate();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_RESERVED);
-
-        volume.mount();
-        assertEquals(volume.getState(), VolumeState.MOUNTED_RESERVED);
-
-        // Volume unmount
-        volume.unmount();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_RESERVED);
-
-        volume.disassociate();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        assertNull(volume.getRasd().getLimit());
+        assertNull(volume.getRasd().getReservation());
+        assertEquals(volume.getSizeInMB(), 0L);
+        assertEquals(volume.getAvailableSizeInMB(), 0L);
     }
 
     @Test
-    public void testInvalidStateTransitions()
+    public void testStateTransitions()
     {
         VolumeManagement volume = createUniqueEntity();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        assertEquals(volume.getState(), VolumeState.DETACHED);
 
-        // Unassociated
-        checkInvalidStateTransition(volume, "mount");
-        checkInvalidStateTransition(volume, "unmount");
-        checkInvalidStateTransition(volume, "disassociate");
-
-        // Associated
         volume.associate();
-        assertEquals(volume.getState(), VolumeState.NOT_MOUNTED_RESERVED);
-        checkInvalidStateTransition(volume, "associate");
-        checkInvalidStateTransition(volume, "unmount");
+        assertEquals(volume.getState(), VolumeState.ATTACHED);
 
-        // Mounted
-        volume.mount();
-        assertEquals(volume.getState(), VolumeState.MOUNTED_RESERVED);
-        checkInvalidStateTransition(volume, "associate");
-        checkInvalidStateTransition(volume, "disassociate");
-        checkInvalidStateTransition(volume, "mount");
+        volume.disassociate();
+        assertEquals(volume.getState(), VolumeState.DETACHED);
     }
 
-    private void checkInvalidStateTransition(final VolumeManagement volume, final String method)
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testInvalidAssociate()
     {
-        try
-        {
-            Method m = volume.getClass().getMethod(method);
-            m.invoke(volume);
-        }
-        catch (InvocationTargetException ex)
-        {
-            if (!(ex.getTargetException() instanceof IllegalStateException))
-            {
-                fail("An IllegalStateException was expected");
-            }
-        }
-        catch (Exception ex)
-        {
-            fail("Could not execute the state change method");
-        }
+        VolumeManagement volume = createUniqueEntity();
+        assertEquals(volume.getState(), VolumeState.DETACHED);
+
+        volume.associate();
+        assertEquals(volume.getState(), VolumeState.ATTACHED);
+
+        volume.associate(); // This one must fail
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testInvalidDisassociate()
+    {
+        VolumeManagement volume = createUniqueEntity();
+        assertEquals(volume.getState(), VolumeState.DETACHED);
+
+        volume.disassociate();
     }
 
 }
