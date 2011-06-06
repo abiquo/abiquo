@@ -220,13 +220,15 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     }
 
     private VirtualMachineConfiguration buildUpdateConfiguration(
-        final VirtualMachineConfiguration newConfig, final ContentType virtualSystem)
+        final VirtualMachineConfiguration vmConfig, final ContentType virtualSystem)
         throws SectionException
     {
         // TODO the default value should be 0, but to avoid errors 256MB is assigned
         long newRam = 256 * 1024 * 1024;
         int newCPUNumber = 1;
         List<VirtualDisk> newDisks = new ArrayList<VirtualDisk>();
+
+        VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
 
         VirtualHardwareSectionType hardwareSection =
             OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
