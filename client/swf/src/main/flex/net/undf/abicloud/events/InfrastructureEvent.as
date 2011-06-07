@@ -72,8 +72,6 @@ package net.undf.abicloud.events
         public static const CHECK_VIRTUAL_INFRASTRUCTURE_STATE:String = "checkVirtualInfrastructureStateInfrastructureEvent";
 
         public static const USED_RESOURCES_BY_DATACENTER_UPDATED:String = "usedResourcesByDatacenterUpdatedInfrastructureEvent";
-        
-        public static const DISCOVER_BALDES:String = "discoverBladesInfrastructureEvent";
 
         /* ------------------------------------ */
 
