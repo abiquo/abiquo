@@ -17,14 +17,19 @@ package com.abiquo.xenserverapplet;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JApplet;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -69,6 +74,12 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
 
     private boolean hideCADButton = false;
 
+    private JPanel passPanel = new JPanel(true);
+
+    private JPasswordField passwordField;
+
+    private JLabel passwordError;
+
     private Connection conn = null;
 
     private boolean connectError = false;
@@ -80,6 +91,8 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     private String serverPass;
 
     private String serverVMName;
+
+    private String serverVMPass;
 
     private Long serverVMDom;
 
@@ -93,15 +106,20 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
         try
         {
             // Get the console parameters from the client
-            getConnexionParameters();
+            getConnetionParameters();
 
             // Set size off the applet
             setSize(getAppletWidth(), getAppletHeight());
 
             // Connect to the VM
-            System.out.println("Connecting to http://" + getServerIP() + "...");
             connect();
-            System.out.println("Connected to " + getServerIP() + " with success !");
+
+            // Add the password field to the applet
+            if (serverVMPass != null && serverVMPass.length() > 0)
+            {
+                writeline("Virtual machine is password protected");
+                addPasswordControls();
+            }
 
             // Open the requested console
             openVMConsole();
@@ -240,12 +258,13 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     /**
      * Get the console parameters from the client
      */
-    private void getConnexionParameters()
+    private void getConnetionParameters()
     {
         setServerIP(getParameter("IP"));
         setServerUser(getParameter("USER"));
         setServerPass(getParameter("PASS"));
         setServerVMname(getParameter("NAME"));
+        setServerVMPass(getParameter("VMPASS"));
         setAppletWidth(Integer.parseInt(getParameter("WIDTH")));
         setAppletHeight(Integer.parseInt(getParameter("HEIGHT")));
     }
@@ -261,6 +280,8 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     private void connect() throws BadServerResponse, XenAPIException, XmlRpcException,
         MalformedURLException
     {
+        writeline("Connecting to http://" + getServerIP() + "...");
+
         if (conn != null)
             disconnect();
 
@@ -308,8 +329,16 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     {
         try
         {
+            writeline("Connecting to VM: " + getServerVMName() + " ...");
+
             // Get the VM matching the name given in parameters
             Set<VM> requestedVM = VM.getByNameLabel(conn, getServerVMName());
+
+            if (requestedVM == null || requestedVM.isEmpty())
+            {
+                throw new Exception("VM " + getServerVMName() + " not found");
+            }
+
             Iterator<VM> iteratorVM = requestedVM.iterator();
 
             // Get the requested console
@@ -320,9 +349,8 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
                 c = currentConsole;
             }
 
-            System.out.println("Session reference: " + conn.getSessionReference());
-            System.out.println("Setting up terminal connection to " + c.getLocation(conn)
-                + " for VM ");
+            writeline("Session reference: " + conn.getSessionReference());
+            writeline("Setting up terminal connection to " + c.getLocation(conn) + " for VM ");
 
             // Configure the console
             String[] args = new String[] {c.getLocation(conn), conn.getSessionReference(), "true"};
@@ -353,8 +381,51 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
         }
         catch (Exception ex)
         {
-            System.out.println("Exception: " + ex.getMessage());
+            ex.printStackTrace();
+            System.err.println("Exception: " + ex.getMessage());
         }
+    }
+
+    private void addPasswordControls()
+    {
+        JLabel label = new JLabel("Virtual machine password: ");
+        label.setLabelFor(passwordField);
+
+        passwordError = new JLabel("Invalid password");
+        passwordError.setForeground(Color.RED);
+        passwordError.setVisible(false);
+
+        passwordField = new JPasswordField(20);
+        passwordField.setActionCommand("checkPassword");
+        passwordField.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent event)
+            {
+                if (event.getActionCommand().equals("checkPassword"))
+                {
+                    char[] input = passwordField.getPassword();
+                    boolean isOk = String.valueOf(input).equals(serverVMPass);
+
+                    passwordField.selectAll();
+
+                    background.setVisible(isOk);
+                    passPanel.setVisible(!isOk);
+                    passwordError.setVisible(!isOk);
+
+                    Arrays.fill(input, '0');
+                }
+            }
+        });
+
+        background.setVisible(false);
+
+        passPanel.setBackground(Color.WHITE);
+        passPanel.add(label);
+        passPanel.add(passwordField);
+        passPanel.add(passwordError);
+
+        this.add(passPanel, BorderLayout.NORTH);
     }
 
     public void setServerIP(final String serverIP)
@@ -395,6 +466,16 @@ public class XenServerConsole extends JApplet implements ConnectionListener, Con
     public String getServerVMName()
     {
         return serverVMName;
+    }
+
+    public String getServerVMPass()
+    {
+        return serverVMPass;
+    }
+
+    public void setServerVMPass(final String serverVMPass)
+    {
+        this.serverVMPass = serverVMPass;
     }
 
     public void setServerVMDom(final Long serverVMDom)
