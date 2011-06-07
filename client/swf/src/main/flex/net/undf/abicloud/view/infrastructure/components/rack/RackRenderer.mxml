@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HBox 
+    width="100%" height="100%"
+    paddingLeft="20"
+    horizontalScrollPolicy="off" verticalScrollPolicy="off"
+    styleName="PhysicalMachineRenderer"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:componentsPM="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.DataCenter;
+        	import net.undf.abicloud.model.AbiCloudModel;
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
+        	import mx.core.Application;
+        	import mx.managers.PopUpManager;
+        	import mx.managers.DragManager;
+        	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+        	import mx.events.DragEvent;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
+            import mx.resources.ResourceManager;
+            import mx.resources.ResourceBundle;
+            import mx.collections.ArrayCollection;
+            import net.undf.abicloud.events.InfrastructureEvent;
+            import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
+
+
+            //The Physical Machine that will be rendered
+            [Bindable]
+            protected var _rack:UcsRack;
+
+            [Bindable]
+            private var _editMode:Boolean;
+            
+            //private var _discoverBlades:DiscoverBladesForm;
+            
+            public var dataCenter:DataCenter;
+
+            public function set rack(value:UcsRack):void
+            {
+                this._rack = value;
+                dispatchEvent(new Event("rackChange"));
+            }
+
+            [Bindable(event="rackChange")]
+            public function get rack():UcsRack
+            {
+                return this._rack;
+            }
+
+            /**
+             * Initializes this component
+             */
+            public function init():void
+            {
+                this._editMode = false;
+                
+                //this._discoverBlades = new DiscoverBladesForm(); 
+                //this._discoverBlades.addEventListener(InfrastructureEvent.DISCOVER_BALDES,closeForm);              
+                
+            }
+
+            private function discoverBlades():void{
+            	/* PopUpManager.addPopUp(this._discoverBlades, Application.application as DisplayObject,true);
+                PopUpManager.centerPopUp(this._discoverBlades);
+                this._discoverBlades.init(this.rack); */
+            }
+            
+            private function closeForm(infraEvent:InfrastructureEvent):void{
+            	if(infraEvent.rackId == 1){
+            		//AbiCloudModel.getInstance().infrastructureManager.updateBlades = true;
+            		var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RACKS_BY_DATACENTER);
+                	event.dataCenter = dataCenter;
+                	event.filters = null;
+	                dispatchEvent(event);	            	
+            	}
+            	//PopUpManager.removePopUp(this._discoverBlades);
+            }
+            
+            
+        ]]>
+    </mx:Script>
+
+
+    <utils:SmoothImage id="rackIcon"
+        width="120" height="120"
+        creationComplete="rackIcon.source = 'config/rack.png'"
+        maintainAspectRatio="true"/>
+
+    <mx:VBox id="testtt"
+        height="100%"
+        styleName="PhysicalMachinesRendererBaseTesttt"
+        maxWidth="400"
+        horizontalAlign="left"
+        horizontalScrollPolicy="off">
+        <mx:HBox 
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0">
+            <mx:Label id="nameLabel"
+				styleName="PhysicalMachinesRendererBaseNameLabel"
+                minWidth="100"
+                text="{this._rack.name} [{UcsRack.TYPE}]" truncateToFit="true"
+                toolTip="{this._rack.name}"
+                includeInLayout="{! _editMode}"
+                visible="{! _editMode}"/>
+			<mx:Button height="18" label=" Discover Blades"
+				click="discoverBlades()"/>           
+        </mx:HBox>
+	    <mx:Form height="100%">    	
+		    <mx:FormItem label="@Resource(bundle='Infrastructure',key='LABEL_IP_MANAGEMENT')">
+				<mx:Label text="{this._rack.ip}"/>
+			</mx:FormItem>
+			<mx:FormItem label="@Resource(bundle='Infrastructure',key='LABEL_USER')">
+				<mx:Label text="{this._rack.user}"/>
+			</mx:FormItem>
+			<mx:FormItem label="@Resource(bundle='Infrastructure',key='LABEL_PORT')">
+				<mx:Label text="{this._rack.port.toString()}"/>
+			</mx:FormItem>
+	    </mx:Form>
+    </mx:VBox>
+</mx:HBox>

@@ -31,10 +31,11 @@
     xmlns:components="net.undf.abicloud.view.infrastructure.components.*"
     xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
     xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
-    xmlns:general="net.undf.abicloud.view.general.*">
+    xmlns:general="net.undf.abicloud.view.general.*" xmlns:rack="net.undf.abicloud.view.infrastructure.components.rack.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.binding.utils.BindingUtils;
             import mx.collections.ArrayCollection;
@@ -72,6 +73,7 @@
             private var _moreInfoResizeEffect:Resize;
 
             //The Datacenter to manage its physical infrastructure
+            [Bindable]
             protected var _dataCenter:DataCenter;
 
             /////////////////////////////////////
@@ -174,6 +176,9 @@
                 //Listening for updates in datacenter used resources information
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.USED_RESOURCES_BY_DATACENTER_UPDATED,
                                                                                    onResourcesByDatacenterUpdated);
+				
+				AbiCloudModel.getInstance().infrastructureManager.addEventListener('liveMotionDone',getVirtualMachine);
+				                                                                                   
             }
 
             public function set dataCenter(value:DataCenter):void
@@ -274,25 +279,31 @@
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
-                	
-                    showPhysicalMachine();
+                	showPhysicalMachine();
                     
-                    //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
-                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
-                    event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                    event.callback = setVirtualMachine;
-                    /* if(physicalServersFilter.text.length != 0){
-	                	event.filters = physicalServersFilter.text;
-	                }else{
-	                	event.filters = null;
-	                } */
-                    dispatchEvent(event);
+                	//AbiCloudModel.getInstance().infrastructureManager.selectedPhysicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+                
+                	
+                	getVirtualMachine();
+                    
+                }else if(infrastructureSelector.selectedInfrastructureElement is UcsRack){
+                	//UCS Rack
+                	showRack();
                 }else
                     //Hiding more info container
                     hideMoreInfoContainer();
 
                 //Setting the Virtual Machines that will be shown
                 setVirtualMachines(false);
+            }
+            
+            private function getVirtualMachine(eventInfra:Event = null):void{
+            	
+                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+                event.callback = setVirtualMachine;
+                dispatchEvent(event);
             }
             
             private function setVirtualMachine(value:ArrayCollection):void{
@@ -382,6 +393,11 @@
             {
                 physicalMachineRenderer.init();
                 showMoreInfoContainer(0);
+            }
+            
+            private function showRack():void{
+            	rackRenderer.init();
+                showMoreInfoContainer(2);
             }
 
             /////////////////////////////////////////////////////////
@@ -635,6 +651,12 @@
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
+                
+                <rack:RackRenderer id="rackRenderer"
+                    width="100%" height="100%"
+                    dataCenter="{this._dataCenter}"
+                    rack="{(infrastructureSelector.selectedInfrastructureElement &amp;&amp; infrastructureSelector.selectedInfrastructureElement is UcsRack) ? infrastructureSelector.selectedInfrastructureElement as UcsRack : null}"/>
+
             </mx:ViewStack>
         </mx:VBox>
     </general:GeneralSubPanel>
