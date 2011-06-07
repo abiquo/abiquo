@@ -73,7 +73,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         NotEnoughResourcesException
     {
 
-
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 
@@ -91,32 +90,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         {
             onError(userSession, response);
         }
-    }
-    
-    
-    
-
-    @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
-    {
-        BasicResult result = new BasicResult();
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
-
-        ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
-
-        if (response.getStatusCode() == 200)
-        {
-            result.setSuccess(true);
-        }
-        else
-        {
-            populateErrors(response, result, "updateVirtualMachine");
-        }
-
-        return result;
     }
 
     @Override

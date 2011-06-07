@@ -75,11 +75,11 @@ public class VmwareMachine extends AbsVmwareMachine
                 vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
                     .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
                     computerResMOR, hostMOR, config.getVnicList(), rdmIQN, disks);
-            
-          vmConfigSpec =
-          vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
-              .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
-              computerResMOR, hostMOR, new ArrayList<VirtualNIC>(), rdmIQN, disks);
+
+            vmConfigSpec =
+                vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
+                    .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
+                    computerResMOR, hostMOR, new ArrayList<VirtualNIC>(), rdmIQN, disks);
 
             vmConfigSpec.setName(machineName);
             vmConfigSpec.setAnnotation("VirtualMachine Annotation");
@@ -99,7 +99,7 @@ public class VmwareMachine extends AbsVmwareMachine
 
                 OptionValue vncPwd = new OptionValue();
                 vncPwd.setKey("RemoteDisplay.vnc.password");
-                vncPort.setValue("secret");
+                vncPort.setValue(this.vmConfig.getRdPassword());
 
                 OptionValue[] values = new OptionValue[] {vncEnabled, vncPort};
 
