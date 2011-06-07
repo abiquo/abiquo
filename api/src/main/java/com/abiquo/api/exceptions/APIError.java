@@ -116,7 +116,9 @@ public enum APIError
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
         "MACHINE-1", "The machine is not assigned to the datacenter or rack"), MACHINE_ANY_DATASTORE_DEFINED(
-        "MACHINE-2", "Machine definition should have at least one datastore created and enabled"),
+        "MACHINE-2", "Machine definition should have at least one datastore created and enabled"), MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK(
+        "MACHINE-3", "A machine can not be added this way to a UCS Rack"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
+        "MACHINE-4", "Invalid virtual switch name"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(

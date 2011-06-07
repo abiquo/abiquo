@@ -21,7 +21,9 @@
 
 package com.abiquo.api.resources;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -50,6 +52,7 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 
@@ -250,5 +253,28 @@ public class MachineResource extends AbstractResource
         
         return machine;
         
+    }
+
+    public static List<Machine> createPersistenceObjects(MachinesDto machinesDto) throws Exception
+    {
+        List<Machine> machines = new ArrayList<Machine>();
+        for (MachineDto machineDto : machinesDto.getCollection())
+        {
+            machines.add(createPersistenceObject(machineDto));
+        }
+        return machines;
+    }
+
+    public static MachinesDto createTransferObjects(List<Machine> machinesCreated,
+        IRESTBuilder restBuilder) throws Exception
+    {
+        MachinesDto machinesDto = new MachinesDto();
+        
+        for (Machine currentMachine : machinesCreated)
+        {
+            machinesDto.getCollection().add(createTransferObject(currentMachine, restBuilder));
+        }
+        
+        return machinesDto;
     }
 }

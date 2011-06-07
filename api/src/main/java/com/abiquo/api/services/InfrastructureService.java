@@ -26,6 +26,7 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -58,6 +59,7 @@ import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.UcsRack;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -131,9 +133,32 @@ public class InfrastructureService extends DefaultApiService
     }
     
     @Transactional(propagation = Propagation.REQUIRED)
+    public List<Machine> addMachines(List<Machine> machinesToCreate, Integer datacenterId,
+        Integer rackId)
+    {
+        List<Machine> machinesCreated = new ArrayList<Machine>();
+        for (Machine currentMachine : machinesToCreate)
+        {
+            machinesCreated.add(addMachine(currentMachine, datacenterId, rackId));
+        }
+        
+        return machinesCreated;
+    }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
     public Machine addMachine(final Machine machine, final Integer datacenterId, final Integer rackId)
     {
-
+        
+        // Gets the rack. It throws the NotFoundException if needed.
+        Rack rack = getRack(datacenterId, rackId);
+        Datacenter datacenter = rack.getDatacenter();
+        
+        UcsRack ucsRack = repo.findUcsRackById(rackId);
+        if (ucsRack != null)
+        {
+            addConflictErrors(APIError.MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK);
+            flushErrors();
+        }
         
         Long realHardDiskInBytes = 0l;
         Long virtualHardDiskInBytes = 0l;
@@ -158,31 +183,22 @@ public class InfrastructureService extends DefaultApiService
             flushErrors();
         }
         
-        // Gets the rack. It throws the NotFoundException if needed.
-        Rack rack = getRack(datacenterId, rackId);
-        Datacenter datacenter = rack.getDatacenter();
-        
-        // Get the remote service to monitor the machine
-        RemoteService vsmRS = getRemoteService(datacenter.getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
         // Insert the machine into database
         machine.setRealHardDiskInBytes(realHardDiskInBytes);
         machine.setVirtualHardDiskInBytes(virtualHardDiskInBytes);
         machine.setVirtualHardDiskUsedInBytes(virtualHardDiskUsedInBytes);
         machine.setDatacenter(datacenter);
         machine.setRack(rack);
+        
+        if (machine.getVirtualSwitch().contains("/"))
+        {
+            addValidationErrors(APIError.MACHINE_INVALID_VIRTUAL_SWITCH_NAME);
+            flushErrors();
+        }
 
         validate(machine.getHypervisor());
         validate(machine);
 
-
-//        Hypervisor hypervisor =
-//            machine.createHypervisor(machine.getHypervisor().getType(), machine.getHypervisor().getIpService(),
-//                machine.getHypervisor().getIpService(), machine.getHypervisor().getPort(), machine.getHypervisor().getUser(),
-//                machine.getHypervisor().getPassword());
-        
-        
         // Part 2: Insert the and machine into database.
         if (repo.existAnyHypervisorWithIp(machine.getHypervisor().getIp()))
         {
@@ -197,14 +213,9 @@ public class InfrastructureService extends DefaultApiService
         
         repo.insertMachine(machine);
 
-//        if (!hypervisor.isValid())
-//        {
-//            addValidationErrors(hypervisor.getValidationErrors());
-//        }
-//        flushErrors();
-
-//        repo.insertHypervisor(hypervisor);
-
+        // Get the remote service to monitor the machine
+        RemoteService vsmRS = getRemoteService(datacenter.getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
         vsmServiceStub.monitor(vsmRS.getUri(), machine.getHypervisor().getIp(), machine.getHypervisor().getPort(), machine.getHypervisor().getType()
             .name(), machine.getHypervisor().getUser(), machine.getHypervisor().getPassword());
         
@@ -641,4 +652,5 @@ public class InfrastructureService extends DefaultApiService
 
         flushErrors();        
     }
+
 }
