@@ -89,6 +89,10 @@ public class VmwareMachine extends AbsVmwareMachine
                 vncPort.setKey("RemoteDisplay.vnc.port");
                 vncPort.setValue(config.getRdPort());
 
+                OptionValue vncPwd = new OptionValue();
+                vncPwd.setKey("RemoteDisplay.vnc.password");
+                vncPort.setValue("secret");
+
                 OptionValue[] values = new OptionValue[] {vncEnabled, vncPort};
 
                 vmConfigSpec.setExtraConfig(values);
