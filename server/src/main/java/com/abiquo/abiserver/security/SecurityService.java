@@ -23,8 +23,11 @@ package com.abiquo.abiserver.security;
 
 import org.springframework.stereotype.Service;
 
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.Privilege;
 import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.User;
 
 /**
  * Security Service to check user privileges
@@ -40,6 +43,8 @@ public class SecurityService
     public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
+
+    public static final String ENTRPRISE_ADMINISTER_ALL = "ENTERPRISE_ADMINISTER_ALL";
 
     public static final String USERS_MANAGE_ENTERPRISE_BRANDING =
         "USERS_MANAGE_ENTERPRISE_BRANDING";
@@ -99,6 +104,22 @@ public class SecurityService
         // }
 
         return false;
+    }
+
+    public static BasicResult checkEnterpriseForPOSTMethods(final User user,
+        final Enterprise enterprise)
+    {
+        BasicResult br = new BasicResult();
+        br.setSuccess(true);
+
+        boolean sameEnt = user.getEnterprise().getId().equals(enterprise.getId());
+        if (!sameEnt && !hasPrivilege(ENTRPRISE_ADMINISTER_ALL, user.getRole()))
+        {
+            br.setSuccess(false);
+            br.setMessage("Missing privilege " + ENTRPRISE_ADMINISTER_ALL);
+        }
+
+        return br;
     }
 
 }

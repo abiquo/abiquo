@@ -34,7 +34,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     EnterpriseGenerator enterpriseGenerator;
 
-    public static final String ENTRPRISE_ADMINISTER_ALL = "ENTRPRISE_ADMINISTER_ALL";
+    public static final String ENTRPRISE_ADMINISTER_ALL = "ENTERPRISE_ADMINISTER_ALL";
 
     public static final String USERS_MANAGE_OTHER_ENTERPRISES = "USERS_MANAGE_OTHER_ENTERPRISES";
 

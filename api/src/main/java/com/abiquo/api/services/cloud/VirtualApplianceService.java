@@ -41,6 +41,7 @@ import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
@@ -88,6 +89,9 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     ConfigService configService;
+
+    @Autowired
+    UserService userService;
 
     public VirtualApplianceService()
     {
@@ -165,7 +169,7 @@ public class VirtualApplianceService extends DefaultApiService
                     remoteService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
-               long timeout = Long.valueOf(configService.getServerTimeout());
+                long timeout = Long.valueOf(configService.getServerTimeout());
 
                 Resource resource =
                     ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
@@ -214,6 +218,7 @@ public class VirtualApplianceService extends DefaultApiService
         final VirtualApplianceDto dto)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         VirtualAppliance vapp =
             new VirtualAppliance(vdc.getEnterprise(),
@@ -242,6 +247,7 @@ public class VirtualApplianceService extends DefaultApiService
         final VirtualApplianceDto dto)
     {
         VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         vapp.setName(dto.getName());
 

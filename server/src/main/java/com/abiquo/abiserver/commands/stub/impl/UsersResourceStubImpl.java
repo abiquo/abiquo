@@ -106,6 +106,35 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     }
 
     @Override
+    public DataResult<User> getUser(final Integer id)
+    {
+        DataResult<User> result = new DataResult<User>();
+
+        ClientResponse response = get(createUserLink("_", id));
+
+        if (response.getStatusCode() == 200)
+        {
+            UserDto responseDto = response.getEntity(UserDto.class);
+
+            Enterprise ent =
+                Enterprise.create(getEnterprise(responseDto.searchLink("enterprise").getHref(),
+                    new HashMap<String, EnterpriseDto>()));
+            Role role =
+                Role.create(getRole(responseDto.searchLink("role").getHref(),
+                    new HashMap<String, RoleDto>()));
+            User newUser = User.create(responseDto, ent, role);
+            result.setSuccess(true);
+            result.setData(newUser);
+        }
+        else
+        {
+            populateErrors(response, result, "getUser");
+        }
+
+        return result;
+    }
+
+    @Override
     public BasicResult deleteUser(final User user)
     {
         BasicResult result = new BasicResult();

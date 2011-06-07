@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.services.UserService;
 import com.abiquo.scheduler.check.IMachineCheck;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
@@ -98,68 +99,72 @@ public class Allocator implements IAllocator
     @Autowired
     EnterpriseLimitChecker checkEnterpirse;
 
+    @Autowired
+    UserService userService;
+
     /** If the check machine fails, how many times the allocator try a new target machine. */
     protected final static Integer RETRIES_AFTER_CHECK = 5;
 
-
-    
-    
-    public void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId, VirtualMachineDto newVmRequirements,
-        boolean foreceEnterpriseSoftLimits) throws AllocatorException
+    @Override
+    public void checkEditVirtualMachineResources(final Integer idVirtualApp,
+        final Integer virtualMachineId, final VirtualMachineDto newVmRequirements,
+        final boolean foreceEnterpriseSoftLimits) throws AllocatorException
     {
 
         final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         final Machine machine = vmachine.getHypervisor().getMachine();
 
-        
-        final VirtualMachineRequirements increaseRequirements = getVirtualMachineRequirements(vmachine, newVmRequirements);
+        final VirtualMachineRequirements increaseRequirements =
+            getVirtualMachineRequirements(vmachine, newVmRequirements);
 
-        
         checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
 
         final VirtualImage increaseVirtualImage = getVirtualImage(increaseRequirements);
-        
+
         boolean check =
             allocationService.checkVirtualMachineResourceIncrease(machine, increaseVirtualImage,
                 idVirtualApp);
-        
-        if(!check)
+
+        if (!check)
         {
-            final String cause = String.format("Current workload rules (RAM and CPU oversubscription) " +
-            		"on the target machine: %s disallow the required resources increment.", machine.getName());
-            throw new AllocatorException(cause);             
-        }        
+            final String cause =
+                String.format("Current workload rules (RAM and CPU oversubscription) "
+                    + "on the target machine: %s disallow the required resources increment.",
+                    machine.getName());
+            throw new AllocatorException(cause);
+        }
     }
-    
-    
-    
-    private VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine vmachine, VirtualMachineDto newVmRequirements)
+
+    private VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine,
+        final VirtualMachineDto newVmRequirements)
     {
         Integer cpu = newVmRequirements.getCpu() - vmachine.getCpu();
         Integer ram = newVmRequirements.getRam() - vmachine.getRam();
-        
+
         cpu = cpu > 0 ? cpu : 0;
         ram = ram > 0 ? ram : 0;
-        
-        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);       
+
+        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);
     }
-    
-    private VirtualImage getVirtualImage(VirtualMachineRequirements increaseRequirements)
+
+    private VirtualImage getVirtualImage(final VirtualMachineRequirements increaseRequirements)
     {
         VirtualImage vimage = new VirtualImage(null); // doesn't care about the enterprise
         vimage.setCpuRequired(increaseRequirements.getCpu().intValue());
-        vimage.setRamRequired(increaseRequirements.getRam().intValue());        
+        vimage.setRamRequired(increaseRequirements.getRam().intValue());
         return vimage;
     }
 
     @Override
-    public VirtualMachine allocateVirtualMachine(Integer idVirtualApp, Integer virtualMachineId,
-        Boolean foreceEnterpriseSoftLimits) throws AllocatorException
+    public VirtualMachine allocateVirtualMachine(final Integer idVirtualApp,
+        final Integer virtualMachineId, final Boolean foreceEnterpriseSoftLimits)
+        throws AllocatorException
     {
 
         VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         VirtualImage vi = vmachine.getVirtualImage();
 
@@ -247,7 +252,7 @@ public class Allocator implements IAllocator
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)
     private VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
-        VirtualMachine vmachine)
+        final VirtualMachine vmachine)
     {
         VirtualImage vimage = new VirtualImage(null); // doesn't care about enterprise
 
@@ -309,7 +314,7 @@ public class Allocator implements IAllocator
      *            for the datacenter repository)
      * @param resources, additional resources configuration
      */
-    protected VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine vmachine)
+    protected VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
     {
         return new VirtualMachineRequirements(vmachine);
     }
@@ -330,13 +335,13 @@ public class Allocator implements IAllocator
      */
 
     @Resource(name = "virtualMachineFactory")
-    public void setVmFactory(VirtualMachineFactory vmFactory)
+    public void setVmFactory(final VirtualMachineFactory vmFactory)
     {
         this.vmFactory = vmFactory;
     }
 
     @Resource(name = "machineCheck")
-    public void setMachineChecke(IMachineCheck machineChecker)
+    public void setMachineChecke(final IMachineCheck machineChecker)
     {
         this.machineChecker = machineChecker;
     }

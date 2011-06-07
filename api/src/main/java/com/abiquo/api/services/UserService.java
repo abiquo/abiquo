@@ -488,10 +488,23 @@ public class UserService extends DefaultApiService
         if (!sameEnterprise
             && (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
                 && !securityService
-                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES) && !securityService
-                .hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)))
+                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES)
+                && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE) && !securityService
+                .hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
         {
-            throw new AccessDeniedException("");
+            throw new AccessDeniedException("Missing privilege to get info from other enterprises");
+        }
+    }
+
+    public void checkCurrentEnterpriseForPostMethods(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+
+        if (!sameEnterprise
+            && (!securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
+        {
+            throw new AccessDeniedException("Missing privilege to manage info from other enterprises");
         }
     }
 
