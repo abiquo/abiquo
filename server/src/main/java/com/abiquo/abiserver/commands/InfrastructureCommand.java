@@ -285,7 +285,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> startVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> startVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Pause" action in the Virtual Machine
@@ -293,7 +293,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Paused"
      */
-    public abstract DataResult<State> pauseVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> pauseVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Reboot" action in the Virtual Machine
@@ -301,7 +301,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> rebootVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> rebootVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Shutdown" action in the Virtual Machine
@@ -309,7 +309,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Powered Off"
      */
-    public abstract DataResult<State> shutdownVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> shutdownVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Moves a virtual machine from a Physical Machine to another virtualMachine's "assignedTo"
