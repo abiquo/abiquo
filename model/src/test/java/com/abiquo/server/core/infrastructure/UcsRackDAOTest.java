@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.Assert;
@@ -35,12 +37,14 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class UcsRackDAOTest extends DefaultDAOTestBase<UcsRackDAO, UcsRack>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
@@ -68,5 +72,33 @@ public class UcsRackDAOTest extends DefaultDAOTestBase<UcsRackDAO, UcsRack>
         return (UcsRackGenerator) super.eg();
     }
 
-    
+    @Test
+    public void findAllUcsRacksByDatacenter()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
+        UcsRack UcsRack2_1 = ucsRackGenerator.createInstance(datacenter2);
+        UcsRack2_1.setName("ucsRack1");
+        UcsRack UcsRack2_2 = ucsRackGenerator.createInstance(datacenter2);
+        UcsRack2_2.setName("ucsRack2");
+        ds().persistAll(datacenter1, datacenter2, UcsRack2_1, UcsRack2_2);
+
+        UcsRackDAO dao = createDaoForRollbackTransaction();
+        List<UcsRack> ucsRacks = dao.findAllUcsRacksByDatacenter(reload(dao, datacenter1));
+        Assert.assertTrue(ucsRacks.isEmpty());
+
+        ucsRacks = dao.findAllUcsRacksByDatacenter(reload(dao, datacenter2));
+        try
+        {
+            assertEqualsPropertyForList(Rack.NAME_PROPERTY, ucsRacks, "ucsRack1", "ucsRack2");
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+    }
+
 }

@@ -76,7 +76,7 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private RackDAO rackDao;
-    
+
     @Autowired
     private UcsRackDAO ucsRackDao;
 
@@ -288,7 +288,7 @@ public class InfrastructureRep extends DefaultRepBase
 
         return this.rackDao.findById(id);
     }
-    
+
     public UcsRack findUcsRackById(Integer rackId)
     {
         return ucsRackDao.findById(rackId);
@@ -605,4 +605,14 @@ public class InfrastructureRep extends DefaultRepBase
         return rackDao.findByIds(datacenterId, rackId);
     }
 
+    /**
+     * Return all {@links UcsRack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
+    {
+        return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
+    }
 }

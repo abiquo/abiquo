@@ -19,26 +19,56 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure;
+package com.abiquo.server.core.infrastructure;
 
-  import javax.persistence.EntityManager;
+import java.util.List;
 
-  import org.springframework.stereotype.Repository;
+import javax.persistence.EntityManager;
+
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-  @Repository("jpaUcsRackDAO")
-  public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
-  {
-      public UcsRackDAO()
-      {
-          super(UcsRack.class);
-      }
+@Repository("jpaUcsRackDAO")
+public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
+{
+    public UcsRackDAO()
+    {
+        super(UcsRack.class);
+    }
 
-      public UcsRackDAO(EntityManager entityManager)
-      {
-          super(UcsRack.class, entityManager);
-      }
+    public UcsRackDAO(EntityManager entityManager)
+    {
+        super(UcsRack.class, entityManager);
+    }
 
-      
-  }
+    /**
+     * Return all {@links UcsRack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<UcsRack> findAllUcsRacksByDatacenter(Datacenter datacenter)
+    {
+        Criteria criteria = createCriteria(sameDatacenter(datacenter));
+        criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
+
+        return criteria.list();
+    }
+
+    /**
+     * Criterion with same {@link Datacenter}.
+     * 
+     * @param datacenterId {@link Datacenter}.
+     * @return Criterion
+     */
+    private Criterion sameDatacenter(Datacenter datacenterId)
+    {
+        return Restrictions.eq(UcsRack.DATACENTER_PROPERTY, datacenterId);
+    }
+
+}
