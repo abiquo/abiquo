@@ -275,7 +275,7 @@
             /**
              * When an InfrastructureElement has been selected
              */
-            private function infrastructureElementSelected():void
+            protected function infrastructureElementSelected():void
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
@@ -286,9 +286,6 @@
                 	
                 	getVirtualMachine();
                     
-                }else if(infrastructureSelector.selectedInfrastructureElement is UcsRack){
-                	//UCS Rack
-                	showRack();
                 }else
                     //Hiding more info container
                     hideMoreInfoContainer();
@@ -395,10 +392,7 @@
                 showMoreInfoContainer(0);
             }
             
-            private function showRack():void{
-            	rackRenderer.init();
-                showMoreInfoContainer(2);
-            }
+            
 
             /////////////////////////////////////////////////////////
             //VIRTUAL MACHINES
@@ -406,7 +400,7 @@
             /**
              * Sets the Virtual Machines that will be displayed, depending on the selected Infrastructure Element
              */
-            private function setVirtualMachines(preserveState:Boolean = false):void
+            protected function setVirtualMachines(preserveState:Boolean = false):void
             {
                 var virtualMachines:ArrayCollection;
                 var currentlySelectedVirtualMachine:VirtualMachine = virtualMachineList.selectedVirtualMachine;
@@ -651,12 +645,7 @@
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
-                
-                <rack:RackRenderer id="rackRenderer"
-                    width="100%" height="100%"
-                    dataCenter="{this._dataCenter}"
-                    rack="{(infrastructureSelector.selectedInfrastructureElement &amp;&amp; infrastructureSelector.selectedInfrastructureElement is UcsRack) ? infrastructureSelector.selectedInfrastructureElement as UcsRack : null}"/>
-
+             
             </mx:ViewStack>
         </mx:VBox>
     </general:GeneralSubPanel>

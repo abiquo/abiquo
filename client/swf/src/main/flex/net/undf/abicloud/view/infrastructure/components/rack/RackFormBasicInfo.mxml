@@ -74,6 +74,7 @@
                     nameInput.text = this._rack.name;
                     shortDescriptionInput.text = this._rack.shortDescription;
                     largeDescriptionInput.text = this._rack.largeDescription;
+                    rackTypeCombo.enabled = false;
                 }
                 else
                 {
@@ -81,6 +82,7 @@
                     nameInput.text = "";
                     shortDescriptionInput.text = "";
                     largeDescriptionInput.text = "";
+                    rackTypeCombo.enabled = true;
                 }
 
                 nameInput.setFocus();
