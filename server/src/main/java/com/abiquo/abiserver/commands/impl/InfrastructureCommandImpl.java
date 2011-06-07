@@ -101,6 +101,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.AbiCloudError;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -136,9 +137,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
-                    .newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -217,8 +217,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             conjunction.add(Restrictions.isNull("rack"));
             conjunction.add(Restrictions.eq("dataCenter", datacenterPojo));
             ArrayList<PhysicalmachineHB> physicalMachinesWORack =
-                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class)
-                    .add(conjunction).list();
+                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class).add(
+                    conjunction).list();
             for (PhysicalmachineHB physicalMachineHB : physicalMachinesWORack)
             {
                 infrastructures.add(physicalMachineHB.toPojo());
@@ -395,8 +395,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             ArrayList<DataCenter> dataCentersPojo = new ArrayList<DataCenter>();
             ArrayList<DatacenterHB> dataCenters =
-                (ArrayList<DatacenterHB>) HibernateUtil.getSession()
-                    .createCriteria(DatacenterHB.class).addOrder(Order.asc("name")).list();
+                (ArrayList<DatacenterHB>) HibernateUtil.getSession().createCriteria(
+                    DatacenterHB.class).addOrder(Order.asc("name")).list();
             for (DatacenterHB datacenterHB : dataCenters)
             {
                 DataCenter dataCenter = datacenterHB.toPojo();
@@ -547,8 +547,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
                     traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
                         userSession, dataCenter, null, remoteServiceHB.getRemoteServiceType()
-                            .getName() + " was not properly configured", null, null, null, null,
-                        null);
+                            .getName()
+                            + " was not properly configured", null, null, null, null, null);
                 }
                 else
                 {
@@ -991,11 +991,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             transaction.commit();
 
             traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackAux.getDataCenter(), null,
-                "Rack '" + rackAux.getName() + "' has been modified [Name: " + rack.getName()
-                    + ", Short description: " + rack.getShortDescription()
-                    + ", Large description: " + rack.getLargeDescription() + "]", null, rackAux,
-                null, null, null);
+                rackAux.getDataCenter(), null, "Rack '" + rackAux.getName()
+                    + "' has been modified [Name: " + rack.getName() + ", Short description: "
+                    + rack.getShortDescription() + ", Large description: "
+                    + rack.getLargeDescription() + "]", null, rackAux, null, null, null);
         }
         catch (HibernateException e)
         {
@@ -1063,6 +1062,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, pm.getDataCenter(), null, e.getMessage(), null,
                 (Rack) pm.getAssignedTo(), pm, null, null);
+
 
         }
 
@@ -1142,8 +1142,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Returning the PhysicalMachine and the Hypervisors created to the
             // client
             PhysicalmachineHB physicalMachineHBCreated =
-                (PhysicalmachineHB) session.get(PhysicalmachineHB.class,
-                    physicalMachineHB.getIdPhysicalMachine());
+                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, physicalMachineHB
+                    .getIdPhysicalMachine());
             PhysicalMachine physicalMachineCreated = physicalMachineHBCreated.toPojo();
 
             transaction.commit();
@@ -1164,8 +1164,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachine.getDataCenter(), null, "Physical machine '"
                     + physicalMachine.getName() + "' has been created [" + physicalMachine.getCpu()
                     + "CPUs, " + physicalMachine.getRam() + " RAM, " + physicalMachine.getHd()
-                    + " HD, " + hyperName + " hypervisor]", null,
-                (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
+                    + " HD, " + hyperName + " hypervisor]", null, (Rack) physicalMachine
+                    .getAssignedTo(), physicalMachine, null, null);
 
         }
         catch (Exception e)
@@ -1346,8 +1346,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         traceLog(SeverityType.WARNING, ComponentType.VIRTUAL_MACHINE,
             com.abiquo.tracer.EventType.VM_UNDEPLOY_FORCED, user, null, vApp
-                .getVirtualDataCenterHB().getName(),
-            "FORCED UNDEPLOY of the VM" + " [" + vMachine.getName() + "] of the enterprise " + "["
+                .getVirtualDataCenterHB().getName(), "FORCED UNDEPLOY of the VM" + " ["
+                + vMachine.getName() + "] of the enterprise " + "["
                 + vMachine.getEnterpriseHB().getName() + "], Virtual Appliance [" + vApp.getName()
                 + "] on VirtualDataCenter [" + vApp.getVirtualDataCenterHB().getName() + "]"
                 + " updated, please force re-deploy", vApp.toPojo(), null, null, null, null);
@@ -1448,8 +1448,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Log the event
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
-                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null,
-                e.getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
+                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null, e
+                    .getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
                     .getAssignedTo(), physicalMachineHb.toPojo(), null, null);
 
         }
@@ -1884,7 +1884,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> startVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> startVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -1929,8 +1930,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
-                // Generating the result
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWERON, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
+              
+               // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
@@ -1967,7 +1973,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> pauseVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> pauseVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2002,7 +2009,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_PAUSED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2038,7 +2049,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> rebootVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> rebootVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         // Rebooting the machine implies powering off and powering up
         DataResult<State> dataResult = new DataResult<State>();
@@ -2076,7 +2088,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RESUMED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2119,7 +2135,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> shutdownVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> shutdownVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2154,7 +2171,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWEROFF, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2301,8 +2322,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Getting the virtual machines updated from the data base
             ArrayList<VirtualmachineHB> virtualMachinesHBChecked =
-                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class)
-                    .add(Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
+                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class).add(
+                    Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
 
             // Returning the result
             for (VirtualmachineHB virtualMachineHB : virtualMachinesHBChecked)
@@ -2470,7 +2491,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         // IP not filed
         if (ip == null || ip.equals(""))
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
@@ -2481,7 +2503,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         }
         catch (InvalidIPAddressException e)
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
     }
@@ -2499,7 +2522,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         if (physicalMachine.getCpu() <= 0 || physicalMachine.getRam() <= 0
             || physicalMachine.getHd() <= 0)
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
