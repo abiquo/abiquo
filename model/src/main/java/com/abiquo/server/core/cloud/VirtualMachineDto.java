@@ -148,7 +148,6 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.idType = idType;
     }
 
-
     private State state;
 
     public void setState(final State state)

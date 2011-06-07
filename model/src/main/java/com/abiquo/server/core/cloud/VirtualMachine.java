@@ -499,6 +499,7 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
+
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
         final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,
         final Integer typeId)
