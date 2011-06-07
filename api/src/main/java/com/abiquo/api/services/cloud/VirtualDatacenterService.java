@@ -144,6 +144,7 @@ public class VirtualDatacenterService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+        userService.checkCurrentEnterprise(vdc.getEnterprise());
         return vdc;
     }
 
@@ -199,7 +200,7 @@ public class VirtualDatacenterService extends DefaultApiService
         final VirtualDatacenterDto dto)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
-
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
         return updateVirtualDatacenter(vdc, dto);
     }
 
@@ -229,6 +230,7 @@ public class VirtualDatacenterService extends DefaultApiService
     public void deleteVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         if (repo.containsVirtualAppliances(vdc))
         {

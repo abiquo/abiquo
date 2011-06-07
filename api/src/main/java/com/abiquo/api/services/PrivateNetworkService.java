@@ -69,6 +69,9 @@ public class PrivateNetworkService extends DefaultApiService
     TracerLogger tracer;
 
     @Autowired
+    UserService userService;
+
+    @Autowired
     ConfigService configService;
 
     public PrivateNetworkService()
@@ -80,6 +83,7 @@ public class PrivateNetworkService extends DefaultApiService
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
+        userService = new UserService(em);
         configService = new ConfigService();
     }
 
@@ -111,6 +115,8 @@ public class PrivateNetworkService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+
+        userService.checkCurrentEnterpriseForPostMethods(virtualDatacenter.getEnterprise());
 
         // check if we have reached the maximum number of VLANs for this virtualdatacenter
         checkNumberOfCurrentVLANs(virtualDatacenter);

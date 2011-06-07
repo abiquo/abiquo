@@ -151,6 +151,7 @@ public class VirtualDatacentersResource extends AbstractResource
         {
             enterprise = getEnterprise(dto.searchLink(ENTERPRISE));
         }
+        userService.checkCurrentEnterpriseForPostMethods(enterprise);
 
         VirtualDatacenter vdc = service.createVirtualDatacenter(dto, datacenter, enterprise);
 

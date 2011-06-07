@@ -31,12 +31,13 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,91 +47,117 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
 /**
- *  Test class to check the functionality of the resource {@link VirtualApplianceResource}
- *  
+ * Test class to check the functionality of the resource {@link VirtualApplianceResource}
+ * 
  * @author jdevesa@abiquo.com
  */
 public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
 {
     protected Enterprise ent;
-    
+
     protected Datacenter datacenter;
-    
+
     protected VirtualDatacenter vdc;
-    
+
+    private static final String SYSADMIN = "sysadmin";
+
     @BeforeMethod
     public void setUp()
     {
         ent = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin("sysRole");
+        User u = userGenerator.createInstance(ent, r, "sysadmin", "sysadmin");
         datacenter = datacenterGenerator.createUniqueInstance();
         vdc = vdcGenerator.createInstance(datacenter, ent);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+        entitiesToSetup.add(vdc);
+
+        setup(entitiesToSetup.toArray());
     }
-    
+
     /**
-     * Check a 'get virtual appliances' call after creating the instances in DB. 
-     * Creating a virtual datacenter with two virtual appliances. Check all of them
-     * are accessible.
+     * Check a 'get virtual appliances' call after creating the instances in DB. Creating a virtual
+     * datacenter with two virtual appliances. Check all of them are accessible.
      */
     @Test
     public void getVirtualApplianceTest()
     {
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc);
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc);
-        
-        setup(ent, datacenter, vdc, vapp1, vapp2);
-        
+
+        setup(vapp1, vapp2);
+
         // Check for vapp1
-        ClientResponse response = get(resolveVirtualApplianceURI(vdc.getId(), vapp1.getId()));
+        ClientResponse response =
+            get(resolveVirtualApplianceURI(vdc.getId(), vapp1.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualApplianceDto vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
-        assertLinkExist(vappdto, resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()), "action", IpAddressesResource.IP_ADDRESSES);
-        assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp1.getId()), VirtualMachineResource.VIRTUAL_MACHINE);
-        
+        assertLinkExist(vappdto,
+            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp1.getId()),
+            VirtualMachineResource.VIRTUAL_MACHINE);
+
         // Check for vapp2
         response = get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vappdto = response.getEntity(VirtualApplianceDto.class);
         assertNotNull(vappdto);
-        assertLinkExist(vappdto, resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp2.getId()), "action", IpAddressesResource.IP_ADDRESSES);
-        assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()), VirtualMachineResource.VIRTUAL_MACHINE);
+        assertLinkExist(vappdto,
+            resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp2.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()),
+            VirtualMachineResource.VIRTUAL_MACHINE);
     }
-    
+
     /**
-     * Check a 'get virtual appliances' 404 NOT FOUND error code when the
-     * identifier of the virtual appliance is a random number.
+     * Check a 'get virtual appliances' 404 NOT FOUND error code when the identifier of the virtual
+     * appliance is a random number.
      */
-    @Test 
+    @Test
     public void getVirtualApplianceRaises404ErrorWhenVappRandomIdentifier()
     {
-        setup(ent, datacenter, vdc);
-        ClientResponse response = get(resolveVirtualApplianceURI(vdc.getId(), new Random().nextInt()));
+        ClientResponse response =
+            get(resolveVirtualApplianceURI(vdc.getId(), new Random().nextInt()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
-    
+
     /**
-     * Create a virtual datacenter and a Virtual appliance. 
-     * Check the 'get virtual appliances' 404 NOT FOUND error code when
-     * the virtual appliance is OK, but the identifier of the virtual datacenter is not.
-     * 
-     * In other words, the virtual appliance exists but doesn't belong to
-     * the virtual datacenter.
+     * Create a virtual datacenter and a Virtual appliance. Check the 'get virtual appliances' 404
+     * NOT FOUND error code when the virtual appliance is OK, but the identifier of the virtual
+     * datacenter is not. In other words, the virtual appliance exists but doesn't belong to the
+     * virtual datacenter.
      */
-    @Test 
+    @Test
     public void getVirtualApplianceRaises404WhenVappNotBelongsToVDC()
     {
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc);
-        setup(ent, datacenter, vdc, vapp1);
-        ClientResponse response = get(resolveVirtualApplianceURI(new Random().nextInt(), vapp1.getId()));
-        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());       
+        setup(vapp1);
+        ClientResponse response =
+            get(resolveVirtualApplianceURI(new Random().nextInt(), vapp1.getId()), SYSADMIN,
+                SYSADMIN);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
-    
-    //TODO: Create a test to return a non-empty list of IPs.
-    
+
+    // TODO: Create a test to return a non-empty list of IPs.
+
     /**
      * Create a virtual appliance. Check the action resource returns an empty list
      */
@@ -138,59 +165,66 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualApplianceActionIPsEmptyList()
     {
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc);
-        setup(ent, datacenter, vdc, vapp1);
-        
-        ClientResponse response = get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()));
+        setup(vapp1);
+
+        ClientResponse response =
+            get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()), SYSADMIN,
+                SYSADMIN);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
-        
+
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 0);
     }
-    
+
     /**
      * Create a virtual appliance. Ask the IPs for an invalid virtual appliance identifier value.
      */
     @Test
     public void getVirtualApplianceActionIPsRaises404WhenVappIsARandomValue()
     {
-        setup(ent, datacenter, vdc);
-        ClientResponse response = get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), new Random().nextInt()));
+        ClientResponse response =
+            get(resolveVirtualApplianceActionGetIPsURI(vdc.getId(), new Random().nextInt()),
+                SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
-    
+
     /**
-     * Create a virtual appliance. Ask the IPs for a valid virtual appliance but invalid virtual datacenter.
+     * Create a virtual appliance. Ask the IPs for a valid virtual appliance but invalid virtual
+     * datacenter.
      */
     @Test
     public void getVirtualApplianceActionIPsRaises404WhenVappNotBelongsToVDC()
     {
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc);
-        setup(ent, datacenter, vdc, vapp1);
-        ClientResponse response = get(resolveVirtualApplianceActionGetIPsURI(new Random().nextInt(), vapp1.getId()));
-        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());  
+        setup(vapp1);
+        ClientResponse response =
+            get(resolveVirtualApplianceActionGetIPsURI(new Random().nextInt(), vapp1.getId()),
+                SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
-    
+
     @Test
     public void updateVirtualAppliance() throws Exception
     {
-    	VirtualAppliance vapp = vappGenerator.createInstance(vdc);        
-        setup(ent, datacenter, vdc, vapp);
-        
-        VirtualApplianceDto dto = ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
-        
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        setup(vapp);
+
+        VirtualApplianceDto dto =
+            ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
+
         String expectedName = "virtualApplianceName";
-        
+
         dto.setName(expectedName);
-        
+
         String uri = resolveVirtualApplianceURI(vdc.getId(), vapp.getId());
-        ClientResponse response = put(uri, dto);
-        
+        ClientResponse response = put(uri, dto, SYSADMIN, SYSADMIN);
+
         assertEquals(response.getStatusCode(), 200);
         VirtualApplianceDto responseDto = response.getEntity(VirtualApplianceDto.class);
-        
+
         assertEquals(responseDto.getName(), expectedName);
     }
-    
+
 }
