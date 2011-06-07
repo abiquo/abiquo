@@ -133,3 +133,11 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
        	END IF;	 
     END IF;
     END;
+
+    
+    --
+    --Datastore rootPath longer
+    --
+    
+    alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
+    
