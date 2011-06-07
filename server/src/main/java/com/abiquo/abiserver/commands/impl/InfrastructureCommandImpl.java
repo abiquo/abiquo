@@ -127,7 +127,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     private IInfrastructureWS infrastructureWS;
 
     // TODO autowire
-    private RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
+    private final RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
 
     public InfrastructureCommandImpl()
     {
@@ -1812,20 +1812,22 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             if (basicResult.getSuccess())
             {
 
-                session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
-                virtualMachineHB =
-                    (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine.getId());
-                // Updating the other attributes
-                virtualMachineHB.setName(virtualMachine.getName());
-                virtualMachineHB.setDescription(virtualMachine.getDescription());
-                virtualMachineHB.setCpu(virtualMachine.getCpu());
-                virtualMachineHB.setRam(virtualMachine.getRam());
-                virtualMachineHB.setHd(virtualMachine.getHd());
-                virtualMachineHB
-                    .setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
-                session.update(virtualMachineHB);
-                transaction.commit();
+                VirtualMachineResourceStub vmachineResource =
+                    APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
+                        VirtualMachineResourceStub.class);
+
+                DAOFactory daoF = HibernateDAOFactory.instance();
+
+                VirtualappHB vapp =
+                    daoF.getVirtualMachineDAO().findVirtualAppFromVM(virtualMachineHB.getIdVm());
+
+                final int virtualDatacenterId =
+                    vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
+                final int virtualApplianceId = vapp.getIdVirtualApp();
+
+                vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
+                    virtualMachine);
+
             }
             else
             {
@@ -2492,6 +2494,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#checkPhysicalMachineData(com.abiquo.abiserver
      * .pojo.infrastructure.PhysicalMachine)
      */
+    @Override
     public void checkPhysicalMachineData(final PhysicalMachine physicalMachine)
         throws InfrastructureCommandException
     {
@@ -2511,6 +2514,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#forceRefreshVirtualMachineState(com.abiquo
      * .abiserver.pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
         BasicResult basicResult = null;
@@ -2525,6 +2529,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#validateRemoteService(com.abiquo.abiserver
      * .business.hibernate.pojohb.service.RemoteServiceHB)
      */
+    @Override
     public boolean validateRemoteService(final RemoteServiceHB remoteService)
     {
         return remoteService.getURI() != null;
@@ -2536,6 +2541,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * com.abiquo.abiserver.commands.InfrastructureCommand#checkExistingDataCenterNames(java.lang
      * .String)
      */
+    @Override
     public boolean checkExistingDataCenterNames(final String name) throws PersistenceException
     {
         DataCenterDAO dao = factory.getDataCenterDAO();
@@ -2569,6 +2575,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * @param physicalMachineId the physical machine identifier to check the virtual infrastructure
      * @return
      */
+    @Override
     public BasicResult checkVirtualInfrastructureState(final Integer physicalMachineId,
         final UserSession userSession, final Boolean isAutomaticCheck)
     {

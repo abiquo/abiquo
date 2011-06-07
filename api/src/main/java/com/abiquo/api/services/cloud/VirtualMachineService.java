@@ -145,6 +145,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
 
         old.setName(dto.getName());
+        old.setDescription(dto.getDescription());
+        old.setCpu(dto.getCpu());
+        old.setRam(dto.getRam());
+        old.setPassword(dto.getPassword());
 
         updateVirtualMachine(old);
 
@@ -242,7 +246,6 @@ public class VirtualMachineService extends DefaultApiService
 
             Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
-
             VirtualAppliance vapp = contanerVirtualAppliance(vm);
             EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
 
@@ -250,7 +253,6 @@ public class VirtualMachineService extends DefaultApiService
 
             RemoteService vf =
                 remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
-
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 

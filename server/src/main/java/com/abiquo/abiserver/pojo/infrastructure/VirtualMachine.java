@@ -66,6 +66,8 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
 
     private Datastore datastore;
 
+    private String password;
+
     /* ------------- Constructor ------------- */
     public VirtualMachine()
     {
@@ -79,6 +81,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         vdrpPort = 0;
         vdrpIP = "";
         highDisponibility = false;
+        password = "";
     }
 
     public VirtualImage getVirtualImage()
@@ -226,6 +229,17 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.enterprise = enterprise;
     }
 
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
+    @Override
     public VirtualmachineHB toPojoHB()
     {
         VirtualmachineHB virtualMachineHB = new VirtualmachineHB();
@@ -267,6 +281,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         virtualMachineHB.setEnterpriseHB((enterprise == null) ? null : enterprise.toPojoHB());
         virtualMachineHB.setIdType(this.idType);
         virtualMachineHB.setDatastore((datastore == null) ? null : datastore.toPojoHB());
+        virtualMachineHB.setPassword(password);
 
         return virtualMachineHB;
     }

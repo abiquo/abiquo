@@ -104,6 +104,8 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
 
     private DatastoreHB datastore;
 
+    private String password;
+
     public VirtualmachineHB()
     {
     }
@@ -303,6 +305,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         this.enterpriseHB = enterpriseHB;
     }
 
+    @Override
     public VirtualMachine toPojo()
     {
         VirtualMachine virtualMachine = new VirtualMachine();
@@ -342,6 +345,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         virtualMachine.setEnterprise(enterpriseHB == null ? null : enterpriseHB.toPojo());
         virtualMachine.setIdType(idType);
         virtualMachine.setDatastore(datastore == null ? null : datastore.toPojo());
+        virtualMachine.setPassword(password);
         return virtualMachine;
     }
 
@@ -379,6 +383,16 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
     public DatastoreHB getDatastore()
     {
         return datastore;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
     }
 
 }
