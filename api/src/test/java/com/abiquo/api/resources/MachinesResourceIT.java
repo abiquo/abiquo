@@ -83,47 +83,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(entity.getCollection().size(), 1);
     }
 
-    @Test
-    public void createMachines()
-    {
-        Resource resource = client.resource(machinesURI);
-
-        MachineDto m = getValidMachine();
-
-        // HypervisorDto hypervisor = HypervisorResourceIT.getValidHypervisor();
-        // m.setHypervisor(hypervisor);
-
-        ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                m);
-
-        assertEquals(response.getStatusCode(), 201);
-
-        MachineDto entityPost = response.getEntity(MachineDto.class);
-
-        assertNotNull(entityPost);
-
-        assertEquals(m.getName(), entityPost.getName());
-        assertEquals(m.getDescription(), entityPost.getDescription());
-        assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
-        assertEquals(m.getVirtualHardDiskInMb(), entityPost.getVirtualHardDiskInMb());
-        assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
-        assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
-        assertEquals(m.getVirtualHardDiskUsedInMb(), entityPost.getVirtualHardDiskUsedInMb());
-        assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
-        assertEquals(m.getType(), entityPost.getType());
-        assertEquals(m.getIp(), entityPost.getIp());
-        assertEquals(m.getIpService(), entityPost.getIpService());
-        assertEquals(m.getUser(), entityPost.getUser());
-        assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealHardDiskInMb(), m.getRealHardDiskInMb());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
-        assertEquals(entityPost.getState(), m.getState());
-        assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
-    }
-    
+  
     @Test
     public void createMachinesWithDatastores()
     {
@@ -155,10 +115,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getDescription(), entityPost.getDescription());
         assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
         assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
-        assertEquals(m.getVirtualHardDiskInMb(), entityPost.getVirtualHardDiskInMb());
         assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
         assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
-        assertEquals(m.getVirtualHardDiskUsedInMb(), entityPost.getVirtualHardDiskUsedInMb());
         assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
         assertEquals(m.getType(), entityPost.getType());
         assertEquals(m.getIp(), entityPost.getIp());
@@ -166,7 +124,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getUser(), entityPost.getUser());
         assertEquals(m.getPassword(), entityPost.getPassword());
         assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealHardDiskInMb(), m.getRealHardDiskInMb());
         assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
@@ -227,7 +184,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = getMachineResource().post(m);
 
         assertEquals(response.getStatusCode(), 400);
-        Assert.assertErrors(response, "virtualSwitch");
     }
 
     private Resource getMachineResource()

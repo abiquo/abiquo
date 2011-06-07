@@ -26,6 +26,8 @@ import static com.abiquo.api.resources.MachineResource.createTransferObject;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -74,16 +76,12 @@ public class MachinesResource extends AbstractResource
     }
     
     @POST
-    public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, MachineDto machine,
+    public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachineDto machine,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        if (!infrastructureService.isAssignedTo(datacenterId, rackId))
-        {
-            throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
-        }
-
-        Machine m = machineService.addMachine(machine, rackId);
+        Machine mToCreate = MachineResource.createPersistenceObject(machine);
+        Machine m = infrastructureService.addMachine(mToCreate, datacenterId, rackId);
         MachineDto transfer = createTransferObject(m, restBuilder);
 
         return transfer;

@@ -43,15 +43,17 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.services.stub.VSMStubImpl;
+import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
@@ -74,6 +76,9 @@ public class InfrastructureService extends DefaultApiService
     // Declare the Repo. It only should use ONE repo.
     @Autowired
     InfrastructureRep repo;
+    
+    @Autowired
+    protected VsmServiceStub vsmServiceStub;
 
     public InfrastructureService()
     {
@@ -123,6 +128,87 @@ public class InfrastructureService extends DefaultApiService
         repo.insertRack(rack);
 
         return rack;
+    }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Machine addMachine(final Machine machine, final Integer datacenterId, final Integer rackId)
+    {
+
+        
+        Long realHardDiskInBytes = 0l;
+        Long virtualHardDiskInBytes = 0l;
+        Long virtualHardDiskUsedInBytes = 0l;
+        Boolean anyEnabled = Boolean.FALSE;
+        for (Datastore datastore : machine.getDatastores())
+        {
+            if (datastore.isEnabled())
+            {
+                anyEnabled = Boolean.TRUE;
+            }
+            realHardDiskInBytes = virtualHardDiskInBytes = datastore.getSize();
+            virtualHardDiskUsedInBytes = datastore.getUsedSize();
+            
+            validate(datastore);
+            repo.insertDatastore(datastore);
+        }
+        
+        if (!anyEnabled)
+        {
+            addValidationErrors(APIError.MACHINE_ANY_DATASTORE_DEFINED);
+            flushErrors();
+        }
+        
+        // Gets the rack. It throws the NotFoundException if needed.
+        Rack rack = getRack(datacenterId, rackId);
+        Datacenter datacenter = rack.getDatacenter();
+        
+        // Get the remote service to monitor the machine
+        RemoteService vsmRS = getRemoteService(datacenter.getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+
+        // Insert the machine into database
+        machine.setRealHardDiskInBytes(realHardDiskInBytes);
+        machine.setVirtualHardDiskInBytes(virtualHardDiskInBytes);
+        machine.setVirtualHardDiskUsedInBytes(virtualHardDiskUsedInBytes);
+        machine.setDatacenter(datacenter);
+        machine.setRack(rack);
+
+        validate(machine.getHypervisor());
+        validate(machine);
+
+
+//        Hypervisor hypervisor =
+//            machine.createHypervisor(machine.getHypervisor().getType(), machine.getHypervisor().getIpService(),
+//                machine.getHypervisor().getIpService(), machine.getHypervisor().getPort(), machine.getHypervisor().getUser(),
+//                machine.getHypervisor().getPassword());
+        
+        
+        // Part 2: Insert the and machine into database.
+        if (repo.existAnyHypervisorWithIp(machine.getHypervisor().getIp()))
+        {
+            addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
+        }
+
+        if (repo.existAnyHypervisorWithIpService(machine.getHypervisor().getIpService()))
+        {
+            addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
+        }
+        flushErrors();
+        
+        repo.insertMachine(machine);
+
+//        if (!hypervisor.isValid())
+//        {
+//            addValidationErrors(hypervisor.getValidationErrors());
+//        }
+//        flushErrors();
+
+//        repo.insertHypervisor(hypervisor);
+
+        vsmServiceStub.monitor(vsmRS.getUri(), machine.getHypervisor().getIp(), machine.getHypervisor().getPort(), machine.getHypervisor().getType()
+            .name(), machine.getHypervisor().getUser(), machine.getHypervisor().getPassword());
+        
+        return machine;
     }
 
     // Return a rack.

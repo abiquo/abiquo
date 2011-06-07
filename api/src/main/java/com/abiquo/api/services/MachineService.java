@@ -34,10 +34,8 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.services.stub.VSMStub;
-import com.abiquo.api.services.stub.VSMStubImpl;
+import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -45,9 +43,7 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -64,7 +60,7 @@ public class MachineService extends DefaultApiService
     protected DatastoreService dataService;
 
     @Autowired
-    private VSMStub vsm;
+    private VsmServiceStub vsm;
 
     @Autowired
     private InfrastructureService infrastructureService;
@@ -84,7 +80,7 @@ public class MachineService extends DefaultApiService
     {
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
-        vsm = new VSMStubImpl();
+        vsm = new VsmServiceStub();
         infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
@@ -94,79 +90,6 @@ public class MachineService extends DefaultApiService
     {
         Rack rack = repo.findRackById(rackId);
         return repo.findRackMachines(rack);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Machine addMachine(final MachineDto machineDto, final Integer rackId)
-    {
-        Rack rack = repo.findRackById(rackId);
-        Datacenter datacenter = rack.getDatacenter();
-
-        // Part 1: Insert the machine into database
-        Machine machine =
-            datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
-
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
-                machineDto.getVirtualRamUsedInMb(),
-
-                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
-                machineDto.getVirtualHardDiskUsedInMb(),
-
-                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
-                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
-
-                machineDto.getState(), machineDto.getVirtualSwitch());
-
-        machine.setRack(rack);
-
-        isValidMachine(machine);
-
-        // Monitoring machine
-        RemoteService vsmRS =
-            infrastructureService.getRemoteService(datacenter.getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
-        Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
-                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
-                machineDto.getPassword());
-
-        vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
-            .name(), hypervisor.getUser(), hypervisor.getPassword());
-
-        repo.insertMachine(machine);
-
-        // Part 2: Insert the hypervisor into database.
-        if (repo.existAnyHypervisorWithIp(machineDto.getIp()))
-        {
-            addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
-        }
-
-        if (repo.existAnyHypervisorWithIpService(machineDto.getIpService()))
-        {
-            addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
-        }
-        flushErrors();
-
-        if (!hypervisor.isValid())
-        {
-            addValidationErrors(hypervisor.getValidationErrors());
-        }
-        flushErrors();
-
-        // Part 3. Call the Datastores resource to create them also
-        // Add the Remote Services in database in case are informed in the request
-        if (machineDto.getDatastores() != null)
-        {
-            for (DatastoreDto dataDto : machineDto.getDatastores().getCollection())
-            {
-                dataService.addDatastore(dataDto, machine.getId());
-            }
-        }
-
-        repo.insertHypervisor(hypervisor);
-
-        return machine;
     }
 
     public Machine getMachine(final Integer id)

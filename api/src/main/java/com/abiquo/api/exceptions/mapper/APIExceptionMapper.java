@@ -37,6 +37,7 @@ import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.ForbiddenException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -104,6 +105,11 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
                 logger.trace("API Response " + Status.NOT_FOUND.name() + "\n" + dto.toString(), exception);
             }
             return Status.NOT_FOUND;
+        }
+        if (exception instanceof ServiceUnavailableException)
+        {
+            logger.error("Unexpected exception that throws a 503 error code in API:\n" + dto.toString(), exception);
+            return Status.SERVICE_UNAVAILABLE;
         }
         if (exception instanceof InternalServerErrorException)
         {

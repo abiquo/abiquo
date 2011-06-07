@@ -115,7 +115,8 @@ public enum APIError
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
-        "MACHINE-1", "The machine is not assigned to the datacenter or rack"),
+        "MACHINE-1", "The machine is not assigned to the datacenter or rack"), MACHINE_ANY_DATASTORE_DEFINED(
+        "MACHINE-2", "Machine definition should have at least one datastore created and enabled"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -125,7 +126,8 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network doesn't have IPs"),
+        "This network doesn't have IPs"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "Parameter IPFrom is greater than IPTo"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
@@ -171,7 +173,12 @@ public enum APIError
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
         "Missing query parameter ip"), NC_BAD_CREDENTIALS_TO_RACK("NC-2",
-        "Bad credentials attempting to retrieve the list of physical machines from rack "),
+        "Bad credentials attempting to retrieve the list of physical machines from rack "), NC_BAD_CREDENTIALS_TO_MACHINE(
+        "NC-3", "Bad credentials attempting to retrieve the machine "), NC_CONNECTION_EXCEPTION(
+        "NC-4", "There is a machine running in the given IP. But any hypervisor responds"), NC_NOT_FOUND_EXCEPTION(
+        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
+        "Unexpected exception building the request to Discovery Manager"), NC_UNAVAILABLE_EXCEPTION(
+        "NC-7", "The discovery manager currently is not available"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(
@@ -243,7 +250,7 @@ public enum APIError
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume")
+        "An unexpected error occured while creating the volume"),
 
     ;
 

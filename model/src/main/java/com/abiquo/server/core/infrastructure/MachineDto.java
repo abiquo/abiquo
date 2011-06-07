@@ -28,12 +28,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.HypervisorDto;
 import com.abiquo.server.core.infrastructure.Machine.State;
 
 @XmlRootElement(name = "machine")
 public class MachineDto extends SingleResourceTransportDto implements Serializable
 {
+    private static final long serialVersionUID = -4971248626582072165L;
+
     private Integer id;
 
     private String name, description;
@@ -61,9 +62,7 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     private String password;
     
     private DatastoresDto datastores;
-    
-    private HypervisorDto hypervisor;
-    
+   
 
     /**
      * @return the port
@@ -346,13 +345,4 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return datastores;
     }
 
-    public void setHypervisor(HypervisorDto hypervisor)
-    {
-        this.hypervisor = hypervisor;
-    }
-
-    public HypervisorDto getHypervisor()
-    {
-        return hypervisor;
-    }
 }
