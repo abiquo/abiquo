@@ -689,6 +689,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
        	END IF;	 
     END IF;
     END;
+<<<<<<< HEAD
 |
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
     FOR EACH ROW BEGIN
@@ -1431,3 +1432,11 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
 |
 DELIMITER ;
 
+
+    
+    --
+    --Datastore rootPath longer
+    --
+    
+    alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
+    
