@@ -23,14 +23,15 @@ package com.abiquo.abiserver.commands.stub.impl;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.server.core.infrastructure.UcsRack;
 
 public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResourceStub
 {
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
      */
+    @Override
     public DataResult<UcsRack> createUcsRack(UcsRack ucsRack)
     {
         // PREMIUM

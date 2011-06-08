@@ -21,8 +21,8 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.server.core.infrastructure.UcsRack;
 
 public interface RacksResourceStub
 {
