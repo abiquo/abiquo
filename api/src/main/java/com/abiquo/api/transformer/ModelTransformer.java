@@ -28,6 +28,8 @@ import java.lang.reflect.Modifier;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 @SuppressWarnings("unchecked")
@@ -76,7 +78,10 @@ public class ModelTransformer
                 {
                     Object value = getter(name, source.getClass()).invoke(source, new Object[0]);
 
-                    setter(name, targetClass, field.getType()).invoke(target, new Object[] {value});
+                    if (setterExist(name, targetClass, field.getType()))
+                    {
+                        setter(name, targetClass, field.getType()).invoke(target, new Object[] {value});
+                    }
                 }
             }
         }
@@ -104,7 +109,11 @@ public class ModelTransformer
     {
         String name = "set" + StringUtils.capitalize(fieldName);
         Method method = clazz.getMethod(name, new Class[] {type});
-        method.setAccessible(true);
+        
+        if (method != null)
+        {
+            method.setAccessible(true);
+        }
         return method;
     }
 

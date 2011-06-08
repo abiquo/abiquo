@@ -19,23 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.vsm.resource;
+package com.abiquo.api.exceptions;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.util.Set;
 
-public class ResourceUtils
+import com.abiquo.model.transport.error.CommonError;
+
+public class ServiceUnavailableException extends APIException
 {
-    public static String decodeParameter(final String parameter)
+    private static final long serialVersionUID = -6673459980522505070L;
+
+    public ServiceUnavailableException(APIError error)
     {
-        try
-        {
-            return URLDecoder.decode(parameter, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            // TODO
-            return parameter;
-        }
+        super(error);
+    }    
+    
+    public ServiceUnavailableException(CommonError error)
+    {
+        super(error);
+    }
+    
+    public ServiceUnavailableException(Set<CommonError> errors)
+    {
+        super(errors);
     }
 }

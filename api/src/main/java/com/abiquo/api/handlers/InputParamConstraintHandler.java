@@ -170,7 +170,7 @@ public class InputParamConstraintHandler implements RequestHandler
         MethodConstraintViolation<Object> constraintViolation, String value, String paramName)
     {
         String code = "CONSTR-" + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName().toUpperCase();
-        String message = "Parameter " + paramName + " " + constraintViolation.getMessage() + " but value " + value + " was found";
+        String message = "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '" + value + "' was found";
         return new CommonError(code, message);
     }
 

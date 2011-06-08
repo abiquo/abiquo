@@ -25,21 +25,17 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.core.Response.Status;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.ForbiddenException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.transport.error.CommonError;
-import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.server.core.common.GenericEnityBase;
 
 public abstract class DefaultApiService
@@ -49,6 +45,7 @@ public abstract class DefaultApiService
     private Collection<CommonError> notfoundErrors;
     private Collection<CommonError> forbiddenErrors;
     private Collection<CommonError> unexpectedErrors;
+    private Collection<CommonError> serviceUnavailableErrors;
 
 
     @Autowired
@@ -60,7 +57,7 @@ public abstract class DefaultApiService
         if (!getUnexpectedErrors().isEmpty())
         {
             errors.addAll(unexpectedErrors);
-            forbiddenErrors.clear();
+            unexpectedErrors.clear();
             throw new InternalServerErrorException(errors);
         }
         if (!getForbiddenErrors().isEmpty())
@@ -86,6 +83,12 @@ public abstract class DefaultApiService
             errors.addAll(conflictErrors);
             conflictErrors.clear();
             throw new ConflictException(errors);
+        }
+        if (!getServiceUnavailableErrors().isEmpty())
+        {
+            errors.addAll(serviceUnavailableErrors);
+            serviceUnavailableErrors.clear();
+            throw new ServiceUnavailableException(errors);
         }
     }
 
@@ -221,6 +224,31 @@ public abstract class DefaultApiService
     protected void addUnexpectedErrors(APIError apiError)
     {
         getUnexpectedErrors().add(addAPIError(apiError));
+    }
+    
+    // Service Unavailabe Errors
+    private Collection<CommonError> getServiceUnavailableErrors()
+    {
+        if (serviceUnavailableErrors == null)
+        {
+            serviceUnavailableErrors = new LinkedHashSet<CommonError>();
+        }
+        return serviceUnavailableErrors;
+    }
+    
+    protected void addServiceUnavailableErrors(Set<CommonError> errors)
+    {
+        getServiceUnavailableErrors().addAll(errors);
+    }
+    
+    protected void addServiceUnavailableErrors(CommonError error)
+    {
+        getServiceUnavailableErrors().add(error);
+    }
+    
+    protected void addServiceUnavailableErrors(APIError apiError)
+    {
+        getServiceUnavailableErrors().add(addAPIError(apiError));
     }
     
     private CommonError addAPIError(APIError apiError)

@@ -21,7 +21,9 @@
 
 package com.abiquo.api.resources;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -40,12 +42,19 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachinesDto;
+import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.RackDto;
 
 @Parent(MachinesResource.class)
 @Path(MachineResource.MACHINE_PARAM)
@@ -184,9 +193,31 @@ public class MachineResource extends AbstractResource
             dto.setPassword(machine.getHypervisor().getPassword());
         }
         
-        dto =
-            addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
-
+        if (machine.getDatastores() != null)
+        {
+            for (Datastore datastore : machine.getDatastores())
+            {
+                DatastoreDto dataDto = new DatastoreDto();
+                dataDto.setDirectory(datastore.getDirectory());
+                dataDto.setEnabled(datastore.isEnabled());
+                dataDto.setId(datastore.getId());
+                dataDto.setName(datastore.getName());
+                dataDto.setRootPath(datastore.getRootPath());
+                dataDto.setShared(datastore.isShared());
+                dataDto.setSize(datastore.getSize());
+                dataDto.setUsedSize(datastore.getUsedSize());
+                
+                dto.getDatastores().add(dataDto);
+            }
+        }
+        
+        // if the machine comes from the discovery manager it is not already saved in database and it does not have
+        // any rack nor datacenter. Don't build the links.
+        if (machine.getRack() != null)
+        {            
+            dto = addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
+        }
+        
         return dto;
     }
 
@@ -197,5 +228,53 @@ public class MachineResource extends AbstractResource
         {
             throw new NotFoundException(APIError.NOT_ASSIGNED_MACHINE_DATACENTER_RACK);
         }
+    }
+    
+    // Create the persistence object.
+    public static Machine createPersistenceObject(MachineDto dto) throws Exception
+    {
+        // Set the machine values.
+        Machine machine = ModelTransformer.persistenceFromTransport(Machine.class, dto);
+                
+        HypervisorType type = dto.getType();
+        String ip = dto.getIp();
+        String ipService = dto.getIpService();
+        Integer port = dto.getPort();
+        String user = dto.getUser();
+        String password = dto.getPassword();
+        Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
+        machine.setHypervisor(hypervisor);
+        
+        // Set the datastores
+        for (DatastoreDto datastoreDto : dto.getDatastores().getCollection())
+        {
+            machine.getDatastores().add(DatastoreResource.createPersistenceObject(datastoreDto));
+        }
+        
+        return machine;
+        
+    }
+
+    public static List<Machine> createPersistenceObjects(MachinesDto machinesDto) throws Exception
+    {
+        List<Machine> machines = new ArrayList<Machine>();
+        for (MachineDto machineDto : machinesDto.getCollection())
+        {
+            machines.add(createPersistenceObject(machineDto));
+        }
+        return machines;
+    }
+
+    public static MachinesDto createTransferObjects(List<Machine> machinesCreated,
+        IRESTBuilder restBuilder) throws Exception
+    {
+        MachinesDto machinesDto = new MachinesDto();
+        
+        for (Machine currentMachine : machinesCreated)
+        {
+            machinesDto.getCollection().add(createTransferObject(currentMachine, restBuilder));
+        }
+        
+        return machinesDto;
     }
 }
