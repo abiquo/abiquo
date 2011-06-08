@@ -102,7 +102,6 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.AbiCloudError;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -1066,6 +1065,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, pm.getDataCenter(), null, e.getMessage(), null,
                 (Rack) pm.getAssignedTo(), pm, null, null);
 
+        }
 
         String virtualSystemMonitorAddress = null;
         try
@@ -1161,8 +1161,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Returning the PhysicalMachine and the Hypervisors created to the
             // client
             PhysicalmachineHB physicalMachineHBCreated =
-                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, physicalMachineHB
-                    .getIdPhysicalMachine());
+                (PhysicalmachineHB) session.get(PhysicalmachineHB.class,
+                    physicalMachineHB.getIdPhysicalMachine());
             PhysicalMachine physicalMachineCreated = physicalMachineHBCreated.toPojo();
 
             transaction.commit();
@@ -1183,8 +1183,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachine.getDataCenter(), null, "Physical machine '"
                     + physicalMachine.getName() + "' has been created [" + physicalMachine.getCpu()
                     + "CPUs, " + physicalMachine.getRam() + " RAM, " + physicalMachine.getHd()
-                    + " HD, " + hyperName + " hypervisor]", null, (Rack) physicalMachine
-                    .getAssignedTo(), physicalMachine, null, null);
+                    + " HD, " + hyperName + " hypervisor]", null,
+                (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
 
         }
         catch (Exception e)
