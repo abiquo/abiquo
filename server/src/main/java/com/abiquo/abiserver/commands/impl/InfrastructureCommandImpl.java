@@ -59,7 +59,9 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
 import com.abiquo.abiserver.eventing.EventingSupport;
@@ -93,6 +95,8 @@ import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
@@ -981,6 +985,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
 
+            rackPojo.setHaEnabled(rack.getHaEnabled());
+
             session.update(rackPojo);
 
             transaction.commit();
@@ -1409,6 +1415,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
+            physicalMachineHb.setIpmiIp(pm.getIpmiIp());
+            physicalMachineHb.setIpmiPort(pm.getIpmiPort());
+            physicalMachineHb.setIpmiUser(pm.getIpmiUser());
+            physicalMachineHb.setIpmiPassword(pm.getIpmiPassword());
 
             // Updating virtual machines
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
@@ -1805,7 +1815,17 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     }
                 }
 
-                basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                VirtualMachine vmPojo = virtualMachineHB.toPojo();
+
+                try
+                {
+                    ignoreVSMEventsIfNecessary(virtualMachineHB, vmPojo);
+                    basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                }
+                finally
+                {
+                    listenAgainToVSMIfNecessary(virtualMachineHB, vmPojo);
+                }
             }
 
             if (basicResult.getSuccess())
@@ -1883,7 +1903,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> startVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> startVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -1928,6 +1949,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWERON, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
 
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
@@ -1966,7 +1994,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> pauseVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> pauseVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2001,7 +2030,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_PAUSED,
+                    userSession, machine.getDataCenter(), null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(),
+                    userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2037,7 +2072,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> rebootVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> rebootVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         // Rebooting the machine implies powering off and powering up
         DataResult<State> dataResult = new DataResult<State>();
@@ -2075,7 +2111,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RESUMED, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2118,7 +2160,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> shutdownVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> shutdownVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2153,7 +2196,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
-
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2580,4 +2629,70 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         return updateUsedResourcesByDatacenter(dataCenter);
     }
 
+    public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        // In XEN and KVM, we need to redefine the domain again, so to void receiving
+        // invalid destruction events, we unsubscribe from the VSM while the operation
+        // is in progress
+        HypervisorType targetHypervisor = vmHB.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
+                    .getPhysicalMachine().getDataCenter().getIdDataCenter());
+
+            EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
+    }
+
+    public static void listenAgainToVSMIfNecessary(final VirtualmachineHB vm,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        HypervisorType targetHypervisor = vm.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
+                    .getDataCenter().getIdDataCenter());
+
+            EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualDataCentersByEnterprise(com
+     * .abiquo.abiserver.pojo.user.Enterprise)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise)
+    {
+        return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
+     * getVirtualDataCentersByEnterpriseAndDatacenter(com.abiquo.abiserver.pojo.user.Enterprise,
+     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
+    {
+        EnterprisesResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new EnterprisesResourceStubImpl(),
+                EnterprisesResourceStub.class);
+
+        DataResult<Collection<VirtualDataCenter>> dataResult =
+            proxy.getVirtualDatacenters(enterprise);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
+    }
 }
