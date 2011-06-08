@@ -21,29 +21,21 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.List;
+
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.result.DataResult;
 
-public interface MachineResourceStub
+public interface MachinesResourceStub
 {
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine);
-
     /**
-     * Changes the operPower state to down. Actually turns the blade associated to the provided
-     * logic server off.
+     * Returns the list of machines from a managed rack (Must be a managed rack, otherwise it throws
+     * an exception!)
      * 
-     * @param machine machine to shutdown.
+     * @param ucsRack machine to shutdown.
      * @return BasicResult
      */
-    public BasicResult powerOff(PhysicalMachine machine);
-
-    /**
-     * Changes the operPower state to up. Actually turns the blade associated to the provided logic
-     * server on.
-     * 
-     * @param machine to power on.
-     * @return BasicResult
-     */
-    public BasicResult powerOn(PhysicalMachine machine);
+    public DataResult<List<PhysicalMachine>> getMachines(UcsRack ucsRack);
 
 }

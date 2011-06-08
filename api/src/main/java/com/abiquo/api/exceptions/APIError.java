@@ -111,7 +111,8 @@ public enum APIError
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
         "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
-        "Machines in this rack can not be discovered"),
+        "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
+        "This rack is not an UCS Rack"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(

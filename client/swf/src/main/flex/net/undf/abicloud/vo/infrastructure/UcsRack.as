@@ -18,32 +18,35 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-package com.abiquo.abiserver.commands.stub;
-
-import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.result.BasicResult;
-
-public interface MachineResourceStub
+package net.undf.abicloud.vo.infrastructure
 {
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine);
+	[Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.infrastructure.UcsRack")]
+	public class UcsRack extends Rack
+	{
+		
+		/* ------------- Public atributes ------------- */
 
-    /**
-     * Changes the operPower state to down. Actually turns the blade associated to the provided
-     * logic server off.
-     * 
-     * @param machine machine to shutdown.
-     * @return BasicResult
-     */
-    public BasicResult powerOff(PhysicalMachine machine);
+        public var ip:String;
 
-    /**
-     * Changes the operPower state to up. Actually turns the blade associated to the provided logic
-     * server on.
-     * 
-     * @param machine to power on.
-     * @return BasicResult
-     */
-    public BasicResult powerOn(PhysicalMachine machine);
+        public var user:String;
 
+        public var password:String;
+        
+        public var port:int;
+        
+        public static const TYPE:String = "Rack UCS";
+        public static const DEFAULT_PORT:int = 80;
+
+        /* ------------- Constructor ------------- */
+		public function UcsRack()
+		{
+			super();
+			ip = "";
+			user = "";
+			password = "";
+			port = DEFAULT_PORT;
+		}
+		
+	}
 }

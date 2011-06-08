@@ -38,6 +38,8 @@ package net.undf.abicloud.vo.infrastructure
         public var dataCenter:DataCenter;
         
         public var vlanNetworkParameters:VlanNetworkParameters;
+        
+        public static const TYPE:String = "Standard Rack";
 
         /* ------------- Constructor ------------- */
         public function Rack()
