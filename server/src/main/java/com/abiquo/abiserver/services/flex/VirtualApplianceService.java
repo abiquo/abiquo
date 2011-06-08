@@ -23,16 +23,24 @@ package com.abiquo.abiserver.services.flex;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
+import com.abiquo.abiserver.commands.BasicCommand;
+import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
+import com.abiquo.abiserver.commands.impl.UserCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualappliance.Log;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.security.SecurityService;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /**
  * This class defines all services related to Virtual Appliances management
@@ -47,6 +55,8 @@ public class VirtualApplianceService
      */
     protected VirtualApplianceCommand virtualApplianceCommand;
 
+    protected UserCommand userCommand;
+
     /**
      * Default constructor.
      */
@@ -56,21 +66,40 @@ public class VirtualApplianceService
         try
         {
             virtualApplianceCommand =
-                (VirtualApplianceCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
+                (VirtualApplianceCommand) Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .loadClass(
+                        "com.abiquo.abiserver.commands.impl.VirtualApplianceCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
         {
             virtualApplianceCommand = new VirtualApplianceCommandImpl();
         }
+        try
+        {
+            userCommand =
+                (UserCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl")
+                    .newInstance();
+        }
+        catch (Exception e)
+        {
+            userCommand = new UserCommandImpl();
+        }
 
     }
 
-    private VirtualApplianceCommand proxyCommand(UserSession userSession)
+    private VirtualApplianceCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, virtualApplianceCommand,
             VirtualApplianceCommand.class);
+    }
+
+    private UserCommand proxyCommand2(final UserSession userSession)
+    {
+        return BusinessDelegateProxy.getInstance(userSession, userCommand, UserCommand.class);
     }
 
     // /////////////////////////
@@ -260,6 +289,26 @@ public class VirtualApplianceService
         final VirtualAppliance virtualAppliance)
     {
         VirtualApplianceCommand command = proxyCommand(session);
+
+        DataResult<User> dr = userCommand.getUser(session, session.getUserIdDb());
+        if (dr.getSuccess())
+        {
+            BasicResult check =
+                SecurityService.checkEnterpriseForPOSTMethods(dr.getData(),
+                    virtualAppliance.getEnterprise());
+            if (!check.getSuccess())
+            {
+                BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VAPP_DELETE, session, null, virtualAppliance.getName(),
+                    "Cannot delete a virtual appliance from other enterprise", null, null, null,
+                    null, null);
+                return check;
+            }
+        }
+        else
+        {
+            return dr;
+        }
 
         return command.deleteVirtualAppliance(session, virtualAppliance);
     }

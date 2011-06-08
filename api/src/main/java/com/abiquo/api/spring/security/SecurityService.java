@@ -40,7 +40,7 @@ public class SecurityService
 {
     public static final String DRP = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX;
 
-    public static final String ENTRPRISE_ADMINISTER_ALL = DRP + "ENTRPRISE_ADMINISTER_ALL";
+    public static final String ENTRPRISE_ADMINISTER_ALL = DRP + "ENTERPRISE_ADMINISTER_ALL";
 
     public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
         + "USERS_MANAGE_OTHER_ENTERPRISES";

@@ -38,6 +38,8 @@ public interface UsersResourceStub
 
     public BasicResult updateUser(User user);
 
+    public DataResult<User> getUser(final Integer id);
+
     public DataResult<UserListResult> getUsers(UserListOptions userListOptions);
 
     public BasicResult deleteUser(User user);

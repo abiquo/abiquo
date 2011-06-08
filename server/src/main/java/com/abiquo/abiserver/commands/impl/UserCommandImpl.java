@@ -81,6 +81,23 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     /*
      * (non-Javadoc)
      * @see
+     * com.abiquo.abiserver.commands.UserCommand#getUser(com.abiquo.abiserver.pojo.authentication
+     * .UserSession, java.lang.Integer)
+     */
+    @Override
+    public DataResult<User> getUser(final UserSession userSession, final Integer idUser)
+    {
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        return proxy.getUser(idUser);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
      * com.abiquo.abiserver.commands.UserCommand#createUser(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.user.User)
      */
