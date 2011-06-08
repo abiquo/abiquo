@@ -223,7 +223,7 @@ package net.undf.abicloud.controller.infrastructure
             {
                 //Used resources updated successfully
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("Infrastructure",
                                                                                        "ALERT_USED_RESOURCES_UPDATED_HEADER"),
                                                ResourceManager.getInstance().getString("Infrastructure",
@@ -244,7 +244,7 @@ package net.undf.abicloud.controller.infrastructure
             {
                 //Virtual Infrastructure State checked successfully
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("Infrastructure",
                                                                                        "ALERT_USED_RESOURCES_UPDATED_HEADER"),
                                                ResourceManager.getInstance().getString("Infrastructure",
