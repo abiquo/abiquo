@@ -289,6 +289,12 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.findById(id);
     }
 
+    public void insertUcsRack(final UcsRack UcsRack)
+    {
+        this.ucsRackDao.persist(UcsRack);
+        this.ucsRackDao.flush();
+    }
+
     public UcsRack findUcsRackById(Integer rackId)
     {
         return ucsRackDao.findById(rackId);
