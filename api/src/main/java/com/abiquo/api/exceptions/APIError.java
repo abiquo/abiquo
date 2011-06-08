@@ -44,9 +44,10 @@ public enum APIError
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4", "Not enough permissions to perform this action"),
-        INVALID_CREDENTIALS("GEN-5", "Invalid credentials"),
-        
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
+        "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
+        "Invalid credentials"),
+
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
         "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
@@ -109,7 +110,7 @@ public enum APIError
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exists"),
+        "RACK-4", "This rack does not exist"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -230,7 +231,8 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR("NODECOLLECTOR-1","Nodecollector has raised an error"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
+        "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
@@ -254,7 +256,7 @@ public enum APIError
     String message;
 
     String cause;
-    
+
     private APIError(final String code, final String message)
     {
         this.code = code;
@@ -271,7 +273,7 @@ public enum APIError
         return this.message;
     }
 
-    public void addCause(String cause)
+    public void addCause(final String cause)
     {
         this.cause = cause;
     }
@@ -292,8 +294,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 
