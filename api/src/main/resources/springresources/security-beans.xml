@@ -14,26 +14,26 @@
         <!--===================================-->
         
         <!-- RULES -->
-        <security:intercept-url pattern="/admin/rules" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/rules" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
         <security:intercept-url pattern="/admin/rules" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/rules" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
 		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
 		<security:intercept-url pattern="/admin/rules/fitsPolicy" method="OPTIONS" access="ROLE_AUTHENTICATED" />
 		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
 		<security:intercept-url pattern="/admin/rules/fitsPolicy/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
 		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
 		<security:intercept-url pattern="/admin/rules/enterpriseExclusions" method="OPTIONS" access="ROLE_AUTHENTICATED" />
 		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
 		<security:intercept-url pattern="/admin/rules/enterpriseExclusions/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
 		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
 		<security:intercept-url pattern="/admin/rules/machineLoadLevel" method="OPTIONS" access="ROLE_AUTHENTICATED" />
 		<security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-		<security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+		<security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION" />
         <security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         
         
