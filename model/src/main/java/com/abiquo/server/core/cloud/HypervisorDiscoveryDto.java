@@ -29,6 +29,9 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "hypervisor")
 public class HypervisorDiscoveryDto extends SingleResourceTransportDto
 {
+    
+    public static final String MEDIA_TYPE = "application/discovery+xml";
+    
     private Integer port;
 
     private String ipFrom;
