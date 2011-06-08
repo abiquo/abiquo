@@ -52,15 +52,14 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
     private String enterprisesURI = resolveEnterprisesURI();
 
-    private Resource enterpriseResource = client.resource(enterprisesURI).accept(
-        MediaType.APPLICATION_XML);
+    private Resource enterpriseResource =
+        client.resource(enterprisesURI).accept(MediaType.APPLICATION_XML);
 
     @Test
     public void getEnterpriseList()
     {
         Enterprise e1 = enterpriseGenerator.createUniqueInstance();
         Enterprise e2 = enterpriseGenerator.createUniqueInstance();
-       
 
         Role r1 = roleGenerator.createInstanceSysAdmin();
         Role r2 = roleGenerator.createInstanceEnterprisAdmin();
@@ -162,7 +161,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setRepositoryLimits(0, 1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "repositoryLimits");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -172,7 +171,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setVlansLimits(0, 1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "vlansLimits");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -182,7 +181,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setCpuCountSoftLimit(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "cpuCountSoftLimit");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -192,7 +191,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setHdHardLimitInMb(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "hdLimitsInMb");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -202,7 +201,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setRamHardLimitInMb(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "ramLimitsInMb");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     private ClientResponse postEnterprise(final EnterpriseDto e)

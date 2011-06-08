@@ -33,24 +33,26 @@ import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.Machine.State;
 
 public class MachinesResourceIT extends AbstractJpaGeneratorIT
 {
     private String machinesURI;
+
     private String datastoresURI;
+
     private Machine machine;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -64,7 +66,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         machinesURI =
             resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
-        
+
     }
 
     @Test
@@ -123,7 +125,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
     }
-    
+
     @Test
     public void createMachinesWithDatastores()
     {
@@ -136,7 +138,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setDirectory("var/lib/virt");
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
-        
 
         // HypervisorDto hypervisor = HypervisorResourceIT.getValidHypervisor();
         // m.setHypervisor(hypervisor);
@@ -169,19 +170,21 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
-        
+
         // Check the datastore was correctly created.
         datastoresURI =
             resolveDatastoresURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 entityPost.getId());
-        
+
         resource = client.resource(datastoresURI);
-        response = resource.contentType(MediaType.APPLICATION_XML_TYPE).accept(MediaType.APPLICATION_XML_TYPE).get();
-        
+        response =
+            resource.contentType(MediaType.APPLICATION_XML_TYPE).accept(
+                MediaType.APPLICATION_XML_TYPE).get();
+
         assertEquals(response.getStatusCode(), 200);
         DatastoresDto datastoresGET = response.getEntity(DatastoresDto.class);
-        assertEquals(datastoresGET.getCollection().size(), 1);        
-        
+        assertEquals(datastoresGET.getCollection().size(), 1);
+
     }
 
     private MachineDto getValidMachine()
@@ -226,7 +229,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = getMachineResource().post(m);
 
         assertEquals(response.getStatusCode(), 400);
-        Assert.assertErrors(response, "virtualSwitch");
     }
 
     private Resource getMachineResource()
