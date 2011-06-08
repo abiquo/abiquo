@@ -25,12 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.validation.ConstraintViolationException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -102,5 +104,22 @@ public class VolumeManagementDAOTest extends
 
         assertEquals(results.size(), 1);
         eg().assertAllPropertiesEqual(results.iterator().next(), volume);
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testCreateVolumeWithTooLargeName()
+    {
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        StringBuilder name = new StringBuilder();
+        for (int i = 0; i < Rasd.ELEMENT_NAME_LENGTH_MAX + 10; i++)
+        {
+            name.append("v");
+        }
+        volume.setName(name.toString());
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
     }
 }
