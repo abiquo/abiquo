@@ -37,6 +37,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -649,5 +650,24 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
+    
+    @Transient
+    private List<String> listOfMacs;
+    
+    public void setListOfMacs(List<String> listOfMacs)
+    {
+        this.listOfMacs = listOfMacs;
+    }
+
+    public List<String> getListOfMacs()
+    {
+        if (listOfMacs == null)
+        {
+            listOfMacs = new ArrayList<String>();
+        }
+        return listOfMacs;
+    }
+
+    
 
 }

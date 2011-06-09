@@ -76,7 +76,7 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private RackDAO rackDao;
-    
+
     @Autowired
     private UcsRackDAO ucsRackDao;
 
@@ -266,6 +266,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
+    public boolean existsAnyUcsRackWithIp(String ip)
+    {
+        return this.ucsRackDao.existAnyOtherWithIP(ip);
+    }
+    
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
@@ -288,7 +293,13 @@ public class InfrastructureRep extends DefaultRepBase
 
         return this.rackDao.findById(id);
     }
-    
+
+    public void insertUcsRack(final UcsRack UcsRack)
+    {
+        this.ucsRackDao.persist(UcsRack);
+        this.ucsRackDao.flush();
+    }
+
     public UcsRack findUcsRackById(Integer rackId)
     {
         return ucsRackDao.findById(rackId);
@@ -605,4 +616,25 @@ public class InfrastructureRep extends DefaultRepBase
         return rackDao.findByIds(datacenterId, rackId);
     }
 
+    /**
+     * Return all {@links UcsRack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
+    {
+        return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return all not managed {@link Rack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
+    {
+        return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
+    }
 }

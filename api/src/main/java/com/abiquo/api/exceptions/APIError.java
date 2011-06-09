@@ -36,10 +36,11 @@ public enum APIError
         "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
         "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
         "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
-        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_UNSUPPORTED_MEDIA_TYPE(
-        "415-UNSUPPORTED MEDIA TYPE",
+        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_CONFLICT(
+        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
         "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
-        "500-INTERNAL SERVER ERROR", "Unexpected exception"),
+        "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
+        "412 - Unprovisioned", "Unprovisioned exception"),
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
@@ -112,7 +113,8 @@ public enum APIError
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
         "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
-        "This rack is not an UCS Rack"),
+        "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
+        "There is already a managed rack with this IP defined"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(

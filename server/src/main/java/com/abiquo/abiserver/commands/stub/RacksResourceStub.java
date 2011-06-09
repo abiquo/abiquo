@@ -21,10 +21,27 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.List;
+
+import com.abiquo.abiserver.networking.IPAddress;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.model.enumerator.HypervisorType;
 
 public interface RacksResourceStub
 {
     public DataResult<UcsRack> createUcsRack(UcsRack ucsRack);
+
+    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter);
+    
+    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId, IPAddress ipFrom, IPAddress ipTo,
+        final HypervisorType hypervisorType, final String user, final String password,
+        final Integer port, final String vSwitchName);
+    
+    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
+    
+    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
 }
