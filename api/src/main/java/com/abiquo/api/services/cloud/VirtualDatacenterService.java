@@ -32,12 +32,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -48,9 +49,6 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -75,7 +73,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
-    
+
     @Autowired
     PrivateNetworkService networkService;
 
@@ -201,7 +199,14 @@ public class VirtualDatacenterService extends DefaultApiService
         }
         if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            addConflictErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+            String vlanXvdc = ConfigService.getSystemProperty(ConfigService.VLAN_PER_VDC);
+            String errorMsg =
+                APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getMessage().replace("{0}",
+                    vlanXvdc);
+            CommonError error =
+                new CommonError(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getCode(),
+                    errorMsg);
+            addConflictErrors(error);
             flushErrors();
         }
 
@@ -241,8 +246,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
@@ -277,7 +285,15 @@ public class VirtualDatacenterService extends DefaultApiService
         }
         else if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            addValidationErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+
+            String vlanXvdc = ConfigService.getSystemProperty(ConfigService.VLAN_PER_VDC);
+            String errorMsg =
+                APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getMessage().replace("{0}",
+                    vlanXvdc);
+            CommonError error =
+                new CommonError(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getCode(),
+                    errorMsg);
+            addValidationErrors(error);
         }
 
         if (vdc.getHypervisorType() != null
