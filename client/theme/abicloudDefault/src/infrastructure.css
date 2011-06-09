@@ -322,12 +322,6 @@
 	
 /* CSS for ComponentsPhysicalMachine*/
 
-	.UCSRackIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/infrastructure/ucs_rack.png");	
-	}
-
 	.PhysicalMachineHBox1
 	{
 		padding-left:"5";
