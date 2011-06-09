@@ -30,7 +30,7 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -282,5 +282,15 @@ public class StorageRep extends DefaultRepBase
     public void updateVolume(final VolumeManagement volume)
     {
         volumeDAO.flush();
+    }
+    
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+    {
+        return volumeDAO.getVolumesByVirtualMachine(vm);
+    }
+
+    public void insertInitiatorMapping(InitiatorMapping imapping)
+    {
+        initiatorMappingDAO.persist(imapping);
     }
 }
