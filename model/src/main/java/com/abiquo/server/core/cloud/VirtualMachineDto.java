@@ -159,4 +159,17 @@ public class VirtualMachineDto extends SingleResourceTransportDto
     {
         return state;
     }
+
+    private String password;
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public void setPassword(String password)
+    {
+        this.password = password;
+    }
+
 }

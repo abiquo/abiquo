@@ -45,10 +45,10 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.libvirt.Connect;
 import org.libvirt.Domain;
+import org.libvirt.DomainInfo.DomainState;
 import org.libvirt.LibvirtException;
 import org.libvirt.StoragePool;
 import org.libvirt.StorageVol;
-import org.libvirt.DomainInfo.DomainState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -58,8 +58,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.abiquo.aimstub.TTransportProxy;
 import com.abiquo.aimstub.Aim.Iface;
+import com.abiquo.aimstub.TTransportProxy;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.AbsLibvirtHypervisor;
@@ -270,7 +270,8 @@ public class LibvirtMachine extends AbsVirtualMachine
                 // Clone the source image
                 logger.info("Cloning the virtual machine: {}", getMachineName().toString());
 
-                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
+                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD
+                    && !config.getVirtualDiskBase().isHa())
                 {
                     cloneVirtualDisk();
                 }
@@ -601,7 +602,8 @@ public class LibvirtMachine extends AbsVirtualMachine
             dom.undefine();
 
             // [ABICLOUDPREMIUM-1459] Should not be executed in stateful images
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
+            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD
+                && !config.getVirtualDiskBase().isHa())
             {
                 removeImage();
             }
@@ -897,7 +899,14 @@ public class LibvirtMachine extends AbsVirtualMachine
         // Only add the VNC port if it is enabled
         if (AddressingUtils.isValidPort(String.valueOf(rdpPort)))
         {
-            src_xml += "<graphics type='vnc' port='???' listen='???'/>";
+            if (configuration.getRdPassword() != null)
+            {
+                src_xml += "<graphics type='vnc' port='???' listen='???' passwd='???'/>";
+            }
+            else
+            {
+                src_xml += "<graphics type='vnc' port='???' listen='???'/>";
+            }
         }
 
         src_xml +=
@@ -950,6 +959,10 @@ public class LibvirtMachine extends AbsVirtualMachine
             {
                 replaceAttribute(doc, "graphics", "listen", "0.0.0.0");
                 replaceAttribute(doc, "graphics", "port", Integer.toString(rdpPort));
+                if (configuration.getRdPassword() != null)
+                {
+                    replaceAttribute(doc, "graphics", "passwd", configuration.getRdPassword());
+                }
             }
 
             if (libvirtHyper.getHypervisorType().toLowerCase().equals("kvm"))
@@ -1002,8 +1015,8 @@ public class LibvirtMachine extends AbsVirtualMachine
                 // Creating the VLAN
                 URL phymach_ip = configuration.getHyper().getAddress();
 
-                VlanStub.createVlan(phymach_ip, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
-                    .getVSwitchName(), bridgeName);
+                VlanStub.createVlan(phymach_ip, String.valueOf(virtualNIC.getVlanTag()),
+                    virtualNIC.getVSwitchName(), bridgeName);
 
                 attachBridgeToDoc(doc, virtualNIC.getMacAddress(), bridgeName);
 
