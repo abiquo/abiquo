@@ -187,7 +187,7 @@
             }
             
             
-            private function getRacksByDatacenter():void{
+            protected function getRacksByDatacenter():void{
             	var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RACKS_BY_DATACENTER);
                 event.dataCenter = this._dataCenter;
                 if(physicalServersFilter.text.length != 0){
