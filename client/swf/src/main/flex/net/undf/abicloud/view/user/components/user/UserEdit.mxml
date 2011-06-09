@@ -125,6 +125,9 @@
                 currentPassword.enabled = true;
                 acceptButton.enabled = false;
                 
+                //Hide fields in case of LDAP
+                updateLDAPFields();
+                
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
                 this._restrict = false;
 
@@ -145,6 +148,19 @@
                 this._firstRetrieve = true;
                 
                 requestRoles();
+            }
+            
+            /**
+             * Hide/Show password fields depending on LDAP
+             */
+            private function updateLDAPFields():void{
+            	var showPassword:Boolean = this._userToEdit.authType == User.ABIQUO;
+            	currentPassword.visible = showPassword;
+            	currentPassword.includeInLayout = showPassword;
+            	newPassword.visible = showPassword;
+            	newPassword.includeInLayout = showPassword;
+            	repeatPassword.visible = showPassword;
+            	repeatPassword.includeInLayout = showPassword;            	
             }
             
             /**
@@ -307,68 +323,72 @@
             {
                 //If ALL is typed!!
                 if (nameInput.text.length > 0 && surnameInput.text.length > 0 && emailInput.text.length > 0)
-                {
-                    //If the user who edits is different thank users to edit don't need to type the
-                    //current password
-                    if (AbiCloudModel.getInstance().loginManager.user.id != _userToEdit.id)
-                    {
-                        //If type one or other password Input text, need to assure that it is
-                        //the same value. Maybe user don't want to change the password
-                        if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
-                        {
-                            //New password == New Password repeat typed by user
-                            if (passwordInput.text == passwordRepeatInput.text)
-                            {
-                                labelPasswordInvalid.visible = false;
-                                acceptButton.enabled = true;
-                            }
-                            else
-                            {
-                                labelPasswordInvalid.visible = true;
-                                acceptButton.enabled = false;
-                            }
-                        }
-                        else
-                        {
-                            labelPasswordInvalid.visible = false;
-                            acceptButton.enabled = true;
-                        }
-                            //If user who edits == users to edit
-                    }
-                    else
-                    {
-                        //This user ALWAYS has to type the current password to apply the changes
-                        if (this._userToEdit.pass == MD5.hash(oldPasswordInput.text))
-                        {
-                            //Maybe user don't want to change the password
-                            if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
-                            {
-                                labelOldPasswordInvalid.visible = false;
-                                //New password == New Password repeat typed by user
-                                if (passwordInput.text == passwordRepeatInput.text)
-                                {
-                                    labelPasswordInvalid.visible = false;
-                                    acceptButton.enabled = true;
-                                }
-                                else
-                                {
-                                    labelPasswordInvalid.visible = true;
-                                    acceptButton.enabled = false;
-                                }
-                            }
-                            else
-                            {
-                                labelOldPasswordInvalid.visible = false;
-                                acceptButton.enabled = true;
-                            }
-
-                        }
-                        else
-                        {
-                            labelOldPasswordInvalid.visible = true;
-                            acceptButton.enabled = false;
-                        }
-
+                {                    
+                    //If the LDAP mode is on, we don't check password fields
+                    if(this._userToEdit.authType == User.ABIQUO){
+                    	//If the user who edits is different thank users to edit don't need to type the
+	                    //current password
+	                    if (AbiCloudModel.getInstance().loginManager.user.id != _userToEdit.id)
+	                    {
+	                        //If type one or other password Input text, need to assure that it is
+	                        //the same value. Maybe user don't want to change the password
+	                        if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
+	                        {
+	                            //New password == New Password repeat typed by user
+	                            if (passwordInput.text == passwordRepeatInput.text)
+	                            {
+	                                labelPasswordInvalid.visible = false;
+	                                acceptButton.enabled = true;
+	                            }
+	                            else
+	                            {
+	                                labelPasswordInvalid.visible = true;
+	                                acceptButton.enabled = false;
+	                            }
+	                        }
+	                        else
+	                        {
+	                            labelPasswordInvalid.visible = false;
+	                            acceptButton.enabled = true;
+	                        }
+	                            //If user who edits == users to edit
+	                    }
+	                    else
+	                    {
+	                        //This user ALWAYS has to type the current password to apply the changes
+	                        if (this._userToEdit.pass == MD5.hash(oldPasswordInput.text))
+	                        {
+	                            //Maybe user don't want to change the password
+	                            if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
+	                            {
+	                                labelOldPasswordInvalid.visible = false;
+	                                //New password == New Password repeat typed by user
+	                                if (passwordInput.text == passwordRepeatInput.text)
+	                                {
+	                                    labelPasswordInvalid.visible = false;
+	                                    acceptButton.enabled = true;
+	                                }
+	                                else
+	                                {
+	                                    labelPasswordInvalid.visible = true;
+	                                    acceptButton.enabled = false;
+	                                }
+	                            }
+	                            else
+	                            {
+	                                labelOldPasswordInvalid.visible = false;
+	                                acceptButton.enabled = true;
+	                            }
+	
+	                        }
+	                        else
+	                        {
+	                            labelOldPasswordInvalid.visible = true;
+	                            acceptButton.enabled = false;
+	                        }	
+	                    }
+                    }else{
+                    	acceptButton.enabled = true;
                     }
                     emailValidator.validate();
                 }
@@ -580,7 +600,7 @@
                 text="@Resource(bundle='User', key='LABEL_OLDPASSWORDINVALID')"/>
         </mx:FormItem>
 
-        <mx:FormItem 
+        <mx:FormItem id="newPassword"
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_NEWPASSWORD')"
             required="false">
             <mx:TextInput id="passwordInput"
@@ -590,7 +610,7 @@
                 displayAsPassword="true"/>
         </mx:FormItem>
 
-        <mx:FormItem 
+        <mx:FormItem id="repeatPassword"
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_PASSWORDREPEAT')"
             direction="horizontal"
             required="false">

@@ -39,11 +39,10 @@ import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -54,8 +53,11 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -66,12 +68,32 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 {
 
+    private static final String SYSADMIN = "sysadmin";
+
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin("sysRole");
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
+
     @Test
     public void getVirtualDatacenterDoesntExist() throws ClientWebException
     {
-        Resource resource = client.resource(resolveVirtualDatacenterURI(12345));
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response =
+            get(resolveVirtualDatacenterURI(12345), SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(404, response.getStatusCode());
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
@@ -100,7 +122,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
     private VirtualDatacenterDto getValidVdc(final VirtualDatacenter vdc)
     {
-        ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()));
+        ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(200, response.getStatusCode());
 
@@ -118,7 +140,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         dto.setName("vdc_name_updated");
 
-        ClientResponse response = put(resolveVirtualDatacenterURI(vdc.getId()), dto);
+        ClientResponse response =
+            put(resolveVirtualDatacenterURI(vdc.getId()), dto, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualDatacenterDto responseDto = response.getEntity(VirtualDatacenterDto.class);
@@ -134,7 +157,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenterDto dto = getValidVdc(vdc);
         dto.setCpuCountLimits(1000, 1001);
 
-        ClientResponse response = put(resolveVirtualDatacenterURI(vdc.getId()), dto);
+        ClientResponse response =
+            put(resolveVirtualDatacenterURI(vdc.getId()), dto, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualDatacenterDto dto2 = getValidVdc(vdc);
@@ -148,7 +172,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
 
-        ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
+        ClientResponse response =
+            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 204);
     }
 
@@ -159,7 +184,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vapp.getVirtualDatacenter();
         setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, vapp);
 
-        ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
+        ClientResponse response =
+            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
         assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_VIRTUAL_APPLIANCES);
     }
 
@@ -175,7 +201,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToPersist.toArray());
 
-        ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
+        ClientResponse response =
+            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
         assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
     }
 
@@ -185,8 +212,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         IpPoolManagement ip = ipGenerator.createInstance(vdc, vdc.getNetwork());
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
-                .getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
+                vdc.getDatacenter());
         ip.getDhcp().setRemoteService(rs);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
@@ -195,7 +222,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToPersist.toArray());
 
-        ClientResponse response = delete(resolveVirtualDatacenterURI(vdc.getId()));
+        ClientResponse response =
+            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 204);
     }
 
@@ -216,9 +244,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
 
-        Resource resource = client.resource(validURI);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -236,9 +262,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
@@ -248,16 +274,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         IPAddress ip2 =
             IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP2 =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan2.getConfiguration()
-                .getAddress()), IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration()
-                .getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan2.getConfiguration().getMask()));
 
         persistIP(ip2, lastIP2, vdc, vlan2);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
 
     }
@@ -277,17 +302,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=ip";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -306,17 +330,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=quarantine";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -335,17 +358,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=mac";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -364,17 +386,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=lease";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -393,17 +414,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=vlan";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -422,17 +442,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualdatacenter";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -451,17 +470,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualmachine";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -480,17 +498,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualappliance";
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
     }
 
@@ -509,16 +526,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         // Test Default
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
-        Resource resource = client.resource(validURI);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
@@ -529,8 +545,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         // Test 30
         validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?limit=30";
-        resource = client.resource(validURI);
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -539,8 +554,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         // Test 120
         validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?limit=120";
-        resource = client.resource(validURI);
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -563,17 +577,16 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         persistIP(ip, lastIP, vdc, vlan);
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
-        Resource resource = client.resource(validURI);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(400, response.getStatusCode());
     }
 
@@ -586,8 +599,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String URI = resolveVirtualDatacenterActionGetDHCPInfoURI(vdc.getId());
-        Resource resource = client.resource(URI);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(URI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
         assertEquals(200, response.getStatusCode());
         String entity = response.getEntity(String.class);
         assertNotNull(entity);

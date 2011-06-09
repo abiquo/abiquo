@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.pojo.infrastructure;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.pojo.IPojo;
@@ -253,7 +255,16 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
             virtualMachineHB.setConversion(conversion.toPojoHB());
         }
 
-        virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
+        // Client sends sometimes a description null or ""
+        if (StringUtils.isEmpty(state.getDescription()))
+        {
+            virtualMachineHB.setState(StateEnum.fromId(state.getId()));
+        }
+        else
+        {
+            virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
+        }
+
         virtualMachineHB.setImage((virtualImage == null) ? null : virtualImage.toPojoHB());
 
         virtualMachineHB.setUuid(UUID);

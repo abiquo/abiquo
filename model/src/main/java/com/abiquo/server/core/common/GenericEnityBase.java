@@ -22,6 +22,7 @@
 package com.abiquo.server.core.common;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -49,16 +50,30 @@ public abstract class GenericEnityBase<T extends Serializable> extends
 
     public Set<CommonError> getValidationErrors()
     {
-        Set<ConstraintViolation< ? extends Object>> constraintValidations =
+        Set<ConstraintViolation< ? extends Object>> violations =
             new LinkedHashSet<ConstraintViolation< ? extends Object>>(ValidationManager
                 .getValidator().validate(this));
-        
-        Set<CommonError> setOfErrors = new LinkedHashSet<CommonError>();
-        for (ConstraintViolation<? extends Object> cons : constraintValidations)
+
+        Set<CommonError> errors = new HashSet<CommonError>();
+
+        for (ConstraintViolation< ? extends Object> constrain : violations)
         {
-            setOfErrors.add(new CommonError(cons.getPropertyPath().toString(), cons.getMessage()));
+            errors.add(buildCommonError(constrain));
         }
-        return setOfErrors;
+
+        return errors;
     }
-    
+
+    private CommonError buildCommonError(final ConstraintViolation< ? extends Object> constraint)
+    {
+        String code =
+            String.format("CONSTR-%s", constraint.getConstraintDescriptor().getAnnotation()
+                .annotationType().getSimpleName().toUpperCase());
+
+        String message =
+            String.format("The propery '%s', %s.", constraint.getPropertyPath().toString(),
+                constraint.getMessage());
+
+        return new CommonError(code, message);
+    }
 }

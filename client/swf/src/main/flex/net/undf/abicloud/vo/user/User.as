@@ -28,6 +28,11 @@ package net.undf.abicloud.vo.user
     [RemoteClass(alias="com.abiquo.abiserver.pojo.user.User")]
     public class User
     {
+        /* ------------- Public constants ------------- */
+        public static const ABIQUO:String = "ABIQUO";
+        
+        public static const LDAP:String = "LDAP";
+        
         /* ------------- Public atributes ------------- */
         public var id:int;
 
@@ -72,7 +77,7 @@ package net.undf.abicloud.vo.user
             locale = "";
             enterprise = new Enterprise();
             availableVirtualDatacenters = new Array();
-            authType = "ABIQUO";
+	    	authType = User.ABIQUO;
         }
 
     }

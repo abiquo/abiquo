@@ -16,7 +16,7 @@
 			<column length="255" name="directory" />
 		</property>
 		<property name="rootPath" type="string">
-			<column length="36" name="rootPath" not-null="true" />
+			<column length="42" name="rootPath" not-null="true" />
 		</property>
 		<property name="enabled" type="boolean">
 			<column name="enabled" />

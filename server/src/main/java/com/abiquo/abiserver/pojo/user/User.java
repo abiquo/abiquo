@@ -29,8 +29,8 @@ import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.server.core.enterprise.UserDto;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -200,6 +200,7 @@ public class User implements IPojo<UserHB>
      * @deprecated all the persistence should be throught the api and we don't need this method any
      *             more
      */
+    @Override
     @Deprecated
     public UserHB toPojoHB()
     {
@@ -244,6 +245,8 @@ public class User implements IPojo<UserHB>
         user.setLocale(dto.getLocale());
         user.setPass(dto.getPassword());
         user.setActive(dto.isActive());
+        user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
+            .valueOf(dto.getAuthType()));
 
         if (!StringUtils.isEmpty(dto.getAvailableVirtualDatacenters()))
         {

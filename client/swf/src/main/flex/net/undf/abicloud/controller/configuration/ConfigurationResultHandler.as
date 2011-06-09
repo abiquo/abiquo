@@ -76,7 +76,7 @@ package net.undf.abicloud.controller.configuration
             {
                 //Registration was sent successfully
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("Configuration",
                                                                                        "ALERT_REGISTRATION_INFO_SEND_SUCCESS_HEADER"),
                                                ResourceManager.getInstance().getString("Configuration",

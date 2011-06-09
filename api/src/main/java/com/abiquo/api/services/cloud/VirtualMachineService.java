@@ -37,6 +37,7 @@ import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -78,6 +79,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     ConfigService configService;
 
+    @Autowired
+    UserService userService;
+
     public VirtualMachineService()
     {
 
@@ -87,6 +91,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
+        this.userService = new UserService(em);
         this.configService = new ConfigService();
     }
 
@@ -166,6 +171,7 @@ public class VirtualMachineService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateVirtualMachine(final VirtualMachine vm)
     {
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
         repo.update(vm);
     }
 

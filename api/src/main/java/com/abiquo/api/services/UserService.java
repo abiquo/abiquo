@@ -316,16 +316,6 @@ public class UserService extends DefaultApiService
         {
             newEnt = findEnterprise(getEnterpriseID(user));
         }
-        if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
-        {
-            if ((old.getEnterprise() == null && newEnt != null)
-                || (old.getEnterprise() != null && newEnt == null)
-                || (!old.getEnterprise().getId().equals(newEnt.getId())))
-            {
-                // In ldap mode it is not possible to edit user's enterprise
-                throw new ConflictException(APIError.NOT_EDIT_USER_ENTERPRISE_LDAP_MODE);
-            }
-        }
 
         if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {
@@ -512,10 +502,23 @@ public class UserService extends DefaultApiService
         if (!sameEnterprise
             && (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
                 && !securityService
-                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES) && !securityService
-                .hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)))
+                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES)
+                && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE) && !securityService
+                .hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
         {
-            throw new AccessDeniedException("");
+            throw new AccessDeniedException("Missing privilege to get info from other enterprises");
+        }
+    }
+
+    public void checkCurrentEnterpriseForPostMethods(final Enterprise enterprise)
+    {
+        User user = getCurrentUser();
+        boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
+
+        if (!sameEnterprise
+            && (!securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
+        {
+            throw new AccessDeniedException("Missing privilege to manage info from other enterprises");
         }
     }
 

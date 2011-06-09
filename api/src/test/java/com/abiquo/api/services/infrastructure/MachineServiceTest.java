@@ -28,10 +28,13 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.springframework.security.context.SecurityContextHolder;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
@@ -43,7 +46,10 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -59,6 +65,17 @@ public class MachineServiceTest extends AbstractGeneratorTest
     // "network_configuration", "dhcp_service", "remote_service", "hypervisor",
     // "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
     // }
+
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+        setup(e, r, u);
+
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
+    }
 
     @Test
     public void testDeleteMachineWithVirtualMachinesDeployed()
@@ -120,7 +137,8 @@ public class MachineServiceTest extends AbstractGeneratorTest
         }
         catch (NotFoundException e)
         {
-            Assert.assertEquals(e.getErrors().iterator().next().getMessage(), "The requested machine does not exist");
+            Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
+                "The requested machine does not exist");
         }
 
         VirtualMachineService vmService = new VirtualMachineService(em);

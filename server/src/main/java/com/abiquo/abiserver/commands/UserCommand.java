@@ -47,9 +47,17 @@ public interface UserCommand
      * @return A DataResult object containing an UserListResult object with an ArrayList of User and
      *         the number of total users
      */
-    @SuppressWarnings("unchecked")
     public abstract DataResult<UserListResult> getUsers(final UserSession userSession,
         final UserListOptions userListOptions);
+
+    /**
+     * Returns a user stored in the Data Base
+     * 
+     * @param userSession
+     * @param idUser a user id
+     * @return A DataResult object containing an User object
+     */
+    public DataResult<User> getUser(final UserSession userSession, final Integer idUser);
 
     /**
      * Creates a new User in the Data Base

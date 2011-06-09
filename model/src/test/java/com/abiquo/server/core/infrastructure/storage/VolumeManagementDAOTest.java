@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.validation.ConstraintViolationException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -257,5 +258,22 @@ public class VolumeManagementDAOTest extends
         List<VolumeManagement> results = dao.getStatefulCandidates(volume1.getVirtualDatacenter());
 
         assertSize(results, 2);
+    }
+
+    @Test(expectedExceptions = ConstraintViolationException.class)
+    public void testCreateVolumeWithTooLargeName()
+    {
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        StringBuilder name = new StringBuilder();
+        for (int i = 0; i < Rasd.ELEMENT_NAME_LENGTH_MAX + 10; i++)
+        {
+            name.append("v");
+        }
+        volume.setName(name.toString());
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
     }
 }

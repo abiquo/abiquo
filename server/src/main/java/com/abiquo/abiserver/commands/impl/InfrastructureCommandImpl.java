@@ -98,6 +98,7 @@ import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -1122,7 +1123,25 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Save the datastores of the physicalmachine first
             for (DatastoreHB datastore : physicalMachineHB.getDatastoresHB())
             {
-                session.save(datastore);
+                if (datastore.getRootPath().length() < Datastore.ROOT_PATH_LENGTH_MAX)
+                {
+                    session.save(datastore);
+                }
+                else
+                {
+                    if (transaction != null && transaction.isActive())
+                    {
+                        transaction.rollback();
+                    }
+                    dataResult.setSuccess(false);
+                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                        "createPhysicalMachine_longname");
+                    // Log the event
+                    traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                        userSession, pm.getDataCenter(), null, "Datastore name size is too long",
+                        null, (Rack) pm.getAssignedTo(), pm, null, null);
+                    return dataResult;
+                }
             }
 
             session.save(physicalMachineHB);
