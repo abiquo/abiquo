@@ -50,8 +50,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
 
     private String vdrpIP;
 
-    private String vrdpPassword;
-
     private State state;
 
     private boolean highDisponibility;
@@ -162,16 +160,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     public void setVdrpIP(final String vdrpIP)
     {
         this.vdrpIP = vdrpIP;
-    }
-
-    public String getVrdpPassword()
-    {
-        return vrdpPassword;
-    }
-
-    public void setVrdpPassword(final String vrdpPassword)
-    {
-        this.vrdpPassword = vrdpPassword;
     }
 
     public State getState()
