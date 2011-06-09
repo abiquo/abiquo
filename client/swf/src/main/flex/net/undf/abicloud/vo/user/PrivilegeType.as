@@ -76,6 +76,7 @@ package net.undf.abicloud.vo.user
 		//SYSTEM CONFIG
 		public static const SYSCONFIG_VIEW:String = "SYSCONFIG_VIEW";
 		public static const SYSCONFIG_ALLOW_MODIFY:String = "SYSCONFIG_ALLOW_MODIFY";
+		public static const SYSCONFIG_SHOW_REPORTS:String = "SYSCONFIG_SHOW_REPORTS";
 		//SYSTEM CONFIG
 		public static const EVENTLOG_VIEW_ENTERPRISE:String = "EVENTLOG_VIEW_ENTERPRISE";
 		public static const EVENTLOG_VIEW_ALL:String = "EVENTLOG_VIEW_ALL";
