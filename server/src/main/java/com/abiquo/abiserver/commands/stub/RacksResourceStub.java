@@ -21,10 +21,16 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.List;
+
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.DataResult;
 
 public interface RacksResourceStub
 {
     public DataResult<UcsRack> createUcsRack(UcsRack ucsRack);
+
+    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter);
 }
