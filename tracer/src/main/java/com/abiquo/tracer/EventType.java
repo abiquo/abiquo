@@ -82,6 +82,7 @@ public enum EventType implements Serializable
     REMOTE_SERVICES_CREATE(311, "REMOTE_SERVICES_CREATE", "Remote Service created"),
     REMOTE_SERVICES_UPDATE(312, "REMOTE_SERVICE_UPDATE", "Remote Service updated"),
     REMOTE_SERVICES_CHECK(313, "REMOTE_SERVICES_CHECK", "Remote service checked"),
+    RACK_RETRIEVAL(314, "RACK_RETRIEVAL", "Retrieve Rack"), 
     
     
     // Storage system-related events

@@ -621,4 +621,15 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
     }
+
+    /**
+     * Return all not managed {@link Rack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
+    {
+        return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
+    }
 }

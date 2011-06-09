@@ -21,8 +21,12 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.List;
+
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.DataResult;
 
@@ -36,6 +40,15 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     {
         // PREMIUM
 
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getAllNotManagedRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter)
+    {
+        // PREMIUM
         return null;
     }
 }
