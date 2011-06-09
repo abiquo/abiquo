@@ -366,7 +366,7 @@
                 	this._userEdit.roleEditable = false;
                 }else{
                 	this._userEdit.activeEditable = true;
-                	this._userEdit.roleEditable = true;
+                	this._userEdit.roleEditable = User(usersDataGrid.selectedItem).authType == User.ABIQUO;
                 }
                 PopUpManager.addPopUp(this._userEdit, this, true);
                 PopUpManager.centerPopUp(this._userEdit);
