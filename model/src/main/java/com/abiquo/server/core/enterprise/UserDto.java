@@ -31,7 +31,7 @@ public class UserDto extends SingleResourceTransportDto
     /**
      * UID.
      */
-    private static final long serialVersionUID = -3233121860012587479L;
+    private static final long serialVersionUID = -5897165717112120594L;
 
     private Integer id;
 
@@ -89,6 +89,7 @@ public class UserDto extends SingleResourceTransportDto
         this.password = password;
         this.locale = locale;
         this.description = description;
+        this.authType = authType;
     }
 
     public Integer getId()
