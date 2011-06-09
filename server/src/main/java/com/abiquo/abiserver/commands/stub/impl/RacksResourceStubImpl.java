@@ -74,6 +74,14 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     public BasicResult powerOffMachine(Integer datacenterId, Integer rackId, Integer machineId)
     {
         // TODO Auto-generated method stub
+    }
+ 
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getUcsRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter)
+    {
+        // PREMIUM
         return null;
     }
 }
