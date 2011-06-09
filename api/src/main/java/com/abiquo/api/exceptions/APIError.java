@@ -24,6 +24,8 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.abiquo.model.validation.IscsiPath;
+
 /**
  * Contains all the errors notified by the API.
  * 
@@ -44,9 +46,10 @@ public enum APIError
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
         "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
-        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4", "Not enough permissions to perform this action"),
-        INVALID_CREDENTIALS("GEN-5", "Invalid credentials"),
-        
+        "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
+        "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
+        "Invalid credentials"),
+
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
         "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
@@ -181,7 +184,8 @@ public enum APIError
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
         "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
         "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
-        "SP-12", "Storage device param in storage pool link not found"),
+        "SP-12", "Storage device param in storage pool link not found"), MISSING_POOL_LINK("SP-13",
+        "Missing storage pool link"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -232,7 +236,8 @@ public enum APIError
         "STATS-1", "Non existent statistical data found for the requested datacenter"), NON_EXISTENT_STATS_FOR_DCLIMITS(
         "STATS-2",
         "Non existent statistical data found for the requested enterprise in this datacenter"), NON_EXISTENT_STATS_FOR_ENTERPRISE(
-        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR("NODECOLLECTOR-1","Nodecollector has raised an error"),
+        "STATS-3", "Non existent statistical data found for the requested enterprise"), NODECOLLECTOR_ERROR(
+        "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
@@ -242,7 +247,8 @@ public enum APIError
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
         "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
-        "The idScsi of the volume is required")
+        "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
+        "The property idScsi " + IscsiPath.ERROR_MESSAGE)
 
     ;
 
@@ -257,7 +263,7 @@ public enum APIError
     String message;
 
     String cause;
-    
+
     private APIError(final String code, final String message)
     {
         this.code = code;
@@ -274,7 +280,7 @@ public enum APIError
         return this.message;
     }
 
-    public void addCause(String cause)
+    public void addCause(final String cause)
     {
         this.cause = cause;
     }

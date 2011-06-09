@@ -31,6 +31,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 /* "availableSizeInMB", "usedSizeInMB", */"idScsi"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
+    public static final String ISCSI_VOLUME_MEDIA_TYPE = "application/iscsivolume+xml";
+
     private static final long serialVersionUID = 1L;
 
     private Integer id;
