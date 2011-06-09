@@ -154,5 +154,4 @@ public class VolumeManagementDto extends SingleResourceTransportDto
     {
         this.idImage = idImage;
     }
-
 }

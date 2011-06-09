@@ -26,6 +26,8 @@ import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
 import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 
 public interface VirtualMachineResourceStub
 
@@ -38,10 +40,13 @@ public interface VirtualMachineResourceStub
     void deallocate(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
-    
-    
-    void checkEdit(UserSession userSession, Integer virtualDatacenterId, Integer virtualApplianceId,
-        Integer virtualMachineId, final int newcpu, final int newram) throws HardLimitExceededException,
-        SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
-    
+
+    void checkEdit(UserSession userSession, Integer virtualDatacenterId,
+        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
+        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
+        NotEnoughResourcesException;
+
+    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
+        Integer virtualApplianceId, VirtualMachine virtualMachine);
+
 }

@@ -435,7 +435,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 user.getUser(),
                 user.getPass(),
                 user.getLocale(),
-                user.getDescription());
+                user.getDescription(),
+                user.getAuthType().name());
 
         newUser.setActive(user.getActive());
         newUser.addLink(new RESTLink("role", createRoleLink(user.getRole().getId())));

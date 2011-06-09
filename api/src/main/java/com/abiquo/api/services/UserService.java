@@ -316,16 +316,6 @@ public class UserService extends DefaultApiService
         {
             newEnt = findEnterprise(getEnterpriseID(user));
         }
-        if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
-        {
-            if ((old.getEnterprise() == null && newEnt != null)
-                || (old.getEnterprise() != null && newEnt == null)
-                || (!old.getEnterprise().getId().equals(newEnt.getId())))
-            {
-                // In ldap mode it is not possible to edit user's enterprise
-                throw new ConflictException(APIError.NOT_EDIT_USER_ENTERPRISE_LDAP_MODE);
-            }
-        }
 
         if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
         {

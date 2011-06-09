@@ -38,6 +38,7 @@ import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType;
+import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
@@ -46,7 +47,6 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.CIMResourceAllocationSettingDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +84,8 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
-import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
+import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -101,8 +101,8 @@ import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 public class OVFModelFromVirtualAppliance
 {
 
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFModelFromVirtualAppliance.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFModelFromVirtualAppliance.class);
 
     // /////////// InfrastructureWS
 
@@ -199,8 +199,8 @@ public class OVFModelFromVirtualAppliance
                 createDiskFromVirtualImage(virtualMachine, virtualImage, "0");
             OVFDiskUtils.addDisk(envelope, virtualDisk);
 
-            OVFReferenceUtils.addFile(references, createFileFromVirtualImage(virtualImage,
-                virtualMachine, false, false));
+            OVFReferenceUtils.addFile(references,
+                createFileFromVirtualImage(virtualImage, virtualMachine, false, false));
 
             // Setting the virtual system as envelope content
             OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
@@ -397,9 +397,10 @@ public class OVFModelFromVirtualAppliance
                 // Adding the virtual disks to references
                 try
                 {
-                    OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage.getVirtualImage(), nodeVirtualImage.getVirtualMachine(),
-                        bundling, isHa));
+                    OVFReferenceUtils.addFile(
+                        references,
+                        createFileFromVirtualImage(nodeVirtualImage.getVirtualImage(),
+                            nodeVirtualImage.getVirtualMachine(), bundling, isHa));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -753,8 +754,8 @@ public class OVFModelFromVirtualAppliance
         // Configure CPU, RAM and Network
         // NodeVirtualImage is a temporal attribute!!!
         VirtualHardwareSectionType hardwareSection =
-            createVirtualSystemSection(virtualMachine, virtualImage, networkName, nodeVirtualImage
-                .getId(), null);
+            createVirtualSystemSection(virtualMachine, virtualImage, networkName,
+                nodeVirtualImage.getId(), null);
 
         // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
@@ -779,9 +780,9 @@ public class OVFModelFromVirtualAppliance
         otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, rdPort);
         logger.debug("The remote desktop port is: " + String.valueOf(rdPort));
 
-        if (virtualMachine.getVrdpPassword() != null)
+        if (virtualMachine.getPassword() != null)
         {
-            String rdPassword = virtualMachine.getVrdpPassword();
+            String rdPassword = virtualMachine.getPassword();
             otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);
             logger.debug("The remote desktop password is: " + rdPassword);
         }
@@ -831,16 +832,16 @@ public class OVFModelFromVirtualAppliance
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
         String virtualImageId = String.valueOf(nodeId);
         String diskId = "disk_" + virtualImageId;

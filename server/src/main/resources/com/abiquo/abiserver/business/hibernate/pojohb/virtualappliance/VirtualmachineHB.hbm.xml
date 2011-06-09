@@ -49,6 +49,10 @@
     <property name="idType" type="int">
       <column name="idType" not-null="true"/>
     </property>
+    <property name="password" type="string">
+      <column length="15" name="password" />
+    </property>
+    
     <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" fetch="select" lazy="false" name="userHB">
       <column name="idUser"/>
     </many-to-one>

@@ -233,12 +233,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 if (vmConfig.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
                 {
                     // Copy from the NAS to the template virtual machine
-                    
-                    if(!vmConfig.getVirtualDiskBase().isHa())
-                    {                        
+
+                    if (!vmConfig.getVirtualDiskBase().isHa())
+                    {
                         cloneVirtualDisk();
                     }
-                    
+
                 }
 
                 // Attach the initial extended disks
@@ -527,13 +527,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             }
 
             executeTaskOnVM(VMTasks.DELETE);
-            
+
             if (vmConfig.getVirtualDiskBase().isHa())
             {
                 executeTaskOnVM(VMTasks.UNREGISTER);
             }
             else
-            {                
+            {
                 executeTaskOnVM(VMTasks.DELETE);
             }
 
@@ -720,7 +720,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     throw new Exception("Invalid task action " + task.name());
             }
 
-            if (taskMOR == null ||taskMOR.waitForMe() == Task.SUCCESS)
+            if (taskMOR == null || taskMOR.waitForMe() == Task.SUCCESS)
             {
                 logger.info("[" + task.name() + "] successfuly for VM [{}]", machineName);
             }
@@ -891,6 +891,8 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 logger.debug("Any disk configruation changed");
             }
 
+            configureVNC(vmConfigSpec);
+
             ManagedObjectReference tmor =
                 utils.getService().reconfigVM_Task(_virtualMachine, vmConfigSpec);
             utils.monitorTask(tmor);
@@ -898,6 +900,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             vmConfig = newConfiguration;
             disks.setVMConfig(vmConfig);
+
         }
         catch (Exception e)
         {
@@ -918,6 +921,9 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
      */
     public abstract VirtualMachineConfigSpec configureVM(ManagedObjectReference computerResMOR,
         ManagedObjectReference hostMOR) throws VirtualMachineException;
+
+    public abstract void configureVNC(VirtualMachineConfigSpec vmConfigSpec)
+        throws VirtualMachineException;
 
     @Override
     public boolean isVMAlreadyCreated() throws VirtualMachineException
