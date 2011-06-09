@@ -266,6 +266,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
+    public boolean existsAnyUcsRackWithIp(String ip)
+    {
+        return this.ucsRackDao.existAnyOtherWithIP(ip);
+    }
+    
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
@@ -621,4 +626,5 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
     }
+
 }

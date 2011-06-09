@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
@@ -252,7 +253,11 @@ public class InfrastructureService
         try
         {
 
-            result.setData(command.getHypervisorByPhysicalMachine(session, pmId).toPojo());
+            HypervisorHB hyp = command.getHypervisorByPhysicalMachine(session, pmId);
+            if (hyp != null)
+            {
+                result.setData(hyp.toPojo());
+            }
             result.setSuccess(Boolean.TRUE);
 
         }

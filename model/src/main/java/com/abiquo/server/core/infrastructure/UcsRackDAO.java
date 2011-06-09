@@ -71,4 +71,9 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
         return Restrictions.eq(UcsRack.DATACENTER_PROPERTY, datacenterId);
     }
 
+    public boolean existAnyOtherWithIP(String ip)
+    {
+        return existsAnyByCriterions(Restrictions.eq(UcsRack.IP_PROPERTY, ip));
+    }
+
 }
