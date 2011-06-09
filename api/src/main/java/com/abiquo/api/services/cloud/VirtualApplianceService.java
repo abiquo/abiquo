@@ -88,9 +88,6 @@ public class VirtualApplianceService extends DefaultApiService
     VirtualMachineAllocatorService allocatorService;
 
     @Autowired
-    ConfigService configService;
-
-    @Autowired
     UserService userService;
 
     public VirtualApplianceService()
@@ -103,7 +100,6 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.vdcService = new VirtualDatacenterService(em);
         this.remoteService = new RemoteServiceService(em);
-        this.configService = new ConfigService();
     }
 
     /**
@@ -169,7 +165,7 @@ public class VirtualApplianceService extends DefaultApiService
                     remoteService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
-                long timeout = Long.valueOf(configService.getServerTimeout());
+                long timeout = Long.valueOf(ConfigService.getServerTimeout());
 
                 Resource resource =
                     ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,

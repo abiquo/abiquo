@@ -71,9 +71,6 @@ public class PrivateNetworkService extends DefaultApiService
     @Autowired
     UserService userService;
 
-    @Autowired
-    ConfigService configService;
-
     public PrivateNetworkService()
     {
 
@@ -84,7 +81,6 @@ public class PrivateNetworkService extends DefaultApiService
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
         userService = new UserService(em);
-        configService = new ConfigService();
     }
 
     public Collection<VLANNetwork> getNetworks()
@@ -220,7 +216,7 @@ public class PrivateNetworkService extends DefaultApiService
     protected void checkNumberOfCurrentVLANs(final VirtualDatacenter vdc)
     {
         // TODO Auto-generated method stub
-        Integer maxVLANs = Integer.valueOf(configService.getVlanPerVdc());
+        Integer maxVLANs = Integer.valueOf(ConfigService.getVlanPerVdc());
         Integer currentVLANs = repo.findVlansByVirtualDatacener(vdc).size();
         if (currentVLANs >= maxVLANs)
         {

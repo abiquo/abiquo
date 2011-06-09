@@ -75,9 +75,6 @@ public class VirtualMachineService extends DefaultApiService
     OVFGeneratorService ovfService;
 
     @Autowired
-    ConfigService configService;
-
-    @Autowired
     UserService userService;
 
     public VirtualMachineService()
@@ -90,7 +87,6 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.configService = new ConfigService();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -214,7 +210,7 @@ public class VirtualMachineService extends DefaultApiService
         RemoteService vf =
             remoteService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
 
-        long timeout = Long.valueOf(configService.getServerTimeout());
+        long timeout = Long.valueOf(ConfigService.getServerTimeout());
 
         Resource resource =
             ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
