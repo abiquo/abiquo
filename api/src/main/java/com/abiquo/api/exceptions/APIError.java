@@ -279,9 +279,8 @@ public enum APIError
         "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
         "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
-        "The size of the 'name' field of the volume cannot exceed 256 characters"),
-        VOLUME_ISCSI_NOT_FOUND("VOL-12", "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-13",
-        "The property idScsi " + IscsiPath.ERROR_MESSAGE),
+        "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
+        "VOL-13", "The property idScsi " + IscsiPath.ERROR_MESSAGE),
 
     // RULES
 
@@ -343,8 +342,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
