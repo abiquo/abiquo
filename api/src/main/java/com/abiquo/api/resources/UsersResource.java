@@ -64,9 +64,6 @@ public class UsersResource extends AbstractResource
     @Autowired
     SecurityService securityService;
 
-    @Autowired
-    ConfigService configService;
-
     @GET
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
@@ -140,7 +137,7 @@ public class UsersResource extends AbstractResource
         final UserDto user, @Context final IRESTBuilder restBuilder) throws Exception
     {
 
-        String authMode = configService.getSecurityMode();
+        String authMode = ConfigService.getSecurityMode();
 
         if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
         {
