@@ -80,9 +80,6 @@ public class VirtualDatacenterService extends DefaultApiService
     @Autowired
     SecurityService securityService;
 
-    @Autowired
-    ConfigService configService;
-
     public VirtualDatacenterService()
     {
 
@@ -98,7 +95,6 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         securityService = new SecurityService();
         networkService = new PrivateNetworkService(em);
-        configService = new ConfigService();
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
@@ -311,7 +307,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     private boolean isValidVlanHardLimitPerVdc(final long vlansHard)
     {
-        String limitS = configService.getVlanPerVdc();
+        String limitS = ConfigService.getVlanPerVdc();
         int limit = Integer.valueOf(limitS);
 
         return limit == 0 || limit >= vlansHard;

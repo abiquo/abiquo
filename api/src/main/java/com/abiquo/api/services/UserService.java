@@ -68,9 +68,6 @@ public class UserService extends DefaultApiService
     @Autowired
     SecurityService securityService;
 
-    @Autowired
-    ConfigService configService;
-
     public UserService()
     {
 
@@ -81,7 +78,6 @@ public class UserService extends DefaultApiService
     {
         repo = new EnterpriseRep(em);
         securityService = new SecurityService();
-        configService = new ConfigService();
     }
 
     /**
@@ -294,7 +290,7 @@ public class UserService extends DefaultApiService
             flushErrors();
         }
 
-        String authMode = configService.getSecurityMode();
+        String authMode = ConfigService.getSecurityMode();
         if (user.searchLink(RoleResource.ROLE) != null)
         {
 
