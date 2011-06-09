@@ -23,6 +23,8 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.abiquo.model.validation.IscsiPath;
+
 /**
  * Contains all the errors notified by the API.
  * 
@@ -207,7 +209,8 @@ public enum APIError
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
         "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
         "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
-        "SP-12", "Storage device param in storage pool link not found"),
+        "SP-12", "Storage device param in storage pool link not found"), MISSING_POOL_LINK("SP-13",
+        "Missing storage pool link"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -277,6 +280,8 @@ public enum APIError
         "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
         "The size of the 'name' field of the volume cannot exceed 256 characters"),
+        VOLUME_ISCSI_NOT_FOUND("VOL-12", "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-13",
+        "The property idScsi " + IscsiPath.ERROR_MESSAGE),
 
     // RULES
 
