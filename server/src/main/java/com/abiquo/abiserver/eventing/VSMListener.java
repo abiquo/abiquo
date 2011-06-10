@@ -123,7 +123,24 @@ public class VSMListener implements VSMCallback
 
             Query query = session.createQuery(VM_BY_UUID);
             query.setString("uuid", event.getVirtualSystemId());
-            VirtualmachineHB virtualMachine = (VirtualmachineHB) query.uniqueResult();
+
+            // HORRIBLE HACK
+            VirtualmachineHB virtualMachineAux = (VirtualmachineHB) query.uniqueResult();
+            VirtualmachineHB virtualMachine = null;
+
+            if (virtualMachineAux.getHypervisor() == null)
+            {
+                logger
+                    .error("WARNING-> virtualMachineAux.getHypervisor() IS NULL. Forcing Hibernate to restore complete VirtualMachine entity...");
+
+                virtualMachine =
+                    (VirtualmachineHB) session.get("VirtualmachineHB", virtualMachineAux.getIdVm());
+            }
+            else
+            {
+                virtualMachine = virtualMachineAux;
+            }
+            // HORRIBLE HACK - end.
 
             // Checking if the VM is not null since the VM that we are receiving
             // the event was already deleted
