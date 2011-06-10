@@ -86,7 +86,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     private final static Logger logger = LoggerFactory.getLogger(OVFModelToVirtualAppliance.class);
 
     final static Integer applyStateDelayMs = Integer.valueOf(System.getProperty(
-        "abiquo.virtualfactory.applyStateDelayMs", "10000"));
+        "abiquo.virtualfactory.applyStateDelayMs", "0"));
 
     /**
      * Default constructor
