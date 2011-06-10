@@ -485,8 +485,9 @@ public class UserService extends DefaultApiService
             && (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
                 && !securityService
                     .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES)
-                && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE) && !securityService
-                .hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
+                && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
+                && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL) && !securityService
+                .hasPrivilege(SecurityService.PHYS_DC_ENUMERATE)))
         {
             throw new AccessDeniedException("Missing privilege to get info from other enterprises");
         }
