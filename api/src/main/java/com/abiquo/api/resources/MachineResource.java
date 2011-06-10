@@ -68,6 +68,14 @@ public class MachineResource extends AbstractResource
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
 
     public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
+    
+    public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
+    
+    public static final String MACHINE_ACTION_POWER_OFF_REL = "powerOff";
+
+    public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
+    
+    public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
 
     @Autowired
     MachineService service;
@@ -156,9 +164,9 @@ public class MachineResource extends AbstractResource
     }
 
     protected static MachineDto addLinks(IRESTBuilder restBuilder, Integer datacenterId,
-        Integer rackId, MachineDto machine)
+        Integer rackId, Boolean managedRack, MachineDto machine)
     {
-        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, machine));
+        machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
 
         return machine;
     }
@@ -215,7 +223,7 @@ public class MachineResource extends AbstractResource
         // any rack nor datacenter. Don't build the links.
         if (machine.getRack() != null)
         {            
-            dto = addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
+            dto = addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), machine.getBelongsToManagedRack(), dto);
         }
         
         return dto;

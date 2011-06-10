@@ -48,6 +48,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.UcsRack;
 
 @Service
 @Transactional(readOnly = false)
@@ -89,7 +90,23 @@ public class MachineService extends DefaultApiService
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
-        return repo.findRackMachines(rack);
+        List<Machine> machines = repo.findRackMachines(rack);        
+        
+        // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
+        // If they belong to a managed rack, a new {@link RESTLink} will be created
+        // in the Dto informing the managed machines special functionality.
+        
+        UcsRack ucsRack = repo.findUcsRackById(rackId);
+        if (ucsRack != null)
+        {
+            for (Machine machine : machines)
+            {
+                machine.setBelongsToManagedRack(Boolean.TRUE);
+            }
+        }
+        
+
+        return machines;
     }
 
     public Machine getMachine(final Integer id)

@@ -651,6 +651,8 @@ public class Machine extends DefaultEntityBase
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
     
+    // Transient attributes needed to Management Racks functionality
+    
     @Transient
     private List<String> listOfMacs;
     
@@ -666,6 +668,19 @@ public class Machine extends DefaultEntityBase
             listOfMacs = new ArrayList<String>();
         }
         return listOfMacs;
+    }
+    
+    @Transient
+    private Boolean belongsToManagedRack = Boolean.FALSE;
+    
+    public void setBelongsToManagedRack(Boolean belongsToManagedRack)
+    {
+        this.belongsToManagedRack = belongsToManagedRack;
+    }
+
+    public Boolean getBelongsToManagedRack()
+    {
+        return belongsToManagedRack;
     }
 
     
