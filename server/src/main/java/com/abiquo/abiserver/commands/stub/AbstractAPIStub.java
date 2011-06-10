@@ -87,6 +87,20 @@ public class AbstractAPIStub
         return resource(uri, user, password).get();
     }
 
+    /**
+     * Adds the content-type and accept headers with appropiate {@link MediaType}.
+     * 
+     * @param uri remote location.
+     * @param user login.
+     * @param password password.
+     * @return ClientResponse
+     */
+    protected ClientResponse get(final String uri, final MediaType mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+    }
+
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
@@ -159,6 +173,32 @@ public class AbstractAPIStub
     private Resource resource(final String uri, final String user, final String password)
     {
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+
+        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
+
+        String cookieValue =
+            StringUtils.join(new String[] {user, valueOf(tokenExpiration), signature}, ":");
+
+        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
+
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
+
+    /**
+     * Instantiate the {@link Resource} and not add the {@link MediaType.APPLICATION_XML} to the
+     * request.
+     * 
+     * @param uri remote location.
+     * @param user login.
+     * @param password password.
+     * @param mediaType content negotiation.
+     * @return Resource
+     */
+    private Resource resource(final String uri, final String user, final String password,
+        final MediaType mediaType)
+    {
+        Resource resource = client.resource(uri).contentType(mediaType);
         long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
 
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);

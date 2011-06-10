@@ -35,6 +35,13 @@ public interface RacksResourceStub
 {
     public DataResult<UcsRack> createUcsRack(UcsRack ucsRack);
 
+    /**
+     * Returns all (runtime type){@link Rack} in {@link DataCenter}.
+     * 
+     * @param datacenter datacenter.
+     * @return wrapper which contains the list of {@link Rack}. Or in case of error the appropiate
+     *         object.
+     */
     public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter);
     
     public BasicResult associateBlades(final Integer datacenterId, final Integer rackId, IPAddress ipFrom, IPAddress ipTo,
@@ -44,4 +51,13 @@ public interface RacksResourceStub
     public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
     
     public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
+
+    /**
+     * Returns all {@link UcsRack} in {@link DataCenter}.
+     * 
+     * @param datacenter datacenter.
+     * @return wrapper which contains the list of {@link UcsRack}. Or in case of error the
+     *         appropiate object.
+     */
+    public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter);
 }
