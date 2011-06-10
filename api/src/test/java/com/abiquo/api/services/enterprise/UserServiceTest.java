@@ -43,6 +43,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 
 public class UserServiceTest extends AbstractGeneratorTest
@@ -176,7 +177,7 @@ public class UserServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         UserService service = new UserService(em);
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "");
+        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "", AuthType.ABIQUO.name());
 
         try
         {
@@ -203,7 +204,7 @@ public class UserServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         UserService service = new UserService(em);
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "");
+        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "", AuthType.ABIQUO.name());
         String roleURI = UriTestResolver.resolveRoleURI(r.getId());
         dto.addLink(new RESTLink("role", roleURI));
 

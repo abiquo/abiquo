@@ -41,6 +41,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
+import com.abiquo.server.core.cloud.VirtualMachine;
 
 @Repository("jpaVolumeManagementDAO")
 /* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
@@ -336,4 +337,14 @@ import com.abiquo.server.core.util.PagedList;
     {
         return Restrictions.eq(VolumeManagement.ID_PROPERTY, id);
     }
+    
+     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+     {
+         Criteria criteria = createCriteria(sameVirtualMachine(vm));
+         return getResultList(criteria);
+     }
+     private static Criterion sameVirtualMachine(final VirtualMachine vm)
+     {
+         return Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_PROPERTY, vm);
+     }
 }

@@ -113,6 +113,10 @@
 			 */
 			private function onCreationComplete():void
 			{
+				//Check privileges
+				SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_SHOW_REPORTS,"removeChild",reportButton,menuBar);
+
+				
 				var fade:Fade = new Fade();
 				fade.duration = 600;
 				fade.alphaFrom = 0;
@@ -295,6 +299,12 @@
 				navigateToURL(new URLRequest(url), "_blank");
 			}
 			
+			private function onClickReportButton():void
+			{
+				var url:String = AbiCloudModel.getInstance().configurationManager.config.client_main_billingUrl.value+"?enterprise="+AbiCloudModel.getInstance().loginManager.user.enterprise.id;
+				navigateToURL(new URLRequest(url), "_blank");
+			}
+			
 			private function onClickSupportButton():void
 			{
 				//Loading the text file
@@ -369,6 +379,7 @@
         minWidth="10"/>
 
     <mx:HBox 
+    	id="menuBar"
         horizontalGap="0"
         paddingBottom="0"
         paddingLeft="0"
@@ -390,6 +401,13 @@
             visible="false"
             click="onClickConfigurationButton()"/>
 
+        <mx:Button id="reportButton"
+            label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_REPORT')}"
+            styleName="MainHeaderReportButton" labelPlacement="bottom"
+            visible="{AbiCloudModel.getInstance().configurationManager.config.client_main_billingUrl.value != ''}"
+            includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_main_billingUrl.value != ''}"
+            click="onClickReportButton()"/>
+        
         <mx:Button id="documentationButton"
             label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_DOCUMENTATION')}"
             styleName="MainHeaderDocumentationButton" labelPlacement="bottom"

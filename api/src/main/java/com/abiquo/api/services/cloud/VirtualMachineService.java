@@ -77,9 +77,6 @@ public class VirtualMachineService extends DefaultApiService
     protected OVFGeneratorService ovfService;
 
     @Autowired
-    ConfigService configService;
-
-    @Autowired
     UserService userService;
 
     public VirtualMachineService()
@@ -92,7 +89,6 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.configService = new ConfigService();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -118,12 +114,12 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
 
-    public VirtualMachine findByUUID(String uuid)
+    public VirtualMachine findByUUID(final String uuid)
     {
         return repo.findByUUID(uuid);
     }
 
-    public VirtualMachine findByName(String name)
+    public VirtualMachine findByName(final String name)
     {
         return repo.findByName(name);
     }
@@ -218,7 +214,7 @@ public class VirtualMachineService extends DefaultApiService
         updateVirtualMachine(vm);
     }
 
-    public void validMachineStateChange(State oldState, State newState)
+    public void validMachineStateChange(final State oldState, final State newState)
     {
         if (oldState == State.NOT_DEPLOYED)
         {
@@ -286,7 +282,7 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
@@ -310,6 +306,8 @@ public class VirtualMachineService extends DefaultApiService
                 "haVapp",
                 com.abiquo.server.core.cloud.State.NOT_DEPLOYED,
                 com.abiquo.server.core.cloud.State.NOT_DEPLOYED);
+
+        long timeout = Long.valueOf(ConfigService.getServerTimeout());
 
         NodeVirtualImage nvi =
             new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);

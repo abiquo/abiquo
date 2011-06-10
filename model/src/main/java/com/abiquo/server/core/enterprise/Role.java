@@ -154,7 +154,7 @@ public class Role extends DefaultEntityBase
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
     @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idRole"), inverseJoinColumns = @JoinColumn(name = "idPrivilege"))
-    private List<Privilege> privileges;
+    private List<Privilege> privileges = new ArrayList<Privilege>();
 
     public List<Privilege> getPrivileges()
     {
