@@ -116,6 +116,13 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         rack.setLargeDescription(dto.getLongDescription());
         rack.setName(dto.getName());
         rack.setShortDescription(dto.getShortDescription());
+        VlanNetworkParameters vlanNetworkParameters =
+            new VlanNetworkParameters(dto.getVlanIdMin(),
+                dto.getVlanIdMax(),
+                dto.getVlansIdAvoided(),
+                dto.getNrsq(),
+                dto.getVlanPerVdcExpected());
+        rack.setVlanNetworkParameters(vlanNetworkParameters);
 
         return rack;
     }

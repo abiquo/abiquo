@@ -22,6 +22,7 @@
 package com.abiquo.abiserver.pojo.infrastructure;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.UcsRackHB;
+import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.server.core.infrastructure.UcsRackDto;
 
 public class UcsRack extends Rack
@@ -123,6 +124,13 @@ public class UcsRack extends Rack
         rack.setIp(dto.getIp());
         rack.setUser(dto.getUser());
         rack.setPassword(dto.getPassword());
+        VlanNetworkParameters vlanNetworkParameters =
+            new VlanNetworkParameters(dto.getVlanIdMin(),
+                dto.getVlanIdMax(),
+                dto.getVlansIdAvoided(),
+                dto.getNrsq(),
+                dto.getVlanPerVdcExpected());
+        rack.setVlanNetworkParameters(vlanNetworkParameters);
 
         return rack;
     }
