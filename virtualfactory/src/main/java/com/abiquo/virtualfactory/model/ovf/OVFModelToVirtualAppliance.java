@@ -85,6 +85,9 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
     private final static Logger logger = LoggerFactory.getLogger(OVFModelToVirtualAppliance.class);
 
+    final static Integer applyStateDelayMs = Integer.valueOf(System.getProperty(
+        "abiquo.virtualfactory.applyStateDelayMs", "10000"));
+
     /**
      * Default constructor
      */
@@ -194,6 +197,8 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         final ContentType virtualSystem, final HypervisorConfiguration hvConfig)
         throws VirtualMachineException, SectionException, Exception
     {
+        final String poweron = "PowerUp";
+
         // We will change the state or reconfigure the machine depending on the state field value
         String machineState = getMachineStateFromAnnotation(virtualSystem);
 
@@ -201,6 +206,19 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         {
             // Apply the new state to the virtual machine
             virtualMachine.applyState(State.fromValue(machineState));
+
+            if (machineState.equalsIgnoreCase(poweron) && applyStateDelayMs != 0)
+            {
+                try
+                {
+                    Thread.sleep(applyStateDelayMs);
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error while apply state delay", e);
+                }
+            }
+
         }
         else
         {
@@ -378,12 +396,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                 // The target datastore must be determined for each disk
                 String targetDatastore =
                     fileRef.getOtherAttributes().get(AbicloudConstants.DATASTORE_QNAME);
-                
+
                 boolean isha = false;
-                if(fileRef.getOtherAttributes().containsKey(AbicloudConstants.HA_DISK))
+                if (fileRef.getOtherAttributes().containsKey(AbicloudConstants.HA_DISK))
                 {
                     logger.debug("Its a HA disk (do not copy or remove)");
-                    isha= true;
+                    isha = true;
                 }
 
                 logger.debug("Registering the virtual disk location:" + path);
@@ -412,13 +430,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                             d.getFileRef(),
                             d.getFormat());
                 }
-                
-                
-                if(isha)
+
+                if (isha)
                 {
                     virtualDisk.setHa();
                 }
-                
+
                 virtualDiskMap.put(d.getDiskId(), virtualDisk);
             }
             else
@@ -864,15 +881,15 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
         for (VirtualDisk vd : extendedDiskList)
         {
-            logger.debug("Attaching disk [{}] generation sequence [{}]", vd.getLocation(), vd
-                .getSequence());
+            logger.debug("Attaching disk [{}] generation sequence [{}]", vd.getLocation(),
+                vd.getSequence());
         }
         // Sort the vnicList
         Collections.sort(vnicList, new VNICSequence());
         for (VirtualNIC vn : vnicList)
         {
-            logger.debug("Attaching NIC [{}] generation sequence [{}]", vn.getMacAddress(), vn
-                .getOrder());
+            logger.debug("Attaching NIC [{}] generation sequence [{}]", vn.getMacAddress(),
+                vn.getOrder());
         }
 
         logger.debug("The remote desktop port is : " + rdPort);

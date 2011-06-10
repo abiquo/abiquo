@@ -375,7 +375,7 @@ public class OVFModelFromVirtualAppliance
 
         // Getting the all the virtual Machines
         for (Node node : virtualAppliance.getNodes())
-        {
+        {            
             if (node.isNodeTypeVirtualImage())
             {
                 NodeVirtualImage nodeVirtualImage = (NodeVirtualImage) node;
@@ -385,6 +385,7 @@ public class OVFModelFromVirtualAppliance
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
                     createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
+                
                 OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
                 // Setting the virtual Disk package level element to the envelope
@@ -743,9 +744,8 @@ public class OVFModelFromVirtualAppliance
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
         VirtualSystemType virtualSystem =
-            OVFEnvelopeUtils.createVirtualSystem(vsId, virtualMachine.getName(), null); // TODO not
-        // name not
-        // info
+            OVFEnvelopeUtils.createVirtualSystem(vsId, virtualMachine.getName(),
+                nodeVirtualImage.getName()); 
 
         // Create a productSection with the virtual system IP
         // ProductSectionType productSection =

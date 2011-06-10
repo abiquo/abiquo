@@ -23,7 +23,10 @@ package com.abiquo.virtualfactory.virtualappliance.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +35,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 
+import org.apache.commons.lang.StringUtils;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.VSSDType;
@@ -83,8 +87,8 @@ import com.sun.ws.management.transfer.TransferExtensions;
 public class VirtualapplianceresourceDeployer implements VirtualapplianceresourceDeployable
 {
 
-    private final static Logger logger =
-        LoggerFactory.getLogger(VirtualapplianceresourceDeployer.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(VirtualapplianceresourceDeployer.class);
 
     protected static final QName QNAME_OVF_ENVELOPE =
         new QName("http://schemas.dmtf.org/ovf/envelope/1", "Envelope");
@@ -148,8 +152,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 {
                     virtualAppliance.setState(State.DEPLOYED);
                 }
-                logger.info("Virtual Appliance : {} created succesfully", virtualAppliance
-                    .getVirtualApplianceId());
+                logger.info("Virtual Appliance : {} created succesfully",
+                    virtualAppliance.getVirtualApplianceId());
 
             }
             catch (SectionException e)
@@ -166,8 +170,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
             logger.debug("Building the end point reference");
 
             EndpointReferenceType epr =
-                TransferExtensions.createEndpointReference(request.getTo(), request
-                    .getResourceURI(), selectors);
+                TransferExtensions.createEndpointReference(request.getTo(),
+                    request.getResourceURI(), selectors);
 
             logger.debug("Building the response");
             xferResponse.setCreateResponse(epr);
@@ -177,8 +181,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
             logger.error("An error is occurred when creating the VA ", e);
             try
             {
-                logger.info("Rolling back the virtual appliance: {}", virtualAppliance
-                    .getVirtualApplianceId());
+                logger.info("Rolling back the virtual appliance: {}",
+                    virtualAppliance.getVirtualApplianceId());
                 virtualApplianceModel.rollbackVirtualAppliance(virtualAppliance);
             }
             catch (VirtualMachineException e1)
@@ -210,8 +214,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         if (virtualAppliance.getMachines().size() > 1)
         {
             VirtualSystemCollectionType virtualSystemCollection =
-                OVFEnvelopeUtils.createVirtualSystemCollection("collection_"
-                    + virtualAppliance.getVirtualApplianceId(),
+                OVFEnvelopeUtils.createVirtualSystemCollection(
+                    "collection_" + virtualAppliance.getVirtualApplianceId(),
                     "Collection for a complex VirtualAppliance",
                     "collection to wrap a virtual appliance with more than one machine");
 
@@ -453,8 +457,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
                 logger.error("An error is occurred when changing properties to the VA:", e);
                 try
                 {
-                    logger.info("Rolling back the virtual appliance: {}", virtualAppliance
-                        .getVirtualApplianceId());
+                    logger.info("Rolling back the virtual appliance: {}",
+                        virtualAppliance.getVirtualApplianceId());
                     virtualApplianceModel.rollbackVirtualAppliance(virtualAppliance);
                 }
                 catch (VirtualMachineException e1)
@@ -517,8 +521,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
 
-        logger.debug("[CHECK VIRTUAL SYSTEM CALL] OVF: {}", OVFSerializer.getInstance().writeXML(
-            envelope));
+        logger.debug("[CHECK VIRTUAL SYSTEM CALL] OVF: {}",
+            OVFSerializer.getInstance().writeXML(envelope));
 
         try
         {
@@ -590,8 +594,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
 
-        logger.debug("[ADD VIRTUAL SYSTEM CALL] OVF: {}", OVFSerializer.getInstance().writeXML(
-            envelope));
+        logger.debug("[ADD VIRTUAL SYSTEM CALL] OVF: {}",
+            OVFSerializer.getInstance().writeXML(envelope));
 
         try
         {
@@ -658,8 +662,8 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         // Get the resource passed in the body
         EnvelopeType envelope = getEnvelope(request);
 
-        logger.debug("[REMOVE VIRTUAL SYSTEM CALL] OVF: {}", OVFSerializer.getInstance().writeXML(
-            envelope));
+        logger.debug("[REMOVE VIRTUAL SYSTEM CALL] OVF: {}",
+            OVFSerializer.getInstance().writeXML(envelope));
 
         try
         {
@@ -742,8 +746,13 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         virtualAppliance.setState(State.fromValue(vappState));
 
         // Changing the state of the VirtualSystems contained in a VirtualSystemCollection
-        for (ContentType subVirtualSystem : OVFEnvelopeUtils
-            .getVirtualSystemsFromCollection(vscollection))
+        
+        List<VirtualSystemType> virtualSystems = OVFEnvelopeUtils.getVirtualSystems(vscollection);        
+            //XXX OVFEnvelopeUtils.getVirtualSystemsFromCollection(vscollection);
+        
+        Collections.sort(virtualSystems, new ContentTypeSequence());
+        
+        for (ContentType subVirtualSystem : virtualSystems)
         {
             if (subVirtualSystem instanceof VirtualSystemType)
             {
@@ -834,6 +843,23 @@ public class VirtualapplianceresourceDeployer implements Virtualapplianceresourc
         } // for each sub virtual system on the collection
 
     }// configure virtual system collection
+
+    class ContentTypeSequence implements Comparator<ContentType>
+    {
+        @Override
+        public int compare(final ContentType arg0, final ContentType arg1)
+        {
+            String info0 =
+                arg0.getInfo() == null || StringUtils.isEmpty(arg0.getInfo().getValue())
+                    ? "default" : arg0.getInfo().getValue();
+
+            String info1 =
+                arg1.getInfo() == null || StringUtils.isEmpty(arg1.getInfo().getValue())
+                    ? "default" : arg1.getInfo().getValue();
+
+            return String.CASE_INSENSITIVE_ORDER.compare(info0, info1);
+        }
+    }
 
     /**
      * Gets the envelope for a given request
