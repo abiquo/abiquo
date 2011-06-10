@@ -88,7 +88,7 @@ public class AbstractAPIStub
     }
 
     /**
-     * Adds the content-type and accept headers with appropiate {@link MediaType.APPLICATION_XML}.
+     * Adds the content-type and accept headers with appropiate {@link MediaType}.
      * 
      * @param uri remote location.
      * @param user login.
