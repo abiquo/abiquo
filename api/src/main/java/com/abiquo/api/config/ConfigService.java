@@ -35,29 +35,28 @@ public class ConfigService
 
     public static final String VLAN_PER_VDC = "abiquo.server.networking.vlanPerVdc";
 
-    public String getSystemProperty(final String property)
+    public static String getSystemProperty(final String property)
     {
         return System.getProperty(property);
     }
 
-    public String getSystemProperty(final String property, final String defaultValue)
+    public static String getSystemProperty(final String property, final String defaultValue)
     {
         return System.getProperty(property, defaultValue);
     }
 
-    public String getSecurityMode()
+    public static String getSecurityMode()
     {
         return getSystemProperty(SECURITY_MODE, User.AuthType.ABIQUO.toString());
-
     }
 
-    public String getServerTimeout()
+    public static String getServerTimeout()
     {
         return getSystemProperty(SERVER_TIMEOUT, "0");
 
     }
 
-    public String getVlanPerVdc()
+    public static String getVlanPerVdc()
     {
         return getSystemProperty(VLAN_PER_VDC, "0");
 

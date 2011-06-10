@@ -23,6 +23,8 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.abiquo.model.validation.IscsiPath;
+
 /**
  * Contains all the errors notified by the API.
  * 
@@ -71,7 +73,7 @@ public enum APIError
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
-        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
+        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
@@ -207,7 +209,8 @@ public enum APIError
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
         "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
         "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
-        "SP-12", "Storage device param in storage pool link not found"),
+        "SP-12", "Storage device param in storage pool link not found"), MISSING_POOL_LINK("SP-13",
+        "Missing storage pool link"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -276,7 +279,8 @@ public enum APIError
         "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
         "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
-        "The size of the 'name' field of the volume cannot exceed 256 characters"),
+        "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
+        "VOL-13", "The property idScsi " + IscsiPath.ERROR_MESSAGE),
 
     // RULES
 
@@ -338,8 +342,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
