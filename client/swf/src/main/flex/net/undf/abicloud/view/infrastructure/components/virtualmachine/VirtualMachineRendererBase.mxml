@@ -290,7 +290,7 @@
                     	+ "&vncUser=" + HyperVisor(this._virtualMachine.assignedTo).user 
                     	+ "&vncPass=" + HyperVisor(this._virtualMachine.assignedTo).password 
                     	+ "&vncName=" + this._virtualMachine.name 
-                    	+ "&VMPASS=" + this._virtualMachine.password
+                    	+ "&vncVmPass=" + this._virtualMachine.password
                     	+ "&width=" + appletWidth 
                     	+ "&height=" + appletHeight;                        
                     }else{
