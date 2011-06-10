@@ -67,8 +67,8 @@ public class MachinesResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
-    public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, @Context IRESTBuilder restBuilder)
+    public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) @Min(1) Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(1) Integer rackId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
         if (!infrastructureService.isAssignedTo(datacenterId, rackId))
