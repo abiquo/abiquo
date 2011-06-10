@@ -474,7 +474,7 @@
 
                 //Notifying user
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("VirtualImage",
                                                                                        "ALERT_VIRTUAL_IMAGE_CREATED_HEADER"),
                                                ResourceManager.getInstance().getString("VirtualImage",
