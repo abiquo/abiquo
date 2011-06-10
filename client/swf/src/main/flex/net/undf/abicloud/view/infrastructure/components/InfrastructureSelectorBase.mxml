@@ -51,6 +51,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
@@ -73,6 +74,9 @@
             //Associated to the filter text
 			[Bindable]
 			public var searchFilter:String;
+			
+			[Bindable]
+			private var _isUcs:Boolean;
 
             public function get racks():ArrayCollection
             {
@@ -97,6 +101,9 @@
             public function set selectedInfrastructureElement(value:InfrastructureElement):void
             {
                 this._selectedInfrastructureElement = value;
+                if(this._selectedInfrastructureElement){
+	                this._isUcs = this._selectedInfrastructureElement.assignedTo is UcsRack;
+                }
                 dispatchEvent(new Event("selectedInfrastructureElementChange"));
             }
 
@@ -281,6 +288,7 @@
     <general:GeneralSubPanelToolBox bottom="0">
         <mx:PopUpMenuButton id="addButton"
             width="40" height="22"
+            enabled="{!this._isUcs }"
             styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
             label="" labelField="@label"
             toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
@@ -288,7 +296,7 @@
             closeDuration="0"/>
 
         <mx:Button id="deleteButton"
-            enabled="{this._selectedInfrastructureElement != null}"
+            enabled="{this._selectedInfrastructureElement != null &amp;&amp; !this._isUcs}"
             styleName="RemoveButton"
             toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
             click="askInfrastructureElementDeletion()"/>
@@ -301,7 +309,7 @@
             click="onClickRefreshDatacenterResourcesButton()"/>
 
         <mx:Button id="editButton"
-            enabled="{this._selectedInfrastructureElement != null}"
+            enabled="{this._selectedInfrastructureElement != null &amp;&amp; !this._isUcs }"
             styleName="ConfigurationButton"
             toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
             click="onClickEditInfrastructureElement()"/>
