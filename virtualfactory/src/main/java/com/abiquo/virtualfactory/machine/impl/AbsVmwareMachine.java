@@ -526,8 +526,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                 }
             }
 
-            executeTaskOnVM(VMTasks.DELETE);
-
             if (vmConfig.getVirtualDiskBase().isHa())
             {
                 executeTaskOnVM(VMTasks.UNREGISTER);
