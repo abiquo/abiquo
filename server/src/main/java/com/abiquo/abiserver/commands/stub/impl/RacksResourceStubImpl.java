@@ -74,6 +74,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     public BasicResult powerOffMachine(Integer datacenterId, Integer rackId, Integer machineId)
     {
         // TODO Auto-generated method stub
+        return null;
     }
  
     /**
