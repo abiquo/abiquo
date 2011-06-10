@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import net.undf.abicloud.vo.virtualimage.Repository;
         	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageListManagement;
         	import net.undf.abicloud.vo.virtualimage.Category;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -262,8 +264,8 @@
                     virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                     virtualImageEvent.datacenter = virtualApplianceDatacenter;
                     dispatchEvent(virtualImageEvent);
-                    displayVirtualImage();
                 }
+                displayVirtualImage();
             } 
 
             private function onRepositoryChange(event:Event):void
