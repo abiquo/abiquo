@@ -38,6 +38,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
 
     private VlanNetworkParameters vlanNetworkParameters;
 
+    private final String type = "Standard Rack";
     /* ------------- Constructor ------------- */
     public Rack()
     {
