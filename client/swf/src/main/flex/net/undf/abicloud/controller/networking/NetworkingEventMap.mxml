@@ -626,7 +626,7 @@
 
         <!-- Make call to the server here -->
         <!-- The Private Networks of an Enterprise is contained in its Virtual Datacenters -->
-        <RemoteObjectInvoker instance="{services.virtualApplianceService}"
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="getVirtualDataCentersByEnterprise"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
 
