@@ -279,9 +279,19 @@ public class AbstractAPIStub
 
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
-        String cookieValue =
-            StringUtils.join(new String[] {user, valueOf(tokenExpiration), signature}, ":");
-
+        String[] tokens;
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
         return resource.cookie(new Cookie("auth", cookieValue));
@@ -650,7 +660,7 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/", params);
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks", params);
     }
 
     protected String createMachinesLink(final Rack rack)
