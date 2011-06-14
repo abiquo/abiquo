@@ -77,7 +77,9 @@ public enum APIError
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
         "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "LIMIT-11",
+        "Can not delete resource limits, current datacenter is used by any virtual datacenters for this enterprise"),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
