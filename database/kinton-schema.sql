@@ -845,7 +845,7 @@ CREATE TABLE  `kinton`.`user` (
   `description` varchar(100) default NULL,
   `email` varchar(200),
   `locale` varchar(10) NOT NULL,
-  `password` varchar(32) NOT NULL,
+  `password` varchar(32),
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
   `authType` varchar(20) NOT NULL,

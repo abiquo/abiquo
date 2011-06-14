@@ -21,6 +21,7 @@
 package com.abiquo.api.spring.security;
 
 import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -49,6 +50,9 @@ public class AbiquoUserDetailsService implements UserDetailsService
     /** The default role prefix to use. */
     protected static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
+    /** The default role prefix to use. */
+    protected static final String DEFAULT_ROLE = "ROLE_ABIQUO";
+
     /** The Enterprise DAO repository. */
     @Autowired
     protected EnterpriseRep enterpriseRep;
@@ -67,7 +71,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
      * @param authType a {@link AuthType} value.
      */
     public void setAuthType(AuthType authType)
-   {
+    {
         this.authType = authType;
     }
 
@@ -84,7 +88,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         User user = null;
         try
         {
-       // If we are not coming from remember me we need to call the abiquo db.
+            // If we are not coming from remember me we need to call the abiquo db.
             if (authType == null)
             {
                 authType = AuthType.ABIQUO;
@@ -135,7 +139,6 @@ public class AbiquoUserDetailsService implements UserDetailsService
             return new GrantedAuthority[] {new GrantedAuthorityImpl(role),
             new GrantedAuthorityImpl(DEFAULT_ROLE)};
         }
- 
         return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
     }
 
