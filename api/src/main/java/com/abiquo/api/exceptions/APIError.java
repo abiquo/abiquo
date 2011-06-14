@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 
 /**
  * Contains all the errors notified by the API.
@@ -248,7 +249,8 @@ public enum APIError
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
         "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
         "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
-        "The property idScsi " + IscsiPath.ERROR_MESSAGE)
+        "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-7",
+        "The size property must be an non-zero integer bewteen up to " + Rasd.LIMIT_MAX),
 
     ;
 
