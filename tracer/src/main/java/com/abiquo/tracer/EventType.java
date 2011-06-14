@@ -93,7 +93,7 @@ public enum EventType implements Serializable
 
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
-        "A Persistent conversion process has started"), STATEFUL_RAW_FINISHED(601,
+        "A Persistent conversion process has started"), PERSISTENT_RAW_FINISHED(601,
         "PERSISTENT_RAW_FINISHED",
         "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), PERSISTENT_VOLUME_CREATED(
         602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), PERSISTENT_DUMP_ENQUEUED(
