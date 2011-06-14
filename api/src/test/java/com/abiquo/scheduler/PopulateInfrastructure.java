@@ -288,7 +288,7 @@ public class PopulateInfrastructure extends PopulateConstants
 
             machine.setRealHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
             machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
-            machine.setVirtualHardDiskUsedInBytes(0);
+            machine.setVirtualHardDiskUsedInBytes(0L);
 
             dcRep.updateMachine(machine);
         }

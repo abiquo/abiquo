@@ -68,8 +68,9 @@ public class Datastore extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "datastore";
 
-    protected Datastore()
+    public Datastore()
     {
+        // never call this!
     }
 
     private final static String ID_COLUMN = "idDatastore";
@@ -164,7 +165,7 @@ public class Datastore extends DefaultEntityBase
         return this.rootPath;
     }
 
-    private void setRootPath(final String rootPath)
+    public void setRootPath(final String rootPath)
     {
         this.rootPath = rootPath;
     }

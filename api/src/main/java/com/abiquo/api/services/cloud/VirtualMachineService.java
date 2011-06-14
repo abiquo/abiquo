@@ -36,8 +36,10 @@ import org.w3c.dom.Document;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.exceptions.PreconditionFailedException;
+import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -71,7 +73,8 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    protected RemoteServiceService remoteService;
+    protected
+    InfrastructureService infrastructureService;
 
     @Autowired
     protected OVFGeneratorService ovfService;
@@ -89,6 +92,7 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -262,7 +266,7 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+                infrastructureService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 
@@ -306,8 +310,6 @@ public class VirtualMachineService extends DefaultApiService
                 "haVapp",
                 com.abiquo.server.core.cloud.State.NOT_DEPLOYED,
                 com.abiquo.server.core.cloud.State.NOT_DEPLOYED);
-
-        long timeout = Long.valueOf(ConfigService.getServerTimeout());
 
         NodeVirtualImage nvi =
             new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);

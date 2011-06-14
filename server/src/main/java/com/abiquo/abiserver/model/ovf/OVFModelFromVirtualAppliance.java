@@ -780,7 +780,7 @@ public class OVFModelFromVirtualAppliance
         otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, rdPort);
         logger.debug("The remote desktop port is: " + String.valueOf(rdPort));
 
-        if (virtualMachine.getPassword() != null)
+        if (virtualMachine.getPassword() != null && !virtualMachine.getPassword().equals(""))
         {
             String rdPassword = virtualMachine.getPassword();
             otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);

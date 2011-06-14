@@ -70,7 +70,7 @@ public enum EventType implements Serializable
         "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
         311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"),
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL", "Retrieve Rack"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -92,15 +92,15 @@ public enum EventType implements Serializable
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
 
     // Stateful related events
-    STATEFUL_PROCESS_START(600, "PERSISTENT_PROCESS_START",
-        "A Persistent conversion process has started"), STATEFUL_RAW_FINISHED(601,
+    PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
+        "A Persistent conversion process has started"), PERSISTENT_RAW_FINISHED(601,
         "PERSISTENT_RAW_FINISHED",
-        "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), STATEFUL_VOLUME_CREATED(
-        602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), STATEFUL_DUMP_ENQUEUED(
-        603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), STATEFUL_DUMP_FINISHED(
-        604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), STATEFUL_PROCESS_FINISHED(
-        605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), STATEFUL_PROCESS_FAILED(
-        606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), STATEFUL_INITIATOR_ADDED(
+        "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), PERSISTENT_VOLUME_CREATED(
+        602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), PERSISTENT_DUMP_ENQUEUED(
+        603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), PERSISTENT_DUMP_FINISHED(
+        604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), PERSISTENT_PROCESS_FINISHED(
+        605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), PERSISTENT_PROCESS_FAILED(
+        606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), PERSISTENT_INITIATOR_ADDED(
         607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
 
     // License related events

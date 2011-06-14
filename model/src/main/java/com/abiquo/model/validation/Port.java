@@ -66,6 +66,11 @@ public @interface Port
             {
                 return true;
             }
+            
+            if (port.required() && value == null)
+            {
+                return false;
+            }
 
             Boolean valid = value >= 0 && value <= 65535;
             

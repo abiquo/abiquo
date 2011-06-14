@@ -10,6 +10,7 @@
 		<!-- infrastructure -->
  		<class>com.abiquo.server.core.infrastructure.Datacenter</class>
 		<class>com.abiquo.server.core.infrastructure.Rack</class>
+		<class>com.abiquo.server.core.infrastructure.UcsRack</class>
 		<class>com.abiquo.server.core.infrastructure.Machine</class>
 		<class>com.abiquo.server.core.infrastructure.RemoteService</class>
 		<class>com.abiquo.server.core.infrastructure.Datastore</class>

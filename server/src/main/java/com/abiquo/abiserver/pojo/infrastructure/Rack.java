@@ -40,6 +40,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
     
     private Boolean haEnabled;
 
+    private final String type = "Standard Rack";
     /* ------------- Constructor ------------- */
     public Rack()
     {
@@ -129,6 +130,13 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         rack.setName(dto.getName());
         rack.setShortDescription(dto.getShortDescription());
         rack.setHaEnabled(dto.isHaEnabled());
+        VlanNetworkParameters vlanNetworkParameters =
+            new VlanNetworkParameters(dto.getVlanIdMin(),
+                dto.getVlanIdMax(),
+                dto.getVlansIdAvoided(),
+                dto.getNrsq(),
+                dto.getVlanPerVdcExpected());
+        rack.setVlanNetworkParameters(vlanNetworkParameters);
 
         return rack;
     }

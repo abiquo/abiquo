@@ -55,7 +55,7 @@ public class DatacenterService extends DefaultApiService
     InfrastructureRep repo;
 
     @Autowired
-    RemoteServiceService remoteServiceService;
+    InfrastructureService infrastructureService;
 
     public DatacenterService()
     {
@@ -65,7 +65,7 @@ public class DatacenterService extends DefaultApiService
     public DatacenterService(final EntityManager em)
     {
         repo = new InfrastructureRep(em);
-        remoteServiceService = new RemoteServiceService(em);
+        infrastructureService = new InfrastructureService(em);
     }
 
     public Collection<Datacenter> getDatacenters()
@@ -110,7 +110,7 @@ public class DatacenterService extends DefaultApiService
             for (RemoteServiceDto rsd : dto.getRemoteServices().getCollection())
             {
                 RemoteServiceDto rsDto =
-                    remoteServiceService.addRemoteService(rsd, datacenter.getId());
+                    infrastructureService.addRemoteService(rsd, datacenter.getId());
                 responseRemoteService.add(rsDto);
             }
             responseDto.setRemoteServices(responseRemoteService);
