@@ -1,3 +1,5 @@
+DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
+
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 
