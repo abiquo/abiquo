@@ -23,7 +23,7 @@ package com.abiquo.abiserver.business;
 
 import java.util.List;
 
-import com.abiquo.abiserver.business.authentication.AuthenticationManagerDB;
+import com.abiquo.abiserver.business.authentication.AuthenticationManagerApi;
 import com.abiquo.abiserver.business.authentication.IAuthenticationManager;
 import com.abiquo.abiserver.business.authorization.IAuthorizationManager;
 import com.abiquo.abiserver.pojo.authentication.Login;
@@ -53,8 +53,7 @@ public class AuthService
 
     private AuthService()
     {
-        // TODO Instantiate convenient authentication and authorization managers
-        authenticationManager = new AuthenticationManagerDB();
+        authenticationManager = new AuthenticationManagerApi();
     }
 
     public static AuthService getInstance()

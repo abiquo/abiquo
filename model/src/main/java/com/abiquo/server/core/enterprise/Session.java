@@ -49,12 +49,18 @@ public class Session extends DefaultEntityBase
     {
     }
 
-    protected Session(User user, String key, Date expireDate)
+    protected Session(User user, String key, Date expireDate, String authType)
     {
         setUser(user);
         setNick(user.getNick());
         setKey(key);
         setExpireDate(expireDate);
+        setAuthType(authType);
+    }
+
+    protected Session(User user, String key, Date expireDate)
+    {
+        this(user, key, expireDate, User.AuthType.ABIQUO.name());
     }
 
     private final static String ID_COLUMN = "id";
@@ -122,5 +128,18 @@ public class Session extends DefaultEntityBase
     private void setUser(User user)
     {
         this.user = user;
+    }
+
+    @Column(name = "authType", nullable = false)
+    private String authType;
+
+    public String getAuthType()
+    {
+        return authType;
+   }
+
+    private void setAuthType(String authType)
+    {
+        this.authType = authType;
     }
 }

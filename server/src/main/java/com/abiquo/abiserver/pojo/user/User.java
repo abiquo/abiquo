@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -60,6 +61,18 @@ public class User implements IPojo<UserHB>
     private Enterprise enterprise;
 
     private Integer[] availableVirtualDatacenters;
+
+    private AuthType authType;
+
+    public AuthType getAuthType()
+    {
+        return authType;
+    }
+
+    public void setAuthType(AuthType authType)
+    {
+        this.authType = authType;
+    }
 
     public Integer[] getAvailableVirtualDatacenters()
     {
@@ -202,6 +215,7 @@ public class User implements IPojo<UserHB>
         userHB.setLocale(locale);
         userHB.setPassword(pass);
         userHB.setActive(active ? 1 : 0);
+        userHB.setAuthType(authType.name());
         if (enterprise != null)
         {
             userHB.setEnterpriseHB(enterprise.toPojoHB());
@@ -230,7 +244,8 @@ public class User implements IPojo<UserHB>
         user.setLocale(dto.getLocale());
         user.setPass(dto.getPassword());
         user.setActive(dto.isActive());
-
+	user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
+            .valueOf(dto.getAuthType()));
         if (!StringUtils.isEmpty(dto.getAvailableVirtualDatacenters()))
         {
             String[] ids = dto.getAvailableVirtualDatacenters().split(",");

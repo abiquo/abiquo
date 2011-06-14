@@ -20,6 +20,7 @@
  */
 package com.abiquo.api.spring.security;
 
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * User details service to load user information from database using the Abiquo persistende layer.
@@ -51,6 +53,30 @@ public class AbiquoUserDetailsService implements UserDetailsService
     @Autowired
     protected EnterpriseRep enterpriseRep;
 
+    /** The authentication type. */
+    protected AuthType authType;
+
+    public AuthType getAuthType()
+    {
+        return authType;
+    }
+
+    /**
+     * Allows to set the proper provider.
+     * 
+     * @param authType a {@link AuthType} value.
+     */
+    public void setAuthType(AuthType authType)
+   {
+        this.authType = authType;
+    }
+
+    @PostConstruct
+    public void init()
+    {
+        authType = null;
+    }
+
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException,
         DataAccessException
@@ -58,7 +84,15 @@ public class AbiquoUserDetailsService implements UserDetailsService
         User user = null;
         try
         {
-            user = enterpriseRep.getUserByUserName(username);
+       // If we are not coming from remember me we need to call the abiquo db.
+            if (authType == null)
+            {
+                authType = AuthType.ABIQUO;
+            }
+            user = enterpriseRep.getUserByAuth(username, authType);
+
+            // for next logins
+            authType = null;
         }
         catch (Exception ex)
         {
@@ -78,6 +112,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         userDetails.setActive(user.getActive() == 1);
         userDetails.setEnterpriseId(user.getEnterprise().getId());
         userDetails.setEnterpriseName(user.getEnterprise().getName());
+        userDetails.setAuthType(user.getAuthType().name());
 
         // Set user authorities
         GrantedAuthority[] authorities = loadUserAuthorities(user);
@@ -95,6 +130,12 @@ public class AbiquoUserDetailsService implements UserDetailsService
     protected GrantedAuthority[] loadUserAuthorities(final User user)
     {
         String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
+        if (DEFAULT_ROLE != null)
+        {
+            return new GrantedAuthority[] {new GrantedAuthorityImpl(role),
+            new GrantedAuthorityImpl(DEFAULT_ROLE)};
+        }
+ 
         return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
     }
 

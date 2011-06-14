@@ -112,4 +112,17 @@ public class AbiConfig
 
         return new LimitHB(hard, soft);
     }
+
+    /**
+     * Whether Abiquo should try to connecto to DB or LDAP/Active Directory and DB.
+     * 
+     * @return <ul>
+     *         <li>abiquo: if DB login only</li>
+    *         <li>ldap: if LDAP and DB authentication</li>
+     *         </ul>
+     */
+    public String getAbiquoSecurityMode()
+    {
+        return System.getProperty("abiquo.auth.module");
+    }
 }

@@ -36,6 +36,7 @@ import com.abiquo.api.resources.DatastoreResource;
 import com.abiquo.api.resources.DatastoresResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.resources.LoginResource;
 import com.abiquo.api.resources.MachineResource;
 import com.abiquo.api.resources.MachinesResource;
 import com.abiquo.api.resources.RackResource;
@@ -704,6 +705,11 @@ public class UriTestResolver
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
         return resolveURI(template, Collections.singletonMap(
             SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+    }
+
+    public static String resolveLoginURI()
+    {
+        return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
     }
 
 }

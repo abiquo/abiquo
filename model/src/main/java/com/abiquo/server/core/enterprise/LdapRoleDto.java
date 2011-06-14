@@ -19,40 +19,37 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.vo.authentication
+package com.abiquo.server.core.enterprise;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "")
+public class LdapRoleDto extends SingleResourceTransportDto
 {
+    private Integer id;
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.authentication.UserSession")]
-    [Bindable]
-    public class Session
+    public Integer getId()
     {
-        /* ------------- Public atributes ------------- */
-        public var id:int;
-
-        public var user:String;
-
-        public var key:String;
-
-        public var expireDate:Date;
-
-        public var locale:String;
-
-	public var enterpriseName:String;
-
-	public var userIdDb:int;
-
-        public var authType:String;
-
-        /* ------------- Constructor ------------- */
-        public function Session()
-        {
-            id = 0;
-            user = "";
-            key = "";
-            expireDate = new Date();
-            locale = "";
-            authType = "ABIQUO";
-        }
-
+        return id;
     }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private String ldapRole;
+
+    public String getLdapRole()
+    {
+        return ldapRole;
+    }
+
+    public void setLdapRole(String ldapRole)
+    {
+        this.ldapRole = ldapRole;
+    }
+
 }

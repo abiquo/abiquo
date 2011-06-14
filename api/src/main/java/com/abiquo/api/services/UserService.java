@@ -50,6 +50,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
 
 @Service
@@ -78,11 +79,24 @@ public class UserService extends DefaultApiService
      */
     public User getCurrentUser()
     {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
+        {
+            AbiquoUserDetails details =
+                (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal();
 
-        return repo.getUserByUserName(userName);
+            AuthType authType =
+                AuthType.valueOf(details.getAuthType() != null ? details.getAuthType()
+                    : AuthType.ABIQUO.name());
+            return repo.getUserByAuth(details.getUsername(), authType);
+        }
+        else
+        { // Backward compatibility and bzngine
+ 
+            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+            return repo.getUserByAuth(userName, AuthType.ABIQUO);
+        }
     }
-
     // TODO: Remove unused method
     // public Collection<User> getUsers()
     // {
@@ -169,7 +183,7 @@ public class UserService extends DefaultApiService
             addValidationErrors(user.getValidationErrors());
             flushErrors();
         }
-        if (repo.existAnyUserWithNick(user.getNick()))
+        if (repo.existAnyUserWithNickAndAuth(user.getNick(), AuthType.ABIQUO))
         {
             addConflictErrors(APIError.USER_DUPLICATED_NICK);
             flushErrors();
