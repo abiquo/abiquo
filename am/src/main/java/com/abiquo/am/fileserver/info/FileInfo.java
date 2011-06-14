@@ -102,6 +102,11 @@ public class FileInfo implements AsyncHandler<Boolean>
     @Override
     public STATE onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception
     {
+        if(isCancell)
+        {
+            return STATE.ABORT;
+        }
+        
         try
         {
             byte[] bodyBytes = bodyPart.getBodyPartBytes();
@@ -344,6 +349,7 @@ public class FileInfo implements AsyncHandler<Boolean>
     public void onCancel()
     {
         isDone = true;
+        isCancell = true;
 
         if (!isAlreadyBeingDownload)
         {
