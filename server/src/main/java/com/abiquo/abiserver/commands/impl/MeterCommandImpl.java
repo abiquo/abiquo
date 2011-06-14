@@ -77,7 +77,8 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
         {
             factory.beginConnection();
 
-            UserHB user = userDAO.getUserByUserName(userSession.getUser());
+            UserHB user =
+                userDAO.getUserByLoginAuth(userSession.getUser(), userSession.getAuthType());
 
             // We split all the users inside the string separated by "/";
             List<String> listOfUsers = new ArrayList<String>();

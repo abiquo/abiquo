@@ -55,6 +55,7 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
      * @see com.abiquo.abiserver.persistence.dao.user.UserDAO#getUserByUserName(java.lang.String)
      */
     @Override
+    @Deprecated
     public UserHB getUserByUserName(final String username)
     {
         return getUserByLoginAuth(username, AuthType.ABIQUO.name());

@@ -867,7 +867,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             currentStateAndAllow =
                 dao.checkVirtualApplianceState(virtualAppliance, StateEnum.IN_PROGRESS);
 
-            userHB = factory.getUserDAO().getUserByUserName(userSession.getUser());
+            userHB =
+                factory.getUserDAO().getUserByLoginAuth(userSession.getUser(),
+                    userSession.getAuthType());
 
             factory.endConnection();
         }
@@ -1634,7 +1636,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
             UserDAO userDAO = factory.getUserDAO();
 
-            UserHB user = userDAO.getUserByUserName(userSession.getUser());
+            UserHB user =
+                userDAO.getUserByLoginAuth(userSession.getUser(), userSession.getAuthType());
             try
             {
                 Collection<VirtualappHB> vAppsHB = get(user, dao);
