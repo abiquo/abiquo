@@ -21,16 +21,6 @@
 
 package com.abiquo.vsm.redis.pubsub.notifier.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
-import com.abiquo.vsm.events.VMEventType;
-import com.abiquo.vsm.model.PhysicalMachine;
-import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
 
 /**
