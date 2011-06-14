@@ -92,15 +92,15 @@ public enum EventType implements Serializable
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
 
     // Stateful related events
-    STATEFUL_PROCESS_START(600, "PERSISTENT_PROCESS_START",
-        "A Persistent conversion process has started"), STATEFUL_RAW_FINISHED(601,
+    PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
+        "A Persistent conversion process has started"), PERSISTENT_RAW_FINISHED(601,
         "PERSISTENT_RAW_FINISHED",
-        "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), STATEFUL_VOLUME_CREATED(
-        602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), STATEFUL_DUMP_ENQUEUED(
-        603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), STATEFUL_DUMP_FINISHED(
-        604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), STATEFUL_PROCESS_FINISHED(
-        605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), STATEFUL_PROCESS_FAILED(
-        606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), STATEFUL_INITIATOR_ADDED(
+        "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), PERSISTENT_VOLUME_CREATED(
+        602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), PERSISTENT_DUMP_ENQUEUED(
+        603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), PERSISTENT_DUMP_FINISHED(
+        604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), PERSISTENT_PROCESS_FINISHED(
+        605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), PERSISTENT_PROCESS_FAILED(
+        606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), PERSISTENT_INITIATOR_ADDED(
         607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
 
     // License related events
