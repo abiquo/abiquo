@@ -299,12 +299,12 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     String msg =
                         "The Virtual Switch "
                             + vnic.getVSwitchName()
-                            + " couln't be found in the hypervisor. The virtual machine networking resources can't be configured. ";
+                            + " coudln't be found in the hypervisor. The virtual machine networking resources can't be configured. ";
 
                     if (vnic.getVSwitchName().toLowerCase().startsWith("dvs"))
                     {
                         msg +=
-                            "Maybe you have the Distributed Virtual Switch funtionallity disabled?";
+                            "Maybe you have the Distributed Virtual Switch functionality disabled?";
                     }
                     throw new VirtualMachineException(msg);
                 }
