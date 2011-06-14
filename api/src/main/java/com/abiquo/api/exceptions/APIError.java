@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 
 /**
  * Contains all the errors notified by the API.
@@ -128,9 +129,9 @@ public enum APIError
         "MACHINE-1", "The machine is not assigned to the datacenter or rack"), MACHINE_ANY_DATASTORE_DEFINED(
         "MACHINE-2", "Machine definition should have at least one datastore created and enabled"), MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK(
         "MACHINE-3", "A machine can not be added this way to a UCS Rack"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
-        "MACHINE-4", "Invalid virtual switch name"), INVALID_STATE_CHANGE(
-        "MACHINE-5", "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE(
-        "MACHINE-6", "The requested machine could not be contacted"),
+        "MACHINE-4", "Invalid virtual switch name"), INVALID_STATE_CHANGE("MACHINE-5",
+        "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE("MACHINE-6",
+        "The requested machine could not be contacted"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -296,7 +297,8 @@ public enum APIError
         "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
         "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
-        "VOL-13", "The property idScsi " + IscsiPath.ERROR_MESSAGE),
+        "VOL-12", "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-13",
+        "The size property must be an non-zero integer bewteen up to " + Rasd.LIMIT_MAX),
 
     // RULES
 
@@ -358,8 +360,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
