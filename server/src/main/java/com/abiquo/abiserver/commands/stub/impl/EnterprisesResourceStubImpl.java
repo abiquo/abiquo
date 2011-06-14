@@ -22,7 +22,6 @@ package com.abiquo.abiserver.commands.stub.impl;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.wink.client.ClientResponse;
@@ -31,8 +30,6 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -53,7 +50,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 {
 
     @Override
-    public DataResult<Enterprise> createEnterprise(Enterprise enterprise)
+    public DataResult<Enterprise> createEnterprise(final Enterprise enterprise)
     {
         String uri = createEnterprisesLink(null, null, null);
 
@@ -94,7 +91,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    public DataResult<Enterprise> editEnterprise(Enterprise enterprise)
+    @Override
+    public DataResult<Enterprise> editEnterprise(final Enterprise enterprise)
     {
         DataResult<Enterprise> result;
         ErrorsDto errors = modifyDatacenterLimits(enterprise);
@@ -104,8 +102,9 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             result = new DataResult<Enterprise>();
             result.setSuccess(false);
             result.setMessage("Can't edit the datacenter limits :\n" + errors.toString());
+            return result;
         }
-        
+
         errors = modifyReservedMachines(enterprise);
 
         if (errors != null)
@@ -113,6 +112,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             result = new DataResult<Enterprise>();
             result.setSuccess(false);
             result.setMessage("Can't edit the physical machine reserved:\n" + errors.toString());
+            return result;
         }
 
         String uri = createEnterpriseLink(enterprise.getId());
@@ -137,7 +137,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    protected EnterpriseDto fromEnterpriseToDto(Enterprise enterprise)
+    protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
@@ -146,8 +146,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return (EnterpriseDto) fillLimits(dto, limits);
     }
 
-    protected SingleResourceWithLimitsDto fillLimits(SingleResourceWithLimitsDto dto,
-        ResourceAllocationLimit limits)
+    protected SingleResourceWithLimitsDto fillLimits(final SingleResourceWithLimitsDto dto,
+        final ResourceAllocationLimit limits)
     {
         dto.setCpuCountLimits((int) limits.getCpu().getSoft(), (int) limits.getCpu().getHard());
         dto.setRamLimitsInMb((int) limits.getRam().getSoft(), (int) limits.getRam().getHard());
@@ -158,7 +158,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return dto;
     }
 
-    protected ErrorsDto createDatacenterLimits(Enterprise enterprise, Enterprise data)
+    protected ErrorsDto createDatacenterLimits(final Enterprise enterprise, final Enterprise data)
     {
         if (CollectionUtils.isEmpty(enterprise.getDcLimits()))
         {
@@ -194,21 +194,19 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return null;
     }
 
-    protected ErrorsDto modifyDatacenterLimits(Enterprise ent)
+    protected ErrorsDto modifyDatacenterLimits(final Enterprise ent)
     {
         // community impl (no limit)
         return null;
     }
-    
-    protected ErrorsDto modifyReservedMachines(Enterprise ent)
-    {
-        // community impl (no limit)
-        return null;
-    }
-    
-    
 
-    private ErrorsDto assignMachines(Enterprise enterprise, Enterprise data)
+    protected ErrorsDto modifyReservedMachines(final Enterprise ent)
+    {
+        // community impl (no limit)
+        return null;
+    }
+
+    private ErrorsDto assignMachines(final Enterprise enterprise, final Enterprise data)
     {
         if (CollectionUtils.isEmpty(enterprise.getReservedMachines()))
         {
@@ -236,7 +234,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
     }
 
     @Override
-    public BasicResult deleteEnterprise(Integer enterpriseId)
+    public BasicResult deleteEnterprise(final Integer enterpriseId)
     {
         BasicResult result = new BasicResult();
 
@@ -255,21 +253,22 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    protected String createReservedMachinesUri(Enterprise enterprise)
+    protected String createReservedMachinesUri(final Enterprise enterprise)
     {
         String uri = createEnterpriseLink(enterprise.getId());
 
         return UriHelper.appendPathToBaseUri(uri, "reservedmachines");
     }
 
-    protected String createDatacenterLimitsUri(Enterprise enterprise)
+    protected String createDatacenterLimitsUri(final Enterprise enterprise)
     {
         String uri = createEnterpriseLink(enterprise.getId());
 
         return UriHelper.appendPathToBaseUri(uri, "limits");
     }
 
-    public DataResult<EnterpriseListResult> getEnterprises(ListRequest enterpriseListOptions)
+    @Override
+    public DataResult<EnterpriseListResult> getEnterprises(final ListRequest enterpriseListOptions)
     {
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
 
@@ -306,7 +305,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    public DataResult<Enterprise> getEnterprise(Integer enterpriseId)
+    @Override
+    public DataResult<Enterprise> getEnterprise(final Integer enterpriseId)
     {
         DataResult<Enterprise> result = new DataResult<Enterprise>();
 
@@ -330,7 +330,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    protected Enterprise getEnterprise(ClientResponse response)
+    protected Enterprise getEnterprise(final ClientResponse response)
     {
         EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
         Enterprise enterprise = Enterprise.create(responseDto);
