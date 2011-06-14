@@ -60,6 +60,7 @@ public class UserServiceTest extends AbstractGeneratorTest
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthenticationStub());
     }
 
+    @Override
     @AfterMethod
     public void tearDown()
     {
@@ -138,7 +139,7 @@ public class UserServiceTest extends AbstractGeneratorTest
     {
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "");
+        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "", User.AuthType.ABIQUO.name());
 
         try
         {
@@ -160,7 +161,7 @@ public class UserServiceTest extends AbstractGeneratorTest
 
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "");
+        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "",  User.AuthType.ABIQUO.name());
         String roleURI = UriTestResolver.resolveRoleURI(r.getId());
         dto.addLink(new RESTLink("role", roleURI));
 

@@ -86,4 +86,40 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
         users = dao.find(user.getEnterprise(), null, null, false, false, 0, 25);
         AssertEx.assertSize(users, 2);
     }
+
+    @Test
+    public void getAbiquoUserByLogin()
+    {
+        User user1 = eg().createInstance(User.AuthType.ABIQUO);
+        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        User user = dao.getAbiquoUserByLogin(user1.getNick());
+        AssertEx.assertNotNull(user);
+    }
+
+    @Test
+    public void getUserByAuth()
+    {
+        User user1 = eg().createInstance(User.AuthType.ABIQUO);
+        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        User user = dao.getUserByAuth(user1.getNick(), User.AuthType.ABIQUO);
+        AssertEx.assertNotNull(user);
+    }
+
+    @Test
+    public void existAnyUserWithNickAndAuth()
+    {
+        User user1 = eg().createInstance(User.AuthType.ABIQUO);
+        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+
+        UserDAO dao = createDaoForRollbackTransaction();
+
+        boolean already = dao.existAnyUserWithNickAndAuth(user1.getNick(), User.AuthType.ABIQUO);
+        AssertEx.assertTrue(already);
+    }
 }

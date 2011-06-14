@@ -42,6 +42,7 @@
 		<class>com.abiquo.server.core.enterprise.User</class>
 		<class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
 		<class>com.abiquo.server.core.enterprise.Session</class>
+                <class>com.abiquo.server.core.enterprise.LdapRole</class>
 		<!-- end: enterprise -->
 
 		<!-- networking -->

@@ -19,40 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.vo.authentication
+package com.abiquo.server.core.enterprise;
+
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
+
+public class LdapRoleTest extends DefaultEntityTestBase<LdapRole>
 {
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.authentication.UserSession")]
-    [Bindable]
-    public class Session
+    @Override
+    protected InstanceTester<LdapRole> createEntityInstanceGenerator()
     {
-        /* ------------- Public atributes ------------- */
-        public var id:int;
-
-        public var user:String;
-
-        public var key:String;
-
-        public var expireDate:Date;
-
-        public var locale:String;
-
-	public var enterpriseName:String;
-
-	public var userIdDb:int;
-
-        public var authType:String;
-
-        /* ------------- Constructor ------------- */
-        public function Session()
-        {
-            id = 0;
-            user = "";
-            key = "";
-            expireDate = new Date();
-            locale = "";
-            authType = "ABIQUO";
-        }
-
+        return new LdapRoleGenerator(getSeed());
     }
+
 }

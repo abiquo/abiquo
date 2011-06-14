@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
@@ -59,6 +60,9 @@ public class EnterpriseRep extends DefaultRepBase
     private RoleDAO roleDAO;
 
     @Autowired
+    private LdapRoleDAO ldapRoleDAO;
+
+    @Autowired
     private UserDAO userDAO;
 
     @Autowired
@@ -82,6 +86,7 @@ public class EnterpriseRep extends DefaultRepBase
         virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
+        ldapRoleDAO = new LdapRoleDAO(entityManager);
     }
 
     public void insert(Enterprise enterprise)
@@ -101,6 +106,11 @@ public class EnterpriseRep extends DefaultRepBase
         assert !enterpriseDAO.existsAnyOtherWithName(enterprise, enterprise.getName()) : BUG_UPDATE_NAME_MUST_BE_UNIQUE;
 
         enterpriseDAO.flush();
+    }
+
+    public LdapRole findLdapRoleByType(String type)
+    {
+        return ldapRoleDAO.findByType(type);
     }
 
     public Enterprise findById(Integer id)
@@ -298,5 +308,33 @@ public class EnterpriseRep extends DefaultRepBase
     public void deleteLimit(DatacenterLimits limit)
     {
         limitsDAO.remove(limit);
+    }
+
+    /**
+     * {@see UserDAO#getAbiquoUserByLogin(String)}
+     */
+    public User getAbiquoUserByUserName(String nick)
+    {
+        return userDAO.getAbiquoUserByLogin(nick);
+    }
+
+    /**
+     * {@see UserDAO#getUserByAuth(String, authType)}
+     */
+    public User getUserByAuth(String nick, AuthType authType)
+    {
+        return userDAO.getUserByAuth(nick, authType);
+    }
+
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param nick login.
+     * @param authType an {@link AuthType} value.
+     * @return boolean false if there is no other user with same nick + authType. False otherwise.
+     */
+    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    {
+        return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }
 }
