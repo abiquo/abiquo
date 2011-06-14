@@ -35,7 +35,7 @@ import javax.ws.rs.core.Context;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
@@ -49,8 +49,8 @@ public class RemoteServicesResource extends AbstractResource
     public final static String REMOTE_SERVICES_PATH = "remoteServices";
 
     // @Autowired
-    @Resource(name = "remoteServiceService")
-    private RemoteServiceService service;
+    @Resource(name = "infrastructureService")
+    private InfrastructureService service;
 
     @GET
     public RemoteServicesDto getRemoteServices(

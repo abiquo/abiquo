@@ -70,7 +70,7 @@ public enum EventType implements Serializable
         "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
         311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"),
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL", "Retrieve Rack"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",

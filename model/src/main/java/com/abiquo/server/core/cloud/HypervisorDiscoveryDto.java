@@ -27,15 +27,64 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "hypervisor")
-public class HypervisorDto extends SingleResourceTransportDto
+public class HypervisorDiscoveryDto extends SingleResourceTransportDto
 {
-    private Integer id, port;
+    
+    public static final String MEDIA_TYPE = "application/discovery+xml";
+    
+    private Integer port;
 
-    private String ip, ipService;
+    private String ipFrom;
+    
+    private String ipTo;
 
     private HypervisorType type;
 
-    private String user, password;
+    private String user;
+    
+    private String password;
+    
+    private String vSwitch;
+
+    public Integer getPort()
+    {
+        return port;
+    }
+
+    public void setPort(Integer port)
+    {
+        this.port = port;
+    }
+
+    public String getIpFrom()
+    {
+        return ipFrom;
+    }
+
+    public void setIpFrom(String ipFrom)
+    {
+        this.ipFrom = ipFrom;
+    }
+
+    public String getIpTo()
+    {
+        return ipTo;
+    }
+
+    public void setIpTo(String ipTo)
+    {
+        this.ipTo = ipTo;
+    }
+
+    public HypervisorType getType()
+    {
+        return type;
+    }
+
+    public void setType(HypervisorType type)
+    {
+        this.type = type;
+    }
 
     public String getUser()
     {
@@ -57,54 +106,14 @@ public class HypervisorDto extends SingleResourceTransportDto
         this.password = password;
     }
 
-    public Integer getId()
+    public String getvSwitch()
     {
-        return id;
+        return vSwitch;
     }
 
-    public void setId(Integer id)
+    public void setvSwitch(String vSwitch)
     {
-        this.id = id;
-    }
-
-    public String getIp()
-    {
-        return ip;
-    }
-
-    public void setIp(String ip)
-    {
-        this.ip = ip;
-    }
-
-    public String getIpService()
-    {
-        return ipService;
-    }
-
-    public void setIpService(String ipService)
-    {
-        this.ipService = ipService;
-    }
-
-    public Integer getPort()
-    {
-        return port;
-    }
-
-    public void setPort(Integer port)
-    {
-        this.port = port;
-    }
-
-    public HypervisorType getType()
-    {
-        return type;
-    }
-
-    public void setType(HypervisorType type)
-    {
-        this.type = type;
+        this.vSwitch = vSwitch;
     }
 
 }

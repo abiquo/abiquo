@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -37,6 +38,10 @@ public class MachinesDto extends WrapperDto<MachineDto>
     @XmlElement(name = "machine")
     public List<MachineDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<MachineDto>();
+        }
         return collection;
     }
 }

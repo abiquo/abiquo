@@ -376,6 +376,8 @@ package net.undf.abicloud.utils.customtree
 	        	for (var i:int = 0; i < listOfMachines.length; i++)
 	            {
 	                physicalMachine = listOfMachines.getItemAt(i) as PhysicalMachine;
+	                //UPDATE ASSIGNEDto ELEMENT
+	                physicalMachine.assignedTo = event.branch.item as InfrastructureElement;
 	                customTreeNodeChild = new CustomTreeNode(physicalMachine, physicalMachine[super.labelField],
 	                                                         this._customTreeDataDescriptor,
 	                                                         false);

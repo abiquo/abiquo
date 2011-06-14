@@ -24,6 +24,7 @@ package net.undf.abicloud.view.infrastructure.components
     import net.undf.abicloud.controller.ThemeHandler;
     import net.undf.abicloud.utils.customtree.CustomTreeNodeRenderer;
     import net.undf.abicloud.vo.infrastructure.Rack;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
 
     public class InfrastructureNodeRenderer extends CustomTreeNodeRenderer
     {
@@ -44,6 +45,7 @@ package net.undf.abicloud.view.infrastructure.components
                 this._label.setStyle("fontWeight", "bold");
             else
                 this._label.setStyle("fontWeight", "normal");
+
         }
 
     }

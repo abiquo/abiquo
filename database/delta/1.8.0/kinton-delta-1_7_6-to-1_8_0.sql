@@ -228,7 +228,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.network.publicVlan","http://community.abiquo.com/display/ABI17/Manage+Networking+Configuration#ManageNetworkingConfiguration-PublicVLANManagement","public vlan creation wiki"),
  ("client.wiki.storage.storageDevice","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StorageDevicemanagement","storage device creation wiki"),
  ("client.wiki.storage.storagePool","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StoragePoolmanagement","storage pool creation wiki"), 
- ("client.wiki.storage.tier","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-TierManagement","tier edition wiki"),
+("client.wiki.storage.tier","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-TierManagement","tier edition wiki"),
  ("client.wiki.allocation.global","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Globalrulesmanagement","global rules wiki"),
  ("client.wiki.allocation.datacenter","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Datacenterrulesmanagement","datacenter rules wiki"),
  ("client.wiki.vdc.createVdc","http://community.abiquo.com/display/ABI17/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter","virtual datacenter creation wiki"),
@@ -544,6 +544,20 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `i
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
 
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
+
+--
+-- Definition of table `kinton`.`ucs_rack`
+--
+DROP TABLE IF EXISTS `kinton`.`ucs_rack`;
+CREATE TABLE  `kinton`.`ucs_rack` (
+  `idRack` int(15) unsigned NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `port` int(5) NOT NULL,
+  `user_rack` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  KEY `id_rack_FK` (`idRack`),
+  CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
