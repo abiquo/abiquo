@@ -816,6 +816,7 @@
             private function closeVirtualApplianceBundleForm(event:Event):void
             {
                 PopUpManager.removePopUp(this._virtualApplianceBundleForm);
+                hideNodeInfoContainer();
             }
 
             /**
