@@ -21,10 +21,12 @@
 
 package com.abiquo.vsm.redis.pubsub.notifier;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
@@ -67,27 +69,32 @@ public abstract class TestNotifierBase<T extends GenericNotifier>
         // POWER_ON
         event = VMEventType.POWER_ON;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertEquals(notifications.size(), 1);
+        assertEquals(notifications.size(), 1);
+        assertTrue(notificationsFromMachine(notifications, machine));
 
         // POWER_OFF
         event = VMEventType.POWER_OFF;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertEquals(notifications.size(), 1);
+        assertEquals(notifications.size(), 1);
+        assertTrue(notificationsFromMachine(notifications, machine));
 
         // PAUSED
         event = VMEventType.PAUSED;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertEquals(notifications.size(), 1);
+        assertEquals(notifications.size(), 1);
+        assertTrue(notificationsFromMachine(notifications, machine));
 
         // RESUMED
         event = VMEventType.RESUMED;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertEquals(notifications.size(), 1);
+        assertEquals(notifications.size(), 1);
+        assertTrue(notificationsFromMachine(notifications, machine));
 
         // DESTROYED
         event = VMEventType.DESTROYED;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertEquals(notifications.size(), 1);
+        assertEquals(notifications.size(), 1);
+        assertTrue(notificationsFromMachine(notifications, machine));
     }
 
     @Test
@@ -114,17 +121,17 @@ public abstract class TestNotifierBase<T extends GenericNotifier>
         // SAVED
         event = VMEventType.SAVED;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // UNKNOWN
         event = VMEventType.UNKNOWN;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // CREATED
         event = VMEventType.CREATED;
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
     }
 
     @Test
@@ -152,30 +159,82 @@ public abstract class TestNotifierBase<T extends GenericNotifier>
         event = VMEventType.POWER_ON;
         vm.setLastKnownState(event.name());
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // POWER_OFF
         event = VMEventType.POWER_OFF;
         vm.setLastKnownState(event.name());
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // PAUSED
         event = VMEventType.PAUSED;
         vm.setLastKnownState(event.name());
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // RESUMED
         event = VMEventType.RESUMED;
         vm.setLastKnownState(event.name());
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
 
         // DESTROYED
         event = VMEventType.DESTROYED;
         vm.setLastKnownState(event.name());
         notifications = notifier.processEvent(vm, machine, event);
-        AssertJUnit.assertTrue(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
+    }
+
+    /**
+     * Checks if a collection of notifications contains a MOVED event.
+     * 
+     * @param notifications The collection of notifications to check
+     * @return True if the collection of notifications contains a MOVED event. Otherwise false.
+     */
+    protected boolean containsMovedEvent(final List<VirtualSystemEvent> notifications)
+    {
+        return containsEvent(VMEventType.MOVED, notifications);
+    }
+
+    /**
+     * Checks if a collection of notifications contains a certain kind of event.
+     * 
+     * @param event The event that you are looking for
+     * @param notifications The collection of notifications to check
+     * @return True if the collection of notifications contains the event. Otherwise false.
+     */
+    protected boolean containsEvent(VMEventType event, final List<VirtualSystemEvent> notifications)
+    {
+        for (VirtualSystemEvent notification : notifications)
+        {
+            if (notification.getEventType().equalsIgnoreCase(event.name()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if each notification of a collection come from the same machine.
+     * 
+     * @param notifications The collection of notifications to check
+     * @param machine The owner machine
+     * @return True if all notifications come from the same machine
+     */
+    protected boolean notificationsFromMachine(List<VirtualSystemEvent> notifications,
+        PhysicalMachine machine)
+    {
+        for (VirtualSystemEvent notification : notifications)
+        {
+            if (!notification.getVirtualSystemAddress().equalsIgnoreCase(machine.getAddress()))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
