@@ -50,8 +50,9 @@ public enum APIError
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
-        "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
+        "GEN-7", "Unexpected error"), GENERIC_OPERATION_ERROR("GEN-8",
+        "The operation could not be performed. Please, contact the Administrator."), NOT_ENOUGH_PRIVILEGES(
+        "GEN-9", "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
         "The paramter ID is different from the Entity ID"),
 
     // DATACENTER
