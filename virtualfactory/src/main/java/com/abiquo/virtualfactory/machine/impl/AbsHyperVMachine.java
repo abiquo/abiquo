@@ -162,7 +162,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         localRepositoryPath =
             localRepositoryPath.endsWith("\\") ? localRepositoryPath : localRepositoryPath + "\\";
 
-        String destinationTemp = localRepositoryPath.replace("\\", "\\\\");
+        String destinationTemp = localRepositoryPath.replace("\\", "\\\\"); // fixes path if
+                                                                            // necessary for
+                                                                            // deleting vhd
 
         destinationImagePath = destinationTemp + machineName + ".vhd";
 
