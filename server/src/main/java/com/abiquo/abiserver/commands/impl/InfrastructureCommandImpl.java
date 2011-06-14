@@ -1123,7 +1123,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Save the datastores of the physicalmachine first
             for (DatastoreHB datastore : physicalMachineHB.getDatastoresHB())
             {
-                if (datastore.getRootPath().length() < Datastore.ROOT_PATH_LENGTH_MAX)
+                if (datastore.getRootPath().length() <= Datastore.ROOT_PATH_LENGTH_MAX)
                 {
                     session.save(datastore);
                 }
