@@ -181,7 +181,7 @@
                     //Filtering virtualAppliances by virtualDataCenter
                     var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
                     var virtualAppliance:VirtualAppliance;
-                    var length:int = this._virtualAppliances.length;
+                    var length:int = this._virtualAppliances ? this._virtualAppliances.length:0;
                     var i:int;
                     for (i = 0; i < length; i++)
                     {
@@ -196,10 +196,13 @@
                     this._virtualAppliancesFiltered = virtualAppliancesFiltered;
                 }
 
-                if (virtualApplianceDataGrid)
-                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
-                if (virtualApplianceTile)
-                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
+                //Update view if _virtualAppliancesFiltered is not null
+                if(this._virtualAppliancesFiltered){
+	                if (virtualApplianceDataGrid)
+	                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
+	                if (virtualApplianceTile)
+	                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);                	
+                }
             }
 
             /**
