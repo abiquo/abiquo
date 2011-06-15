@@ -2865,18 +2865,7 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
         IF NEW.state != OLD.state THEN
             IF NEW.state = 1 THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE enterprise_resources_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE dc_enterprise_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE vdc_enterprise_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            ELSEIF NEW.state = 2 THEN
-                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
+		UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE enterprise_resources_stats 
                     SET     extStorageUsed = extStorageUsed +  reservedSize
                     WHERE idEnterprise = idEnterpriseObj;
@@ -2888,8 +2877,6 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
             END IF;     
             IF OLD.state = 1 THEN 
-                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-            ELSEIF OLD.state = 2 THEN
                 UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE enterprise_resources_stats 
