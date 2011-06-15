@@ -228,6 +228,8 @@ public class VirtualMachineService extends DefaultApiService
 
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
+        checkPauseAllowed(vm,state);
+        
         State old = vm.getState();
 
         validMachineStateChange(old, state);
@@ -318,5 +320,14 @@ public class VirtualMachineService extends DefaultApiService
             OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
 
         resource.put(docEnvelopeRunning);
+    }
+    
+    public void checkPauseAllowed(VirtualMachine vm, State state)
+    {
+        if((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
+            flushErrors();
+        }
     }
 }
