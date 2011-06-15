@@ -65,9 +65,8 @@ public class VSMListener implements VSMCallback
 
     private static final long serialVersionUID = 1L;
 
-    protected final static String IDVIRTUALAPP_SQL_BY_VM =
-        "SELECT n.idVirtualApp " + "FROM node n, nodevirtualimage ni "
-            + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
+    protected final static String IDVIRTUALAPP_SQL_BY_VM = "SELECT n.idVirtualApp "
+        + "FROM node n, nodevirtualimage ni " + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
 
     private final static String VM_BY_UUID =
         "Select vm "
@@ -116,8 +115,8 @@ public class VSMListener implements VSMCallback
                 for (Object object : results)
                 {
                     VirtualmachineHB vmHB = (VirtualmachineHB) object;
-                    logger.trace("The VM ID is: {}, The VM state is : {}", vmHB.getIdVm(), vmHB
-                        .getState());
+                    logger.trace("The VM ID is: {}, The VM state is : {}", vmHB.getIdVm(),
+                        vmHB.getState());
                 }
             }
 
@@ -137,8 +136,6 @@ public class VSMListener implements VSMCallback
                 switch (eventType)
                 {
                     case MOVED:
-                        // VM must be deleted from system and Vapp Updated
-                        onVMDestroyedEvent(session, virtualMachine.getIdVm());
                         // Physicalmachine destination must be updated
                         // VApp is also updated
                         onVMMovedEvent(session, virtualMachine, event.getVirtualSystemAddress(),
