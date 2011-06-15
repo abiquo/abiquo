@@ -203,7 +203,6 @@ public class AMConfigurationManager
                 final String msg =
                     String.format("Can not create the abiquo repositroy file mark at [%s].",
                         abiquoRepoMark.getAbsolutePath());
-
                 throw new Exception(msg, e);
             }
         }

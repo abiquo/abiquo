@@ -643,9 +643,9 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static String LIMIT_COLUMN = "limitResource";
 
-    private final static long LIMIT_MIN = Integer.MIN_VALUE;
+    public final static long LIMIT_MIN = Integer.MIN_VALUE;
 
-    private final static long LIMIT_MAX = Integer.MAX_VALUE;
+    public final static long LIMIT_MAX = Integer.MAX_VALUE;
 
     @Column(name = LIMIT_COLUMN, nullable = true)
     @Range(min = LIMIT_MIN, max = LIMIT_MAX)
