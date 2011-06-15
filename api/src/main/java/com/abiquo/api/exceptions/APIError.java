@@ -46,7 +46,7 @@ public enum APIError
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
-        "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
+        "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
         "Invalid credentials"),
