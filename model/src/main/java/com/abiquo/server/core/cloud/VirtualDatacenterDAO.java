@@ -172,7 +172,8 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
-        used.setStorage(storage == null ? 0 : storage.longValue());
+        // Storage usage is stored in MB
+        used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
         used.setPublicIp(publicIps == null ? 0 : publicIps.longValue());
         used.setVlanCount(0); // TODO
 
