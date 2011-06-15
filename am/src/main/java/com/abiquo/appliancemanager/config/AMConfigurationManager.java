@@ -22,6 +22,7 @@
 package com.abiquo.appliancemanager.config;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,12 +187,24 @@ public class AMConfigurationManager
         File abiquoRepoMark = new File(repoPath + ABIQUO_REPOSITROY_FILE_MARK);
         if (!abiquoRepoMark.exists())
         {
-            final String msg =
-                String.format("The abiquo repositroy file mark at [%s] do not exist, "
-                    + "please check this folder is properly mounted (usually NFS).",
-                    abiquoRepoMark.getAbsolutePath());
+            try
+            {
+                if (!abiquoRepoMark.createNewFile())
+                {
+                    final String msg =
+                        String.format("Can not create the abiquo repositroy file mark at [%s].",
+                            abiquoRepoMark.getAbsolutePath());
 
-            throw new Exception(msg);            
+                    throw new Exception(msg);
+                }
+            }
+            catch (IOException e)
+            {
+                final String msg =
+                    String.format("Can not create the abiquo repositroy file mark at [%s].",
+                        abiquoRepoMark.getAbsolutePath());
+                throw new Exception(msg, e);
+            }
         }
 
         // [FATAL] ApplianceManager configuration error, caused by:
