@@ -105,6 +105,62 @@ public class Enterprise extends DefaultEntityWithLimits
         this.name = name;
     }
 
+    public final static String CHEF_URL_PROPERTY = "chefURL";
+
+    private final static boolean CHEF_URL_REQUIRED = false;
+
+    public final static int CHEF_URL_LENGTH_MIN = 1;
+
+    public final static int CHEF_URL_LENGTH_MAX = 255;
+
+    private final static boolean CHEF_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_URL_COLUMN = "chef_url";
+
+    @Column(name = CHEF_URL_COLUMN, nullable = !CHEF_URL_REQUIRED, length = CHEF_URL_LENGTH_MAX)
+    private String chefURL;
+
+    @Required(value = CHEF_URL_REQUIRED)
+    @Length(min = CHEF_URL_LENGTH_MIN, max = CHEF_URL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefURL()
+    {
+        return this.chefURL;
+    }
+
+    public void setchefURL(String URL)
+    {
+        this.chefURL = URL;
+    }
+
+    public final static String CHEF_CERTIFICATE_PROPERTY = "chefCertificate";
+
+    private final static boolean CHEF_CERTIFICATE_REQUIRED = false;
+
+    public final static int CHEF_CERTIFICATE_LENGTH_MIN = 1;
+
+    public final static int CHEF_CERTIFICATE_LENGTH_MAX = 255;
+
+    private final static boolean CHEF_CERTIFICATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_CERTIFICATE_COLUMN = "chef_certificate";
+
+    @Column(name = CHEF_CERTIFICATE_COLUMN, nullable = !CHEF_CERTIFICATE_REQUIRED, length = CHEF_CERTIFICATE_LENGTH_MAX)
+    private String chefCertificate;
+
+    @Required(value = CHEF_CERTIFICATE_REQUIRED)
+    @Length(min = CHEF_CERTIFICATE_LENGTH_MIN, max = CHEF_CERTIFICATE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_CERTIFICATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getCertificate()
+    {
+        return this.chefCertificate;
+    }
+
+    public void setCertificate(String certificate)
+    {
+        this.chefCertificate = certificate;
+    }
+
     public final static String REPOSITORY_SOFT_PROPERTY = "repositorySoft";
 
     /* package */final static String REPOSITORY_SOFT_COLUMN = "repositorySoft";

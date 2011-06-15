@@ -64,6 +64,10 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
     private String defaultTheme;
 
+    private String chefURL;
+
+    private String chefCertificate;
+
     public Enterprise()
     {
         reservedMachines = new ArrayList<PhysicalMachine>();
@@ -89,6 +93,26 @@ public class Enterprise implements IPojo<EnterpriseHB>
     public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public void setChefURL(final String URL)
+    {
+        this.chefURL = URL;
+    }
+
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefCertificate(final String certificate)
+    {
+        this.chefCertificate = certificate;
+    }
+
+    public String getChefCertificate()
+    {
+        return chefCertificate;
     }
 
     /**

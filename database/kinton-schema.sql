@@ -359,6 +359,8 @@ CREATE TABLE  `kinton`.`enterprise` (
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
   `version_c` integer NOT NULL DEFAULT 1,
+  `chef_url` varchar(255) default NULL,
+  `chef_certificate` varchar(255) default NULL,
   PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
@@ -368,7 +370,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'','');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
@@ -996,6 +998,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
+  `chef` int(1) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
   KEY `virtualImage_FK3` (`idRepository`),

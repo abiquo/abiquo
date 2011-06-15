@@ -67,6 +67,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private int stateful;
 
+    private Boolean chef;
+
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -192,6 +194,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     public void setDeleted(final Boolean deleted)
     {
         this.deleted = deleted;
+    }
+
+    public Boolean isChef()
+    {
+        return chef;
+    }
+
+    public void setChef(final Boolean isChef)
+    {
+        this.chef = isChef;
     }
 
     public DiskFormatType getDiskFormatType()
