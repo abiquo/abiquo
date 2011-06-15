@@ -24,13 +24,13 @@ package com.abiquo.server.core.enterprise;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-public class LdapRoleTest extends DefaultEntityTestBase<LdapRole>
+public class RoleLdapTest extends DefaultEntityTestBase<RoleLdap>
 {
 
     @Override
-    protected InstanceTester<LdapRole> createEntityInstanceGenerator()
+    protected InstanceTester<RoleLdap> createEntityInstanceGenerator()
     {
-        return new LdapRoleGenerator(getSeed());
+        return new RoleLdapGenerator(getSeed());
     }
 
 }

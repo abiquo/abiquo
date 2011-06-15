@@ -39,17 +39,17 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = LdapRole.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = LdapRole.TABLE_NAME)
-public class LdapRole extends DefaultEntityBase
+@Table(name = RoleLdap.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = RoleLdap.TABLE_NAME)
+public class RoleLdap extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "role_ldap";
 
-    protected LdapRole()
+    protected RoleLdap()
     {
     }
 
-    public LdapRole(String ldapRole, Role role)
+    public RoleLdap(String ldapRole, Role role)
     {
         this.ldapRole = ldapRole;
         this.role = role;

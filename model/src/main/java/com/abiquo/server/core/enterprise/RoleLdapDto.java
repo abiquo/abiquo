@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "")
-public class LdapRoleDto extends SingleResourceTransportDto
+public class RoleLdapDto extends SingleResourceTransportDto
 {
     private Integer id;
 

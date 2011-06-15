@@ -27,46 +27,46 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class LdapRoleGenerator extends DefaultEntityGenerator<LdapRole>
+public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
 {
 
     private RoleGenerator roleGenerator = null;
 
-    public LdapRoleGenerator(SeedGenerator seed)
+    public RoleLdapGenerator(SeedGenerator seed)
     {
         super(seed);
         roleGenerator = new RoleGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(LdapRole obj1, LdapRole obj2)
+    public void assertAllPropertiesEqual(RoleLdap obj1, RoleLdap obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2);
         roleGenerator.assertAllPropertiesEqual(obj1.getRole(), obj2.getRole());
     }
 
     @Override
-    public LdapRole createUniqueInstance()
+    public RoleLdap createUniqueInstance()
     {
         // FIXME: Write here how to create the pojo
 
         return createInstance(newString(nextSeed(), 1, 128));
     }
 
-    public LdapRole createUniqueInstance(String type)
+    public RoleLdap createUniqueInstance(String type)
     {
         return createInstance(type);
     }
 
-    private LdapRole createInstance(String type)
+    private RoleLdap createInstance(String type)
     {
-        LdapRole ldapRole = new LdapRole(type, roleGenerator.createUniqueInstance());
+        RoleLdap ldapRole = new RoleLdap(type, roleGenerator.createUniqueInstance());
 
         return ldapRole;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(LdapRole entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(RoleLdap entity, List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
