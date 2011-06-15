@@ -40,26 +40,26 @@ public class MachineLoadRuleDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private int cpuLoadPercentage;
+    private Integer cpuLoadPercentage;
 
-    public int getCpuLoadPercentage()
+    public Integer getCpuLoadPercentage()
     {
         return cpuLoadPercentage;
     }
 
-    public void setCpuLoadPercentage(int cpuLoadPercentage)
+    public void setCpuLoadPercentage(Integer cpuLoadPercentage)
     {
         this.cpuLoadPercentage = cpuLoadPercentage;
     }
 
-    private int ramLoadPercentage;
+    private Integer ramLoadPercentage;
 
-    public int getRamLoadPercentage()
+    public Integer getRamLoadPercentage()
     {
         return ramLoadPercentage;
     }
 
-    public void setRamLoadPercentage(int ramLoadPercentage)
+    public void setRamLoadPercentage(Integer ramLoadPercentage)
     {
         this.ramLoadPercentage = ramLoadPercentage;
     }
