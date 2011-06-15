@@ -60,7 +60,7 @@ public class EnterpriseRep extends DefaultRepBase
     private RoleDAO roleDAO;
 
     @Autowired
-    private LdapRoleDAO ldapRoleDAO;
+    private RoleLdapDAO ldapRoleDAO;
 
     @Autowired
     private UserDAO userDAO;
@@ -86,7 +86,7 @@ public class EnterpriseRep extends DefaultRepBase
         virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
-        ldapRoleDAO = new LdapRoleDAO(entityManager);
+        ldapRoleDAO = new RoleLdapDAO(entityManager);
     }
 
     public void insert(Enterprise enterprise)
@@ -108,7 +108,7 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
-    public LdapRole findLdapRoleByType(String type)
+    public RoleLdap findLdapRoleByType(String type)
     {
         return ldapRoleDAO.findByType(type);
     }

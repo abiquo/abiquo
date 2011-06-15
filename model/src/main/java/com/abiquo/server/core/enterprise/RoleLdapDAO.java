@@ -31,19 +31,19 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 /**
- * This class provides access to DB in order to query for {@link LdapRole}.
+ * This class provides access to DB in order to query for {@link RoleLdap}.
  * 
  * @author ssedano
  */
 @Repository("jpaLdapRoleDAO")
-public class LdapRoleDAO extends DefaultDAOBase<Integer, LdapRole>
+public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 {
     /**
      * Constructor.
      */
-    public LdapRoleDAO()
+    public RoleLdapDAO()
     {
-        super(LdapRole.class);
+        super(RoleLdap.class);
     }
 
     /**
@@ -51,9 +51,9 @@ public class LdapRoleDAO extends DefaultDAOBase<Integer, LdapRole>
      * 
      * @param entityManager entitimanager.
      */
-    public LdapRoleDAO(EntityManager entityManager)
+    public RoleLdapDAO(EntityManager entityManager)
     {
-        super(LdapRole.class, entityManager);
+        super(RoleLdap.class, entityManager);
     }
 
     /**
@@ -62,7 +62,7 @@ public class LdapRoleDAO extends DefaultDAOBase<Integer, LdapRole>
      * @param type name of the <code>LdapRoleDAO</code>
      * @return <code>LdapRoleDAO</code>s which type mathes name
      */
-    public LdapRole findByType(String type)
+    public RoleLdap findByType(String type)
     {
         if (type == null)
         {
@@ -70,7 +70,7 @@ public class LdapRoleDAO extends DefaultDAOBase<Integer, LdapRole>
         }
         // If at some point a single ldapRole will map more than one role, the implementation of
         // this function must change.
-        LdapRole role = (LdapRole) createCriteria(type).uniqueResult();
+        RoleLdap role = (RoleLdap) createCriteria(type).uniqueResult();
 
         return role;
     }

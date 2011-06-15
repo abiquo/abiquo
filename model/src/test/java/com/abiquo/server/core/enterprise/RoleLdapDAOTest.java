@@ -32,7 +32,7 @@ import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerF
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
+public class RoleLdapDAOTest extends DefaultDAOTestBase<RoleLdapDAO, RoleLdap>
 {
 
     @Override
@@ -47,15 +47,15 @@ public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
     }
 
     @Override
-    protected LdapRoleDAO createDao(EntityManager entityManager)
+    protected RoleLdapDAO createDao(EntityManager entityManager)
     {
-        return new LdapRoleDAO(entityManager);
+        return new RoleLdapDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<LdapRole> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<RoleLdap> createEntityInstanceGenerator()
     {
-        return new LdapRoleGenerator(getSeed());
+        return new RoleLdapGenerator(getSeed());
     }
 
     @Override
@@ -65,22 +65,22 @@ public class LdapRoleDAOTest extends DefaultDAOTestBase<LdapRoleDAO, LdapRole>
     }
 
     @Override
-    public LdapRoleGenerator eg()
+    public RoleLdapGenerator eg()
     {
-        return (LdapRoleGenerator) super.eg();
+        return (RoleLdapGenerator) super.eg();
     }
 
     @Test(enabled = false)
     public void findByType()
     {
-        LdapRole ldapRole = eg().createUniqueInstance();
+        RoleLdap ldapRole = eg().createUniqueInstance();
         ds().persistAll(ldapRole);
-        LdapRoleDAO dao = createDaoForReadWriteTransaction();
+        RoleLdapDAO dao = createDaoForReadWriteTransaction();
 
-        LdapRole role = dao.findByType(ldapRole.getLdapRole());
+        RoleLdap role = dao.findByType(ldapRole.getLdapRole());
         try
         {
-            AssertEx.assertPropertiesEqual(ldapRole, role, LdapRole.ROLE_PROPERTY);
+            AssertEx.assertPropertiesEqual(ldapRole, role, RoleLdap.ROLE_PROPERTY);
         }
         catch (Exception e)
         {
