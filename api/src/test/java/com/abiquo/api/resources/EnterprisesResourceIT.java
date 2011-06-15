@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
@@ -50,8 +49,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
     private String enterprisesURI = resolveEnterprisesURI();
 
-    private Resource enterpriseResource =
-        client.resource(enterprisesURI).accept(MediaType.APPLICATION_XML);
+    private Resource enterpriseResource = client.resource(enterprisesURI).accept(
+        MediaType.APPLICATION_XML);
 
     @Test
     public void getEnterpriseList()
@@ -140,7 +139,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setRepositoryLimits(0, 1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "repositoryLimits");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -150,7 +149,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setVlansLimits(0, 1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "vlansLimits");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -160,7 +159,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setCpuCountSoftLimit(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "cpuCountSoftLimit");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -170,7 +169,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setHdHardLimitInMb(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "hdLimitsInMb");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     @Test
@@ -180,7 +179,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e.setRamHardLimitInMb(-1);
 
         ClientResponse response = postEnterprise(e);
-        assertErrors(response, "ramLimitsInMb");
+        assertEquals(response.getStatusCode(), 400);
     }
 
     private ClientResponse postEnterprise(EnterpriseDto e)

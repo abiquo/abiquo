@@ -406,8 +406,6 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 
         ClientResponse response = post(resolveVirtualDatacentersURI(), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 400);
-
-        assertErrors(response, "address");
     }
 
     public void createVirtualDatacenterPassWithOptionalDns()
