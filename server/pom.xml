@@ -92,12 +92,7 @@
             <artifactId>vsm</artifactId>
             <version>${pom.version}</version>
             <classifier>client</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-client</artifactId>
-            <version>${wink.version}</version>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
