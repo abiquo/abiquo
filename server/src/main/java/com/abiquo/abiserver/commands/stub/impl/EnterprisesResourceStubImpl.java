@@ -108,7 +108,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         {
             result = new DataResult<Enterprise>();
             result.setSuccess(false);
-            result.setMessage("Can't edit the datacenter limits :\n" + errors.toString());
+            result.setMessage(errors.toString());
             return result;
         }
 
@@ -118,7 +118,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         {
             result = new DataResult<Enterprise>();
             result.setSuccess(false);
-            result.setMessage("Can't edit the physical machine reserved:\n" + errors.toString());
+            result.setMessage(errors.toString());
             return result;
         }
 
