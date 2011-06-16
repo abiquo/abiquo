@@ -20,6 +20,7 @@
  */
 
 package com.abiquo.api.services;
+
 import javax.jms.ResourceAllocationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +60,15 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     public void checkAllocate(Integer idVirtualApp, Integer virtualMachineId,
         VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
     {
-        
+
         VirtualMachine vmachine = vmachineDao.findById(virtualMachineId);
-        
-        if(vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
+
+        if (vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
         {
             addConflictErrors(APIError.CHECK_EDIT_NO_TARGET_MACHINE);
             flushErrors();
         }
-        
+
         try
         {
             allocator.checkEditVirtualMachineResources(idVirtualApp, virtualMachineId,
@@ -75,10 +76,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (NotEnoughResourcesException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (LimitExceededException limite)
         {
@@ -86,37 +85,39 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (ResourceAllocationException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (AllocatorException e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));
         }
         catch (Exception e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addUnexpectedErrors(error);
+            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));
         }
         finally
         {
             flushErrors();
         }
-        
-        
+
         final int cpuIncrease = newVmRequirements.getCpu() - vmachine.getCpu();
         final int ramIncrease = newVmRequirements.getRam() - vmachine.getRam();
-        
 
         upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), cpuIncrease, ramIncrease);
 
+    }
+
+    private CommonError createErrorWithExceptionDetails(APIError apiError,
+        Integer virtualMachineId, Exception e)
+    {
+        final String msg =
+            String.format("%s (%s)\n%s", apiError.getMessage(),
+                virtualMachineInfo(virtualMachineId), e.getMessage());
+
+        return new CommonError(apiError.getCode(), msg);
     }
 
     public VirtualMachine allocateVirtualMachine(Integer virtualMachineId, Integer idVirtualApp,
