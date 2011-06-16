@@ -630,6 +630,17 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             // have to revert to the it's state as it was before
             virtualappHBPojo =
                 (VirtualappHB) session.get("VirtualappExtendedHB", virtualAppliance.getId());
+
+            if (virtualappHBPojo == null)
+            {
+                transaction.rollback();
+                dataResult.setSuccess(false);
+                dataResult.setMessage(resourceManager
+                    .getMessage("editVirtualAppliance.modifyDeletedApp"));
+
+                return dataResult;
+            }
+
             virtualappHBPojoOld =
                 (VirtualappHB) session.get("VirtualappExtendedHB", virtualAppliance.getId());
             virtualappOld = virtualappHBPojoOld.toPojo();
@@ -857,7 +868,26 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         UserHB userHB = null;
 
         // Before start editing a VirtualAppliance, we must check that it is not
-        // already being edited by another user
+        // already being edited by another user or deleted
+
+        session = HibernateUtil.getSession();
+        transaction = session.beginTransaction();
+        VirtualappHB vapp =
+            (VirtualappHB) session.get("VirtualappExtendedHB", virtualAppliance.getId());
+
+        if (vapp == null)
+        {
+            transaction.rollback();
+            
+            dataResult.setSuccess(false);
+            dataResult.setMessage(resourceManager
+                .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
+
+            return dataResult;
+        }
+        transaction.commit();
+        
+
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
         {
