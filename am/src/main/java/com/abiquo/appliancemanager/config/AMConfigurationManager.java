@@ -187,9 +187,11 @@ public class AMConfigurationManager
         if (!abiquoRepoMark.exists())
         {
             final String msg =
-                String.format("The abiquo repositroy file mark at [%s] do not exist, "
-                    + "please check this folder is properly mounted (usually NFS).",
-                    abiquoRepoMark.getAbsolutePath());
+                String
+                    .format(
+                        "The abiquo repositroy file mark at [%s] do not exist, "
+                            + "please check this folder is properly mounted (usually NFS) the location [%s].",
+                        abiquoRepoMark.getAbsolutePath(), configuration.getRepositoryLocation());
 
             throw new Exception(msg);            
         }
