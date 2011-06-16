@@ -252,7 +252,7 @@ public class RemoteService implements IPojo<RemoteServiceHB>
 
         String serviceMappingTrim = serviceMapping.trim();
 
-        if (!StringUtils.isEmpty(serviceMappingTrim))
+        if (!StringUtils.isEmpty(serviceMappingTrim) && !(serviceMappingTrim.split(" ").length > 1))
         {
             if (!serviceMappingTrim.equals("bpm") && !serviceMappingTrim.equals("dhcp"))
             {

@@ -1488,3 +1488,9 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
+
+--
+-- Datastore rootPath longer
+--
+
+alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
