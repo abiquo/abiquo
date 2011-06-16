@@ -59,8 +59,10 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.infrastructure.Repository;
 
 @Controller
 public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryCommand
@@ -1262,4 +1264,93 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         return ovfIds;
     }
 
+    /**
+     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#getOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
+     *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
+     */
+    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
+        final String nameOVFPackageList, Integer idOVFPackageName, Integer idEnterprise,
+        Integer idRepository) throws AppsLibraryCommandException
+    {
+        final String ovfIds =
+            getOVFPackageInstanceUrl(userSession, idEnterprise, nameOVFPackageList,
+                idOVFPackageName);
+
+        return refreshOVFPackageInstanceStatus(userSession, ovfIds, idEnterprise, idRepository);
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#refreshOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
+     *      java.lang.String, java.lang.Integer, java.lang.Integer)
+     */
+    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
+        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
+        throws AppsLibraryCommandException
+    {
+
+        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
+        final String idEnterpriseSt = String.valueOf(idEnterprise);
+
+        OVFPackageInstanceStatusDto status;
+        try
+        {
+            ApplianceManagerResourceStubImpl amStub =
+                new ApplianceManagerResourceStubImpl(amServiceUri);
+
+            status = amStub.getOVFPackageInstanceStatus(idEnterpriseSt, idsOvfInstance);
+        }
+        catch (final Exception e)
+        {
+            final String errorCause =
+                String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
+
+            status = new OVFPackageInstanceStatusDto();
+            status.setOvfId(idsOvfInstance);
+            status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
+            status.setErrorCause(errorCause);
+        }
+        return status;
+
+    }
+
+    /**
+     * Retorna la URL del {@link OVFPackageInstance}.
+     * 
+     * @param userSession Current logged.
+     * @param userSession Data from the current user.
+     * @param idsOvfInstance Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return URL.
+     * @throws AppsLibraryCommandException String
+     */
+    private String getOVFPackageInstanceUrl(final UserSession userSession,
+        final Integer idEnterprise, final String nameOVFPackageList,
+        final Integer nameOVFPackageInstance) throws AppsLibraryCommandException
+    {
+        OVFPackageListDto packageList;
+
+        try
+        {
+            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
+
+            packageList = appsLibClient.getOVFPackageList(idEnterprise, nameOVFPackageList);
+        }
+        catch (final WebApplicationException e)
+        {
+            final String cause =
+                String.format("Can not obtain the OVFPackageList [%s].\n%s", nameOVFPackageList);
+            throw new AppsLibraryCommandException(cause, e);
+        }
+
+        for (final OVFPackageDto ovfPackage : packageList.getOvfPackages())
+        {
+            if (nameOVFPackageInstance.equals(ovfPackage.getId()))
+            {
+                return ovfPackage.getUrl();
+            }
+        }
+
+        return null;
+    }
 }
