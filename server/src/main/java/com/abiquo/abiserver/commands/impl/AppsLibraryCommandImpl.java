@@ -62,6 +62,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 import com.abiquo.server.core.infrastructure.Repository;
 
 @Controller
@@ -1268,6 +1269,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      * @see com.abiquo.abiserver.commands.AppsLibraryCommand#getOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
      *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
+    @Override
     public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
         final String nameOVFPackageList, Integer idOVFPackageName, Integer idEnterprise,
         Integer idRepository) throws AppsLibraryCommandException
@@ -1283,6 +1285,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      * @see com.abiquo.abiserver.commands.AppsLibraryCommand#refreshOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
      *      java.lang.String, java.lang.Integer, java.lang.Integer)
      */
+    @Override
     public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
         String idsOvfInstance, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException
@@ -1328,13 +1331,13 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final Integer idEnterprise, final String nameOVFPackageList,
         final Integer nameOVFPackageInstance) throws AppsLibraryCommandException
     {
-        OVFPackageListDto packageList;
+        OVFPackagesDto packageList;
 
         try
         {
             AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
 
-            packageList = appsLibClient.getOVFPackageList(idEnterprise, nameOVFPackageList);
+            packageList = appsLibClient.getOVFPackages(idEnterprise, nameOVFPackageList);
         }
         catch (final WebApplicationException e)
         {
@@ -1342,9 +1345,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 String.format("Can not obtain the OVFPackageList [%s].\n%s", nameOVFPackageList);
             throw new AppsLibraryCommandException(cause, e);
         }
-
-        for (final OVFPackageDto ovfPackage : packageList.getOvfPackages())
+        for (int i = 0; i < packageList.getTotalSize(); i++)
         {
+            final OVFPackageDto ovfPackage = packageList.getCollection().get(i++);
             if (nameOVFPackageInstance.equals(ovfPackage.getId()))
             {
                 return ovfPackage.getUrl();
