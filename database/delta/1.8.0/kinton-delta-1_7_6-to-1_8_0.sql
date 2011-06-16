@@ -30,6 +30,19 @@ alter table kinton.metering modify user varchar(128) NOT NULL;
 alter table kinton.session add authType varchar(20) NOT NULL;
 
 --
+-- Datastore rootPath longer
+--
+
+alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
+
+--
+-- [ABICLOUDPREMIUM 1615]  Accounting changes --
+--
+
+alter table kinton.accounting_event_vm add costCode varchar(50) DEFAULT NULL;
+alter table kinton.accounting_event_detail add costCode varchar(50) DEFAULT NULL;
+
+--
 -- Drop table `kinton`.`auth_clientresource_exception`
 --
 
@@ -280,49 +293,6 @@ ALTER TABLE `kinton`.`physicalmachine` ADD COLUMN `ipmiIP` VARCHAR(39)  DEFAULT 
  ADD COLUMN `ipmiPassword` VARCHAR(255)  DEFAULT NULL AFTER `ipmiUser`;
 
 
-
--- [ABICLOUDPREMIUM 1615]  Accounting changes --
-
-DROP TABLE IF EXISTS `kinton`.`accounting_event_vm`;
-CREATE TABLE `kinton`.`accounting_event_vm` (
-  `idVMAccountingEvent` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idVM` INTEGER(10) UNSIGNED NOT NULL,
-  `idEnterprise` INTEGER(10) UNSIGNED NOT NULL,
-  `idVirtualDataCenter` INTEGER(10) UNSIGNED NOT NULL,
-  `idVirtualApp` INTEGER(10) UNSIGNED NOT NULL,
-  `cpu` INTEGER(10) UNSIGNED NOT NULL,
-  `ram` INTEGER(10) UNSIGNED NOT NULL,
-  `hd` BIGINT(20) UNSIGNED NOT NULL,
-  `startTime` TIMESTAMP NULL,
-  `stopTime` TIMESTAMP NULL,
-  `consolidated` BOOLEAN NOT NULL default 0,
-  `costCode` VARCHAR(50) DEFAULT NULL,
-  `version_c` int(11) DEFAULT '0',
-   PRIMARY KEY (`idVMAccountingEvent`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `kinton`.`accounting_event_detail`;
-CREATE TABLE `kinton`.`accounting_event_detail` (
-  `idAccountingEvent` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `startTime` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `endTime` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `idAccountingResourceType` TINYINT(4) NOT NULL COMMENT '1 - VirtualMachine-vcpu; 2 - VirtualMachine-vram; 3 - VirtualMachine-vhd; 4 - ExternalStorage; 5 - IPAddress;', 
-  `resourceType` VARCHAR(255)  NOT NULL,
-  `resourceUnits` BIGINT(20) NOT NULL,
-  `resourceName` VARCHAR(511)  NOT NULL,
-  `idEnterprise` INTEGER(11) UNSIGNED NOT NULL,
-  `idVirtualDataCenter` INTEGER(11) UNSIGNED NOT NULL,
-  `idVirtualApp` INTEGER(11) UNSIGNED,
-  `idVirtualMachine` INTEGER(11) UNSIGNED,
-  `enterpriseName` VARCHAR(255)  NOT NULL,
-  `virtualDataCenter` VARCHAR(255)  NOT NULL,
-  `virtualApp` VARCHAR(255) ,
-  `virtualMachine` VARCHAR(255) ,
-  `costCode` VARCHAR(50) DEFAULT NULL,
-  `version_c` int(11) DEFAULT '0',
-  PRIMARY KEY (`idAccountingEvent`)
-) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8;
-
 DROP PROCEDURE IF EXISTS `kinton`.`AccountingVMRegisterEvents`;
 DROP PROCEDURE IF EXISTS `kinton`.`UpdateAccounting`;
 DELIMITER |
@@ -542,6 +512,34 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idMan
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
 
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
+-- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
+alter table kinton.user modify user varchar(128) NOT NULL;
+alter table kinton.user add authType varchar(20) NOT NULL;
+alter table kinton.user modify column password varchar(32);
+update kinton.user set authtype = 'ABIQUO';
+alter table kinton.session modify user varchar(128) NOT NULL;
+alter table kinton.user modify name varchar(128) NOT NULL;
+alter table kinton.metering modify user varchar(128) NOT NULL;
+alter table kinton.session add authType varchar(20) NOT NULL;
+
+--
+-- Definition of table `kinton`.`role_ldap`
+--
+DROP TABLE IF EXISTS `kinton`.`role_ldap`;
+CREATE  TABLE `kinton`.`role_ldap` (
+  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `role_ldap` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idRole_ldap`) ,
+  KEY `fk_role_ldap_role` (`idRole`) ,
+  CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+insert into kinton.role_ldap(idRole, role_ldap,  version_c) values ((select idRole from kinton.role where type = 'SYS_ADMIN'), 'LDAP_SYS_ADMIN', 0);
+insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'USER'), 'LDAP_USER', 0);
+insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'ENTERPRISE_ADMIN'), 'LDAP_ENTERPRISE_ADMIN', 0);
 
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
 
@@ -568,6 +566,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateEnterpriseResourcesStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVappEnterpriseStats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
+DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 
 DELIMITER |
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
@@ -1489,12 +1488,3 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
-
-
-    
-    --
-    --Datastore rootPath longer
-    --
-    
-    alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
-    

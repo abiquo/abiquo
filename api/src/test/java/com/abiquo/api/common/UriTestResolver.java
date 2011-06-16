@@ -730,4 +730,5 @@ public class UriTestResolver
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
     }
 
+
 }

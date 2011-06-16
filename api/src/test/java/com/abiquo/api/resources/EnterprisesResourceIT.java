@@ -52,8 +52,8 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
     private String enterprisesURI = resolveEnterprisesURI();
 
-    private Resource enterpriseResource =
-        client.resource(enterprisesURI).accept(MediaType.APPLICATION_XML);
+    private Resource enterpriseResource = client.resource(enterprisesURI).accept(
+        MediaType.APPLICATION_XML);
 
     @Test
     public void getEnterpriseList()
