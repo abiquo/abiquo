@@ -236,7 +236,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED))
+                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDatacenter)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }
