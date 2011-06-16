@@ -565,7 +565,7 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static boolean ELEMENT_NAME_REQUIRED = true;
 
-    public final static int ELEMENT_NAME_LENGTH_MIN = 0;
+    public final static int ELEMENT_NAME_LENGTH_MIN = 1;
 
     public final static int ELEMENT_NAME_LENGTH_MAX = 255;
 
@@ -593,7 +593,7 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static boolean DESCRIPTION_REQUIRED = false;
 
-    private final static int DESCRIPTION_LENGTH_MIN = 0;
+    private final static int DESCRIPTION_LENGTH_MIN = 1;
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 

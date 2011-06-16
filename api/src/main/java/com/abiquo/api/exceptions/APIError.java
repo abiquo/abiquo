@@ -242,7 +242,9 @@ public enum APIError
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
         "An unexpected error occured while creating the volume"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
-        "VOL-5", "The size of the volume cannot be decreased")
+        "VOL-5", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
+        "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
+        "VOL-15", "An unexpected error occurred and the bvolume could not be updated")
 
     ;
 
