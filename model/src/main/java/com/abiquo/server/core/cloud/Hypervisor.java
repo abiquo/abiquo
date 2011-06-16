@@ -252,7 +252,7 @@ public class Hypervisor extends DefaultEntityBase
     // *************************** Mandatory constructors ***********************
     // TODO: define mandatory constructors
     public Hypervisor(final Machine machine, final HypervisorType type, final String ip,
-        final String ipService, final int port, final String user, final String password)
+        final String ipService, final Integer port, final String user, final String password)
     {
         setMachine(machine);
         setType(type);
