@@ -132,7 +132,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         
         <!-- TIERS -->
-        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE,ROLE_VAPP_CREATE_STATEFUL" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
