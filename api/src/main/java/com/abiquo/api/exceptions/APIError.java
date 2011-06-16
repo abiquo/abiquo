@@ -299,7 +299,7 @@ public enum APIError
         "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
         "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
         "VOL-12", "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-13",
-        "The size property must be an non-zero integer up to " + Rasd.LIMIT_MAX),
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX),
 
     // RULES
 
