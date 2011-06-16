@@ -651,7 +651,7 @@ UNLOCK TABLES;
 CREATE TABLE  `kinton`.`datastore` (
   `idDatastore` int(10) unsigned NOT NULL auto_increment,
   `name` varchar(255) NOT NULL,
-  `rootPath` varchar(36) NOT NULL,
+  `rootPath` varchar(42) NOT NULL,
   `directory` varchar(255) NOT NULL,
   `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
