@@ -225,3 +225,11 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
     END;
 |
 DELIMITER ;
+
+    
+    --
+    --Datastore rootPath longer
+    --
+    
+    alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
+    

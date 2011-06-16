@@ -108,7 +108,7 @@ public class Datastore extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -136,29 +136,9 @@ public class Datastore extends DefaultEntityBase
         return this.directory;
     }
 
-    public void setDirectory(String directory)
+    public void setDirectory(final String directory)
     {
         this.directory = directory;
-    }
-
-    public final static String SHARED_PROPERTY = "shared";
-
-    private final static String SHARED_COLUMN = "shared";
-
-    private final static boolean SHARED_REQUIRED = true;
-
-    @Column(name = SHARED_COLUMN, nullable = false)
-    private boolean shared;
-
-    @Required(value = SHARED_REQUIRED)
-    public boolean isShared()
-    {
-        return this.shared;
-    }
-
-    public void setShared(boolean shared)
-    {
-        this.shared = shared;
     }
 
     public final static String ROOT_PATH_PROPERTY = "rootPath";
@@ -167,7 +147,7 @@ public class Datastore extends DefaultEntityBase
 
     private final static int ROOT_PATH_LENGTH_MIN = 1;
 
-    private final static int ROOT_PATH_LENGTH_MAX = 255;
+    public final static int ROOT_PATH_LENGTH_MAX = 42;
 
     private final static boolean ROOT_PATH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -184,7 +164,7 @@ public class Datastore extends DefaultEntityBase
         return this.rootPath;
     }
 
-    private void setRootPath(String rootPath)
+    private void setRootPath(final String rootPath)
     {
         this.rootPath = rootPath;
     }
@@ -209,7 +189,7 @@ public class Datastore extends DefaultEntityBase
         return this.size;
     }
 
-    public void setSize(long size)
+    public void setSize(final long size)
     {
         this.size = size;
     }
@@ -234,7 +214,7 @@ public class Datastore extends DefaultEntityBase
         return this.usedSize;
     }
 
-    public void setUsedSize(long usedSize)
+    public void setUsedSize(final long usedSize)
     {
         this.usedSize = usedSize;
     }
@@ -254,9 +234,37 @@ public class Datastore extends DefaultEntityBase
         return this.enabled;
     }
 
-    public void setEnabled(boolean enabled)
+    public void setEnabled(final boolean enabled)
     {
         this.enabled = enabled;
+    }
+
+    public final static String DATASTORE_UUID_PROPERTY = "datastoreUUID";
+
+    private final static boolean DATASTORE_UUID_REQUIRED = false;
+
+    private final static int DATASTORE_UUID_LENGTH_MIN = 0;
+
+    private final static int DATASTORE_UUID_LENGTH_MAX = 255;
+
+    private final static boolean DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DATASTORE_UUID_COLUMN = "datastoreUuid";
+
+    @Column(name = DATASTORE_UUID_COLUMN, nullable = !DATASTORE_UUID_REQUIRED, length = DATASTORE_UUID_LENGTH_MAX)
+    private String datastoreUUID;
+
+    @Required(value = DATASTORE_UUID_REQUIRED)
+    @Length(min = DATASTORE_UUID_LENGTH_MIN, max = DATASTORE_UUID_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDatastoreUUID()
+    {
+        return this.datastoreUUID;
+    }
+
+    public void setDatastoreUUID(final String datastoreUUID)
+    {
+        this.datastoreUUID = datastoreUUID;
     }
 
     // code in Datastore
@@ -271,7 +279,7 @@ public class Datastore extends DefaultEntityBase
         return Collections.unmodifiableList(this.machines);
     }
 
-    public void addToMachines(Machine value)
+    public void addToMachines(final Machine value)
     {
         assert value != null;
         assert !this.machines.contains(value);
@@ -280,7 +288,7 @@ public class Datastore extends DefaultEntityBase
         value.addToDatastores(this);
     }
 
-    public void removeFromMachines(Machine value)
+    public void removeFromMachines(final Machine value)
     {
         assert value != null;
         assert this.machines.contains(value);
@@ -289,7 +297,8 @@ public class Datastore extends DefaultEntityBase
         value.removeFromDatastores(this);
     }
 
-    public Datastore(Machine machine, String name, String rootPath, String directory)
+    public Datastore(final Machine machine, final String name, final String rootPath,
+        final String directory)
     {
         setRootPath(rootPath);
         setName(name);
