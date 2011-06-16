@@ -125,6 +125,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
         <security:intercept-url pattern="/admin/datacenters/*/action/enterprises" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/discover" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/discover_multiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         
         <!-- RACKS -->
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
