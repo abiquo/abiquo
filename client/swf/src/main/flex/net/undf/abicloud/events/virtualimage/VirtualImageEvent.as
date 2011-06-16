@@ -103,6 +103,8 @@ package net.undf.abicloud.events.virtualimage
 
         public var ovfPackageURLList:ArrayCollection;
         
+        public var ovfInstanceId:String;
+        
         public var virtualImageMiniature:VirtualImageMiniature;
 
         /* ------------- Constructor ------------- */

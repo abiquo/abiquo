@@ -220,12 +220,9 @@ package net.undf.abicloud.controller.virtualimage
         {
             if (result.success)
             {
-                var ovfPackageStatusList:ArrayCollection = DataResult(result).data as ArrayCollection;
-                if (ovfPackageStatusList.length > 0)
-                {
-                    //The upload progress are not saved in model, but returned to who asked for them
-                    callback(ovfPackageStatusList.getItemAt(0) as OVFPackageInstanceStatus);
-                }
+                var ovfPackageInstanceStatus:OVFPackageInstanceStatus = DataResult(result).data as OVFPackageInstanceStatus;
+                //The upload progress are not saved in model, but returned to who asked for them
+                callback(ovfPackageInstanceStatus);                
             }
             else
             {
