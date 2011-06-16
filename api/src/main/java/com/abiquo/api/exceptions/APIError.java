@@ -250,7 +250,7 @@ public enum APIError
         "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
         "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
         "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-7",
-        "The size property must be an non-zero integer up to " + Rasd.LIMIT_MAX),
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX),
 
     ;
 
