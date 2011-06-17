@@ -450,13 +450,13 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         if (!importBundleDir.exists())
         {
             throw new IdNotFoundException(String.format(
-                "The path do not exist. %s\nShould be a bundle of an imported virtual machien.",
+                "The path do not exist. %s\nShould be a bundle of an imported virtual machine.",
                 absPath));
         }
         else if (!importBundleDir.isDirectory())
         {
             throw new IdNotFoundException(String.format(
-                "The path is not a folder. %s\nShould be a bundle of an imported virtual machien.",
+                "The path is not a folder. %s\nShould be a bundle of an imported virtual machine.",
                 absPath));
         }
         try
