@@ -20,21 +20,27 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.Collection;
+
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 
 public interface EnterprisesResourceStub
 {
     public DataResult<Enterprise> createEnterprise(Enterprise enterprise);
-    
+
     public DataResult<Enterprise> editEnterprise(Enterprise enterprise);
 
     public BasicResult deleteEnterprise(Integer enterpriseId);
 
     public DataResult<EnterpriseListResult> getEnterprises(ListRequest enterpriseListOptions);
-    
-    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);    
+
+    public DataResult<Enterprise> getEnterprise(Integer enterpriseId);
+
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
+        final Enterprise enterprise);
 }

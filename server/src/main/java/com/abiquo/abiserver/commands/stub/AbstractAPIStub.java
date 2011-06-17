@@ -63,6 +63,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @SuppressWarnings("unchecked")
 public class AbstractAPIStub
 {
+    public static final String FLAT_MEDIA_TYPE = "application/flat+xml";
+
+    public static final String LINK_MEDIA_TYPE = "application/link+xml";
+
     protected RestClient client = new RestClient();
 
     protected final String apiUri;
@@ -101,9 +105,21 @@ public class AbstractAPIStub
         return resource(uri, user, password).contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
+    protected ClientResponse put(final String uri, final Object dto, final String user,
+        final String password, final String mediaType)
+    {
+        return resource(uri, user, password).accept(mediaType).contentType(mediaType).put(dto);
+    }
+
     protected ClientResponse delete(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).delete();
+    }
+
+    protected ClientResponse delete(final String uri, final String user, final String password,
+        final String mediaType)
+    {
+        return resource(uri, user, password).accept(mediaType).delete();
     }
 
     protected ClientResponse get(final String uri)
@@ -146,6 +162,13 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML).put(dto);
     }
 
+    protected ClientResponse put(final String uri, final Object dto, final String mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).put(dto);
+    }
+
     protected ClientResponse delete(final String uri)
     {
         UserHB user = getCurrentUser();
@@ -155,6 +178,13 @@ public class AbstractAPIStub
     protected String createLoginLink()
     {
         return URIResolver.resolveURI(apiUri, "/login", Collections.emptyMap());
+    }
+
+    protected ClientResponse delete(final String uri, final String mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -207,6 +237,7 @@ public class AbstractAPIStub
                 new ResourceManager(BasicCommand.class), result,
                 "onFaultAuthorization.noPermission", methodName);
             result.setMessage(response.getMessage());
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
             throw new UserSessionException(result);
         }
         else
@@ -276,6 +307,67 @@ public class AbstractAPIStub
             Collections.singletonMap("role", valueOf(roleId)));
     }
 
+    protected String createRolesLink()
+    {
+        return createRolesLink(null, null);
+    }
+
+    protected String createRolesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "admin/roles", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createPrivilegeLink(final int privilegeId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
+    }
+
+    protected String createRoleActionGetPrivilegesURI(final Integer entId)
+    {
+        return createRoleLink(entId) + "/action/privileges";
+    }
+
+    protected String createRolesLdapLink()
+    {
+        return createRolesLdapLink(null, null);
+    }
+
+    protected String createRolesLdapLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "admin/rolesldap", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createRoleLdapLink(final int roleLdapId)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+    }
+
     protected String createUsersLink(final String enterpriseId)
     {
         return createUsersLink(enterpriseId, null, null);
@@ -334,6 +426,15 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters",
             new HashMap<String, String>(), queryParams);
+    }
+
+    protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", idEnterprise.toString());
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/action/virtualdatacenters", params);
     }
 
     protected String createVirtualDatacenterPrivateIPsLink(final Integer vdcId)

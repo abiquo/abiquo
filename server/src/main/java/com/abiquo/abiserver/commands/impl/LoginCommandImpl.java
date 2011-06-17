@@ -23,23 +23,21 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
-
 import com.abiquo.abiserver.business.AuthService;
-import com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthClientResourceHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.authorization.AuthClientresourceExceptionHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
-import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.UsersResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.authorization.Resource;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Privilege;
+import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.user.UserListResult;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -59,89 +57,41 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
      * com.abiquo.abiserver.commands.impl.LoginCommand#login(com.abiquo.abiserver.pojo.authentication
      * .Login)
      */
-    @SuppressWarnings("unchecked")
-    public DataResult<LoginResult> login(Login loginData)
+
+    @Override
+    public DataResult<LoginResult> login(final Login loginData)
     {
         DataResult<LoginResult> resultResponse = AuthService.getInstance().doLogin(loginData);
 
         if (resultResponse.getSuccess())
         {
-            // Generating the list of client resources for the user that has
-            // logged in
-            Session session = null;
-            Transaction transaction = null;
 
-            ArrayList<Resource> userResources = new ArrayList<Resource>();
+            ArrayList<Privilege> privileges = new ArrayList<Privilege>();
 
             try
             {
-                session = HibernateUtil.getSession();
-                transaction = session.beginTransaction();
 
-                // Getting the user that is being loggin in
-                UserHB userHBLogged =
-                    (UserHB) session.get(UserHB.class, resultResponse.getData().getUser().getId());
+                UsersResourceStub proxy =
+                    APIStubFactory.getInstance(resultResponse.getData().getSession(),
+                        new UsersResourceStubImpl(), UsersResourceStub.class);
 
-                // Getting the list of all client resources
-                ArrayList<AuthClientResourceHB> allClientResourcesHB =
-                    (ArrayList<AuthClientResourceHB>) session.createCriteria(
-                        AuthClientResourceHB.class).list();
+                UserListOptions userListOptions = new UserListOptions();
+                userListOptions.setFilter(resultResponse.getData().getUser().getUser());
+                userListOptions.setOrderBy(User.NICK_PROPERTY);
+                DataResult<UserListResult> user = proxy.getUsers(userListOptions);
 
-                AuthClientresourceExceptionHB authClientresourceExceptionHB;
-                for (AuthClientResourceHB authClientResourceHB : allClientResourcesHB)
+                if (user.getSuccess() && user.getData().getTotalUsers() == 1)
                 {
-                    // Checking if there is any exception for this client
-                    // resource and this user
-                    authClientresourceExceptionHB = null;
-                    authClientresourceExceptionHB =
-                        (AuthClientresourceExceptionHB) session.createCriteria(
-                            AuthClientresourceExceptionHB.class).add(
-                            Restrictions.eq("userHB", userHBLogged)).add(
-                            Restrictions.eq("authResourceHB", authClientResourceHB)).uniqueResult();
+                    // Getting the list of user privileges
+                    for (com.abiquo.abiserver.pojo.user.User u : user.getData().getUsersList())
+                    {
+                        for (Privilege p : u.getRole().getPrivileges())
+                        {
+                            privileges.add(p.toPojoHB().toPojo());
+                        }
 
-                    int priorAuth =
-                        authClientResourceHB.getRoleHB().getSecurityLevel().compareTo(
-                            userHBLogged.getRoleHB().getSecurityLevel());
-                    if (priorAuth >= 0)
-                    {
-                        // User has authorization for this client resource.
-                        // Checking if there is any
-                        // exception for that
-                        if (authClientresourceExceptionHB == null)
-                        {
-                            // No exceptions. Adding the client resource for
-                            // this user
-                            userResources.add(authClientResourceHB.toPojo());
-                        }
-                        else
-                        {
-                            // There is an exception, so this user is not
-                            // authorized to use this
-                            // client resource
-                            // We do not add this client resource
-                        }
-                    }
-                    else
-                    {
-                        // User is not authorized for this client resource.
-                        // Checking if there is any
-                        // exception for that
-                        if (authClientresourceExceptionHB != null)
-                        {
-                            // An exception exists, so this user is authorized.
-                            // Adding the client
-                            // resource
-                            userResources.add(authClientResourceHB.toPojo());
-                        }
-                        else
-                        {
-                            // No exception exists, so we do not add this client
-                            // resource
-                        }
                     }
                 }
-
-                transaction.commit();
 
                 // log the event
                 traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGIN,
@@ -152,10 +102,6 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
             catch (Exception e)
             {
-                if (transaction != null && transaction.isActive())
-                {
-                    transaction.rollback();
-                }
 
                 errorManager.reportError(resourceManager, resultResponse, "login.resourceCreation",
                     e);
@@ -169,7 +115,7 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
             }
 
             // Returning result
-            resultResponse.getData().setClientResources(userResources);
+            resultResponse.getData().setPrivileges(privileges);
         }
 
         return resultResponse;
@@ -181,7 +127,8 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
      * com.abiquo.abiserver.commands.impl.LoginCommand#logout(com.abiquo.abiserver.pojo.authentication
      * .UserSession)
      */
-    public BasicResult logout(UserSession session)
+    @Override
+    public BasicResult logout(final UserSession session)
     {
         traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_LOGOUT, session, null, null,
             null, null, null, null, null, null);

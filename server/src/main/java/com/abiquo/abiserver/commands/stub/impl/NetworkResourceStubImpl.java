@@ -87,8 +87,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
-        VLANNetworkDto dto)
+    public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
+        final VLANNetworkDto dto)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPrivateNetworksLink(vdcId);
@@ -204,7 +204,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, dataResult, "getListNetworkPoolByEnterprise");
+            populateErrors(response, dataResult, "getListNetworkPoolByVirtualDatacenter");
         }
 
         return dataResult;
@@ -252,6 +252,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     }
 
+    @Override
     public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
         throws NetworkCommandException
     {
@@ -269,7 +270,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");
+            populateErrors(response, dataResult, "getInfoDHCPServer");
         }
         return dataResult;
     }

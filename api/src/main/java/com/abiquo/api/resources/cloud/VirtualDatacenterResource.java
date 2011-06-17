@@ -43,6 +43,7 @@ import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -71,6 +72,9 @@ public class VirtualDatacenterResource extends AbstractResource
     @Autowired
     IpAddressService ipService;
 
+    @Autowired
+    UserService userService;
+    
     @Context
     UriInfo uriInfo;
 
@@ -89,6 +93,7 @@ public class VirtualDatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualDatacenter vdc = service.updateVirtualDatacenter(id, dto);
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
         return createTransferObject(vdc, restBuilder);
     }
 

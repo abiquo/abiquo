@@ -35,7 +35,9 @@ import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.Session;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -71,82 +73,83 @@ import com.softwarementors.bzngine.engines.jpa.test.configuration.PersistentClas
 import com.softwarementors.bzngine.entities.PersistentEntity;
 import com.softwarementors.commons.collections.ListUtils;
 
-public class TestDataAccessManager {
-	private static JpaEntityManagerFactoryForTesting factory;
+public class TestDataAccessManager
+{
+    private static JpaEntityManagerFactoryForTesting factory;
 
-	private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
-			.createList();
+    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
+        .createList();
 
-	private static List<PersistentClassRemovalInformation<PersistentEntity<?>, ?>> persistentClassesInEntityDeletionOrder = ListUtils
-			.createList();
+    private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
+        ListUtils.createList();
 
-	static {
-		initializePersistentInstanceRemovalSupport();
-	}
+    static
+    {
+        initializePersistentInstanceRemovalSupport();
+    }
 
-	@SuppressWarnings("unchecked")
-	private static <T extends PersistentEntity<?>> void addPersistentClassesToCleanInRemovalOrder(
-			Class<?>... classes) {
-		for (Class<?> cls : classes) {
-			persistentClassesInEntityDeletionOrder
-					.add(new PersistentClassRemovalInformation(cls));
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private static <T extends PersistentEntity< ? >> void addPersistentClassesToCleanInRemovalOrder(
+        final Class< ? >... classes)
+    {
+        for (Class< ? > cls : classes)
+        {
+            persistentClassesInEntityDeletionOrder.add(new PersistentClassRemovalInformation(cls));
+        }
+    }
 
-	private static void addIntermediateTablesToCleanInRemovalOrder(
-			String... tables) {
-		for (String table : tables) {
-			associationTablesInAssociationDeletionOrder.add(table);
-		}
-	}
+    private static void addIntermediateTablesToCleanInRemovalOrder(final String... tables)
+    {
+        for (String table : tables)
+        {
+            associationTablesInAssociationDeletionOrder.add(table);
+        }
+    }
 
-	public static EntityManagerFactoryForTesting getFactory() {
-		if (factory == null) {
-			factory = new JpaEntityManagerFactoryForTesting(
-					"abiquoPersistence",
-					persistentClassesInEntityDeletionOrder,
-					associationTablesInAssociationDeletionOrder);
-		}
+    public static EntityManagerFactoryForTesting getFactory()
+    {
+        if (factory == null)
+        {
+            factory =
+                new JpaEntityManagerFactoryForTesting("abiquoPersistence",
+                    persistentClassesInEntityDeletionOrder,
+                    associationTablesInAssociationDeletionOrder);
+        }
 
-		return factory;
-	}
+        return factory;
+    }
 
-	/*
-	 * public static void closeFactory() { if( factory != null ) {
-	 * factory.close(); factory = null; } }
-	 */
+    /*
+     * public static void closeFactory() { if( factory != null ) { factory.close(); factory = null;
+     * } }
+     */
 
-	private static void initializePersistentInstanceRemovalSupport() {
-		/**
-		 * Please Notice that arguments ORDER in this method is important to
-		 * avoid persistence problems.
-		 */
-		addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class,
-				NodeVirtualImage.class, EnterpriseExclusionRule.class,
-				FitPolicyRule.class, MachineLoadRule.class,
-				VirtualAppResources.class, VirtualAppliance.class,
-				VirtualMachine.class, AppsLibrary.class,
-				VolumeManagement.class, VirtualImageConversion.class,
-				VirtualImage.class, IpPoolManagement.class,
-				RasdManagement.class, VLANNetwork.class,
-				NetworkConfiguration.class, Dhcp.class,
-				VirtualDatacenterResources.class, VirtualDatacenter.class,
-				DatacenterResources.class, DatacenterLimits.class,
-				Session.class, User.class, EnterpriseResources.class,
-				Enterprise.class, Hypervisor.class, Datastore.class,
-				Machine.class, Rack.class, StoragePool.class, Tier.class,
-				StorageDevice.class, RemoteService.class, Repository.class,
-				CloudUsage.class, Datacenter.class, Network.class, Role.class,
-				SystemProperty.class, Rasd.class, License.class, Task.class);
+    private static void initializePersistentInstanceRemovalSupport()
+    {
+        /**
+         * Please Notice that arguments ORDER in this method is important to avoid persistence
+         * problems.
+         */
+        addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
+            EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
+            VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
+            AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
+            VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
+            NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
+            VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
+            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
+            EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
+            Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
+            RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
+            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class);
 
-		// XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
-		// AppsLibrary.class,
-		// Icon.class,
-		// XXX last -- Category.class
+        // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
+        // AppsLibrary.class,
+        // Icon.class,
+        // XXX last -- Category.class
 
-		addIntermediateTablesToCleanInRemovalOrder(
-				Machine.DATASTORES_ASSOCIATION_TABLE,
-				DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME
-		/* , OVFPackageList.ASSOCIATION_TABLE */);
-	}
+        addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
+            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE
+        /* , OVFPackageList.ASSOCIATION_TABLE */);
+    }
 }

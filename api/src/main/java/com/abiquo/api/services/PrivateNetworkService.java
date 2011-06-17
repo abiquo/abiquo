@@ -31,10 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.exceptions.ConflictException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -69,6 +68,9 @@ public class PrivateNetworkService extends DefaultApiService
     @Autowired
     TracerLogger tracer;
 
+    @Autowired
+    UserService userService;
+
     public PrivateNetworkService()
     {
 
@@ -78,6 +80,7 @@ public class PrivateNetworkService extends DefaultApiService
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
+        userService = new UserService(em);
     }
 
     public Collection<VLANNetwork> getNetworks()
@@ -108,6 +111,8 @@ public class PrivateNetworkService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+
+        userService.checkCurrentEnterpriseForPostMethods(virtualDatacenter.getEnterprise());
 
         // check if we have reached the maximum number of VLANs for this virtualdatacenter
         checkNumberOfCurrentVLANs(virtualDatacenter);
@@ -176,7 +181,8 @@ public class PrivateNetworkService extends DefaultApiService
                 + "' has been created in " + virtualDatacenter.getName();
         if (tracer != null)
         {
-            tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_CREATED, messageTrace);
+            tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_CREATED,
+                messageTrace);
         }
         return vlan;
     }
@@ -207,11 +213,10 @@ public class PrivateNetworkService extends DefaultApiService
             && nw.getNetwork().getId().equals(vdc.getNetwork().getId());
     }
 
-    protected void checkNumberOfCurrentVLANs(VirtualDatacenter vdc)
+    protected void checkNumberOfCurrentVLANs(final VirtualDatacenter vdc)
     {
         // TODO Auto-generated method stub
-        Integer maxVLANs =
-            Integer.valueOf(System.getProperty("abiquo.server.networking.vlanPerVdc"));
+        Integer maxVLANs = Integer.valueOf(ConfigService.getVlanPerVdc());
         Integer currentVLANs = repo.findVlansByVirtualDatacener(vdc).size();
         if (currentVLANs >= maxVLANs)
         {
@@ -229,7 +234,7 @@ public class PrivateNetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkAddressAndMaskCoherency(IPAddress netAddress, Integer netmask)
+    protected void checkAddressAndMaskCoherency(final IPAddress netAddress, final Integer netmask)
     {
 
         // Parse the correct IP. (avoid 127.00.00.01), for instance
@@ -281,7 +286,7 @@ public class PrivateNetworkService extends DefaultApiService
      * @param vlan transfer object to create/delete/modify vlans.
      * @return the collection of ip ranges.
      */
-    private Collection<IPAddress> calculateIPRange(VLANNetworkDto vlan)
+    private Collection<IPAddress> calculateIPRange(final VLANNetworkDto vlan)
     {
         Collection<IPAddress> range =
             IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(vlan.getAddress()),
@@ -331,8 +336,13 @@ public class PrivateNetworkService extends DefaultApiService
             String name = macAddress.replace(":", "") + "_host";
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
-                    .getName(), IpPoolManagement.Type.PRIVATE);
+                new IpPoolManagement(dhcp,
+                    vlan,
+                    macAddress,
+                    name,
+                    address.toString(),
+                    vlan.getName(),
+                    IpPoolManagement.Type.PRIVATE);
 
             ipManagement.setVirtualDatacenter(vdc);
 

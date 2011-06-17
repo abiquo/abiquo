@@ -25,12 +25,17 @@ package net.undf.abicloud.controller.login
     import flash.net.URLRequest;
     import flash.net.navigateToURL;
     
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.controller.ResultHandler;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.utils.ScreenBlocker;
     import net.undf.abicloud.vo.authentication.LoginResult;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
+    import net.undf.abicloud.vo.user.Role;
+    import net.undf.abicloud.vo.user.Privilege;
+    import net.undf.abicloud.vo.user.PrivilegeType;
 
     public class LoginResultHandler extends ResultHandler
     {
@@ -44,13 +49,7 @@ package net.undf.abicloud.controller.login
 
 
         public function loginHandler(result:BasicResult):void
-        {
-        	
-//        	result.data.user.enterprise.id;
-//        	result.data.user.enterprise.name;
-//			result.data.user.enterprise.id;
-//			result.data.user.enterprise.defaultTheme; //we must receive this from server, now it is hardcoded
-        	
+        {    	
         	
             if (result.success)
             {
@@ -64,11 +63,10 @@ package net.undf.abicloud.controller.login
                 AbiCloudModel.getInstance().loginManager.user = loginResult.user;
 
                 //Saving user's authorized client resources
-                AbiCloudModel.getInstance().authorizationManager.authorizedResources = loginResult.clientResources;
-
+                AbiCloudModel.getInstance().userManager.privileges = loginResult.privileges;
 
                 //Notifying that a user has logged in
-                AbiCloudModel.getInstance().loginManager.userLogged = true;
+                AbiCloudModel.getInstance().loginManager.userLogged = true;                
 
             }
             else

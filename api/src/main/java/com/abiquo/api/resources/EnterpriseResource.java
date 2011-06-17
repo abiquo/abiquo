@@ -44,18 +44,25 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.util.PagedList;
@@ -73,6 +80,9 @@ public class EnterpriseResource extends AbstractResource
 
     public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
 
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS =
+        "/action/virtualdatacenters";
+
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
     @Autowired
@@ -87,10 +97,35 @@ public class EnterpriseResource extends AbstractResource
     @Context
     UriInfo uriInfo;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    VirtualDatacenterService vdcService;
+
+    @Autowired
+    SecurityService securityService;
+
     @GET
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        {
+            User currentUser = userService.getCurrentUser();
+            if (currentUser.getEnterprise().getId().equals(enterpriseId))
+            {
+                Enterprise enterprise = service.getEnterprise(enterpriseId);
+                return createTransferObject(enterprise, restBuilder);
+            }
+            else
+            {
+                // throws access denied exception
+                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+            }
+
+        }
+
         Enterprise enterprise = service.getEnterprise(enterpriseId);
 
         return createTransferObject(enterprise, restBuilder);
@@ -169,6 +204,35 @@ public class EnterpriseResource extends AbstractResource
         Collection<VirtualMachine> vms = vmService.findByEnterprise(enterprise);
 
         return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+
+    }
+
+    /**
+     * Retrieves the list Of Virtual datacenters defined into an enterprise.
+     * 
+     * @param enterpriseId identifier of the enterprise
+     * @param restBuilder {@linnk IRESTBuilder} object injected by context
+     * @return the {@link VirtualDatacentersDto} object. A {@link VirtualDatacenterDto} wrapper.
+     * @throws Exception
+     */
+    @GET
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS)
+    public VirtualDatacentersDto getVirtualDatacenters(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        Enterprise enterprise = service.getEnterprise(enterpriseId);
+
+        Collection<VirtualDatacenter> all = vdcService.getVirtualDatacenters(enterprise, null);
+        VirtualDatacentersDto vdcs = new VirtualDatacentersDto();
+
+        for (VirtualDatacenter d : all)
+        {
+            vdcs.add(VirtualDatacenterResource.createTransferObject(d, restBuilder));
+        }
+
+        return vdcs;
 
     }
 

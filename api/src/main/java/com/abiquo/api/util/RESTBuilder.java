@@ -54,8 +54,10 @@ import com.abiquo.api.resources.cloud.PrivateNetworksResource;
 import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -67,13 +69,14 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdapDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -219,6 +222,20 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
     public List<RESTLink> buildRoleLinks(final RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -228,6 +245,27 @@ public class RESTBuilder implements IRESTBuilder
 
         RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildRoleLinks(final Integer enterpriseId, final RoleDto role)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        params.put(RoleResource.ROLE, role.getId().toString());
+        links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
 
         return links;
     }
@@ -266,6 +304,11 @@ public class RESTBuilder implements IRESTBuilder
             .add(builder.buildActionLink(EnterpriseResource.class,
                 EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
                 params));
+
+        // action get virtual datacenters by enterprise
+        links.add(builder.buildActionLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+            VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
     }
@@ -679,6 +722,12 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildRoleLdapLinks(final Integer roleId, final RoleLdapDto roleLdap)
     {
         return null;
     }

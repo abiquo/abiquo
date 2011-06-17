@@ -21,20 +21,23 @@
 package com.abiquo.api.spring.security;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.User.AuthType;
 
@@ -50,8 +53,8 @@ public class AbiquoUserDetailsService implements UserDetailsService
     /** The default role prefix to use. */
     protected static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
-    /** The default role prefix to use. */
-    protected static final String DEFAULT_ROLE = "ROLE_ABIQUO";
+    /** The default role. */
+    protected static final String DEFAULT_ROLE = DEFAULT_ROLE_PREFIX + "AUTHENTICATED";
 
     /** The Enterprise DAO repository. */
     @Autowired
@@ -133,6 +136,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
      */
     protected GrantedAuthority[] loadUserAuthorities(final User user)
     {
+<<<<<<< HEAD
         String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
         if (DEFAULT_ROLE != null)
         {
@@ -140,6 +144,24 @@ public class AbiquoUserDetailsService implements UserDetailsService
             new GrantedAuthorityImpl(DEFAULT_ROLE)};
         }
         return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
+=======
+        List<Privilege> privileges = user.getRole().getPrivileges();
+        ArrayList<String> grantedAuthority = new ArrayList<String>();
+
+        // Adding default role
+        grantedAuthority.add(DEFAULT_ROLE);
+
+        if (privileges != null)
+        {
+            for (Privilege privilege : privileges)
+            {
+                grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
+            }
+        }
+
+        return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
+            .toArray(new String[grantedAuthority.size()]));
+>>>>>>> roles
     }
 
 }

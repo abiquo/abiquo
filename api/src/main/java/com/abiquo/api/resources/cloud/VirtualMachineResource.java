@@ -84,10 +84,10 @@ public class VirtualMachineResource extends AbstractResource
      */
     @GET
     public VirtualMachineDto getVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
@@ -97,10 +97,10 @@ public class VirtualMachineResource extends AbstractResource
     @GET
     @Path(VirtualMachineResource.VIRTUAL_MACHINE_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
@@ -116,10 +116,10 @@ public class VirtualMachineResource extends AbstractResource
 
     @PUT
     public VirtualMachineDto updateVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId, VirtualMachineDto dto,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.updateVirtualMachine(vdcId, vappId, vmId, dto);
 
@@ -129,9 +129,10 @@ public class VirtualMachineResource extends AbstractResource
     @PUT
     @Path("action/allocate")
     public synchronized VirtualMachineDto allocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId,
-        String forceEnterpriseLimitsStr, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
+        final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
@@ -152,9 +153,9 @@ public class VirtualMachineResource extends AbstractResource
     @PUT
     @Path("action/checkedit")
     public synchronized void checkEditAllocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId,
-        VirtualMachineDto vmachine, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
+        final VirtualMachineDto vmachine, @Context final IRESTBuilder restBuilder) throws Exception
     {
         // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
         // get user form the authentication layer
@@ -166,15 +167,17 @@ public class VirtualMachineResource extends AbstractResource
     @DELETE
     @Path("action/deallocate")
     public synchronized void deallocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer virtualMachineId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         service.deallocateVirtualMachine(virtualMachineId);
     }
+
     /**
-     *  Power on the VirtualMachine
+     * Power on the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -184,12 +187,13 @@ public class VirtualMachineResource extends AbstractResource
     @POST
     @Path("action/poweron")
     public void powerOnVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
         if (!vmService.sameState(vm, State.RUNNING))
         {
             vmService.blockVirtualMachine(vm);
@@ -197,8 +201,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.RUNNING);
         }
     }
+
     /**
      * Power off the virtual machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -208,12 +214,14 @@ public class VirtualMachineResource extends AbstractResource
     @POST
     @Path("action/poweroff")
     public void powerOffVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
             vmService.blockVirtualMachine(vm);
@@ -221,8 +229,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.POWERED_OFF);
         }
     }
+
     /**
      * Resume the Virtual Machine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -232,12 +242,14 @@ public class VirtualMachineResource extends AbstractResource
     @POST
     @Path("action/resume")
     public void resumeVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
         if (!vmService.sameState(vm, State.REBOOTED))
         {
             vmService.blockVirtualMachine(vm);
@@ -245,8 +257,10 @@ public class VirtualMachineResource extends AbstractResource
             vmService.changeVirtualMachineState(vappId, vdcId, State.REBOOTED);
         }
     }
+
     /**
-     *  Pause the VirtualMachine
+     * Pause the VirtualMachine
+     * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
@@ -256,12 +270,14 @@ public class VirtualMachineResource extends AbstractResource
     @POST
     @Path("action/pause")
     public void pauseVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) Integer vmId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
         if (!vmService.sameState(vm, State.PAUSED))
         {
             vmService.blockVirtualMachine(vm);

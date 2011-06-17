@@ -40,14 +40,13 @@ public class RoleLdapDAOTest extends DefaultDAOTestBase<RoleLdapDAO, RoleLdap>
     protected void methodSetUp()
     {
         super.methodSetUp();
-
         // FIXME: Remember to add all entities that have to be removed during tearDown in the
         // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected RoleLdapDAO createDao(EntityManager entityManager)
+    protected RoleLdapDAO createDao(final EntityManager entityManager)
     {
         return new RoleLdapDAO(entityManager);
     }

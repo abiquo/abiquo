@@ -38,6 +38,7 @@
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/PhysicalmachineHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/RackHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/RepositoryHB.hbm.xml"/>
+    <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/PrivilegeHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/RoleHB.hbm.xml"/>       
     <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/UserHB.hbm.xml"/>
     <mapping resource="com/abiquo/abiserver/pojo/authentication/UserSession.hbm.xml"/>

@@ -25,9 +25,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "roleLdap")
 public class RoleLdapDto extends SingleResourceTransportDto
 {
+
+    public RoleLdapDto()
+    {
+        super();
+    }
+
+    public RoleLdapDto(final Integer id, final String roleLdap)
+    {
+        super();
+        this.id = id;
+        this.roleLdap = roleLdap;
+    }
+
     private Integer id;
 
     public Integer getId()
@@ -35,21 +48,21 @@ public class RoleLdapDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    private String ldapRole;
+    private String roleLdap;
 
-    public String getLdapRole()
+    public String getRoleLdap()
     {
-        return ldapRole;
+        return roleLdap;
     }
 
-    public void setLdapRole(String ldapRole)
+    public void setRoleLdap(final String roleLdap)
     {
-        this.ldapRole = ldapRole;
+        this.roleLdap = roleLdap;
     }
 
 }

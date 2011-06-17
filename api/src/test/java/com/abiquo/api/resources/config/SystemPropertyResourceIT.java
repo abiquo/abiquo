@@ -46,6 +46,7 @@ import com.abiquo.server.core.enterprise.User;
 public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
 {
 
+    @Override
     @AfterMethod
     public void tearDown()
     {
@@ -104,7 +105,7 @@ public class SystemPropertyResourceIT extends AbstractJpaGeneratorIT
     {
         SystemProperty property = systemPropertyGenerator.createUniqueInstance();
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role sysadminRole = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role sysadminRole = roleGenerator.createInstance();
         User sysadmin = userGenerator.createInstance(ent, sysadminRole, "foo");
         setup(property, ent, sysadminRole, sysadmin);
 

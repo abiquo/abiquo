@@ -32,11 +32,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
@@ -44,13 +45,9 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -75,9 +72,12 @@ public class VirtualDatacenterService extends DefaultApiService
 
     @Autowired
     DatacenterLimitsDAO datacenterLimitsDao;
-    
+
     @Autowired
     PrivateNetworkService networkService;
+
+    @Autowired
+    SecurityService securityService;
 
     public VirtualDatacenterService()
     {
@@ -92,6 +92,7 @@ public class VirtualDatacenterService extends DefaultApiService
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
+        securityService = new SecurityService();
         networkService = new PrivateNetworkService(em);
     }
 
@@ -105,9 +106,14 @@ public class VirtualDatacenterService extends DefaultApiService
     Collection<VirtualDatacenter> getVirtualDatacenters(Enterprise enterprise,
         final Datacenter datacenter, final User user)
     {
+        // boolean findByUser =
+        // user != null
+        // && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
+        // .getAvailableVirtualDatacenters()));
         boolean findByUser =
             user != null
-                && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
+                && (!securityService.canManageOtherEnterprises()
+                    && !securityService.canManageOtherUsers() && !StringUtils.isEmpty(user
                     .getAvailableVirtualDatacenters()));
 
         if (enterprise == null && user != null)
@@ -133,6 +139,7 @@ public class VirtualDatacenterService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+        userService.checkCurrentEnterprise(vdc.getEnterprise());
         return vdc;
     }
 
@@ -162,8 +169,12 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         User currentUser = userService.getCurrentUser();
 
-        if (currentUser.getRole().getType() == Role.Type.USER
-            && currentUser.getAvailableVirtualDatacenters() != null)
+        // if (currentUser.getRole().getType() == Role.Type.USER
+        // && currentUser.getAvailableVirtualDatacenters() != null)
+        if (!securityService.canManageOtherEnterprises()
+            && !securityService.canManageOtherUsers()
+            && org.springframework.util.StringUtils.hasText(currentUser
+                .getAvailableVirtualDatacenters()))
         {
             String availableVirtualDatacenters =
                 currentUser.getAvailableVirtualDatacenters() + "," + vdc.getId();
@@ -184,7 +195,7 @@ public class VirtualDatacenterService extends DefaultApiService
         final VirtualDatacenterDto dto)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
-
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
         return updateVirtualDatacenter(vdc, dto);
     }
 
@@ -214,6 +225,7 @@ public class VirtualDatacenterService extends DefaultApiService
     public void deleteVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(id);
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         if (repo.containsVirtualAppliances(vdc))
         {
@@ -241,8 +253,11 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
-                .getName());
+            new VirtualDatacenter(enterprise,
+                datacenter,
+                network,
+                dto.getHypervisorType(),
+                dto.getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
@@ -291,7 +306,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     private boolean isValidVlanHardLimitPerVdc(final long vlansHard)
     {
-        String limitS = System.getProperty("abiquo.server.networking.vlanPerVdc", "0");
+        String limitS = ConfigService.getVlanPerVdc();
         int limit = Integer.valueOf(limitS);
 
         return limit == 0 || limit >= vlansHard;
@@ -302,5 +317,4 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         return datacenterRepo.findHypervisors(datacenter).contains(type);
     }
-
 }
