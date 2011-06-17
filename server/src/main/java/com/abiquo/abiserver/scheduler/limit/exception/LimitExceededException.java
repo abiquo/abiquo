@@ -45,11 +45,12 @@ public class LimitExceededException extends AllocatorException
     public LimitExceededException(Object entity, long required, long actual, LimitHB limit,
         LimitResource resource)
     {
+
         super(
             String
                 .format(
-                    "It's not possible to reserve a new Public IP, your hard limit it's defined to %d and your soft limit is %d and you have %d Public IP allocated. Please change your Virtual Datacenter limits to allow this action.",
-                    limit.getHard(), limit.getSoft(), actual));
+                    "It's not possible to reserve a new %s, your hard limit it's defined to %d, your soft limit is %d and you have %d %s allocated. ",
+                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual, resource.getEntityName()));
 
         this.entity = entity;
         this.required = required;
