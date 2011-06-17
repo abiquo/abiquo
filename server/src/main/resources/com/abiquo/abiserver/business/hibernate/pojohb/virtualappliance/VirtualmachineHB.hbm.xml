@@ -2,7 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping> 
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" table="virtualmachine">
+  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" entity-name="VirtualmachineHB" table="virtualmachine">
     <id name="idVm" type="java.lang.Integer">
       <column name="idVM"/>
       <generator class="identity"/>
