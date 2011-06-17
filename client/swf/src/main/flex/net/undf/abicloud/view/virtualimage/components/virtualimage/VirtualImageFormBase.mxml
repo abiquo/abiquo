@@ -117,6 +117,7 @@
                 //Listening for updates in model
                 ChangeWatcher.watch(virtualImageManager, "icons", onIconsUpdated);
                 ChangeWatcher.watch(virtualImageManager, "diskFormatTypes", onDiskFormatTypesUpdated);
+                AbiCloudModel.getInstance().virtualImageManager.addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_UPLOAD_ERROR, onUploadError);
 
                 //Adding support for external calls from Javascript
                 ExternalInterface.addCallback("virtualImageFileSelected", onVirtualImageFileSelected);
@@ -540,6 +541,13 @@
                 event.callback = setVirtualImageUploadProgress;
                 dispatchEvent(event);
             }
+            
+            private function onUploadError(event:VirtualImageEvent):void{
+            	this._uploadProgressTimer.stop();
+                virtualImageFileSelected = false;
+                creatingVirtualImage = false;
+                virtualImageFormVS.selectedIndex = 0;
+            }
 
             /**
              * Handler called when the upload progress of a VirtualImage has been checked
@@ -547,14 +555,12 @@
             private function setVirtualImageUploadProgress(ovfPackageStatus:OVFPackageInstanceStatus):void
             {
                 //Updating the progress bar
-                if (ovfPackageStatus.progress > 0)
-                {
-                    uploadProgressBar.indeterminate = false;
-                    uploadProgressBar.setProgress(ovfPackageStatus.progress,
-                                                  100);
-                }else if(ovfPackageStatus.progress == 100){
+                if(ovfPackageStatus.progress == 100){
                 	this._uploadProgressTimer.stop();
                 	onVirtualImageCreated();
+                }else if (ovfPackageStatus.progress > 0){
+                    uploadProgressBar.indeterminate = false;
+                    uploadProgressBar.setProgress(ovfPackageStatus.progress,100);
                 }
             }
             

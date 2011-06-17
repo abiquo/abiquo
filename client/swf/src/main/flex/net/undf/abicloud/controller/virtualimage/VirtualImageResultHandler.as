@@ -24,6 +24,7 @@ package net.undf.abicloud.controller.virtualimage
     import mx.collections.ArrayCollection;
     
     import net.undf.abicloud.controller.ResultHandler;
+    import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
@@ -226,6 +227,8 @@ package net.undf.abicloud.controller.virtualimage
             }
             else
             {
+            	//Dispatch an event that an error occured
+            	AbiCloudModel.getInstance().virtualImageManager.dispatchEvent(new VirtualImageEvent(VirtualImageEvent.VIRTUAL_IMAGE_UPLOAD_ERROR));
                 //There was a problem
                 super.handleResult(result);
             }
