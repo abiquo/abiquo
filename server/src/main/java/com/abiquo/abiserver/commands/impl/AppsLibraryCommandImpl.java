@@ -1300,7 +1300,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             ApplianceManagerResourceStubImpl amStub =
                 new ApplianceManagerResourceStubImpl(amServiceUri);
 
-            status = amStub.getOVFPackageInstanceStatus(idEnterpriseSt, idsOvfInstance);
+            status = amStub.getCurrentOVFPackageInstanceStatus(idEnterpriseSt, idsOvfInstance);
         }
         catch (final Exception e)
         {

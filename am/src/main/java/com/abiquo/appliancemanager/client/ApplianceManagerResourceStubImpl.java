@@ -33,6 +33,7 @@ import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 
 //@Service
 // @Transactional
@@ -236,4 +237,69 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         return response.getEntity(String.class);
     }
 
+    /**
+     * Current status, eval if uploading.
+     * 
+     * @param idsOvfpackageIn Name of the item to refresh.
+     * @param idEnterprise Id of  Enterprise to which this {@link OVFPackage} belongs.
+     * @return OVFPackageInstanceStatusDto
+     */
+    public OVFPackageInstanceStatusDto getCurrentOVFPackageInstanceStatus(
+        final String idEnterprise, final String ovfId)
+    {
+        Resource resource = ovfPackage(idEnterprise, ovfId);
+
+        ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
+
+        final int httpStatus = response.getStatusCode();
+        if (httpStatus == 200)
+        {
+            return response.getEntity(OVFPackageInstanceStatusDto.class);
+        }
+        if (httpStatus == 404)
+        {
+            return uploading(ovfId);
+        }
+
+        checkErrorStatusResponse(response, httpStatus);
+
+        return response.getEntity(OVFPackageInstanceStatusDto.class);
+    }
+
+    /**
+     * This {@link OVFPackage} is uploading.
+     * 
+     * @param ovfId id {@link OVFPackage}.
+     * @return OVFPackageInstanceStatusDto
+     */
+    private OVFPackageInstanceStatusDto uploading(final String ovfId)
+    {
+        OVFPackageInstanceStatusDto statusUploading = new OVFPackageInstanceStatusDto();
+        statusUploading.setOvfId(ovfId);
+        statusUploading.setProgress(0d);
+        statusUploading.setOvfPackageStatus(OVFPackageInstanceStatusType.DOWNLOAD);
+        return statusUploading;
+    }
+
+    /**
+     * Returns the proper error.
+     * @param response response.
+     * @param httpStatus code.
+     */
+    private void checkErrorStatusResponse(final ClientResponse response, Integer httpStatus)
+    {
+        String cause = null;
+        try
+        {
+            cause = response.getEntity(String.class);
+        }
+        catch (Exception e)
+        {
+            cause = response.getMessage();
+
+            }
+
+        throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
+            response.getMessage(), cause));
+    }
 }
