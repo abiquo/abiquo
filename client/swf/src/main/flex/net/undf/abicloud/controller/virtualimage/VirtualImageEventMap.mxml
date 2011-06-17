@@ -502,9 +502,6 @@
     <!-- VirtualImageEvent.CHECK_VIRTUAL_IMAGE_UPLOAD_PROGRESS ________________________________________________________________________ -->
     <EventHandlers type="{VirtualImageEvent.CHECK_VIRTUAL_IMAGE_UPLOAD_PROGRESS}">
 
-        <!-- Blocking screen -->
-        <InlineInvoker method="ScreenBlocker.blockScreen"/>
-
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
