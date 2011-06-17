@@ -23,6 +23,7 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterWithDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
@@ -32,6 +33,8 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
     private static final long serialVersionUID = 1L;
 
     private VirtualMachineDto virtualMachine;
+
+    private VirtualApplianceDto virtualAppliance;
 
     private VirtualDatacenterWithDatacenterDto virtualDatacenter;
 
@@ -66,5 +69,15 @@ public class VolumeManagementWithVirtualMachineDto extends VolumeManagementDto
     public StoragePoolWithDeviceDto getStoragePoolWithDevice()
     {
         return storagePoolWithDevice;
+    }
+
+    public void setVirtualAppliance(final VirtualApplianceDto virtualAppliance)
+    {
+        this.virtualAppliance = virtualAppliance;
+    }
+
+    public VirtualApplianceDto getVirtualAppliance()
+    {
+        return virtualAppliance;
     }
 }
