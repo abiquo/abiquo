@@ -273,6 +273,7 @@ public class OVFModelFromVirtualAppliance
         return state;
     }
 
+    @Deprecated // this function should be deleted    
     private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
     {
         // from the image
@@ -830,10 +831,22 @@ public class OVFModelFromVirtualAppliance
         // the fileSize + disk
         // format it can be
         // computed)
-        DiskFormat format = null; // TODO require format
-
-        format =
-            DiskFormat.fromValue(nodeVirtualImage.getVirtualImage().getDiskFormatType().getUri());
+        DiskFormat format = null; 
+        
+        if (nodeVirtualImage.getVirtualMachine().getConversion() != null)
+        {
+            format =
+                DiskFormat.fromValue(nodeVirtualImage.getVirtualMachine().getConversion()
+                    .getDiskTargetFormatType().getUri());
+        }
+        else
+        {
+            format =
+                DiskFormat.fromValue(nodeVirtualImage.getVirtualImage().getDiskFormatType()
+                    .getUri());
+        }
+        
+        
 
         // Adding the virtual Disks to the package level element
         VirtualDiskDescType virtualDescTypePackage =
