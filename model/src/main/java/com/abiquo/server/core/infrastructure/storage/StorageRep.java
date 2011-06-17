@@ -38,6 +38,7 @@ import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.util.FilterOptions;
 
@@ -226,7 +227,9 @@ public class StorageRep extends DefaultRepBase
 
     public void removeVolume(final VolumeManagement volume)
     {
+        Rasd rasd = volume.getRasd();
         volumeDAO.remove(volume);
+        rasdDAO.remove(rasd);
         volumeDAO.flush();
     }
 
@@ -244,5 +247,4 @@ public class StorageRep extends DefaultRepBase
     {
         poolDAO.flush();
     }
-
 }
