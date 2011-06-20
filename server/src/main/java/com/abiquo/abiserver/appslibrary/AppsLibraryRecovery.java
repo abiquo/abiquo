@@ -181,20 +181,34 @@ public class AppsLibraryRecovery
 
             if (!oldLocation.equalsIgnoreCase(repositoryLocation))
             {
+
+                String msg =
+                    String.format("The virtual image repository have changed its location, "
+                        + "was pointing to [%s] and the new location is [%s]. "
+                        + "WARNING: some virtual images could not be available. ", oldLocation,
+                        repositoryLocation);
+
+                TracerFactory.getTracer().log(SeverityType.CRITICAL,
+                    ComponentType.APPLIANCE_MANAGER,
+                    com.abiquo.tracer.EventType.REMOTE_SERVICES_UPDATE, msg,
+                    new UserInfo("SYSTEM"),
+                    platform("abicloud").enterprise(enterprise("abiCloud").user(user("SYSTEM"))));
+
                 // change the datacenter repository
                 try
                 {
                     daoF.beginConnection();
-                    daoF.getRepositoryDAO().makeTransient(repo);
+
+                    repo.setUrl(repositoryLocation);
+                    daoF.getRepositoryDAO().makePersistent(repo);
+
                     daoF.endConnection();
                 }
                 catch (PersistenceException e)
                 {
                     daoF.rollbackConnection();
-                    throw new ConfigurationException("Can not determine the Datacenter Repository");
+                    throw new ConfigurationException("Can not change the Datacenter Repository location.");
                 }
-
-                repo = createRepository(idDatacenter, repositoryLocation);
             }
         }
 
