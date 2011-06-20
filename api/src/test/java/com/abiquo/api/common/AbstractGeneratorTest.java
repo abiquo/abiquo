@@ -42,7 +42,6 @@ import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
 import com.abiquo.server.core.enterprise.RoleLdapGenerator;
@@ -99,8 +98,6 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         new NodeVirtualImageGenerator(seed);
 
     protected RoleGenerator roleGenerator = new RoleGenerator(seed);
-
-    protected RoleLdapGenerator ldapRoleGenerator = new RoleLdapGenerator(seed);
 
     protected UserGenerator userGenerator = new UserGenerator(seed);
 

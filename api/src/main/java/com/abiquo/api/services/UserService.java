@@ -87,7 +87,7 @@ public class UserService extends DefaultApiService
      */
     public User getCurrentUser()
     {
-    if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
         {
             AbiquoUserDetails details =
                 (AbiquoUserDetails) SecurityContextHolder.getContext().getAuthentication()
@@ -100,7 +100,7 @@ public class UserService extends DefaultApiService
         }
         else
         { // Backward compatibility and bzngine
- 
+
             String userName = SecurityContextHolder.getContext().getAuthentication().getName();
             return repo.getUserByAuth(userName, AuthType.ABIQUO);
         }
@@ -303,16 +303,6 @@ public class UserService extends DefaultApiService
         if (user.searchLink(EnterpriseResource.ENTERPRISE) != null)
         {
             newEnt = findEnterprise(getEnterpriseID(user));
-        }
-        if (authMode.equalsIgnoreCase(User.AuthType.LDAP.toString()))
-        {
-            if ((old.getEnterprise() == null && newEnt != null)
-                || (old.getEnterprise() != null && newEnt == null)
-                || (!old.getEnterprise().getId().equals(newEnt.getId())))
-            {
-                // In ldap mode it is not possible to edit user's enterprise
-                throw new ConflictException(APIError.NOT_EDIT_USER_ENTERPRISE_LDAP_MODE);
-            }
         }
 
         if (securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))

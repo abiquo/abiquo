@@ -194,8 +194,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         String uri =
             createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
                 userListOptions.getLength());
-        
-	uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
         ClientResponse response = get(uri);
         if (response.getStatusCode() == 200)
@@ -284,7 +284,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
                 userListOptions.getLength());
 
-	uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
         ClientResponse response = get(uri);
         if (response.getStatusCode() == 200)
@@ -322,7 +322,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                     && orderBy.equalsIgnoreCase("role"))
                 {
                     normalUsers.add(User.create(dto, Enterprise.create(enterprise),
-		    Role.create(role, entRole, privileges)));
+                        Role.create(role, entRole, privileges)));
                 }
                 else
                 {

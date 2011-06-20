@@ -76,7 +76,7 @@ public class RoleLdapDAOTest extends DefaultDAOTestBase<RoleLdapDAO, RoleLdap>
         ds().persistAll(ldapRole);
         RoleLdapDAO dao = createDaoForReadWriteTransaction();
 
-        RoleLdap role = dao.findByType(ldapRole.getLdapRole());
+        RoleLdap role = dao.findByType(ldapRole.getRoleLdap());
         try
         {
             AssertEx.assertPropertiesEqual(ldapRole, role, RoleLdap.ROLE_PROPERTY);

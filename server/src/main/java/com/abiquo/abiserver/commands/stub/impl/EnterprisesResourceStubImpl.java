@@ -31,6 +31,8 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -335,6 +337,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
+    @Override
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
         final Enterprise enterprise)
     {

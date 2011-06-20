@@ -28,6 +28,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -154,6 +155,20 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
         return page;
     }
+
+    public List<Privilege> findPrivilegesByIdRole(final Integer idRole)
+    {
+        Query query = getSession().createQuery(QUERY_PRIVILEGES_FROM_ROLE);
+        query.setInteger("idRole", idRole);
+
+        List<Privilege> privileges = query.list();
+        return privileges;
+    }
+
+    private final static String QUERY_PRIVILEGES_FROM_ROLE = //
+        "  SELECT r.privileges FROM " + //
+            "com.abiquo.server.core.enterprise.Role r " + //
+            "WHERE r.id = :idRole";
 
     private Criteria createCriteria(final Enterprise enterprise, final String filter,
         final String orderBy, final boolean desc, final boolean discardNullEnterprises)

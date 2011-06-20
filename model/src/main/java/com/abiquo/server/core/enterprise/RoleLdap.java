@@ -23,7 +23,6 @@ package com.abiquo.server.core.enterprise;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -52,7 +51,7 @@ public class RoleLdap extends DefaultEntityBase
     public RoleLdap(final String roleLdap, final Role role)
     {
         super();
-        this.ldapRole = ldapRole;
+        this.roleLdap = roleLdap;
         this.role = role;
     }
 
@@ -69,35 +68,6 @@ public class RoleLdap extends DefaultEntityBase
         return this.id;
     }
 
-    public final static String LDAP_ROLE_PROPERTY = "ldapRole";
-
-    private final static boolean LDAP_ROLE_REQUIRED = true;
-
-    private final static String LDAP_ROLE_COLUMN = "role_ldap";
-
-    private final static int LDAP_ROLE_LENGTH_MIN = 0;
-
-    private final static int LDAP_ROLE_LENGTH_MAX = 128;
-
-    private final static boolean LDAP_ROLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = LDAP_ROLE_COLUMN, nullable = !LDAP_ROLE_REQUIRED, length = LDAP_ROLE_LENGTH_MAX)
-    private String ldapRole;
-
-    @Required(value = true)
-    @Length(min = LDAP_ROLE_LENGTH_MIN, max = LDAP_ROLE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = LDAP_ROLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getLdapRole()
-    {
-        return ldapRole;
-    }
-
-    private void setLdapRole(String ldapRole)
-    {
-        this.ldapRole = ldapRole;
-    }
-
     public void setId(final Integer id)
     {
         this.id = id;
@@ -105,12 +75,12 @@ public class RoleLdap extends DefaultEntityBase
 
     public final static String ROLE_PROPERTY = "role";
 
-    private final static boolean ROLE_REQUIRED = false;
+    private final static boolean ROLE_REQUIRED = true;
 
     private final static String ROLE_ID_COLUMN = "idRole";
 
     @JoinColumn(name = ROLE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @ForeignKey(name = "fk_" + TABLE_NAME + "_role")
     private Role role;
 
@@ -131,7 +101,7 @@ public class RoleLdap extends DefaultEntityBase
 
     public final static int ROLE_LDAP_LENGTH_MIN = 0;
 
-    public final static int ROLE_LDAP_LENGTH_MAX = 255;
+    public final static int ROLE_LDAP_LENGTH_MAX = 128;
 
     private final static boolean ROLE_LDAP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 

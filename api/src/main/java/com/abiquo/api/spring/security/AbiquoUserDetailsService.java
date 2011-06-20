@@ -20,9 +20,10 @@
  */
 package com.abiquo.api.spring.security;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -73,7 +74,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
      * 
      * @param authType a {@link AuthType} value.
      */
-    public void setAuthType(AuthType authType)
+    public void setAuthType(final AuthType authType)
     {
         this.authType = authType;
     }
@@ -136,15 +137,6 @@ public class AbiquoUserDetailsService implements UserDetailsService
      */
     protected GrantedAuthority[] loadUserAuthorities(final User user)
     {
-<<<<<<< HEAD
-        String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
-        if (DEFAULT_ROLE != null)
-        {
-            return new GrantedAuthority[] {new GrantedAuthorityImpl(role),
-            new GrantedAuthorityImpl(DEFAULT_ROLE)};
-        }
-        return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
-=======
         List<Privilege> privileges = user.getRole().getPrivileges();
         ArrayList<String> grantedAuthority = new ArrayList<String>();
 
@@ -161,7 +153,6 @@ public class AbiquoUserDetailsService implements UserDetailsService
 
         return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
             .toArray(new String[grantedAuthority.size()]));
->>>>>>> roles
     }
 
 }

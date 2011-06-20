@@ -39,10 +39,10 @@ import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
+import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -231,9 +231,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     // TESTS refered to the action of GET IPs by VDC
 
     /**
-     * <<<<<<<
-     * HEAD:api/src/test/java/com/abiquo/api/resources/cloud/VirtualDatacenterResourceIT.java
-     * ======= Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
+     * Create a VirtualDatacenter without IPs and check the 'HTTP Conflict' error
      */
     @Test
     public void getVirtualDatacenterEmptyListWhenHasVLANsWithoutIPs()
