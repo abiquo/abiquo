@@ -166,7 +166,6 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         }
     }
 
-    
     @POST
     @Consumes("multipart/form-data")
     public Response uploadOVFPackage(@Context HttpHeaders headers,
@@ -175,9 +174,9 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         EventException
     {
         InPart diskInfoPart = mp.next();
-        
+
         fixMediaType(diskInfoPart);
-        
+
         OVFPackageInstanceDto diskInfo = diskInfoPart.getBody(OVFPackageInstanceDto.class, null);
 
         InPart diskFilePart = mp.next();
@@ -196,33 +195,28 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
 
         return Response.created(URI.create(diskInfo.getOvfUrl())).build();
     }
-    
-    
+
     // CaseInsensitiveMultivaluedMap [map=[Content-Disposition=form-data; name="diskInfo";
     // filename="diskInfo.json",Content-Type=application/json]]
     private void fixMediaType(InPart diskInfoPart)
     {
-        if(diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
+        if (diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
         {
             diskInfoPart.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        }        
-    }    
+        }
+    }
 
-    
-    
     private void copy(InputStream fin, File destFile) throws IOException
     {
-
         OutputStream fout = new FileOutputStream(destFile);
-
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = fin.read(buf)) > 0)
+        try
         {
-            fout.write(buf, 0, len);
+            IOUtils.copy(fin, fout);
+        }
+        finally
+        {
+            fout.close();
         }
 
-        // XXX fin.close();
-        fout.close();
     }
 }

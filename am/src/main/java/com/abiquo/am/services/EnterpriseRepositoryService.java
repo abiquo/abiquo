@@ -259,6 +259,8 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     {
         File enterpriseRepositoryFile = new File(enterpriseRepositoryPath);
 
+        TimeoutFSUtils.getInstance().canUseRepository();
+
         List<String> ovfids =
             traverseOVFFolderStructure(enterpriseRepositoryFile.getAbsolutePath(), new String(),
                 includeBundeles, false);
@@ -281,8 +283,6 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     private List<String> traverseOVFFolderStructure(final String erPath, final String relativePath,
         final Boolean includeBundles, final Boolean cleanDeploys)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         List<String> ovfids = new LinkedList<String>();
         File enterpriseRepositoryFile = new File(erPath);
 
@@ -307,7 +307,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
                 recRelativePath = relativePath + '/' + file.getName();
             }
 
-            if (file.exists() && file.isDirectory())
+            if (file.exists() && file.isDirectory() && file.listFiles().length != 0)
             {
                 List<String> recOvfids =
                     traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
@@ -1177,11 +1177,10 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         {
             return f.length();
         }
-        else if (f.isDirectory())
+        else if (f.isDirectory() && f.listFiles().length != 0)
         {
-            File[] fs = f.listFiles();
             Long acum = 0l;
-            for (File element : fs)
+            for (File element : f.listFiles())
             {
                 acum += sizeOfDirectory(element);
             }

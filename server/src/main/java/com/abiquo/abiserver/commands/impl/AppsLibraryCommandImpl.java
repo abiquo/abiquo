@@ -195,7 +195,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         {
             final String cause =
                 String.format("Can not obtain the repository usage info "
-                    + "of the Datacenter [%s] for the Enterprise [%s]", idDatacenter, idEnterprise);
+                    + "of the Datacenter [%s] for the Enterprise [%s]. "
+                    + "NFS could be bussy (check it later).", idDatacenter, idEnterprise);
 
             final String detail = e.getMessage();
 

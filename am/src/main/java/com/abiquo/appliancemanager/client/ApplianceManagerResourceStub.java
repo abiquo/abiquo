@@ -112,6 +112,9 @@ public class ApplianceManagerResourceStub
         return repository(idEnterprise, false);
     }
 
+    /**
+     * Timeout
+     * */
     Resource repository(final String idEnterprise, final boolean checkCanWrite)
     {
         String url =
@@ -125,7 +128,7 @@ public class ApplianceManagerResourceStub
             url = UriHelper.appendQueryParamsToPath(url, queryParams, false);
         }
 
-        Resource resource = client.resource(url);
+        Resource resource = clientTimeout.resource(url);
 
         return resource;
     }
