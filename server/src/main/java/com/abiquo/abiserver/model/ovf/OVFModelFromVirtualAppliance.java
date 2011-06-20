@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -269,29 +270,6 @@ public class OVFModelFromVirtualAppliance
                 break;
         }
         return state;
-    }
-
-    @Deprecated // this function should be deleted    
-    private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
-    {
-        // from the image
-        String diskfileId = image.getName() + "." + image.getId();
-        String diskId = String.valueOf(image.getId());
-        Long capacity = image.getHdRequired();// TODO set capacity !!! (using fileId? )
-
-        DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().getUri());
-
-        // TODO (also capacityUnit and parentRef (populateSize on an empty disk do not matter))
-
-        // Setting the virtual Disk package level element
-        DiskSectionType diskSection = new DiskSectionType();
-        VirtualDiskDescType virtualDescType =
-            OVFDiskUtils.createDiskDescription(diskId, diskfileId, format, capacity, null, null,
-                null);
-
-        diskSection.getDisk().add(virtualDescType);
-
-        return diskSection;
     }
 
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
