@@ -228,7 +228,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_VIRTUALDATACENTER_HEADER")+" "+this._selectedVirtualDataCenter.name,
+                                                                                "ALERT_DELETE_VIRTUALDATACENTER_HEADER")+" '"+this._selectedVirtualDataCenter.name+"'",
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALDATACENTER_TEXT"),
                                         Alert.YES | Alert.NO, virtualDataCenterDeletionResponseHandler);
