@@ -32,11 +32,14 @@ package net.undf.abicloud.vo.user
         public var id:int;
 
         public var name:String;
+        
+        public var isReservationRestricted:Boolean;
 
         public var deleted:Boolean;
         
         public var limits:ResourceAllocationLimit;
         
+	public var isReservationRestricted:Boolean;
         /******
         * 
         * allowedDatacenter is an array containing all allowed datacenters for this enterprise
@@ -55,10 +58,12 @@ package net.undf.abicloud.vo.user
         {
             id = 0;
             name = "";
+            isReservationRestricted = false;
             deleted = false;
             limits = new ResourceAllocationLimit();
             dcLimits = new ArrayCollection();
             reservedMachines = new ArrayCollection();
+	    isReservationRestricted = false;
         }
 
     }

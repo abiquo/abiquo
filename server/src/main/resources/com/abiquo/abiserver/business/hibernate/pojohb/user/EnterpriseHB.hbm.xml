@@ -18,6 +18,10 @@
 			<column length="40" name="name" not-null="true" />
 		</property>
 		
+		<property name="isReservationRestricted" type="boolean">
+        	<column name="isReservationRestricted" />
+        </property>
+		
 		<set name="dcLimits" lazy="false" cascade="all-delete-orphan">
 			<key>
 				<column name="idEnterprise" not-null="true" />
