@@ -159,6 +159,7 @@ public class EnterpriseService extends DefaultApiService
                 dto.getCpuCountHardLimit(),
                 dto.getHdHardLimitInMb());
 
+        enterprise.setIsReservationRestricted(dto.getIsReservationRestricted());
         enterprise.setStorageLimits(new Limit(dto.getStorageSoft(), dto.getStorageHard()));
         enterprise.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
@@ -544,6 +545,7 @@ public class EnterpriseService extends DefaultApiService
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)
+
     {
         // community dummy impl (no limit check)
 
