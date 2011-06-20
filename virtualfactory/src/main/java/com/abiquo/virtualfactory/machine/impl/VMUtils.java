@@ -519,7 +519,6 @@ public class VMUtils
         {
             List<VirtualDeviceConfigSpec> nicSpecList = new ArrayList<VirtualDeviceConfigSpec>();
             VmwareMachineUtils utils = new VmwareMachineUtils(cb);
-            int index = 1;
             for (VirtualNIC vnic : vnicList)
             {
                 VirtualDeviceConfigSpec nicSpec = new VirtualDeviceConfigSpec();
@@ -538,7 +537,6 @@ public class VMUtils
                 nic2.setKey(4);
                 nicSpec.setDevice(nic2);
                 nicSpecList.add(nicSpec);
-                index++;
             }
             return nicSpecList;
         }
