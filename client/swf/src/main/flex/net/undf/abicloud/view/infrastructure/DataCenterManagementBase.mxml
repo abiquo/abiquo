@@ -51,6 +51,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
             import com.google.maps.LatLng;
             import com.google.maps.Map;
@@ -171,6 +173,10 @@
              **/
             protected function onCreationComplete():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',addButton,manageDCTools);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',deleteButton,manageDCTools);
+                
                 //Creating Pop Ups				
                 this._datacenterFormAdd = new DatacenterFormAdd();
                 this._datacenterFormAdd.addEventListener("DatacenterFormAddClose",
@@ -650,25 +656,29 @@
             itemRenderer="net.undf.abicloud.view.infrastructure.components.datacenter.DataCenterListRenderer"
             click="onClickDataCenterList()"/>
 
-        <general:GeneralPanelToolBox>
-            <mx:Button id="addButton"
-                styleName="AddButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                click="addDataCenter()"/>
-
-            <mx:Button id="deleteButton"
-                enabled="{dataCenterList.selectedIndex > -1}"
-                styleName="RemoveButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-                click="askDataCenterDeletion()"/>
-
-            <mx:Spacer width="100%"/>
-
-            <mx:Button id="editButton"
-                enabled="{dataCenterList.selectedIndex > -1}"
-                styleName="ConfigurationButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-                click="editDataCenter(dataCenterList.selectedItem as DataCenter)"/>
+        <general:GeneralPanelToolBox >
+	        <mx:HBox width="100%" 
+	        	id="manageDCTools"
+	        	verticalAlign="middle">
+	            <mx:Button id="addButton"
+	                styleName="AddButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	                click="addDataCenter()"/>
+	
+	            <mx:Button id="deleteButton"
+	                enabled="{dataCenterList.selectedIndex > -1}"
+	                styleName="RemoveButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	                click="askDataCenterDeletion()"/>
+	
+	            <mx:Spacer width="100%"/>
+	
+	            <mx:Button id="editButton"
+	                enabled="{dataCenterList.selectedIndex > -1}"
+	                styleName="ConfigurationButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+	                click="editDataCenter(dataCenterList.selectedItem as DataCenter)"/>
+             </mx:HBox>
         </general:GeneralPanelToolBox>
     </general:GeneralPanel>
 

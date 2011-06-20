@@ -26,7 +26,9 @@ import static com.abiquo.api.common.UriTestResolver.resolveEnterprisesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -41,6 +43,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
@@ -57,13 +60,33 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
     {
         Enterprise e1 = enterpriseGenerator.createUniqueInstance();
         Enterprise e2 = enterpriseGenerator.createUniqueInstance();
-        Role r1 = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
-        Role r2 = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+       
+
+        Role r1 = roleGenerator.createInstanceSysAdmin();
+        Role r2 = roleGenerator.createInstanceEnterprisAdmin();
 
         User u1 = userGenerator.createInstance(e1, r1, "foo");
         User u2 = userGenerator.createInstance(e2, r2, "bar");
 
-        setup(e1, e2, r1, r2, u1, u2);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(e1);
+        entitiesToSetup.add(e2);
+
+        for (Privilege p : r1.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        for (Privilege p : r2.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r1);
+        entitiesToSetup.add(r2);
+        entitiesToSetup.add(u1);
+        entitiesToSetup.add(u2);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response = get(enterprisesURI, u1.getNick(), "foo");
         assertEquals(response.getStatusCode(), 200);
@@ -84,7 +107,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         Enterprise e1 = enterpriseGenerator.createInstance("enterprise_foo_enterprise");
         Enterprise e2 = enterpriseGenerator.createInstance("enterprise_bar_enterprise");
 
-        Role r1 = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role r1 = roleGenerator.createInstance();
         User u1 = userGenerator.createInstance(e1, r1, "foo");
 
         setup(e1, e2, r1, u1);
@@ -182,7 +205,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 400);
     }
 
-    private ClientResponse postEnterprise(EnterpriseDto e)
+    private ClientResponse postEnterprise(final EnterpriseDto e)
     {
         return enterpriseResource.contentType(MediaType.APPLICATION_XML).post(e);
     }

@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.enterprise;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -29,6 +28,22 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "role")
 public class RoleDto extends SingleResourceTransportDto
 {
+    public RoleDto()
+    {
+        super();
+    }
+
+    public RoleDto(final Integer id, final String name, final boolean blocked, final String ldap,
+        final Integer idEnterprise)
+    {
+        super();
+        this.id = id;
+        this.name = name;
+        this.blocked = blocked;
+        this.ldap = ldap;
+        this.idEnterprise = idEnterprise;
+    }
+
     private Integer id;
 
     public Integer getId()
@@ -36,59 +51,57 @@ public class RoleDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    private String shortDescription;
+    private String name;
 
-    @XmlElement(name = "name")
-    public String getShortDescription()
+    public String getName()
     {
-        return shortDescription;
+        return name;
     }
 
-    public void setShortDescription(String shortDescription)
+    public void setName(final String name)
     {
-        this.shortDescription = shortDescription;
+        this.name = name;
     }
 
-    private String largeDescription;
+    private boolean blocked;
 
-    @XmlElement(name = "description")
-    public String getLargeDescription()
+    public boolean isBlocked()
     {
-        return largeDescription;
+        return blocked;
     }
 
-    public void setLargeDescription(String largeDescription)
+    public void setBlocked(final boolean blocked)
     {
-        this.largeDescription = largeDescription;
+        this.blocked = blocked;
     }
 
-    private float securityLevel;
+    protected String ldap;
 
-    public float getSecurityLevel()
+    public String getLdap()
     {
-        return securityLevel;
+        return ldap;
     }
 
-    public void setSecurityLevel(float securityLevel)
+    public void setLdap(final String ldap)
     {
-        this.securityLevel = securityLevel;
+        this.ldap = ldap;
     }
 
-    private Role.Type type;
+    private Integer idEnterprise;
 
-    public Role.Type getType()
+    public Integer getIdEnterprise()
     {
-        return type;
+        return idEnterprise;
     }
 
-    public void setType(Role.Type type)
+    public void setIdEnterprise(final Integer idEnterprise)
     {
-        this.type = type;
+        this.idEnterprise = idEnterprise;
     }
 
 }

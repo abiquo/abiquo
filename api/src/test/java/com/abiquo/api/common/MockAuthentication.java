@@ -23,17 +23,21 @@ package com.abiquo.api.common;
 
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
+import org.springframework.security.GrantedAuthorityImpl;
 
-public class AuthenticationStub implements Authentication {
+import com.abiquo.api.spring.security.SecurityService;
 
-	private String name;
-	
-	public AuthenticationStub(String username)
-	{
-		this.name = username;
-	}
-	
-	@Override
+public class MockAuthentication implements Authentication
+{
+
+    private String name;
+
+    public MockAuthentication(final String username)
+    {
+        this.name = username;
+    }
+
+    @Override
     public String getName()
     {
         return name;
@@ -48,8 +52,15 @@ public class AuthenticationStub implements Authentication {
     @Override
     public GrantedAuthority[] getAuthorities()
     {
-        // TODO Auto-generated method stub
-        return null;
+        String[] authorityStrings = SecurityService.getAllPrivileges();
+        GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
+
+        for (int i = 0; i < authorityStrings.length; i++)
+        {
+            authorities[i] = new GrantedAuthorityImpl(authorityStrings[i]);
+        }
+
+        return authorities;
     }
 
     @Override
@@ -74,7 +85,7 @@ public class AuthenticationStub implements Authentication {
     }
 
     @Override
-    public void setAuthenticated(boolean arg0) throws IllegalArgumentException
+    public void setAuthenticated(final boolean arg0) throws IllegalArgumentException
     {
 
     }

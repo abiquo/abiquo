@@ -38,6 +38,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.events.EffectEvent;
             import mx.effects.Effect;
             import mx.effects.Resize;
@@ -64,6 +66,8 @@
              */
             private function onInitialize():void
             {
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_RETRIEVE_DETAILS,"removeChild",accessButton,this);
+                
                 //Creating an resize effect
                 this._resizeEffect = new Resize();
                 this._resizeEffect.duration = 500;
@@ -183,6 +187,7 @@
         visible="{this._isClicked}"/>
 
     <mx:Button 
+    	id="accessButton"
         right="20" bottom="20"
         label="@Resource(bundle='Common', key='BUTTON_ENTER_TOOLTIP')"
         includeInLayout="{this._isClicked}"

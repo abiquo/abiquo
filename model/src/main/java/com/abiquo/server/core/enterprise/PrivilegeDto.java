@@ -19,27 +19,49 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.security
+package com.abiquo.server.core.enterprise;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "privilege")
+public class PrivilegeDto extends SingleResourceTransportDto
 {
-
-    /**
-     * This interface defines how to make a Flex component securable
-     *
-     * A Securable component must define the resources that must be securable externally, for example from a server
-     *
-     * A Securable Component needs an Authorization Manager to check the authorization in its Securable Resources
-     **/
-
-
-    public interface ISecurableComponent
+    public PrivilegeDto()
     {
 
-        function defineSecurableResources():void
-
-
-        function checkSecurableResources():void
-
-
-        function makeUnavailable():void
     }
+
+    public PrivilegeDto(final Integer id, final String name)
+    {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
 }

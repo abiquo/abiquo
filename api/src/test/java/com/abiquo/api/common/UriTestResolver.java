@@ -64,6 +64,8 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
+import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.resources.config.SystemPropertiesResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.util.URIResolver;
@@ -96,8 +98,8 @@ public class UriTestResolver
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
 
-        return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
-            enterpriseId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
     }
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
@@ -113,12 +115,22 @@ public class UriTestResolver
 
     public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
     {
-        return resolveDatacenterURI(datacenterId) +"/"+ DatacenterResource.ENTERPRISES_PATH;
+        return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ENTERPRISES_PATH;
     }
+
     public static String resolveRolesURI()
     {
         String uri = resolveURI(RolesResource.ROLES_PATH, new HashMap<String, String>());
         return uri;
+    }
+
+    public static String resolvePrivilegeURI(final Integer privilegeId)
+    {
+        String template =
+            buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
+
+        return resolveURI(template,
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)
@@ -126,6 +138,11 @@ public class UriTestResolver
         String template = buildPath(RolesResource.ROLES_PATH, RoleResource.ROLE_PARAM);
 
         return resolveURI(template, Collections.singletonMap(RoleResource.ROLE, roleId.toString()));
+    }
+
+    public static String resolveRoleActionGetPrivilegesURI(final Integer entId)
+    {
+        return resolveRoleURI(entId) + RoleResource.ROLE_ACTION_GET_PRIVILEGES;
     }
 
     public static String resolveUsersURI(final Serializable enterpriseId)
@@ -175,8 +192,8 @@ public class UriTestResolver
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolveRacksURI(final Integer datacenterId)
@@ -184,8 +201,8 @@ public class UriTestResolver
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
                 RacksResource.RACKS_PATH);
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
@@ -449,8 +466,8 @@ public class UriTestResolver
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
                 + RacksResource.RACKS_PATH;
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
@@ -641,8 +658,9 @@ public class UriTestResolver
         return resolveVirtualDatacenterURI(virtualDatacenterId)
             + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
     }
-    
-    public static String resolveVirtualDatacenterActionGetDHCPInfoURI(final Integer virtualDatacenterId)
+
+    public static String resolveVirtualDatacenterActionGetDHCPInfoURI(
+        final Integer virtualDatacenterId)
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
             + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
@@ -703,8 +721,8 @@ public class UriTestResolver
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
-        return resolveURI(template, Collections.singletonMap(
-            SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
     }
 
     public static String resolveLoginURI()

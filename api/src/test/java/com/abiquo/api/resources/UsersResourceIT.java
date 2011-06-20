@@ -26,16 +26,19 @@ import static com.abiquo.api.common.UriTestResolver.resolveUsersURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.Assert;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
@@ -53,17 +56,38 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role role = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
 
-        setup(ent, role, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        entitiesToPersist.add(ent);
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(role);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
     }
 
     @Test
     public void getUsersList() throws Exception
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         ClientResponse response =
             get(resolveUsersURI(user.getEnterprise().getId()), SYSADMIN, SYSADMIN);
@@ -78,16 +102,71 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void getUsersListFilteredByID() throws Exception
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createUniqueInstance();
+        User u1 = userGenerator.createInstance(e1, r, "p1", "u1", "s1", "e1", "neck");
+        User u2 = userGenerator.createInstance(e2, r, "p2", "u2", "s2", "e2", "nack");
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(r);
+        entitiesToPersist.add(u1);
+        entitiesToPersist.add(u2);
+
+        setup(entitiesToPersist.toArray());
+
+        String uri = resolveUsersURI("_");
+        uri =
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("orderBy", new String[] {"nick"}), false);
+        uri =
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("filter", new String[] {u1.getNick()}), false);
+
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), 200);
+
+        UsersDto entity = response.getEntity(UsersDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 1);
+        UserDto u = entity.getCollection().iterator().next();
+        Assert.assertEquals(u.getNick(), "neck");
+    }
+
+    @Test
     public void getUsersListDescOrder() throws Exception
     {
         User user = userGenerator.createUniqueInstance();
         User user2 = userGenerator.createInstance(user.getEnterprise(), user.getRole());
-        setup(user.getRole(), user.getEnterprise(), user, user2);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+        entitiesToSetup.add(user2);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("desc", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -105,12 +184,31 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     {
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role userRole = roleGenerator.createInstance(Role.Type.USER);
-        Role entRole = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
-        setup(ent, userRole, entRole, entUser, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        entitiesToPersist.add(ent);
+        for (Privilege p : entRole.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        if (userRole.getPrivileges() != null)
+        {
+            for (Privilege p : userRole.getPrivileges())
+            {
+                entitiesToPersist.add(p);
+            }
+        }
+        entitiesToPersist.add(entRole);
+        entitiesToPersist.add(userRole);
+        entitiesToPersist.add(entUser);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
 
         // Test the get response depending on the user who performs the request
         String wildwardURI = resolveUsersURI("_");
@@ -130,12 +228,32 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
-        Role userRole = roleGenerator.createInstance(Role.Type.USER);
-        Role entRole = roleGenerator.createInstance(Role.Type.ENTERPRISE_ADMIN);
+        Role userRole = roleGenerator.createInstance();
+        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
-        setup(ent, ent2, userRole, entRole, entUser, user);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+
+        entitiesToPersist.add(ent);
+        entitiesToPersist.add(ent2);
+        for (Privilege p : entRole.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        if (userRole.getPrivileges() != null)
+        {
+            for (Privilege p : userRole.getPrivileges())
+            {
+                entitiesToPersist.add(p);
+            }
+        }
+        entitiesToPersist.add(entRole);
+        entitiesToPersist.add(userRole);
+        entitiesToPersist.add(entUser);
+        entitiesToPersist.add(user);
+
+        setup(entitiesToPersist.toArray());
 
         // Test the get response depending on the user who performs the request
         String uri = resolveUsersURI(ent2.getId());
@@ -148,7 +266,18 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     public void createUsers()
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         UserDto dto = getValidUser(user);
 
@@ -164,7 +293,18 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     public void createUsersWithAvailableDatacenters()
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getRole(), user.getEnterprise(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         UserDto dto = getValidUser(user);
         dto.setAvailableVirtualDatacenters("1,2");
@@ -176,8 +316,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         assertUserResponse(dto, response);
         UserDto entityPost = response.getEntity(UserDto.class);
-        assertEquals(entityPost.getAvailableVirtualDatacenters(), dto
-            .getAvailableVirtualDatacenters());
+        assertEquals(entityPost.getAvailableVirtualDatacenters(),
+            dto.getAvailableVirtualDatacenters());
     }
 
     @Test
@@ -186,12 +326,23 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         User user = userGenerator.createUserWithSession();
         User withoutSession = userGenerator.createInstance(user.getEnterprise(), user.getRole());
 
-        setup(user.getEnterprise(), user.getRole(), user, withoutSession);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+        entitiesToSetup.add(withoutSession);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("connected", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 

@@ -200,6 +200,7 @@ public class User implements IPojo<UserHB>
      * @deprecated all the persistence should be throught the api and we don't need this method any
      *             more
      */
+    @Override
     @Deprecated
     public UserHB toPojoHB()
     {

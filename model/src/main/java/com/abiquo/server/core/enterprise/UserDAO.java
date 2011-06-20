@@ -48,27 +48,32 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         super(User.class);
     }
 
-    public UserDAO(EntityManager entityManager)
+    public UserDAO(final EntityManager entityManager)
     {
         super(User.class, entityManager);
     }
 
-    public static Criterion sameEnterprise(Enterprise enterprise)
+    public static Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(User.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    public static Criterion sameId(Integer userId)
+    public static Criterion sameId(final Integer userId)
     {
         return Restrictions.eq(User.ID_PROPERTY, userId);
     }
 
-    public static Criterion sameNick(String nick)
+    public static Criterion sameNick(final String nick)
     {
         return Restrictions.eq(User.NICK_PROPERTY, nick);
     }
 
-    private Criterion filterBy(String filter)
+    public static Criterion sameRole(final Role role)
+    {
+        return Restrictions.eq(User.ROLE_PROPERTY, role);
+    }
+
+    private Criterion filterBy(final String filter)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
 
@@ -80,12 +85,17 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return filterDisjunction;
     }
 
-    public Collection<User> findByEnterprise(Enterprise enterprise)
+    public Collection<User> findByRole(final Role role)
+    {
+        return find(null, role, null, User.ID_PROPERTY, false, false, 0, 25);
+    }
+
+    public Collection<User> findByEnterprise(final Enterprise enterprise)
     {
         return find(enterprise, null, VirtualDatacenter.NAME_PROPERTY, false);
     }
 
-    public User findByEnterprise(Integer userId, Enterprise enterprise)
+    public User findByEnterprise(final Integer userId, final Enterprise enterprise)
     {
         Criteria criteria = createCriteria(sameId(userId), sameEnterprise(enterprise));
         criteria.addOrder(Order.asc(VirtualDatacenter.NAME_PROPERTY));
@@ -93,19 +103,21 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return (User) criteria.uniqueResult();
     }
 
-    public Collection<User> find(Enterprise enterprise, String filter, String orderBy, boolean desc)
+    public Collection<User> find(final Enterprise enterprise, final String filter,
+        final String orderBy, final boolean desc)
     {
-        return find(enterprise, filter, orderBy, desc, false, 0, 25);
+        return find(enterprise, null, filter, orderBy, desc, false, 0, 25);
     }
 
-    public Collection<User> find(Enterprise enterprise, String filter, String orderBy,
-        boolean desc, boolean connected, Integer offset, Integer numResults)
+    public Collection<User> find(final Enterprise enterprise, final Role role, final String filter,
+        final String orderBy, final boolean desc, final boolean connected, final Integer offset,
+        final Integer numResults)
     {
-        Criteria criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        Criteria criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(enterprise, filter, orderBy, desc, connected);
+        criteria = createCriteria(enterprise, role, filter, orderBy, desc, connected);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -121,14 +133,19 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return page;
     }
 
-    private Criteria createCriteria(Enterprise enterprise, String filter, String orderBy,
-        boolean desc, boolean connected)
+    private Criteria createCriteria(final Enterprise enterprise, final Role role,
+        final String filter, final String orderBy, final boolean desc, final boolean connected)
     {
         Criteria criteria = createCriteria();
 
         if (enterprise != null)
         {
             criteria.add(sameEnterprise(enterprise));
+        }
+
+        if (role != null)
+        {
+            criteria.add(sameRole(role));
         }
 
         if (!StringUtils.isEmpty(filter))
@@ -154,12 +171,12 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         return criteria;
     }
 
-    public boolean existAnyUserWithNick(String nick)
+    public boolean existAnyUserWithNick(final String nick)
     {
         return existsAnyByCriterions(sameNick(nick));
     }
 
-    public boolean existAnyOtherUserWithNick(User user, String nick)
+    public boolean existAnyOtherUserWithNick(final User user, final String nick)
     {
         return existsAnyOtherByCriterions(user, sameNick(nick));
     }
@@ -170,7 +187,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param login that must match.
      * @return User.
      */
-    public User getAbiquoUserByLogin(String login)
+    public User getAbiquoUserByLogin(final String login)
     {
         Criteria criteria = createCriteria();
         criteria.add(sameNick(login));
@@ -187,7 +204,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType a {@link User.AuthType} value.
      * @return User .
      */
-    public User getUserByAuth(String login, AuthType authType)
+    public User getUserByAuth(final String login, final AuthType authType)
     {
         Criteria criteria = createCriteria();
         criteria.add(sameNick(login));
@@ -203,7 +220,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType AuthType.a {@link User.AuthType} value.
      * @return Criterion
      */
-    public static Criterion sameAuthType(AuthType authType)
+    public static Criterion sameAuthType(final AuthType authType)
     {
         return Restrictions.eq("authType", authType);
     }
@@ -215,8 +232,13 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType a {@link User.AuthType} value.
      * @return boolean true if exists, false otherwise.
      */
-    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return existsAnyByCriterions(sameNick(nick), sameAuthType(authType));
+    }
+
+    public boolean existAnyUserWithRole(final Role role)
+    {
+        return existsAnyByCriterions(sameRole(role));
     }
 }
