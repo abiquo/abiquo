@@ -22,45 +22,83 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
+import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveRoleActionGetPrivilegesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.User;
 
 public class RoleResourceIT extends AbstractJpaGeneratorIT
 {
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
 
     @Test
     public void getRoleDoesntExist() throws ClientWebException
     {
         Role role = roleGenerator.createUniqueInstance();
-        setup(role);
 
-        Resource resource = client.resource(resolveRoleURI(12345));
+        List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+
+        setup(entitiesToSetup.toArray());
+
+        ClientResponse response =
+            get(resolveRoleURI(12345), "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE);
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test
     public void getRole() throws Exception
     {
         Role role = roleGenerator.createUniqueInstance();
-        setup(role);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        Resource resource = client.resource(resolveRoleURI(role.getId()));
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
 
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        setup(entitiesToSetup.toArray());
+
+        ClientResponse response =
+            get(resolveRoleURI(role.getId()), "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE);
 
         RoleDto dto = response.getEntity(RoleDto.class);
 
@@ -71,15 +109,33 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
     public void roleContainCorrectLinks() throws ClientWebException
     {
         Role role = roleGenerator.createUniqueInstance();
-        setup(role);
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        role.setEnterprise(ent);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(role);
+
+        setup(entitiesToSetup.toArray());
 
         String href = resolveRoleURI(role.getId());
-        Resource resource = client.resource(href);
+        String enterpriseUri = resolveEnterpriseURI(role.getEnterprise().getId());
+        String privilegesUri = resolveRoleActionGetPrivilegesURI(role.getId());
 
-        RoleDto dto = resource.accept(MediaType.APPLICATION_XML).get(RoleDto.class);
+        RoleDto dto =
+            get(href, "sysadmin", "sysadmin", RoleResource.LINK_MEDIA_TYPE)
+                .getEntity(RoleDto.class);
 
         assertNotNull(dto.getLinks());
 
         assertLinkExist(dto, href, "edit");
+        assertLinkExist(dto, enterpriseUri, "enterprise");
+        assertLinkExist(dto, privilegesUri, "action", "privileges");
     }
+
 }

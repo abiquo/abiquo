@@ -34,14 +34,14 @@ package net.undf.abicloud.vo.authentication
 
         public var user:User
 
-        public var clientResources:ArrayCollection;
+        public var privileges:ArrayCollection;
 
         /* ------------- Constructor ------------- */
         public function LoginResult()
         {
             session = new Session();
             user = new User();
-            clientResources = new ArrayCollection();
+            privileges = new ArrayCollection();
         }
 
     }

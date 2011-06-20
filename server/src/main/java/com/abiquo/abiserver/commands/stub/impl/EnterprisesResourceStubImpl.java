@@ -28,23 +28,30 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.SingleResourceWithLimitsDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.util.URIResolver;
 
 public class EnterprisesResourceStubImpl extends AbstractAPIStub implements EnterprisesResourceStub
 {
@@ -325,6 +332,47 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         else
         {
             populateErrors(response, result, "getEnterprise");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
+        final Enterprise enterprise)
+    {
+        DataResult<Collection<VirtualDataCenter>> result =
+            new DataResult<Collection<VirtualDataCenter>>();
+
+        String uri = createVirtualDatacentersFromEnterpriseLink(enterprise.getId());
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+            DAOFactory factory = HibernateDAOFactory.instance();
+            factory.beginConnection();
+
+            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
+            Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
+
+            for (VirtualDatacenterDto vdc : dto.getCollection())
+            {
+                int datacenterId =
+                    URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
+                        "{datacenter}", "datacenter");
+
+                NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
+                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise,
+                    network.toPojo()));
+            }
+            result.setData(datacenters);
+
+            factory.endConnection();
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualDatacenters");
         }
 
         return result;

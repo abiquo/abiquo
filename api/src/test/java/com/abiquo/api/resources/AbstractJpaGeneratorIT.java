@@ -36,12 +36,12 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 
     protected RestClient client = new RestClient();
 
-    protected ClientResponse get(String uri)
+    protected ClientResponse get(final String uri)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
     }
 
-    protected ClientResponse get(String uri, String username, String password)
+    protected ClientResponse get(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -49,23 +49,33 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .header("Authorization", "Basic " + basicAuth).get();
     }
 
-    protected ClientResponse get(String uri, String mediaType)
+    protected ClientResponse get(final String uri, final String mediaType)
     {
         return client.resource(uri).accept(mediaType).get();
     }
 
-    protected ClientResponse post(String uri, Object dto)
+    protected ClientResponse get(final String uri, final String username, final String password,
+        final String mediaType)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(mediaType).header("Authorization", "Basic " + basicAuth)
+            .get();
+    }
+
+    protected ClientResponse post(final String uri, final Object dto)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML)
             .contentType(MediaType.APPLICATION_XML).post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String mediaType)
+    protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         return client.resource(uri).accept(mediaType).contentType(mediaType).post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String username, String password)
+    protected ClientResponse post(final String uri, final Object dto, final String username,
+        final String password)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -74,8 +84,8 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String username, String password,
-        String mediaType)
+    protected ClientResponse post(final String uri, final Object dto, final String username,
+        final String password, final String mediaType)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -83,13 +93,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .header("Authorization", "Basic " + basicAuth).post(dto);
     }
 
-    protected ClientResponse put(String uri, Object dto)
+    protected ClientResponse put(final String uri, final Object dto)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML)
             .contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
-    protected ClientResponse put(String uri, Object dto, String username, String password)
+    protected ClientResponse put(final String uri, final Object dto, final String username,
+        final String password)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -98,12 +109,21 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .put(dto);
     }
 
-    protected ClientResponse delete(String uri)
+    protected ClientResponse put(final String uri, final Object dto, final String username,
+        final String password, final String mediaType)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(mediaType).contentType(mediaType)
+            .header("Authorization", "Basic " + basicAuth).put(dto);
+    }
+
+    protected ClientResponse delete(final String uri)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).delete();
     }
 
-    protected ClientResponse delete(String uri, String username, String password)
+    protected ClientResponse delete(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
 
@@ -112,7 +132,16 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .delete();
     }
 
-    protected String basicAuth(String username, String password)
+    protected ClientResponse delete(final String uri, final String username, final String password,
+        final String mediaType)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(mediaType).contentType(mediaType)
+            .header("Authorization", "Basic " + basicAuth).delete();
+    }
+
+    protected String basicAuth(final String username, final String password)
     {
         return new String(Base64.encodeBase64((username + ":" + password).getBytes()));
     }

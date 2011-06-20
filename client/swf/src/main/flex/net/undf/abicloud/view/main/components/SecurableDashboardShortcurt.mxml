@@ -28,7 +28,6 @@
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
-    implements="net.undf.abicloud.security.ISecurableComponent"
     useHandCursor="true"
     buttonMode="true"
     mouseChildren="false"
@@ -50,7 +49,6 @@
     <mx:Script>
         <![CDATA[
             import net.undf.abicloud.model.AbiCloudModel;
-            import net.undf.abicloud.security.SecurableResource;
             import mx.events.ItemClickEvent;
 
             [Bindable]
@@ -67,7 +65,7 @@
 
             private function onCreationComplete():void
             {
-                checkSecurableResources();
+                
             }
 
             public function set enterButtonEnabled(flag:Boolean):void
@@ -115,43 +113,7 @@
                 }
             }
 
-            /////////////////////////////////////////////////////////////////////////////
-            //ISecurableComponent implementation
-
-            //Securable Resources of this Securable Component
-            private var _securableResource:SecurableResource;
-
-            public function set securableResource(sR:SecurableResource):void
-            {
-                this._securableResource = sR;
-            }
-
-            /**
-             * For this Securable Component, the Securable Resource will be defined externaly
-             **/
-            public function defineSecurableResources():void
-            {
-            }
-
-            public function checkSecurableResources():void
-            {
-                //Since the Securable Resource is defined externaly, we also must check that it is initalized.
-                //Otherwise, we consider this Securable Component as unathorized
-                if (this._securableResource == null)
-                    makeUnavailable();
-                else if (!this._securableResource.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
-                    makeUnavailable();
-                else
-                {
-                    //The resource is authorized. Nothing to do
-                }
-            }
-
-            public function makeUnavailable():void
-            {
-                this.visible = false;
-                this.includeInLayout = false;
-            }
+           
         ]]>
     </mx:Script>
 

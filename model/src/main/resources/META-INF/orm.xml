@@ -7,11 +7,12 @@
 
     <!-- enterprise -->
     <orm:entity class="com.abiquo.server.core.enterprise.Enterprise"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.Privilege"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Role"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.RoleLdap"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.User"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.DatacenterLimits"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Session"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.enterprise.RoleLdap"></orm:entity>
     <!-- end: enterprise -->
 
     <!-- physical infrastructure -->

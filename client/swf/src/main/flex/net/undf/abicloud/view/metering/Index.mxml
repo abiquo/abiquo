@@ -37,6 +37,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import net.undf.abicloud.events.MeteringEvent;
             import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.events.MainEvent;
@@ -81,8 +83,12 @@
                 else
                 {
                     //The lastest list of events, not filtered
-                    meteringEvent.filter = new Object();
+                    meteringEvent.filter = new Object();                    
                     meteringEvent.maxResults = 100;
+                }
+                //Check for privilege
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ALL)){
+                	meteringEvent.filter.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise.name;
                 }
                 dispatchEvent(meteringEvent);
             }

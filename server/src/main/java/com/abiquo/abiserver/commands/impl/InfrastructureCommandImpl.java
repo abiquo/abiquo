@@ -59,7 +59,9 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
 import com.abiquo.abiserver.eventing.EventingSupport;
@@ -93,6 +95,8 @@ import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
@@ -2580,4 +2584,39 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         return updateUsedResourcesByDatacenter(dataCenter);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualDataCentersByEnterprise(com
+     * .abiquo.abiserver.pojo.user.Enterprise)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise)
+    {
+        return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
+     * getVirtualDataCentersByEnterpriseAndDatacenter(com.abiquo.abiserver.pojo.user.Enterprise,
+     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
+    {
+        EnterprisesResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new EnterprisesResourceStubImpl(),
+                EnterprisesResourceStub.class);
+
+        DataResult<Collection<VirtualDataCenter>> dataResult =
+            proxy.getVirtualDatacenters(enterprise);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
+    }
 }

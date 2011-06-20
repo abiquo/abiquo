@@ -40,8 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
@@ -50,7 +52,9 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -74,6 +78,9 @@ public class EnterpriseService extends DefaultApiService
 
     @Autowired
     DatacenterService datacenterService;
+
+    @Autowired
+    SecurityService securityService;
 
     public EnterpriseService()
     {
@@ -120,7 +127,8 @@ public class EnterpriseService extends DefaultApiService
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
-        if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (securityService.isEnterpriseAdmin())
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -151,6 +159,7 @@ public class EnterpriseService extends DefaultApiService
                 dto.getCpuCountHardLimit(),
                 dto.getHdHardLimitInMb());
 
+        enterprise.setIsReservationRestricted(dto.getIsReservationRestricted());
         enterprise.setStorageLimits(new Limit(dto.getStorageSoft(), dto.getStorageHard()));
         enterprise.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
@@ -244,10 +253,45 @@ public class EnterpriseService extends DefaultApiService
             for (Machine m : reservedMachines)
             {
                 releaseMachine(m.getId(), id);
+	    }
+	}
+
+        if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
+        {
+            String message =
+                "Cannot delete enterprise because some users have roles with super privileges ("
+                    + userService.enterpriseWithBlockedRoles(enterprise)
+                    + "), please change their enterprise before continuing";
+            addConflictErrors(new CommonError(APIError.ENTERPRISE_WITH_BLOCKED_USER.getCode(),
+                message));
+            flushErrors();
+        }
+
+        // user with blocked role is checked before
+        Collection<Role> roles =
+            repo.findRolesByEnterpriseNotNull(enterprise, null, null, false, 0, 1000);
+        if (roles != null)
+        {
+            for (Role r : roles)
+            {
+                Collection<User> users = repo.findUsersByRole(r);
+                if (users != null)
+                {
+                    for (User u : users)
+                    {
+                        repo.removeUser(u);
+                    }
+                }
+                deleteRole(r);
             }
         }
 
         repo.delete(enterprise);
+    }
+
+    protected void deleteRole(final Role role)
+    {
+        repo.deleteRole(role);
     }
 
     public List<Machine> findReservedMachines(final Integer enterpriseId)
@@ -462,7 +506,46 @@ public class EnterpriseService extends DefaultApiService
         flushErrors();
     }
 
+    public Collection<Privilege> findAllPrivileges()
+    {
+        return repo.findAllPrivileges();
+    }
+
+    public Privilege getPrivilege(final Integer id)
+    {
+        Privilege privilege = repo.findPrivilegeById(id);
+        if (privilege == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRIVILEGE);
+            flushErrors();
+        }
+
+        return privilege;
+    }
+
+    public Collection<Privilege> getAllPrivileges()
+    {
+        return repo.findAllPrivileges();
+    }
+
+    public RoleLdap getRoleLdap(final String role_ldap)
+    {
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        if (list == null || list.isEmpty())
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
+            flushErrors();
+        }
+        else if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+        return list.get(0);
+    }
+
     protected void isValidEnterpriseLimit(final Enterprise old)
+
     {
         // community dummy impl (no limit check)
 

@@ -152,7 +152,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_REMOTE_SERVICE_HEADER"),
+                                                                                "ALERT_DELETE_REMOTE_SERVICE_HEADER")+" '"+RemoteService(remoteServiceList.selectedItem).remoteServiceType.name+"'",
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_REMOTE_SERVICE_TEXT"),
                                         Alert.YES | Alert.NO, deleteRemoteService);
