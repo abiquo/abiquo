@@ -271,6 +271,29 @@ public class OVFModelFromVirtualAppliance
         return state;
     }
 
+    @Deprecated // this function should be deleted    
+    private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
+    {
+        // from the image
+        String diskfileId = image.getName() + "." + image.getId();
+        String diskId = String.valueOf(image.getId());
+        Long capacity = image.getHdRequired();// TODO set capacity !!! (using fileId? )
+
+        DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().getUri());
+
+        // TODO (also capacityUnit and parentRef (populateSize on an empty disk do not matter))
+
+        // Setting the virtual Disk package level element
+        DiskSectionType diskSection = new DiskSectionType();
+        VirtualDiskDescType virtualDescType =
+            OVFDiskUtils.createDiskDescription(diskId, diskfileId, format, capacity, null, null,
+                null);
+
+        diskSection.getDisk().add(virtualDescType);
+
+        return diskSection;
+    }
+
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
     {
         // TODO EBS when the path is formed by IP|IQN avoid using the repository and just the path
@@ -715,7 +738,7 @@ public class OVFModelFromVirtualAppliance
         Long capacity = virtualImage.getHdRequired();
         Long populate = virtualImage.getHdRequired(); // TODO required (using the fileSize + disk
         // format it can be computed)
-
+        //
         // Adding the virtual Disks to the package level element
         VirtualDiskDescType virtualDescTypePackage =
             OVFDiskUtils.createDiskDescription("disk_" + diskId, fileRef, format, capacity, null,
