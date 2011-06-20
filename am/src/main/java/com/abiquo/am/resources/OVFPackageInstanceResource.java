@@ -55,6 +55,7 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Parent(OVFPackageInstancesResource.class)
@@ -187,11 +188,18 @@ public class OVFPackageInstanceResource extends AbstractResource
     {
         OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
             getOVFPackageInstanceStatus(idEnterprise, ovfId);
-        if(ovfPackageInstanceStatus == null) {
+        if (ovfPackageInstanceStatus == null)
+        {
             return Response.status(Status.NOT_FOUND).build();
         }
         if (!StringUtils.isBlank(ovfPackageInstanceStatus.getErrorCause()))
         {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        if (OVFPackageInstanceStatusType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
         ovfPackageInstanceStatus.setProgress(100d);
