@@ -39,6 +39,7 @@ package net.undf.abicloud.vo.user
         
         public var limits:ResourceAllocationLimit;
         
+	public var isReservationRestricted:Boolean;
         /******
         * 
         * allowedDatacenter is an array containing all allowed datacenters for this enterprise
@@ -62,6 +63,7 @@ package net.undf.abicloud.vo.user
             limits = new ResourceAllocationLimit();
             dcLimits = new ArrayCollection();
             reservedMachines = new ArrayCollection();
+	    isReservationRestricted = false;
         }
 
     }

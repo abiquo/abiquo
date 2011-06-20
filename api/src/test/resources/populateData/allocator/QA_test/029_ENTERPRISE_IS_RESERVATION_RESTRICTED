@@ -1,0 +1,35 @@
+# test
+test.name=ISRESERVATIONRESTRICTED
+test.description=Check enterprise is reservation restricted
+
+#creating a physical infrastructure
+# -datacenters
+dc1
+
+# -racks
+dc1.r1
+
+# -Machines
+dc1.r1.m1:VMX_04,2,5,200
+
+
+#creating virtual infrastructure
+# -enterprise
+e1:1
+
+# -virtual image
+e1.vi1:dc1,2,2,2
+
+# -virtual datacenter
+e1.vdc1:dc1,VMX_04
+
+# -virtual appliances
+e1.vdc1.va1
+
+# -virtual machine
+e1.vdc1.va1.vm1:vi1
+
+#Rules
+rule.reserved.e1:m1
+
+action.allocate.vm1=m1
