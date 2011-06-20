@@ -38,8 +38,7 @@ package net.undf.abicloud.vo.user
         public var deleted:Boolean;
         
         public var limits:ResourceAllocationLimit;
-        
-	public var isReservationRestricted:Boolean;
+
         /******
         * 
         * allowedDatacenter is an array containing all allowed datacenters for this enterprise
