@@ -27,10 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -42,16 +38,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.InPart;
-import org.apache.wink.providers.json.JsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -171,15 +164,15 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     @Consumes("multipart/form-data")
     public Response uploadOVFPackage(@Context HttpHeaders headers,
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        InMultiPart mp) throws RepositoryException, IOException, IdNotFoundException,
+        InMultiPart mp, @Context Providers providers) throws RepositoryException, IOException,
+        IdNotFoundException,
         EventException
     {
         InPart diskInfoPart = mp.next();
-        
-        fixMediaType(diskInfoPart);
-        
-        OVFPackageInstanceDto diskInfo = diskInfoPart.getBody(OVFPackageInstanceDto.class, null);
 
+        fixMediaType(diskInfoPart);
+
+        OVFPackageInstanceDto diskInfo = diskInfoPart.getBody(OVFPackageInstanceDto.class, null);
         InPart diskFilePart = mp.next();
 
         InputStream isDiskFile = diskFilePart.getBody(InputStream.class, null);
