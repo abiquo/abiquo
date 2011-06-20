@@ -159,25 +159,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>integration-tests</id>
-                            <phase>integration-test</phase>
-                            <goals>
-                                <goal>test</goal>
-                            </goals>
-                            <configuration>
-                                <skip>true</skip>
-                                <excludes>
-                                    <exclude>none</exclude>
-                                </excludes>
-                                <includes>
-                                    <include>**/*Test.java
-                                    </include>
-                                </includes>
-                            </configuration>
-                        </execution>
-                    </executions>
+                    <configuration>
+                        <suiteXmlFiles>
+	                        <suiteXmlFile>src/test/resources/testng/test-${test.suite}.xml</suiteXmlFile>
+	                    </suiteXmlFiles>
+                        <properties>
+                            <property>
+                                <name>listener</name>
+                                <value>com.abiquo.TestListenerOutput</value>
+                            </property>
+                        </properties>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -197,6 +189,11 @@
                             </goals>
                         </execution>
                     </executions>
+                    <configuration>
+                        <suiteXmlFiles>
+                            <suiteXmlFile>src/test/resources/testng/it-${it.suite}.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -290,12 +287,16 @@
             <id>dev</id>
             <properties>
                 <env>dev</env>
+                <test.suite>basic</test.suite>
+                <it.suite>${test.suite}</it.suite>
             </properties>
         </profile>
         <profile>
             <id>test</id>
             <properties>
                 <env>test</env>
+                <test.suite>all</test.suite>
+                <it.suite>${test.suite}</it.suite>
             </properties>
         </profile>
         <profile>
@@ -308,6 +309,8 @@
                 <tomcat.password>admin</tomcat.password>
                 <mysql.bin>/usr/bin</mysql.bin>
                 <env.family>nix</env.family>
+                <test.suite>all</test.suite>
+                <it.suite>${test.suite}</it.suite>
             </properties>
         </profile>
         <!-- Profiles defined by target -->

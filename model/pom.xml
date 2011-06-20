@@ -339,8 +339,8 @@
                 <version>1.1</version>
                 <executions>
                     <execution>
-                        <id>install-database-test</id>
-                        <phase>generate-sources</phase>
+                        <id>create-database-test</id>
+                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -355,7 +355,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate_test_db</id>
+                        <id>insert-database-test</id>
                         <phase>generate-test-resources</phase>
                         <goals>
                             <goal>exec</goal>
@@ -372,7 +372,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>drop_test_db</id>
+                        <id>drop-database-test</id>
                         <phase>test</phase>
                         <goals>
                             <goal>exec</goal>
