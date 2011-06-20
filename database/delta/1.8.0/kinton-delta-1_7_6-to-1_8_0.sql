@@ -23,7 +23,7 @@ update `kinton`.`volume_management` set state = 1 where state = 2;
 alter table kinton.user modify user varchar(128) NOT NULL;
 alter table kinton.user add authType varchar(20) NOT NULL;
 alter table kinton.user modify column password varchar(32);
-update kinton.user set authtype = 'ABIQUO';
+update kinton.user set authType = 'ABIQUO';
 alter table kinton.session modify user varchar(128) NOT NULL;
 alter table kinton.user modify name varchar(128) NOT NULL;
 alter table kinton.metering modify user varchar(128) NOT NULL;
@@ -512,15 +512,6 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idMan
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
 
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
--- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
-alter table kinton.user modify user varchar(128) NOT NULL;
-alter table kinton.user add authType varchar(20) NOT NULL;
-alter table kinton.user modify column password varchar(32);
-update kinton.user set authtype = 'ABIQUO';
-alter table kinton.session modify user varchar(128) NOT NULL;
-alter table kinton.user modify name varchar(128) NOT NULL;
-alter table kinton.metering modify user varchar(128) NOT NULL;
-alter table kinton.session add authType varchar(20) NOT NULL;
 
 --
 -- Definition of table `kinton`.`role_ldap`
