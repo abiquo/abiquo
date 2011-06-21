@@ -33,11 +33,19 @@ import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import com.abiquo.server.core.util.PagedList;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.util.PagedList;
 
-@Repository("jpaRoleLdapDAO")
+/**
+ * This class provides access to DB in order to query for {@link RoleLdap}.
+ * 
+ * @author ssedano
+ */
+
+
+@Repository("jpaLdapRoleDAO")
 public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 {
     public RoleLdapDAO()
@@ -45,11 +53,54 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
         super(RoleLdap.class);
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param entityManager entitimanager.
+     */
     public RoleLdapDAO(final EntityManager entityManager)
     {
         super(RoleLdap.class, entityManager);
     }
 
+    /**
+     * {@link Role} that match <b>exactly</b> with type.
+     * 
+     * @param type name of the <code>LdapRoleDAO</code>
+     * @return <code>LdapRoleDAO</code>s which type mathes name
+     */
+    public RoleLdap findByType(String type)
+    {
+        if (type == null)
+        {
+            return null;
+        }
+        // If at some point a single ldapRole will map more than one role, the implementation of
+        // this function must change.
+        RoleLdap role = (RoleLdap) createCriteria(type).uniqueResult();
+
+        return role;
+    }
+
+    /**
+     * @param type name.
+     * @return Criteria that matches type.
+     */
+    private Criterion sameType(String type)
+    {
+        return Restrictions.eq("ldapRole", type);
+    }
+
+    private Criteria createCriteria(String type)
+    {
+
+        Criteria criteria = createCriteria();
+        if (type != null)
+        {
+            criteria.add(sameType(type));
+        }
+        return criteria;
+    }
     // Criterions
 
     private Criterion sameRole(final Role role)

@@ -24,11 +24,13 @@ package com.abiquo.server.core.enterprise;
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class RoleLdapDAOTest extends DefaultDAOTestBase<RoleLdapDAO, RoleLdap>
 {

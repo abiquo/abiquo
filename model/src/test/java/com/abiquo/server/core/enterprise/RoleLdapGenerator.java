@@ -41,7 +41,8 @@ public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
     @Override
     public void assertAllPropertiesEqual(final RoleLdap obj1, final RoleLdap obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RoleLdap.ROLE_LDAP_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2);
+        roleGenerator.assertAllPropertiesEqual(obj1.getRole(), obj2.getRole());
     }
 
     @Override
@@ -51,6 +52,13 @@ public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
             newString(nextSeed(), RoleLdap.ROLE_LDAP_LENGTH_MIN, RoleLdap.ROLE_LDAP_LENGTH_MAX);
 
         RoleLdap roleLdap = new RoleLdap(role_ldap, roleGenerator.createUniqueInstance());
+
+        return roleLdap;
+    }
+
+    public RoleLdap createUniqueInstance(final String name)
+    {
+        RoleLdap roleLdap = new RoleLdap(name, roleGenerator.createUniqueInstance());
 
         return roleLdap;
     }

@@ -301,6 +301,19 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
                     + "and any machine is reserver current enterprise : %s", enterprise.getName());
 
             throw new PersistenceException(msg);
+<<<<<<< HEAD
+=======
+        }
+    }
+
+    private List<Machine> findFirstCandidateMachinesReservedRestrictedHAExclude(Integer idRack,
+        Integer idVirtualDatacenter, Enterprise enterprise, Integer originalHypervisorId)
+    {
+
+        List<Machine> machines = null;
+
+        List<Machine> reservMachines = findReservedMachines(enterprise);
+
         }
     }
 

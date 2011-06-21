@@ -187,7 +187,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param login that must match.
      * @return User.
      */
-    public User getAbiquoUserByLogin(String login)
+    public User getAbiquoUserByLogin(final String login)
     {
         Criteria criteria = createCriteria();
         criteria.add(sameNick(login));
@@ -204,7 +204,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType a {@link User.AuthType} value.
      * @return User .
      */
-    public User getUserByAuth(String login, AuthType authType)
+    public User getUserByAuth(final String login, final AuthType authType)
     {
         Criteria criteria = createCriteria();
         criteria.add(sameNick(login));
@@ -220,7 +220,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType AuthType.a {@link User.AuthType} value.
      * @return Criterion
      */
-    public static Criterion sameAuthType(AuthType authType)
+    public static Criterion sameAuthType(final AuthType authType)
     {
         return Restrictions.eq("authType", authType);
     }
@@ -232,11 +232,11 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
      * @param authType a {@link User.AuthType} value.
      * @return boolean true if exists, false otherwise.
      */
-    public boolean existAnyUserWithNickAndAuth(String nick, AuthType authType)
+    public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return existsAnyByCriterions(sameNick(nick), sameAuthType(authType));
     }
-    
+
     public boolean existAnyUserWithRole(final Role role)
     {
         return existsAnyByCriterions(sameRole(role));

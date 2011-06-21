@@ -103,4 +103,21 @@ public interface UserDAO extends DAO<UserHB, Integer>
      * @return UserHB
      */
     public UserHB findUserHBByName(String name, String authType);
+
+    /**
+     * Users uniqueness is id.
+     * 
+     * @param name login.
+     * @return UserHB
+     */
+    public UserHB findUserHBById(final Integer id);
+
+    /**
+     * Users uniqueness is id + authType.
+     * 
+     * @param name login.
+     * @param authType {@link AuthType} value.
+     * @return UserHB
+     */
+    public UserHB findUserHBById(final Integer id, String authType);
 }

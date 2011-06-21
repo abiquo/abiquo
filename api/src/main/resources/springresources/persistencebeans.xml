@@ -44,6 +44,8 @@
 	      <ref bean="enterpriseResource"/>
 	      <ref bean="rolesResource"/>
 	      <ref bean="roleResource"/>
+	      <ref bean="privilegesResource"/>
+	      <ref bean="privilegeResource"/>
 	      <ref bean="usersResource"/>
 	      <ref bean="userResource"/>
 	      <ref bean="OVFPackageListsResource"/>

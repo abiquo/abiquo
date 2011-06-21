@@ -112,6 +112,11 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
+    public RoleLdap findLdapRoleByType(final String type)
+    {
+        return roleLdapDAO.findByType(type);
+    }
+
     public Enterprise findById(final Integer id)
     {
         assert id != null;
