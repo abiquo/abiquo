@@ -1068,6 +1068,26 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
             throw new AppsLibraryCommandException(cause, e);
         }
+        catch (final Exception e)
+        {
+            String cause =
+                String.format("Can not create the OVFPackageList [%s]", ovfpackageListURL);
+
+            try
+            {
+                final String reason = e.getMessage();
+                if (reason != null)
+                {
+                    cause = cause + "\nCaused by: " + reason;
+                }
+            }
+            catch (final Exception e2)
+            {
+
+            }
+
+            throw new AppsLibraryCommandException(cause, e);
+        }
 
         return packageList;
     }
