@@ -202,6 +202,12 @@ public class OVFPackageInstanceResource extends AbstractResource
             ovfPackageInstanceStatus.setProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
+        if (OVFPackageInstanceStatusType.ERROR.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
         ovfPackageInstanceStatus.setProgress(100d);
         return Response.ok(ovfPackageInstanceStatus).build();
     }
