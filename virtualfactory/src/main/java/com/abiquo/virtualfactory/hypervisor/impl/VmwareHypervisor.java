@@ -24,6 +24,7 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -384,7 +385,7 @@ public class VmwareHypervisor implements IHypervisor
         }
 
         // Datastore not found, creating it.
-        final String localPath = String.format("nfsrepository-%s", remoteHost);
+        final String localPath = String.format("ABQ_%s", UUID.randomUUID().toString());
 
         HostNasVolumeSpec spec = new HostNasVolumeSpec();
         spec.setRemoteHost(remoteHost);

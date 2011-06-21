@@ -35,6 +35,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
         	import flash.net.navigateToURL;
@@ -107,6 +109,9 @@
 			
             private function onCreationComplete():void
             {
+                //Checking privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
+                
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -420,11 +425,8 @@
             	//if the virtualImage is shared, everyone can download it
             	if(_virtualImage.shared == 1){
             		downloadEnable = true;
-        		//else if the user is a sysadmin, he can download the image
-            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
-            		downloadEnable = true;
         		//else if the user enterprise id == virtualImage enterprise id
-            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            	} else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
             		downloadEnable = true;
             	}                
                 
@@ -672,6 +674,7 @@
 
 
             <mx:FormItem 
+            	id="downloadItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_FILE_NAME')"
                 direction="horizontal"
                 includeInLayout="{this._virtualImage != null}"

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:HDividedBox 
+    width="100%" height="100%"
+    horizontalGap="10"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    verticalGap="0"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    implements="net.undf.abicloud.view.main.IBodyComponent"
+    xmlns:components="net.undf.abicloud.view.user.components.*"
+    xmlns:enterprise="net.undf.abicloud.view.user.components.enterprise.*"
+    xmlns:user="net.undf.abicloud.view.user.components.user.*"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.resources.ResourceManager;
+            import mx.core.Application;
+            import net.undf.abicloud.events.UserEvent;
+            import net.undf.abicloud.events.MainEvent;
+            import mx.effects.Resize;
+            import mx.events.EffectEvent;
+            import net.undf.abicloud.vo.user.User;
+
+
+            private var _resizeEffect:Resize;
+            
+            private var userListBis:UserList;
+
+            /////////////////////////////////////
+            //IBodyComponent implementation (in progress...)
+
+            public function bodyComponentWillChange():void
+            {
+                //For now, we just say we are ready to be changed
+                var mainEvent:MainEvent = new MainEvent(MainEvent.IBODYCOMPONENT_READY_TO_BE_CHANGED);
+                dispatchEvent(mainEvent);
+            }
+
+            public function bodyComponentWillShow():void
+            {
+                //Cleaning the view everytime this component is shown
+                hideMoreInfoContainer();
+
+                userList.init();
+
+                enterpriseSelector.init();
+            }
+            
+             override protected function createChildren():void
+            {
+                super.createChildren();
+                
+                userListBis = new UserList();
+                
+                userToggledContainer.addContent(userListBis, ResourceManager.getInstance().getString("User","LABEL_USERS"));
+                 
+               
+            }
+
+            /////////// END IBodyComponent implementation ////////////////
+
+            private function onCreationComplete():void
+            {
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 160;
+            }
+
+            /**
+             * Shows a User, using an UserRenderer component
+             **/
+            private function showUser(user:User):void
+            {
+                if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._resizeEffect.play([ moreInfoContainer ]);
+                }
+
+                userRenderer.init(user);
+            }
+
+            private function hideMoreInfoContainer():void
+            {
+                if (moreInfoContainer.visible)
+                {
+                    this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                    this._resizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onEndUserResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideUserButton():void
+            {
+                hideMoreInfoContainer();
+            }
+
+
+            private function onUserSelected():void
+            {
+                if (userList.selectedUser)
+                    showUser(userList.selectedUser);
+                else
+                    hideMoreInfoContainer();
+            }
+
+            /////////////////////////////////////
+            //Enterprises
+            /**
+             * When users clicks in enterprises list
+             */
+            private function onSelectedEnterpriseChange():void
+            {
+                hideMoreInfoContainer();
+
+                //Filter the user list by enterprise
+                userList.enterprise = enterpriseSelector.selectedEnterprise;
+            }
+        ]]>
+    </mx:Script>
+
+    <!-- Enterprises list -->
+    <general:GeneralPanel 
+        width="200" height="100%"
+        title="@Resource(bundle='User', key='LABEL_ENTERPRISES')">
+
+        <enterprise:SecurableEnterpriseSelector id="enterpriseSelector"
+            width="100%" height="100%"
+            selectedEnterpriseChange="onSelectedEnterpriseChange()"/>
+    </general:GeneralPanel>
+
+    <!-- Users container -->
+    <general:GeneralPanel id="usersContainer"
+        width="100%" height="100%"
+        title="@Resource(bundle='User', key='LABEL_USERS')">
+        
+        <mx:TabBar id="tabBar"
+	        height="20"
+	        left="0" top="0"
+	        styleName="GeneralToggleContainerTabBar" dataProvider="{mainViewStack}"/>
+        <mx:ViewStack id="mainViewStack" width="100%" height="100%">
+	        <user:UserList id="userList"
+	            width="100%" height="100%"
+	            selectedUserChange="onUserSelected()"/>
+        	
+        </mx:ViewStack>
+        
+        <mx:Canvas 
+            width="100%" height="100%"
+            styleName="VirtualDataCenterManagementBaseCanvas1">
+            <general:GeneralToggledContainer id="userToggledContainer"
+                x="0" y="0"
+                left="5" right="5" top="5" bottom="5"/>
+        </mx:Canvas>
+
+
+        <!-- More info -->
+        <mx:VBox id="moreInfoContainer"
+            width="100%" height="0"
+            horizontalAlign="center"
+            paddingBottom="0"
+            paddingLeft="0"
+            paddingRight="0"
+            paddingTop="0"
+            verticalGap="0"
+            visible="false">
+
+            <mx:Button id="hideUserButton"
+                width="49" height="10"
+                styleName="UpDownButton"
+                click="onClickHideUserButton()"/>
+
+            <user:UserRenderer id="userRenderer"
+                width="100%" height="100%"/>
+        </mx:VBox>
+    </general:GeneralPanel>
+
+</mx:HDividedBox>

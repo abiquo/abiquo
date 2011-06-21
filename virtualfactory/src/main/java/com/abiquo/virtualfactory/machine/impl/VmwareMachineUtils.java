@@ -289,6 +289,11 @@ public class VmwareMachineUtils
             ConfigTarget configTarget = vmutils.getConfigTargetForHost(crmor, hostmor);
 
             boolean flag = false;
+            if (configTarget.getNetwork() == null)
+            {
+                return null;
+            }
+            
             for (int i = 0; i < configTarget.getNetwork().length; i++)
             {
                 VirtualMachineNetworkInfo networkInfo = configTarget.getNetwork()[i];

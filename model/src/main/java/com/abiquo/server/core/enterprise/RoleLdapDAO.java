@@ -25,8 +25,19 @@ import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import com.abiquo.server.core.util.PagedList;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
@@ -35,12 +46,11 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
  * 
  * @author ssedano
  */
+
+
 @Repository("jpaLdapRoleDAO")
 public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 {
-    /**
-     * Constructor.
-     */
     public RoleLdapDAO()
     {
         super(RoleLdap.class);
@@ -51,7 +61,7 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
      * 
      * @param entityManager entitimanager.
      */
-    public RoleLdapDAO(EntityManager entityManager)
+    public RoleLdapDAO(final EntityManager entityManager)
     {
         super(RoleLdap.class, entityManager);
     }
@@ -93,5 +103,85 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
             criteria.add(sameType(type));
         }
         return criteria;
+    }
+    // Criterions
+
+    private Criterion sameRole(final Role role)
+    {
+        return Restrictions.eq(RoleLdap.ROLE_PROPERTY, role);
+    }
+
+    private Criterion sameRoleLdap(final String roleLdap)
+    {
+        return Restrictions.eq(RoleLdap.ROLE_LDAP_PROPERTY, roleLdap);
+    }
+
+    public List<RoleLdap> findByRoleLdap(final String roleLdap)
+    {
+        return findByCriterions(sameRoleLdap(roleLdap));
+    }
+
+    public Collection<RoleLdap> findByRole(final Role role)
+    {
+        return findByCriterions(sameRole(role));
+    }
+
+    public Collection<RoleLdap> find(final String filter, final String orderBy, final boolean desc,
+        final Integer offset, final Integer numResults)
+    {
+        Criteria criteria = createCriteria(filter, orderBy, desc);
+
+        Long total = count(criteria);
+
+        criteria = createCriteria(filter, orderBy, desc);
+
+        criteria.setFirstResult(offset * numResults);
+        criteria.setMaxResults(numResults);
+
+        List<RoleLdap> result = getResultList(criteria);
+
+        PagedList<RoleLdap> page = new PagedList<RoleLdap>();
+        page.addAll(result);
+        page.setCurrentElement(offset);
+        page.setPageSize(numResults);
+        page.setTotalResults(total.intValue());
+
+        return page;
+    }
+
+    private Criteria createCriteria(final String filter, final String orderBy, final boolean desc)
+    {
+        Criteria criteria = createCriteria();
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderBy))
+        {
+            Order order = Order.asc(orderBy);
+            if (desc)
+            {
+                order = Order.desc(orderBy);
+            }
+            criteria.addOrder(order);
+        }
+
+        return criteria;
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(RoleLdap.ROLE_LDAP_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
+    }
+
+    public boolean existAnyRoleLdapWithRole(final Role role)
+    {
+        return existsAnyByCriterions(sameRole(role));
     }
 }

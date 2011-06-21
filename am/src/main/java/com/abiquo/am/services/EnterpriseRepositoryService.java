@@ -416,7 +416,28 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
             }
             catch (IOException e)
             {
-                throw new RepositoryException(e);
+                // caused by .nfs temp files (try retry in 5s)
+                if(e instanceof FileNotFoundException)
+                {
+                    try
+                    {
+                        Thread.sleep(5000);
+                    }
+                    catch (InterruptedException e1)
+                    {
+                        e1.printStackTrace();
+                    }
+                    
+                    try
+                    {
+                        FileUtils.deleteDirectory(packageFile);
+                    }
+                    catch (IOException e1)
+                    {
+                        throw new RepositoryException(e);
+                    }
+                }// nfs issue
+                
             }
             return;
         }
@@ -450,13 +471,13 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         if (!importBundleDir.exists())
         {
             throw new IdNotFoundException(String.format(
-                "The path do not exist. %s\nShould be a bundle of an imported virtual machien.",
+                "The path do not exist. %s\nShould be a bundle of an imported virtual machine.",
                 absPath));
         }
         else if (!importBundleDir.isDirectory())
         {
             throw new IdNotFoundException(String.format(
-                "The path is not a folder. %s\nShould be a bundle of an imported virtual machien.",
+                "The path is not a folder. %s\nShould be a bundle of an imported virtual machine.",
                 absPath));
         }
         try

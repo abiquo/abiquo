@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -46,7 +45,7 @@ public class SystemPropertyService extends DefaultApiService
         return repo.findAll();
     }
 
-    public SystemProperty getSystemProperty(Integer id)
+    public SystemProperty getSystemProperty(final Integer id)
     {
         SystemProperty property = repo.findById(id);
         if (property == null)
@@ -54,21 +53,21 @@ public class SystemPropertyService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_SYSTEM_PROPERTY);
             flushErrors();
         }
-        return property;        
+        return property;
     }
 
-    public SystemProperty findByName(String name)
+    public SystemProperty findByName(final String name)
     {
         return repo.findByName(name);
     }
 
-    public Collection<SystemProperty> findByComponent(String component)
+    public Collection<SystemProperty> findByComponent(final String component)
     {
         return repo.findByComponent(component);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public SystemProperty addSystemProperty(SystemPropertyDto dto)
+    public SystemProperty addSystemProperty(final SystemPropertyDto dto)
     {
         if (repo.existsAnyWithName(dto.getName()))
         {
@@ -86,7 +85,7 @@ public class SystemPropertyService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public SystemProperty modifySystemProperty(Integer propertyId, SystemPropertyDto dto)
+    public SystemProperty modifySystemProperty(final Integer propertyId, final SystemPropertyDto dto)
     {
         SystemProperty old = getSystemProperty(propertyId);
 
@@ -108,7 +107,8 @@ public class SystemPropertyService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Collection<SystemProperty> modifySystemProperties(Collection<SystemProperty> properties)
+    public Collection<SystemProperty> modifySystemProperties(
+        final Collection<SystemProperty> properties)
     {
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
@@ -130,8 +130,8 @@ public class SystemPropertyService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Collection<SystemProperty> modifySystemProperties(Collection<SystemProperty> properties,
-        String component)
+    public Collection<SystemProperty> modifySystemProperties(
+        final Collection<SystemProperty> properties, final String component)
     {
         // Validate input to show all possible errors in a unique response
         for (SystemProperty property : properties)
@@ -153,13 +153,13 @@ public class SystemPropertyService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeSystemProperty(Integer propertyId)
+    public void removeSystemProperty(final Integer propertyId)
     {
         SystemProperty property = getSystemProperty(propertyId);
         repo.delete(property);
     }
 
-    private void saveProperties(Collection<SystemProperty> properties)
+    private void saveProperties(final Collection<SystemProperty> properties)
     {
         for (SystemProperty property : properties)
         {
@@ -174,7 +174,7 @@ public class SystemPropertyService extends DefaultApiService
         }
     }
 
-    private void isValidSystemProperty(SystemProperty systemProperty)
+    private void isValidSystemProperty(final SystemProperty systemProperty)
     {
         if (!systemProperty.isValid())
         {

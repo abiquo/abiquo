@@ -27,11 +27,14 @@
     paddingTop="0"
     horizontalScrollPolicy="off" verticalScrollPolicy="off"
     initialize="onInitialize()"
+    creationComplete="onCreationComplete()"
     show="onShow()"
     xmlns:mx="http://www.adobe.com/2006/mxml">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.binding.utils.ChangeWatcher;
             import mx.controls.Alert;
             import mx.events.CloseEvent;
@@ -55,6 +58,16 @@
                 //Listening for updates in model
                 ChangeWatcher.watch(AbiCloudModel.getInstance().configurationManager,
                                     "lastHeartbeatInfo", onLastHeartbeatInfoChange);
+            }
+            
+            private function onCreationComplete():void{
+                //Checking for privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_ALLOW_MODIFY,"enabled",enableDisableCheck);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_ALLOW_MODIFY,"visible",testHeartbeatButton);
+            }
+            
+            private function checkPrivilege():void{
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_ALLOW_MODIFY,"visible",hearbeataction);            	
             }
 
             private function onShow():void
@@ -306,6 +319,8 @@
         <mx:VBox label="@Resource(bundle='Configuration', key='LABEL_LOGS')">
 
             <mx:HBox 
+            	id="hearbeataction"
+            	creationComplete="checkPrivilege()"
                 width="100%"
                 paddingBottom="0"
                 paddingLeft="0"
@@ -313,7 +328,7 @@
                 paddingTop="0"
                 verticalAlign="middle">
 
-                <mx:Button id="askForLastHeartbeatEntriesButton"
+                <mx:Button id="askForLastHeartbeatEntriesButton"                	
                     height="18"
                     label="@Resource(bundle='Configuration', key='LABEL_SHOW')"
                     click="askForLastHeartbeatEntries()"/>

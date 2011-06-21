@@ -30,16 +30,16 @@ import com.softwarementors.commons.testng.AssertEx;
 public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
 {
 
-    private RoleGenerator roleGenerator = null;
+    RoleGenerator roleGenerator;
 
-    public RoleLdapGenerator(SeedGenerator seed)
+    public RoleLdapGenerator(final SeedGenerator seed)
     {
         super(seed);
         roleGenerator = new RoleGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(RoleLdap obj1, RoleLdap obj2)
+    public void assertAllPropertiesEqual(final RoleLdap obj1, final RoleLdap obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2);
         roleGenerator.assertAllPropertiesEqual(obj1.getRole(), obj2.getRole());
@@ -48,25 +48,34 @@ public class RoleLdapGenerator extends DefaultEntityGenerator<RoleLdap>
     @Override
     public RoleLdap createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
+        String role_ldap =
+            newString(nextSeed(), RoleLdap.ROLE_LDAP_LENGTH_MIN, RoleLdap.ROLE_LDAP_LENGTH_MAX);
 
-        return createInstance(newString(nextSeed(), 1, 128));
+        RoleLdap roleLdap = new RoleLdap(role_ldap, roleGenerator.createUniqueInstance());
+
+        return roleLdap;
     }
 
-    public RoleLdap createUniqueInstance(String type)
+    public RoleLdap createUniqueInstance(final String name)
     {
-        return createInstance(type);
+        RoleLdap roleLdap = new RoleLdap(name, roleGenerator.createUniqueInstance());
+
+        return roleLdap;
     }
 
-    private RoleLdap createInstance(String type)
+    public RoleLdap createInstance(final Role role)
     {
-        RoleLdap ldapRole = new RoleLdap(type, roleGenerator.createUniqueInstance());
+        String role_ldap =
+            newString(nextSeed(), RoleLdap.ROLE_LDAP_LENGTH_MIN, RoleLdap.ROLE_LDAP_LENGTH_MAX);
 
-        return ldapRole;
+        RoleLdap roleLdap = new RoleLdap(role_ldap, role);
+
+        return roleLdap;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(RoleLdap entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final RoleLdap entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

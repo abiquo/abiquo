@@ -44,6 +44,8 @@
 	      <ref bean="enterpriseResource"/>
 	      <ref bean="rolesResource"/>
 	      <ref bean="roleResource"/>
+	      <ref bean="privilegesResource"/>
+	      <ref bean="privilegeResource"/>
 	      <ref bean="usersResource"/>
 	      <ref bean="userResource"/>
 	      <ref bean="OVFPackageListsResource"/>
@@ -78,9 +80,9 @@
 
              <!-- Login -->
              <ref bean="loginResource" />
-	    </set>
-	  </property>
-	</bean>
+	   </set>
+         </property>
+     </bean>
 	      
      <bean id="wink.customPropertiesFactory" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="locations">

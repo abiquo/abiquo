@@ -65,7 +65,9 @@ public enum APIError
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
-        "ENTERPRISE-7", "Enterprise name can't be empty"),
+        "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
+        "ENTERPRISE-8",
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -133,14 +135,31 @@ public enum APIError
         "VM-2", "The virtual machine is already in progress"),
 
     // ROLE
-    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
+    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
+        "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",
+        "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
+        "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
+        "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
+        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME("ROLE-6",
+        "Cannot create a role with the same name of existing role for the same enterprise"),
+
+    // PRIVILEGE
+    NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
+
+    // ROLE_LDAP
+    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"), MULTIPLE_ENTRIES_ROLELDAP(
+        "ROLELDAP-1", "There are multiple entries for the requested roleLdap"), NOT_ASSIGNED_ROLE(
+        "ROLELDAP-2", "The roleLdap must have a Role"),
 
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"),
+        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In Ldap mode can not modify user's enterprise"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",

@@ -23,7 +23,6 @@ package com.abiquo.server.core.enterprise;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -45,66 +44,44 @@ public class RoleLdap extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "role_ldap";
 
-    protected RoleLdap()
+    public RoleLdap()
     {
     }
 
-    public RoleLdap(String ldapRole, Role role)
+    public RoleLdap(final String roleLdap, final Role role)
     {
-        this.ldapRole = ldapRole;
+        super();
+        this.roleLdap = roleLdap;
         this.role = role;
     }
 
-    private final static String ID_COLUMN = "idLdapRole";
+    private final static String ID_COLUMN = "idRole_ldap";
 
     @Id
     @GeneratedValue
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
     }
 
-    public final static String LDAP_ROLE_PROPERTY = "ldapRole";
-
-    private final static boolean LDAP_ROLE_REQUIRED = true;
-
-    private final static String LDAP_ROLE_COLUMN = "role_ldap";
-
-    private final static int LDAP_ROLE_LENGTH_MIN = 0;
-
-    private final static int LDAP_ROLE_LENGTH_MAX = 128;
-
-    private final static boolean LDAP_ROLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = LDAP_ROLE_COLUMN, nullable = !LDAP_ROLE_REQUIRED, length = LDAP_ROLE_LENGTH_MAX)
-    private String ldapRole;
-
-    @Required(value = true)
-    @Length(min = LDAP_ROLE_LENGTH_MIN, max = LDAP_ROLE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = LDAP_ROLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getLdapRole()
+    public void setId(final Integer id)
     {
-        return ldapRole;
-    }
-
-    private void setLdapRole(String ldapRole)
-    {
-        this.ldapRole = ldapRole;
+        this.id = id;
     }
 
     public final static String ROLE_PROPERTY = "role";
 
-    private final static boolean ROLE_REQUIRED = false;
+    private final static boolean ROLE_REQUIRED = true;
 
     private final static String ROLE_ID_COLUMN = "idRole";
 
     @JoinColumn(name = ROLE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.EAGER)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_role")
+    @ForeignKey(name = "fk_" + TABLE_NAME + "_role")
     private Role role;
 
     @Required(value = ROLE_REQUIRED)
@@ -113,8 +90,37 @@ public class RoleLdap extends DefaultEntityBase
         return this.role;
     }
 
-    public void setRole(Role role)
+    public void setRole(final Role role)
     {
         this.role = role;
     }
+
+    public final static String ROLE_LDAP_PROPERTY = "roleLdap";
+
+    private final static boolean ROLE_LDAP_REQUIRED = false;
+
+    public final static int ROLE_LDAP_LENGTH_MIN = 0;
+
+    public final static int ROLE_LDAP_LENGTH_MAX = 128;
+
+    private final static boolean ROLE_LDAP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String ROLE_LDAP_COLUMN = "role_ldap";
+
+    @Column(name = ROLE_LDAP_COLUMN, nullable = !ROLE_LDAP_REQUIRED, length = ROLE_LDAP_LENGTH_MAX)
+    private String roleLdap;
+
+    @Required(value = ROLE_LDAP_REQUIRED)
+    @Length(min = ROLE_LDAP_LENGTH_MIN, max = ROLE_LDAP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ROLE_LDAP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getRoleLdap()
+    {
+        return this.roleLdap;
+    }
+
+    public void setRoleLdap(final String roleLdap)
+    {
+        this.roleLdap = roleLdap;
+    }
+
 }
