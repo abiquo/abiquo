@@ -78,7 +78,6 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         return crit;
     }
 
-    //
     private Criteria sameEnterprise(final Enterprise enterprise)
     {
         Criteria crit =
@@ -95,5 +94,4 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         return result;
 
     }
-
 }
