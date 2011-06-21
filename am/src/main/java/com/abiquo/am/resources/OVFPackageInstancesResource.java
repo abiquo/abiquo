@@ -182,7 +182,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
             json = diskInfoPart.getBody(String.class, null);
             // we replace the \ with / because a fail parsing strings with \ followed by a char that
             // might resemble a control char. (C:\f... ends up as C:[ctrl-L]...)
-            String json2 = removeFakePath(removeControlChar(json)).replace("\\", "/");
+            String json2 = removeFakePath(removeControlChar(json));
             
             diskInfo =
                 providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
@@ -231,12 +231,8 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
      */
     private String removeFakePath(String in)
     {
-        if (in.startsWith("C:\\fakepath\\"))
-        { // TODO this is a hack as the server adds the fake path somehow
-            in = in.substring("C:\\fakepath\\".length());
-            return in.substring("C:\\fakepath\\".length());
-        }
-        return in;
+        // TODO this is a hack as the server adds the fake path somehow
+        return in.replace("C:\\fakepath\\", "").replace("\\", "/");
     }
 
     /**
