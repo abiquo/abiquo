@@ -58,7 +58,7 @@ public class SecuredURLRequest extends HttpServletRequestWrapper
 
     private String removeLastSlash(final String str)
     {
-        if (StringUtils.hasText(str) && str.endsWith("/"))
+        if (StringUtils.hasText(str) && str.endsWith("/") && str.length() != 1)
         {
             return str.substring(0, str.length() - 1);
         }
