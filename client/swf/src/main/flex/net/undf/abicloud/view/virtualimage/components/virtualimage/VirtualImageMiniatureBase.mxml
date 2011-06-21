@@ -194,7 +194,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualImage",
-                                                                                "ALERT_DELETE_VIRTUALIMAGE_HEADER"),
+                                                                                "ALERT_DELETE_VIRTUALIMAGE_HEADER")+" '"+this._virtualImage.name+"'",
                                         ResourceManager.getInstance().getString("VirtualImage",
                                                                                 "ALERT_DELETE_VIRTUALIMAGE_TEXT"),
                                         Alert.YES | Alert.NO,
