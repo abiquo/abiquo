@@ -158,7 +158,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_DATASTORE_HEADER"),
+                                                                                "ALERT_DELETE_DATASTORE_HEADER")+" '"+Datastore(datagrid.selectedItem).name+"'",
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_DATASTORE_TEXT"),
                                         Alert.YES | Alert.NO,

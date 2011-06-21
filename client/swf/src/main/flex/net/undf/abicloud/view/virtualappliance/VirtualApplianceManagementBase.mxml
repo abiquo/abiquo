@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import net.undf.abicloud.vo.virtualimage.Repository;
         	import net.undf.abicloud.view.virtualimage.components.virtualimage.VirtualImageListManagement;
         	import net.undf.abicloud.vo.virtualimage.Category;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -262,8 +264,8 @@
                     virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                     virtualImageEvent.datacenter = virtualApplianceDatacenter;
                     dispatchEvent(virtualImageEvent);
-                    displayVirtualImage();
                 }
+                displayVirtualImage();
             } 
 
             private function onRepositoryChange(event:Event):void
@@ -509,7 +511,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER")+" "+this._virtualAppliance.name,
+                                                                                "ALERT_DELETE_VIRTUALAPPLIANCE_HEADER")+" '"+this._virtualAppliance.name+"'",
                                         ResourceManager.getInstance().getString("VirtualAppliance",
                                                                                 "ALERT_DELETE_VIRTUALAPPLIANCE_TEXT"),
                                         Alert.YES | Alert.NO,
@@ -816,6 +818,7 @@
             private function closeVirtualApplianceBundleForm(event:Event):void
             {
                 PopUpManager.removePopUp(this._virtualApplianceBundleForm);
+                hideNodeInfoContainer();
             }
 
             /**
