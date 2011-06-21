@@ -53,18 +53,17 @@
     from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb
     inner join userhb.enterpriseHB as enterprisehb
     inner join userhb.roleHB as rolehb
+    inner join rolehb.privilegesHB as privilegehb
+    where enterprisehb.id = :enterprise
+    and privilegehb.name = :privilege
   </query>
-<!--     where rolehb.securityLevel >= :security -->
-<!--       and enterprisehb.idEnterprise = :enterprise -->
   
-	<query name="GET_USERS_BY_ROLE_DESC">
+  <query name="GET_USERS_BY_ROLE_DESC">
     select userhb
     from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb
     inner join userhb.enterpriseHB as enterprisehb
     inner join userhb.roleHB as rolehb
   </query>
-<!--     where rolehb.shortDescription = :roleDescription -->
-<!--       and enterprisehb.idEnterprise = :enterprise -->
   
   
 </hibernate-mapping>

@@ -50,43 +50,43 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         super(Machine.class);
     }
 
-    public MachineDAO(EntityManager entityManager)
+    public MachineDAO(final EntityManager entityManager)
     {
         super(Machine.class, entityManager);
     }
 
-    private static Criterion sameDatacenter(Datacenter datacenter)
+    private static Criterion sameDatacenter(final Datacenter datacenter)
     {
         assert datacenter != null;
 
         return Restrictions.eq(Machine.DATACENTER_PROPERTY, datacenter);
     }
 
-    private static Criterion sameRack(Rack rack)
+    private static Criterion sameRack(final Rack rack)
     {
         assert rack != null;
 
         return Restrictions.eq(Machine.RACK_PROPERTY, rack);
     }
 
-    private static Criterion sameId(Integer id)
+    private static Criterion sameId(final Integer id)
     {
         return Restrictions.eq(Machine.ID_PROPERTY, id);
     }
 
-    private static Criterion sameName(String name)
+    private static Criterion sameName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Machine.NAME_PROPERTY, name);
     }
 
-    private Criterion sameEnterprise(Enterprise enterprise)
+    private Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    public List<Machine> findMachines(Datacenter datacenter)
+    public List<Machine> findMachines(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert isManaged2(datacenter);
@@ -112,7 +112,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     }
 
-    public List<Machine> findRackMachines(Rack rack)
+    public List<Machine> findRackMachines(final Rack rack)
     {
         assert rack != null;
         assert isManaged2(rack);
@@ -123,7 +123,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
         Criteria criteria = createCriteria(sameRack(rack));
 
@@ -142,7 +142,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
+    public boolean existsAnyWithDatacenterAndName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert !StringUtils.isEmpty(name);
@@ -150,7 +150,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return existsAnyByCriterions(sameDatacenter(datacenter), sameName(name));
     }
 
-    public boolean existsAnyOtherWithDatacenterAndName(Machine machine, String name)
+    public boolean existsAnyOtherWithDatacenterAndName(final Machine machine, final String name)
     {
         assert machine != null;
         assert !StringUtils.isEmpty(name);
@@ -159,7 +159,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             sameName(name));
     }
 
-    public int deleteRackMachines(Rack rack)
+    public int deleteRackMachines(final Rack rack)
     {
         assert rack != null;
         assert isManaged2(rack);
@@ -172,8 +172,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return machines.size();
     }
 
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise)
+    public List<Machine> findCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Long hdRequiredOnDatastore,
+        final Enterprise enterprise)
     {
 
         List<Machine> machines;
@@ -238,8 +239,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return notExcludedMachines;
     }
 
-    private List<Machine> findFirstCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise)
+    private List<Machine> findFirstCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Long hdRequiredOnDatastore,
+        final Enterprise enterprise)
     {
         List<Machine> machines = null;
 
@@ -261,8 +263,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return machines;
     }
 
-    private List<Machine> findFirstCandidateMachinesReservedRestricted(Integer idRack,
-        Integer idVirtualDatacenter, Long hdRequiredOnDatastore, Enterprise enterprise)
+    private List<Machine> findFirstCandidateMachinesReservedRestricted(final Integer idRack,
+        final Integer idVirtualDatacenter, final Long hdRequiredOnDatastore,
+        final Enterprise enterprise)
     {
 
         List<Machine> machines = null;
@@ -304,8 +307,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         }
     }
 
-    private List<Machine> findFirstCandidateMachinesReservedRestrictedHAExclude(Integer idRack,
-        Integer idVirtualDatacenter, Enterprise enterprise, Integer originalHypervisorId)
+    private List<Machine> findFirstCandidateMachinesReservedRestrictedHAExclude(
+        final Integer idRack, final Integer idVirtualDatacenter, final Enterprise enterprise,
+        final Integer originalHypervisorId)
     {
 
         List<Machine> machines = null;
@@ -353,8 +357,9 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
      * Do not require additional space on the datastore. Used during HA, selects a machine different
      * of the ''originalHypervisorId'' with the same ''datastoreUuid'' enabled.
      */
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    public List<Machine> findCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Enterprise enterprise, final String datastoreUuid,
+        final Integer originalHypervisorId)
     {
 
         List<Machine> machines = null;
@@ -451,8 +456,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return notExcludedMachines;
     }
 
-    private void whyNotCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Long hdRequiredOnDatastore, Enterprise enterprise, List<Integer> reserveds)
+    private void whyNotCandidateMachines(final Integer idRack, final Integer idVirtualDatacenter,
+        final Long hdRequiredOnDatastore, final Enterprise enterprise, final List<Integer> reserveds)
         throws PersistenceException
     {
 
@@ -585,7 +590,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         }
     }
 
-    public List<Machine> findReservedMachines(Enterprise enterprise)
+    public List<Machine> findReservedMachines(final Enterprise enterprise)
     {
         Criteria criteria = createCriteria(sameEnterprise(enterprise));
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
@@ -593,19 +598,19 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    public Machine findReservedMachine(Enterprise enterprise, Integer machineId)
+    public Machine findReservedMachine(final Enterprise enterprise, final Integer machineId)
     {
         Criteria criteria = createCriteria(sameEnterprise(enterprise), sameId(machineId));
         return getSingleResult(criteria);
     }
 
-    public void reserveMachine(Machine machine, Enterprise enterprise)
+    public void reserveMachine(final Machine machine, final Enterprise enterprise)
     {
         machine.setEnterprise(enterprise);
         flush();
     }
 
-    public void releaseMachine(Machine machine)
+    public void releaseMachine(final Machine machine)
     {
         machine.setEnterprise(null);
         flush();
@@ -791,7 +796,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
             + ") AND m.id = :machineId";
 
-    public Machine findByIds(Integer datacenterId, Integer rackId, Integer machineId)
+    public Machine findByIds(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
             Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));

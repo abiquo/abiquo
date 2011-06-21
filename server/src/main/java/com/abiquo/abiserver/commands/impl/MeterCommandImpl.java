@@ -103,7 +103,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
             factory.beginConnection();
 
             UserHB user =
-                userDAO.getUserByLoginAuth(userSession.getUser(), userSession.getAuthType());
+                userDAO.findUserHBById(userSession.getUserIdDb(), userSession.getAuthType());
 
             listOfMeters =
                 meterDAO.findAllByFilter(filters, listOfUsers, numrows, user.getRoleHB());

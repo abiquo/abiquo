@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -715,7 +716,7 @@ public class OVFModelFromVirtualAppliance
         Long capacity = virtualImage.getHdRequired();
         Long populate = virtualImage.getHdRequired(); // TODO required (using the fileSize + disk
         // format it can be computed)
-
+        //
         // Adding the virtual Disks to the package level element
         VirtualDiskDescType virtualDescTypePackage =
             OVFDiskUtils.createDiskDescription("disk_" + diskId, fileRef, format, capacity, null,

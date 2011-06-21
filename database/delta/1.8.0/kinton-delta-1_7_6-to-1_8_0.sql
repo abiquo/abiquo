@@ -19,6 +19,8 @@ update `kinton`.`volume_management` set state = 1 where state = 2;
 -- [ABICLOUDPREMIUM-1616]
 -- ALTER TABLE `kinton`.`virtualimage` ADD cost_code VARCHAR(50);
 
+DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
+
 -- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
 alter table kinton.user modify user varchar(128) NOT NULL;
 alter table kinton.user add authType varchar(20) NOT NULL;
@@ -59,6 +61,7 @@ DROP TABLE IF EXISTS `kinton`.`auth_clientresource`;
 -- Definition of table `kinton`.`role_ldap`
 --
 
+DROP TABLE IF EXISTS `kinton`.`role_ldap`;
 CREATE  TABLE `kinton`.`role_ldap` (
   `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
   `idRole` INT(10) UNSIGNED NOT NULL ,
@@ -69,10 +72,6 @@ CREATE  TABLE `kinton`.`role_ldap` (
   CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-insert into kinton.role_ldap(idRole, role_ldap,  version_c) values ((select idRole from kinton.role where type = 'SYS_ADMIN'), 'LDAP_SYS_ADMIN', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'USER'), 'LDAP_USER', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'ENTERPRISE_ADMIN'), 'LDAP_ENTERPRISE_ADMIN', 0);
 
 UPDATE `kinton`.`metering` SET actionperformed="PERSISTENT_PROCESS_START" WHERE actionperformed="STATEFUL_PROCESS_START";
 UPDATE `kinton`.`metering` SET actionperformed="PERSISTENT_RAW_FINISHED" WHERE actionperformed="STATEFUL_RAW_FINISHED";
@@ -168,7 +167,8 @@ INSERT INTO `kinton`.`privilege` VALUES
  (44,'EVENTLOG_VIEW_ALL',0),
  (45,'APPLIB_VM_COST_CODE',0),
  (46,'USERS_MANAGE_ENTERPRISE_BRANDING',0),
- (47,'SYSCONFIG_SHOW_REPORTS',0);
+ (47,'SYSCONFIG_SHOW_REPORTS',0),
+ (48,'USERS_DEFINE_AS_MANAGER',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -202,9 +202,9 @@ CREATE  TABLE `kinton`.`roles_privileges` (
 LOCK TABLES `roles_privileges` WRITE;
 INSERT INTO `roles_privileges` VALUES
  (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),
- (1,23,0),(1,24,0),(1,25,0),(1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),
- (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),
- (3,43,0),(2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
+ (1,23,0),(1,24,0),(1,25,0),(1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,48,0),
+ (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
+ (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `roles_privileges` ENABLE KEYS */;
 
@@ -222,7 +222,6 @@ UNLOCK TABLES;
 --
 -- System properties
 --
-
 
 /*!40000 ALTER TABLE `system_properties` DISABLE KEYS */;
 LOCK TABLES `system_properties` WRITE;
@@ -513,21 +512,6 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `i
 
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
 
---
--- Definition of table `kinton`.`role_ldap`
---
-DROP TABLE IF EXISTS `kinton`.`role_ldap`;
-CREATE  TABLE `kinton`.`role_ldap` (
-  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
-  `idRole` INT(10) UNSIGNED NOT NULL ,
-  `role_ldap` VARCHAR(128) NOT NULL ,
-  `version_c` int(11) default 0,
-  PRIMARY KEY (`idRole_ldap`) ,
-  KEY `fk_role_ldap_role` (`idRole`) ,
-  CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
 
 --
@@ -548,12 +532,13 @@ CREATE TABLE  `kinton`.`ucs_rack` (
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
+DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_deleted`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateEnterpriseResourcesStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVappEnterpriseStats`;
-DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
-DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 
 DELIMITER |
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
@@ -1475,9 +1460,3 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
-
---
--- Datastore rootPath longer
---
-
-alter table kinton.datastore modify rootPath varchar(42) NOT NULL;

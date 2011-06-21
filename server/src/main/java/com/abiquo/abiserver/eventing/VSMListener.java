@@ -128,7 +128,9 @@ public class VSMListener implements VSMCallback
             VirtualmachineHB virtualMachineAux = (VirtualmachineHB) query.uniqueResult();
             VirtualmachineHB virtualMachine = null;
 
-            if (virtualMachineAux != null && virtualMachineAux.getHypervisor() == null)
+            if (virtualMachineAux != null
+                && (virtualMachineAux.getHypervisor() == null || virtualMachineAux.getHypervisor()
+                    .getPhysicalMachine() == null))
             {
                 logger
                     .error("WARNING-> virtualMachineAux.getHypervisor() IS NULL. Forcing Hibernate to restore complete VirtualMachine entity...");
@@ -143,15 +145,11 @@ public class VSMListener implements VSMCallback
             }
             // HORRIBLE HACK - end.
 
-            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 -
-            // DISABLED_FOR_HA states
-            if ((virtualMachine.getHypervisor().getPhysicalMachine().getIdState() == PhysicalmachineHB.STATE_HA_IN_PROGRESS || virtualMachine
-                .getHypervisor().getPhysicalMachine().getIdState() == PhysicalmachineHB.STATE_DISABLED_FOR_HA))
+            
+            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 - DISABLED_FOR_HA states
+            if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
             {
-                logger
-                    .trace(
-                        "Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process",
-                        virtualMachine.getIdVm(), virtualMachine.getState());
+                logger.trace("Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process", virtualMachine.getIdVm(), virtualMachine.getState());
                 return;
             }
 

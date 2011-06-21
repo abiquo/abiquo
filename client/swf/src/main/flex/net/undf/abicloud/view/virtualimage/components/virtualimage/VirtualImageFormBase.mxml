@@ -461,10 +461,10 @@
                 //The second step to create a VirtualImage, is to select the image file from user file system.
                 //Since we cannot do this with Flex, because size limitations, we make a call to Javascript
                 virtualImageFormVS.selectedIndex = 1;
-                if(imagePath){
+                /* if(imagePath){
 	                imagePath.text = "";                	
-                }
-                //ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
+                } */
+                ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
             }
 
 
@@ -614,7 +614,7 @@
                     selectedFiles.addItem(tmpObject); */
                     virtualImageFileSelected = true;
                 	_virtualImageFileName = fileRef.name;
-                	imagePath.text = fileRef.name;
+                	//imagePath.text = fileRef.name;
                     
                     //fileRef.upload(new URLRequest(FILE_UPLOAD_URL));
                 } catch (err:Error) {
@@ -836,10 +836,10 @@
 	                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP2_MORE_INFO')"
 	                click="openMoreInfo()"/>
         	</mx:HBox>
-            <!--<mx:Canvas 
-                width="300" height="155">-->
-                <!-- Where the HTML Form will be placed -->
-                <mx:HBox 
+            <!-- Where the HTML Form will be placed -->
+            <mx:Canvas 
+                width="310" height="165">
+                <!--<mx:HBox 
                 	horizontalAlign="center"
                 	paddingTop="15" paddingBottom="15" 
                 	width="100%" verticalAlign="middle">
@@ -848,8 +848,8 @@
                 		height="18" 
                 		label="{resourceManager.getString('VirtualImage','LABEL_BROWSE')}" 
                 		click="selectFile()"/>
-                </mx:HBox>
-            <!--</mx:Canvas>-->
+                </mx:HBox>-->
+            </mx:Canvas>
         </mx:VBox>
 
         <!-- STEP 3: CREATING VIRTUAL IMAGE -->

@@ -38,7 +38,6 @@ package net.undf.abicloud.vo.user
         public var deleted:Boolean;
         
         public var limits:ResourceAllocationLimit;
-        
 
         /******
         * 

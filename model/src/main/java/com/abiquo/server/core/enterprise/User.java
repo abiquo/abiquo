@@ -363,8 +363,9 @@ public class User extends DefaultEntityBase
      *             {@link #User(Enterprise, Role, String, String, String, String, String, String, AuthType)}
      */
     @Deprecated
-    public User(Enterprise enterprise, Role role, String name, String surname, String email,
-        String nick, String password, String locale)
+    public User(final Enterprise enterprise, final Role role, final String name,
+        final String surname, final String email, final String nick, final String password,
+        final String locale)
     {
         setEnterprise(enterprise);
         setRole(role);

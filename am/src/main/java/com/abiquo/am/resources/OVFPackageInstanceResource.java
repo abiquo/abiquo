@@ -79,7 +79,6 @@ public class OVFPackageInstanceResource extends AbstractResource
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
         @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn) throws DownloadException
     {
-
         String ovfId1;
         String ovfId;
         try
@@ -93,7 +92,7 @@ public class OVFPackageInstanceResource extends AbstractResource
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                 .entity("Malformed URL of the ovfid " + ovfIdIn).build());
         }
-
+        
         OVFPackageInstanceStatusDto status =
             service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
 
@@ -258,7 +257,6 @@ public class OVFPackageInstanceResource extends AbstractResource
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                 .entity("Malformed URL of the ovfid " + ovfIdIn).build());
         }
-        
         
         try
         {
