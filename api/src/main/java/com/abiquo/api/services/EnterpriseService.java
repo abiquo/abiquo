@@ -467,6 +467,15 @@ public class EnterpriseService extends DefaultApiService
 
         DatacenterLimits limit = findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
 
+        Collection<VirtualDatacenter> vdcs =
+            vdcRepo.findByEnterpriseAndDatacenter(enterprise, limit.getDatacenter());
+
+        if (vdcs != null && !vdcs.isEmpty())
+        {
+            addConflictErrors(APIError.DATACENTER_LIMIT_DELETE_VDCS);
+            flushErrors();
+        }
+
         repo.deleteLimit(limit);
     }
 
