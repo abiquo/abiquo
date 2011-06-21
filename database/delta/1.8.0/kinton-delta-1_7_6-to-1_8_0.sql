@@ -59,6 +59,7 @@ DROP TABLE IF EXISTS `kinton`.`auth_clientresource`;
 -- Definition of table `kinton`.`role_ldap`
 --
 
+DROP TABLE IF EXISTS `kinton`.`role_ldap`;
 CREATE  TABLE `kinton`.`role_ldap` (
   `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
   `idRole` INT(10) UNSIGNED NOT NULL ,
@@ -512,34 +513,6 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idMan
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
 
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
--- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
-alter table kinton.user modify user varchar(128) NOT NULL;
-alter table kinton.user add authType varchar(20) NOT NULL;
-alter table kinton.user modify column password varchar(32);
-update kinton.user set authtype = 'ABIQUO';
-alter table kinton.session modify user varchar(128) NOT NULL;
-alter table kinton.user modify name varchar(128) NOT NULL;
-alter table kinton.metering modify user varchar(128) NOT NULL;
-alter table kinton.session add authType varchar(20) NOT NULL;
-
---
--- Definition of table `kinton`.`role_ldap`
---
-DROP TABLE IF EXISTS `kinton`.`role_ldap`;
-CREATE  TABLE `kinton`.`role_ldap` (
-  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
-  `idRole` INT(10) UNSIGNED NOT NULL ,
-  `role_ldap` VARCHAR(128) NOT NULL ,
-  `version_c` int(11) default 0,
-  PRIMARY KEY (`idRole_ldap`) ,
-  KEY `fk_role_ldap_role` (`idRole`) ,
-  CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-insert into kinton.role_ldap(idRole, role_ldap,  version_c) values ((select idRole from kinton.role where type = 'SYS_ADMIN'), 'LDAP_SYS_ADMIN', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'USER'), 'LDAP_USER', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'ENTERPRISE_ADMIN'), 'LDAP_ENTERPRISE_ADMIN', 0);
 
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
 
@@ -561,12 +534,13 @@ CREATE TABLE  `kinton`.`ucs_rack` (
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
+DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_deleted`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateEnterpriseResourcesStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVappEnterpriseStats`;
-DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
-DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 
 DELIMITER |
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
@@ -1488,9 +1462,3 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
-
---
--- Datastore rootPath longer
---
-
-alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
