@@ -128,7 +128,9 @@ public class VSMListener implements VSMCallback
             VirtualmachineHB virtualMachineAux = (VirtualmachineHB) query.uniqueResult();
             VirtualmachineHB virtualMachine = null;
 
-            if (virtualMachineAux != null && virtualMachineAux.getHypervisor() == null)
+            if (virtualMachineAux != null
+                && (virtualMachineAux.getHypervisor() == null || virtualMachineAux.getHypervisor()
+                    .getPhysicalMachine() == null))
             {
                 logger
                     .error("WARNING-> virtualMachineAux.getHypervisor() IS NULL. Forcing Hibernate to restore complete VirtualMachine entity...");
