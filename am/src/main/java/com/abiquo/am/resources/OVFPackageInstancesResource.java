@@ -234,7 +234,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         if (in.startsWith("C:\\fakepath\\"))
         { // TODO this is a hack as the server adds the fake path somehow
             in = in.substring("C:\\fakepath\\".length());
-            return in.substring("C:\\fakepath\\".length()).replace("\\", "/");
+            return in.substring("C:\\fakepath\\".length());
         }
         return in;
     }
