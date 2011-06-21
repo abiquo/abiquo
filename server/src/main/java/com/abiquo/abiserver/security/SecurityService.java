@@ -40,11 +40,13 @@ public class SecurityService
 {
     public static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
+    public static final String ENTERPRISE_ADMINISTER_ALL = "ENTERPRISE_ADMINISTER_ALL";
+
     public static final String OTHER_ENTERPRISES_PRIVILEGE = "USERS_MANAGE_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
 
-    public static final String ENTERPRISE_ADMINISTER_ALL = "ENTERPRISE_ADMINISTER_ALL";
+    public static final String USERS_DEFINE_AS_RESPONSIBLE = "USERS_DEFINE_AS_RESPONSIBLE";
 
     public static final String USERS_MANAGE_ENTERPRISE_BRANDING =
         "USERS_MANAGE_ENTERPRISE_BRANDING";
