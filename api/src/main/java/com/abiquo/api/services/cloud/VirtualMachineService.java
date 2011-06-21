@@ -256,10 +256,10 @@ public class VirtualMachineService extends DefaultApiService
 
         validMachineStateChange(old, state);
 
+        blockVirtualMachine(vm);
         try
         {
-            blockVirtualMachine(vm);
-
+            
             Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
             VirtualAppliance vapp = contanerVirtualAppliance(vm);
