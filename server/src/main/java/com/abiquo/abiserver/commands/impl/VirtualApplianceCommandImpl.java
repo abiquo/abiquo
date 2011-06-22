@@ -1048,8 +1048,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             {
                 // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
                 final String cause =
-                    String.format("There are not enough resources in datacenter "
-                        + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
+                    String.format("There are not enough resources in the datacenter "
+                        + "to deploy the Virtual Appliance:%s", virtualAppliance.getName());
 
                 dataResult =
                     traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
@@ -2177,8 +2177,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
-                String.format("There are not enough resources in datacenter "
-                    + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
+                String.format("There are not enough resources in the datacenter "
+                    + "to deploy the Virtual Appliance:%s", virtualAppliance.getName());
 
             dataResult =
                 traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
