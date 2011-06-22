@@ -28,6 +28,8 @@
         <security:intercept-url pattern="/**" access="ROLE_NOBODY" />
         <security:intercept-url pattern="/admin/datacenters/*/action/discover" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/discover_multiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" /> 
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" /> 
         <security:http-basic />
         <security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
     </security:http>
