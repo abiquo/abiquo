@@ -208,10 +208,14 @@ public class VSMManager
             }
         }
 
-        logger
-            .info(
-                "Check result = {} (The check result can be false until the redis subscriber has been started.)",
-                initialized);
+        if (initialized)
+        {
+            logger.info("VSM is up and running properly.");
+        }
+        else
+        {
+            logger.error("VSM is NOT running properly. Check redis and rabbitmq status.");
+        }
 
         return initialized;
     }
