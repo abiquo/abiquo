@@ -135,9 +135,26 @@ public class VSMListener implements VSMCallback
                 logger
                     .error("WARNING-> virtualMachineAux.getHypervisor() IS NULL. Forcing Hibernate to restore complete VirtualMachine entity...");
 
+                transaction.commit();
+
+                Session session2 = HibernateUtil.getSession();
+
+                transaction = session2.beginTransaction();
+
                 virtualMachine =
-                    (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachineAux
+                    (VirtualmachineHB) session2.get(VirtualmachineHB.class, virtualMachineAux
                         .getIdVm());
+
+                transaction.commit();
+
+                session = HibernateUtil.getSession();
+
+                transaction = session.beginTransaction();
+
+                logger
+                    .debug("Hibernate was forced to restore complete VirtualMachine: Hypervisor is now "
+                        + virtualMachine.getHypervisor());
+
             }
             else
             {

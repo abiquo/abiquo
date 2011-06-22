@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.internal.uri.UriEncoder;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
@@ -55,6 +56,7 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Parent(OVFPackageInstancesResource.class)
@@ -147,7 +149,7 @@ public class OVFPackageInstanceResource extends AbstractResource
         }
         else if (format.equals("status"))
         {
-            return Response.ok(getOVFPackageInstanceStatus(idEnterprise, ovfId)).build();
+            return evalStatus(idEnterprise, ovfId);
         }
         else if (format.equals("envelope"))
         {
@@ -174,6 +176,41 @@ public class OVFPackageInstanceResource extends AbstractResource
         {
             return Response.ok(getOVFEnvelope(idEnterprise, ovfId)).build();
         }
+    }
+
+    /**
+     * Eval the current status. *
+     * 
+     * @param idEnterprise Id of Enterprise to which this OVFPackage belongs.
+     * @param idRepository Id of the Repository to which the OVFPackage belongs.
+     * @return DataResult<OVFPackageInstanceStatus>@return Response
+     */
+    private Response evalStatus(String idEnterprise, String ovfId)
+    {
+        OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
+            getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        if (ovfPackageInstanceStatus == null)
+        {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        if (!StringUtils.isBlank(ovfPackageInstanceStatus.getErrorCause()))
+        {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        if (OVFPackageInstanceStatusType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        if (OVFPackageInstanceStatusType.ERROR.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        ovfPackageInstanceStatus.setProgress(100d);
+        return Response.ok(ovfPackageInstanceStatus).build();
     }
 
     /**

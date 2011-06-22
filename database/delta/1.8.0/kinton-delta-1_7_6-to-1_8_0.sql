@@ -25,7 +25,7 @@ DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBo
 alter table kinton.user modify user varchar(128) NOT NULL;
 alter table kinton.user add authType varchar(20) NOT NULL;
 alter table kinton.user modify column password varchar(32);
-update kinton.user set authtype = 'ABIQUO';
+update kinton.user set authType = 'ABIQUO';
 alter table kinton.session modify user varchar(128) NOT NULL;
 alter table kinton.user modify name varchar(128) NOT NULL;
 alter table kinton.metering modify user varchar(128) NOT NULL;
@@ -72,10 +72,6 @@ CREATE  TABLE `kinton`.`role_ldap` (
   CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-insert into kinton.role_ldap(idRole, role_ldap,  version_c) values ((select idRole from kinton.role where type = 'SYS_ADMIN'), 'LDAP_SYS_ADMIN', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'USER'), 'LDAP_USER', 0);
-insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRole from kinton.role where type = 'ENTERPRISE_ADMIN'), 'LDAP_ENTERPRISE_ADMIN', 0);
 
 UPDATE `kinton`.`metering` SET actionperformed="PERSISTENT_PROCESS_START" WHERE actionperformed="STATEFUL_PROCESS_START";
 UPDATE `kinton`.`metering` SET actionperformed="PERSISTENT_RAW_FINISHED" WHERE actionperformed="STATEFUL_RAW_FINISHED";
