@@ -36,6 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FileUtils;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
@@ -48,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
@@ -78,6 +87,11 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
 
     /** Repository path particular of the current enterprise. */
     private final String enterpriseRepositoryPath;
+
+    private final Integer FS_TIMOUT_MS = AMConfigurationManager.getInstance().getAMConfiguration()
+        .getFsTimeoutMs();
+
+    private List<String> cachedpackages = null;
 
     private EnterpriseRepositoryService(final String idEnterprise)
     {
@@ -261,13 +275,53 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
 
         TimeoutFSUtils.getInstance().canUseRepository();
 
-        List<String> ovfids =
-            traverseOVFFolderStructure(enterpriseRepositoryFile.getAbsolutePath(), new String(),
-                includeBundeles, false);
+        List<String> availableOvs = null;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        final Future<List<String>> futureAvailable =
+            executor.submit(new TraverseFSWithTimeout(enterpriseRepositoryFile.getAbsolutePath(),
+                new String(),
+                includeBundeles,
+                false));
+
+        try
+        {
+            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS);
+        }
+        catch (TimeoutException e)
+        {
+            futureAvailable.cancel(true);
+        }
+        catch (Exception e)
+        {
+            logger.error("Can't inspect the folder " + enterpriseRepositoryPath, e);
+        }
+        finally
+        {
+            executor.shutdownNow();
+        }
+
+        if (availableOvs != null)
+        {
+            cachedpackages = availableOvs;
+        }
+        else if (cachedpackages != null)
+        {
+            logger.warn("Slow file system, can't list folder [{}] content (timout), "
+                + "using cached result.", enterpriseRepositoryPath);
+
+            availableOvs = cachedpackages;
+        }
+        else
+        {
+            throw new AMException(Status.INTERNAL_SERVER_ERROR, String.format(
+                "Can't list content of the folder [%s] ", enterpriseRepositoryPath));
+        }
 
         List<String> cleanovfids = new LinkedList<String>();
 
-        for (String ovfid : ovfids)
+        for (String ovfid : availableOvs)
         {
             cleanovfids.add(cleanOVFurlOnOldRepo(ovfid));
         }
@@ -276,96 +330,128 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     }
 
     /**
-     * @param includeBundles, if true return also the OVF packages identifier for the bundled
-     *            packages (only used on status = DOWNLOAD).
-     * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
+     * Run a folder list in another thread in order to cancel if it take too long
      */
-    private List<String> traverseOVFFolderStructure(final String erPath, final String relativePath,
-        final Boolean includeBundles, final Boolean cleanDeploys)
+    class TraverseFSWithTimeout implements Callable<List<String>>
     {
-        List<String> ovfids = new LinkedList<String>();
-        File enterpriseRepositoryFile = new File(erPath);
+        final String erPath;
 
-        if (!enterpriseRepositoryFile.exists() || !enterpriseRepositoryFile.isDirectory())
+        final String relativePath;
+
+        final Boolean includeBundles;
+
+        final Boolean cleanDeploys;
+
+        public TraverseFSWithTimeout(String erPath, String relativePath, Boolean includeBundles,
+            Boolean cleanDeploys)
         {
-            return new LinkedList<String>();
+            this.erPath = erPath;
+            this.relativePath = relativePath;
+            this.includeBundles = includeBundles;
+            this.cleanDeploys = cleanDeploys;
         }
 
-        for (File file : enterpriseRepositoryFile.listFiles())
+        @Override
+        public List<String> call() throws Exception
         {
-            /**
-             * TODO assert inside a folder only one .ovf (to exactly know the bundle parent!)
-             */
-            String recRelativePath;
-            if (relativePath.isEmpty())
-            {
+            return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys);
+        }
 
-                recRelativePath = file.getName();
+        /**
+         * @param includeBundles, if true return also the OVF packages identifier for the bundled
+         *            packages (only used on status = DOWNLOAD).
+         * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
+         */
+        private List<String> traverseOVFFolderStructure(final String erPath,
+            final String relativePath, final Boolean includeBundles, final Boolean cleanDeploys)
+        {
+            List<String> ovfids = new LinkedList<String>();
+            File enterpriseRepositoryFile = new File(erPath);
+
+            if (!enterpriseRepositoryFile.exists() || !enterpriseRepositoryFile.isDirectory())
+            {
+                return new LinkedList<String>();
             }
-            else
+
+            for (File file : enterpriseRepositoryFile.listFiles())
             {
-                recRelativePath = relativePath + '/' + file.getName();
-            }
-
-            if (file.exists() && file.isDirectory() && file.listFiles().length != 0)
-            {
-                List<String> recOvfids =
-                    traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
-                        includeBundles, cleanDeploys);
-
-                ovfids.addAll(recOvfids);
-            }
-            // else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION) &&
-            // file.getName().contains(OVF_BUNDLE_PATH_IDENTIFIER))
-            // { logger.debug("deleting [{}]", file.getName());
-            // file.delete();
-            // }
-            else if (file.exists() && file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION))
-            // an ovf
-            {
-                recRelativePath = customDencode(recRelativePath);
-
-                String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
-
-                OVFPackageInstanceStatusType ovfStatus = getOVFStatus(ovfId);
-
-                if (cleanDeploys && ovfStatus == OVFPackageInstanceStatusType.DOWNLOADING)
+                /**
+                 * TODO assert inside a folder only one .ovf (to exactly know the bundle parent!)
+                 */
+                String recRelativePath;
+                if (relativePath.isEmpty())
                 {
-                    try
-                    {
-                        FileUtils.deleteDirectory(enterpriseRepositoryFile);
-                    }
-                    catch (Exception e)
-                    {
-                        logger
-                            .error("Can not delete the interrupted download [{}], \n{}", ovfId, e);
-                    }
+
+                    recRelativePath = file.getName();
                 }
-                else if (ovfStatus == OVFPackageInstanceStatusType.DOWNLOAD)
+                else
                 {
-                    ovfids.add(ovfId);
+                    recRelativePath = relativePath + '/' + file.getName();
+                }
 
-                    if (includeBundles)
+                if (file.exists() && file.isDirectory() && file.listFiles().length != 0)
+                {
+                    List<String> recOvfids =
+                        traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
+                            includeBundles, cleanDeploys);
+
+                    ovfids.addAll(recOvfids);
+                }
+                // else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION) &&
+                // file.getName().contains(OVF_BUNDLE_PATH_IDENTIFIER))
+                // { logger.debug("deleting [{}]", file.getName());
+                // file.delete();
+                // }
+                else if (file.exists() && file.isFile()
+                    && file.getName().endsWith(OVF_FILE_EXTENSION))
+                // an ovf
+                {
+                    recRelativePath = customDencode(recRelativePath);
+
+                    String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
+
+                    OVFPackageInstanceStatusType ovfStatus = getOVFStatus(ovfId);
+
+                    if (cleanDeploys && ovfStatus == OVFPackageInstanceStatusType.DOWNLOADING)
                     {
-                        for (String fileBund : enterpriseRepositoryFile
-                            .list(new BundleImageFileFilter()))
+                        try
                         {
-                            final String snapshot =
-                                fileBund.substring(0, fileBund.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
-
-                            final String bundleOvfId = createBundleOvfId(ovfId, snapshot);
-
-                            ovfids.add(bundleOvfId);
+                            FileUtils.deleteDirectory(enterpriseRepositoryFile);
                         }
-                    }// includeBundles
-                }
+                        catch (Exception e)
+                        {
+                            logger.error("Can not delete the interrupted download [{}], \n{}",
+                                ovfId, e);
+                        }
+                    }
+                    else if (ovfStatus == OVFPackageInstanceStatusType.DOWNLOAD)
+                    {
+                        ovfids.add(ovfId);
 
-            }// an OVF
+                        if (includeBundles)
+                        {
+                            for (String fileBund : enterpriseRepositoryFile
+                                .list(new BundleImageFileFilter()))
+                            {
+                                final String snapshot =
+                                    fileBund.substring(0,
+                                        fileBund.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
 
-        }// files
+                                final String bundleOvfId = createBundleOvfId(ovfId, snapshot);
 
-        return ovfids;
-    }
+                                ovfids.add(bundleOvfId);
+                            }
+                        }// includeBundles
+                    }
+
+                }// an OVF
+
+            }// files
+
+            return ovfids;
+        }
+
+    }// traverse class
 
     private class BundleImageFileFilter implements FilenameFilter
     {
@@ -417,7 +503,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
             catch (IOException e)
             {
                 // caused by .nfs temp files (try retry in 5s)
-                if(e instanceof FileNotFoundException)
+                if (e instanceof FileNotFoundException)
                 {
                     try
                     {
@@ -427,7 +513,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
                     {
                         e1.printStackTrace();
                     }
-                    
+
                     try
                     {
                         FileUtils.deleteDirectory(packageFile);
@@ -437,7 +523,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
                         throw new RepositoryException(e);
                     }
                 }// nfs issue
-                
+
             }
             return;
         }

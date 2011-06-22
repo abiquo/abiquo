@@ -89,9 +89,9 @@
 		styleName="DataCenterListItemRendererForm1"
 		verticalScrollPolicy="off"
 		horizontalScrollPolicy="off"
-        includeInLayout="{expanded}"
+        includeInLayout="{expanded &amp;&amp; AbiCloudModel.getInstance().virtualImageManager.repository.repositoryCapacityMb != 0 }"
         verticalGap="-3"
-        visible="{expanded}">
+        visible="{expanded &amp;&amp; AbiCloudModel.getInstance().virtualImageManager.repository.repositoryCapacityMb != 0}">
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_CAPACITY')">
             <mx:Label text="{AbiCloudModel.getInstance().virtualImageManager.repository == null ? '-' :
@@ -103,4 +103,9 @@
 					  																			  ((AbiCloudModel.getInstance().virtualImageManager.repository.repositoryRemainingMb / AbiCloudModel.GB_TO_MBYTES).toFixed(2) + ' GB')}"/>
         </mx:FormItem>
     </mx:Form>
+    <mx:Text width="100%"
+    	paddingTop="5"
+    	includeInLayout="{expanded &amp;&amp; AbiCloudModel.getInstance().virtualImageManager.repository.repositoryCapacityMb == 0 }"
+        visible="{expanded &amp;&amp; AbiCloudModel.getInstance().virtualImageManager.repository.repositoryCapacityMb == 0}"
+    	text="@Resource(bundle='Networking', key='LABEL_NFS_DOWN')"/>
 </mx:VBox>
