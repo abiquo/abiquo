@@ -853,6 +853,7 @@ public class AppsLibraryService
             if (result.getData().getError() != null && !"".equals(result.getData().getError()))
             {
                 result.setSuccess(false);
+                result.setMessage(result.getData().getError());
             }
         }
         catch (AppsLibraryCommandException e)
