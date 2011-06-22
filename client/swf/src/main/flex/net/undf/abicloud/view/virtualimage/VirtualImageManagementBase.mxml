@@ -239,7 +239,7 @@
             private function onClickDatacenterList():void
             {
                 //clean the virtual images list when selecting the datacenter
-                virtualImageList.removeAllChildren();
+				//virtualImageList.removeAllChildren();
                 
                 if (datacenterList.selectedIndex > -1)
                 {
