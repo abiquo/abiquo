@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VSMStub;
 import com.abiquo.api.services.stub.VSMStubImpl;
@@ -46,8 +45,8 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -106,16 +105,16 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
-                machineDto.getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(), machineDto
+                .getVirtualRamUsedInMb(),
 
-                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
-                machineDto.getVirtualHardDiskUsedInMb(),
+            machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(), machineDto
+                .getVirtualHardDiskUsedInMb(),
 
-                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
-                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+            machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(), machineDto
+                .getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
 
-                machineDto.getState(), machineDto.getVirtualSwitch());
+            machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
@@ -127,9 +126,9 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
-                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
-                machineDto.getPassword());
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
+                .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
+                .getPassword());
 
         vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
             .name(), hypervisor.getUser(), hypervisor.getPassword());
@@ -309,5 +308,17 @@ public class MachineService extends DefaultApiService
         }
 
         flushErrors();
+    }
+
+    // Needed in unit testing
+
+    public VSMStub getVsm()
+    {
+        return vsm;
+    }
+
+    public void setVsm(final VSMStub vsm)
+    {
+        this.vsm = vsm;
     }
 }

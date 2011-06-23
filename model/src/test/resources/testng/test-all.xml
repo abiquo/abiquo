@@ -1,21 +1,19 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="Model all unit tests" verbose="1">
-
-    <!-- Suit files to include -->
-    <suite-files>
-        <suite-file path="src/test/resources/testng/test-basic.xml" />
-    </suite-files>
+    <listeners>
+        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
+    </listeners>
     
-    <!-- Additional tests -->
-    <test name="DAO tests">
-       <groups>
-           <run>
-               <include name="dataaccess" />
-           </run>
-       </groups>
-       <packages>
-           <package name="com.abiquo.server.core.*" />
-       </packages>
-    </test>
-    
+	<test name="All tests">
+		<groups>
+			<run>
+                <include name="model" />
+				<include name="dataaccess" />
+			</run>
+		</groups>
+		<packages>
+            <package name="com.abiquo.model.util.*" />
+			<package name="com.abiquo.server.core.*" />
+		</packages>
+	</test>
 </suite>

@@ -9,6 +9,7 @@
 		<property name="replacements">
 			<map>
 				<entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
+				<entry key="remoteServiceService" value="remoteServicesTestService" />
 			</map>
 		</property>
 	</bean>

@@ -18,16 +18,21 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo;
+package com.abiquo.testng;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
-public class TestListenerOutput extends TestListenerAdapter
+/**
+ * Outputs test execution information.
+ * 
+ * @author ibarrera
+ */
+public class TestOutputListener extends TestListenerAdapter
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestListenerOutput.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestOutputListener.class);
 
     @Override
     public void onTestFailure(final ITestResult tr)

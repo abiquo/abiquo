@@ -28,7 +28,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthenticationStub;
 import com.abiquo.api.exceptions.APIError;
@@ -44,7 +44,7 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
-public class EnterpriseServiceTest extends AbstractGeneratorTest
+public class EnterpriseServiceTest extends AbstractUnitTest
 {
 
     Enterprise e;

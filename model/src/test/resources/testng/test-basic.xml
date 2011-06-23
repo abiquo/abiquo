@@ -1,15 +1,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="Model basic unit tests" verbose="1">
-
-    <test name="Hibernate tests">
-       <groups>
-           <run>
-               <include name="model" />
-           </run>
-       </groups>
-       <packages>
-           <package name="com.abiquo.server.core.*" />
-       </packages>
-    </test>
-    
+	<test name="Hibernate tests">
+		<groups>
+			<run>
+				<include name="model" />
+			</run>
+		</groups>
+		<packages>
+            <package name="com.abiquo.model.util.*" />
+			<package name="com.abiquo.server.core.*" />
+		</packages>
+	</test>
 </suite>

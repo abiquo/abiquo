@@ -21,98 +21,120 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.testng.TestConfig.ALL_INTEGRATION_TESTS;
+
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.RestClient;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 
+@Test(groups = ALL_INTEGRATION_TESTS)
 public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 {
-
     protected static final String API_URI = "http://localhost:9009/api";
 
     protected RestClient client = new RestClient();
 
-    protected ClientResponse get(String uri)
+    @BeforeMethod
+    @Override
+    public void setup()
+    {
+        // Do not remove. This method must be in this class in order to properly handle TestNG
+        // groups
+        super.setup();
+    }
+
+    @AfterMethod
+    @Override
+    public void tearDown()
+    {
+        // Do not remove. This method must be in this class in order to properly handle TestNG
+        // groups
+        super.tearDown();
+    }
+
+    protected ClientResponse get(final String uri)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
     }
 
-    protected ClientResponse get(String uri, String username, String password)
+    protected ClientResponse get(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .header("Authorization", "Basic " + basicAuth).get();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).header("Authorization",
+            "Basic " + basicAuth).get();
     }
 
-    protected ClientResponse get(String uri, String mediaType)
+    protected ClientResponse get(final String uri, final String mediaType)
     {
         return client.resource(uri).accept(mediaType).get();
     }
 
-    protected ClientResponse post(String uri, Object dto)
+    protected ClientResponse post(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String mediaType)
+    protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         return client.resource(uri).accept(mediaType).contentType(mediaType).post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String username, String password)
+    protected ClientResponse post(final String uri, final Object dto, final String username,
+        final String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).post(dto);
     }
 
-    protected ClientResponse post(String uri, Object dto, String username, String password,
-        String mediaType)
+    protected ClientResponse post(final String uri, final Object dto, final String username,
+        final String password, final String mediaType)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(mediaType).contentType(mediaType)
-            .header("Authorization", "Basic " + basicAuth).post(dto);
+        return client.resource(uri).accept(mediaType).contentType(mediaType).header(
+            "Authorization", "Basic " + basicAuth).post(dto);
     }
 
-    protected ClientResponse put(String uri, Object dto)
+    protected ClientResponse put(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).put(dto);
     }
 
-    protected ClientResponse put(String uri, Object dto, String username, String password)
+    protected ClientResponse put(final String uri, final Object dto, final String username,
+        final String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).put(dto);
     }
 
-    protected ClientResponse delete(String uri)
+    protected ClientResponse delete(final String uri)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).delete();
     }
 
-    protected ClientResponse delete(String uri, String username, String password)
+    protected ClientResponse delete(final String uri, final String username, final String password)
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .delete();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
+            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).delete();
     }
 
-    protected String basicAuth(String username, String password)
+    protected String basicAuth(final String username, final String password)
     {
         return new String(Base64.encodeBase64((username + ":" + password).getBytes()));
     }

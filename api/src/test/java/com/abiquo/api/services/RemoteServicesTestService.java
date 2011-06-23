@@ -18,25 +18,29 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.api.services.stub;
+package com.abiquo.api.services;
 
-import org.mockito.Mockito;
+import org.springframework.stereotype.Service;
+
+import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
- * Mock class to simulate the VSM behavior.
+ * Mock class to simulate the remote services service to avoid connecting to the target remote
+ * service.
  * 
- * @author pnavarro
+ * @author ibarrera
  */
-public class MockVSMStub
+@Service
+public class RemoteServicesTestService extends RemoteServiceService
 {
-    public static VSMStub mock()
+
+    @Override
+    public ErrorsDto checkStatus(final RemoteServiceType type, final String url)
     {
-        VSMStub mock = Mockito.mock(VSMStub.class);
-        /*
-         * doNothing().when(mock).monitor(anyString(), anyString(), anyInt(), anyString(),
-         * anyString(), anyString()); doNothing().when(mock).shutdownMonitor(anyString(),
-         * anyString(), anyInt(), anyString());
-         */
-        return mock;
+        // During tests the target remote service may not be up and running
+        // Do not return errors to simulate a normal behavior
+        return new ErrorsDto();
     }
+
 }

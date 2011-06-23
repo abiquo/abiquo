@@ -28,7 +28,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthenticationStub;
 import com.abiquo.api.common.UriTestResolver;
@@ -40,7 +40,7 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
 
-public class UserServiceTest extends AbstractGeneratorTest
+public class UserServiceTest extends AbstractUnitTest
 {
 
     Enterprise e;
@@ -139,7 +139,15 @@ public class UserServiceTest extends AbstractGeneratorTest
     {
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "", User.AuthType.ABIQUO.name());
+        UserDto dto =
+            new UserDto("foo",
+                "foo",
+                "foo@foo.com",
+                u.getNick(),
+                "foo",
+                "ES",
+                "",
+                User.AuthType.ABIQUO.name());
 
         try
         {
@@ -161,7 +169,15 @@ public class UserServiceTest extends AbstractGeneratorTest
 
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
-        UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "",  User.AuthType.ABIQUO.name());
+        UserDto dto =
+            new UserDto("foo",
+                "foo",
+                "foo@foo.com",
+                u.getNick(),
+                "foo",
+                "ES",
+                "",
+                User.AuthType.ABIQUO.name());
         String roleURI = UriTestResolver.resolveRoleURI(r.getId());
         dto.addLink(new RESTLink("role", roleURI));
 

@@ -18,36 +18,38 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.api.spring;
+package com.abiquo.api.common;
 
-import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
+import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = ALL_UNIT_TESTS)
-public class SpringReplacementsTest
+/**
+ * Base class for all TestNG unit tests.
+ * 
+ * @author ibarrera
+ */
+@Test(groups = BASIC_UNIT_TESTS)
+public abstract class AbstractUnitTest extends AbstractGeneratorTest
 {
-    private ApplicationContext springContext;
-
     @BeforeMethod
-    public void setUp()
+    @Override
+    public void setup()
     {
-        springContext = new AnnotationConfigApplicationContext(SpringReplacementsTestContext.class);
-        Assert.assertNotNull(springContext);
+        // Do not remove. This method must be in this class in order to properly handle TestNG
+        // groups
+        super.setup();
     }
 
-    @Test
-    public void testSpringBeanReplacements()
+    @AfterMethod
+    @Override
+    public void tearDown()
     {
-        String[] names = springContext.getBeanNamesForType(String.class);
-        Assert.assertEquals(names.length, 1);
-        Assert.assertEquals(names[0], "replacedBean");
-
-        String replacedBean = (String) springContext.getBean("replacedBean");
-        Assert.assertEquals(replacedBean, SpringReplacementsTestContext.REPLACED_STRING);
+        // Do not remove. This method must be in this class in order to properly handle TestNG
+        // groups
+        super.tearDown();
     }
+
 }

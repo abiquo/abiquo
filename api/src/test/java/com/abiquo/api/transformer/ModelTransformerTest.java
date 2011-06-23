@@ -21,6 +21,7 @@
 
 package com.abiquo.api.transformer;
 
+import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
@@ -28,6 +29,7 @@ import org.testng.annotations.Test;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 
+@Test(groups = ALL_UNIT_TESTS)
 public class ModelTransformerTest
 {
 

@@ -42,8 +42,8 @@ import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.RoleGenerator;
+import com.abiquo.server.core.enterprise.RoleLdapGenerator;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
@@ -60,7 +60,7 @@ import com.softwarementors.commons.test.SeedGenerator;
 @TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
-public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
+public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 {
     protected SeedGenerator seed = new SeedGenerator();
 

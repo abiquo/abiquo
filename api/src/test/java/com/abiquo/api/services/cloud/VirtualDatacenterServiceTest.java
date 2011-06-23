@@ -29,7 +29,7 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.AuthenticationStub;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
@@ -46,17 +46,17 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
-public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
+public class VirtualDatacenterServiceTest extends AbstractUnitTest
 {
-	@AfterMethod
+    @AfterMethod
     public void tearDown()
     {
         tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
             "vlan_network", "network_configuration", "dhcp_service", "remote_service",
-            "hypervisor", "physicalmachine", "rack",
-            "datacenter", "network", "user", "role", "enterprise");
+            "hypervisor", "physicalmachine", "rack", "datacenter", "network", "user", "role",
+            "enterprise");
     }
-	
+
     @Test
     public void findVirtualDatacenterAssignedToUser()
     {
@@ -111,52 +111,55 @@ public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
         vdcs = service.getVirtualDatacenters(null, null, user);
         Assert.assertSize(vdcs, 2);
     }
-    
+
     @Test
     public void createVirtualDatacenterByUserWithVdcsAssigned()
     {
-    	Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-    	Datacenter d = datacenterGenerator.createUniqueInstance();
-    	Machine machine = machineGenerator.createMachine(d);
-    	Hypervisor hypervisor = hypervisorGenerator.createInstance(machine, HypervisorType.KVM);
-    	VirtualDatacenter vdc = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
-    	
-    	VirtualDatacenter vdc1 = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
-    	
-    	setup(enterprise, d, machine, hypervisor, vdc);
-    	
-    	Role role = roleGenerator.createInstance(Role.Type.USER);
-    	User user = userGenerator.createInstance(enterprise, role);
-    	user.setAvailableVirtualDatacenters(vdc.getId().toString());
-    	
-    	setup(role, user);
-    	
-    	SecurityContextHolder.getContext().setAuthentication(new AuthenticationStub(user.getNick()));
-    	
-    	EntityManager em = getEntityManagerWithAnActiveTransaction();
-    	
-    	DatacenterService datacenterService = new DatacenterService(em);
-    	VirtualDatacenterService service = new VirtualDatacenterService(em);
-    	
-    	Datacenter datacenter = datacenterService.getDatacenter(d.getId());
-    	
-    	VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
-    	VLANNetworkDto networkDto = new VLANNetworkDto();
-    	networkDto.setName("DefaultNetwork");
-    	networkDto.setDefaultNetwork(Boolean.TRUE);
-    	networkDto.setAddress("192.168.0.0");
-    	networkDto.setGateway("192.168.0.1");
-    	networkDto.setMask(24);
-    	networkDto.setPrimaryDNS("10.0.0.1");
-    	networkDto.setSecondaryDNS("10.0.0.1");
-        
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        Datacenter d = datacenterGenerator.createUniqueInstance();
+        Machine machine = machineGenerator.createMachine(d);
+        Hypervisor hypervisor = hypervisorGenerator.createInstance(machine, HypervisorType.KVM);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
+
+        VirtualDatacenter vdc1 = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
+
+        setup(enterprise, d, machine, hypervisor, vdc);
+
+        Role role = roleGenerator.createInstance(Role.Type.USER);
+        User user = userGenerator.createInstance(enterprise, role);
+        user.setAvailableVirtualDatacenters(vdc.getId().toString());
+
+        setup(role, user);
+
+        SecurityContextHolder.getContext()
+            .setAuthentication(new AuthenticationStub(user.getNick()));
+
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+
+        DatacenterService datacenterService = new DatacenterService(em);
+        VirtualDatacenterService service = new VirtualDatacenterService(em);
+
+        Datacenter datacenter = datacenterService.getDatacenter(d.getId());
+
+        VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
+        VLANNetworkDto networkDto = new VLANNetworkDto();
+        networkDto.setName("DefaultNetwork");
+        networkDto.setDefaultNetwork(Boolean.TRUE);
+        networkDto.setAddress("192.168.0.0");
+        networkDto.setGateway("192.168.0.1");
+        networkDto.setMask(24);
+        networkDto.setPrimaryDNS("10.0.0.1");
+        networkDto.setSecondaryDNS("10.0.0.1");
+
         dto.setVlan(networkDto);
-    	
-    	VirtualDatacenter virtualDatacenter = service.createVirtualDatacenter(dto, datacenter, enterprise);
-    	
-    	UserService userService = new UserService(em);
-    	
-    	User currentUser = userService.getCurrentUser();
-    	Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith("," + virtualDatacenter.getId()));
+
+        VirtualDatacenter virtualDatacenter =
+            service.createVirtualDatacenter(dto, datacenter, enterprise);
+
+        UserService userService = new UserService(em);
+
+        User currentUser = userService.getCurrentUser();
+        Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
+            "," + virtualDatacenter.getId()));
     }
 }
