@@ -41,7 +41,6 @@ public class AMConfiguration
      */
     private String repositoryLocation;
 
-
     /** proxy host server. if any. */
     private String proxyHost;
 
@@ -56,6 +55,12 @@ public class AMConfiguration
 
     /** Timeout for remote connection (during deploy). */
     private Integer timeout;
+
+    /**
+     * Timeout of of available ovf packages refresh on the filesystem (when timeout use cached
+     * result)
+     */
+    private Integer fstimeoutMs;
 
     public AMConfiguration(String repositoryPath, final String repositoryLocation)
     {
@@ -79,6 +84,16 @@ public class AMConfiguration
             .contains(":"));
     }
 
+    public Integer getFsTimeoutMs()
+    {
+        return fstimeoutMs;
+    }
+    
+    public void setFsTimeoutMs(final Integer fstimeoutMs)
+    {
+        this.fstimeoutMs = fstimeoutMs;
+    }
+    
     public String getRepositoryPath()
     {
         return repositoryPath;
@@ -138,7 +153,6 @@ public class AMConfiguration
 
         this.timeout = timeout;
     }
-
 
     public void setProxyHost(final String proxyHost)
     {

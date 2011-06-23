@@ -878,7 +878,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (vapp == null)
         {
             transaction.rollback();
-            
+
             dataResult.setSuccess(false);
             dataResult.setMessage(resourceManager
                 .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
@@ -886,7 +886,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             return dataResult;
         }
         transaction.commit();
-        
 
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
@@ -1113,6 +1112,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 dataResult.setData(virtualappOld);
                 dataResult.setSuccess(Boolean.FALSE);
                 dataResult.setMessage(e.getMessage());
+                updateVMStateInDB(virtualappOld, originalVirtualApplianceState.toEnum());
                 return dataResult;
             }
         }
@@ -3593,4 +3593,55 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         // session.close();
     }
 
+    private void updateVMStateInDB(VirtualAppliance virtualappliance, final StateEnum newState)
+    {
+        DataResult<VirtualAppliance> dataResult;
+        dataResult = new DataResult<VirtualAppliance>();
+        dataResult.setSuccess(true);
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            VirtualappHB virtualAppPojo =
+                (VirtualappHB) session.get("VirtualappExtendedHB", virtualappliance.getId());
+            // virtualAppPojo.getNodesHB()
+
+            virtualappliance = virtualAppPojo.toPojo();
+            for (Node node : virtualappliance.getNodes())
+            {
+                if (node.isNodeTypeVirtualImage())
+                {
+                    NodeVirtualImage nodevi = (NodeVirtualImage) node;
+
+                    VirtualMachine vm = nodevi.getVirtualMachine();
+
+                    if (vm != null)
+                    {
+                        // update the virtual machine instance from DB
+                        VirtualmachineHB vmachineHB =
+                            (VirtualmachineHB) session.get(VirtualmachineHB.class, vm.getId());
+                        if (vmachineHB.getState().equals(StateEnum.IN_PROGRESS))
+                        {
+                            vmachineHB.setState(StateEnum.NOT_DEPLOYED);
+                        }
+                        session.update("VirtualmachineHB", vmachineHB);
+                    }
+                }
+            }
+            transaction.commit();
+
+            dataResult.setData(virtualappliance);
+        }
+        catch (HibernateException e)
+        {
+            if (transaction != null && transaction.isActive())
+            {
+                transaction.rollback();
+            }
+
+            errorManager.reportError(resourceManager, dataResult, "updateStateInDB", e);
+        }
+    }
 }
