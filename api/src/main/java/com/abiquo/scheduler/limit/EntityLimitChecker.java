@@ -259,7 +259,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
                 break;
         }
 
-   
+    }
 
     enum InformationSecurity
     {
