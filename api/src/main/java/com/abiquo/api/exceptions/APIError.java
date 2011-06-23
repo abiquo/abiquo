@@ -244,7 +244,8 @@ public enum APIError
         "An unexpected error occured while creating the volume"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-5", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
         "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
-        "VOL-15", "An unexpected error occurred and the bvolume could not be updated")
+        "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_UPDATE_STATEFUL(
+        "VOL-16", "Cannot update a persistant volume"),
 
     ;
 
