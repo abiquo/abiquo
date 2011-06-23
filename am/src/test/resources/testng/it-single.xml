@@ -1,7 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Single unit test" verbose="1">
+<suite name="Single integration test" verbose="1">
     <listeners>
-        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
         <listener class-name="com.abiquo.testng.TestServerListener" />
     </listeners>
     

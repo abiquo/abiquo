@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Api basic unit tests" verbose="1">
+<suite name="API basic unit tests" verbose="1">
     <listeners>
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
     </listeners>

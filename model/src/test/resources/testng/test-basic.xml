@@ -1,5 +1,5 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Model basic unit tests" verbose="1">
+<suite name="MODEL basic unit tests" verbose="1">
 	<test name="Hibernate tests">
 		<groups>
 			<run>
