@@ -29,11 +29,11 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -156,7 +156,7 @@ public abstract class AbsMachineTest extends TestCase
     }
 
     @Override
-    @Before
+    @BeforeMethod
     public void setUp()
     {
         try
@@ -184,7 +184,7 @@ public abstract class AbsMachineTest extends TestCase
     }
 
     @Override
-    @After
+    @AfterMethod
     public void tearDown()
     {
         log.debug("deleting VM on state " + vMachine.getStateInHypervisor());
@@ -368,7 +368,7 @@ public abstract class AbsMachineTest extends TestCase
          */
     }
 
-    private void logAndFail(String msg, Exception e)
+    private void logAndFail(final String msg, final Exception e)
     {
         log.error(msg, e);
         fail(msg);

@@ -27,7 +27,7 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import com.abiquo.virtualfactory.hypervisor.impl.XenServerHypervisor;
 import com.abiquo.virtualfactory.machine.impl.XenServerMachine;
@@ -107,7 +107,7 @@ public class XenServerMachineTest extends TestCase
         return new XenServerHypervisor();
     }
 
-    protected void configureExternalStorage(VirtualMachineConfiguration config)
+    protected void configureExternalStorage(final VirtualMachineConfiguration config)
     {
         // Do nothing
     }
