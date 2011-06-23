@@ -29,109 +29,106 @@ import static com.abiquo.tracer.Platform.platform;
 import static com.abiquo.tracer.Rack.rack;
 import static com.abiquo.tracer.StoragePool.storagePool;
 import static com.abiquo.tracer.User.user;
-import static com.abiquo.tracer.VirtualDatacenter.virtualDatacenter;
 import static com.abiquo.tracer.VirtualAppliance.virtualAppliance;
+import static com.abiquo.tracer.VirtualDatacenter.virtualDatacenter;
 import static com.abiquo.tracer.VirtualMachine.virtualMachine;
 import static com.abiquo.tracer.VirtualStorage.virtualStorage;
 import static com.abiquo.tracer.Volume.volume;
-import static org.junit.Assert.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.tracer.server.LoggingTracerProcessor;
 import com.abiquo.tracer.server.TracerCollector;
 import com.abiquo.tracer.server.TracerCollectorFactory;
 
-public class TracerTest {
+public class TracerTest
+{
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @BeforeMethod
+    public void setUp() throws Exception
+    {
+    }
 
-	@After
-	public void tearDown() throws Exception {
-	}
+    @AfterMethod
+    public void tearDown() throws Exception
+    {
+    }
 
-	@Test
-	public void testLogSeverityTypeComponentTypeEventTypeStringUserInfo()
-			throws Exception {
-		TracerCollector t = TracerCollectorFactory.getTracerCollector();
-		t.addListener(new LoggingTracerProcessor());
-		t.init();
-		for (SeverityType severity : SeverityType.values()) {
-			for (ComponentType component : ComponentType.values()) {
-				for (EventType event : EventType.values()) {
-					TracerFactory.getTracer().log(severity, component, event,
-							"HolaMundo", null,null);
-				}
-			}
-		}
-		t.destroy();
-		assert(true);
-	}
+    @Test
+    public void testLogSeverityTypeComponentTypeEventTypeStringUserInfo() throws Exception
+    {
+        TracerCollector t = TracerCollectorFactory.getTracerCollector();
+        t.addListener(new LoggingTracerProcessor());
+        t.init();
+        for (SeverityType severity : SeverityType.values())
+        {
+            for (ComponentType component : ComponentType.values())
+            {
+                for (EventType event : EventType.values())
+                {
+                    TracerFactory.getTracer().log(severity, component, event, "HolaMundo", null,
+                        null);
+                }
+            }
+        }
+        t.destroy();
+        assert (true);
+    }
 
-	@Test
-	public void testFluentInterface() throws Exception {
-		Platform platform = platform("MyPlatform").datacenter(
-				datacenter("myDatacenter").rack(
-						rack("myRack").machine(
-								machine("myMachine").virtualMachine(
-										virtualMachine("myVirtualMachine")))));
+    @Test
+    public void testFluentInterface() throws Exception
+    {
+        Platform platform =
+            platform("MyPlatform").datacenter(
+                datacenter("myDatacenter").rack(
+                    rack("myRack").machine(
+                        machine("myMachine").virtualMachine(virtualMachine("myVirtualMachine")))));
 
-		Platform platform2 = platform("MyPlatform").datacenter(
-				datacenter("myDatacenter").virtualStorage(
-						virtualStorage("myVirtualStorage").storagePool(
-								storagePool("myStoragePool").volume(
-										volume("myVolume")))));
+        Platform platform2 =
+            platform("MyPlatform").datacenter(
+                datacenter("myDatacenter").virtualStorage(
+                    virtualStorage("myVirtualStorage").storagePool(
+                        storagePool("myStoragePool").volume(volume("myVolume")))));
 
-		Platform platform3 = platform("MyPlatform").datacenter(
-				datacenter("myDatacenter").network(network("mynetwork")));
+        Platform platform3 =
+            platform("MyPlatform").datacenter(
+                datacenter("myDatacenter").network(network("mynetwork")));
 
-		Platform platform4 = platform("MyPlatform").enterprise(
-				enterprise("myEnterprise").user(user("myuser")));
+        Platform platform4 =
+            platform("MyPlatform").enterprise(enterprise("myEnterprise").user(user("myuser")));
 
-		Platform platform5 = platform("MyPlatform").enterprise(
-				enterprise("myEnterprise").virtualDatacenter(
-						virtualDatacenter("myVirtualDatacenter").volume(
-								volume("myVolume"))));
+        Platform platform5 =
+            platform("MyPlatform").enterprise(
+                enterprise("myEnterprise").virtualDatacenter(
+                    virtualDatacenter("myVirtualDatacenter").volume(volume("myVolume"))));
 
-		Platform platform6 = platform("MyPlatform").enterprise(
-				enterprise("myEnterprise").virtualDatacenter(
-						virtualDatacenter("myVirtualDatacenter").network(
-								network("myNetwork"))));
+        Platform platform6 =
+            platform("MyPlatform").enterprise(
+                enterprise("myEnterprise").virtualDatacenter(
+                    virtualDatacenter("myVirtualDatacenter").network(network("myNetwork"))));
 
-		Platform platform7 = platform("MyPlatform")
-				.enterprise(
-						enterprise("myEnterprise")
-								.virtualDatacenter(
-										virtualDatacenter("myVirtualDatacenter")
-												.virtualAppliance(
-														virtualAppliance(
-																"myVirtualAppliance")
-																.virtualMachine(
-																		virtualMachine("myVirtualMachine")))));
+        Platform platform7 =
+            platform("MyPlatform").enterprise(
+                enterprise("myEnterprise").virtualDatacenter(
+                    virtualDatacenter("myVirtualDatacenter").virtualAppliance(
+                        virtualAppliance("myVirtualAppliance").virtualMachine(
+                            virtualMachine("myVirtualMachine")))));
 
-		Platform platform8 = platform("MyPlatform").enterprise(
-				enterprise("myEnterprise").virtualDatacenter(
-						virtualDatacenter("myVirtualDatacenter")
-								.virtualAppliance(
-										virtualAppliance("myVirtualAppliance")
-												.volume(volume("myVolume")))));
+        Platform platform8 =
+            platform("MyPlatform").enterprise(
+                enterprise("myEnterprise").virtualDatacenter(
+                    virtualDatacenter("myVirtualDatacenter").virtualAppliance(
+                        virtualAppliance("myVirtualAppliance").volume(volume("myVolume")))));
 
-		Platform platform9 = platform("MyPlatform")
-				.enterprise(
-						enterprise("myEnterprise")
-								.virtualDatacenter(
-										virtualDatacenter("myVirtualDatacenter")
-												.virtualAppliance(
-														virtualAppliance(
-																"myVirtualAppliance")
-																.network(
-																		network("myNetwork")))));
+        Platform platform9 =
+            platform("MyPlatform").enterprise(
+                enterprise("myEnterprise").virtualDatacenter(
+                    virtualDatacenter("myVirtualDatacenter").virtualAppliance(
+                        virtualAppliance("myVirtualAppliance").network(network("myNetwork")))));
 
-		assert(true);
-	}
+        assert (true);
+    }
 }
