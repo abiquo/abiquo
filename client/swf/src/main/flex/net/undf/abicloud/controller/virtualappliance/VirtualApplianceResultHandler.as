@@ -271,6 +271,9 @@ package net.undf.abicloud.controller.virtualappliance
                 //Check if there was an error due Soft or Hard Limits
                 if (result.resultCode == BasicResult.SOFT_LIMT_EXCEEDED)
                 {
+                    //Need to revert the virtual appliance state and subState
+                    _virtualAppliance.state = VirtualAppliance(DataResult(result).data).state;
+                    _virtualAppliance.subState = VirtualAppliance(DataResult(result).data).subState;
                     //Soft limits exceeded, but we can still force operation. Asking user...
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
