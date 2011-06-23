@@ -878,7 +878,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (vapp == null)
         {
             transaction.rollback();
-            
+
             dataResult.setSuccess(false);
             dataResult.setMessage(resourceManager
                 .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
@@ -886,7 +886,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             return dataResult;
         }
         transaction.commit();
-        
 
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
@@ -1114,7 +1113,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 dataResult.setSuccess(Boolean.FALSE);
                 dataResult.setMessage(e.getMessage());
                 updateVMStateInDB(virtualappOld, originalVirtualApplianceState.toEnum());
-                return dataResult;
                 return dataResult;
             }
         }
