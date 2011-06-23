@@ -586,6 +586,7 @@ CREATE TABLE  `kinton`.`ucs_rack` (
   `port` int(5) NOT NULL,
   `user_rack` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `version_c` int(11) DEFAULT '0',
   KEY `id_rack_FK` (`idRack`),
   CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -765,8 +766,8 @@ CREATE TABLE  `kinton`.`role` (
   `blocked` tinyint(1) NOT NULL DEFAULT '0',
   `version_c` int(11) DEFAULT '0',
   PRIMARY KEY (`idRole`),
-  KEY `fk_role_1` (`idEnterprise`),
-  CONSTRAINT `fk_role_1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  KEY `fk_role_enterprise` (`idEnterprise`),
+  CONSTRAINT `fk_role_enterprise` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8; 
 
 --
@@ -1182,7 +1183,7 @@ CREATE TABLE  `kinton`.`metering` (
   `idEnterprise` int(10) unsigned default NULL,
   `enterprise` varchar(40) default NULL,
   `idUser` int(10) unsigned default NULL,
-  `user` varchar(128) default NULL,
+  `user` varchar(128) NOT NULL,
   `idVirtualDataCenter` int(10) unsigned default NULL,
   `virtualDataCenter` varchar(40) default NULL,
   `idVirtualApp` int(10) unsigned default NULL,
