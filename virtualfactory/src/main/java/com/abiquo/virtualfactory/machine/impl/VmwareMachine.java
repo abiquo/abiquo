@@ -127,7 +127,7 @@ public class VmwareMachine extends AbsVmwareMachine
             }
             else
             {
-                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort, vncPwd});
+                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort});
             }
         }
     }
