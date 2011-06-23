@@ -4,7 +4,7 @@
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
     </listeners>
     
-	<test name="All tests">
+	<test name="All unit tests">
 		<groups>
 			<run>
                 <include name="model" />

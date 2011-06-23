@@ -23,7 +23,7 @@ package com.abiquo.abiserver.networking;
 
 import junit.framework.TestCase;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import com.abiquo.abiserver.exception.InvalidIPAddressException;
 
@@ -35,7 +35,8 @@ public class IPAddressTest extends TestCase
 
     /**
      * Test method for {@link com.abiquo.abiserver.networking.IPAddress#nextIPAddress()}.
-     * @throws InvalidIPAddressException 
+     * 
+     * @throws InvalidIPAddressException
      */
     @Test
     public void testNextIPAddress() throws InvalidIPAddressException
@@ -62,7 +63,8 @@ public class IPAddressTest extends TestCase
 
     /**
      * Test method for {@link com.abiquo.abiserver.networking.IPAddress#previousIPAddress()}.
-     * @throws InvalidIPAddressException 
+     * 
+     * @throws InvalidIPAddressException
      */
     @Test
     public void testPreviousIPAddress() throws InvalidIPAddressException
@@ -86,6 +88,5 @@ public class IPAddressTest extends TestCase
         assertTrue(IPAddress.newIPAddress("0.255.0.abc").previousIPAddress().toString()
             .equalsIgnoreCase(""));
     }
-
 
 }

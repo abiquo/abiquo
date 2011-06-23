@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="AM basic unit tests" verbose="1">
-    <test name="basic unit tests">
+    <test name="Basic unit tests">
         <groups>
             <run>
                 <include name="test-basic" />
