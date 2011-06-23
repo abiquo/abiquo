@@ -33,7 +33,7 @@
         <commonscli.version>1.1</commonscli.version>
         <jackson.version>1.6.1</jackson.version>
         <catalina.version>6.0.29</catalina.version>
-        <testng.version>5.12.1</testng.version>        
+        <testng.version>5.12.1</testng.version>
     </properties>
 
     <!-- Aggregations. Common modules -->
