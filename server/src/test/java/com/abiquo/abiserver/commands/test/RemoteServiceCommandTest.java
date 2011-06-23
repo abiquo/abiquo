@@ -21,9 +21,8 @@
 
 package com.abiquo.abiserver.commands.test;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertTrue;
 
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,7 +33,7 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 /**
  * The Class InfrastructureCommandTest
  */
-public class RemoteServiceCommandTest extends TestCase
+public class RemoteServiceCommandTest
 {
 
     /** The infra command. */
@@ -48,24 +47,12 @@ public class RemoteServiceCommandTest extends TestCase
      * 
      * @throws java.lang.Exception * @throws Exception the exception
      */
-    @Override
     @BeforeMethod
     public void setUp() throws Exception
     {
         rsCommand = new RemoteServicesCommandImpl();
         userSession = new UserSession();
         userSession.setUser("admin");
-    }
-
-    /**
-     * Tear down.
-     * 
-     * @throws java.lang.Exception * @throws Exception the exception
-     */
-    @Override
-    @AfterMethod
-    public void tearDown() throws Exception
-    {
     }
 
     /**

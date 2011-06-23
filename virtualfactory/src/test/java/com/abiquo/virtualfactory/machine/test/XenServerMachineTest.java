@@ -25,8 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.virtualfactory.hypervisor.impl.XenServerHypervisor;
@@ -42,7 +41,7 @@ import com.abiquo.virtualfactory.network.VirtualNIC;
  * 
  * @author ibarrera
  */
-public class XenServerMachineTest extends TestCase
+public class XenServerMachineTest
 {
     private static final String HYPERVISOR_HOST = "10.60.1.77";
 
@@ -67,7 +66,7 @@ public class XenServerMachineTest extends TestCase
 
     protected XenServerMachine machine;
 
-    @Override
+    @BeforeMethod
     protected void setUp() throws Exception
     {
         hypervisor = getHypervisor();

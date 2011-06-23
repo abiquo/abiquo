@@ -21,7 +21,7 @@
 
 package com.abiquo.abiserver.networking;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
@@ -30,7 +30,7 @@ import com.abiquo.abiserver.exception.InvalidIPAddressException;
 /**
  * @author abiquo
  */
-public class IPAddressTest extends TestCase
+public class IPAddressTest
 {
 
     /**

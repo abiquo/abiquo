@@ -21,13 +21,13 @@
 
 package com.abiquo.virtualfactory.machine.test;
 
+import static org.testng.Assert.fail;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-
-import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import com.abiquo.virtualfactory.model.VirtualDiskType;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
 
-public abstract class AbsMachineTest extends TestCase
+public abstract class AbsMachineTest
 {
 
     private final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
@@ -155,7 +155,6 @@ public abstract class AbsMachineTest extends TestCase
         return conf;
     }
 
-    @Override
     @BeforeMethod
     public void setUp()
     {
@@ -183,7 +182,6 @@ public abstract class AbsMachineTest extends TestCase
         log.debug("Created test machine");
     }
 
-    @Override
     @AfterMethod
     public void tearDown()
     {

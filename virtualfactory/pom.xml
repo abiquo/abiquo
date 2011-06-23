@@ -205,6 +205,12 @@
 			<groupId>org.apache.wink</groupId>
 			<artifactId>wink-client</artifactId>
 			<version>${wink.version}</version>
+			<exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- testing dependences -->

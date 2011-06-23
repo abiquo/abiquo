@@ -21,6 +21,7 @@
 
 package com.abiquo.tracer;
 
+import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
 import static com.abiquo.tracer.Datacenter.datacenter;
 import static com.abiquo.tracer.Enterprise.enterprise;
 import static com.abiquo.tracer.Machine.machine;
@@ -78,7 +79,7 @@ public class TracerTest
         assert (true);
     }
 
-    @Test
+    @Test(groups = BASIC_UNIT_TESTS)
     public void testFluentInterface() throws Exception
     {
         Platform platform =
