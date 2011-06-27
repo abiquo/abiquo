@@ -20,7 +20,6 @@
  */
 package com.abiquo.testng;
 
-
 /**
  * Common configuration to customize test execution.
  * 
@@ -41,6 +40,18 @@ public class TestConfig
 
     /** TestNG group for all integration tests. */
     public static final String ALL_INTEGRATION_TESTS = "it-all";
+
+    /** TestNG group for default premium unit tests. */
+    public static final String PREMIUM_BASIC_UNIT_TESTS = "test-premium-basic";
+
+    /** TestNG group for default premium integration tests. */
+    public static final String PREMIUM_BASIC_INTEGRATION_TESTS = "it-premium-basic";
+
+    /** TestNG group for all premium unit tests. */
+    public static final String PREMIUM_ALL_UNIT_TESTS = "test-premium-all";
+
+    /** TestNG group for all premium integration tests. */
+    public static final String PREMIUM_ALL_INTEGRATION_TESTS = "it-premium-all";
 
     // Test database configuration
 
