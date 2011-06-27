@@ -35,7 +35,7 @@ package net.undf.abicloud.vo.infrastructure
         
         public var port:int;
         
-        public static const TYPE:String = "UCS Rack";
+        public static const TYPE:String = "Cisco UCS";
         public static const DEFAULT_PORT:int = 80;
 
         /* ------------- Constructor ------------- */
