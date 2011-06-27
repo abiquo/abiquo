@@ -694,6 +694,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
         DECLARE idImage INTEGER;
         DECLARE idDataCenterObj INTEGER;
         DECLARE idEnterpriseObj INTEGER;
+        DECLARE reservedSize BIGINT;
         DECLARE ipAddress VARCHAR(20);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
             --	   
@@ -703,6 +704,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 FROM volume_management vm
                 WHERE vm.idManagement = OLD.idManagement;     
                 --
+		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateRASD: ',idState,' - ', IFNULL(OLD.idVirtualApp, 'OLD.idVirtualApp es NULL'), IFNULL(NEW.idVirtualApp, 'NEW.idVirtualApp es NULL')));	
 		-- Detectamos cambios de VDC: V2V
 		IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NOT NULL AND OLD.idVirtualDataCenter != NEW.idVirtualDataCenter AND OLD.idVirtualApp = NEW.idVirtualApp THEN
 			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1, volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
@@ -717,7 +719,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 		            UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			END IF;
-			-- Volume removed from a Vapp
+			-- Volume added from a Vapp
 			IF OLD.idVirtualApp IS NULL AND NEW.idVirtualApp IS NOT NULL THEN       
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualApp = NEW.idVirtualApp;      
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
@@ -726,13 +728,30 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    END IF;                         
 			END IF;
-			-- Volume added from a Vapp
+			-- Volume removed from a Vapp
 			IF OLD.idVirtualApp IS NOT NULL AND NEW.idVirtualApp IS NULL THEN
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			    IF idState = 1 THEN
+				SELECT vdc.idEnterprise, vdc.idDataCenter INTO idEnterpriseObj, idDataCenterObj
+				FROM virtualdatacenter vdc
+				WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;
+				SELECT r.limitResource INTO reservedSize
+				FROM rasd r
+				WHERE r.instanceID = OLD.idResource;
+				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
+				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
+				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
+				UPDATE IGNORE enterprise_resources_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE dc_enterprise_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE vdc_enterprise_stats 
+				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
+				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
 			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
-			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			    END IF;                 
 			END IF;
 			-- Volume added to VDC
@@ -896,25 +915,28 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
         FROM storage_pool sp, storage_device sd
         WHERE OLD.idStorage = sp.idStorage
         AND sp.idStorageDevice = sd.id;
-        
+        --      
         SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
         FROM rasd_management rasd, virtualapp vapp
         WHERE OLD.idManagement = rasd.idManagement
         AND rasd.idVirtualApp = vapp.idVirtualApp;
-        
+        --
         SELECT vdc.idEnterprise INTO idEnterpriseObj
         FROM virtualdatacenter vdc
         WHERE vdc.idVirtualDataCenter = idVirtualDataCenterObj;
-        
+        --
         SELECT r.limitResource INTO reservedSize
         FROM rasd_management rm, rasd r
         WHERE rm.idManagement = NEW.idManagement
         AND r.instanceID = rm.idResource;
-        
+        --
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), IFNULL(idVirtualDataCenterObj, 'idVirtualDataCenterObj es NULL'), IFNULL(idDataCenterObj, 'idDataCenterObj es NULL')));
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',OLD.state, NEW.state, reservedSize));
+	-- 
         IF NEW.state != OLD.state THEN
             IF NEW.state = 1 THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
-    UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
+		UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE enterprise_resources_stats 
                     SET     extStorageUsed = extStorageUsed +  reservedSize
                     WHERE idEnterprise = idEnterpriseObj;
@@ -925,19 +947,7 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
                     SET     volAttached = volAttached + 1, extStorageUsed = extStorageUsed +  reservedSize
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
             END IF;     
-            IF OLD.state = 1 THEN 
-                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE enterprise_resources_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE dc_enterprise_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE vdc_enterprise_stats 
-                    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed +  reservedSize
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            END IF;
+	-- IF OLD.state = 1 ====> This is done in update_rasd_management_update_stats
         END IF;
     END IF;
     END;
@@ -1527,3 +1537,4 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
+
