@@ -1084,7 +1084,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 dataResult.setMessage(e.getMessage());
                 updateVMStateInDB(virtualappOld, originalVirtualApplianceState.toEnum());
                 return dataResult;
-                return dataResult;
             }
         }
         else
