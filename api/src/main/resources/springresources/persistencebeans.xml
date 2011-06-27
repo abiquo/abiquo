@@ -78,8 +78,8 @@
 	      <ref bean="systemPropertiesResource"/>
 	      <ref bean="systemPropertyResource"/>
 
-             <!-- Login -->
-             <ref bean="loginResource" />
+          <!-- Login -->
+          <ref bean="loginResource" />
 	   </set>
          </property>
      </bean>
@@ -103,5 +103,7 @@
              </list>
         </property>
      </bean>
+     
+     <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>
           

@@ -323,6 +323,7 @@
 		<!--===================================-->
 		<security:intercept-url pattern="/login" access="ROLE_AUTHENTICATED" />
 		<security:intercept-url pattern="/**" access="ROLE_NOBODY" />
+		
 		<security:http-basic />
 		<security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
 	</security:http>
@@ -340,5 +341,5 @@
 		<property name="cookieName" value="auth" />
 		<property name="tokenValiditySeconds" value="1800" />
 	</bean>
-
+	
 </beans>
