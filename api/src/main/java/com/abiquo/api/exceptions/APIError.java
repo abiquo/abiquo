@@ -131,7 +131,9 @@ public enum APIError
         "MACHINE-3", "A machine can not be added this way to a UCS Rack"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), INVALID_STATE_CHANGE("MACHINE-5",
         "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE("MACHINE-6",
-        "The requested machine could not be contacted"),
+        "The requested machine could not be contacted"), MACHINE_CANNOT_BE_DELETED(
+        "MACHINE-7",
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
