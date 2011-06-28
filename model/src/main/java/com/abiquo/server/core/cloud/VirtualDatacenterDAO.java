@@ -139,7 +139,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     }
 
     private static final String SUM_VM_RESOURCES =
-        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a, hypervisor hy, physicalmachine pm "        
+        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a "        
             + "where vi.idVM = vm.idVM and vi.idNode = n.idNode and n.idVirtualApp = a.idVirtualApp "
             + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0"; 
             // + "and hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine and pm.idState != 7"; // not HA_DISABLED
