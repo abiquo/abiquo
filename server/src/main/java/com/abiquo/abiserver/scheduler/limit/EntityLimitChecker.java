@@ -250,8 +250,12 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage);
+                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDatacenter)
+                {
+                    TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
+                        etype, traceMessage);
+                }
                 break;
             default:
                 break;
