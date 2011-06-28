@@ -147,11 +147,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
+        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
+        limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
 
         /**
          * TODO vlan and public ip is not checked there
