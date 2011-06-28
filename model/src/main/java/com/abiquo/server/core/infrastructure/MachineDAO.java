@@ -331,6 +331,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             query
                 .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
             query.setParameterList("reserveds", reserveds);
+            query.setInteger("enterpriseId", enterprise.getId());
             query.setInteger("originalHypervisorId", originalHypervisorId);
 
             machines = query.list();
