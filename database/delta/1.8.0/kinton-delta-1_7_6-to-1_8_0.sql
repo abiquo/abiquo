@@ -424,3 +424,7 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
 ALTER TABLE `kinton`.`enterprise` ADD `isReservationRestricted` tinyint(1) DEFAULT 0
+
+-- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
+update volume_management set state = 1 where state = 2;
+
