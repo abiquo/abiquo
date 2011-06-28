@@ -58,7 +58,7 @@ public abstract class AbstractHierarchyProcessor<T> implements HierarchyProcesso
     private String getIdentifier(final String uri)
     {
         String prefix = getIdentifierPrefix();
-        int prefixPos = uri.indexOf(prefix);
+        int prefixPos = uri.indexOf('/'+prefix);
 
         if (prefixPos == -1)
         {
