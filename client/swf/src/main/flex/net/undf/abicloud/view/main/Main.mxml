@@ -219,14 +219,16 @@
 
                 if (AbiCloudModel.getInstance().configurationManager.registration == null)
                 {
+                    //ABICLOUDPREMIUM-1933 -> temporaly disable
                     //If this Abicloud is not yet registered, we ask if we have to present the Registration Reminder screen
                     var configurationEvent:ConfigurationEvent = new ConfigurationEvent(ConfigurationEvent.ASK_FOR_REGISTRATION_REMINDER_SCREEN);
-                    dispatchEvent(configurationEvent);
+                    //dispatchEvent(configurationEvent);
                 }
 
+                //ABICLOUDPREMIUM-1933 -> temporaly disable
                 //Request Heartbeating status
                 configurationEvent = new ConfigurationEvent(ConfigurationEvent.GET_HEARTBEAT_STATUS);
-                dispatchEvent(configurationEvent);
+                //dispatchEvent(configurationEvent);
             }
 
             /**
