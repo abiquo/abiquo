@@ -108,7 +108,7 @@ public class LimitExceededException extends AllocatorException
             actual.getPublicIp(), //
             requir.getCpu(),
             requir.getRam(),
-            requir.getHd(),
+            (requir.getHd() / 1048576),// en MB,
             (requir.getStorage() / 1048576),// en MB
             requir.getPublicVLAN(),
             requir.getPublicIP(), //
