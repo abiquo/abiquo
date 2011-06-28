@@ -50,7 +50,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC)})
+@NamedQueries( {@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC_QUERY, query = VolumeManagement.BY_VDC)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -60,6 +60,8 @@ public class VolumeManagement extends RasdManagement
     public static final String TABLE_NAME = "volume_management";
 
     // Queries
+
+    public static final String VOLUMES_BY_VDC_QUERY = "VOLUMES_BY_VDC";
 
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
@@ -95,10 +97,6 @@ public class VolumeManagement extends RasdManagement
         setIdScsi(idScsi);
         setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
         setSizeInMB(sizeInMB);
-
-        // TODO: Remove these fields?
-        setUsedSizeInMB(0);
-        setAvailableSizeInMB(sizeInMB);
     }
 
     public final static String STORAGE_POOL_PROPERTY = "storagePool";
@@ -236,7 +234,7 @@ public class VolumeManagement extends RasdManagement
 
     public long getSizeInMB()
     {
-        return getRasd().getLimit();
+        return getRasd().getLimit() == null ? 0L : getRasd().getLimit();
     }
 
     public void setSizeInMB(final long sizeInMB)
@@ -246,7 +244,7 @@ public class VolumeManagement extends RasdManagement
 
     public long getAvailableSizeInMB()
     {
-        return getRasd().getReservation();
+        return getRasd().getReservation() == null ? 0L : getRasd().getReservation();
     }
 
     public void setAvailableSizeInMB(final long availableSizeInMB)

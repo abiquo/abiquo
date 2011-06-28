@@ -45,9 +45,11 @@ import com.abiquo.model.util.AddressingUtils;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IscsiPath
 {
+    public static final String ERROR_MESSAGE = "must be a valid iSCSI path";
+
     boolean required() default true;
 
-    String message() default "must be a valid iSCSI path";
+    String message() default ERROR_MESSAGE;
 
     Class< ? >[] groups() default {};
 

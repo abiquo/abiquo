@@ -81,7 +81,7 @@ public class StorageRep extends DefaultRepBase
     public StorageDevice findDeviceByManagementIP(final Integer datacenterId,
         final String managementIp)
     {
-        return deviceDAO.findDeviceById(datacenterId, managementIp);
+        return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
     public Tier findTierById(final Integer datacenterId, final Integer tierId)
@@ -144,6 +144,11 @@ public class StorageRep extends DefaultRepBase
     public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
+    }
+
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getStatefulCandidates(vdc);
     }
 
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)

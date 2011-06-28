@@ -170,19 +170,12 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
         final VirtualDataCenterHB virtualDataCenterHB = new VirtualDataCenterHB();
         virtualDataCenterHB.setIdVirtualDataCenter(id);
         virtualDataCenterHB.setName(name);
-        virtualDataCenterHB.setEnterpriseHB(enterprise.toPojoHB());
+        virtualDataCenterHB.setEnterpriseHB(enterprise == null ? null : enterprise.toPojoHB());
         virtualDataCenterHB.setIdDataCenter(idDataCenter);
-        virtualDataCenterHB.setHypervisorType(HypervisorType.fromValue(hyperType.getName()));
-
-        if (limits != null)
-        {
-            virtualDataCenterHB.setLimits(limits.toPojoHB());
-        }
-
-        if (network != null)
-        {
-            virtualDataCenterHB.setNetwork(network.toPojoHB());
-        }
+        virtualDataCenterHB.setHypervisorType(hyperType == null ? null : HypervisorType
+            .fromValue(hyperType.getName()));
+        virtualDataCenterHB.setLimits(limits == null ? null : limits.toPojoHB());
+        virtualDataCenterHB.setNetwork(network == null ? null : network.toPojoHB());
 
         return virtualDataCenterHB;
     }
