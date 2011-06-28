@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -87,11 +88,11 @@ public class RoleDAO extends DefaultDAOBase<Integer, Role>
 
     private Criterion filterExactlyBy(final String filter)
     {
-        Disjunction filterDisjunction = Restrictions.disjunction();
+        Conjunction filterConjunction = Restrictions.conjunction();
 
-        filterDisjunction.add(Restrictions.like(Role.NAME_PROPERTY, filter));
+        filterConjunction.add(Restrictions.like(Role.NAME_PROPERTY, filter));
 
-        return filterDisjunction;
+        return filterConjunction;
     }
 
     public Collection<Role> find(final Enterprise enterprise, final String filter,
