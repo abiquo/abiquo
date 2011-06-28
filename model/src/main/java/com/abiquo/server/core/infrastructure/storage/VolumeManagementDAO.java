@@ -125,7 +125,7 @@ import com.abiquo.server.core.util.PagedList;
         crit.add(sameVirtualDatacenter(vdc));
         crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
         crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY,
-            VolumeState.NOT_MOUNTED_NOT_RESERVED));
+            VolumeState.DETACHED));
 
         crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
             StorageTechnologyType.GENERIC_ISCSI));
