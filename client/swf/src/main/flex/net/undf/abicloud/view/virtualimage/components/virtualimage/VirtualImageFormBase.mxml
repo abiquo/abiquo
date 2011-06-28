@@ -113,6 +113,8 @@
             {
                 //Check privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_VM_COST_CODE,"removeChild",costCodeFormItem,virtualImageFormContainer);
+                
+                //Checking privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
                 
                 //Caching VirtualImageManager
