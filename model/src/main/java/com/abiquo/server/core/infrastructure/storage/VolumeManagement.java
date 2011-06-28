@@ -95,7 +95,7 @@ public class VolumeManagement extends RasdManagement
         // Volume properties
         setStoragePool(pool);
         setIdScsi(idScsi);
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        setState(VolumeState.DETACHED);
         setSizeInMB(sizeInMB);
     }
 
@@ -234,7 +234,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getSizeInMB()
     {
-        return getRasd().getLimit() == null ? 0L : getRasd().getLimit();
+        Long size = getRasd().getLimit();
+        return size == null ? 0L : size;
     }
 
     public void setSizeInMB(final long sizeInMB)
@@ -244,7 +245,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getAvailableSizeInMB()
     {
-        return getRasd().getReservation() == null ? 0L : getRasd().getReservation();
+        Long reservation = getRasd().getReservation();
+        return reservation == null ? 0L : reservation;
     }
 
     public void setAvailableSizeInMB(final long availableSizeInMB)
@@ -256,46 +258,24 @@ public class VolumeManagement extends RasdManagement
 
     public void associate()
     {
-        if (state != VolumeState.NOT_MOUNTED_NOT_RESERVED)
+        if (state != VolumeState.DETACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_NOT_RESERVED.name());
+                + VolumeState.DETACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.ATTACHED);
     }
 
     public void disassociate()
     {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
+        if (state != VolumeState.ATTACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
+                + VolumeState.ATTACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
-    }
-
-    public void mount()
-    {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.MOUNTED_RESERVED);
-    }
-
-    public void unmount()
-    {
-        if (state != VolumeState.MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.DETACHED);
     }
 
     // ********************************** Others ********************************

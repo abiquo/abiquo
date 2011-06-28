@@ -59,8 +59,6 @@ public class InfrastructureService
 
     public InfrastructureService()
     {
-        infrastructureCommand = new InfrastructureCommandImpl();
-
         try
         {
             infrastructureCommand =
