@@ -134,4 +134,53 @@ public class NetworkAssignment extends DefaultEntityBase
         this.rack = rack;
     }
 
+    // Needed because of a Collection.contains() critical call!
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((rack == null) ? 0 : rack.hashCode());
+        result = prime * result + ((virtualDatacenter == null) ? 0 : virtualDatacenter.hashCode());
+        result = prime * result + ((vlanNetwork == null) ? 0 : vlanNetwork.hashCode());
+        return result;
+    }
+
+    // Needed because of a Collection.contains() critical call!
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        NetworkAssignment other = (NetworkAssignment) obj;
+        if (rack == null)
+        {
+            if (other.rack != null)
+                return false;
+        }
+        else if (!rack.equals(other.rack))
+            return false;
+        if (virtualDatacenter == null)
+        {
+            if (other.virtualDatacenter != null)
+                return false;
+        }
+        else if (!virtualDatacenter.equals(other.virtualDatacenter))
+            return false;
+        if (vlanNetwork == null)
+        {
+            if (other.vlanNetwork != null)
+                return false;
+        }
+        else if (!vlanNetwork.equals(other.vlanNetwork))
+            return false;
+        return true;
+    }
+    
+    
+
 }
