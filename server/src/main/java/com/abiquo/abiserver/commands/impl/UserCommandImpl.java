@@ -25,11 +25,8 @@ import java.util.ArrayList;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Restrictions;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -37,8 +34,6 @@ import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.UsersResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -46,10 +41,12 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.EnterpriseListResult;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
+import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.user.RoleListResult;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
 import com.abiquo.abiserver.pojo.user.UserListResult;
-import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -69,6 +66,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * com.abiquo.abiserver.commands.UserCommand#getUsers(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.user.UserListOptions)
      */
+    @Override
     public DataResult<UserListResult> getUsers(final UserSession userSession,
         final UserListOptions userListOptions)
     {
@@ -83,9 +81,27 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     /*
      * (non-Javadoc)
      * @see
+     * com.abiquo.abiserver.commands.UserCommand#getUser(com.abiquo.abiserver.pojo.authentication
+     * .UserSession, java.lang.Integer)
+     */
+    @Override
+    public DataResult<User> getUser(final UserSession userSession, final Integer idUser)
+    {
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        return proxy.getUser(idUser);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
      * com.abiquo.abiserver.commands.UserCommand#createUser(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.user.User)
      */
+    @Override
     public DataResult<User> createUser(final UserSession userSession, final User user)
     {
         DataResult<User> dataResult = null;
@@ -98,13 +114,19 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         if (dataResult.getSuccess())
         {
-            traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, userSession,
-                null, null, "User '" + user.getUser() + "' has been created [Enterprise: "
+            traceLog(
+                SeverityType.INFO,
+                ComponentType.USER,
+                EventType.USER_CREATE,
+                userSession,
+                null,
+                null,
+                "User '" + user.getUser() + "' has been created [Enterprise: "
                     + user.getEnterprise().getName() + ", Name: " + user.getName() + ", Surname: "
-                    + user.getSurname() + ", Role: " + user.getRole().getShortDescription()
-                    + ", User: " + user.getUser() + ", Email: " + user.getEmail()
-                    + ", Description: " + user.getDescription() + "]", null, null, null, user
-                    .getUser(), user.getEnterprise().getName());
+                    + user.getSurname() + ", Role: " + user.getRole().getName() + ", User: "
+                    + user.getUser() + ", Email: " + user.getEmail() + ", Description: "
+                    + user.getDescription() + "]", null, null, null, user.getUser(), user
+                    .getEnterprise().getName());
         }
 
         return dataResult;
@@ -116,6 +138,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * com.abiquo.abiserver.commands.UserCommand#editUser(com.abiquo.abiserver.pojo.authentication
      * .UserSession, java.util.ArrayList)
      */
+    @Override
     public BasicResult editUser(final UserSession userSession, final ArrayList<User> users)
     {
         BasicResult basicResult = new BasicResult();
@@ -134,10 +157,10 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
                 traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, userSession,
                     null, null, "User '" + user.getUser() + "' has been modified [Enterprise: "
                         + user.getEnterprise().getName() + ", Name: " + user.getName()
-                        + ", Surname: " + user.getSurname() + ", Role: "
-                        + user.getRole().getShortDescription() + ", User: " + user.getUser()
-                        + ", Email: " + user.getEmail() + ", Description: " + user.getDescription()
-                        + "]", null, null, null, user.getUser(), user.getEnterprise().getName());
+                        + ", Surname: " + user.getSurname() + ", Role: " + user.getRole().getName()
+                        + ", User: " + user.getUser() + ", Email: " + user.getEmail()
+                        + ", Description: " + user.getDescription() + "]", null, null, null,
+                    user.getUser(), user.getEnterprise().getName());
             }
             else
             {
@@ -154,6 +177,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * com.abiquo.abiserver.commands.UserCommand#deleteUser(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.user.User)
      */
+    @Override
     public BasicResult deleteUser(final UserSession userSession, final User user)
     {
         BasicResult basicResult = new BasicResult();
@@ -182,6 +206,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * @seecom.abiquo.abiserver.commands.UserCommand#closeSessionUsers(com.abiquo.abiserver.pojo.
      * authentication.UserSession, java.util.ArrayList)
      */
+    @Override
     public BasicResult closeSessionUsers(final UserSession userSession, final ArrayList<User> users)
     {
         BasicResult basicResult = new BasicResult();
@@ -244,6 +269,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * @seecom.abiquo.abiserver.commands.UserCommand#closeSessionUsers(com.abiquo.abiserver.pojo.
      * authentication.UserSession)
      */
+    @Override
     public BasicResult closeSessionUsers(final UserSession userSession)
     {
         BasicResult basicResult = new BasicResult();
@@ -259,8 +285,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             // Generating a custom query to delete all sessions, except userSession
             String hqlDelete =
                 "delete UserSession uS where uS.user != :notUser and uS.key != :notKey";
-            session.createQuery(hqlDelete).setString("notUser", userSession.getUser()).setString(
-                "notKey", userSession.getKey()).executeUpdate();
+            session.createQuery(hqlDelete).setString("notUser", userSession.getUser())
+                .setString("notKey", userSession.getKey()).executeUpdate();
 
             transaction.commit();
 
@@ -291,6 +317,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * com.abiquo.abiserver.commands.UserCommand#getEnterprises(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.result.ListRequest)
      */
+    @Override
     public DataResult<EnterpriseListResult> getEnterprises(final UserSession userSession,
         final ListRequest enterpriseListOptions)
     {
@@ -310,6 +337,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * @seecom.abiquo.abiserver.commands.UserCommand#createEnterprise(com.abiquo.abiserver.pojo.
      * authentication.UserSession, com.abiquo.abiserver.pojo.user.Enterprise)
      */
+    @Override
     public DataResult<Enterprise> createEnterprise(final UserSession userSession,
         final Enterprise enterprise)
     {
@@ -340,6 +368,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * com.abiquo.abiserver.commands.UserCommand#editEnterprise(com.abiquo.abiserver.pojo.authentication
      * .UserSession, com.abiquo.abiserver.pojo.user.Enterprise)
      */
+    @Override
     @SuppressWarnings("unchecked")
     public BasicResult editEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
@@ -361,19 +390,20 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             basicResult.setMessage(resourceManager.getMessage("editEnterprise.limitExceeded"));
 
             return basicResult;
-                        
+
         }
         finally
         {
             transaction.commit();
+            enterpriseHB = null;
         }
 
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
-        
+
         DataResult<Enterprise> result = new DataResult<Enterprise>();
-        
+
         result = proxy.editEnterprise(enterprise);
-        
+
         if (result.getSuccess())
         {
             // Building result
@@ -396,15 +426,15 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             // result.getMessage());
 
             traceLog(SeverityType.CRITICAL, ComponentType.ENTERPRISE, EventType.ENTERPRISE_MODIFY,
-                userSession, null, null, result.getMessage(), null, null, null, null, enterprise
-                    .getName());
+                userSession, null, null, result.getMessage(), null, null, null, null,
+                enterprise.getName());
         }
 
         return result;
     }
 
-    protected void checkEditLimits(EnterpriseHB currentEnterprise, Enterprise newEnterprise)
-        throws HardLimitExceededException
+    protected void checkEditLimits(final EnterpriseHB currentEnterprise,
+        final Enterprise newEnterprise) throws HardLimitExceededException
     {
         // community impl (no limits at all)
     }
@@ -414,6 +444,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
      * @seecom.abiquo.abiserver.commands.UserCommand#deleteEnterprise(com.abiquo.abiserver.pojo.
      * authentication.UserSession, com.abiquo.abiserver.pojo.user.Enterprise)
      */
+    @Override
     public BasicResult deleteEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
@@ -430,20 +461,82 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         else
         {
             traceLog(SeverityType.CRITICAL, ComponentType.ENTERPRISE, EventType.ENTERPRISE_DELETE,
-                userSession, null, null, result.getMessage(), null, null, null, null, enterprise
-                    .getName());
+                userSession, null, null, result.getMessage(), null, null, null, null,
+                enterprise.getName());
         }
 
         return result;
     }
 
+    @Override
     public DataResult<Enterprise> getEnterprise(final UserSession userSession,
         final Integer enterpriseId)
     {
         EnterprisesResourceStub proxy = getEnterpriseStubProxy(userSession);
 
         DataResult<Enterprise> dataResult = proxy.getEnterprise(enterpriseId);
-        
+
         return dataResult;
+    }
+
+    @Override
+    public DataResult<Role> getRole(final UserSession userSession, final Integer roleId)
+    {
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        DataResult<Role> dataResult = proxy.getRole(roleId);
+
+        return dataResult;
+    }
+
+    @Override
+    public DataResult<RoleListResult> getRoles(final UserSession userSession,
+        final ListRequest roleListOptions, final Enterprise enterprise)
+    {
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        return proxy.getRoles(roleListOptions, enterprise);
+    }
+
+    @Override
+    public DataResult<PrivilegeListResult> getPrivilegesByRole(final UserSession userSession,
+        final int roleId)
+    {
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        return proxy.getPrivilegesByRole(roleId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.com.abiquo.abiserver.commands.UserCommandPremium#checkRolePrivilege
+     * (com.abiquo.abiserver.pojo.authentication.UserSession, java.lang.Integer, java.lang.String)
+     */
+    @Override
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        final String namePrivilege)
+    {
+        BasicResult basicResult = new BasicResult();
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        basicResult = proxy.checkRolePrivilege(idRole, namePrivilege);
+        if (basicResult.getSuccess())
+        {
+            basicResult.setMessage(resourceManager.getMessage("checkRolePrivilege.success"));
+        }
+
+        return basicResult;
     }
 }

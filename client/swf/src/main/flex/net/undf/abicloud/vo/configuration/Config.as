@@ -75,9 +75,9 @@ package net.undf.abicloud.vo.configuration
 		public var client_virtual_moreInfoAboutUploadLimitations:SystemProperty;
 		public var client_infra_vlanIdMin:SystemProperty;
 		public var client_infra_vlanIdMax:SystemProperty;
-		public var client_infra_useVirtualBox:SystemProperty;
 		public var client_virtual_virtualImagesRefreshConversionsInterval:SystemProperty; 
 		public var client_main_enterpriseLogoURL:SystemProperty;
+		public var client_main_billingUrl:SystemProperty;
 		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
@@ -120,6 +120,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_user_createEnterprise:SystemProperty;
 		public var client_wiki_user_dataCenterLimits:SystemProperty;
 		public var client_wiki_user_createUser:SystemProperty;
+		public var client_wiki_user_createRole:SystemProperty;
 		
 		public var client_wiki_config_general:SystemProperty;
 		public var client_wiki_config_heartbeat:SystemProperty;

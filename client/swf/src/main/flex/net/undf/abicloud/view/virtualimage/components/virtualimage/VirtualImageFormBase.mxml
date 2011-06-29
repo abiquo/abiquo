@@ -27,7 +27,7 @@
     resizeEffect="{myResize}"
     creationComplete="onCreationComplete()"
     wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_apps_uploadVM.value}"
-    xmlns:mx="http://www.adobe.com/2006/mxml">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:virtualimage="net.undf.abicloud.view.virtualimage.components.virtualimage.*">
 
     <mx:Metadata>
 		[Event(name="VirtualImageFormClose", type="flash.events.Event")]
@@ -35,6 +35,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
         	import flash.net.navigateToURL;
@@ -64,6 +66,8 @@
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceUploadDTO;
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
             import net.undf.abicloud.vo.virtualimage.VirtualImage;
+            import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+            import net.undf.abicloud.vo.user.PrivilegeType;
 
             [ResourceBundle("Common")]
             private var rb:ResourceBundle;
@@ -107,6 +111,12 @@
 			
             private function onCreationComplete():void
             {
+                //Check privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_VM_COST_CODE,"removeChild",costCodeFormItem,virtualImageFormContainer);
+                
+                //Checking privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
+                
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -221,6 +231,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
+                    costInput.text = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -241,6 +252,7 @@
                     hdUnitsSelector.selectedIndex = 0;
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
+                    costInput.text = "";
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -276,7 +288,9 @@
                     if (publicImageInput.selected)
                         updatedValues.shared = 1;
                     else
-                        updatedValues.shared = 0;                    
+                        updatedValues.shared = 0; 
+                        
+                    updatedValues.costCode = costInput.text;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
@@ -420,11 +434,8 @@
             	//if the virtualImage is shared, everyone can download it
             	if(_virtualImage.shared == 1){
             		downloadEnable = true;
-        		//else if the user is a sysadmin, he can download the image
-            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
-            		downloadEnable = true;
         		//else if the user enterprise id == virtualImage enterprise id
-            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            	} else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
             		downloadEnable = true;
             	}                
                 
@@ -451,7 +462,10 @@
                 //The second step to create a VirtualImage, is to select the image file from user file system.
                 //Since we cannot do this with Flex, because size limitations, we make a call to Javascript
                 virtualImageFormVS.selectedIndex = 1;
-                ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
+                if(imagePath){
+	                imagePath.text = "";                	
+                }
+                //ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
             }
 
 
@@ -474,7 +488,7 @@
 
                 //Notifying user
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("VirtualImage",
                                                                                        "ALERT_VIRTUAL_IMAGE_CREATED_HEADER"),
                                                ResourceManager.getInstance().getString("VirtualImage",
@@ -561,6 +575,53 @@
             private function openMoreInfo():void{
             	navigateToURL(new URLRequest(AbiCloudModel.getInstance().configurationManager.config.client_virtual_moreInfoAboutUploadLimitations.value),"_blank");
             }
+            
+            private var fileRef:FileReference;
+            
+            public function selectFile():void{
+            	fileRef = new FileReference();
+                fileRef.addEventListener(Event.SELECT, fileRef_select);
+                fileRef.addEventListener(ProgressEvent.PROGRESS, fileRef_progress);
+                fileRef.addEventListener(Event.COMPLETE, fileRef_complete);
+                fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorFunction);
+                fileRef.addEventListener(IOErrorEvent.IO_ERROR , ioError);
+                fileRef.browse();
+            }
+            
+             private function errorFunction(event:SecurityErrorEvent):void{
+            	Alert.show(event.currentTarget.toString(),'Security Error');
+            }
+            
+            private function ioError(event:IOErrorEvent):void{
+            	Alert.show(event.text, 'IO error');
+            }
+            
+
+            private function fileRef_select(evt:Event):void {
+                try {
+                	/* var tmpObject:Object = new Object();
+                	tmpObject.name = fileRef.name;
+                	tmpObject.size = fileRef.size;
+                	tmpObject.uploaded = "No";
+                	tmpObject.data = fileRef;
+                    selectedFiles.addItem(tmpObject); */
+                    virtualImageFileSelected = true;
+                	_virtualImageFileName = fileRef.name;
+                	imagePath.text = fileRef.name;
+                    
+                    //fileRef.upload(new URLRequest(FILE_UPLOAD_URL));
+                } catch (err:Error) {
+                    Alert.show("ERROR: zero-byte file");
+                }
+            }
+
+            private function fileRef_progress(evt:ProgressEvent):void {
+                
+            }
+
+            private function fileRef_complete(evt:Event):void {
+                
+            }
         ]]>
     </mx:Script>
 
@@ -622,6 +683,7 @@
 
 
             <mx:FormItem 
+            	id="downloadItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_FILE_NAME')"
                 direction="horizontal"
                 includeInLayout="{this._virtualImage != null}"
@@ -741,6 +803,17 @@
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
             </mx:FormItem>
+            
+            <mx:FormItem 
+            	id="costCodeFormItem"
+                label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:TextInput id="costInput"
+                    height="18"
+                    maxChars="50"
+                    change="validateForm()"/>
+            </mx:FormItem>
         </mx:Form>
 
         <!-- STEP 2: SELECT VIRTUAL IMAGE FILE TO UPLOAD -->
@@ -756,10 +829,20 @@
 	                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP2_MORE_INFO')"
 	                click="openMoreInfo()"/>
         	</mx:HBox>
-            <mx:Canvas 
-                width="300" height="155">
+            <!--<mx:Canvas 
+                width="300" height="155">-->
                 <!-- Where the HTML Form will be placed -->
-            </mx:Canvas>
+                <mx:HBox 
+                	horizontalAlign="center"
+                	paddingTop="15" paddingBottom="15" 
+                	width="100%" verticalAlign="middle">
+                	<mx:TextInput id="imagePath" editable="false"/>
+                	<mx:Button  
+                		height="18" 
+                		label="{resourceManager.getString('VirtualImage','LABEL_BROWSE')}" 
+                		click="selectFile()"/>
+                </mx:HBox>
+            <!--</mx:Canvas>-->
         </mx:VBox>
 
         <!-- STEP 3: CREATING VIRTUAL IMAGE -->

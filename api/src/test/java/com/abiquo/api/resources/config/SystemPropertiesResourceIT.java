@@ -36,12 +36,10 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.config.SystemPropertiesDto;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.config.SystemPropertyDto;
-import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Role;
-import com.abiquo.server.core.enterprise.User;
 
 public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
 {
+    @Override
     @AfterMethod
     public void tearDown()
     {
@@ -116,28 +114,6 @@ public class SystemPropertiesResourceIT extends AbstractJpaGeneratorIT
         SystemPropertyDto entityPost = response.getEntity(SystemPropertyDto.class);
         assertNotNull(entityPost);
         assertEquals(property.getName(), entityPost.getName());
-    }
-
-    @Test
-    public void addSystemPropertyIsRestrictedToSysadmin()
-    {
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        Role sysadminRole = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
-        Role userRole = roleGenerator.createInstance(Role.Type.USER);
-        User sysadmin = userGenerator.createInstance(ent, sysadminRole, "foo");
-        User user = userGenerator.createInstance(ent, userRole, "bar");
-        setup(ent, sysadminRole, userRole, sysadmin, user);
-
-        SystemPropertyDto property = new SystemPropertyDto();
-        property.setName("test.property");
-        property.setValue("test property value");
-
-        ClientResponse response =
-            post(resolveSystemPropertiesURI(), property, user.getNick(), "bar");
-        assertEquals(response.getStatusCode(), 403);
-
-        response = post(resolveSystemPropertiesURI(), property, sysadmin.getNick(), "foo");
-        assertEquals(response.getStatusCode(), 201);
     }
 
     @Test

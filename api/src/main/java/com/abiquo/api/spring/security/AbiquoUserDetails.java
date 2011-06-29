@@ -54,6 +54,9 @@ public class AbiquoUserDetails implements UserDetails
     /** The granted authorities for the authenticated user. */
     private GrantedAuthority[] authorities;
 
+    /** The type of user and where it login. */
+    private String authType;
+
     // Implementation of UserDetails interface
 
     @Override
@@ -154,5 +157,16 @@ public class AbiquoUserDetails implements UserDetails
     {
         this.authorities = authorities;
     }
+
+    public String getAuthType()
+    {
+        return authType;
+    }
+
+    public void setAuthType(String authType)
+    {
+        this.authType = authType;
+    }
+
 
 }

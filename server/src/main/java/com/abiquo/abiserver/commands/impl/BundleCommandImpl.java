@@ -73,7 +73,6 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
-
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.UserInfo;
 import com.abiquo.tracer.client.TracerFactory;
@@ -431,6 +430,12 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         {
             if (!virtualApp.getNodes().isEmpty())
             {
+                for(Node node:virtualApp.getNodes())
+                {
+                    String message = "Bundle process started in "+ node.getName();
+                    TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                        EventType.VAPP_BUNDLE, message, user, platform);
+                }
                 BasicResult result = virtualApplianceWs.bundleVirtualAppliance(virtualApp);
                 done = result.getSuccess();
             }
@@ -438,7 +443,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            traceBundleError("Error bundling virtual pppliance " + virtualApp.getName() + "("
+            traceBundleError("Error bundling virtual appliance " + virtualApp.getName() + "("
                 + virtualApp.getId() + "). " + e.getMessage());
             done = false;
         }

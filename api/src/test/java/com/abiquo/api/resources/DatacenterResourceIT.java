@@ -39,7 +39,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -86,7 +85,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     public void existHypervisorsLink()
     {
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()), DatacenterResource.HYPERVISORS_PATH);
+        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()),
+            DatacenterResource.HYPERVISORS_PATH);
     }
 
     @Test
@@ -94,7 +94,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     {
 
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()), RemoteServicesResource.REMOTE_SERVICES_PATH);
+        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()),
+            RemoteServicesResource.REMOTE_SERVICES_PATH);
     }
 
     @Test
@@ -190,7 +191,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String uri0 = resolveEnterprisesByDatacenterURI(datacenterId);
         String uri1 = uri0 + "?network=true";
-        String uri2 = uri0 + "?network=true&startwith=2";
+        String uri2 = uri0 + "?network=true&startwith=2&limit=1";
         ClientResponse response0 = get(uri0);
         ClientResponse response1 = get(uri1);
         ClientResponse response2 = get(uri2);
@@ -204,7 +205,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(enterprises0);
         assertEquals(enterprises0.getCollection().size(), 2);
         assertEquals(enterprises1.getCollection().size(), 1);
-        assertEquals(enterprises2.getCollection().size(), 0);
+        assertEquals(enterprises2.getCollection().size(), 1);
         assertEquals(enterprises1.getCollection().get(0).getName(),vdc.getEnterprise().getName());
     }
 
@@ -226,7 +227,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(datacenter);
 
         String href = resolveDatacenterURI(datacenter.getId());
-        
+
         return get(href).getEntity(DatacenterDto.class);
     }
 }

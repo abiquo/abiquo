@@ -38,16 +38,16 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 public class RoleDAOHibernate extends HibernateDAO<RoleHB, Integer> implements RoleDAO
 {
 
-    private final static String GET_ROLE_BY_SHORT_DESC = "GET_ROLE_BY_SHORT_DESC";
+    private final static String GET_ROLE_BY_NAME = "GET_ROLE_BY_NAME";
 
     @Override
-    public RoleHB getRoleByShortDescription(String description)
+    public RoleHB getRoleByName(final String name)
     {
         RoleHB requestedRol = new RoleHB();
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query userQuery = session.getNamedQuery(GET_ROLE_BY_SHORT_DESC);
-        userQuery.setString("shortDescription", description);
+        Query userQuery = session.getNamedQuery(GET_ROLE_BY_NAME);
+        userQuery.setString("name", name);
         requestedRol = (RoleHB) userQuery.uniqueResult();
 
         return requestedRol;

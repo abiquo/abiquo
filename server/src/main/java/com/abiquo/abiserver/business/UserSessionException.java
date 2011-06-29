@@ -34,7 +34,7 @@ public class UserSessionException extends RuntimeException
 
     private BasicResult result;
 
-    public UserSessionException(BasicResult paramResult)
+    public UserSessionException(final BasicResult paramResult)
     {
         super(paramResult.getMessage());
 
@@ -63,7 +63,7 @@ public class UserSessionException extends RuntimeException
         setResult(paramResult);
     }
 
-    public void setResult(BasicResult result)
+    public void setResult(final BasicResult result)
     {
         this.result = result;
     }

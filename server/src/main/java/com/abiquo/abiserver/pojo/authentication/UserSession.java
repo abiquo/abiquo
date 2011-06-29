@@ -51,11 +51,14 @@ public class UserSession
 
     private String enterpriseName;
 
+    private String authType;
+
     public UserSession()
     {
         user = "";
         key = "";
         locale = "";
+        authType = "ABIQUO";
     }
 
     public String getUser()
@@ -126,5 +129,23 @@ public class UserSession
     public void setEnterpriseName(String enterpriseName)
     {
         this.enterpriseName = enterpriseName;
+    }
+
+    /**
+     * Against which system should authenticate. @returna {@link AuthType} value. String
+     */
+    public String getAuthType()
+    {
+        return authType;
+    }
+
+    /**
+     * Against which system should authenticate.
+     * 
+     * @param authType a {@link AuthType} value.
+     */
+    public void setAuthType(String authType)
+    {
+        this.authType = authType;
     }
 }

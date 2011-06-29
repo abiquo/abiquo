@@ -46,6 +46,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.binding.utils.BindingUtils;
         	import mx.core.Application;
         	import mx.managers.PopUpManager;
@@ -100,6 +102,11 @@
 
             private function onCreationComplete():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",powerOnOffButton,drawingToolBar);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CREATE_INSTANCE, "removeChild",createBundleButton,drawingToolBar);
+                                
+                
                 //Registering Nodes interaction
                 addEventListener(NodeRendererEvent.NODERENDERER_ERASE, onNodeRendererErase);
                 addEventListener(NodeRendererEvent.NODERENDERER_CHANGED, onNodeRendererChanged);

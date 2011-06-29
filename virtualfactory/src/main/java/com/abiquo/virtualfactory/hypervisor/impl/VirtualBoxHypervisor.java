@@ -69,7 +69,7 @@ public class VirtualBoxHypervisor implements IHypervisor
 
     /** The admin password */
     private String password;
-    
+
     private int vboxport = 18083;
 
     /**
@@ -111,8 +111,8 @@ public class VirtualBoxHypervisor implements IHypervisor
     public void connect(final URL url)
     {
         this.url = url;
-        URL vboxURL = null; 
-        
+        URL vboxURL = null;
+
         try
         {
             vboxURL = new URL(url.getProtocol(), url.getHost(), vboxport, url.getFile());
@@ -141,7 +141,10 @@ public class VirtualBoxHypervisor implements IHypervisor
      */
     public void reconnect()
     {
-        connect(this.url);
+        if (this.mgr == null)
+        {
+            connect(this.url);
+        }
     }
 
     /*
@@ -199,10 +202,11 @@ public class VirtualBoxHypervisor implements IHypervisor
     }
 
     @Override
-    public void init(final URL url, String user, String password) throws HypervisorException
+    public void init(final URL url, final String user, final String password)
+        throws HypervisorException
     {
         logger.debug("VirtualBox Hypervisor initialized");
-        login(user,password);
+        login(user, password);
 
     }
 
@@ -233,7 +237,7 @@ public class VirtualBoxHypervisor implements IHypervisor
     }
 
     @Override
-    public AbsVirtualMachine getMachine(VirtualMachineConfiguration virtualMachineConfig)
+    public AbsVirtualMachine getMachine(final VirtualMachineConfiguration virtualMachineConfig)
         throws HypervisorException
     {
         init(this.url, this.user, this.password);
@@ -269,7 +273,7 @@ public class VirtualBoxHypervisor implements IHypervisor
         }
         disconnect();
         return vm;
-        
+
     }
 
     /**

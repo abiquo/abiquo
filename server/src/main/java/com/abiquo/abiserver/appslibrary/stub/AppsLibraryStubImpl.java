@@ -20,6 +20,8 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
+import static java.lang.String.valueOf;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,6 +63,8 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
     final String password;
 
+    final String authType;
+
     public AppsLibraryStubImpl(final UserSession session)
     {
         client = new RestClient();
@@ -68,20 +72,30 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
         DAOFactory factory = HibernateDAOFactory.instance();
         factory.beginConnection();
-        UserHB user = factory.getUserDAO().getUserByUserName(session.getUser());
+        UserHB user =
+            factory.getUserDAO().getUserByLoginAuth(session.getUser(), session.getAuthType());
         factory.endConnection();
 
         this.user = user.getUser();
         this.password = user.getPassword();
+        this.authType = user.getAuthType();
     }
 
     private void setAuthCookie(final Resource resource)
     {
         long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
-
-        String cookieValue =
-            StringUtils.join(new String[] {user, String.valueOf(tokenExpiration), signature}, ":");
+        String authType = this.authType;
+        String[] tokens;
+        if (authType != null)
+        {
+            tokens = new String[] {user, valueOf(tokenExpiration), signature, authType};
+        }
+        else
+        {
+            tokens = new String[] {user, valueOf(tokenExpiration), signature};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
 
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
@@ -123,8 +137,8 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML).post(
-                ovfpackageListURL);
+            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML)
+                .post(ovfpackageListURL);
 
         final Integer httpStatus = response.getStatusCode();
 

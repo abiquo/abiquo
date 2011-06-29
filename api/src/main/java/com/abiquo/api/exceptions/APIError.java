@@ -24,6 +24,9 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.infrastructure.management.Rasd;
+
 /**
  * Contains all the errors notified by the API.
  * 
@@ -50,8 +53,9 @@ public enum APIError
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
-        "GEN-7", "Unexpected error"), NOT_ENOUGH_PRIVILEGES("GEN-9",
-        "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
+        "GEN-7", "Unexpected error"), GENERIC_OPERATION_ERROR("GEN-8",
+        "The operation could not be performed. Please, contact the Administrator."), NOT_ENOUGH_PRIVILEGES(
+        "GEN-9", "Not enough privileges to perform this operation"), INCOHERENT_IDS("GEN-10",
         "The paramter ID is different from the Entity ID"),
 
     // DATACENTER
@@ -64,7 +68,9 @@ public enum APIError
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
-        "ENTERPRISE-7", "Enterprise name can't be empty"),
+        "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
+        "ENTERPRISE-8",
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -77,7 +83,9 @@ public enum APIError
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
         "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "LIMIT-11",
+        "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
@@ -110,7 +118,7 @@ public enum APIError
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exists"),
+        "RACK-4", "This rack does not exist"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -132,14 +140,31 @@ public enum APIError
         "VM-2", "The virtual machine is already in progress"),
 
     // ROLE
-    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
+    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
+        "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",
+        "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
+        "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
+        "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
+        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME("ROLE-6",
+        "Cannot create a role with the same name of existing role for the same enterprise"),
+
+    // PRIVILEGE
+    NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
+
+    // ROLE_LDAP
+    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"), MULTIPLE_ENTRIES_ROLELDAP(
+        "ROLELDAP-1", "There are multiple entries for the requested roleLdap"), NOT_ASSIGNED_ROLE(
+        "ROLELDAP-2", "The roleLdap must have a Role"),
 
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"),
+        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In Ldap mode can not modify user's enterprise"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -154,7 +179,7 @@ public enum APIError
         "AM-0",
         "The repository exported by the current appliance manager is being used on other datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
-        "The current repository holds virtual images being used on some virtual appliance, appliance manager only can be modified if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
+        "The current repository holds virtual images being used on some virtual appliances, so it's not possible to remove this Remote Service. You can modify the Appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-8", "Cannot delete a Storage Manager with associated Storage Pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-9",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
@@ -180,7 +205,10 @@ public enum APIError
         "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
         "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
-        "Tier is disabled"),
+        "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
+        "SP-12", "Storage device param in storage pool link not found"), MISSING_POOL_LINK("SP-13",
+        "Missing storage pool link"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -194,7 +222,7 @@ public enum APIError
 
     // ALLOCATOR
     LIMIT_EXCEEDED("LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
-        "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
+        "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
     CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",
@@ -223,7 +251,7 @@ public enum APIError
         "TIER-6", "Can not disable a Tier with associated Storage Pools"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED(
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
         "DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS
@@ -237,12 +265,15 @@ public enum APIError
     // QUERY PAGGING STANDARD ERRORS
     QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
 
-    VOLUME_SSM_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
+    VOLUME_GENERIC_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
-        "VOL-5", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
+        "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
+        "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
+        "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-7",
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-13", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
         "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_UPDATE_STATEFUL(
         "VOL-16", "Cannot update a persistant volume"),

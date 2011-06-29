@@ -20,6 +20,7 @@
  */
 
 package com.abiquo.api.services;
+
 import javax.jms.ResourceAllocationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,24 +51,28 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     ResourceUpgradeUse upgradeUse;
 
     @Autowired
+    UserService userService;
+
+    @Autowired
     IAllocator allocator;
 
     /**
      * Only perform checks if the resources are increased. Checks the resource limits, check the
      * target machine can hold the new resource requirements and update the target machine usage.
      */
-    public void checkAllocate(Integer idVirtualApp, Integer virtualMachineId,
-        VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
+    public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
+        final VirtualMachineDto newVmRequirements, final boolean foreceEnterpriseSoftLimits)
     {
-        
+
         VirtualMachine vmachine = vmachineDao.findById(virtualMachineId);
-        
-        if(vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
+        userService.checkCurrentEnterpriseForPostMethods(vmachine.getEnterprise());
+
+        if (vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
         {
             addConflictErrors(APIError.CHECK_EDIT_NO_TARGET_MACHINE);
             flushErrors();
         }
-        
+
         try
         {
             allocator.checkEditVirtualMachineResources(idVirtualApp, virtualMachineId,
@@ -109,18 +114,16 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         {
             flushErrors();
         }
-        
-        
+
         final int cpuIncrease = newVmRequirements.getCpu() - vmachine.getCpu();
         final int ramIncrease = newVmRequirements.getRam() - vmachine.getRam();
-        
 
         upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), cpuIncrease, ramIncrease);
 
     }
 
-    public VirtualMachine allocateVirtualMachine(Integer virtualMachineId, Integer idVirtualApp,
-        Boolean foreceEnterpriseSoftLimits)
+    public VirtualMachine allocateVirtualMachine(final Integer virtualMachineId,
+        final Integer idVirtualApp, final Boolean foreceEnterpriseSoftLimits)
     {
         VirtualMachine vmachine = null; // flush errors
 
@@ -171,7 +174,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return vmachine;
     }
 
-    public void updateVirtualMachineUse(Integer idVirtualApp, VirtualMachine vMachine)
+    public void updateVirtualMachineUse(final Integer idVirtualApp, final VirtualMachine vMachine)
     {
         // UPGRADE PHYSICAL MACHINE USE
         try
@@ -191,9 +194,10 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
-    public void deallocateVirtualMachine(Integer idVirtualMachine)
+    public void deallocateVirtualMachine(final Integer idVirtualMachine)
     {
         VirtualMachine vmachine = vmachineDao.findById(idVirtualMachine);
+        userService.checkCurrentEnterpriseForPostMethods(vmachine.getEnterprise());
 
         try
         {
@@ -212,7 +216,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
-    private String virtualMachineInfo(Integer vmid)
+    private String virtualMachineInfo(final Integer vmid)
     {
         VirtualMachine vm = vmachineDao.findById(vmid);
 

@@ -32,6 +32,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.model.AbiCloudModel;
             import mx.managers.PopUpManager;
             import mx.resources.ResourceManager;
@@ -67,8 +69,12 @@
 
                 //Creating components
                 vmNetworkManagement = new NetworkManagement();
-                toggledContainer.addContent(vmNetworkManagement, ResourceManager.getInstance().getString("Networking",
-                                                                                                         "LABEL_NETWORK"));
+                
+                //Checking privilege
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_NETWORK)){
+	                toggledContainer.addContent(vmNetworkManagement, ResourceManager.getInstance().getString("Networking",
+                                                                                                         "LABEL_NETWORK"));                	
+                }
             }
 
             /**

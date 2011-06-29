@@ -29,6 +29,9 @@ import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.MeterCommand;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.UsersResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.exception.MeterCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
@@ -36,7 +39,10 @@ import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.User;
+import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.user.UserListResult;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
@@ -45,6 +51,8 @@ import com.abiquo.tracer.SeverityType;
  */
 public class MeterCommandImpl extends BasicCommand implements MeterCommand
 {
+
+    // private UsersResourceStub userResourceStub;
 
     /**
      * To create DAOs and manage transactions
@@ -55,6 +63,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
     {
         // get the factory from hibernate framework
         factory = HibernateDAOFactory.instance();
+        // userResourceStub = new UsersResourceStubImpl();
     }
 
     /*
@@ -64,47 +73,41 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
      * .UserSession, java.util.HashMap)
      */
     @Override
-    public List<MeterHB> getMeters(UserSession userSession, HashMap<String, String> filters,
-        Integer numrows) throws MeterCommandException
+    public List<MeterHB> getMeters(final UserSession userSession,
+        final HashMap<String, String> filters, final Integer numrows) throws MeterCommandException
     {
         List<MeterHB> listOfMeters = new ArrayList<MeterHB>();
         UserDAO userDAO = factory.getUserDAO();
         MeterDAO meterDAO = factory.getMeterDAO();
 
-        List<UserHB> downUsers = new ArrayList<UserHB>();
-
         try
         {
-            factory.beginConnection();
-
-            UserHB user = userDAO.getUserByUserName(userSession.getUser());
-
             // We split all the users inside the string separated by "/";
             List<String> listOfUsers = new ArrayList<String>();
 
-            if (user.getRoleHB().getIdRole() == Role.ENTERPRISE_ADMIN)
+            UsersResourceStub proxy =
+                APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                    UsersResourceStub.class);
+            DataResult<UserListResult> users = proxy.getOnlyUsers(new UserListOptions());
+
+            if (users.getData() != null && users.getData().getUsersList() != null
+                && !users.getData().getUsersList().isEmpty())
             {
-                downUsers =
-                    userDAO.getUsersByUserPrivileges(
-                        user.getRoleHB().getSecurityLevel().toString(), user.getEnterpriseHB()
-                            .getIdEnterprise());
-                listOfUsers.add(user.getUser());
-                for (UserHB currentUser : downUsers)
+                for (User u : users.getData().getUsersList())
                 {
-                    listOfUsers.add(currentUser.getUser());
+                    listOfUsers.add(u.getUser());
+
                 }
             }
-            else if (user.getRoleHB().getIdRole() == Role.SYS_ADMIN)
-            {
-                downUsers = userDAO.findAll();
-            }
-            else
-            {
-                listOfUsers.add(user.getUser());
-            }
+
+            factory.beginConnection();
+
+            // UserHB user = userDAO.getUserByUserName(userSession.getUser());
+            UserHB user =
+                userDAO.findUserHBById(userSession.getUserIdDb(), userSession.getAuthType());
+
             listOfMeters =
-                meterDAO.findAllByFilter(filters, listOfUsers, numrows, user.getRoleHB()
-                    .getIdRole());
+                meterDAO.findAllByFilter(filters, listOfUsers, numrows, user.getRoleHB());
 
             factory.endConnection();
         }
@@ -162,7 +165,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
     /**
      * @param factory the factory to set
      */
-    public void setFactory(DAOFactory factory)
+    public void setFactory(final DAOFactory factory)
     {
         this.factory = factory;
     }

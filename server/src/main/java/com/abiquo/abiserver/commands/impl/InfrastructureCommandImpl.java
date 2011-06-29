@@ -59,7 +59,9 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
 import com.abiquo.abiserver.eventing.EventingSupport;
@@ -93,7 +95,10 @@ import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -132,9 +137,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
-                    .newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -213,8 +217,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             conjunction.add(Restrictions.isNull("rack"));
             conjunction.add(Restrictions.eq("dataCenter", datacenterPojo));
             ArrayList<PhysicalmachineHB> physicalMachinesWORack =
-                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class)
-                    .add(conjunction).list();
+                (ArrayList<PhysicalmachineHB>) session.createCriteria(PhysicalmachineHB.class).add(
+                    conjunction).list();
             for (PhysicalmachineHB physicalMachineHB : physicalMachinesWORack)
             {
                 infrastructures.add(physicalMachineHB.toPojo());
@@ -391,8 +395,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             ArrayList<DataCenter> dataCentersPojo = new ArrayList<DataCenter>();
             ArrayList<DatacenterHB> dataCenters =
-                (ArrayList<DatacenterHB>) HibernateUtil.getSession()
-                    .createCriteria(DatacenterHB.class).addOrder(Order.asc("name")).list();
+                (ArrayList<DatacenterHB>) HibernateUtil.getSession().createCriteria(
+                    DatacenterHB.class).addOrder(Order.asc("name")).list();
             for (DatacenterHB datacenterHB : dataCenters)
             {
                 DataCenter dataCenter = datacenterHB.toPojo();
@@ -452,40 +456,35 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            
 
-			try {
-				if (dataCenter.getName() != null
-						&& dataCenter.getName().trim().length() == 0) {
+            try
+            {
+                if (dataCenter.getName() != null && dataCenter.getName().trim().length() == 0)
+                {
 
-					dataResult.setSuccess(false);
-					errorManager.reportError(
-							InfrastructureCommandImpl.resourceManager,
-							dataResult, "createDataCenter_noname");
-					// Log the event
-					traceLog(SeverityType.MINOR, ComponentType.DATACENTER,
-							EventType.DC_CREATE, userSession, dataCenter, null,
-							"Datacenter  without name", null, null, null, null,
-							userSession.getEnterpriseName());
+                    dataResult.setSuccess(false);
+                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                        "createDataCenter_noname");
+                    // Log the event
+                    traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                        userSession, dataCenter, null, "Datacenter  without name", null, null,
+                        null, null, userSession.getEnterpriseName());
 
-					return dataResult;
-				}
-			} 
-			catch (Exception e) 
-			{
-				errorManager.reportError(
-						InfrastructureCommandImpl.resourceManager, dataResult,
-						"createDataCenter_noname", e);
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.DATACENTER,
-						EventType.DC_CREATE, userSession, dataCenter, null,
-						e.getMessage(), null, null, null, null,
-						userSession.getEnterpriseName());
+                    return dataResult;
+                }
+            }
+            catch (Exception e)
+            {
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createDataCenter_noname", e);
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                    userSession, dataCenter, null, e.getMessage(), null, null, null, null,
+                    userSession.getEnterpriseName());
 
-			}
+            }
 
-    		
-            // Checks for existing DataCenters with the same name 
+            // Checks for existing DataCenters with the same name
             try
             {
                 if (checkExistingDataCenterNames(dataCenter.getName()))
@@ -548,8 +547,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
                     traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
                         userSession, dataCenter, null, remoteServiceHB.getRemoteServiceType()
-                            .getName() + " was not properly configured", null, null, null, null,
-                        null);
+                            .getName()
+                            + " was not properly configured", null, null, null, null, null);
                 }
                 else
                 {
@@ -805,29 +804,32 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         Session session = null;
         Transaction transaction = null;
- 
-		
+
         try
         {
-        	if (rack.getName()!=null && rack.getName().trim().length()==0) {
-				
-				dataResult.setSuccess(false);
-				errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,"createRack_noname");
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-	                null, null, "Rack without name", null,rack, null, null, null);
-				return dataResult;
-			}
+            if (rack.getName() != null && rack.getName().trim().length() == 0)
+            {
+
+                dataResult.setSuccess(false);
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createRack_noname");
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
+                    userSession, null, null, "Rack without name", null, rack, null, null, null);
+                return dataResult;
+            }
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
-			errorManager.reportError(InfrastructureCommandImpl.resourceManager,dataResult, "_noname", e);
-			// Log the event
-			traceLog(SeverityType.MINOR, ComponentType.RACK,EventType.RACK_CREATE, userSession,
-					null, null, e.getMessage(),null,rack, null, null, null);
-		}
-        
-        try{
+            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                "_noname", e);
+            // Log the event
+            traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+                null, null, e.getMessage(), null, rack, null, null, null);
+        }
+
+        try
+        {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
@@ -864,7 +866,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
 
         }
-        
+
         return dataResult;
     }
 
@@ -987,11 +989,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             transaction.commit();
 
             traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackAux.getDataCenter(), null,
-                "Rack '" + rackAux.getName() + "' has been modified [Name: " + rack.getName()
-                    + ", Short description: " + rack.getShortDescription()
-                    + ", Large description: " + rack.getLargeDescription() + "]", null, rackAux,
-                null, null, null);
+                rackAux.getDataCenter(), null, "Rack '" + rackAux.getName()
+                    + "' has been modified [Name: " + rack.getName() + ", Short description: "
+                    + rack.getShortDescription() + ", Large description: "
+                    + rack.getLargeDescription() + "]", null, rackAux, null, null, null);
         }
         catch (HibernateException e)
         {
@@ -1035,28 +1036,31 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         Session session = null;
         Transaction transaction = null;
         PhysicalMachine pm = physicalMachineCreation.getPhysicalMachine();
-       
-		try {
-			if (pm.getName() != null && pm.getName().trim().length() == 0) {
 
-				dataResult.setSuccess(false);
-				errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-										"createPhysicalMachine_noname");
-				// Log the event
-				traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-			                userSession, pm.getDataCenter(), null, "Physical machine  without name",
-			                  null, (Rack) pm.getAssignedTo(), pm, null, null);
-				return dataResult;
-			}
-		} catch (Exception e) {
-			errorManager.reportError(InfrastructureCommandImpl.resourceManager,
-					dataResult, "createPhysicalMachine_noname", e);
-			// Log the event
-			traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+        try
+        {
+            if (pm.getName() != null && pm.getName().trim().length() == 0)
+            {
+
+                dataResult.setSuccess(false);
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                    "createPhysicalMachine_noname");
+                // Log the event
+                traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                    userSession, pm.getDataCenter(), null, "Physical machine  without name", null,
+                    (Rack) pm.getAssignedTo(), pm, null, null);
+                return dataResult;
+            }
+        }
+        catch (Exception e)
+        {
+            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                "createPhysicalMachine_noname", e);
+            // Log the event
+            traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, pm.getDataCenter(), null, e.getMessage(), null,
                 (Rack) pm.getAssignedTo(), pm, null, null);
-			
-		}
+        }
 
         String virtualSystemMonitorAddress = null;
         try
@@ -1072,7 +1076,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             PhysicalMachine physicalMachine = physicalMachineCreation.getPhysicalMachine();
 
             // Log the event
-            
+
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, physicalMachine.getDataCenter(), null, e.getMessage(), null,
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
@@ -1114,7 +1118,25 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Save the datastores of the physicalmachine first
             for (DatastoreHB datastore : physicalMachineHB.getDatastoresHB())
             {
-                session.save(datastore);
+                if (datastore.getRootPath().length() <= Datastore.ROOT_PATH_LENGTH_MAX)
+                {
+                    session.save(datastore);
+                }
+                else
+                {
+                    if (transaction != null && transaction.isActive())
+                    {
+                        transaction.rollback();
+                    }
+                    dataResult.setSuccess(false);
+                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+                        "createPhysicalMachine_longname");
+                    // Log the event
+                    traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+                        userSession, pm.getDataCenter(), null, "Datastore name size is too long",
+                        null, (Rack) pm.getAssignedTo(), pm, null, null);
+                    return dataResult;
+                }
             }
 
             session.save(physicalMachineHB);
@@ -1134,8 +1156,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             // Returning the PhysicalMachine and the Hypervisors created to the
             // client
             PhysicalmachineHB physicalMachineHBCreated =
-                (PhysicalmachineHB) session.get(PhysicalmachineHB.class,
-                    physicalMachineHB.getIdPhysicalMachine());
+                (PhysicalmachineHB) session.get(PhysicalmachineHB.class, physicalMachineHB
+                    .getIdPhysicalMachine());
             PhysicalMachine physicalMachineCreated = physicalMachineHBCreated.toPojo();
 
             transaction.commit();
@@ -1156,8 +1178,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachine.getDataCenter(), null, "Physical machine '"
                     + physicalMachine.getName() + "' has been created [" + physicalMachine.getCpu()
                     + "CPUs, " + physicalMachine.getRam() + " RAM, " + physicalMachine.getHd()
-                    + " HD, " + hyperName + " hypervisor]", null,
-                (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
+                    + " HD, " + hyperName + " hypervisor]", null, (Rack) physicalMachine
+                    .getAssignedTo(), physicalMachine, null, null);
 
         }
         catch (Exception e)
@@ -1338,8 +1360,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         traceLog(SeverityType.WARNING, ComponentType.VIRTUAL_MACHINE,
             com.abiquo.tracer.EventType.VM_UNDEPLOY_FORCED, user, null, vApp
-                .getVirtualDataCenterHB().getName(),
-            "FORCED UNDEPLOY of the VM" + " [" + vMachine.getName() + "] of the enterprise " + "["
+                .getVirtualDataCenterHB().getName(), "FORCED UNDEPLOY of the VM" + " ["
+                + vMachine.getName() + "] of the enterprise " + "["
                 + vMachine.getEnterpriseHB().getName() + "], Virtual Appliance [" + vApp.getName()
                 + "] on VirtualDataCenter [" + vApp.getVirtualDataCenterHB().getName() + "]"
                 + " updated, please force re-deploy", vApp.toPojo(), null, null, null, null);
@@ -1436,8 +1458,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Log the event
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
-                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null,
-                e.getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
+                userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(), null, e
+                    .getMessage(), null, (Rack) physicalMachineCreation.getPhysicalMachine()
                     .getAssignedTo(), physicalMachineHb.toPojo(), null, null);
 
         }
@@ -1784,7 +1806,17 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     }
                 }
 
-                basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                VirtualMachine vmPojo = virtualMachineHB.toPojo();
+
+                try
+                {
+                    ignoreVSMEventsIfNecessary(virtualMachineHB, vmPojo);
+                    basicResult = getInfrastructureWS().editVirtualMachine(virtualMachine);
+                }
+                finally
+                {
+                    listenAgainToVSMIfNecessary(virtualMachineHB, vmPojo);
+                }
             }
 
             if (basicResult.getSuccess())
@@ -2279,8 +2311,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Getting the virtual machines updated from the data base
             ArrayList<VirtualmachineHB> virtualMachinesHBChecked =
-                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class)
-                    .add(Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
+                (ArrayList<VirtualmachineHB>) session.createCriteria(VirtualmachineHB.class).add(
+                    Restrictions.in("idVm", virtualMachinesToCheckIds)).list();
 
             // Returning the result
             for (VirtualmachineHB virtualMachineHB : virtualMachinesHBChecked)
@@ -2448,7 +2480,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         // IP not filed
         if (ip == null || ip.equals(""))
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("assignPublicIPDatacenter.NOIP.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
@@ -2459,7 +2492,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         }
         catch (InvalidIPAddressException e)
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("assignPublicIPDatacenter.IPNOWELLFORMED.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
     }
@@ -2477,7 +2511,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         if (physicalMachine.getCpu() <= 0 || physicalMachine.getRam() <= 0
             || physicalMachine.getHd() <= 0)
         {
-            throw new InfrastructureCommandException(resourceManager.getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
+            throw new InfrastructureCommandException(resourceManager
+                .getMessage("checkPhysicalMachine.zerovalues.extraMsg"),
                 AbiCloudError.INFRASTRUCTURE_ERROR);
         }
 
@@ -2557,6 +2592,73 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         factory.endConnection();
 
         return updateUsedResourcesByDatacenter(dataCenter);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualDataCentersByEnterprise(com
+     * .abiquo.abiserver.pojo.user.Enterprise)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise)
+    {
+        return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
+     * getVirtualDataCentersByEnterpriseAndDatacenter(com.abiquo.abiserver.pojo.user.Enterprise,
+     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter)
+    {
+        EnterprisesResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new EnterprisesResourceStubImpl(),
+                EnterprisesResourceStub.class);
+
+        DataResult<Collection<VirtualDataCenter>> dataResult =
+            proxy.getVirtualDatacenters(enterprise);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
+    }
+
+    public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        // In XEN and KVM, we need to redefine the domain again, so to void receiving
+        // invalid destruction events, we unsubscribe from the VSM while the operation
+        // is in progress
+        HypervisorType targetHypervisor = vmHB.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
+                    .getPhysicalMachine().getDataCenter().getIdDataCenter());
+
+            EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
+    }
+
+    public static void listenAgainToVSMIfNecessary(final VirtualmachineHB vm,
+        final VirtualMachine vmPojo) throws Exception
+    {
+        HypervisorType targetHypervisor = vm.getHypervisor().getType();
+        if (targetHypervisor == HypervisorType.KVM || targetHypervisor == HypervisorType.XEN_3)
+        {
+            String virtualSystemMonitorAddress =
+                RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
+                    .getDataCenter().getIdDataCenter());
+
+            EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
+        }
     }
 
 }

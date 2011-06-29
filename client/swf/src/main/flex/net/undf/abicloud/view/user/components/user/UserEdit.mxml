@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     titleText="@Resource(bundle='User', key='POPUP_TITLE_USEREDIT')" 
+    creationComplete="onCreationComplete()"
     wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_user_createUser.value}"
     xmlns:virtualdatacenter="net.undf.abicloud.view.user.components.user.virtualdatacenter.*">
 
@@ -36,6 +37,10 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.result.ListRequest;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.user.Role;
         	import mx.managers.PopUpManager;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.binding.utils.ChangeWatcher;
@@ -79,13 +84,20 @@
             
             [Bindable]
             private var _restrict:Boolean;
+            
+            [Bindable]
+            private var _vdcAllowed:Boolean;
 
 
+            private function onCreationComplete():void{
+
+            }
             /**
              * Initializes this form to create a new user
              **/
             public function init(user:User, role:Boolean):void
             {
+            	this._vdcAllowed = true;
                 this._userToEdit = user;
                 this._isUserEditing = role;
 
@@ -93,8 +105,9 @@
                 nameInput.text = this._userToEdit.name;
                 surnameInput.text = this._userToEdit.surname;
                 roleInput.selectedIndex = -1;
-                roleInput.prompt = this._userToEdit.role.shortDescription;
+                roleInput.prompt = this._userToEdit.role.name;
                 userInput.text = this._userToEdit.user;
+                
                 //Now user will be able to modify all the information without changing the pass
                 //passwordInput.text = this._userToEdit.pass;
                 //passwordRepeatInput.text = this._userToEdit.pass;
@@ -112,6 +125,9 @@
                 currentPassword.enabled = true;
                 acceptButton.enabled = false;
                 
+                //Hide fields in case of LDAP
+                updateLDAPFields();
+                
                 virtualDatacenterList.listOfSelectedVirtualDatacenter = new ArrayCollection();
                 this._restrict = false;
 
@@ -122,6 +138,7 @@
                     oldPasswordInput.text = _userToEdit.pass;
                     labelOldPasswordInvalid.visible = false;
                     currentPassword.enabled = false;
+                    requestPrivilege(this._userToEdit.role);
                 }
 
                 nameInput.setFocus();
@@ -130,23 +147,32 @@
                 //In case that any VDC exists, we need to call just one time the retrieve vdc list
                 this._firstRetrieve = true;
                 
-                //Retrieve the list of virtual datacenter if you are not a Simple User
-                if(AbiCloudModel.getInstance().loginManager.user.role.id != Role.USER_ROLE){
-	                _virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");                	
-                }
+                requestRoles();
+            }
+            
+            /**
+             * Hide/Show password fields depending on LDAP
+             */
+            private function updateLDAPFields():void{
+            	var showPassword:Boolean = this._userToEdit.authType == User.ABIQUO;
+            	currentPassword.visible = showPassword;
+            	currentPassword.includeInLayout = showPassword;
+            	newPassword.visible = showPassword;
+            	newPassword.includeInLayout = showPassword;
+            	repeatPassword.visible = showPassword;
+            	repeatPassword.includeInLayout = showPassword;            	
             }
             
             /**
              * Retrieves the list of available VirtualDatacenters
              */
-            private function createVirtualDataCenterList(value:ArrayCollection):void{
+            private function createVirtualDataCenterList(value:ArrayCollection = null):void{
         		if(this._firstRetrieve){
             		var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE);
             		event.enterprise = this._userToEdit.enterprise;
             		dispatchEvent(event);            		
             		this._firstRetrieve = false;           		
             	}else{
-            		_virtualDatacenterWatcher.unwatch();
             		populateSelectedRestrictedVirtualDatacenters(value);
             	}
             }  
@@ -254,7 +280,9 @@
                 if (this._listenerRegistered)
                     AbiCloudModel.getInstance().userManager.removeEventListener(UserEvent.USERS_EDITED,
                                                                                 onUserEdited);
-
+				if(_virtualDatacenterWatcher)
+					_virtualDatacenterWatcher.unwatch();
+				
                 dispatchEvent(new Event("userEditClose"));
             }
 
@@ -295,68 +323,72 @@
             {
                 //If ALL is typed!!
                 if (nameInput.text.length > 0 && surnameInput.text.length > 0 && emailInput.text.length > 0)
-                {
-                    //If the user who edits is different thank users to edit don't need to type the
-                    //current password
-                    if (AbiCloudModel.getInstance().loginManager.user.id != _userToEdit.id)
-                    {
-                        //If type one or other password Input text, need to assure that it is
-                        //the same value. Maybe user don't want to change the password
-                        if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
-                        {
-                            //New password == New Password repeat typed by user
-                            if (passwordInput.text == passwordRepeatInput.text)
-                            {
-                                labelPasswordInvalid.visible = false;
-                                acceptButton.enabled = true;
-                            }
-                            else
-                            {
-                                labelPasswordInvalid.visible = true;
-                                acceptButton.enabled = false;
-                            }
-                        }
-                        else
-                        {
-                            labelPasswordInvalid.visible = false;
-                            acceptButton.enabled = true;
-                        }
-                            //If user who edits == users to edit
-                    }
-                    else
-                    {
-                        //This user ALWAYS has to type the current password to apply the changes
-                        if (this._userToEdit.pass == MD5.hash(oldPasswordInput.text))
-                        {
-                            //Maybe user don't want to change the password
-                            if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
-                            {
-                                labelOldPasswordInvalid.visible = false;
-                                //New password == New Password repeat typed by user
-                                if (passwordInput.text == passwordRepeatInput.text)
-                                {
-                                    labelPasswordInvalid.visible = false;
-                                    acceptButton.enabled = true;
-                                }
-                                else
-                                {
-                                    labelPasswordInvalid.visible = true;
-                                    acceptButton.enabled = false;
-                                }
-                            }
-                            else
-                            {
-                                labelOldPasswordInvalid.visible = false;
-                                acceptButton.enabled = true;
-                            }
-
-                        }
-                        else
-                        {
-                            labelOldPasswordInvalid.visible = true;
-                            acceptButton.enabled = false;
-                        }
-
+                {                    
+                    //If the LDAP mode is on, we don't check password fields
+                    if(this._userToEdit.authType == User.ABIQUO){
+                    	//If the user who edits is different thank users to edit don't need to type the
+	                    //current password
+	                    if (AbiCloudModel.getInstance().loginManager.user.id != _userToEdit.id)
+	                    {
+	                        //If type one or other password Input text, need to assure that it is
+	                        //the same value. Maybe user don't want to change the password
+	                        if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
+	                        {
+	                            //New password == New Password repeat typed by user
+	                            if (passwordInput.text == passwordRepeatInput.text)
+	                            {
+	                                labelPasswordInvalid.visible = false;
+	                                acceptButton.enabled = true;
+	                            }
+	                            else
+	                            {
+	                                labelPasswordInvalid.visible = true;
+	                                acceptButton.enabled = false;
+	                            }
+	                        }
+	                        else
+	                        {
+	                            labelPasswordInvalid.visible = false;
+	                            acceptButton.enabled = true;
+	                        }
+	                            //If user who edits == users to edit
+	                    }
+	                    else
+	                    {
+	                        //This user ALWAYS has to type the current password to apply the changes
+	                        if (this._userToEdit.pass == MD5.hash(oldPasswordInput.text))
+	                        {
+	                            //Maybe user don't want to change the password
+	                            if (passwordInput.text.length > 0 || passwordRepeatInput.text.length > 0)
+	                            {
+	                                labelOldPasswordInvalid.visible = false;
+	                                //New password == New Password repeat typed by user
+	                                if (passwordInput.text == passwordRepeatInput.text)
+	                                {
+	                                    labelPasswordInvalid.visible = false;
+	                                    acceptButton.enabled = true;
+	                                }
+	                                else
+	                                {
+	                                    labelPasswordInvalid.visible = true;
+	                                    acceptButton.enabled = false;
+	                                }
+	                            }
+	                            else
+	                            {
+	                                labelOldPasswordInvalid.visible = false;
+	                                acceptButton.enabled = true;
+	                            }
+	
+	                        }
+	                        else
+	                        {
+	                            labelOldPasswordInvalid.visible = true;
+	                            acceptButton.enabled = false;
+	                        }	
+	                    }
+                    }else{
+                    	acceptButton.enabled = true;
                     }
                     emailValidator.validate();
                 }
@@ -414,6 +446,46 @@
             	}
             	PopUpManager.centerPopUp(this);
             }
+            
+            private function requestRoles():void{
+            	var roleListOptions:ListRequest = new ListRequest();
+                roleListOptions.offset = 0;
+                roleListOptions.numberOfNodes = 10000;
+                roleListOptions.filterLike = "";
+                roleListOptions.asc = true;
+                roleListOptions.orderBy = "enterprise";            	
+            	
+            	var roleEvent:UserEvent = new UserEvent(UserEvent.GET_ROLES);
+           		roleEvent.enterprise = this._userToEdit.enterprise;
+            	roleEvent.roleListOptions = roleListOptions;
+            	dispatchEvent(roleEvent);
+            }
+            
+            private function requestPrivilege(role:Role = null):void{
+            	var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_PRIVILEGE);
+            	if(role){
+            		event.role = role;
+            	}else{
+            		event.role = roleInput.selectedItem as Role;
+            	}            	
+            	event.privilege = PrivilegeType.USERS_PROHIBIT_VDC_RESTRICTION;
+            	event.callback = setRestrictedVDC;
+            	dispatchEvent(event);
+            	validateForm();
+            }
+            
+            private function setRestrictedVDC(value:Boolean):void{
+            	this._vdcAllowed = value;	
+            	if(!this._vdcAllowed){
+            		this._firstRetrieve = true;
+            		if( !_virtualDatacenterWatcher || !_virtualDatacenterWatcher.isWatching()){
+	            		//Retrieve the list of virtual datacenter if you are not a Simple User
+	                	_virtualDatacenterWatcher = BindingUtils.bindSetter(createVirtualDataCenterList,AbiCloudModel.getInstance().virtualApplianceManager,"virtualDataCenters");	
+            		}else{
+            			createVirtualDataCenterList();
+            		}            		
+            	}
+            }
         ]]>
     </mx:Script>
     
@@ -460,16 +532,17 @@
         	includeInLayout="{!this._isUserEditing}">
             <mx:ComboBox id="roleInput"
                 height="18"
+                change="requestPrivilege()"
                 dataProvider="{AbiCloudModel.getInstance().userManager.roles}"
-                labelField="shortDescription" enabled="{this._roleEditable}"/>
+                labelField="name" enabled="{this._roleEditable}"/>
         </mx:FormItem>
 
 		 <mx:FormItem 
         	id="vdcFormItem"
         	direction="horizontal"
-            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"
-            visible="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}"
-            includeInLayout="{!this._isUserEditing &amp;&amp; (this._userToEdit.role.id == Role.USER_ROLE || Role(roleInput.selectedItem).id == Role.USER_ROLE)}">
+            label="@Resource(bundle='User', key='LABEL_ALLOWED_VIRTUAL_DATACENTER')"            
+            visible="{!this._vdcAllowed}"
+            includeInLayout="{!this._vdcAllowed}">
             <mx:VBox verticalAlign="middle"
             	visible="{this._restrict}"
             	includeInLayout="{this._restrict}">
@@ -527,7 +600,7 @@
                 text="@Resource(bundle='User', key='LABEL_OLDPASSWORDINVALID')"/>
         </mx:FormItem>
 
-        <mx:FormItem 
+        <mx:FormItem id="newPassword"
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_NEWPASSWORD')"
             required="false">
             <mx:TextInput id="passwordInput"
@@ -537,7 +610,7 @@
                 displayAsPassword="true"/>
         </mx:FormItem>
 
-        <mx:FormItem 
+        <mx:FormItem id="repeatPassword"
             label="@Resource(bundle='User', key='TEXTINPUT_LABEL_PASSWORDREPEAT')"
             direction="horizontal"
             required="false">

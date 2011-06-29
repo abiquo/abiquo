@@ -867,7 +867,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             currentStateAndAllow =
                 dao.checkVirtualApplianceState(virtualAppliance, StateEnum.IN_PROGRESS);
 
-            userHB = factory.getUserDAO().getUserByUserName(userSession.getUser());
+            userHB =
+                factory.getUserDAO().getUserByLoginAuth(userSession.getUser(),
+                    userSession.getAuthType());
 
             factory.endConnection();
         }
@@ -1046,8 +1048,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             {
                 // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
                 final String cause =
-                    String.format("There are not enough resources in datacenter "
-                        + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
+                    String.format("There are not enough resources in the datacenter "
+                        + "to deploy the Virtual Appliance:%s", virtualAppliance.getName());
 
                 dataResult =
                     traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
@@ -1080,6 +1082,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 dataResult.setData(virtualappOld);
                 dataResult.setSuccess(Boolean.FALSE);
                 dataResult.setMessage(e.getMessage());
+                updateVMStateInDB(virtualappOld, originalVirtualApplianceState.toEnum());
                 return dataResult;
             }
         }
@@ -1377,7 +1380,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return result;
     }
 
-    protected void checkLimits(VirtualDataCenterHB vdc) throws HardLimitExceededException
+    protected void checkLimits(final VirtualDataCenterHB vdc) throws HardLimitExceededException
     {
         // community impl (no limits at all)
     }
@@ -1634,7 +1637,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
             UserDAO userDAO = factory.getUserDAO();
 
-            UserHB user = userDAO.getUserByUserName(userSession.getUser());
+            UserHB user =
+                userDAO.getUserByLoginAuth(userSession.getUser(), userSession.getAuthType());
             try
             {
                 Collection<VirtualappHB> vAppsHB = get(user, dao);
@@ -2174,8 +2178,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             final String cause =
-                String.format("There are not enough resources in datacenter "
-                    + "for deploying the Virtual Appliance:%s", virtualAppliance.getName());
+                String.format("There are not enough resources in the datacenter "
+                    + "to deploy the Virtual Appliance:%s", virtualAppliance.getName());
 
             dataResult =
                 traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
@@ -3175,10 +3179,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 beforeDeletingNode(session, nodeVi);
                                 // Delete Rasds
                                 deleteRasdFromNode(session, nodeVi);
-                                // Deleting from database
-                                session.delete(nodePojo);
-                                // Deleting from nodes list
-                                nodesPojoList.remove(nodePojo);
+
                                 // Rolling back physical machine resources
                                 VirtualmachineHB virtualMachineHB = nodeVi.getVirtualMachineHB();
                                 VirtualMachine virtualMachine = virtualMachineHB.toPojo();
@@ -3201,6 +3202,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                     vmachineResource.deallocate(userSession, virtualDatacenterId,
                                         virtualApplianceId, virtualMachineId);
                                 }
+
+                                // Deleting from database
+                                deleteNode(nodePojo, session);
+                                // Deleting from nodes list
+                                nodesPojoList.remove(nodePojo);
+
                                 State changesNeededState =
                                     new State(StateEnum.APPLY_CHANGES_NEEDED);
                                 virtualAppliance.setState(changesNeededState);
@@ -3257,7 +3264,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     break;
             }
         }
-        session.update("VirtualappExtendedHB", virtualappHBPojo);
+        // session.update("VirtualappExtendedHB", virtualappHBPojo);
+        update(virtualappHBPojo, session);
 
         return updatenodesList;
 
@@ -3352,7 +3360,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
      * @param session The hibernate session.
      * @param resourceManagement The resource to delete.
      */
-    protected void deleteNetworkRasd(Session session, ResourceManagementHB resourceManagement)
+    protected void deleteNetworkRasd(final Session session,
+        final ResourceManagementHB resourceManagement)
     {
         if (resourceManagement instanceof IpPoolManagementHB)
         {
@@ -3375,7 +3384,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
      * @param session The Hibernate session.
      * @param resourceManagement The resource to delete.
      */
-    protected void deleteStorageRasd(Session session, ResourceManagementHB resourceManagement)
+    protected void deleteStorageRasd(final Session session,
+        final ResourceManagementHB resourceManagement)
     {
         resourceManagement.setVirtualApp(null);
         resourceManagement.setVirtualMachine(null);
@@ -3523,4 +3533,83 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return virtualApplianceWs;
     }
 
+    private void deleteNode(final NodeHB nodePojo, Session session)
+    {
+        if (session == null || !session.isConnected())
+        {
+            Transaction transaction = null;
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+        }
+
+        session.delete(nodePojo);
+
+        // session.close();
+    }
+
+    private void update(final VirtualappHB virtualappHBPojo, Session session)
+    {
+        if (session == null || !session.isConnected())
+        {
+            Transaction transaction = null;
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+        }
+
+        session.update("VirtualappExtendedHB", virtualappHBPojo);
+
+        // session.close();
+    }
+
+    private void updateVMStateInDB(VirtualAppliance virtualappliance, final StateEnum newState)
+    {
+        DataResult<VirtualAppliance> dataResult;
+        dataResult = new DataResult<VirtualAppliance>();
+        dataResult.setSuccess(true);
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            VirtualappHB virtualAppPojo =
+                (VirtualappHB) session.get("VirtualappExtendedHB", virtualappliance.getId());
+            // virtualAppPojo.getNodesHB()
+
+            virtualappliance = virtualAppPojo.toPojo();
+            for (Node node : virtualappliance.getNodes())
+            {
+                if (node.isNodeTypeVirtualImage())
+                {
+                    NodeVirtualImage nodevi = (NodeVirtualImage) node;
+
+                    VirtualMachine vm = nodevi.getVirtualMachine();
+
+                    if (vm != null)
+                    {
+                        // update the virtual machine instance from DB
+                        VirtualmachineHB vmachineHB =
+                            (VirtualmachineHB) session.get(VirtualmachineHB.class, vm.getId());
+                        if (vmachineHB.getState().equals(StateEnum.IN_PROGRESS))
+                        {
+                            vmachineHB.setState(StateEnum.NOT_DEPLOYED);
+                        }
+                        session.update("VirtualmachineHB", vmachineHB);
+                    }
+                }
+            }
+            transaction.commit();
+
+            dataResult.setData(virtualappliance);
+        }
+        catch (HibernateException e)
+        {
+            if (transaction != null && transaction.isActive())
+            {
+                transaction.rollback();
+            }
+
+            errorManager.reportError(resourceManager, dataResult, "updateStateInDB", e);
+        }
+    }
 }

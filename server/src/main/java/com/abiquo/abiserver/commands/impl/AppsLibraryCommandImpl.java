@@ -600,7 +600,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      * </pre>
      */
     private Boolean isVirtualImageConvertedOrCompatible(final VirtualimageHB vi,
-        HypervisorType hypervisorType)
+        final HypervisorType hypervisorType)
     {
 
         final DAOFactory factory = HibernateDAOFactory.instance();
@@ -1126,12 +1126,16 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
         final String idEnterpriseSt = String.valueOf(idEnterprise);
 
+        ApplianceManagerResourceStubImpl amStub =
+            new ApplianceManagerResourceStubImpl(amServiceUri);
+
+        boolean checkCanWrite = true;
+        amStub.getRepository(idEnterpriseSt, checkCanWrite);
+
         for (final String ovfId : idsOvfpackage)
         {
             try
             {
-                ApplianceManagerResourceStubImpl amStub =
-                    new ApplianceManagerResourceStubImpl(amServiceUri);
 
                 amStub.createOVFPackageInstance(idEnterpriseSt, ovfId);
 

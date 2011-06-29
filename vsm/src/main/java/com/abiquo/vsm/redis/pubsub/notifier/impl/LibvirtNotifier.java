@@ -30,5 +30,4 @@ import com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier;
  */
 public class LibvirtNotifier extends GenericNotifier
 {
-
 }

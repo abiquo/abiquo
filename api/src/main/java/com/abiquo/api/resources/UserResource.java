@@ -40,6 +40,7 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -67,10 +68,31 @@ public class UserResource extends AbstractResource
     @Autowired
     VirtualMachineService vmService;
 
+    @Autowired
+    SecurityService securityService;
+
     @GET
-    public UserDto getUser(@PathParam(EnterpriseResource.ENTERPRISE) String enterpriseIdOrWildcard,
-        @PathParam(USER) Integer userId, @Context IRESTBuilder restBuilder) throws Exception
+    public UserDto getUser(
+        @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseIdOrWildcard,
+        @PathParam(USER) final Integer userId, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
+        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        {
+            User currentUser = service.getCurrentUser();
+            if (currentUser.getId().equals(userId))
+            {
+                User user = service.getUser(userId);
+                return createTransferObject(user, restBuilder);
+            }
+            else
+            {
+                // throws access denied exception
+                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+            }
+
+        }
+
         if (!enterpriseIdOrWildcard.equals("_"))
         {
             validatePathParameters(Integer.valueOf(enterpriseIdOrWildcard), userId);
@@ -82,9 +104,9 @@ public class UserResource extends AbstractResource
 
     @PUT
     public UserDto modifyUser(
-        @PathParam(EnterpriseResource.ENTERPRISE) String enterpriseIdOrWildcard,
-        @PathParam(USER) Integer userId, UserDto user, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseIdOrWildcard,
+        @PathParam(USER) final Integer userId, final UserDto user,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         if (!enterpriseIdOrWildcard.equals("_"))
         {
@@ -97,8 +119,8 @@ public class UserResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteUser(@PathParam(EnterpriseResource.ENTERPRISE) Integer enterpriseId,
-        @PathParam(USER) Integer userId)
+    public void deleteUser(@PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @PathParam(USER) final Integer userId)
     {
         validatePathParameters(enterpriseId, userId);
         service.removeUser(userId);
@@ -107,8 +129,8 @@ public class UserResource extends AbstractResource
     @GET
     @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES)
     public VirtualMachinesDto getVirtualMachines(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer enterpriseId,
-        @PathParam(UserResource.USER) Integer userId, @Context IRESTBuilder restBuilder)
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
 
@@ -121,14 +143,14 @@ public class UserResource extends AbstractResource
         return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
     }
 
-    private static UserDto addLinks(IRESTBuilder restBuilder, UserDto user, Integer enterpriseId,
-        Integer roleId)
+    private static UserDto addLinks(final IRESTBuilder restBuilder, final UserDto user,
+        final Integer enterpriseId, final Integer roleId)
     {
         user.setLinks(restBuilder.buildUserLinks(enterpriseId, roleId, user));
         return user;
     }
 
-    public static UserDto createTransferObject(User user, IRESTBuilder restBuilder)
+    public static UserDto createTransferObject(final User user, final IRESTBuilder restBuilder)
         throws Exception
     {
         UserDto u = createTransferObject(user);
@@ -138,7 +160,7 @@ public class UserResource extends AbstractResource
         return u;
     }
 
-    public static UserDto createTransferObject(User user)
+    public static UserDto createTransferObject(final User user)
     {
         UserDto u = new UserDto();
 
@@ -152,6 +174,8 @@ public class UserResource extends AbstractResource
         u.setNick(user.getNick());
         u.setDescription(user.getDescription());
         u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+        u.setAuthType(user.getAuthType().name());
+
         return u;
     }
 

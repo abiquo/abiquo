@@ -27,80 +27,6 @@ USE kinton;
 DROP TABLE IF EXISTS `kinton`.`appliancemanagernotification`;
 
 --
--- Definition of table `kinton`.`auth_clientresource`
---
-
-DROP TABLE IF EXISTS `kinton`.`auth_clientresource`;
-CREATE TABLE  `kinton`.`auth_clientresource` (
-  `id` int(11) unsigned NOT NULL auto_increment,
-  `name` varchar(50) default NULL,
-  `description` varchar(100) default NULL,
-  `idGroup` int(11) unsigned default NULL,
-  `idRole` int(3) unsigned NOT NULL,
-  `version_c` int(11) default 0,
-  PRIMARY KEY  (`id`),
-  KEY `auth_clientresourceFK1` (`idGroup`),
-  KEY `auth_clientresourceFK2` (`idRole`),
-  CONSTRAINT `auth_clientresourceFK1` FOREIGN KEY (`idGroup`) REFERENCES `auth_group` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `auth_clientresourceFK2` FOREIGN KEY (`idRole`) REFERENCES `role` (`idRole`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `kinton`.`auth_clientresource`
---
-
-/*!40000 ALTER TABLE `auth_clientresource` DISABLE KEYS */;
-LOCK TABLES `auth_clientresource` WRITE;
-INSERT INTO `kinton`.`auth_clientresource` VALUES  (1,'USER_BUTTON','User access button in header',2,3,0),
- (2,'VIRTUALAPP_BUTTON','Virtual App access button in header',2,2,0),
- (3,'VIRTUALIMAGE_BUTTON','Virtual Image access button in header',2,3,0),
- (4,'INFRASTRUCTURE_BUTTON','Infrastructure access buttton in header',2,1,0),
- (5,'DASHBOARD_BUTTON','Dashboard acces button in header',2,2,0),
- (6,'CHARTS_BUTTON','Charts access button in header',2,1,0),
- (7,'CONFIG_BUTTON','Config access button in header',2,1,0),
- (8,'SEE_LOGGED_USERS','Option to see the current logged users in User Management',3,1,0),
- (9,'METERING_BUTTON','Metering access button in header',2,2,0),
- (10,'CRUD_ENTERPRISE','Permissions to Create, Edit or Delete enterprises',3,1,0),
- (11,'EDIT_PUBLIC_VIRTUAL_IMAGE','Permission to edit a public Virtual Image in Appliance Library',4,1,0),
- (12,'DELETE_PUBLIC_VIRTUAL_IMAGE','Permission to delete a public Virtual Image in Appliance Library',4,1,0),
- (13,'VDC_ALLOCATION_LIMITS_TAB','Allocation resources for Virtual Datacenter',1,3,0),
- (14, 'THEMES_MANAGEMENT', 'Allows to handle the application themes', 1, 1, 0),
- (15,'MANAGE_CATEGORIES_BUTTONS','Allows to manage virtual image categories',4,1,0),
- (16,'STATS_BASIC_CONTROL','Allows to see basics statistics',1,2,0),
- (17,'STATS_ENTERPRISE_CONTROL','Allows to filter statistics  by enterprise',1,1,0),
- (18,'ALLOW_VDC_ACTIONS','Permissions to allow/deny actions in VDC',1,2,0);   
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `auth_clientresource` ENABLE KEYS */;
-
-
---
--- Definition of table `kinton`.`auth_clientresource_exception`
---
-
-DROP TABLE IF EXISTS `kinton`.`auth_clientresource_exception`;
-CREATE TABLE  `kinton`.`auth_clientresource_exception` (
-  `id` int(11) unsigned NOT NULL auto_increment,
-  `idResource` int(11) unsigned NOT NULL,
-  `idUser` int(10) unsigned NOT NULL,
-  `version_c` int(11) default 0,
-  PRIMARY KEY  (`id`),
-  KEY `auth_clientresource_exceptionFK1` (`idResource`),
-  KEY `auth_clientresource_exceptionFK2` (`idUser`),
-  CONSTRAINT `auth_clientresource_exceptionFK1` FOREIGN KEY (`idResource`) REFERENCES `auth_clientresource` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `auth_clientresource_exceptionFK2` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `kinton`.`auth_clientresource_exception`
---
-
-/*!40000 ALTER TABLE `auth_clientresource_exception` DISABLE KEYS */;
-LOCK TABLES `auth_clientresource_exception` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `auth_clientresource_exception` ENABLE KEYS */;
-
-
---
 -- Definition of table `kinton`.`auth_group`
 --
 
@@ -358,6 +284,7 @@ CREATE TABLE  `kinton`.`enterprise` (
   `repositoryHard` bigint(20)  NOT NULL default 0,
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
+  `isReservationRestricted` tinyint(1) default '0',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
@@ -368,7 +295,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
@@ -595,8 +522,10 @@ CREATE TABLE  `kinton`.`physicalmachine` (
   PRIMARY KEY  (`idPhysicalMachine`),
   KEY `PhysicalMachine_FK1` (`idRack`),
   KEY `PhysicalMachine_FK5` (`idDataCenter`),
-  CONSTRAINT `PhysicalMachine_FK1` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE,
-  CONSTRAINT `PhysicalMachine_FK5` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
+  KEY `PhysicalMachine_FK6` (`idEnterprise`),
+  CONSTRAINT `PhysicalMachine_FK1` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE,  
+  CONSTRAINT `PhysicalMachine_FK5` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE,
+  CONSTRAINT `PhysicalMachine_FK6` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
@@ -649,7 +578,7 @@ UNLOCK TABLES;
 CREATE TABLE  `kinton`.`datastore` (
   `idDatastore` int(10) unsigned NOT NULL auto_increment,
   `name` varchar(255) NOT NULL,
-  `rootPath` varchar(36) NOT NULL,
+  `rootPath` varchar(42) NOT NULL,
   `directory` varchar(255) NOT NULL,
   `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
@@ -804,16 +733,19 @@ CREATE TABLE  `kinton`.`repository` (
 -- Definition of table `kinton`.`role`
 --
 
+
 DROP TABLE IF EXISTS `kinton`.`role`;
+
 CREATE TABLE  `kinton`.`role` (
-  `idRole` int(3) unsigned NOT NULL auto_increment,
-  `type` varchar(20) NOT NULL,
-  `shortDescription` varchar(20) NOT NULL,
-  `largeDescription` varchar(100) default NULL,
-  `securityLevel` float(10,1) unsigned NOT NULL default '0.0',
-  `version_c` int(11) default 0,
-  PRIMARY KEY  (`idRole`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+  `idRole` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) NOT NULL DEFAULT 'auto_name',
+  `idEnterprise` int(10) unsigned DEFAULT NULL,
+  `blocked` tinyint(1) NOT NULL DEFAULT '0',
+  `version_c` int(11) DEFAULT '0',
+  PRIMARY KEY (`idRole`),
+  KEY `fk_role_1` (`idEnterprise`),
+  CONSTRAINT `fk_role_1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8; 
 
 --
 -- Dumping data for table `kinton`.`role`
@@ -821,12 +753,130 @@ CREATE TABLE  `kinton`.`role` (
 
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
 LOCK TABLES `role` WRITE;
-INSERT INTO `kinton`.`role` VALUES
- (1,'SYS_ADMIN', 'Cloud Admin','IT Cloud Administrator','1.0', 0),
- (2,'USER', 'User','Generic Registered User','2.0', 0),
- (3,'ENTERPRISE_ADMIN', 'Enterprise Admin','Generic Registered User plus limited grants to access to User Management','1.9', 0);
+	INSERT INTO `kinton`.`role` (idRole,name,blocked,version_c) VALUES (1,'CLOUD_ADMIN',1,0);
+	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (2,'USER',0);
+	INSERT INTO `kinton`.`role` (idRole,name,version_c) VALUES (3,'ENTERPRISE_ADMIN',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
+
+--
+-- Definition of table `kinton`.`roles_privileges`
+--
+
+CREATE  TABLE `kinton`.`roles_privileges` (
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `idPrivilege` INT(10) UNSIGNED NOT NULL ,
+  `version_c` INT(11) default 0,
+  INDEX `fk_roles_privileges_role` (`idRole` ASC) ,
+  INDEX `fk_roles_privileges_privileges` (`idPrivilege` ASC) ,
+  CONSTRAINT `fk_roles_privileges_role`
+    FOREIGN KEY (`idRole` )
+    REFERENCES `kinton`.`role` (`idRole` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_roles_privileges_privileges`
+    FOREIGN KEY (`idPrivilege` )
+    REFERENCES `kinton`.`privilege` (`idPrivilege` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`privilege`
+--
+
+CREATE TABLE `privilege` (
+  `idPrivilege` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPrivilege`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `kinton`.`privilege`
+--
+
+/*!40000 ALTER TABLE `privilege` DISABLE KEYS */;
+LOCK TABLES `privilege` WRITE;
+INSERT INTO `privilege` VALUES
+ (1,'ENTERPRISE_ENUMERATE',0),
+ (2,'ENTERPRISE_ADMINISTER_ALL',0),
+ (3,'ENTERPRISE_RESOURCE_SUMMARY_ENT',0),
+ (4,'PHYS_DC_ENUMERATE',0),
+ (5,'PHYS_DC_RETRIEVE_RESOURCE_USAGE',0),
+ (6,'PHYS_DC_MANAGE',0),
+ (7,'PHYS_DC_RETRIEVE_DETAILS',0),
+ (8,'PHYS_DC_ALLOW_MODIFY_SERVERS',0),
+ (9,'PHYS_DC_ALLOW_MODIFY_NETWORK',0),
+ (10,'PHYS_DC_ALLOW_MODIFY_STORAGE',0),
+ (11,'PHYS_DC_ALLOW_MODIFY_ALLOCATION',0),
+ (12,'VDC_ENUMERATE',0),
+ (13,'VDC_MANAGE',0),
+ (14,'VDC_MANAGE_VAPP',0),
+ (15,'VDC_MANAGE_NETWORK',0),
+ (16,'VDC_MANAGE_STORAGE',0),
+ (17,'VAPP_CUSTOMISE_SETTINGS',0),
+ (18,'VAPP_DEPLOY_UNDEPLOY',0),
+ (19,'VAPP_ASSIGN_NETWORK',0),
+ (20,'VAPP_ASSIGN_VOLUME',0),
+ (21,'VAPP_PERFORM_ACTIONS',0),
+ (22,'VAPP_CREATE_STATEFUL',0),
+ (23,'VAPP_CREATE_INSTANCE',0),
+ (24,'APPLIB_VIEW',0),
+ (25,'APPLIB_ALLOW_MODIFY',0),
+ (26,'APPLIB_UPLOAD_IMAGE',0),
+ (27,'APPLIB_MANAGE_REPOSITORY',0),
+ (28,'APPLIB_DOWNLOAD_IMAGE',0),
+ (29,'APPLIB_MANAGE_CATEGORIES',0),
+ (30,'USERS_VIEW',0),
+ (31,'USERS_MANAGE_ENTERPRISE',0),
+ (32,'USERS_MANAGE_USERS',0),
+ (33,'USERS_MANAGE_OTHER_ENTERPRISES',0),
+ (34,'USERS_PROHIBIT_VDC_RESTRICTION',0),
+ (35,'USERS_VIEW_PRIVILEGES',0),
+ (36,'USERS_MANAGE_ROLES',0),
+ (37,'USERS_MANAGE_ROLES_OTHER_ENTERPRISES',0),
+ (38,'USERS_MANAGE_SYSTEM_ROLES',0),
+ (39,'USERS_MANAGE_LDAP_GROUP',0),
+ (40,'USERS_ENUMERATE_CONNECTED',0),
+ (41,'SYSCONFIG_VIEW',0),
+ (42,'SYSCONFIG_ALLOW_MODIFY',0),
+ (43,'EVENTLOG_VIEW_ENTERPRISE',0),
+ (44,'EVENTLOG_VIEW_ALL',0),
+ (45,'APPLIB_VM_COST_CODE',0),
+ (46,'USERS_MANAGE_ENTERPRISE_BRANDING',0),
+ (47,'SYSCONFIG_SHOW_REPORTS',0);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
+
+--
+-- Dumping data for table `kinton`.`roles_privileges`
+--
+
+/*!40000 ALTER TABLE `roles_privileges` DISABLE KEYS */;
+LOCK TABLES `roles_privileges` WRITE;
+INSERT INTO `roles_privileges` VALUES
+ (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),
+ (1,23,0),(1,24,0),(1,25,0),(1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),
+ (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),
+ (3,43,0),(2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `roles_privileges` ENABLE KEYS */;
+
+--
+-- Definition of table `kinton`.`role_ldap`
+--
+DROP TABLE IF EXISTS `kinton`.`role_ldap`;
+
+CREATE  TABLE `kinton`.`role_ldap` (
+  `idRole_ldap` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idRole` INT(10) UNSIGNED NOT NULL ,
+  `role_ldap` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idRole_ldap`) ,
+  KEY `fk_role_ldap_role` (`idRole`) ,
+  CONSTRAINT `fk_role_ldap_role` FOREIGN KEY (`idRole` ) REFERENCES `kinton`.`role` (`idRole` ) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Definition of table `kinton`.`user`
@@ -837,15 +887,16 @@ CREATE TABLE  `kinton`.`user` (
   `idUser` int(10) unsigned NOT NULL auto_increment,
   `idRole` int(3) unsigned NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
-  `user` varchar(20) NOT NULL,
-  `name` varchar(30) NOT NULL,
+  `user` varchar(128) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `surname` varchar(50) default NULL,
   `description` varchar(100) default NULL,
-  `email` varchar(200) NOT NULL,
+  `email` varchar(200),
   `locale` varchar(10) NOT NULL,
-  `password` varchar(32) NOT NULL,
+  `password` varchar(32),
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
+  `authType` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idUser`),
   KEY `User_FK1` (`idRole`),
@@ -860,8 +911,8 @@ CREATE TABLE  `kinton`.`user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 LOCK TABLES `user` WRITE;
-INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1,0),
- (2,2,1,'user','Standard','User','Standard user','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1,0);
+INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0),
+ (2,2,1,'user','Standard','User','Standard user','-','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
@@ -872,10 +923,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`session`;
 CREATE TABLE  `kinton`.`session` (
   `id` int(10) unsigned NOT NULL auto_increment,
-  `user` varchar(20) NOT NULL,
+  `user` varchar(128) NOT NULL,
   `key` varchar(100) NOT NULL,
   `expireDate` timestamp NOT NULL,
   `idUser` int(10) unsigned default null,
+  `authType` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`id`),
   CONSTRAINT `fk_session_user` foreign key (`idUser`) references `user` (`idUser`)
@@ -1102,7 +1154,7 @@ CREATE TABLE  `kinton`.`metering` (
   `idEnterprise` int(10) unsigned default NULL,
   `enterprise` varchar(40) default NULL,
   `idUser` int(10) unsigned default NULL,
-  `user` varchar(20) default NULL,
+  `user` varchar(128) default NULL,
   `idVirtualDataCenter` int(10) unsigned default NULL,
   `virtualDataCenter` varchar(40) default NULL,
   `idVirtualApp` int(10) unsigned default NULL,
@@ -1249,8 +1301,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.dashboard.abiquoURL","http://www.abiquo.org","URL of Abiquo web page"),
  ("client.dashboard.allowUsersAccess","1","Allow (1) or deny (0) access to the \'Users\' section"),
  ("client.dashboard.showStartUpAlert","0","Set to 1 to show an Alert with the text found in Startup_Alert.txt file"),
- ("client.infra.googleMapsDefaultLatitude","90","Google Maps will be centered by default at this longitude value"),
- ("client.infra.googleMapsDefaultLongitude","42","Google Maps will be centered by default at this latitude value"),
+ ("client.infra.googleMapsDefaultLatitude","41.3825","Google Maps will be centered by default at this longitude value"),
+ ("client.infra.googleMapsDefaultLongitude","2.176944","Google Maps will be centered by default at this latitude value"),
  ("client.infra.googleMapsDefaultZoom","4","Google Maps will be centered by default with this zoom level value"),
  ("client.infra.googleMapskey","0","The map\'s Google key used in infrastructure section"),
  ("client.infra.googleMapsLadTimeOut","10","Time, in seconds, that applications waits Google Maps to load. After that, application considers that Google Maps service is temporarily unavailable, and is not used"),
@@ -1266,7 +1318,6 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.virtual.moreInfoAboutUploadLimitations","http://community.abicloud.org/display/ABI16/Appliance+Library+view#ApplianceLibraryview-Uploadingfromourlocalfilesystem","URL of Abiquo virtual image upload limitations web page"),
  ("client.infra.vlanIdMin","2","Minimum value for vlan ID"),
  ("client.infra.vlanIdMax","4094","Maximum value for vlan ID"),
- ("client.infra.useVirtualBox","0","Support (1) or not (0) Virtual Box"),
  ("client.dashboard.dashboardUpdateInterval","30","Time interval in seconds"),
  ("client.infra.defaultHypervisorPassword","temporal","Default Hypervisor password used when creating Physical Machines"),
  ("client.infra.defaultHypervisorPort","8889","Default Hypervisor port used when creating Physical Machines"),
@@ -1274,6 +1325,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.storage.volumeMaxSizeValues","1,2,4,8,16,32,64,128,256","Comma separated values, with the allowed sizes when creating or editing a VolumeManagement"),
  ("client.virtual.virtualImagesRefreshConversionsInterval","5","Time interval in seconds to refresh missing virtual image conversions"),
  ("client.main.enterpriseLogoURL","http://www.abiquo.com","URL displayed when the header enterprise logo is clicked"),
+ ("client.main.billingUrl","","URL displayed when the report header logo is clicked, if empty the report button will not be displayed"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI17/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
@@ -1306,6 +1358,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-CreatingoreditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-Datacenters","Datacenter Limits wiki"),
  ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI17/Manage+Users#ManageUsers-Creatingoreditinganuser","User creation wiki"),
+ ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI18/Manage+Roles","Role creation wiki"),
  ("client.wiki.config.general","http://community.abiquo.com/display/ABI17/Configuration+view","Configuration wiki"),
  ("client.wiki.config.heartbeat","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Heartbeating","Heartbeat configuration wiki"),
  ("client.wiki.config.licence","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Licensemanagement","Licence configuration wiki"),
@@ -1670,8 +1723,7 @@ CREATE TABLE  `kinton`.`vappstateful_conversions` (
   KEY `idUser_FK3` (`idUser`),
   CONSTRAINT `idVirtualApp_FK3` FOREIGN KEY (`idVirtualApp`) REFERENCES `virtualapp` (`idVirtualApp`) ON DELETE CASCADE,
   CONSTRAINT `idUser_FK3` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`) ON DELETE CASCADE
-
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -1687,18 +1739,21 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idDiskStatefulConversion` int(1) unsigned,
   `version_c` int(11) default 0,
   `idTier` int(10) unsigned NOT NULL,
+  `idManagement` int(10) unsigned,
   PRIMARY KEY  (`id`),
   KEY `idVirtualApplianceStatefulConversion_FK4` (`idVirtualApplianceStatefulConversion`),
   KEY `idNodeVirtualImage_FK4` (`idNodeVirtualImage`),
   KEY `idVirtualImageConversion_FK4` (`idVirtualImageConversion`),
   KEY `idDiskStatefulConversion_FK4` (`idDiskStatefulConversion`),
   KEY `idTier_FK4` (`idTier`),
+  KEY `idManagement_FK4` (`idManagement`),
   CONSTRAINT `idVirtualApplianceStatefulConversion_FK4` FOREIGN KEY (`idVirtualApplianceStatefulConversion`) REFERENCES `vappstateful_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idNodeVirtualImage_FK4` FOREIGN KEY (`idNodeVirtualImage`) REFERENCES `nodevirtualimage` (`idNode`) ON DELETE CASCADE,
   CONSTRAINT `idVirtualImageConversion_FK4` FOREIGN KEY (`idVirtualImageConversion`) REFERENCES `virtualimage_conversions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `idDiskStatefulConversion_FK4` FOREIGN KEY (`idDiskStatefulConversion`) REFERENCES `diskstateful_conversions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `idTier_FK4` FOREIGN KEY (`idTier`) REFERENCES `tier` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 --
@@ -2608,23 +2663,35 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
         END IF;
         IF OLD.networktypeID IS NOT NULL AND NEW.networktypeID IS NULL THEN
         -- Remove VlanUsed
-            SELECT DISTINCT vn.network_id, vn.network_name into vlanNetworkIdObj, networkNameObj
-		    FROM vlan_network vn
-		    WHERE vn.network_id = OLD.networktypeID;
-            -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
-            IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
-                CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
-            END IF;
-            -- Statistics
-            UPDATE IGNORE cloud_usage_stats
-                SET     vlanUsed = vlanUsed - 1
-                WHERE idDataCenter = -1;
-            UPDATE IGNORE enterprise_resources_stats 
-                SET     vlanUsed = vlanUsed - 1
-                WHERE idEnterprise = OLD.idEnterprise;
-            UPDATE IGNORE vdc_enterprise_stats 
-                SET     vlanUsed = vlanUsed - 1
-            WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+	    BEGIN
+		DECLARE done INTEGER DEFAULT 0;
+		DECLARE cursorVlan CURSOR FOR SELECT DISTINCT vn.network_id, vn.network_name FROM vlan_network vn WHERE vn.network_id = OLD.networktypeID;
+		DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+		    
+		OPEN cursorVlan;
+		    
+		REPEAT
+		   FETCH cursorVlan into vlanNetworkIdObj, networkNameObj;
+		   IF NOT done THEN
+
+		    -- INSERT INTO debug_msg (msg) VALUES (CONCAT('VDC UPDATED -> OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'), 'Enterprise: ',IFNULL(OLD.idEnterprise,'NULL'),' VDC: ',IFNULL(OLD.idVirtualDataCenter,'NULL'),IFNULL(vlanNetworkIdObj,'NULL'),IFNULL(networkNameObj,'NULL')));
+			IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVLANRegisterEvents' ) THEN
+				CALL AccountingVLANRegisterEvents('DELETE_VLAN',vlanNetworkIdObj, networkNameObj, OLD.idVirtualDataCenter,OLD.idEnterprise);
+			END IF;
+			-- Statistics
+			UPDATE IGNORE cloud_usage_stats
+				SET     vlanUsed = vlanUsed - 1
+				WHERE idDataCenter = -1;
+			UPDATE IGNORE enterprise_resources_stats 
+				SET     vlanUsed = vlanUsed - 1
+				WHERE idEnterprise = OLD.idEnterprise;
+			UPDATE IGNORE vdc_enterprise_stats 
+				SET     vlanUsed = vlanUsed - 1
+			    WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+		   END IF;    
+		UNTIL done END REPEAT;
+		CLOSE cursorVlan;
+	    END;
         END IF;
     END;
 |

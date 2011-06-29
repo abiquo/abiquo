@@ -232,23 +232,10 @@ public class InfrastructureRep extends DefaultRepBase
         final Boolean network, final Integer firstElem, final Integer numElem)
     {
         PagedList<Enterprise> enterprises = new PagedList<Enterprise>();
-        if (network)
-        {
-            enterprises =
-                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter,
-                    firstElem, numElem);
-        }
-        else
-        {
-            Collection<DatacenterLimits> dlimits =
-                this.datacenterLimitDao.findByDatacenter(datacenter);
-            for (DatacenterLimits d : dlimits)
-            {
-                Enterprise e = d.getEnterprise();
-                enterprises.add(e);
-            }
-            enterprises.setTotalResults(enterprises.size());
-        }
+
+        enterprises =
+            (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter, firstElem,
+                numElem, network);
 
         return enterprises;
     }
@@ -570,6 +557,11 @@ public class InfrastructureRep extends DefaultRepBase
         final String repositoryLocation)
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
+    }
+    
+    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+    {
+        return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
     }
 
     public void createRepository(final Datacenter datacenter, final String repositoryLocation)

@@ -20,20 +20,27 @@
  */
 package com.abiquo.api.spring.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.GrantedAuthority;
-import org.springframework.security.GrantedAuthorityImpl;
 import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
+import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.User.AuthType;
 
 /**
  * User details service to load user information from database using the Abiquo persistende layer.
@@ -47,9 +54,36 @@ public class AbiquoUserDetailsService implements UserDetailsService
     /** The default role prefix to use. */
     protected static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
+    /** The default role. */
+    protected static final String DEFAULT_ROLE = DEFAULT_ROLE_PREFIX + "AUTHENTICATED";
+
     /** The Enterprise DAO repository. */
     @Autowired
     protected EnterpriseRep enterpriseRep;
+
+    /** The authentication type. */
+    protected AuthType authType;
+
+    public AuthType getAuthType()
+    {
+        return authType;
+    }
+
+    /**
+     * Allows to set the proper provider.
+     * 
+     * @param authType a {@link AuthType} value.
+     */
+    public void setAuthType(final AuthType authType)
+    {
+        this.authType = authType;
+    }
+
+    @PostConstruct
+    public void init()
+    {
+        authType = null;
+    }
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException,
@@ -58,7 +92,15 @@ public class AbiquoUserDetailsService implements UserDetailsService
         User user = null;
         try
         {
-            user = enterpriseRep.getUserByUserName(username);
+            // If we are not coming from remember me we need to call the abiquo db.
+            if (authType == null)
+            {
+                authType = AuthType.ABIQUO;
+            }
+            user = enterpriseRep.getUserByAuth(username, authType);
+
+            // for next logins
+            authType = null;
         }
         catch (Exception ex)
         {
@@ -78,6 +120,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         userDetails.setActive(user.getActive() == 1);
         userDetails.setEnterpriseId(user.getEnterprise().getId());
         userDetails.setEnterpriseName(user.getEnterprise().getName());
+        userDetails.setAuthType(user.getAuthType().name());
 
         // Set user authorities
         GrantedAuthority[] authorities = loadUserAuthorities(user);
@@ -94,8 +137,22 @@ public class AbiquoUserDetailsService implements UserDetailsService
      */
     protected GrantedAuthority[] loadUserAuthorities(final User user)
     {
-        String role = DEFAULT_ROLE_PREFIX + user.getRole().getType();
-        return new GrantedAuthority[] {new GrantedAuthorityImpl(role)};
+        List<Privilege> privileges = user.getRole().getPrivileges();
+        ArrayList<String> grantedAuthority = new ArrayList<String>();
+
+        // Adding default role
+        grantedAuthority.add(DEFAULT_ROLE);
+
+        if (privileges != null)
+        {
+            for (Privilege privilege : privileges)
+            {
+                grantedAuthority.add(DEFAULT_ROLE_PREFIX + privilege.getName());
+            }
+        }
+
+        return AuthorityUtils.stringArrayToAuthorityArray(grantedAuthority
+            .toArray(new String[grantedAuthority.size()]));
     }
 
 }
