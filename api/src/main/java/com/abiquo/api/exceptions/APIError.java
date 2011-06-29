@@ -275,8 +275,8 @@ public enum APIError
         "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
         "VOL-13", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
         "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
-        "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_UPDATE_STATEFUL(
-        "VOL-16", "Cannot update a persistant volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
+        "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_RESIZE_STATEFUL(
+        "VOL-16", "Cannot resize a persistant volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"),
 
     ;
