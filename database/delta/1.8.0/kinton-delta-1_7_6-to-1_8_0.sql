@@ -1,3 +1,6 @@
+
+alter table physicalmachine modify column vswitchName varchar(200) NOT NULL;
+
 --
 -- Definition of table `kinton`.`ucs_rack`
 --
