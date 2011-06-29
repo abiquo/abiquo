@@ -207,6 +207,7 @@
 
                 event.infrastructureElement = this._virtualMachine;
                 dispatchEvent(event);
+                updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);                
             }
 
             private function powerOffVirtualMachine(closeEvent:CloseEvent = null):void
@@ -218,6 +219,7 @@
 
                     event.infrastructureElement = this._virtualMachine;
                     dispatchEvent(event);
+                    updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
                 }
             }
 
@@ -255,7 +257,8 @@
                     }
 
                     event.infrastructureElement = this._virtualMachine;
-                    dispatchEvent(event);
+                    dispatchEvent(event);                    
+                    updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
                 }
             }
 
@@ -287,6 +290,7 @@
                     var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE);
                     event.infrastructureElement = this._virtualMachine;
                     dispatchEvent(event);
+                    updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
                 }
             }
 
@@ -382,6 +386,10 @@
                         // If this is a ROLL_OVER event, play the effect forwards.
                         zoomAll.play([ busyIcon ], event.type == MouseEvent.ROLL_OUT ? true : false);
                 }
+            }
+            
+            private function updateBackgroundProcess(interval:Number):void{;
+                AbiCloudModel.getInstance().countdownManager.startAutoCountdown(interval);
             }
         ]]>
     </mx:Script>
