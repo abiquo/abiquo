@@ -147,11 +147,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
+        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
+        limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
 
         /**
          * TODO vlan and public ip is not checked there
@@ -206,6 +208,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
                     actual,
                     getEntityIdentifier(entity));
 
+            // don't trace anything in tests.
             traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
         }
     }
@@ -224,7 +227,10 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                if (tracer != null)
+                {
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                }
                 break;
             default:
                 break;
@@ -236,8 +242,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
-                    || entity instanceof VirtualDatacenter)
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDatacenter) && tracer != null)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }

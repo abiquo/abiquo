@@ -103,7 +103,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     private final String FIND_BY_ENTERPRISE = " SELECT vlan "//
         + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
         + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "WHERE vlan.id = vdc.network.id "//
+        + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.enterprise.id = :enterpriseId";
 
     public List<VLANNetwork> findByEnterprise(int enterpriseId)
