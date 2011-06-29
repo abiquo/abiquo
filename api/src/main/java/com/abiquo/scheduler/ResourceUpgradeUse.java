@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.event.HyperlinkEvent;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
@@ -101,6 +103,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Autowired
     VirtualMachineDAO vmachineDao;
+    
+    @Autowired
+    HypervisorDAO hypervisorDao;
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
@@ -112,13 +117,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceMachineId)
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceHypervisorId)
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
 
-        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources on the original hypervisor       
+        // free resources on the original hypervisor
+        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();        
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
-
     }
 
     private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
