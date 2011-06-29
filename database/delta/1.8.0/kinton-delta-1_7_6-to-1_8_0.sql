@@ -6,6 +6,10 @@
 -- 4th -> Triggers 
 -- 5th -> SQL Procedures
 
+-- [ABICLOUDPREMIUM-1954]
+-- Enlarge the vswitchName field
+ALTER TABLE physicalmachine modify column vswitchName varchar(200) NOT NULL;
+
 -- [ABICLOUDPREMIUM-1502]
 -- Fix int precision
 ALTER TABLE `kinton`.`vappstateful_conversions` MODIFY COLUMN `idUser` int(10) unsigned NOT NULL;
