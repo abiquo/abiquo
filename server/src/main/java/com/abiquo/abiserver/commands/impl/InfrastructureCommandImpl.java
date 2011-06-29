@@ -1216,7 +1216,27 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             HypervisorHB hypervisor = machine.getHypervisor();
 
-            deletePhysicalMachineFromDatabase(physicalMachine.getId(), userSession);
+            try
+            {
+                deletePhysicalMachineFromDatabase(physicalMachine.getId(), userSession);
+            }
+            catch (InfrastructureCommandException ice)
+            {
+                // Captures error messages properly from deletePhysicalMachineFromDatabase en
+                // InfrasctructureCommandPremiumImpl
+                factory.rollbackConnection();
+
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
+                    "deletePhysicalMachine", ice, ice.getMessage());
+
+                basicResult.setMessage(ice.getMessage());
+
+                traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_DELETE,
+                    userSession, physicalMachine.getDataCenter(), null, ice.getMessage(), null,
+                    (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
+
+                return basicResult;
+            }
 
             String user = hypervisor.getUser();
             String password = hypervisor.getPassword();
