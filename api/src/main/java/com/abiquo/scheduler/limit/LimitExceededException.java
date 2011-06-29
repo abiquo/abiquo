@@ -102,13 +102,13 @@ public class LimitExceededException extends AllocatorException
             entityId, //
             actual.getCpu(),
             actual.getRamInMb(),
-            actual.getHdInMb(),
+            (actual.getHdInMb() / 1048576), // en MB
             (actual.getStorage() / 1048576), // en MB
             actual.getVlanCount(),
             actual.getPublicIp(), //
             requir.getCpu(),
             requir.getRam(),
-            requir.getHd(),
+            (requir.getHd() / 1048576),// en MB,
             (requir.getStorage() / 1048576),// en MB
             requir.getPublicVLAN(),
             requir.getPublicIP(), //

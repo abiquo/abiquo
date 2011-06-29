@@ -518,7 +518,7 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 5 - UNLICENSED
 6 - HA_IN_PROGRESS
 7 - DISABLED_FOR_HA',
-  `vswitchName` VARCHAR(30)  NOT NULL,
+  `vswitchName` VARCHAR(200)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
   `version_c` int(11) default 0,
@@ -1329,7 +1329,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.applibrary.virtualimageUploadProgressUpdateInterval","10","Time interval in seconds"),
  ("client.dashboard.abiquoURL","http://www.abiquo.org","URL of Abiquo web page"),
  ("client.dashboard.allowUsersAccess","1","Allow (1) or deny (0) access to the \'Users\' section"),
- ("client.dashboard.showStartUpAlert","0","Set to 1 to show an Alert with the text found in Startup_Alert.txt file"),
+ ("client.dashboard.showStartUpAlert","1","Set to 1 to show an Alert with the text found in Startup_Alert.txt file"),
  ("client.infra.googleMapsDefaultLatitude","41.3825","Google Maps will be centered by default at this longitude value"),
  ("client.infra.googleMapsDefaultLongitude","2.176944","Google Maps will be centered by default at this latitude value"),
  ("client.infra.googleMapsDefaultZoom","4","Google Maps will be centered by default with this zoom level value"),

@@ -49,7 +49,7 @@ public class HibernateDAO<T, ID extends Serializable> implements DAO<T, ID>
     /**
      * Class to work with
      */
-    private Class<T> persistentClass;
+    protected Class<T> persistentClass;
 
     /**
      * Hibernate session

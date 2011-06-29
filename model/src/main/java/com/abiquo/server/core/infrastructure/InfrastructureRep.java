@@ -226,7 +226,10 @@ public class InfrastructureRep extends DefaultRepBase
 
         for (Machine machine : findMachines(datacenter))
         {
-            types.add(machine.getHypervisor().getType());
+            if (machine.getHypervisor() != null)
+            {
+                types.add(machine.getHypervisor().getType());
+            }
         }
 
         return types;
