@@ -208,6 +208,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
                     actual,
                     getEntityIdentifier(entity));
 
+            // don't trace anything in tests.
             traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
         }
     }
@@ -226,7 +227,10 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                if (tracer != null)
+                {
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                }
                 break;
             default:
                 break;
@@ -238,8 +242,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
-                    || entity instanceof VirtualDatacenter)
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDatacenter) && tracer != null)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }
