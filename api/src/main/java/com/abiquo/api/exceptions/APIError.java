@@ -145,8 +145,9 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME("ROLE-6",
-        "Cannot create a role with the same name of existing role for the same enterprise"),
+        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
+        "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
