@@ -33,9 +33,18 @@ public interface MachinesResourceStub
      * Returns the list of machines from a managed rack (Must be a managed rack, otherwise it throws
      * an exception!)
      * 
-     * @param ucsRack machine to shutdown.
+     * @param ucsRack which the machines are attached.
      * @return BasicResult
      */
     public DataResult<List<PhysicalMachine>> getMachines(UcsRack ucsRack);
+
+    /**
+     * Refresh the list of machines from a managed rack (Must be a managed rack, otherwise it throws
+     * an exception!)
+     * 
+     * @param ucsRack which the machines.
+     * @return BasicResult
+     */
+    public DataResult<List<PhysicalMachine>> refreshMachines(UcsRack ucsRack);
 
 }
