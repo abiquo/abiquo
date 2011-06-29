@@ -40,7 +40,6 @@ import org.virtualbox_4_0.IMedium;
 import org.virtualbox_4_0.INetworkAdapter;
 import org.virtualbox_4_0.IProgress;
 import org.virtualbox_4_0.ISession;
-import org.virtualbox_4_0.IStorageController;
 import org.virtualbox_4_0.IVRDEServer;
 import org.virtualbox_4_0.IVirtualBox;
 import org.virtualbox_4_0.LockType;
@@ -49,10 +48,10 @@ import org.virtualbox_4_0.NetworkAdapterType;
 import org.virtualbox_4_0.SessionState;
 import org.virtualbox_4_0.StorageBus;
 
-import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.RimpException;
 import com.abiquo.aimstub.TTransportProxy;
+import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.hypervisor.impl.VirtualBoxHypervisor;
@@ -73,15 +72,14 @@ import com.abiquo.virtualfactory.vlanstub.VlanStub;
  */
 public class VirtualBoxMachine extends AbsVirtualMachine
 {
-
     /** The logger. */
-    private static final Logger logger = LoggerFactory.getLogger(VirtualBoxMachine.class);
+    protected static final Logger logger = LoggerFactory.getLogger(VirtualBoxMachine.class);
 
     /** The v box hyper. */
-    private VirtualBoxHypervisor vBoxHyper;
+    protected VirtualBoxHypervisor vBoxHyper;
 
     /** The machine. */
-    private IMachine machine;
+    protected IMachine machine;
 
     /** The machine name. */
     private final String machineName;
@@ -107,21 +105,11 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     /** Timeout to wait for a virtual machine state transition. */
     private final static Integer OPERATION_TIMEOUT = 2 * 60000; // 2 minutes
 
-    /*
-     * The cloned image name. private String clonedImageName;
-     */
+    /** The storage controller name. */
+    protected final String sataStorageControllerName;
 
     /** The storage controller name. */
-    private final String sataStorageControllerName;
-
-    /** The storage controller name. */
-    private final String scsiStorageControllerName;
-
-    /** The last storage controller port. */
-    private int lastControllerPortUsed;
-
-    /** Maximum devices per port count. */
-    private long maxDevicesPerPortCount;
+    protected final String scsiStorageControllerName;
 
     /**
      * Instantiates a new virtual box machine.
@@ -129,7 +117,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param config the config
      * @throws VirtualMachineException the virtual machine exception
      */
-    public VirtualBoxMachine(VirtualMachineConfiguration config) throws VirtualMachineException
+    public VirtualBoxMachine(final VirtualMachineConfiguration config)
+        throws VirtualMachineException
     {
         super(config);
 
@@ -149,9 +138,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         rdpPort = config.getRdPort();
         cpuNumbers = config.getCpuNumber();//
         memoryRam = config.getMemoryRAM() / (1024 * 1024);
-        sataStorageControllerName = machineId.concat("SATASController");
         scsiStorageControllerName = machineId.concat("SCSISController");
-        lastControllerPortUsed = 0;
+        sataStorageControllerName = machineId.concat("SATASController");
         vnicList = config.getVnicList();
     }
 
@@ -163,7 +151,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     @Override
     public void deployMachine() throws VirtualMachineException
     {
-
         try
         {
             vBoxHyper.reconnect();
@@ -190,11 +177,14 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             logger.error("Failed to deploy machine :{}", e);
             // The roll back in the virtual machine is done in top level when
-            // rolling back the
-            // virtual appliance
+            // rolling back the virtual appliance
             rollBackVirtualMachine();
             state = State.CANCELLED;
             throw new VirtualMachineException(e);
+        }
+        finally
+        {
+            vBoxHyper.logout();
         }
 
         logger.info("Created virtualbox machine name:" + config.getMachineName() + "\t ID:"
@@ -202,7 +192,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             + config.getHyper().getAddress().toString());
 
         state = State.DEPLOYED;
-
     }
 
     /**
@@ -213,10 +202,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      */
     private void createVirtualMachine()
     {
-        // Getting the virtualBox hypervisor
         IVirtualBox vbox = vBoxHyper.getVirtualBox();
-        // Creating the machine implies 4 steps
-        // 1. Creating the mutable machine, or opening if it was created
+
         logger.info("Creating the virtual machine in the hypervisor");
 
         machine =
@@ -235,19 +222,16 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     {
         // Getting the session
         ISession oSession = vBoxHyper.getSession();
+
         try
         {
+            vBoxHyper.getVirtualBox().registerMachine(machine);
+            lockMachine(oSession, LockType.Write);
 
             configureBasicResources();
-
             configureVirtualDiskResources();
-
             configureNetwork();
-
             machine.saveSettings();
-
-            vBoxHyper.getSession().unlockMachine();
-
         }
         catch (WebServiceException e)
         {
@@ -255,15 +239,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         }
         finally
         {
-            // Closing the sessions
-            if (machine != null)
-            {
-                machine.releaseRemote();
-            }
-            if (oSession != null)
-            {
-                oSession.releaseRemote();
-            }
+            releaseMachineAndSession(machine, oSession);
         }
     }
 
@@ -272,16 +248,9 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * 
      * @throws VirtualMachineException
      */
-    private void configureVirtualDiskResources() throws VirtualMachineException
+    protected void configureVirtualDiskResources() throws VirtualMachineException
     {
         logger.debug("Configuring Virtual disks resources");
-
-        // Getting the virtualBox hypervisor
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
-
-        // Using SATA driver for attaching extended disks
-        IStorageController controller =
-            machine.addStorageController(sataStorageControllerName, StorageBus.SATA);
 
         // Adding the scsci controller
 
@@ -296,24 +265,16 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         machine.addStorageController(scsiStorageControllerName, StorageBus.SCSI).setUseHostIOCache(
             true);
 
+        // Using SATA driver for attaching extended disks
+        machine.addStorageController(sataStorageControllerName, StorageBus.SATA);
+
         if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
         {
             // Attaching base disks
             logger.debug("Attaching the harddisk with the id: {}", newVDI.getId());
 
             machine.attachDevice(scsiStorageControllerName, 0, 0, DeviceType.HardDisk, newVDI);
-
-            maxDevicesPerPortCount = controller.getPortCount().longValue();
         }
-        else if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
-        {
-            // If the virtual disk is an statefull one
-            attachIscsiDisk(config.getVirtualDiskBase(), vbox, machine, scsiStorageControllerName);
-        }
-
-        // Attaching extended disks
-        attachExtendedDisks(config.getExtendedVirtualDiskList(), vbox, machine);
-
     }
 
     /**
@@ -327,7 +288,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
 
         // Attaching the bridge interfaces
         attachBridgeInterfaces(vnicList);
-
     }
 
     /**
@@ -336,21 +296,22 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     private void configureBasicResources()
     {
         logger.debug("Configuring Basic resources");
-        ISession oSession = null;
-        // Getting the virtualBox hypervisor
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
-        // 3. Saving settings ¿? We do it below
-        // targetMachine.saveSettings();
-        // 4. Registering machine
-        vbox.registerMachine(machine);
-        // Getting the session
-        oSession = vBoxHyper.getSession();
-        machine.lockMachine(oSession, LockType.Write);
-        machine = oSession.getMachine();
 
-        // Definining RAM and CPU number
         machine.setMemorySize(memoryRam);
         machine.setCPUCount(new Long(cpuNumbers));
+
+        IVRDEServer vrdpserver = machine.getVRDEServer();
+
+        if (AddressingUtils.isValidPort(String.valueOf(rdpPort)))
+        {
+            vrdpserver.setEnabled(true);
+            logger.debug("Activating the VRDP port: " + rdpPort);
+            vrdpserver.setVRDEProperty("TCP/Ports", String.valueOf(rdpPort));
+        }
+        else
+        {
+            vrdpserver.setEnabled(false);
+        }
     }
 
     /**
@@ -359,7 +320,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param vnicList the mac list with the interface bridge list to attach
      * @throws VirtualMachineException
      */
-    private void attachBridgeInterfaces(List<VirtualNIC> vnicList) throws VirtualMachineException
+    private void attachBridgeInterfaces(final List<VirtualNIC> vnicList)
+        throws VirtualMachineException
     {
         try
         {
@@ -373,13 +335,11 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(),
-                        phymach_ip.getHost(),
-                        8889,
-                        phymach_ip.getFile());
+                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
+                        .getFile());
 
-                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
-                    virtualNIC.getVSwitchName(), bridgeName);
+                VlanStub.createVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
+                    .getVSwitchName(), bridgeName);
 
                 attachNetworkAdapter(machine, virtualNIC.getMacAddress(), abiquoPrefix + "_"
                     + virtualNIC.getVlanTag(), vnicList.indexOf(virtualNIC));
@@ -405,7 +365,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param vnicList the mac list with the interface bridge list to attach
      * @throws VirtualMachineException
      */
-    private void detachBridgeInterfaces(List<VirtualNIC> vnicList) throws VirtualMachineException
+    private void detachBridgeInterfaces(final List<VirtualNIC> vnicList)
+        throws VirtualMachineException
     {
         try
         {
@@ -419,15 +380,13 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 URL phymach_ip = vBoxHyper.getAddress();
 
                 URL aimURL =
-                    new URL(phymach_ip.getProtocol(),
-                        phymach_ip.getHost(),
-                        8889,
-                        phymach_ip.getFile());
+                    new URL(phymach_ip.getProtocol(), phymach_ip.getHost(), 8889, phymach_ip
+                        .getFile());
 
                 if (mustDeleteVLAN(bridgeName))
                 {
-                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()),
-                        virtualNIC.getVSwitchName(), bridgeName);
+                    VlanStub.deleteVlan(aimURL, String.valueOf(virtualNIC.getVlanTag()), virtualNIC
+                        .getVSwitchName(), bridgeName);
 
                 }
             }
@@ -453,7 +412,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param bridgeName the bridge name
      * @return true if the bridge name can be deleted, false if not.
      */
-    private boolean mustDeleteVLAN(String bridgeName)
+    private boolean mustDeleteVLAN(final String bridgeName)
     {
         List<IMachine> machines = vBoxHyper.getVirtualBox().getMachines();
         machines.remove(machine);
@@ -481,8 +440,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param bridgeName the bridge name
      * @param slot
      */
-    private void attachNetworkAdapter(IMachine targetMachine, String macAddress, String bridgeName,
-        int slot)
+    private void attachNetworkAdapter(final IMachine targetMachine, final String macAddress,
+        final String bridgeName, final int slot)
     {
         // Attaching the network adapter
         INetworkAdapter networkAdapter = machine.getNetworkAdapter(new Long(slot));
@@ -490,68 +449,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         networkAdapter.setEnabled(true);
         networkAdapter.attachToBridgedInterface();
         networkAdapter.setHostInterface(bridgeName);
-        // networkAdapter.attachToBridgedInterface();
         networkAdapter.setMACAddress(macAddress);
-
-    }
-
-    /**
-     * Private helper to attach the virtual extended disks from a virtual machine configuration.
-     * 
-     * @param list the virtual machine configuration
-     * @param vbox the vbox
-     * @param machine the machine to attache the disks
-     * @throws VirtualMachineException
-     */
-    private void attachExtendedDisks(List<VirtualDisk> list, IVirtualBox vbox, IMachine machine)
-        throws VirtualMachineException
-    {
-        if (!list.isEmpty())
-        {
-            for (VirtualDisk vdisk : list)
-            {
-                // TODO Attaching other STANDARD extended disks
-                if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)
-                {
-                    if (lastControllerPortUsed <= maxDevicesPerPortCount)
-                    {
-                        attachIscsiDisk(vdisk, vbox, machine, sataStorageControllerName);
-                    }
-                    else
-                    {
-                        throw new VirtualMachineException("The maximum devices to attach was reached. Impossible to add more extended disks");
-                    }
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Private helper to attach an ISCSI disk to a virtual machine.
-     * 
-     * @param vdisk the virtual disk to attach
-     * @param vbox the {@link IVirtualBox} object used to create the hard disk
-     * @param machine the machine to attach the hard disk
-     * @param controllerName the controller name
-     */
-    private void attachIscsiDisk(VirtualDisk vdisk, IVirtualBox vbox, IMachine machine,
-        String controllerName)
-    {
-        String location = vdisk.getLocation();
-        IMedium iscsidiskVDI = vbox.createHardDisk("iSCSI", location);
-        int index = location.indexOf("|");
-        String ip = location.substring(0, index);
-        String iscsiPath = location.substring(index + 1);
-        String iqn = AddressingUtils.getIQN(iscsiPath);
-        String lunId = AddressingUtils.getLUN(iscsiPath);
-        iscsidiskVDI.setProperty("InitiatorName", "iqn.2008-04.com.sun.virtualbox.initiator");
-        iscsidiskVDI.setProperty("TargetAddress", ip);
-        iscsidiskVDI.setProperty("TargetName", iqn);
-        iscsidiskVDI.setProperty("LUN", lunId);
-        machine.attachDevice(controllerName, lastControllerPortUsed, 0, DeviceType.HardDisk,
-            iscsidiskVDI);
-        lastControllerPortUsed++;
     }
 
     /**
@@ -613,6 +511,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
         {
             return null;
         }
+
         return path.endsWith("/") ? path : path + "/";
     }
 
@@ -657,7 +556,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @param clonedImagePath the cloned image path
      * @throws VirtualMachineException the virtual machine exception
      */
-    public void cloneThroughAPI(String imageRemotePath, String clonedImagePath)
+    public void cloneThroughAPI(final String imageRemotePath, final String clonedImagePath)
         throws VirtualMachineException
     {
         IMedium diskVDI = null;
@@ -703,70 +602,42 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     }
 
     /**
-     * Opens a remote session.
-     * 
-     * @throws VirtualMachineException
-     */
-    private void openRemoteSession() throws VirtualMachineException
-    {
-
-        String sessionType = "headless";
-        String env = "DISPLAY=:0.0";
-
-        logger.info("Opening the remote session");
-
-        // openExistingSession();
-        ISession oSession = vBoxHyper.getSession();
-
-        IProgress oProgress = machine.launchVMProcess(oSession, sessionType, env);
-        logger.info("Session for VM " + config.getMachineId().toString() + " is opened...");
-
-        waitOperation(oProgress, 10000); // 10 seconds
-
-        // This hacks are necesarry since state synchronization does not work
-        // well in Vbox
-        try
-        {
-            Thread.sleep(5000);
-        }
-        catch (InterruptedException e)
-        {
-            logger.error("An error waiting the session to be closed was occurred: "
-                + e.getMessage());
-        }
-
-        oSession.unlockMachine();
-    }
-
-    /**
      * Starts the virtual machine execution.
      */
     @Override
     public void powerOnMachine() throws VirtualMachineException
     {
-        if (!checkState(State.POWER_UP))
+        vBoxHyper.reconnect();
+        ISession oSession = vBoxHyper.getSession();
+
+        try
         {
-            vBoxHyper.reconnect();
-            // openRemoteSession();
-            ISession oSession = vBoxHyper.getSession();
-            machine.lockMachine(oSession, LockType.Write);
-            IMachine machine = vBoxHyper.getConsole().getMachine();
-            IVRDEServer vrdpserver = machine.getVRDEServer();
-
-            if (AddressingUtils.isValidPort(String.valueOf(rdpPort)))
+            if (!checkState(State.POWER_UP))
             {
-                vrdpserver.setEnabled(true);
-                logger.debug("Activating the VRDP port: " + rdpPort);
-                vrdpserver.setVRDEProperty("TCP/Ports", String.valueOf(rdpPort));
-            }
-            else
-            {
-                vrdpserver.setEnabled(false);
-            }
+                logger.info("Opening the remote session");
 
-            machine.saveSettings();
-            oSession.unlockMachine();
-            openRemoteSession();
+                machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+                IProgress oProgress = machine.launchVMProcess(oSession, "headless", "DISPLAY=:0.0");
+                logger.info("Session for VM " + config.getMachineId().toString() + " is opened...");
+
+                waitOperation(oProgress, 10000); // 10 seconds
+
+                try
+                {
+                    // This hacks are necesary since state synchronization does not work well
+                    Thread.sleep(5000);
+                }
+                catch (InterruptedException e)
+                {
+                    logger.error("An error waiting the session to be closed was occurred: "
+                        + e.getMessage());
+                }
+            }
+        }
+        finally
+        {
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
@@ -776,26 +647,31 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     @Override
     public void powerOffMachine() throws VirtualMachineException
     {
-        if (!checkState(State.POWER_OFF))
+        vBoxHyper.reconnect();
+        ISession oSession = vBoxHyper.getSession();
+
+        try
         {
-            vBoxHyper.reconnect();
-            machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
-
-            IProgress oProgress = vBoxHyper.getConsole().powerDown();
-
-            waitOperation(oProgress, 10000);
-
-            if (vBoxHyper.getSession().getState() == SessionState.Locked)
+            if (!checkState(State.POWER_OFF))
             {
-                vBoxHyper.getSession().unlockMachine();
+                machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+                lockMachine(oSession, LockType.Shared);
+                IProgress oProgress = vBoxHyper.getConsole().powerDown();
+                waitOperation(oProgress, 10000);
             }
+        }
+        finally
+        {
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
     /**
      * Check every 5 seconds if the operation ended.
      */
-    private void waitOperation(IProgress progress, long totalms) throws VirtualMachineException
+    protected void waitOperation(final IProgress progress, final long totalms)
+        throws VirtualMachineException
     {
         for (long current = 0; current < totalms; current = current + 1000)
         {
@@ -815,8 +691,7 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             }
             catch (Exception e)
             {
-                // timeout
-                e.printStackTrace();
+                e.printStackTrace(); // timeout
             }
 
             try
@@ -827,8 +702,9 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             {
                 throw new VirtualMachineException(e);
             }
-            logger.debug("Vbox op %s at %d", progress.getOperationDescription(),
-                progress.getOperationPercent());
+
+            logger.debug("{} process: {}% completed", progress.getOperationDescription(), progress
+                .getOperationPercent());
         }
 
         throw new VirtualMachineException(String.format("Timeout [%s] it waits %d seconds",
@@ -842,12 +718,22 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     @Override
     public void pauseMachine() throws VirtualMachineException
     {
-        if (!checkState(State.PAUSE))
+        vBoxHyper.reconnect();
+        ISession oSession = vBoxHyper.getSession();
+
+        try
         {
-            vBoxHyper.reconnect();
-            machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
-            vBoxHyper.getSession().getConsole().pause();
-            vBoxHyper.getSession().unlockMachine();
+            if (!checkState(State.PAUSE))
+            {
+                machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+                lockMachine(oSession, LockType.Shared);
+                oSession.getConsole().pause();
+            }
+        }
+        finally
+        {
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
@@ -857,13 +743,22 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     @Override
     public void resumeMachine() throws VirtualMachineException
     {
-        if (!checkState(State.RESUME))
+        vBoxHyper.reconnect();
+        ISession oSession = vBoxHyper.getSession();
+
+        try
         {
-            // openSession().resume();
-            vBoxHyper.reconnect();
-            machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
-            vBoxHyper.getConsole().resume();
-            vBoxHyper.getSession().unlockMachine();
+            if (!checkState(State.RESUME))
+            {
+                machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+                lockMachine(vBoxHyper.getSession(), LockType.Shared);
+                oSession.getConsole().resume();
+            }
+        }
+        finally
+        {
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
@@ -873,12 +768,22 @@ public class VirtualBoxMachine extends AbsVirtualMachine
     @Override
     public void resetMachine() throws VirtualMachineException
     {
-        if (!checkState(State.POWER_UP))
+        vBoxHyper.reconnect();
+        ISession oSession = vBoxHyper.getSession();
+
+        try
         {
-            vBoxHyper.reconnect();
-            machine.lockMachine(vBoxHyper.getSession(), LockType.Shared);
-            vBoxHyper.getConsole().reset();
-            vBoxHyper.getSession().unlockMachine();
+            if (!checkState(State.POWER_UP))
+            {
+                machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+                lockMachine(oSession, LockType.Shared);
+                oSession.getConsole().reset();
+            }
+        }
+        finally
+        {
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
@@ -925,9 +830,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             logger.error("An error waiting the session to be closed was occurred: "
                 + e.getMessage());
         }
-        // machine.lockMachine(oSession, LockType.Write);
+        // lockMachine(oSession, LockType.Write);
         // // Detaching hard disk
-        // machine = oSession.getMachine();
         // detachDisks(machine);
         // // Detaching extended disks
         // detachExtendedDisks(machine);
@@ -1028,53 +932,46 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * VirtualMachineConfiguration)
      */
     @Override
-    public void reconfigVM(VirtualMachineConfiguration newConfiguration)
+    public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
         throws VirtualMachineException
     {
         vBoxHyper.reconnect();
-        IVirtualBox vbox = vBoxHyper.getVirtualBox();
         ISession oSession = vBoxHyper.getSession();
-        if (oSession.getState().compareTo(SessionState.Unlocked) == 0)
+
+        try
         {
-            machine.lockMachine(oSession, LockType.Write);
-            machine = oSession.getMachine();
-            IMachine machine = vBoxHyper.getConsole().getMachine();
+            machine = vBoxHyper.getVirtualBox().findMachine(machineName);
+
+            lockMachine(oSession, LockType.Write);
+
             // Setting the new Ram value
             logger.info("Reconfiguring The Virtual Machine For Memory Update " + this.machineId);
             if (newConfiguration.isRam_set())
             {
                 machine.setMemorySize(newConfiguration.getMemoryRAM() / (1024 * 1024));
             }
+
             logger.info("Reconfiguring The Virtual Machine For CPU Update " + this.machineId);
             // Setting the number cpu value
             if (newConfiguration.isCpu_number_set())
             {
                 machine.setCPUCount(new Long(newConfiguration.getCpuNumber()));
             }
-            // Closing the sessions
-            if (machine != null)
-            {
-                machine.releaseRemote();
-            }
-            if (oSession != null)
-            {
-                oSession.releaseRemote();
-                oSession.unlockMachine();
-            }
-            // reconfigDisks(newConfiguration, config);
+
+            reconfigDisks(newConfiguration, config, machine);
+
+            machine.saveSettings();
         }
-        else
+        finally
         {
-            logger
-                .warn("The reconfiguration could not be done since the virtual machine must be powered off");
+            releaseMachineAndSession(machine, oSession);
+            vBoxHyper.logout();
         }
     }
 
     @Override
     public boolean isVMAlreadyCreated() throws VirtualMachineException
     {
-        // Getting the session
-        vBoxHyper.reconnect();
         // Getting the virtualBox hypervisor
         IVirtualBox vbox = vBoxHyper.getVirtualBox();
         try
@@ -1104,27 +1001,19 @@ public class VirtualBoxMachine extends AbsVirtualMachine
      * @return true if the state in the hypervisors equals to the state as parameter, false if
      *         contrary
      */
-    private boolean checkState(State stateToCheck) throws VirtualMachineException
+    private boolean checkState(final State stateToCheck) throws VirtualMachineException
     {
-        State actualState = getStateInHypervisor();
-        if (actualState.compareTo(stateToCheck) == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return getStateInHypervisor() == stateToCheck;
     }
 
     @Override
-    public void bundleVirtualMachine(String sourcePath, String destinationPath,
-        String snapshotName, boolean isManaged) throws VirtualMachineException
+    public void bundleVirtualMachine(final String sourcePath, final String destinationPath,
+        final String snapshotName, final boolean isManaged) throws VirtualMachineException
     {
-
         logger.debug("Creating instance of image [{}] in clonedImagePath[{}]", sourcePath,
             destinationPath);
         logger.info("Creating an instance of the virtual machine: {}", config.getMachineName());
+
         try
         {
             String hypervisorLocation = vBoxHyper.getAddress().getHost();
@@ -1142,7 +1031,6 @@ public class VirtualBoxMachine extends AbsVirtualMachine
                 int indexEndImagePath = imagePath.lastIndexOf('/');
                 imagePath = imagePath.substring(0, indexEndImagePath);
                 sourceFolder = imagePath;
-
             }
 
             Iface aimclient =
@@ -1150,8 +1038,8 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             aimclient.copyFromDatastoreToRepository(machineName, snapshotName, destinationPath,
                 sourceFolder);
 
-            logger.info("Creating an instance of the virtual machine: {} DONE",
-                config.getMachineName());
+            logger.info("Creating an instance of the virtual machine: {} DONE", config
+                .getMachineName());
         }
         catch (Exception e)
         {
@@ -1159,6 +1047,47 @@ public class VirtualBoxMachine extends AbsVirtualMachine
             logger.error(errorMessage, machineId, e);
             throw new VirtualMachineException("Fail to bundle the virtual machine", e);
         }
+    }
 
+    protected void lockMachine(final ISession session, final LockType lockType)
+    {
+        if (logger.isTraceEnabled())
+        {
+            StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
+            logger.trace("### {}.{} ###", trace.getClassName(), trace.getMethodName());
+            logger.trace("Locking machine {} in {} mode", machine.getName(), lockType.name());
+        }
+
+        machine.lockMachine(session, lockType);
+        machine = session.getMachine();
+    }
+
+    protected void releaseMachineAndSession(final IMachine machine, final ISession session)
+    {
+        if (session.getState() != SessionState.Unlocked)
+        {
+            if (logger.isTraceEnabled())
+            {
+                StackTraceElement trace = Thread.currentThread().getStackTrace()[2];
+                logger.trace("### {}.{} ###", trace.getClassName(), trace.getMethodName());
+                logger.trace("Unlocking machine {}", machine.getName());
+            }
+
+            session.unlockMachine();
+        }
+
+        if (machine != null)
+        {
+            machine.releaseRemote();
+        }
+
+        session.releaseRemote();
+    }
+
+    protected void reconfigDisks(final VirtualMachineConfiguration newConfiguration,
+        final VirtualMachineConfiguration config, final IMachine machine)
+        throws VirtualMachineException
+    {
+        // Do nothing.
     }
 }

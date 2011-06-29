@@ -46,172 +46,218 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = StorageDevice.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = StorageDevice.TABLE_NAME)
-public class StorageDevice extends DefaultEntityBase {
-	public static final String TABLE_NAME = "storage_device";
+public class StorageDevice extends DefaultEntityBase
+{
+    public static final String TABLE_NAME = "storage_device";
 
-	protected StorageDevice() {
-	}
+    protected StorageDevice()
+    {
+    }
 
-	public StorageDevice(final String name, final String managementIP, final Integer managementPort,
-	    final String iscsiIP, final Integer iscsiPort, StorageTechnologyType storageTechnology, final Datacenter dc)
-	{
-	    this.setName(name);
-	    this.setManagementIp(managementIP);
-	    this.setManagementPort(managementPort);
-	    this.setIscsiIp(iscsiIP);
-	    this.setIscsiPort(iscsiPort);
-	    this.setStorageTechnology(storageTechnology);
-	    this.setDatacenter(dc);
-	}
-	
-	private final static String ID_COLUMN = "id";
+    public StorageDevice(final String name, final String managementIP,
+        final Integer managementPort, final String iscsiIP, final Integer iscsiPort,
+        final StorageTechnologyType storageTechnology, final Datacenter dc)
+    {
+        this.setName(name);
+        this.setManagementIp(managementIP);
+        this.setManagementPort(managementPort);
+        this.setIscsiIp(iscsiIP);
+        this.setIscsiPort(iscsiPort);
+        this.setStorageTechnology(storageTechnology);
+        this.setDatacenter(dc);
+    }
 
-	@Id
-	@GeneratedValue
-	@Column(name = ID_COLUMN, nullable = false)
-	private Integer id;
+    private final static String ID_COLUMN = "id";
 
-	public Integer getId() {
-		return this.id;
-	}
+    @Id
+    @GeneratedValue
+    @Column(name = ID_COLUMN, nullable = false)
+    private Integer id;
 
-	public final static String MANAGEMENT_PORT_PROPERTY = "managementPort";
-	private final static boolean MANAGEMENT_PORT_REQUIRED = true;
-	private final static String MANAGEMENT_PORT_COLUMN = "management_port";
-	private final static int MANAGEMENT_PORT_MIN = Integer.MIN_VALUE;
-	private final static int MANAGEMENT_PORT_MAX = Integer.MAX_VALUE;
+    public Integer getId()
+    {
+        return this.id;
+    }
 
-	@Column(name = MANAGEMENT_PORT_COLUMN, nullable = !MANAGEMENT_PORT_REQUIRED)
-	@Range(min = MANAGEMENT_PORT_MIN, max = MANAGEMENT_PORT_MAX)
-	private Integer managementPort;
+    public final static String MANAGEMENT_PORT_PROPERTY = "managementPort";
 
-	@Port
-	public Integer getManagementPort() {
-		return this.managementPort;
-	}
+    private final static boolean MANAGEMENT_PORT_REQUIRED = true;
 
-	public void setManagementPort(Integer managementPort) {
-		this.managementPort = managementPort;
-	}
+    private final static String MANAGEMENT_PORT_COLUMN = "management_port";
 
-	public final static String NAME_PROPERTY = "name";
-	private final static boolean NAME_REQUIRED = true;
-	private final static int NAME_LENGTH_MIN = 0;
-	private final static int NAME_LENGTH_MAX = 255;
-	private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-	private final static String NAME_COLUMN = "name";
+    private final static int MANAGEMENT_PORT_MIN = Integer.MIN_VALUE;
 
-	@Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
-	private String name;
+    private final static int MANAGEMENT_PORT_MAX = Integer.MAX_VALUE;
 
-	@Required(value = NAME_REQUIRED)
-	@Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
-	@LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-	public String getName() {
-		return this.name;
-	}
+    @Column(name = MANAGEMENT_PORT_COLUMN, nullable = !MANAGEMENT_PORT_REQUIRED)
+    @Range(min = MANAGEMENT_PORT_MIN, max = MANAGEMENT_PORT_MAX)
+    private Integer managementPort;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Port
+    public Integer getManagementPort()
+    {
+        return this.managementPort;
+    }
 
-	public final static String DATACENTER_PROPERTY = "datacenter";
-	private final static boolean DATACENTER_REQUIRED = true;
-	private final static String DATACENTER_ID_COLUMN = "idDataCenter";
+    public void setManagementPort(final Integer managementPort)
+    {
+        this.managementPort = managementPort;
+    }
 
-	@JoinColumn(name = DATACENTER_ID_COLUMN)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@ForeignKey(name = "FK_" + TABLE_NAME + "_datacenter")
-	private Datacenter datacenter;
+    public final static String NAME_PROPERTY = "name";
 
-	@Required(value = DATACENTER_REQUIRED)
-	public Datacenter getDatacenter() {
-		return this.datacenter;
-	}
+    private final static boolean NAME_REQUIRED = true;
 
-	public void setDatacenter(Datacenter datacenter) {
-		this.datacenter = datacenter;
-	}
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-	public final static String ISCSI_IP_PROPERTY = "iscsiIp";
-	private final static boolean ISCSI_IP_REQUIRED = true;
-	private final static int ISCSI_IP_LENGTH_MIN = 0;
-	private final static int ISCSI_IP_LENGTH_MAX = 255;
-	private final static boolean ISCSI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-	private final static String ISCSI_IP_COLUMN = "iscsi_ip";
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
-	@Column(name = ISCSI_IP_COLUMN, nullable = !ISCSI_IP_REQUIRED, length = ISCSI_IP_LENGTH_MAX)
-	private String iscsiIp;
+    private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-	@Required(value = ISCSI_IP_REQUIRED)
-	@Length(min = ISCSI_IP_LENGTH_MIN, max = ISCSI_IP_LENGTH_MAX)
-	@LeadingOrTrailingWhitespace(allowed = ISCSI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-	@Ip
-	public String getIscsiIp() {
-		return this.iscsiIp;
-	}
+    private final static String NAME_COLUMN = "name";
 
-	public void setIscsiIp(String iscsiIp) {
-		this.iscsiIp = iscsiIp;
-	}
+    @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
+    private String name;
 
-	public final static String STORAGE_TECHNOLOGY_PROPERTY = "storageTechnology";
-	private final static boolean STORAGE_TECHNOLOGY_REQUIRED = true;
-	private final static int STORAGE_TECHNOLOGY_LENGTH_MAX = 255;
-	private final static String STORAGE_TECHNOLOGY_COLUMN = "storage_technology";
-	
-	@Enumerated(value = javax.persistence.EnumType.STRING)
-	@Column(name = STORAGE_TECHNOLOGY_COLUMN, nullable = !STORAGE_TECHNOLOGY_REQUIRED, length = STORAGE_TECHNOLOGY_LENGTH_MAX)
-	private StorageTechnologyType storageTechnology;
+    @Required(value = NAME_REQUIRED)
+    @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getName()
+    {
+        return this.name;
+    }
 
-	@Required(value = STORAGE_TECHNOLOGY_REQUIRED)
-	public StorageTechnologyType getStorageTechnology() {
-		return this.storageTechnology;
-	}
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
 
-	public void setStorageTechnology(StorageTechnologyType storageTechnology) {
-		this.storageTechnology = storageTechnology;
-	}
+    public final static String DATACENTER_PROPERTY = "datacenter";
 
-	public final static String MANAGEMENT_IP_PROPERTY = "managementIp";
-	private final static boolean MANAGEMENT_IP_REQUIRED = true;
-	private final static int MANAGEMENT_IP_LENGTH_MIN = 0;
-	private final static int MANAGEMENT_IP_LENGTH_MAX = 255;
-	private final static boolean MANAGEMENT_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
-	private final static String MANAGEMENT_IP_COLUMN = "management_ip";
+    private final static boolean DATACENTER_REQUIRED = true;
 
-	@Column(name = MANAGEMENT_IP_COLUMN, nullable = !MANAGEMENT_IP_REQUIRED, length = MANAGEMENT_IP_LENGTH_MAX)
-	private String managementIp;
+    private final static String DATACENTER_ID_COLUMN = "idDataCenter";
 
-	@Required(value = MANAGEMENT_IP_REQUIRED)
-	@Length(min = MANAGEMENT_IP_LENGTH_MIN, max = MANAGEMENT_IP_LENGTH_MAX)
-	@LeadingOrTrailingWhitespace(allowed = MANAGEMENT_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-	@Ip
-	public String getManagementIp() {
-		return this.managementIp;
-	}
+    @JoinColumn(name = DATACENTER_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_datacenter")
+    private Datacenter datacenter;
 
-	public void setManagementIp(String managementIp) {
-		this.managementIp = managementIp;
-	}
+    @Required(value = DATACENTER_REQUIRED)
+    public Datacenter getDatacenter()
+    {
+        return this.datacenter;
+    }
 
-	public final static String ISCSI_PORT_PROPERTY = "iscsiPort";
-	private final static boolean ISCSI_PORT_REQUIRED = true;
-	private final static String ISCSI_PORT_COLUMN = "iscsi_port";
-	private final static int ISCSI_PORT_MIN = Integer.MIN_VALUE;
-	private final static int ISCSI_PORT_MAX = Integer.MAX_VALUE;
+    public void setDatacenter(final Datacenter datacenter)
+    {
+        this.datacenter = datacenter;
+    }
 
-	@Column(name = ISCSI_PORT_COLUMN, nullable = !ISCSI_PORT_REQUIRED)
-	@Range(min = ISCSI_PORT_MIN, max = ISCSI_PORT_MAX)
-	private int iscsiPort;
+    public final static String ISCSI_IP_PROPERTY = "iscsiIp";
 
-	@Port
-	public int getIscsiPort() {
-		return this.iscsiPort;
-	}
+    private final static boolean ISCSI_IP_REQUIRED = true;
 
-	public void setIscsiPort(int iscsiPort) {
-		this.iscsiPort = iscsiPort;
-	}
+    private final static int ISCSI_IP_LENGTH_MIN = 0;
+
+    private final static int ISCSI_IP_LENGTH_MAX = 255;
+
+    private final static boolean ISCSI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String ISCSI_IP_COLUMN = "iscsi_ip";
+
+    @Column(name = ISCSI_IP_COLUMN, nullable = !ISCSI_IP_REQUIRED, length = ISCSI_IP_LENGTH_MAX)
+    private String iscsiIp;
+
+    @Required(value = ISCSI_IP_REQUIRED)
+    @Length(min = ISCSI_IP_LENGTH_MIN, max = ISCSI_IP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ISCSI_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @Ip
+    public String getIscsiIp()
+    {
+        return this.iscsiIp;
+    }
+
+    public void setIscsiIp(final String iscsiIp)
+    {
+        this.iscsiIp = iscsiIp;
+    }
+
+    public final static String STORAGE_TECHNOLOGY_PROPERTY = "storageTechnology";
+
+    private final static boolean STORAGE_TECHNOLOGY_REQUIRED = true;
+
+    private final static int STORAGE_TECHNOLOGY_LENGTH_MAX = 255;
+
+    private final static String STORAGE_TECHNOLOGY_COLUMN = "storage_technology";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = STORAGE_TECHNOLOGY_COLUMN, nullable = !STORAGE_TECHNOLOGY_REQUIRED, length = STORAGE_TECHNOLOGY_LENGTH_MAX)
+    private StorageTechnologyType storageTechnology;
+
+    @Required(value = STORAGE_TECHNOLOGY_REQUIRED)
+    public StorageTechnologyType getStorageTechnology()
+    {
+        return this.storageTechnology;
+    }
+
+    public void setStorageTechnology(final StorageTechnologyType storageTechnology)
+    {
+        this.storageTechnology = storageTechnology;
+    }
+
+    public final static String MANAGEMENT_IP_PROPERTY = "managementIp";
+
+    private final static boolean MANAGEMENT_IP_REQUIRED = true;
+
+    private final static int MANAGEMENT_IP_LENGTH_MIN = 0;
+
+    private final static int MANAGEMENT_IP_LENGTH_MAX = 255;
+
+    private final static boolean MANAGEMENT_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String MANAGEMENT_IP_COLUMN = "management_ip";
+
+    @Column(name = MANAGEMENT_IP_COLUMN, nullable = !MANAGEMENT_IP_REQUIRED, length = MANAGEMENT_IP_LENGTH_MAX)
+    private String managementIp;
+
+    @Required(value = MANAGEMENT_IP_REQUIRED)
+    @Length(min = MANAGEMENT_IP_LENGTH_MIN, max = MANAGEMENT_IP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = MANAGEMENT_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @Ip
+    public String getManagementIp()
+    {
+        return this.managementIp;
+    }
+
+    public void setManagementIp(final String managementIp)
+    {
+        this.managementIp = managementIp;
+    }
+
+    public final static String ISCSI_PORT_PROPERTY = "iscsiPort";
+
+    private final static boolean ISCSI_PORT_REQUIRED = true;
+
+    private final static String ISCSI_PORT_COLUMN = "iscsi_port";
+
+    private final static int ISCSI_PORT_MIN = Integer.MIN_VALUE;
+
+    private final static int ISCSI_PORT_MAX = Integer.MAX_VALUE;
+
+    @Column(name = ISCSI_PORT_COLUMN, nullable = !ISCSI_PORT_REQUIRED)
+    @Range(min = ISCSI_PORT_MIN, max = ISCSI_PORT_MAX)
+    private int iscsiPort;
+
+    @Port
+    public int getIscsiPort()
+    {
+        return this.iscsiPort;
+    }
+
+    public void setIscsiPort(final int iscsiPort)
+    {
+        this.iscsiPort = iscsiPort;
+    }
 
 }

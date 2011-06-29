@@ -50,7 +50,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC)})
+@NamedQueries( {@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC_QUERY, query = VolumeManagement.BY_VDC)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -60,6 +60,8 @@ public class VolumeManagement extends RasdManagement
     public static final String TABLE_NAME = "volume_management";
 
     // Queries
+
+    public static final String VOLUMES_BY_VDC_QUERY = "VOLUMES_BY_VDC";
 
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
@@ -93,12 +95,8 @@ public class VolumeManagement extends RasdManagement
         // Volume properties
         setStoragePool(pool);
         setIdScsi(idScsi);
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        setState(VolumeState.DETACHED);
         setSizeInMB(sizeInMB);
-
-        // TODO: Remove these fields?
-        setUsedSizeInMB(0);
-        setAvailableSizeInMB(sizeInMB);
     }
 
     public final static String STORAGE_POOL_PROPERTY = "storagePool";
@@ -236,7 +234,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getSizeInMB()
     {
-        return getRasd().getLimit();
+        Long size = getRasd().getLimit();
+        return size == null ? 0L : size;
     }
 
     public void setSizeInMB(final long sizeInMB)
@@ -246,7 +245,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getAvailableSizeInMB()
     {
-        return getRasd().getReservation();
+        Long reservation = getRasd().getReservation();
+        return reservation == null ? 0L : reservation;
     }
 
     public void setAvailableSizeInMB(final long availableSizeInMB)
@@ -258,46 +258,24 @@ public class VolumeManagement extends RasdManagement
 
     public void associate()
     {
-        if (state != VolumeState.NOT_MOUNTED_NOT_RESERVED)
+        if (state != VolumeState.DETACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_NOT_RESERVED.name());
+                + VolumeState.DETACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.ATTACHED);
     }
 
     public void disassociate()
     {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
+        if (state != VolumeState.ATTACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
+                + VolumeState.ATTACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
-    }
-
-    public void mount()
-    {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.MOUNTED_RESERVED);
-    }
-
-    public void unmount()
-    {
-        if (state != VolumeState.MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.DETACHED);
     }
 
     // ********************************** Others ********************************

@@ -32,71 +32,70 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class StorageDeviceGenerator extends DefaultEntityGenerator<StorageDevice>
 {
+    private DatacenterGenerator datacenterGenerator;
 
-    
-      DatacenterGenerator datacenterGenerator;
-    
-
-    public StorageDeviceGenerator(SeedGenerator seed)
+    public StorageDeviceGenerator(final SeedGenerator seed)
     {
         super(seed);
-        
-          datacenterGenerator = new DatacenterGenerator(seed);
-        
+        datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(StorageDevice obj1, StorageDevice obj2)
+    public void assertAllPropertiesEqual(final StorageDevice obj1, final StorageDevice obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, StorageDevice.MANAGEMENT_PORT_PROPERTY,StorageDevice.NAME_PROPERTY,StorageDevice.ISCSI_IP_PROPERTY,StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,StorageDevice.MANAGEMENT_IP_PROPERTY,StorageDevice.ISCSI_PORT_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, StorageDevice.MANAGEMENT_PORT_PROPERTY,
+            StorageDevice.NAME_PROPERTY, StorageDevice.ISCSI_IP_PROPERTY,
+            StorageDevice.STORAGE_TECHNOLOGY_PROPERTY, StorageDevice.MANAGEMENT_IP_PROPERTY,
+            StorageDevice.ISCSI_PORT_PROPERTY);
+
+        datacenterGenerator.assertAllPropertiesEqual(obj1.getDatacenter(), obj2.getDatacenter());
     }
 
     @Override
     public StorageDevice createUniqueInstance()
     {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        return createInstance(datacenter);
+    }
 
+    public StorageDevice createInstance(final StorageTechnologyType storageTechnology)
+    {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        return createInstance(datacenter, storageTechnology);
+    }
+
+    public StorageDevice createInstance(final Datacenter datacenter)
+    {
+        StorageTechnologyType storageTechnology = newEnum(StorageTechnologyType.class, nextSeed());
+        return createInstance(datacenter, storageTechnology);
+    }
+
+    public StorageDevice createInstance(final Datacenter datacenter,
+        final StorageTechnologyType storageTechnology)
+    {
         StorageDevice device = new StorageDevice();
 
-        
-        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         device.setDatacenter(datacenter);
         device.setIscsiIp("192.168.1.1");
         device.setIscsiPort(80);
         device.setManagementIp("102.168.1.2");
         device.setManagementPort(8080);
-        device.setName("LoPutoCabinet");        
-        device.setStorageTechnology(StorageTechnologyType.LVM);
+        device.setName(newString(nextSeed(), StorageDevice.NAME_LENGTH_MIN,
+            StorageDevice.NAME_LENGTH_MAX));
+        device.setStorageTechnology(storageTechnology);
 
         return device;
     }
 
-	public StorageDevice createDeviceForInstance(Datacenter datacenter) {
-        
-		StorageDevice device = new StorageDevice();
-
-        device.setDatacenter(datacenter);
-        device.setIscsiIp("192.168.1.1");
-        device.setIscsiPort(80);
-        device.setManagementIp("102.168.1.2");
-        device.setManagementPort(8080);
-        device.setName("LoPutoCabinet");     
-        device.setStorageTechnology(StorageTechnologyType.LVM);
-
-        return device;
-	}
-	
     @Override
-    public void addAuxiliaryEntitiesToPersist(StorageDevice entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final StorageDevice entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
-          Datacenter datacenter = entity.getDatacenter();
-          datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
-          entitiesToPersist.add(datacenter);
-        
+
+        Datacenter datacenter = entity.getDatacenter();
+        datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
+        entitiesToPersist.add(datacenter);
     }
-
-
 
 }

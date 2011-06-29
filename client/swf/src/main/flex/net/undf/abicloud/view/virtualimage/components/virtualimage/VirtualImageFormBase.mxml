@@ -66,6 +66,8 @@
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceUploadDTO;
             import net.undf.abicloud.vo.virtualimage.OVFPackageInstanceStatus;
             import net.undf.abicloud.vo.virtualimage.VirtualImage;
+            import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+            import net.undf.abicloud.vo.user.PrivilegeType;
 
             [ResourceBundle("Common")]
             private var rb:ResourceBundle;
@@ -109,6 +111,9 @@
 			
             private function onCreationComplete():void
             {
+                //Check privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_VM_COST_CODE,"removeChild",costCodeFormItem,virtualImageFormContainer);
+                
                 //Checking privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
                 
@@ -226,6 +231,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
+                    costInput.text = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -246,6 +252,7 @@
                     hdUnitsSelector.selectedIndex = 0;
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
+                    costInput.text = "";
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -281,7 +288,9 @@
                     if (publicImageInput.selected)
                         updatedValues.shared = 1;
                     else
-                        updatedValues.shared = 0;                    
+                        updatedValues.shared = 0; 
+                        
+                    updatedValues.costCode = costInput.text;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
@@ -793,6 +802,17 @@
                 visible="{this._virtualImage != null &amp;&amp; this._canShare}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+            	id="costCodeFormItem"
+                label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
+                <mx:TextInput id="costInput"
+                    height="18"
+                    maxChars="50"
+                    change="validateForm()"/>
             </mx:FormItem>
         </mx:Form>
 

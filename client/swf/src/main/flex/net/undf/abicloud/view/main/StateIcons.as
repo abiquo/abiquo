@@ -47,11 +47,9 @@ package net.undf.abicloud.view.main
 		[Bindable]
 		public static var DISABLED:*;
 		[Bindable]
-		public static var MOUNTED_RESERVED:*;
+		public static var ATTACHED:*;
 		[Bindable]
-		public static var NOT_MOUNTED_RESERVED:*;
-		[Bindable]
-		public static var NOT_MOUNTED_NOT_RESERVED:*;
+		public static var DETACHED:*;
 		
 		
 		private static var errors:Array;
@@ -69,9 +67,8 @@ package net.undf.abicloud.view.main
 				NOT_DEPLOYED = getImage("MainStateNOTDEPLOYED");			
 				STOPPED = getImage("MainStateSTOPPED");			
 				DISABLED = getImage("MainStateDISABLED");			
-				MOUNTED_RESERVED = getImage("MainStateMOUNTEDRESERVED");			
-				NOT_MOUNTED_RESERVED = getImage("MainStateNOTMOUNTEDRESERVED");			
-				NOT_MOUNTED_NOT_RESERVED = getImage("MainStateNOTMOUNTEDNOTRESERVED");
+				ATTACHED = getImage("MainStateMOUNTEDRESERVED");					
+				DETACHED = getImage("MainStateNOTMOUNTEDNOTRESERVED");
 				
 				if(errors.length > 0){
 					trace(errors.toString());		

@@ -1037,7 +1037,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @return The virtual machine object.
      * @throws JIException If the vmDispatch cannot eb retrieved.
      */
-    protected IJIDispatch getVmDispatch(String vmName) throws JIException
+    protected IJIDispatch getVmDispatch(final String vmName) throws JIException
     {
         JIVariant[] tmp =
             execQuery("Select * From Msvm_ComputerSystem Where ElementName='" + vmName + "'");
@@ -1328,6 +1328,12 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         {
             hyperVHypervisor.reconnect();
 
+            // Load the VM in the hypervisor to be used in the called methods
+            if (this.vmDispatch == null)
+            {
+                this.vmDispatch = getVmDispatch(machineName);
+            }
+
             // Setting the new Ram value
             if (newConfiguration.isRam_set())
             {
@@ -1472,7 +1478,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws JIException
      */
 
-    private JIVariant[] eraseVLANFromArray(JIVariant[] trunkArray, int vlanTag) throws JIException
+    private JIVariant[] eraseVLANFromArray(final JIVariant[] trunkArray, final int vlanTag)
+        throws JIException
     {
         List<JIVariant> tagList = new ArrayList<JIVariant>();
         for (int i = 0; i < trunkArray.length; i++)

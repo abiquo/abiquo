@@ -774,6 +774,8 @@
             {
                 if (!isVirtualApplianceModified)
                 {
+                    //Stop background process to avoid a bad refresh
+                    stopBackgroundUpdates();
                     //Showing a NodeForm Pop Up to show NodeRenderer configuration options
                     PopUpManager.addPopUp(this._nodeManagement, Application.application as DisplayObject,
                                           true);
@@ -798,7 +800,7 @@
              * Closes a NodeForm when is Popped Up
              */
             private function closeNodeForm(event:Event):void
-            {
+            {                
                 PopUpManager.removePopUp(this._nodeManagement);
                 checkVirtualAppliance();
             }
