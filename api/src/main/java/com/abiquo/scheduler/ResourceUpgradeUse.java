@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
@@ -95,6 +96,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Autowired
     VirtualMachineDAO vmachineDao;
 
+    @Autowired
+    HypervisorDAO hypervisorDao;
+
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
     /**
@@ -111,16 +115,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Override
     public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
-        Integer sourceMachineId)
+        Integer sourceHypervisorId)
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
                                                              // hypervisor
-
-        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources
-                                                                                 // on the original
-                                                                                 // hypervisor
+        // free resources on the original hypervisor
+        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
-
     }
 
     private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
