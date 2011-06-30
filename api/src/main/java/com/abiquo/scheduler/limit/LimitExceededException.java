@@ -46,6 +46,8 @@ public class LimitExceededException extends AllocatorException
 
     private String entityId;
 
+    private final static Long BYTES_TO_MB = 1024l * 1024l;
+
     public LimitExceededException(final Map<LimitResource, LimitStatus> resourcesStatus,
         final DefaultEntityWithLimits entity, final VirtualMachineRequirements requirements,
         final DefaultEntityCurrentUsed actual, final String entityId)
@@ -102,26 +104,26 @@ public class LimitExceededException extends AllocatorException
             entityId, //
             actual.getCpu(),
             actual.getRamInMb(),
-            actual.getHdInMb(),
-            (actual.getStorage() / 1048576), // en MB
+            (actual.getHdInMb() / BYTES_TO_MB),
+            (actual.getStorage() / BYTES_TO_MB),
             actual.getVlanCount(),
             actual.getPublicIp(), //
             requir.getCpu(),
             requir.getRam(),
-            requir.getHd(),
-            (requir.getStorage() / 1048576),// en MB
+            (requir.getHd() / BYTES_TO_MB),
+            (requir.getStorage() / BYTES_TO_MB),
             requir.getPublicVLAN(),
             requir.getPublicIP(), //
             entity.getCpuCountSoftLimit(),
             entity.getRamSoftLimitInMb(),
-            entity.getHdSoftLimitInMb(),
-            (entity.getStorageSoft() / 1048576),// en MB
+            (entity.getHdSoftLimitInMb() / BYTES_TO_MB),
+            (entity.getStorageSoft() / BYTES_TO_MB),
             entity.getVlanSoft(),
             entity.getPublicIpsSoft(), //
             entity.getCpuCountHardLimit(),
-            entity.getRamHardLimitInMb(),
-            entity.getHdHardLimitInMb(),
-            (entity.getStorageHard() / 1048576),// en MB
+	    entity.getRamHardLimitInMb(),
+            (entity.getHdHardLimitInMb() / BYTES_TO_MB),
+            (entity.getStorageHard() / BYTES_TO_MB),
             entity.getVlanHard(),
             entity.getPublicIpsHard(), //
             status.get(LimitResource.CPU),

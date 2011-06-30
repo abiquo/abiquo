@@ -23,6 +23,7 @@ package com.abiquo.abiserver.commands;
 
 import java.util.List;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
@@ -283,6 +284,6 @@ public interface NetworkCommand
      * 
      * @throws NetworkCommandException if the Hard Limit is exceeded.
      */
-    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter)
-        throws NetworkCommandException;
+    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter,
+        UserSession userSession) throws NetworkCommandException;
 }

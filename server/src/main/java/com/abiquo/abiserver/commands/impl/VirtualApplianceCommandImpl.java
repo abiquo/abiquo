@@ -418,7 +418,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             daoF.beginConnection();
 
-            instantiateNetworkCommand().checkPrivateVlan(vdc, vdc.getIdDataCenter(), enter);
+            instantiateNetworkCommand().checkPrivateVlan(vdc, vdc.getIdDataCenter(), enter,
+                userSession);
         }
         catch (Exception e)
         {
@@ -1339,7 +1340,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         try
         {
             VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
-            checkLimits(vdcHb);
+            checkLimits(vdcHb, userSession);
         }
         catch (HardLimitExceededException e)
         {
@@ -1380,7 +1381,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return result;
     }
 
-    protected void checkLimits(final VirtualDataCenterHB vdc) throws HardLimitExceededException
+    protected void checkLimits(final VirtualDataCenterHB vdc, final UserSession userSession) throws HardLimitExceededException
     {
         // community impl (no limits at all)
     }
