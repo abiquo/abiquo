@@ -41,4 +41,14 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         return null;
     }
 
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachinesResourceStub#refreshMachines(com.abiquo.abiserver.pojo.infrastructure.UcsRack)
+     */
+    @Override
+    public DataResult<List<PhysicalMachine>> refreshMachines(UcsRack ucsRack)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }
