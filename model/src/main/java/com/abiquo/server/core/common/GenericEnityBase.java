@@ -71,7 +71,7 @@ public abstract class GenericEnityBase<T extends Serializable> extends
                 .annotationType().getSimpleName().toUpperCase());
 
         String message =
-            String.format("The property '%s', %s.", constraint.getPropertyPath().toString(),
+            String.format("The property '%s' %s.", constraint.getPropertyPath().toString(),
                 constraint.getMessage());
 
         return new CommonError(code, message);
