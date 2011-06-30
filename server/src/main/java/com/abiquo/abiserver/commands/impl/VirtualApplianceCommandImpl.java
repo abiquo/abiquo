@@ -1073,7 +1073,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 return traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
                     originalVirtualApplianceState, originalVirtualApplianceSubState, userHB,
                     ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(), "createVirtualMachines", sl,
-                    BasicResult.SOFT_LIMT_EXCEEDED);
+                    EventType.WORKLOAD_HARD_LIMIT_EXCEEDED, BasicResult.SOFT_LIMT_EXCEEDED);
             }
             catch (NotEnoughResourcesException nl)
             {
@@ -1411,7 +1411,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return result;
     }
 
-    protected void checkLimits(final VirtualDataCenterHB vdc, final UserSession userSession) throws HardLimitExceededException
+    protected void checkLimits(final VirtualDataCenterHB vdc, final UserSession userSession)
+        throws HardLimitExceededException
     {
         // community impl (no limits at all)
     }
@@ -2044,27 +2045,18 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return startVirtualAppliance(userSession, userId, vApp, sourceState, sourceSubState, force);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.VirtualApplianceCommand#traceErrorStartingVirtualAppliance(
-     * com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance,
-     * com.abiquo.abiserver.pojo.infrastructure.State,
-     * com.abiquo.abiserver.pojo.infrastructure.State,
-     * com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB, com.abiquo.tracer.ComponentType,
-     * java.lang.String, java.lang.String, boolean, int)
-     */
-    // @Override
     protected DataResult<VirtualAppliance> traceErrorStartingVirtualAppliance(
         final UserSession userSession, VirtualAppliance vApp, final State state,
         final State subState, final UserHB userHB, final ComponentType componentType,
         final String message, final String reportErrorKey, final Exception exception,
-        final int... resultCode)
+        EventType eventType, final int... resultCode)
     {
+
+        eventType = (eventType == null) ? EventType.VAPP_POWERON : eventType;
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
 
-        traceLog(SeverityType.CRITICAL, componentType, EventType.VAPP_POWERON, userSession, null,
-            vApp.getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+        traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
+            .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
 
         errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
             vApp.getId());
@@ -2079,6 +2071,29 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
 
         return dataResult;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.VirtualApplianceCommand#traceErrorStartingVirtualAppliance(
+     * com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance,
+     * com.abiquo.abiserver.pojo.infrastructure.State,
+     * com.abiquo.abiserver.pojo.infrastructure.State,
+     * com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB, com.abiquo.tracer.ComponentType,
+     * java.lang.String, java.lang.String, boolean, int)
+     */
+    // @Override
+    protected DataResult<VirtualAppliance> traceErrorStartingVirtualAppliance(
+        final UserSession userSession, final VirtualAppliance vApp, final State state,
+        final State subState, final UserHB userHB, final ComponentType componentType,
+        final String message, final String reportErrorKey, final Exception exception,
+        final int... resultCode)
+    {
+
+        return traceErrorStartingVirtualAppliance(userSession, vApp, state, subState, userHB,
+            componentType, message, reportErrorKey, exception, null, resultCode);
+
     }
 
     /**
@@ -2197,7 +2212,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
-                "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
+                "createVirtualMachines", hl, EventType.WORKLOAD_HARD_LIMIT_EXCEEDED,
+                BasicResult.HARD_LIMT_EXCEEDED);
         }
         catch (SoftLimitExceededException sl)
         {
