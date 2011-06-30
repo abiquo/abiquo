@@ -112,7 +112,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
-        used.setStorage(storage == null ? 0 : storage.longValue());
+        // Storage usage is stored in MB
+        used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
         used.setPublicIp(publicIps == null ? 0 : publicIps.longValue());
         used.setVlanCount(vlan == null ? 0 : vlan.longValue());
         return used;
@@ -136,7 +137,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         Integer totalResults = finalQuery.list().size();
 
         Integer Start = firstElem;
-        if(totalResults < firstElem) Start = totalResults-numElem;
+        if (totalResults < firstElem)
+            Start = totalResults - numElem;
         // Get the list of elements
         finalQuery.setFirstResult(Start);
         finalQuery.setMaxResults(numElem);
