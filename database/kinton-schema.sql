@@ -1039,6 +1039,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `ovfid` varchar(255),
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
+  `cost_code` varchar(50) default NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
@@ -2310,6 +2311,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
+        DECLARE costCodeObj VARCHAR(50);
 	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
@@ -2330,7 +2332,8 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         FROM nodevirtualimage nvi, node n, virtualapp vapp
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
-        AND vapp.idVirtualApp = n.idVirtualApp;     
+        AND vapp.idVirtualApp = n.idVirtualApp;   
+
 	IF NEW.idType = 1 AND OLD.idType = 0 THEN
 		-- Imported !!!
 		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
@@ -2430,13 +2433,17 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
             END IF;         
         END IF;
+        --
+        SELECT IF(vi.cost_code IS NULL, "", vi.cost_code) INTO costCodeObj
+        FROM virtualimage vi
+        WHERE vi.idImage = NEW.idImage;
         -- Register Accounting Events
         IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
-       		 IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage AND vi.idRepository IS NOT NULL) THEN CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, NEW.ram, NEW.cpu, NEW.hd);
-        
-       		 END IF;          
-       	END IF;	 
-    END IF;
+       		 IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage AND vi.idRepository IS NOT NULL) THEN 
+	          CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, NEW.ram, NEW.cpu, NEW.hd, costCodeObj);
+       		 END IF;              
+	    END IF;
+      END IF;
     END;
 --
 --

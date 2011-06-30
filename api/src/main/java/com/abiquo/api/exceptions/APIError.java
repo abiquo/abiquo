@@ -74,7 +74,7 @@ public enum APIError
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
-        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
+        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
@@ -145,8 +145,9 @@ public enum APIError
         "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
         "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
-        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME("ROLE-6",
-        "Cannot create a role with the same name of existing role for the same enterprise"),
+        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
+        "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
