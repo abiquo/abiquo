@@ -640,4 +640,9 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
     }
+
+    public boolean existAnyHypervisorWithIpInDatacenter(String ip, Integer datacenterId)
+    {
+        return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
+    }
 }

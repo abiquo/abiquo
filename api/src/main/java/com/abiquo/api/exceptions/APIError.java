@@ -114,7 +114,8 @@ public enum APIError
         "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
-        "There is already a managed rack with this IP defined"),
+        "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
+        "There is a problem with the details of the UCS Rack"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(

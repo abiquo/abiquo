@@ -32,12 +32,12 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
-import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervisor>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -72,6 +72,17 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
         Assert.assertTrue(dao.existsAnyWithIp(hypervisor.getIp()));
 
         Assert.assertTrue(dao.existsAnyWithIpService(hypervisor.getIpService()));
+    }
+
+    @Test
+    public void existAnyWithIpSameDatacenter()
+    {
+        Hypervisor hypervisor = createHypervisor();
+
+        HypervisorDAO dao = createDaoForRollbackTransaction();
+
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor.getMachine()
+            .getDatacenter().getId()));
     }
 
     private Hypervisor createHypervisor()
