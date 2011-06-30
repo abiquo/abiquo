@@ -73,7 +73,6 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -537,6 +536,12 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildPaggingLinks(final String absolutePath, final PagedList< ? > list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
+
+        // If the list is empty, we don't return the links
+        if (list.size() == 0)
+        {
+            return links;
+        }
 
         // Add FIRST element
         links.add(new RESTLink(FIRST, absolutePath));
