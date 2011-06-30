@@ -37,9 +37,7 @@ import com.abiquo.abiserver.scheduler.limit.exception.SoftLimitExceededException
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
 
 /**
  * Check the current range for the total resource allocation limits on a provided entity, indicating
@@ -241,14 +239,37 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         final EventType etype =
             hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
 
+        DAOFactory daoF = HibernateDAOFactory.instance();
+        DatacenterHB dcHB = null;
+        DataCenter dc = null;
+        String vdcName = (virtualDatacenter != null) ? virtualDatacenter.getName() : null;
+        try
+        {
+            daoF.beginConnection();
+            dcHB = daoF.getDataCenterDAO().findById(virtualDatacenter.getIdDataCenter());
+            if (dcHB != null)
+            {
+                dc = dcHB.toPojo();
+            }
+
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            daoF.endConnection();
+        }
+
         String traceMessage = String.format("Not enough resources on %s", entityId);
         switch (traceSystem(entity))
         {
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage, Platform.SYSTEM_PLATFORM);
+                BasicCommand.traceSystemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, dc,
+                    vdcName, traceMessage, null, null, null);
                 break;
             default:
                 break;
@@ -266,30 +287,6 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 
                     // TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
                     // etype, traceMessage);
-                    DAOFactory daoF = HibernateDAOFactory.instance();
-                    DatacenterHB dcHB = null;
-                    DataCenter dc = null;
-                    String vdcName =
-                        (virtualDatacenter != null) ? virtualDatacenter.getName() : null;
-                    try
-                    {
-                        daoF.beginConnection();
-                        dcHB =
-                            daoF.getDataCenterDAO().findById(virtualDatacenter.getIdDataCenter());
-                        if (dcHB != null)
-                        {
-                            dc = dcHB.toPojo();
-                        }
-
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
-                    finally
-                    {
-                        daoF.endConnection();
-                    }
 
                     BasicCommand.traceLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
                         userSession, dc, vdcName, traceMessage, null, null, null,
