@@ -116,10 +116,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public void checkEdit(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void checkEdit(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
+        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
+        SchedulerException, NotEnoughResourcesException
     {
 
         VirtualMachineDto newRequirements = new VirtualMachineDto();
@@ -146,10 +146,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public void allocate(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, boolean forceEnterpirseLimits)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void allocate(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId,
+        final boolean forceEnterpirseLimits) throws HardLimitExceededException,
+        SoftLimitExceededException, SchedulerException, NotEnoughResourcesException
     {
 
         String vmachineUrl =
@@ -179,9 +179,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public void deallocate(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
-        SoftLimitExceededException, SchedulerException, NotEnoughResourcesException
+    public void deallocate(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
+        NotEnoughResourcesException
     {
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
@@ -196,7 +197,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
     }
 
-    private void onError(UserSession userSession, ClientResponse response)
+    private void onError(final UserSession userSession, final ClientResponse response)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
         NotEnoughResourcesException
     {
@@ -221,8 +222,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 throw new SoftLimitExceededException(message);
             }
             else
-            // this isn't possible
             {
+                // Enterprise or datacenter hard limits exceeded
                 throw new NotEnoughResourcesException(message);
             }
         }
@@ -247,8 +248,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
     }
 
-    private String resolveVirtualMachineUrl(Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId)
+    private String resolveVirtualMachineUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
