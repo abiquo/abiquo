@@ -381,7 +381,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             (EnterpriseHB) session.get(EnterpriseHB.class, enterprise.getId());
         try
         {
-            checkEditLimits(enterpriseHB, enterprise);
+            checkEditLimits(enterpriseHB, enterprise, userSession);
         }
         catch (HardLimitExceededException e)
         {
@@ -433,7 +433,8 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
     }
 
     protected void checkEditLimits(final EnterpriseHB currentEnterprise,
-        final Enterprise newEnterprise) throws HardLimitExceededException
+        final Enterprise newEnterprise, final UserSession userSession)
+        throws HardLimitExceededException
     {
         // community impl (no limits at all)
     }

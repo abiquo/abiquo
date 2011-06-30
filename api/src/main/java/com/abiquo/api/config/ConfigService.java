@@ -48,6 +48,7 @@ public class ConfigService
     public static String getSecurityMode()
     {
         return getSystemProperty(SECURITY_MODE, User.AuthType.ABIQUO.toString());
+
     }
 
     public static String getServerTimeout()
