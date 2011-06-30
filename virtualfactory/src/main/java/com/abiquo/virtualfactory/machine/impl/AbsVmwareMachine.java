@@ -511,6 +511,15 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // Force to power off the machine before deleting
             powerOffMachine();
 
+            if (vmConfig.getVirtualDiskBase().isHa())
+            {
+                executeTaskOnVM(VMTasks.UNREGISTER);
+            }
+            else
+            {
+                executeTaskOnVM(VMTasks.DELETE);
+            }
+
             // if we have connection with the vCenter, unregister the 'orphaned' machine.
             // Do nothing
             if (vCenterBridge != null)
@@ -524,15 +533,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     logger.warn("Could not unregister Virtual Machine '" + config.getMachineName()
                         + "' and it will be 'orphaned'");
                 }
-            }
-
-            if (vmConfig.getVirtualDiskBase().isHa())
-            {
-                executeTaskOnVM(VMTasks.UNREGISTER);
-            }
-            else
-            {
-                executeTaskOnVM(VMTasks.DELETE);
             }
 
             try

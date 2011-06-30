@@ -188,7 +188,8 @@ public class OVFPackageInstanceResource extends AbstractResource
     private Response evalStatus(String idEnterprise, String ovfId)
     {
         OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
-            getOVFPackageInstanceStatus(idEnterprise, ovfId);
+            getOVFPackageInstanceStatus(idEnterprise, ovfId); 
+        
         if (ovfPackageInstanceStatus == null)
         {
             return Response.status(Status.NOT_FOUND).build();
@@ -209,6 +210,14 @@ public class OVFPackageInstanceResource extends AbstractResource
             ovfPackageInstanceStatus.setProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
+        
+        if (OVFPackageInstanceStatusType.DOWNLOADING.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        
+        
         ovfPackageInstanceStatus.setProgress(100d);
         return Response.ok(ovfPackageInstanceStatus).build();
     }

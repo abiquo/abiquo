@@ -127,7 +127,10 @@ public class VmwareMachine extends AbsVmwareMachine
             }
             else
             {
-                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort});
+                vncPwd = new OptionValue();
+                vncPwd.setKey("RemoteDisplay.vnc.password");
+                vncPwd.setValue("");
+                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort, vncPwd});
             }
         }
     }

@@ -6,6 +6,10 @@
 -- 4th -> Triggers 
 -- 5th -> SQL Procedures
 
+-- [ABICLOUDPREMIUM-1954]
+-- Enlarge the vswitchName field
+ALTER TABLE physicalmachine modify column vswitchName varchar(200) NOT NULL;
+
 -- [ABICLOUDPREMIUM-1502]
 -- Fix int precision
 ALTER TABLE `kinton`.`vappstateful_conversions` MODIFY COLUMN `idUser` int(10) unsigned NOT NULL;
@@ -694,6 +698,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
         DECLARE idImage INTEGER;
         DECLARE idDataCenterObj INTEGER;
         DECLARE idEnterpriseObj INTEGER;
+        DECLARE reservedSize BIGINT;
         DECLARE ipAddress VARCHAR(20);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
             --	   
@@ -703,6 +708,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 FROM volume_management vm
                 WHERE vm.idManagement = OLD.idManagement;     
                 --
+		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateRASD: ',idState,' - ', IFNULL(OLD.idVirtualApp, 'OLD.idVirtualApp es NULL'), IFNULL(NEW.idVirtualApp, 'NEW.idVirtualApp es NULL')));	
 		-- Detectamos cambios de VDC: V2V
 		IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NOT NULL AND OLD.idVirtualDataCenter != NEW.idVirtualDataCenter AND OLD.idVirtualApp = NEW.idVirtualApp THEN
 			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1, volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
@@ -717,7 +723,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 		            UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			END IF;
-			-- Volume removed from a Vapp
+			-- Volume added from a Vapp
 			IF OLD.idVirtualApp IS NULL AND NEW.idVirtualApp IS NOT NULL THEN       
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualApp = NEW.idVirtualApp;      
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
@@ -726,13 +732,30 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
 			    END IF;                         
 			END IF;
-			-- Volume added from a Vapp
+			-- Volume removed from a Vapp
 			IF OLD.idVirtualApp IS NOT NULL AND NEW.idVirtualApp IS NULL THEN
 			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualApp = OLD.idVirtualApp;
 			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			    IF idState = 1 THEN
+				SELECT vdc.idEnterprise, vdc.idDataCenter INTO idEnterpriseObj, idDataCenterObj
+				FROM virtualdatacenter vdc
+				WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;
+				SELECT r.limitResource INTO reservedSize
+				FROM rasd r
+				WHERE r.instanceID = OLD.idResource;
+				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
+				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
+				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
+				UPDATE IGNORE enterprise_resources_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE dc_enterprise_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE vdc_enterprise_stats 
+				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
+				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
 			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
-			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
 			    END IF;                 
 			END IF;
 			-- Volume added to VDC
@@ -896,25 +919,28 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
         FROM storage_pool sp, storage_device sd
         WHERE OLD.idStorage = sp.idStorage
         AND sp.idStorageDevice = sd.id;
-        
+        --      
         SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
         FROM rasd_management rasd, virtualapp vapp
         WHERE OLD.idManagement = rasd.idManagement
         AND rasd.idVirtualApp = vapp.idVirtualApp;
-        
+        --
         SELECT vdc.idEnterprise INTO idEnterpriseObj
         FROM virtualdatacenter vdc
         WHERE vdc.idVirtualDataCenter = idVirtualDataCenterObj;
-        
+        --
         SELECT r.limitResource INTO reservedSize
         FROM rasd_management rm, rasd r
         WHERE rm.idManagement = NEW.idManagement
         AND r.instanceID = rm.idResource;
-        
+        --
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), IFNULL(idVirtualDataCenterObj, 'idVirtualDataCenterObj es NULL'), IFNULL(idDataCenterObj, 'idDataCenterObj es NULL')));
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',OLD.state, NEW.state, reservedSize));
+	-- 
         IF NEW.state != OLD.state THEN
             IF NEW.state = 1 THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
-    UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
+		UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE enterprise_resources_stats 
                     SET     extStorageUsed = extStorageUsed +  reservedSize
                     WHERE idEnterprise = idEnterpriseObj;
@@ -925,19 +951,7 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
                     SET     volAttached = volAttached + 1, extStorageUsed = extStorageUsed +  reservedSize
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
             END IF;     
-            IF OLD.state = 1 THEN 
-                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = idVirtualAppObj;
-                UPDATE IGNORE enterprise_resources_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE dc_enterprise_stats 
-                    SET     extStorageUsed = extStorageUsed +  reservedSize
-                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
-                UPDATE IGNORE vdc_enterprise_stats 
-                    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed +  reservedSize
-                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            END IF;
+	-- IF OLD.state = 1 ====> This is done in update_rasd_management_update_stats
         END IF;
     END IF;
     END;
@@ -1527,3 +1541,66 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 |
 DELIMITER ;
+
+--
+-- Datastore rootPath longer
+--
+
+alter table kinton.datastore modify rootPath varchar(42) NOT NULL;
+
+--
+-- System properties
+--
+
+
+/*!40000 ALTER TABLE `kinton`.`system_properties` DISABLE KEYS */;
+LOCK TABLES `kinton`.`system_properties` WRITE;
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
+ ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
+ ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI17/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
+ ("client.wiki.infra.createDatacenter","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-CreatingaDatacenter","datacenter creation wiki"), 
+ ("client.wiki.infra.editDatacenter","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-ModifyingaDatacenter","datacenter edition wiki"), 
+ ("client.wiki.infra.editRemoteService","http://community.abiquo.com/display/ABI17/Managing+Datacenters#ManagingDatacenters-RemoteServices","remote service edition wiki"), 
+ ("client.wiki.infra.createPhysicalMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingPhysicalMachines","physical machine creation wiki"),
+ ("client.wiki.infra.mailNotification","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Sendingemailnotifications","mail notification wiki"),
+ ("client.wiki.infra.addDatastore","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Datastoresmanagement","Datastore manager wiki"),
+ ("client.wiki.infra.createRack","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingRacks","rack creation wiki"),
+ ("client.wiki.infra.createMultiplePhysicalMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Createmultiplesphysicalmachines.","multiple physical machine creation wiki"),
+ ("client.wiki.network.publicVlan","http://community.abiquo.com/display/ABI17/Manage+Networking+Configuration#ManageNetworkingConfiguration-PublicVLANManagement","public vlan creation wiki"),
+ ("client.wiki.storage.storageDevice","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StorageDevicemanagement","storage device creation wiki"),
+ ("client.wiki.storage.storagePool","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-StoragePoolmanagement","storage pool creation wiki"), 
+ ("client.wiki.storage.tier","http://community.abiquo.com/display/ABI17/Manage+External+Storage+%281.7.5%29#ManageExternalStorage%281.7.5%29-TierManagement","tier edition wiki"),
+ ("client.wiki.allocation.global","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Globalrulesmanagement","global rules wiki"),
+ ("client.wiki.allocation.datacenter","http://community.abiquo.com/display/ABI17/Manage+Allocation+Rules#ManageAllocationRules-Datacenterrulesmanagement","datacenter rules wiki"),
+ ("client.wiki.vdc.createVdc","http://community.abiquo.com/display/ABI17/Manage+Virtual+Datacenters#ManageVirtualDatacenters-CreatingaVirtualDatacenter","virtual datacenter creation wiki"),
+ ("client.wiki.vdc.createVapp","http://community.abiquo.com/display/ABI17/Basic+operations#Basicoperations-CreatinganewVirtualAppliance","virtual app creation wiki"),
+ ("client.wiki.vdc.createPrivateNetwork","http://community.abiquo.com/display/ABI17/Manage+Networks#ManageNetworks-PrivateIPaddresses","VDC private network creation wiki"),
+ ("client.wiki.vdc.createPublicNetwork","http://community.abiquo.com/display/ABI17/Manage+Networks#ManageNetworks-PublicIPreservation","VDC public network creation wiki"),
+ ("client.wiki.vdc.createVolume","http://community.abiquo.com/display/ABI17/Manage+Virtual+Storage#ManageVirtualStorage-CreatingaVolume","VDC virtual volume creation wiki"),
+ ("client.wiki.vm.editVirtualMachine","http://community.abiquo.com/display/ABI17/Configure+Virtual+Machines","Virtual Machine edition wiki"),
+ ("client.wiki.vm.bundleVirtualMachine","http://community.abiquo.com/display/ABI17/Configure+a+Virtual+Appliance#ConfigureaVirtualAppliance-Configure","Bundles VM wiki"),
+ ("client.wiki.vm.createNetworkInterface","http://community.abiquo.com/display/ABI17/Configure+Virtual+Machines#ConfigureVirtualMachines-CreatinganewNetworkInterface","Network Interface creation wiki"),
+ ("client.wiki.vm.createInstance","http://community.abiquo.com/display/ABI17/Create+Virtual+Machine+instances","Virtual Machine instance creation wiki"),
+ ("client.wiki.vm.createStateful","http://community.abiquo.com/display/ABI17/Create+Stateful+Virtual+Machines","Virtual Machine stateful creation wiki"),
+ ("client.wiki.vm.captureVirtualMachine","http://community.abiquo.com/display/ABI17/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-Importaretrievedmachine.","Capture Virtual Machine wiki"),
+ ("client.wiki.apps.uploadVM","http://community.abiquo.com/display/ABI17/Adding+virtual+images+into+the+repository#Addingvirtualimagesintotherepository-Uploadingfromourlocalfilesystem","Virtual Image upload wiki"),
+ ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-CreatingoreditinganEnterprise","Enterprise creation wiki"),
+ ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI17/Manage+Enterprises#ManageEnterprises-Datacenters","Datacenter Limits wiki"),
+ ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI17/Manage+Users#ManageUsers-Creatingoreditinganuser","User creation wiki"),
+ ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI18/Manage+Roles","Role creation wiki"),
+ ("client.wiki.config.general","http://community.abiquo.com/display/ABI17/Configuration+view","Configuration wiki"),
+ ("client.wiki.config.heartbeat","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Heartbeating","Heartbeat configuration wiki"),
+ ("client.wiki.config.licence","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-Licensemanagement","Licence configuration wiki"),
+ ("client.wiki.config.registration","http://community.abiquo.com/display/ABI17/Configuration+view#Configurationview-ProductRegistration","Registration wiki"),
+ ("client.main.billingUrl","","URL displayed when the report header logo is clicked, if empty the report button will not be displayed");
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
+
+ALTER TABLE `kinton`.`enterprise` ADD `isReservationRestricted` tinyint(1) DEFAULT 0
+
+-- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
+update volume_management set state = 1 where state = 2;
+
+-- [ABICLOUDPREMIUM-1933] Change the default value
+UPDATE  `kinton`.`system_properties`  Set value ='1' where name='client.dashboard.showStartUpAlert';

@@ -29,7 +29,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 
 import com.abiquo.abiserver.appslibrary.AppsLibraryRecovery;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
@@ -65,7 +64,6 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 import com.abiquo.server.core.infrastructure.Repository;
 
-@Controller
 public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryCommand
 {
 
@@ -77,8 +75,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
-        .getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace =
+        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -141,8 +139,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]",
-                        idDatacenter.toString());
+                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
+                        .toString());
             }
 
             factory.rollbackConnection();
