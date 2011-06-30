@@ -637,6 +637,12 @@ public class RESTBuilder implements IRESTBuilder
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
+        // If the list is empty, we don't return the links
+        if (list.size() == 0)
+        {
+            return links;
+        }
+
         // Add FIRST element
         links.add(new RESTLink(FIRST, absolutePath));
 
