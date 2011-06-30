@@ -30,6 +30,7 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.LimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.SoftLimitExceededException;
@@ -250,19 +251,24 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
                 if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
                     || entity instanceof VirtualDatacenter)
                 {
-                    // UserInfo ui = new UserInfo();
-                    // ui.setId(userSession.getUserIdDb());
-                    // ui.setUsername(userSession.getUser());
-                    // ui.setEnterprise(userSession.getEnterpriseName());
 
                     // TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
-                    // etype, traceMessage, ui);
+                    // etype, traceMessage);
                     DAOFactory daoF = HibernateDAOFactory.instance();
-                    DatacenterHB dc = null;
+                    DatacenterHB dcHB = null;
+                    DataCenter dc = null;
+                    String vdcName =
+                        (virtualDatacenter != null) ? virtualDatacenter.getName() : null;
                     try
                     {
                         daoF.beginConnection();
-                        dc = daoF.getDataCenterDAO().findById(virtualDatacenter.getIdDataCenter());
+                        dcHB =
+                            daoF.getDataCenterDAO().findById(virtualDatacenter.getIdDataCenter());
+                        if (dcHB != null)
+                        {
+                            dc = dcHB.toPojo();
+                        }
+
                     }
                     catch (Exception e)
                     {
@@ -272,9 +278,11 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
                     {
                         daoF.endConnection();
                     }
+
                     BasicCommand.traceLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                        userSession, dc.toPojo(), virtualDatacenter.getName(), traceMessage, null,
-                        null, null, userSession.getUser(), userSession.getEnterpriseName());
+                        userSession, dc, vdcName, traceMessage, null, null, null,
+                        userSession.getUser(), userSession.getEnterpriseName());
+
                 }
                 break;
             default:

@@ -120,8 +120,7 @@ public class LimitExceededException extends AllocatorException
             (entity.getStorageSoft() / BYTES_TO_MB),
             entity.getVlanSoft(),
             entity.getPublicIpsSoft(), //
-            entity.getCpuCountHardLimit(),
-	    entity.getRamHardLimitInMb(),
+            entity.getCpuCountHardLimit(), entity.getRamHardLimitInMb(),
             (entity.getHdHardLimitInMb() / BYTES_TO_MB),
             (entity.getStorageHard() / BYTES_TO_MB),
             entity.getVlanHard(),
