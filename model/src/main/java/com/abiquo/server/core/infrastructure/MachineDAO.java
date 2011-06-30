@@ -36,6 +36,8 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Machine.State;
@@ -126,6 +128,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
     public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
         Criteria criteria = createCriteria(sameRack(rack));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
         // Is a managed one
         criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
@@ -135,11 +138,14 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
 
+        // XenServer does not support HA
+        criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
+            HypervisorType.XENSERVER));
+
         // Order by name
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
 
-        List<Machine> result = getResultList(criteria);
-        return result;
+        return getResultList(criteria);
     }
 
     public boolean existsAnyWithDatacenterAndName(final Datacenter datacenter, final String name)
