@@ -386,7 +386,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
         if (machines == null || machines.size() == 0)
         {
-            Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL);
+            Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_NO_EXCLUDE_ORIGINAL);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
             query
@@ -733,6 +733,21 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "AND m.state = :state " + // reserved machines
             "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
             "AND h.id <> :originalHypervisorId";
+    
+    private final static String QUERY_CANDIDATE_MACHINES_HA_NO_EXCLUDE_ORIGINAL = //
+        "SELECT m FROM " + //
+            "com.abiquo.server.core.infrastructure.Machine m, " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
+            "com.abiquo.server.core.cloud.Hypervisor h " + //
+            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
+            "WHERE m = h.machine " + //
+            "AND h.type = vdc.hypervisorType " + //
+            "AND dc.id = vdc.datacenter.id " + //
+            "AND m.rack.id = :idRack " + //
+            "AND vdc.id = :idVirtualDataCenter " + //
+            "AND m.state = :state " + // reserved machines
+            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId";
+            
 
     private final static String QUERY_CANDIDATE_MACHINES_RESERVED = //
         "SELECT m FROM " + //
