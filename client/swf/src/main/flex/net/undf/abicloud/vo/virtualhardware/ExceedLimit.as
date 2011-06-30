@@ -92,29 +92,29 @@ package net.undf.abicloud.vo.virtualhardware
            cause = String(lines[0]);
            usedCPU = String(used_value[1]).slice(0,String(used_value[1]).search(' '));
            usedRAM = convertValue(String(used_value[2]).slice(0,String(used_value[2]).search(' ')),ExceedLimit.MBYTES);
-           usedHD = convertValue(String(used_value[3]).slice(0,String(used_value[3]).search(' ')));  
-           usedStorage = convertValue(String(used_value[4]).slice(0,String(used_value[4]).search(' ')));
+           usedHD = convertValue(String(used_value[3]).slice(0,String(used_value[3]).search(' ')),ExceedLimit.MBYTES);  
+           usedStorage = convertValue(String(used_value[4]).slice(0,String(used_value[4]).search(' ')),ExceedLimit.MBYTES);
            usedVLAN = String(used_value[5]).slice(0,String(used_value[5]).search(' '));
            usedIP = String(used_value[6]);
                     
            requiredCPU = String(required_value[1]).slice(0,String(required_value[1]).search(' '));
            requiredRAM  = convertValue(String(required_value[2]).slice(0,String(required_value[2]).search(' ')),ExceedLimit.MBYTES);
-           requiredHD= convertValue(String(required_value[3]).slice(0,String(required_value[3]).search(' ')));   
-           requiredStorage = convertValue(String(required_value[4]).slice(0,String(required_value[4]).search(' ')));
+           requiredHD= convertValue(String(required_value[3]).slice(0,String(required_value[3]).search(' ')),ExceedLimit.MBYTES);   
+           requiredStorage = convertValue(String(required_value[4]).slice(0,String(required_value[4]).search(' ')),ExceedLimit.MBYTES);
            requiredVLAN  = String(required_value[5]).slice(0,String(required_value[5]).search(' '));
            requiredIP= String(required_value[6]); 
                     
            softCPU  = displayUnlimitedValue(String(soft_value[1]).slice(0,String(soft_value[1]).search(' ')));
            softRAM  = displayUnlimitedValue(String(soft_value[2]).slice(0,String(soft_value[2]).search(' ')),true,ExceedLimit.MBYTES); 
-           softHD = displayUnlimitedValue(String(soft_value[3]).slice(0,String(soft_value[3]).search(' ')), true);    
-           softStorage  = displayUnlimitedValue(String(soft_value[4]).slice(0,String(soft_value[4]).search(' ')), true);
+           softHD = displayUnlimitedValue(String(soft_value[3]).slice(0,String(soft_value[3]).search(' ')), true,ExceedLimit.MBYTES);    
+           softStorage  = displayUnlimitedValue(String(soft_value[4]).slice(0,String(soft_value[4]).search(' ')), true,ExceedLimit.MBYTES);
            softVLAN  = displayUnlimitedValue(String(soft_value[5]).slice(0,String(soft_value[5]).search(' '))); 
            softIP = displayUnlimitedValue(String(soft_value[6]));
                    
            hardCPU  = displayUnlimitedValue(String(hard_value[1]).slice(0,String(hard_value[1]).search(' ')));
            hardRAM  = displayUnlimitedValue(String(hard_value[2]).slice(0,String(hard_value[2]).search(' ')), true,ExceedLimit.MBYTES); 
-           hardHD = displayUnlimitedValue(String(hard_value[3]).slice(0,String(hard_value[3]).search(' ')), true);
-           hardStorage  = displayUnlimitedValue(String(hard_value[4]).slice(0,String(hard_value[4]).search(' ')), true);
+           hardHD = displayUnlimitedValue(String(hard_value[3]).slice(0,String(hard_value[3]).search(' ')), true,ExceedLimit.MBYTES);
+           hardStorage  = displayUnlimitedValue(String(hard_value[4]).slice(0,String(hard_value[4]).search(' ')), true,ExceedLimit.MBYTES);
            hardVLAN  = displayUnlimitedValue(String(hard_value[5]).slice(0,String(hard_value[5]).search(' '))); 
            hardIP = displayUnlimitedValue(String(hard_value[6])); 
            
