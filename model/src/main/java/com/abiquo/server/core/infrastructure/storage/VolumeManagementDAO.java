@@ -163,7 +163,7 @@ import com.abiquo.server.core.util.PagedList;
 
         String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
 
-        Query query = getSession().getNamedQuery("VOLUMES_BY_POOL");
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_POOL);
 
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
