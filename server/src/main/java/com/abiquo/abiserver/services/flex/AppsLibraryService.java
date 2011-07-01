@@ -824,4 +824,50 @@ public class AppsLibraryService
             AppsLibraryCommand.class);
     }
 
+    /**
+     * Refreshes the instance status of the image.
+     * 
+     * @param userSession current user.
+     * @param idsOvfpackageIn Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return DataResult<OVFPackageInstanceStatus>
+     */
+    public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
+        UserSession userSession, String idsOvfpackageIn, Integer idEnterprise, Integer idRepository)
+    {
+
+        String idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
+
+        DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
+
+        AppsLibraryCommand proxyService = proxyService(userSession);
+        try
+        {
+            OVFPackageInstanceStatusDto statusListDto =
+                proxyService.refreshOVFPackageInstanceStatus(userSession, idsOvfpackage,
+                    idEnterprise, idRepository);
+
+            result.setData(transform(statusListDto));
+            result.setSuccess(true);
+            if (result.getData().getError() != null && !"".equals(result.getData().getError()))
+            {
+                result.setSuccess(false);
+                result.setMessage(result.getData().getError());
+            }
+        }
+        catch (AppsLibraryCommandException e)
+        {
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
+        }
+        catch (UserSessionException e)
+        {
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
+            result.setResultCode(e.getResult().getResultCode());
+        }
+
+        return result;
+    }
 }
