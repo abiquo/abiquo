@@ -305,7 +305,7 @@ public class VolumeManagement extends RasdManagement
     public static enum OrderByEnum
     {
         NAME("elementname", "vol.rasd.elementName"), ID("idman", "vol.id"), VIRTUALDATACENTER(
-            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname", "vol.name"), VIRTUALAPPLIANCE(
+            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname", "vm.name"), VIRTUALAPPLIANCE(
             "vaname", "vapp.name"), TIER("tier", "vol.storagePool.tier.name"), TOTALSIZE("size",
             "vol.rasd.limit"), AVAILABLESIZE("available", "vol.rasd.reservation"), USEDSIZE("used",
             "vol.usedSizeInMB"), STATE("state", "vol.state");
