@@ -105,9 +105,6 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
-            
-            [Bindable]
-			private var _canShare:Boolean;
 			
             private function onCreationComplete():void
             {
@@ -116,6 +113,9 @@
                 
                 //Checking privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
+                
+                //Checking privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.ENTERPRISE_ADMINISTER_ALL, "removeChild",publicImageFormItem,virtualImageFormContainer);
                 
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
@@ -206,12 +206,6 @@
                     titleText = ResourceManager.getInstance().getString("VirtualImage",
                                                                         "POPUP_TITLE_VIRTUALIMAGE_EDIT");
 
-                    //Setting fields
-                    if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == this._virtualImage.idEnterprise){
-                    	this._canShare = true;
-                    }else{
-                    	this._canShare = false;
-                    }
                     nameInput.text = virtualImage.name;
                     descriptionInput.text = virtualImage.description;
                     diskFormatTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.diskFormatTypes.toArray(),
@@ -240,7 +234,6 @@
                                                                         "POPUP_TITLE_VIRTUALIMAGE_ADD");
 
                     //Cleaning fields
-                    this._canShare = true;
                     nameInput.text = "";
                     descriptionInput.text = "";
                     diskFormatTypeInput.selectedIndex = -1;
@@ -797,9 +790,10 @@
             </mx:FormItem>
 
             <mx:FormItem 
+            	id="publicImageFormItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
-                includeInLayout="{this._virtualImage != null &amp;&amp; this._canShare}"
-                visible="{this._virtualImage != null &amp;&amp; this._canShare}">
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
             </mx:FormItem>
