@@ -247,7 +247,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         }
         finally
         {
-            daoF.endConnection();
+            // daoF.endConnection();
         }
 
         String traceMessage = String.format("Not enough resources on %s", entityId);
