@@ -78,4 +78,28 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
 
         return query.list();
     }
+
+    /**
+     * Returns {@link Hypervisor} with same ip and in the same datacenter.
+     */
+    private final String QUERY_SAME_IP_DATACENTER = "SELECT h " + //
+        "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE h.ip = :ip AND h.machine.datacenter.id = :datacenterId";
+
+    /**
+     * {@link Hypervisor} with same ip and in the same datacenter.
+     * 
+     * @param ip {@link Hypervisor} ip.
+     * @param datacenterId {@link Hypervisor} machines datacenter.
+     * @return false is there is no other {@link Hypervisor} with same ip and same datacenter
+     *         boolean
+     */
+    public boolean existsAnyWithIpAndDatacenter(String ip, Integer datacenterId)
+    {
+        Query query = getSession().createQuery(QUERY_SAME_IP_DATACENTER);
+        query.setParameter("ip", ip);
+        query.setParameter("datacenterId", datacenterId);
+
+        return !query.list().isEmpty();
+    }
 }

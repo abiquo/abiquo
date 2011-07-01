@@ -302,8 +302,10 @@ import com.abiquo.server.core.cloud.VirtualMachine;
     private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
+        
         queryString.append(" order by ");
-        queryString.append(orderBy);
+        if(orderBy.equalsIgnoreCase("vol.id")) queryString.append("vol.rasd.id");
+        else queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
