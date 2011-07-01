@@ -385,7 +385,6 @@
         <utils:SmoothImage id="masterImage"
             left="0" top="0"
             creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseMasterImage', masterImage)"
-            toolTip="@Resource(bundle='VirtualImage', key='LABEL_MASTER_EXPLANATION')"
             useHandCursor="true"
             visible="{hasSlaveImage}"
             buttonMode="true"
