@@ -23,6 +23,8 @@ package com.abiquo.scheduler.limit;
 
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +39,16 @@ public class EnterpriseLimitChecker extends EntityLimitChecker<Enterprise>
     @Autowired
     EnterpriseRep enterpriseRep;
 
+    public EnterpriseLimitChecker()
+    {
+        
+    }
+    
+    public EnterpriseLimitChecker(final EntityManager entityManager)
+    {
+        enterpriseRep = new EnterpriseRep(entityManager);
+    }
+    
     @Override
     protected String getEntityIdentifier(Enterprise entity)
     {
