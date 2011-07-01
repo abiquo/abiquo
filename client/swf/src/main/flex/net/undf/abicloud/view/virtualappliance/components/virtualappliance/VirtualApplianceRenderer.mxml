@@ -237,7 +237,7 @@
             private function dateLabelFunction(item:Object, column:DataGridColumn):String
             {
                 var date:Date = Log(item).logDate;
-                return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+                return AbicloudUtils.formatDate(date,true);
             }
         ]]>
     </mx:Script>
