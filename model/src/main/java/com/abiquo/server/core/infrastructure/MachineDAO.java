@@ -313,7 +313,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         }
     }
 
-    private List<Machine> findFirstCandidateMachinesReservedRestrictedHAExclude(
+    protected List<Machine> findFirstCandidateMachinesReservedRestrictedHAExclude(
         final Integer idRack, final Integer idVirtualDatacenter, final Enterprise enterprise,
         final Integer originalHypervisorId)
     {
@@ -392,7 +392,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
         if (machines == null || machines.size() == 0)
         {
-            Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_NO_EXCLUDE_ORIGINAL);
+            Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
             query
@@ -501,9 +501,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             /**
              * rack, hypervisor type and managed state
              */
-            Query query2 =
-                getSession().createQuery(
-                    WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE_AND_RESERVED_RESTRICTED);
+            Query query2 = getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED);
             query2.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query2.setInteger("idRack", idRack);
             query2.setParameter("state",
@@ -569,9 +567,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             /**
              * rack, hypervisor type, managed state and enterprise reservation
              */
-            Query query3 =
-                getSession().createQuery(
-                    WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE_AND_RESERVED);
+            Query query3 = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query3.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query3.setInteger("idRack", idRack);
             query3.setParameter("state",
@@ -623,75 +619,38 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         flush();
     }
 
+    // idVirtualDataCenter, idRack
     private final static String WHY_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE = //
         "SELECT m.id FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.enterprise is null";
 
+    // idVirtualDataCenter, idRack, state
     private final static String WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE = //
         "SELECT m.id FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
             "AND m.state = :state " + //
             "AND m.enterprise is null";
 
+    // reserved, idVirtualDataCenter, idRack
     private final static String WHY_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_RESERVED = //
         "SELECT m.id FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m.id in (:reserveds) " + //
-            "AND m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
-            "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter ";
-
-    private final static String WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE_AND_RESERVED_RESTRICTED = //
-        "SELECT m.id FROM " + //
-            "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m.id in (:reserveds) " + //
-            "AND m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
-            "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state ";
-
-    // "AND m.enterprise is null OR m.enterprise.id = :enterpriseId "; // reserved machines
-
-    private final static String WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE_AND_RESERVED = //
-        "SELECT m.id FROM " + //
-            "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
-            "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + //
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId "; // reserved machines
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE m.id in (:reserveds) AND " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
+            "AND m.rack.id = :idRack ";
 
     private final static String QUERY_CANDIDATE_NO_ENTERPRISE_EXCLUDED = //
         "SELECT DISTINCT vm.hypervisor.machine.id "
@@ -711,91 +670,65 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             + "      ( SELECT rule.enterprise1.id FROM com.abiquo.server.core.scheduler.EnterpriseExclusionRule rule WHERE rule.enterprise2.id = :enterpriseId )"
             + "   ) ";
 
+    // idVirtualDataCenter, idRack, state, enterprise
     private final static String QUERY_CANDIDATE_MACHINES = //
         "SELECT m FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + // reserved machines
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
+            "AND m.state = :state " + //
+            "AND (m.enterprise is null OR m.enterprise.id = :enterpriseId) ";
 
+    /**
+     * HA related
+     */
+
+    // idVirtualDataCenter, idRack, state, enterprise, originalHypervisorId
     private final static String QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL = //
         "SELECT m FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + // reserved machines
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
-            "AND h.id <> :originalHypervisorId";
-    
-    private final static String QUERY_CANDIDATE_MACHINES_HA_NO_EXCLUDE_ORIGINAL = //
-        "SELECT m FROM " + //
-            "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
-            "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + // reserved machines
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId";
-            
+            "AND m.state = :state " + //
+            "AND (m.enterprise is null OR m.enterprise.id = :enterpriseId) " + //
+            "AND m.hypervisor.id <> :originalHypervisorId";
 
+    // reserved, idVirtualDataCenter, idRack, state
     private final static String QUERY_CANDIDATE_MACHINES_RESERVED = //
         "SELECT m FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m.id in (:reserveds) " + //
-            "AND m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE m.id in (:reserveds) AND " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state ";// + // reserved machines
+            "AND m.state = :state ";
 
+    // reserved, idVirtualDataCenter, idRack, state, enterprise, orignalHypervisorId
     private final static String QUERY_CANDIDATE_MACHINES_RESERVED_HA_EXCLUDE_ORIGINAL = //
         "SELECT m FROM " + //
             "com.abiquo.server.core.infrastructure.Machine m, " + //
-            "com.abiquo.server.core.cloud.VirtualDatacenter vdc, " + //
-            "com.abiquo.server.core.cloud.Hypervisor h " + //
-            "JOIN m.datacenter dc " + // managed machine on the VDC and Rack
-            "WHERE m.id in (:reserveds) " + //
-            "AND m = h.machine " + //
-            "AND h.type = vdc.hypervisorType " + //
-            "AND dc.id = vdc.datacenter.id " + //
+            "com.abiquo.server.core.cloud.VirtualDatacenter vdc " + //
+            "WHERE m.id in (:reserveds) AND " + //
+            "vdc.id = :idVirtualDataCenter " + //
+            "AND m.hypervisor.type = vdc.hypervisorType " + //
             "AND m.rack.id = :idRack " + //
-            "AND vdc.id = :idVirtualDataCenter " + //
-            "AND m.state = :state " + // reserved machines
-            "AND m.enterprise is null OR m.enterprise.id = :enterpriseId " + //
-            "AND h.id <> :originalHypervisorId";
-
-    // "AND m.enterprise is null"; //"AND m.enterprise is null OR m.enterprise.id = :enterpriseId ";
+            "AND m.state = :state " + //
+            "AND (m.enterprise is null OR m.enterprise.id = :enterpriseId) " + //
+            "AND m.hypervisor.id <> :originalHypervisorId";
 
     private final static String QUERY_CANDIDATE_DATASTORE = //
-        "  SELECT py.id FROM "
-            + //
-            "  com.abiquo.server.core.infrastructure.Datastore datastore, "
-            + //
-            "  com.abiquo.server.core.infrastructure.Machine py "
-            + //
-            "    WHERE py.id in (:candidates)"
-            + "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
+        "  SELECT py.id FROM " + //
+            "  com.abiquo.server.core.infrastructure.Datastore datastore, " + //
+            "  com.abiquo.server.core.infrastructure.Machine py " + //
+            "    WHERE py.id in (:candidates)" + //
+            "    AND (datastore.size - datastore.usedSize) > :hdRequiredOnRepository " + //
             "    AND py in elements(datastore.machines) " + //
             "    AND datastore.size > datastore.usedSize " + //
             "    AND datastore.enabled = true";
