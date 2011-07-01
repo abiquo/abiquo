@@ -331,8 +331,8 @@
                 click="onClickRefreshDatacenterResourcesButton()"/>
 
             <mx:Button id="editButton"
-                enabled="{this._selectedInfrastructureElement != null &amp;&amp; !this._isUcs }"
-                styleName="ConfigurationButton"
+                enabled="{this._selectedInfrastructureElement != null &amp;&amp; (!this._isUcs || this._ucsMachineEditable )}" 
+		styleName="ConfigurationButton"
                 toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
                 click="onClickEditInfrastructureElement()"/>
         </mx:HBox>
