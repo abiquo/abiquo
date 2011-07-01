@@ -162,6 +162,12 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByEnterprise(id, filters);
     }
 
+    public List<VolumeManagement> findVolumesByPool(final StoragePool pool,
+        final FilterOptions filters) throws Exception
+    {
+        return volumeDAO.getVolumesByPool(pool, filters);
+    }
+
     public Tier insertTier(final Tier tier)
     {
         tierDAO.persist(tier);
