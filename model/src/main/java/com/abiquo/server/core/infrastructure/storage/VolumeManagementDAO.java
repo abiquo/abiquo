@@ -37,11 +37,11 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
-import com.abiquo.server.core.cloud.VirtualMachine;
 
 @Repository("jpaVolumeManagementDAO")
 /* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
@@ -255,8 +255,8 @@ import com.abiquo.server.core.cloud.VirtualMachine;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike",
-            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
+        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 
@@ -302,10 +302,12 @@ import com.abiquo.server.core.cloud.VirtualMachine;
     private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
-        
+
         queryString.append(" order by ");
-        if(orderBy.equalsIgnoreCase("vol.id")) queryString.append("vol.rasd.id");
-        else queryString.append(orderBy);
+        if (orderBy.equalsIgnoreCase("vol.id"))
+            queryString.append("vol.rasd.id");
+        else
+            queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
@@ -339,14 +341,15 @@ import com.abiquo.server.core.cloud.VirtualMachine;
     {
         return Restrictions.eq(VolumeManagement.ID_PROPERTY, id);
     }
-    
-     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
-     {
-         Criteria criteria = createCriteria(sameVirtualMachine(vm));
-         return getResultList(criteria);
-     }
-     private static Criterion sameVirtualMachine(final VirtualMachine vm)
-     {
-         return Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_PROPERTY, vm);
-     }
+
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+    {
+        Criteria criteria = createCriteria(sameVirtualMachine(vm));
+        return getResultList(criteria);
+    }
+
+    private static Criterion sameVirtualMachine(final VirtualMachine vm)
+    {
+        return Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_PROPERTY, vm);
+    }
 }

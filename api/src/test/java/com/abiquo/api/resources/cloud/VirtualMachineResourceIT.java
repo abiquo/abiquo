@@ -198,8 +198,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage());
-	entitiesToSetup.add(machine);
-	entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(nvi);
 
@@ -211,8 +211,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage());
-	entitiesToSetup.add(machine2);
-	entitiesToSetup.add(vm2.getHypervisor());
+        entitiesToSetup.add(machine2);
+        entitiesToSetup.add(vm2.getHypervisor());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(nvi2);
 

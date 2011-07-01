@@ -49,19 +49,20 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP =
+        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
+            + "WHERE nvi.virtualAppliance.id = :vapp_id";
 
-    public static final String BY_DC = "SELECT vm "
-        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-        + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC =
+        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+            + " AND pm.datacenter.id = :datacenterId";
 
     public static final int MANAGED = 1;
 
@@ -470,7 +471,6 @@ public class VirtualMachine extends DefaultEntityBase
         this.state = state;
     }
 
-
     public final static String PASSWORD_PROPERTY = "password";
 
     private final static boolean PASSWORD_REQUIRED = false;
@@ -494,11 +494,10 @@ public class VirtualMachine extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
-
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
         final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,

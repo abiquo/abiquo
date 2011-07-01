@@ -124,6 +124,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.vdrpIp = vdrpIp;
     }
 
+    private int idState;
+
+    public int getIdState()
+    {
+        return idState;
+    }
+
+    public void setIdState(final int idState)
+    {
+        this.idState = idState;
+    }
+
     private int highDisponibility;
 
     public int getHighDisponibility()
@@ -167,7 +179,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
