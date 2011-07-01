@@ -47,13 +47,17 @@ import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
@@ -94,14 +98,20 @@ public class EnterpriseResource extends AbstractResource
     @Autowired
     VirtualMachineService vmService;
 
+    @Autowired
+    DatacenterService dcService;
+
+    @Autowired
+    VirtualDatacenterService vdcService;
+
+    @Autowired
+    VirtualApplianceService vappService;
+
     @Context
     UriInfo uriInfo;
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    VirtualDatacenterService vdcService;
 
     @Autowired
     SecurityService securityService;
@@ -200,10 +210,19 @@ public class EnterpriseResource extends AbstractResource
     {
 
         Enterprise enterprise = service.getEnterprise(enterpriseId);
+        Collection<NodeVirtualImage> nvimgs =
+            vdcService.getNodeVirtualImageByEnterprise(enterprise);
 
-        Collection<VirtualMachine> vms = vmService.findByEnterprise(enterprise);
+        VirtualMachinesDto vmDto = new VirtualMachinesDto();
+        for (NodeVirtualImage nvimg : nvimgs)
+        {
+            VirtualAppliance vapp = nvimg.getVirtualAppliance();
+            VirtualMachine vm = nvimg.getVirtualMachine();
 
-        return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+            vmDto.add(VirtualMachinesResource.createCloudAdminTransferObject(vm, vapp
+                .getVirtualDatacenter().getId(), vapp.getId(), restBuilder));
+        }
+        return vmDto;
 
     }
 
