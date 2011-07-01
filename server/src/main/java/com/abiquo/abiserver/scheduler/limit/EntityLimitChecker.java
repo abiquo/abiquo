@@ -48,7 +48,19 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 
     public enum LimitResource
     {
-        STORAGE, VLAN, PUBLICIP;
+        STORAGE("storage"), VLAN("vlan"), PUBLICIP("public ip");
+        
+        private String entityName;
+        
+        private LimitResource(String entityname)
+        {
+            this.entityName = entityname;
+        }
+        
+        public String getEntityName()
+        {
+            return this.entityName;
+        }
     }
 
     /**
