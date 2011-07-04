@@ -18,21 +18,19 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.model.enumerator;
 
-/**
- * The volume state.
- * <p>
- * <b>IMPORTANT:</b> Do not change the order of the elements of the enum. If more values need to be
- * added they must be added at the end.
- * 
- * @author abiquo
- */
-public enum VolumeState
+package com.abiquo.server.core.cloud.stateful;
+
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
+
+public class NodeVirtualImageStatefulConversionTest extends
+    DefaultEntityTestBase<NodeVirtualImageStatefulConversion>
 {
-    /** The volume is not attached to a virtual machine. */
-    DETACHED,
 
-    /** The volume is attached to a virtual machine. */
-    ATTACHED
+    @Override
+    protected InstanceTester<NodeVirtualImageStatefulConversion> createEntityInstanceGenerator()
+    {
+        return new NodeVirtualImageStatefulConversionGenerator(getSeed());
+    }
 }

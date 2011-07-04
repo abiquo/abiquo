@@ -270,13 +270,19 @@ public enum APIError
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
-        "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
-        "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-7",
-        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
-        "VOL-13", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
-        "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
-        "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_RESIZE_STATEFUL(
+        "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
+        "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
+        "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
+        "VOL-7", "The volume cannot be deleted because it is in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
+        "VOL-8",
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
+        "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
+        "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
+        "VOL-12", "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-13",
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_IN_USE(
+        "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
+        "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"),
 
