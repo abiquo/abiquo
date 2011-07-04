@@ -951,7 +951,7 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
                     SET     volAttached = volAttached + 1, extStorageUsed = extStorageUsed +  reservedSize
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
             END IF;     
-	-- IF OLD.state = 1 ====> This is done in update_rasd_management_update_stats
+	-- IF OLD.state = 1 *****> This is done in update_rasd_management_update_stats
         END IF;
     END IF;
     END;
@@ -1604,3 +1604,15 @@ update volume_management set state = 1 where state = 2;
 
 -- [ABICLOUDPREMIUM-1933] Change the default value
 UPDATE  `kinton`.`system_properties`  Set value ='1' where name='client.dashboard.showStartUpAlert';
+
+
+
+-- 
+-- DO NOT DELETE
+-- [ABICLOUDPREMIUM-1460] Statistics Information MUST be updated in each upgrade
+CALL `kinton`.`CalculateCloudUsageStats`();
+CALL `kinton`.`CalculateEnterpriseResourcesStats`();
+CALL `kinton`.`CalculateVappEnterpriseStats`();
+CALL `kinton`.`CalculateVdcEnterpriseStats`();
+-- These calls should be included in every DB Delta
+-- 
