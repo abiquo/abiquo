@@ -273,7 +273,12 @@ public enum APIError
         "An unexpected error occured while creating the volume"), VOLUME_ISCSI_NOT_FOUND("VOL-5",
         "The idScsi of the volume is required"), VOLUME_ISCSI_INVALID("VOL-6",
         "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-7",
-        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX),
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-13", "The size of the volume cannot be decreased"), VOLUME_IN_USE("VOL-14",
+        "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
+        "VOL-15", "An unexpected error occurred and the bvolume could not be updated"), VOLUME_RESIZE_STATEFUL(
+        "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
+        "Cannot resize a generic Iscsi volume"),
 
     ;
 
@@ -326,8 +331,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

@@ -234,4 +234,8 @@ public class StorageRep extends DefaultRepBase
         poolDAO.flush();
     }
 
+    public void updateVolume(final VolumeManagement volume)
+    {
+        volumeDAO.flush();
+    }
 }

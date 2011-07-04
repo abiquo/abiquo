@@ -155,6 +155,11 @@ public class VolumeManagement extends RasdManagement
         this.virtualImage = virtualImage;
     }
 
+    public boolean isStateful()
+    {
+        return virtualImage != null;
+    }
+
     public final static String ID_SCSI_PROPERTY = "idScsi";
 
     private final static boolean ID_SCSI_REQUIRED = false;

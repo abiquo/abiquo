@@ -58,7 +58,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
