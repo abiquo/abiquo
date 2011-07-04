@@ -163,7 +163,7 @@ import com.abiquo.server.core.util.PagedList;
 
         String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
 
-        Query query = getSession().getNamedQuery("VOLUMES_BY_POOL");
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_POOL);
 
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
@@ -288,8 +288,10 @@ import com.abiquo.server.core.util.PagedList;
     private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
+        
         queryString.append(" order by ");
-        queryString.append(orderBy);
+        if(orderBy.equalsIgnoreCase("vol.id")) queryString.append("vol.rasd.id");
+        else queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
