@@ -1616,3 +1616,7 @@ CALL `kinton`.`CalculateVappEnterpriseStats`();
 CALL `kinton`.`CalculateVdcEnterpriseStats`();
 -- These calls should be included in every DB Delta
 -- 
+
+-- [UCS]Add the specific wiki link for discovering blades form
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");

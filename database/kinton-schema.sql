@@ -1366,6 +1366,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.infra.addDatastore","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DatastoresManagement","Datastore manager wiki"),
  ("client.wiki.infra.createRack","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingRacks","rack creation wiki"),
  ("client.wiki.infra.createMultiplePhysicalMachine","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-CreatingMultiplePhysicalMachines","multiple physical machine creation wiki"),
+ ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki"),
  ("client.wiki.network.publicVlan","http://community.abiquo.com/display/ABI18/Manage+Network+Configuration#ManageNetworkConfiguration-ManagePublicVLANs","public vlan creation wiki"),
  ("client.wiki.storage.storageDevice","http://community.abiquo.com/display/ABI18/Managing+External+Storage#ManagingExternalStorage-ManagingManagedStorageDevices","storage device creation wiki"),
  ("client.wiki.storage.storagePool","http://community.abiquo.com/display/ABI18/Managing+External+Storage#ManagingExternalStorage-StoragePools","storage pool creation wiki"), 
