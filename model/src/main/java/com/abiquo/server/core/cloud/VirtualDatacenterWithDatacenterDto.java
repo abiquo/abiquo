@@ -18,21 +18,27 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.model.enumerator;
 
-/**
- * The volume state.
- * <p>
- * <b>IMPORTANT:</b> Do not change the order of the elements of the enum. If more values need to be
- * added they must be added at the end.
- * 
- * @author abiquo
- */
-public enum VolumeState
+package com.abiquo.server.core.cloud;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.server.core.infrastructure.DatacenterDto;
+
+@XmlRootElement(name = "virtualDatacenterWithDatacenter")
+public class VirtualDatacenterWithDatacenterDto extends VirtualDatacenterDto
 {
-    /** The volume is not attached to a virtual machine. */
-    DETACHED,
+    private static final long serialVersionUID = 1L;
 
-    /** The volume is attached to a virtual machine. */
-    ATTACHED
+    private DatacenterDto datacenter;
+
+    public void setDatacenter(final DatacenterDto datacenter)
+    {
+        this.datacenter = datacenter;
+    }
+
+    public DatacenterDto getDatacenter()
+    {
+        return datacenter;
+    }
 }

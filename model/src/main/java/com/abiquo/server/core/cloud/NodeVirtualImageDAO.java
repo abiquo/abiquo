@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
@@ -37,26 +39,40 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         super(NodeVirtualImage.class);
     }
 
-    public NodeVirtualImageDAO(EntityManager entityManager)
+    public NodeVirtualImageDAO(final EntityManager entityManager)
     {
         super(NodeVirtualImage.class, entityManager);
     }
 
-    private Criteria sameVirtualMachine(VirtualMachine vmachine)
+    private Criteria sameVirtualMachine(final VirtualMachine vmachine)
     {
         Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY);
         crit.add(Restrictions.eq(VirtualMachine.ID_PROPERTY, vmachine.getId()));
         return crit;
     }
 
-    public VirtualAppliance findVirtualAppliance(VirtualMachine vmachine)
+    public VirtualAppliance findVirtualAppliance(final VirtualMachine vmachine)
     {
-        return findByVirtualMachine(vmachine).getVirtualAppliance();
+        NodeVirtualImage nvi = findByVirtualMachine(vmachine);
+        return nvi == null ? null : nvi.getVirtualAppliance();
     }
 
-    public NodeVirtualImage findByVirtualMachine(VirtualMachine vmachine)
+    public NodeVirtualImage findByVirtualMachine(final VirtualMachine vmachine)
     {
         Criteria criteria = sameVirtualMachine(vmachine);
         return (NodeVirtualImage) criteria.uniqueResult();
+    }
+
+    public List<NodeVirtualImage> findByVirtualImage(final VirtualImage virtualImage)
+    {
+        Criteria criteria = sameVirtualImage(virtualImage);
+        return getResultList(criteria);
+    }
+
+    private Criteria sameVirtualImage(final VirtualImage virtualImage)
+    {
+        Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_IMAGE_PROPERTY);
+        crit.add(Restrictions.eq(VirtualImage.ID_PROPERTY, virtualImage.getId()));
+        return crit;
     }
 }

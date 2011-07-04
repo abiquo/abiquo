@@ -19,45 +19,39 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.exceptions;
+package com.abiquo.server.core.cloud.stateful;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-import org.testng.annotations.Test;
-
-public class APIErrorTest
+@XmlRootElement(name = "nodeVirtualImageStatefulConversion")
+public class NodeVirtualImageStatefulConversionDto extends SingleResourceTransportDto
 {
-    @Test
-    public void testUniqueCodes()
-    {
-        Set<String> codes = new HashSet<String>();
+    private static final long serialVersionUID = -7925016301617309142L;
 
-        for (APIError error : APIError.values())
-        {
-            assertFalse(codes.contains(error.getCode()), error.getCode() + " is repeated");
-            codes.add(error.getCode());
-        }
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
     }
 
-    @Test
-    public void testNotEmptyCodes()
+    public void setId(final Integer id)
     {
-        for (APIError error : APIError.values())
-        {
-            assertTrue(error.getCode().length() > 0);
-        }
+        this.id = id;
     }
 
-    @Test
-    public void testNotEmptyMessages()
+    private String newName;
+
+    public String getNewName()
     {
-        for (APIError error : APIError.values())
-        {
-            assertTrue(error.getMessage().length() > 0);
-        }
+        return newName;
     }
+
+    public void setNewName(final String newName)
+    {
+        this.newName = newName;
+    }
+
 }
