@@ -80,7 +80,7 @@ public enum EventType implements Serializable
         "Storage Pool deleted"), VOLUME_CREATE(406, "VOLUME_CREATE", "Volume created"), VOLUME_MODIFY(
         407, "VOLUME_MODIFY", "Volume modified"), VOLUME_DELETE(408, "VOLUME_DELETE",
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
-            410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
+        410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
         413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
 

@@ -187,6 +187,11 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                             VirtualMachineConfigInfo vmConfig =
                                 esx.getVMConfigFromObjectContent(vm);
 
+                            if (vmConfig == null)
+                            {
+                                continue;
+                            }
+
                             // Save the VM in the list of current VMs
                             String vmName = vmConfig.getName();
                             currentVMs.add(vmName);

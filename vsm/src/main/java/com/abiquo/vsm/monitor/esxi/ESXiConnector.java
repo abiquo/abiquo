@@ -20,6 +20,7 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
+import java.awt.color.CMMException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -45,7 +46,7 @@ import com.vmware.vim25.mo.ServiceInstance;
 
 /**
  * WMI Connector for ESXi monitoring tasks.
- *
+ * 
  * @author ibarrera
  */
 public class ESXiConnector
@@ -98,7 +99,7 @@ public class ESXiConnector
 
     /**
      * Connects to the hypervisor.
-     *
+     * 
      * @param physicalMachineAddress The address of the hypervisor.
      * @param username The user name used to connect to the hypervisor.
      * @param password The password used to connect to the hypervisor.
@@ -133,7 +134,7 @@ public class ESXiConnector
 
     /**
      * Get the state of the specified virtual machine.
-     *
+     * 
      * @param virtualMachineName The name of the virtual machine.
      * @return The virtual machine state.
      * @throws MonitorException If an error occurs retrieving machine state.
@@ -150,7 +151,7 @@ public class ESXiConnector
             {
                 VirtualMachineConfigInfo vmConfig = getVMConfigFromObjectContent(esxiMachine);
 
-                if (vmConfig.getName().equals(virtualMachineName))
+                if (vmConfig != null && vmConfig.getName().equals(virtualMachineName))
                 {
                     return getStateForObject(esxiMachine);
                 }
@@ -167,7 +168,7 @@ public class ESXiConnector
 
     /**
      * Get the information of all virtual machines in the target physical machine.
-     *
+     * 
      * @return The information of all virtual machines in the target physical machine.
      * @throws MonitorException If the list of virtual machine information cannot be obtained.
      */
@@ -220,7 +221,7 @@ public class ESXiConnector
 
     /**
      * Disconnects from the hypervisor.
-     *
+     * 
      * @param physicalMachineAddress The hypervisor address.
      */
     public void disconnect(String physicalMachineAddress)
@@ -236,13 +237,22 @@ public class ESXiConnector
 
     /**
      * Encapsulates the call to get the {@link VirtualMachineConfigInfo} object.
-     *
+     * 
      * @param esxiMachine remote deployed machine
-     * @return the configuration of the deployed machine
+     * @return the configuration of the deployed machine or null if is not an instance of
+     *         VirtualMachineConfigInfo.
      */
     public VirtualMachineConfigInfo getVMConfigFromObjectContent(final ObjectContent esxiMachine)
     {
-        return (VirtualMachineConfigInfo) esxiMachine.getPropSet()[2].getVal();
+        Object value = esxiMachine.getPropSet()[2].getVal();
+        VirtualMachineConfigInfo configuration = null;
+
+        if (value instanceof VirtualMachineConfigInfo)
+        {
+            configuration = (VirtualMachineConfigInfo) esxiMachine.getPropSet()[2].getVal();
+        }
+
+        return configuration;
     }
 
     /**
@@ -250,7 +260,7 @@ public class ESXiConnector
      * ObjectContent instance. Informing the name of the managed object reference as a parameter,
      * will return the list of MORs whatever is its place into the inventory hierarchy of the VI
      * SDK.
-     *
+     * 
      * @param managedObjectType name of the MOR we want to retrieve
      * @return list of ObjectContent with the result of the search.
      * @throws RemoteException if there is any problem working with the remote objects
@@ -314,7 +324,7 @@ public class ESXiConnector
     /**
      * This method creates a SelectionSpec[] to traverses the entire inventory tree starting at a
      * Folder.
-     *
+     * 
      * @return The SelectionSpec[]
      */
     private static SelectionSpec[] buildFullTraversal()
