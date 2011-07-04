@@ -19,45 +19,31 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.exceptions;
+package com.abiquo.server.core.infrastructure.storage;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.HashSet;
-import java.util.Set;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.testng.annotations.Test;
+import com.abiquo.model.transport.WrapperDto;
 
-public class APIErrorTest
+@XmlRootElement(name = "volumes")
+public class VolumesManagementWithVirtualMachineDto extends
+    WrapperDto<VolumeManagementWithVirtualMachineDto>
 {
-    @Test
-    public void testUniqueCodes()
-    {
-        Set<String> codes = new HashSet<String>();
+    private static final long serialVersionUID = 1L;
 
-        for (APIError error : APIError.values())
+    @Override
+    @XmlElement(name = "volume")
+    public List<VolumeManagementWithVirtualMachineDto> getCollection()
+    {
+        if (collection == null)
         {
-            assertFalse(codes.contains(error.getCode()), error.getCode() + " is repeated");
-            codes.add(error.getCode());
+            collection = new ArrayList<VolumeManagementWithVirtualMachineDto>();
         }
+        return collection;
     }
 
-    @Test
-    public void testNotEmptyCodes()
-    {
-        for (APIError error : APIError.values())
-        {
-            assertTrue(error.getCode().length() > 0);
-        }
-    }
-
-    @Test
-    public void testNotEmptyMessages()
-    {
-        for (APIError error : APIError.values())
-        {
-            assertTrue(error.getMessage().length() > 0);
-        }
-    }
 }

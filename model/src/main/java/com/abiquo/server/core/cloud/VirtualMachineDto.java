@@ -35,7 +35,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,7 +47,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -59,7 +59,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -71,7 +71,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return ram;
     }
 
-    public void setRam(int ram)
+    public void setRam(final int ram)
     {
         this.ram = ram;
     }
@@ -83,7 +83,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return cpu;
     }
 
-    public void setCpu(int cpu)
+    public void setCpu(final int cpu)
     {
         this.cpu = cpu;
     }
@@ -95,7 +95,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return hd;
     }
 
-    public void setHd(int hd)
+    public void setHd(final int hd)
     {
         this.hd = hd;
     }
@@ -107,7 +107,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return vdrpPort;
     }
 
-    public void setVdrpPort(int vdrpPort)
+    public void setVdrpPort(final int vdrpPort)
     {
         this.vdrpPort = vdrpPort;
     }
@@ -119,7 +119,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return vdrpIp;
     }
 
-    public void setVdrpIP(String vdrpIp)
+    public void setVdrpIP(final String vdrpIp)
     {
         this.vdrpIp = vdrpIp;
     }
@@ -131,9 +131,21 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return idState;
     }
 
-    public void setIdState(int idState)
+    public void setIdState(final int idState)
     {
         this.idState = idState;
+    }
+
+    private State state;
+
+    public void setState(final State state)
+    {
+        this.state = state;
+    }
+
+    public State getState()
+    {
+        return state;
     }
 
     private int highDisponibility;
@@ -143,7 +155,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -155,7 +167,7 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return idType;
     }
 
-    public void setIdType(int idType)
+    public void setIdType(final int idType)
     {
         this.idType = idType;
     }
