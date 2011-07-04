@@ -697,3 +697,15 @@ update volume_management set state = 1 where state = 2;
 
 -- [ABICLOUDPREMIUM-1933] Change the default value
 UPDATE  `kinton`.`system_properties`  Set value ='1' where name='client.dashboard.showStartUpAlert';
+
+
+
+-- 
+-- DO NOT DELETE
+-- [ABICLOUDPREMIUM-1460] Statistics Information MUST be updated in each upgrade
+CALL `kinton`.`CalculateCloudUsageStats`();
+CALL `kinton`.`CalculateEnterpriseResourcesStats`();
+CALL `kinton`.`CalculateVappEnterpriseStats`();
+CALL `kinton`.`CalculateVdcEnterpriseStats`();
+-- These calls should be included in every DB Delta
+-- 
