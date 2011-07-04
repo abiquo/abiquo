@@ -50,7 +50,9 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC_QUERY, query = VolumeManagement.BY_VDC)})
+@NamedQueries( {
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -61,11 +63,20 @@ public class VolumeManagement extends RasdManagement
 
     // Queries
 
-    public static final String VOLUMES_BY_VDC_QUERY = "VOLUMES_BY_VDC";
+    public static final String VOLUMES_BY_VDC = "VOLUMES_BY_VDC";
+
+    public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
 
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
             + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.virtualDatacenter.id = :vdcId "
+            + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+
+    public static final String BY_POOL =
+        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.storagePool.idStorage = :poolId "
             + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
             + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
             + "OR vol.storagePool.tier.name like :filterLike " + ")";
@@ -288,11 +299,10 @@ public class VolumeManagement extends RasdManagement
     public static enum OrderByEnum
     {
         NAME("elementname", "vol.rasd.elementName"), ID("idman", "vol.id"), VIRTUALDATACENTER(
-            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname",
-            "vol.virtualMachine.name"), VIRTUALAPPLIANCE("vaname", "vapp.name"), TIER("tier",
-            "vol.storagePool.tier.name"), TOTALSIZE("size", "vol.rasd.limit"), AVAILABLESIZE(
-            "available", "vol.rasd.reservation"), USEDSIZE("used", "vol.usedSizeInMB"), STATE(
-            "state", "vol.state");
+            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname", "vm.name"), VIRTUALAPPLIANCE(
+            "vaname", "vapp.name"), TIER("tier", "vol.storagePool.tier.name"), TOTALSIZE("size",
+            "vol.rasd.limit"), AVAILABLESIZE("available", "vol.rasd.reservation"), USEDSIZE("used",
+            "vol.usedSizeInMB"), STATE("state", "vol.state");
 
         private String columnSQL;
 
