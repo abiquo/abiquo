@@ -102,6 +102,7 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.tracer.client.TracerFactory;
 import com.abiquo.util.AbiCloudError;
 import com.abiquo.util.resources.ResourceManager;
 
@@ -1060,6 +1061,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, pm.getDataCenter(), null, e.getMessage(), null,
                 (Rack) pm.getAssignedTo(), pm, null, null);
+
         }
 
         String virtualSystemMonitorAddress = null;
@@ -1894,7 +1896,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> startVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> startVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -1939,8 +1942,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
-                // Generating the result
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWERON, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
+              
+               // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
@@ -1977,7 +1985,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> pauseVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> pauseVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2012,7 +2021,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_PAUSED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2048,7 +2061,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> rebootVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> rebootVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         // Rebooting the machine implies powering off and powering up
         DataResult<State> dataResult = new DataResult<State>();
@@ -2086,7 +2100,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RESUMED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2129,7 +2147,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .pojo.infrastructure.VirtualMachine)
      */
     @Override
-    public DataResult<State> shutdownVirtualMachine(final VirtualMachine virtualMachine)
+    public DataResult<State> shutdownVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine)
     {
         DataResult<State> dataResult = new DataResult<State>();
         BasicResult basicResult = new BasicResult();
@@ -2164,7 +2183,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
-
+                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_POWEROFF, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                        + virtualMachine.getName() + " because datacenter isn't well configured.",
+                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
