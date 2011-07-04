@@ -22,9 +22,12 @@
 package com.abiquo.vsm.web.servlet;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -34,6 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
 import com.abiquo.commons.amqp.util.RabbitMQUtils;
 import com.abiquo.vsm.VSMManager;
+import com.abiquo.vsm.model.PhysicalMachine;
+import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
 import com.abiquo.vsm.redis.dao.RedisDaoFactory;
 import com.abiquo.vsm.redis.util.RedisUtils;
@@ -41,6 +46,24 @@ import com.abiquo.vsm.redis.util.RedisUtils;
 public class ConsoleServlet extends HttpServlet
 {
     private static final long serialVersionUID = 5424477177953465654L;
+
+    protected class PhysicalMachineComparator implements Comparator<PhysicalMachine>
+    {
+        @Override
+        public int compare(PhysicalMachine o1, PhysicalMachine o2)
+        {
+            return o1.getAddress().compareTo(o2.getAddress());
+        }
+    }
+
+    protected class VirtualMachineComparator implements Comparator<VirtualMachine>
+    {
+        @Override
+        public int compare(VirtualMachine o1, VirtualMachine o2)
+        {
+            return o1.getName().compareTo(o2.getName());
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -52,30 +75,37 @@ public class ConsoleServlet extends HttpServlet
         int redisPort = vsmManager.getRedisPort();
 
         // Publish check status
-        Map<String, Boolean> checks = new HashMap<String, Boolean>();
+        Map<String, Boolean> checks = new LinkedHashMap<String, Boolean>();
         checks.put("VSM check result", vsmManager.checkSystem());
         checks.put("Redis listening", RedisUtils.ping(redisHost, redisPort));
         checks.put("RabbitMQ listening", RabbitMQUtils.pingRabbitMQ());
 
+        request.setAttribute("checks", checks);
+
         // Publish configuration values
-        Map<String, Object> config = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, Object> config = new LinkedHashMap<String, Object>();
 
-        config.put("Redis host", vsmManager.getRedisHost());
-        config.put("Redis port", vsmManager.getRedisPort());
-
+        config.put("Redis host", redisHost);
+        config.put("Redis port", redisPort);
         config.put("RabbitMQ host", VSMConfiguration.getInstance().getRabbitMQHost());
         config.put("RabbitMQ port", VSMConfiguration.getInstance().getRabbitMQPort());
 
-        request.setAttribute("checks", checks);
         request.setAttribute("config", config);
 
         // Extended report
         if (request.getParameterMap().containsKey("extended"))
         {
             RedisDao dao = RedisDaoFactory.getInstance();
+
+            List<PhysicalMachine> pms = new ArrayList(dao.findAllPhysicalMachines());
+            Collections.sort(pms, new PhysicalMachineComparator());
+
+            List<VirtualMachine> vms = new ArrayList(dao.findAllVirtualMachines());
+            Collections.sort(vms, new VirtualMachineComparator());
+
             request.setAttribute("extended", Boolean.TRUE);
-            request.setAttribute("pms", dao.findAllPhysicalMachines());
-            request.setAttribute("vms", dao.findAllVirtualMachines());
+            request.setAttribute("pms", pms);
+            request.setAttribute("vms", vms);
         }
 
         getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);
