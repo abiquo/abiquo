@@ -31,6 +31,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
+import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.listener.ProxyContextLoaderListener;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -57,9 +58,21 @@ public class AppsLibraryService
     public AppsLibraryService()
     {
         appsLibraryCommand = ProxyContextLoaderListener.getCtx().getBean(AppsLibraryCommand.class);
+
+        try
+        {
+            appsLibraryCommand =
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                    .newInstance();
+        }
+        catch (Exception e)
+        {
+            appsLibraryCommand = new AppsLibraryCommandImpl();
+        }
     }
 
-    public DataResult<List<DiskFormatType>> getDiskFormatTypes(UserSession userSession)
+    public DataResult<List<DiskFormatType>> getDiskFormatTypes(final UserSession userSession)
     {
         DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
 
@@ -81,8 +94,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<Repository> getDatacenterRepository(UserSession userSession,
-        Integer idDatacenter, Integer idEnterprise) // TODO idEnterpise is not used
+    public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
+        final Integer idDatacenter, final Integer idEnterprise) // TODO idEnterpise is not used
     {
         DataResult<Repository> result = new DataResult<Repository>();
 
@@ -113,8 +126,8 @@ public class AppsLibraryService
     // todo con idRepo
 
     /** Category */
-    public DataResult<Category> createCategory(UserSession userSession, Integer idEnterprise,
-        String categoryName)
+    public DataResult<Category> createCategory(final UserSession userSession,
+        final Integer idEnterprise, final String categoryName)
     {
         DataResult<Category> result = new DataResult<Category>();
 
@@ -142,7 +155,7 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult deleteCategory(UserSession userSession, Integer idCategory)
+    public BasicResult deleteCategory(final UserSession userSession, final Integer idCategory)
     {
         BasicResult result = new BasicResult();
 
@@ -168,7 +181,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<List<Category>> getCategories(UserSession userSession, Integer idEnterprise)
+    public DataResult<List<Category>> getCategories(final UserSession userSession,
+        final Integer idEnterprise)
     {
         DataResult<List<Category>> result = new DataResult<List<Category>>();
 
@@ -202,7 +216,8 @@ public class AppsLibraryService
     }
 
     /** Icon */
-    public DataResult<Icon> createIcon(UserSession userSession, Integer idEnterprise, Icon icon)
+    public DataResult<Icon> createIcon(final UserSession userSession, final Integer idEnterprise,
+        final Icon icon)
     {
         DataResult<Icon> result = new DataResult<Icon>();
 
@@ -229,7 +244,7 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult editIcon(UserSession userSession, Icon icon)
+    public BasicResult editIcon(final UserSession userSession, final Icon icon)
     {
         BasicResult result = new BasicResult();
 
@@ -255,7 +270,7 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult deleteIcon(UserSession userSession, Integer idIcon)
+    public BasicResult deleteIcon(final UserSession userSession, final Integer idIcon)
     {
         BasicResult result = new BasicResult();
 
@@ -281,7 +296,7 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<List<Icon>> getIcons(UserSession userSession, Integer idEnterprise)
+    public DataResult<List<Icon>> getIcons(final UserSession userSession, final Integer idEnterprise)
     {
         DataResult<List<Icon>> result = new DataResult<List<Icon>>();
 
@@ -323,8 +338,8 @@ public class AppsLibraryService
      * @param idCategory, if 0 indicate return all the categories
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        UserSession userSession, Integer idEnterprise, Integer idRepo, Integer idCategory,
-        Integer idHypervisorType)
+        final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
+        final Integer idCategory, final Integer idHypervisorType)
     {
         DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
@@ -357,8 +372,8 @@ public class AppsLibraryService
      * @param idRepo, if 0, indicate stateful images
      * @param idCategory, if 0 indicate return all the categories
      */
-    public DataResult<List<VirtualImage>> getVirtualImageByCategory(UserSession userSession,
-        Integer idEnterprise, Integer idRepo, Integer idCategory)
+    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
+        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
     {
         DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
@@ -395,7 +410,7 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult editVirtualImage(UserSession userSession, VirtualImage vimage)
+    public BasicResult editVirtualImage(final UserSession userSession, final VirtualImage vimage)
     {
         BasicResult result = new BasicResult();
 
@@ -421,7 +436,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
+    public BasicResult deleteVirtualImage(final UserSession userSession,
+        final Integer idVirtualImage)
     {
         BasicResult result = new BasicResult();
 
@@ -448,8 +464,8 @@ public class AppsLibraryService
     }
 
     /** List. */
-    public DataResult<List<String>> getOVFPackageListName(UserSession userSession,
-        Integer idEnterprise)
+    public DataResult<List<String>> getOVFPackageListName(final UserSession userSession,
+        final Integer idEnterprise)
     {
 
         DataResult<List<String>> result = new DataResult<List<String>>();
@@ -479,8 +495,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<OVFPackageList> getOVFPackageList(UserSession userSession,
-        Integer idEnterprise, String nameOVFPackageList)
+    public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOVFPackageList)
     {
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
@@ -510,8 +526,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<OVFPackageList> createOVFPackageList(UserSession userSession,
-        Integer idEnterprise, String ovfpackageListURL)
+    public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String ovfpackageListURL)
     {
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
@@ -545,8 +561,8 @@ public class AppsLibraryService
 
     }
 
-    public DataResult<OVFPackageList> refreshOVFPackageList(UserSession userSession,
-        Integer idEnterprise, String nameOvfpackageList)
+    public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOvfpackageList)
     {
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
@@ -576,8 +592,8 @@ public class AppsLibraryService
         return result;
     }
 
-    public BasicResult deleteOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOvfpackageList)
+    public BasicResult deleteOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOvfpackageList)
     {
         BasicResult result = new BasicResult();
 
@@ -605,8 +621,8 @@ public class AppsLibraryService
 
     /** DC specific status. */
     public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListStatus(
-        UserSession userSession, String nameOVFPackageList, Integer idEnterprise,
-        Integer idRepository)
+        final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
+        final Integer idRepository)
     {
 
         DataResult<List<OVFPackageInstanceStatus>> result =
@@ -641,8 +657,8 @@ public class AppsLibraryService
 
     }
 
-    public BasicResult startDownloadOVFPackage(UserSession userSession,
-        List<String> idsOvfpackageIn, Integer idEnterprise, Integer idRepository)
+    public BasicResult startDownloadOVFPackage(final UserSession userSession,
+        final List<String> idsOvfpackageIn, final Integer idEnterprise, final Integer idRepository)
     {
         List<String> idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
 
@@ -671,8 +687,9 @@ public class AppsLibraryService
         return result;
     }
 
-    public DataResult<OVFPackageInstanceStatus> cancelDownloadOVFPackage(UserSession userSession,
-        String idOvfpackage, Integer idEnterprise, Integer idRepository)
+    public DataResult<OVFPackageInstanceStatus> cancelDownloadOVFPackage(
+        final UserSession userSession, final String idOvfpackage, final Integer idEnterprise,
+        final Integer idRepository)
     {
 
         DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
@@ -703,8 +720,8 @@ public class AppsLibraryService
     }
 
     public DataResult<List<OVFPackageInstanceStatus>> refreshOVFPackageStatus(
-        UserSession userSession, List<String> idsOvfpackageIn, Integer idEnterprise,
-        Integer idRepository)
+        final UserSession userSession, final List<String> idsOvfpackageIn,
+        final Integer idEnterprise, final Integer idRepository)
     {
 
         List<String> idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
@@ -737,7 +754,7 @@ public class AppsLibraryService
         return result;
     }
 
-    protected OVFPackage transform(OVFPackageDto packDto)
+    protected OVFPackage transform(final OVFPackageDto packDto)
     {
         OVFPackage pack = new OVFPackage();
         if (packDto.getCategoryName() != null)
@@ -763,7 +780,7 @@ public class AppsLibraryService
         return pack;
     }
 
-    protected OVFPackageList transform(OVFPackageListDto listDto)
+    protected OVFPackageList transform(final OVFPackageListDto listDto)
     {
         OVFPackageList list = new OVFPackageList();
         list.setName(listDto.getName());
@@ -783,7 +800,7 @@ public class AppsLibraryService
         return list;
     }
 
-    protected OVFPackageInstanceStatus transform(OVFPackageInstanceStatusDto statusDto)
+    protected OVFPackageInstanceStatus transform(final OVFPackageInstanceStatusDto statusDto)
     {
         OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
 
@@ -800,7 +817,8 @@ public class AppsLibraryService
         return status;
     }
 
-    protected List<OVFPackageInstanceStatus> transform(OVFPackageInstanceStatusListDto statusListDto)
+    protected List<OVFPackageInstanceStatus> transform(
+        final OVFPackageInstanceStatusListDto statusListDto)
     {
         List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
 
@@ -824,4 +842,50 @@ public class AppsLibraryService
             AppsLibraryCommand.class);
     }
 
+    /**
+     * Refreshes the instance status of the image.
+     * 
+     * @param userSession current user.
+     * @param idsOvfpackageIn Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return DataResult<OVFPackageInstanceStatus>
+     */
+    public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
+        UserSession userSession, String idsOvfpackageIn, Integer idEnterprise, Integer idRepository)
+    {
+
+        String idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
+
+        DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
+
+        AppsLibraryCommand proxyService = proxyService(userSession);
+        try
+        {
+            OVFPackageInstanceStatusDto statusListDto =
+                proxyService.refreshOVFPackageInstanceStatus(userSession, idsOvfpackage,
+                    idEnterprise, idRepository);
+
+            result.setData(transform(statusListDto));
+            result.setSuccess(true);
+            if (result.getData().getError() != null && !"".equals(result.getData().getError()))
+            {
+                result.setSuccess(false);
+                result.setMessage(result.getData().getError());
+            }
+        }
+        catch (AppsLibraryCommandException e)
+        {
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
+        }
+        catch (UserSessionException e)
+        {
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
+            result.setResultCode(e.getResult().getResultCode());
+        }
+
+        return result;
+    }
 }

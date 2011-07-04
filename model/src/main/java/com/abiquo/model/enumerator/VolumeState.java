@@ -21,7 +21,10 @@
 package com.abiquo.model.enumerator;
 
 /**
- * Sets the States of a Volume Storage can live in AbiCloud
+ * The volume state.
+ * <p>
+ * <b>IMPORTANT:</b> Do not change the order of the elements of the enum. If more values need to be
+ * added they must be added at the end.
  * 
  * @author abiquo
  */

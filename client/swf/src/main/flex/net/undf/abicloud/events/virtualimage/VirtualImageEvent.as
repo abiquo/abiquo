@@ -80,6 +80,8 @@ package net.undf.abicloud.events.virtualimage
         public static const VIRTUAL_IMAGE_CHECKED:String = "virtualImageCheckedVirtualImageEvent";
         
         public static const VIRTUAL_IMAGE_UNCHECKED:String = "virtualImageUncheckedVirtualImageEvent";
+        
+        public static const VIRTUAL_IMAGE_UPLOAD_ERROR:String = "virtualImageUploadErrorVirtualImageEvent";
 
         /* ------------- Public atributes ------------- */
 
@@ -102,6 +104,8 @@ package net.undf.abicloud.events.virtualimage
         public var viUpdatedValues:VirtualImage;
 
         public var ovfPackageURLList:ArrayCollection;
+        
+        public var ovfInstanceId:String;
         
         public var virtualImageMiniature:VirtualImageMiniature;
 

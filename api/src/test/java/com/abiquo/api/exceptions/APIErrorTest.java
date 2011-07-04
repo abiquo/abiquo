@@ -38,7 +38,7 @@ public class APIErrorTest
 
         for (APIError error : APIError.values())
         {
-            assertFalse(codes.contains(error.getCode()));
+            assertFalse(codes.contains(error.getCode()), error.getCode() + " is repeated");
             codes.add(error.getCode());
         }
     }

@@ -105,9 +105,6 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
-            
-            [Bindable]
-			private var _canShare:Boolean;
 			
             private function onCreationComplete():void
             {
@@ -116,6 +113,9 @@
                 
                 //Checking privileges
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE, "removeChild",downloadButton,downloadItem);
+                
+                //Checking privileges
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.ENTERPRISE_ADMINISTER_ALL, "removeChild",publicImageFormItem,virtualImageFormContainer);
                 
                 //Caching VirtualImageManager
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
@@ -127,15 +127,16 @@
                 //Listening for updates in model
                 ChangeWatcher.watch(virtualImageManager, "icons", onIconsUpdated);
                 ChangeWatcher.watch(virtualImageManager, "diskFormatTypes", onDiskFormatTypesUpdated);
+                AbiCloudModel.getInstance().virtualImageManager.addEventListener(VirtualImageEvent.VIRTUAL_IMAGE_UPLOAD_ERROR, onUploadError);
 
                 //Adding support for external calls from Javascript
                 ExternalInterface.addCallback("virtualImageFileSelected", onVirtualImageFileSelected);
-                ExternalInterface.addCallback("virtualImageCreated", onVirtualImageCreated);
+                //ExternalInterface.addCallback("virtualImageCreated", onVirtualImageCreated);
 
                 //Creating timer to periodically check upload progress
-                this._uploadProgressTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_applibrary_virtualimageUploadProgressUpdateInterval.value * 1000,
-                                                      0);
+                this._uploadProgressTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_applibrary_virtualimageUploadProgressUpdateInterval.value * 1000,0);
                 this._uploadProgressTimer.addEventListener(TimerEvent.TIMER, checkVirtualImageUploadProgress);
+                this._uploadProgressTimer.addEventListener(TimerEvent.TIMER_COMPLETE, checkVirtualImageUploadProgress);
 
                 requestDiskFormatTypes();
             }
@@ -206,12 +207,6 @@
                     titleText = ResourceManager.getInstance().getString("VirtualImage",
                                                                         "POPUP_TITLE_VIRTUALIMAGE_EDIT");
 
-                    //Setting fields
-                    if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == this._virtualImage.idEnterprise){
-                    	this._canShare = true;
-                    }else{
-                    	this._canShare = false;
-                    }
                     nameInput.text = virtualImage.name;
                     descriptionInput.text = virtualImage.description;
                     diskFormatTypeInput.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.diskFormatTypes.toArray(),
@@ -240,7 +235,6 @@
                                                                         "POPUP_TITLE_VIRTUALIMAGE_ADD");
 
                     //Cleaning fields
-                    this._canShare = true;
                     nameInput.text = "";
                     descriptionInput.text = "";
                     diskFormatTypeInput.selectedIndex = -1;
@@ -344,11 +338,11 @@
 
 					ovfPackageInstanceUploadDTO.ovfPackageInstanceDto = ovfPackageInstanceDTO;
                     
+                    //Starting timer to periodically check upload progress
+                    this._uploadProgressTimer.start();
+                    
                     ExternalInterface.call("submitVirtualImageForm", JSON.encode(ovfPackageInstanceUploadDTO),
                                            applianceManagerAddress);
-
-                        //Starting timer to periodically check upload progress
-                        //this._uploadProgressTimer.start(); <= DISABLED FOR NOW...
                 }
             }
 
@@ -462,10 +456,10 @@
                 //The second step to create a VirtualImage, is to select the image file from user file system.
                 //Since we cannot do this with Flex, because size limitations, we make a call to Javascript
                 virtualImageFormVS.selectedIndex = 1;
-                if(imagePath){
+                /* if(imagePath){
 	                imagePath.text = "";                	
-                }
-                //ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
+                } */
+                ExternalInterface.call("showVirtualImageForm", !virtualImageFileSelected);
             }
 
 
@@ -494,8 +488,8 @@
                                                ResourceManager.getInstance().getString("VirtualImage",
                                                                                        "ALERT_VIRTUAL_IMAGE_CREATED_TEXT"),
                                                Alert.OK);
-
-                //Announce that a Virtual Image has been created
+                                               
+				//Announce that a Virtual Image has been created
                 dispatchEvent(new Event("VirtualImageCreated"));
 
                 //Closing the form
@@ -544,15 +538,19 @@
 
             private function checkVirtualImageUploadProgress(timerEvent:TimerEvent = null):void
             {
-                var ovfURLList:ArrayCollection = new ArrayCollection();
-                ovfURLList.addItem(ovfPackageInstanceDTO.ovfUrl);
-
                 var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.CHECK_VIRTUAL_IMAGE_UPLOAD_PROGRESS);
                 event.repository = AbiCloudModel.getInstance().virtualImageManager.repository;
                 event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-                event.ovfPackageURLList = ovfURLList;
+                event.ovfInstanceId = ovfPackageInstanceDTO.ovfUrl;
                 event.callback = setVirtualImageUploadProgress;
                 dispatchEvent(event);
+            }
+            
+            private function onUploadError(event:VirtualImageEvent):void{
+            	this._uploadProgressTimer.stop();
+                virtualImageFileSelected = false;
+                creatingVirtualImage = false;
+                virtualImageFormVS.selectedIndex = 0;
             }
 
             /**
@@ -561,11 +559,12 @@
             private function setVirtualImageUploadProgress(ovfPackageStatus:OVFPackageInstanceStatus):void
             {
                 //Updating the progress bar
-                if (ovfPackageStatus.progress > 0)
-                {
+                if(ovfPackageStatus.progress == 100){
+                	this._uploadProgressTimer.stop();
+                	onVirtualImageCreated();
+                }else if (ovfPackageStatus.progress > 0){
                     uploadProgressBar.indeterminate = false;
-                    uploadProgressBar.setProgress(ovfPackageStatus.progress,
-                                                  100);
+                    uploadProgressBar.setProgress(ovfPackageStatus.progress,100);
                 }
             }
             
@@ -607,7 +606,7 @@
                     selectedFiles.addItem(tmpObject); */
                     virtualImageFileSelected = true;
                 	_virtualImageFileName = fileRef.name;
-                	imagePath.text = fileRef.name;
+                	//imagePath.text = fileRef.name;
                     
                     //fileRef.upload(new URLRequest(FILE_UPLOAD_URL));
                 } catch (err:Error) {
@@ -797,9 +796,10 @@
             </mx:FormItem>
 
             <mx:FormItem 
+            	id="publicImageFormItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
-                includeInLayout="{this._virtualImage != null &amp;&amp; this._canShare}"
-                visible="{this._virtualImage != null &amp;&amp; this._canShare}">
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
             </mx:FormItem>
@@ -829,10 +829,10 @@
 	                text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP2_MORE_INFO')"
 	                click="openMoreInfo()"/>
         	</mx:HBox>
-            <!--<mx:Canvas 
-                width="300" height="155">-->
-                <!-- Where the HTML Form will be placed -->
-                <mx:HBox 
+            <!-- Where the HTML Form will be placed -->
+            <mx:Canvas 
+                width="310" height="165">
+                <!--<mx:HBox 
                 	horizontalAlign="center"
                 	paddingTop="15" paddingBottom="15" 
                 	width="100%" verticalAlign="middle">
@@ -841,8 +841,8 @@
                 		height="18" 
                 		label="{resourceManager.getString('VirtualImage','LABEL_BROWSE')}" 
                 		click="selectFile()"/>
-                </mx:HBox>
-            <!--</mx:Canvas>-->
+                </mx:HBox>-->
+            </mx:Canvas>
         </mx:VBox>
 
         <!-- STEP 3: CREATING VIRTUAL IMAGE -->

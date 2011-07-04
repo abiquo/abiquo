@@ -28,7 +28,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "volume")
 @XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
-/* "availableSizeInMB", "usedSizeInMB", */"idScsi"})
+/* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
     public static final String ISCSI_VOLUME_MEDIA_TYPE = "application/iscsivolume+xml";
@@ -47,12 +47,15 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private long sizeInMB;
 
-    // These fields are deprecated
+    // These fields are deprecated. We are only considering the whole volume size
     // private long availableSizeInMB;
     //
     // private long usedSizeInMB;
 
     private String idScsi;
+
+    // TODO: vmahe. Replace this field by a link when the VirtualImage Resource is created
+    private Integer idImage;
 
     public Integer getId()
     {
@@ -144,4 +147,13 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.description = description;
     }
 
+    public Integer getIdImage()
+    {
+        return idImage;
+    }
+
+    public void setIdImage(final Integer idImage)
+    {
+        this.idImage = idImage;
+    }
 }

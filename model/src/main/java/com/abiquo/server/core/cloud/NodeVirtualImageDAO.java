@@ -54,7 +54,8 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
 
     public VirtualAppliance findVirtualAppliance(final VirtualMachine vmachine)
     {
-        return findByVirtualMachine(vmachine).getVirtualAppliance();
+        NodeVirtualImage nvi = findByVirtualMachine(vmachine);
+        return nvi == null ? null : nvi.getVirtualAppliance();
     }
 
     public NodeVirtualImage findByVirtualMachine(final VirtualMachine vmachine)
@@ -83,4 +84,16 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
 
     }
 
+    public List<NodeVirtualImage> findByVirtualImage(final VirtualImage virtualImage)
+    {
+        Criteria criteria = sameVirtualImage(virtualImage);
+        return getResultList(criteria);
+    }
+
+    private Criteria sameVirtualImage(final VirtualImage virtualImage)
+    {
+        Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_IMAGE_PROPERTY);
+        crit.add(Restrictions.eq(VirtualImage.ID_PROPERTY, virtualImage.getId()));
+        return crit;
+    }
 }

@@ -33,7 +33,9 @@ import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
+import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.infrastructure.Repository;
 
 /**
  * This command collects all actions related to Virtual Images
@@ -125,4 +127,31 @@ public interface AppsLibraryCommand
         String idOvfpackage, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException;
 
+    /**
+     * Returns the current status of a {@link OVFPackage} in the DB.
+     * 
+     * @param userSession Data from the current user.
+     * @param idOVFPackageName Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return {@link OVFPackageInstanceStatusDto } queried.
+     * @throws AppsLibraryCommandException .
+     */
+    OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
+        String idOVFPackageName, final Integer nameOVFPackageList, Integer idEnterprise,
+        Integer idRepository)
+        throws AppsLibraryCommandException;
+    
+    /**
+     * Refresh the current status of a {@link OVFPackage} in the DB.
+     * @param userSession Data from the current user.
+     * @param idsOvfInstance Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return {@link OVFPackageInstanceStatusDto } queried.
+     * @throws AppsLibraryCommandException .
+     */
+    OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
+        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
+        throws AppsLibraryCommandException;
 }

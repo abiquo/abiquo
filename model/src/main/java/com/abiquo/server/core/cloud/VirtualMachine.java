@@ -102,7 +102,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.hypervisor;
     }
 
-    public void setHypervisor(Hypervisor hypervisor)
+    public void setHypervisor(final Hypervisor hypervisor)
     {
         this.hypervisor = hypervisor;
     }
@@ -127,7 +127,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.virtualImage;
     }
 
-    public void setVirtualImage(VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
     }
@@ -150,7 +150,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.datastore;
     }
 
-    public void setDatastore(Datastore datastore)
+    public void setDatastore(final Datastore datastore)
     {
         this.datastore = datastore;
     }
@@ -161,9 +161,9 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = false;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -180,7 +180,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -193,7 +193,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
-    //private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    // private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String DESCRIPTION_COLUMN = "Description";
 
@@ -202,13 +202,13 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Required(value = DESCRIPTION_REQUIRED)
     @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
-    //@LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getDescription()
     {
         return this.description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -230,7 +230,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.ram;
     }
 
-    public void setRam(int ram)
+    public void setRam(final int ram)
     {
         this.ram = ram;
     }
@@ -252,7 +252,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.cpu;
     }
 
-    public void setCpu(int cpu)
+    public void setCpu(final int cpu)
     {
         this.cpu = cpu;
     }
@@ -274,7 +274,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.hdInBytes;
     }
 
-    public void setHdInBytes(long hdInBytes)
+    public void setHdInBytes(final long hdInBytes)
     {
         this.hdInBytes = hdInBytes;
     }
@@ -296,7 +296,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.vdrpPort;
     }
 
-    public void setVdrpPort(int vdrpPort)
+    public void setVdrpPort(final int vdrpPort)
     {
         this.vdrpPort = vdrpPort;
     }
@@ -324,7 +324,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.vdrpIP;
     }
 
-    public void setVdrpIP(String vdrpIp)
+    public void setVdrpIP(final String vdrpIp)
     {
         this.vdrpIP = vdrpIp;
     }
@@ -342,7 +342,7 @@ public class VirtualMachine extends DefaultEntityBase
     @Column(name = UUID_COLUMN, nullable = !UUID_REQUIRED, length = UUID_LENGTH_MAX)
     private String uuid;
 
-    public void setUuid(String uuid)
+    public void setUuid(final String uuid)
     {
         this.uuid = uuid;
     }
@@ -371,7 +371,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -398,7 +398,7 @@ public class VirtualMachine extends DefaultEntityBase
         return getIdType() == MANAGED;
     }
 
-    public void setIdType(Integer idType)
+    public void setIdType(final Integer idType)
     {
         this.idType = idType;
     }
@@ -420,7 +420,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -442,7 +442,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.user;
     }
 
-    public void setUser(User user)
+    public void setUser(final User user)
     {
         this.user = user;
     }
@@ -466,13 +466,14 @@ public class VirtualMachine extends DefaultEntityBase
         return this.state;
     }
 
-    public void setState(State state)
+    public void setState(final State state)
     {
         this.state = state;
     }
 
-    public VirtualMachine(String name, Enterprise enterprise, User user, Hypervisor hypervisor,
-        VirtualImage virtualImage, UUID uuid, Integer typeId)
+    public VirtualMachine(final String name, final Enterprise enterprise, final User user,
+        final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,
+        final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
@@ -483,8 +484,8 @@ public class VirtualMachine extends DefaultEntityBase
         setIdType(typeId);
     }
 
-    public VirtualMachine(String name, Enterprise enterprise, User user, VirtualImage virtualImage,
-        UUID uuid, Integer typeId)
+    public VirtualMachine(final String name, final Enterprise enterprise, final User user,
+        final VirtualImage virtualImage, final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);

@@ -134,6 +134,16 @@ package net.undf.abicloud.controller
                                                                                         "ALERT_MESSAGE_SESSION_VIRTUAL_IMAGE_IN_USE"),
                                                 Alert.OK);
                         break;
+                    
+                    case BasicResult.HARD_LIMT_EXCEEDED:
+                		AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_HARD_LIMITS_EXCEEDED_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_HARD_LIMITS_EXCEEDED_TEXT") + '\n' + basicResult.message,
+                                            Alert.OK,null,false,basicResult as Object);
+                    	break;
 
                     default:
                         //Default response -> BasicResult.STANDARD_RESULT

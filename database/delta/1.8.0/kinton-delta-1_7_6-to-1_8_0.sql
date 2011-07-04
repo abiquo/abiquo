@@ -172,9 +172,10 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `i
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
+DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
+DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 
 DELIMITER |
-=======
 ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
 -- ABICLOUDPREMIUM 1615  Accounting changes --
@@ -633,6 +634,271 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
         END IF;
     END;
 |
+CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`virtualdatacenter`
+    FOR EACH ROW BEGIN
+	DECLARE currentIdManagement INTEGER DEFAULT -1;
+	DECLARE currentDataCenter INTEGER DEFAULT -1;
+	DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+	DECLARE no_more_ipsfreed INT;
+	DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement	
+           FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
+           WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+           AND vn.network_configuration_id = nc.network_configuration_id
+           AND vn.network_id = dc.network_id
+           AND ra.idManagement = ipm.idManagement
+           AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
+	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+            UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated-1 WHERE idDataCenter = OLD.idDataCenter;  
+            -- Remove Stats
+            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;	
+           -- 	
+	SET no_more_ipsfreed = 0;	    
+	    OPEN curIpFreed;  	    	
+   		my_loop:WHILE(no_more_ipsfreed=0) DO 
+   		FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
+		IF no_more_ipsfreed=1 THEN
+                	LEAVE my_loop;
+	         END IF;
+--		INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
+		-- We reset MAC and NAME for the reserved IPs. Java code should do this!
+		UPDATE ip_pool_management set mac=NULL, name=NULL WHERE idManagement = currentIdManagement;
+		IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+               		CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
+           	END IF;                    
+		UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
+		UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise;	
+	    END WHILE my_loop;	       
+	    CLOSE curIpFreed;
+        END IF;
+    END;
+|
+CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
+    FOR EACH ROW BEGIN
+        DECLARE state VARCHAR(50);
+        DECLARE idState INTEGER;
+        DECLARE idImage INTEGER;
+        DECLARE idDataCenterObj INTEGER;
+        DECLARE idEnterpriseObj INTEGER;
+        DECLARE reservedSize BIGINT;
+        DECLARE ipAddress VARCHAR(20);
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
+            --	   
+            IF OLD.idResourceType = 8 THEN
+                -- vol Attached ?? -- is stateful
+                SELECT IF(count(*) = 0, 0, vm.state), idImage INTO idState, idImage
+                FROM volume_management vm
+                WHERE vm.idManagement = OLD.idManagement;     
+                --
+		-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateRASD: ',idState,' - ', IFNULL(OLD.idVirtualApp, 'OLD.idVirtualApp es NULL'), IFNULL(NEW.idVirtualApp, 'NEW.idVirtualApp es NULL')));	
+		-- Detectamos cambios de VDC: V2V
+		IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NOT NULL AND OLD.idVirtualDataCenter != NEW.idVirtualDataCenter AND OLD.idVirtualApp = NEW.idVirtualApp THEN
+			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1, volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+			UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1, volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			IF idState = 1 THEN
+				UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+				UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			END IF;
+		ELSE 			
+		        IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NOT NULL AND OLD.idVirtualDataCenter != NEW.idVirtualDataCenter THEN
+				-- Volume was changed to another VDC not in a V2V operation (cold move)
+		            UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+			END IF;
+			-- Volume added from a Vapp
+			IF OLD.idVirtualApp IS NULL AND NEW.idVirtualApp IS NOT NULL THEN       
+			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualApp = NEW.idVirtualApp;      
+			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    IF idState = 1 THEN
+			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = NEW.idVirtualApp;
+			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    END IF;                         
+			END IF;
+			-- Volume removed from a Vapp
+			IF OLD.idVirtualApp IS NOT NULL AND NEW.idVirtualApp IS NULL THEN
+			    UPDATE IGNORE vapp_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualApp = OLD.idVirtualApp;
+			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+			    IF idState = 1 THEN
+				SELECT vdc.idEnterprise, vdc.idDataCenter INTO idEnterpriseObj, idDataCenterObj
+				FROM virtualdatacenter vdc
+				WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;
+				SELECT r.limitResource INTO reservedSize
+				FROM rasd r
+				WHERE r.instanceID = OLD.idResource;
+				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
+				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
+				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
+				UPDATE IGNORE enterprise_resources_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE dc_enterprise_stats 
+				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+				UPDATE IGNORE vdc_enterprise_stats 
+				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
+				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
+			        UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
+			    END IF;                 
+			END IF;
+			-- Volume added to VDC
+			IF OLD.idVirtualDataCenter IS NULL AND NEW.idVirtualDataCenter IS NOT NULL THEN        
+			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    -- Stateful are always Attached 
+			    IF idState = 1 THEN
+			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;                     
+			    END IF;
+			END IF;
+			-- Volume removed from VDC
+			IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NULL THEN                 
+			    UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;   
+			    UPDATE IGNORE vdc_enterprise_stats SET volAssociated = volAssociated-1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+			    -- Stateful are always Attached
+			    IF idState = 1 THEN
+			        UPDATE IGNORE vdc_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;                     
+			    END IF;
+			END IF;                         
+                END IF;
+            END IF;
+            -- From old `autoDetachVolume`
+            -- UPDATE IGNORE volume_management v set v.state = 0
+            -- WHERE v.idManagement = OLD.idManagement;
+            -- Checks for used IPs
+            IF OLD.idVM IS NULL AND NEW.idVM IS NOT NULL THEN
+                -- Query for datacenter
+                SELECT dc.idDataCenter INTO idDataCenterObj
+                FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
+                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+                AND vn.network_configuration_id = nc.network_configuration_id
+                AND vn.network_id = dc.network_id
+                AND NEW.idManagement = ipm.idManagement;
+                -- Datacenter found ---> PublicIPUsed
+                IF idDataCenterObj IS NOT NULL THEN
+                    -- Query for enterprise 
+                    SELECT vdc.idEnterprise INTO idEnterpriseObj
+                    FROM virtualdatacenter vdc
+                    WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+                    -- 
+                    -- UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed + 1 WHERE idDataCenter = idDataCenterObj;
+                    UPDATE IGNORE enterprise_resources_stats 
+                        SET     publicIPsUsed = publicIPsUsed + 1
+                        WHERE idEnterprise = idEnterpriseObj;
+                    UPDATE IGNORE dc_enterprise_stats 
+                        SET     publicIPsUsed = publicIPsUsed + 1
+                        WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                    UPDATE IGNORE vdc_enterprise_stats 
+                        SET     publicIPsUsed = publicIPsUsed + 1
+                    WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+                END IF;
+            END IF;
+            -- Checks for unused IPs
+            IF OLD.idVM IS NOT NULL AND NEW.idVM IS NULL THEN
+                -- Query for datacenter
+                SELECT dc.idDataCenter INTO idDataCenterObj
+                FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
+                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+                AND vn.network_configuration_id = nc.network_configuration_id
+                AND vn.network_id = dc.network_id
+                AND NEW.idManagement = ipm.idManagement;
+                -- Datacenter found ---> Not PublicIPUsed
+                IF idDataCenterObj IS NOT NULL THEN
+                    -- Query for enterprise 
+                    SELECT vdc.idEnterprise INTO idEnterpriseObj
+                    FROM virtualdatacenter vdc
+                    WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
+                    -- 
+                    -- UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = idDataCenterObj;
+                    UPDATE IGNORE enterprise_resources_stats 
+                        SET     publicIPsUsed = publicIPsUsed - 1
+                        WHERE idEnterprise = idEnterpriseObj;
+                    UPDATE IGNORE dc_enterprise_stats 
+                        SET     publicIPsUsed = publicIPsUsed - 1
+                        WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                    UPDATE IGNORE vdc_enterprise_stats 
+                        SET     publicIPsUsed = publicIPsUsed - 1
+                    WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+                END IF;
+            END IF;
+            -- Checks for unreserved IPs
+            IF OLD.idVirtualDataCenter IS NOT NULL AND NEW.idVirtualDataCenter IS NULL THEN
+                -- Query for datacenter
+                SELECT dc.idDataCenter, ipm.ip INTO idDataCenterObj, ipAddress
+                FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
+                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+                AND vn.network_configuration_id = nc.network_configuration_id
+                AND vn.network_id = dc.network_id
+                AND OLD.idManagement = ipm.idManagement;
+                -- Datacenter found ---> Not PublicIPReserved
+                IF idDataCenterObj IS NOT NULL THEN
+                    UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = idDataCenterObj;
+                    -- Registers Accounting Event
+                    SELECT vdc.idEnterprise INTO idEnterpriseObj
+                    FROM virtualdatacenter vdc
+                    WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;                    
+                    UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = idEnterpriseObj;
+                    UPDATE IGNORE vdc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
+                    UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = idDataCenterObj;
+                    IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+                        CALL AccountingIPsRegisterEvents('IP_FREED',OLD.idManagement,ipAddress,OLD.idVirtualDataCenter, idEnterpriseObj);
+                    END IF;                    
+                END IF;
+            END IF;
+        END IF;
+    END;
+|
+CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON `kinton`.`volume_management`
+    FOR EACH ROW BEGIN
+        DECLARE idDataCenterObj INTEGER;
+        DECLARE idVirtualAppObj INTEGER;
+        DECLARE idVirtualDataCenterObj INTEGER;
+        DECLARE idEnterpriseObj INTEGER;
+        DECLARE reservedSize BIGINT;
+        DECLARE incr INTEGER;
+        IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN       
+        SET incr = NEW.usedSize-OLD.usedSize;
+        SELECT sd.idDataCenter INTO idDataCenterObj
+        FROM storage_pool sp, storage_device sd
+        WHERE OLD.idStorage = sp.idStorage
+        AND sp.idStorageDevice = sd.id;
+        --      
+        SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj
+        FROM rasd_management rasd, virtualapp vapp
+        WHERE OLD.idManagement = rasd.idManagement
+        AND rasd.idVirtualApp = vapp.idVirtualApp;
+        --
+        SELECT vdc.idEnterprise INTO idEnterpriseObj
+        FROM virtualdatacenter vdc
+        WHERE vdc.idVirtualDataCenter = idVirtualDataCenterObj;
+        --
+        SELECT r.limitResource INTO reservedSize
+        FROM rasd_management rm, rasd r
+        WHERE rm.idManagement = NEW.idManagement
+        AND r.instanceID = rm.idResource;
+        --
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), IFNULL(idVirtualDataCenterObj, 'idVirtualDataCenterObj es NULL'), IFNULL(idDataCenterObj, 'idDataCenterObj es NULL')));
+	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UpdateVol: ',OLD.state, NEW.state, reservedSize));
+	-- 
+        IF NEW.state != OLD.state THEN
+            IF NEW.state = 1 THEN 
+                UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed+reservedSize WHERE idDataCenter = idDataCenterObj;
+		UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached+1 WHERE idVirtualApp = idVirtualAppObj;
+                UPDATE IGNORE enterprise_resources_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE dc_enterprise_stats 
+                    SET     extStorageUsed = extStorageUsed +  reservedSize
+                    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
+                UPDATE IGNORE vdc_enterprise_stats 
+                    SET     volAttached = volAttached + 1, extStorageUsed = extStorageUsed +  reservedSize
+                WHERE idVirtualDataCenter = idVirtualDataCenterObj;
+            END IF;     
+	-- IF OLD.state = 1 ====> This is done in update_rasd_management_update_stats
+        END IF;
+    END IF;
+    END;
+
+|
 DELIMITER ;
 
 --
@@ -697,3 +963,15 @@ update volume_management set state = 1 where state = 2;
 
 -- [ABICLOUDPREMIUM-1933] Change the default value
 UPDATE  `kinton`.`system_properties`  Set value ='1' where name='client.dashboard.showStartUpAlert';
+
+
+
+-- 
+-- DO NOT DELETE
+-- [ABICLOUDPREMIUM-1460] Statistics Information MUST be updated in each upgrade
+CALL `kinton`.`CalculateCloudUsageStats`();
+CALL `kinton`.`CalculateEnterpriseResourcesStats`();
+CALL `kinton`.`CalculateVappEnterpriseStats`();
+CALL `kinton`.`CalculateVdcEnterpriseStats`();
+-- These calls should be included in every DB Delta
+-- 
