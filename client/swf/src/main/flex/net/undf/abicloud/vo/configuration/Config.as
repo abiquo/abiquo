@@ -92,6 +92,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_infra_addDatastore:SystemProperty;
 		public var client_wiki_infra_createMultiplePhysicalMachine:SystemProperty;
 		public var client_wiki_infra_createRack:SystemProperty;
+		public var client_wiki_infra_discoverBlades:SystemProperty;
 		
 		public var client_wiki_network_publicVlan:SystemProperty;
 		
