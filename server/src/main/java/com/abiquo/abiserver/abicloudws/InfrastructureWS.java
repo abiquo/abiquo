@@ -83,9 +83,8 @@ import com.sun.ws.management.client.exceptions.FaultException;
  */
 public class InfrastructureWS implements IInfrastructureWS
 {
-    private final static String IDVIRTUALAPP_SQL_BY_VM =
-        "SELECT n.idVirtualApp " + "FROM node n, nodevirtualimage ni "
-            + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
+    private final static String IDVIRTUALAPP_SQL_BY_VM = "SELECT n.idVirtualApp "
+        + "FROM node n, nodevirtualimage ni " + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
 
     /** The logger object */
     private final static Logger logger = LoggerFactory.getLogger(InfrastructureWS.class);
@@ -101,8 +100,8 @@ public class InfrastructureWS implements IInfrastructureWS
 
     static final ResourceManager resourceManager = new ResourceManager(InfrastructureWS.class);
 
-    private final ErrorManager errorManager =
-        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager = ErrorManager
+        .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     private static Integer bugTimeout;
 
@@ -319,7 +318,9 @@ public class InfrastructureWS implements IInfrastructureWS
             // [ABICLOUDPREMIUM-1491] When editing a VM we do not perform a state change
             envelope =
                 OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
-                    virtualMachine, null, null);
+                    virtualMachine,
+                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
+                        virtualMachine));
 
             // envelope =
             // OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
@@ -353,7 +354,7 @@ public class InfrastructureWS implements IInfrastructureWS
 
         EnvelopeType envelope =
             OVFModelFactory.createOVFModelFromVirtualAppliance().changeMachineState(virtualMachine,
-                machineState, additionalRasds);
+                machineState);
 
         Document doc = ovfSerializer.bindToDocument(envelope, false); // TODO not namespaceaware
 
@@ -396,8 +397,8 @@ public class InfrastructureWS implements IInfrastructureWS
         SelectorSetType selector = createSelectorId(virtualMachine.getUUID());
         String destination = getDestinationFromVM(virtualMachine);
         Resource[] resources =
-            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI, abiConfig
-                .getTimeout(), selector);
+            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI,
+                abiConfig.getTimeout(), selector);
         Resource resource = resources[0];
         return resource;
 

@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.State;
@@ -112,11 +110,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceMachineId)
+    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
+        Integer sourceMachineId)
     {
-        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
+        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
+                                                             // hypervisor
 
-        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources on the original hypervisor       
+        Machine sourceMachine = datacenterRepo.findMachineById(sourceMachineId); // free resources
+                                                                                 // on the original
+                                                                                 // hypervisor
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
 
     }
@@ -250,70 +252,34 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // Get the network and the rack, entities that perform the network assignment
             VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
             Rack rack = physicalTarget.getRack();
-            
+
             // Discover the tag of the vlan if it is the first address to be deployed.
             if (vlanNetwork.getTag() == null)
             {
+                List<VLANNetwork> publicVLANs =
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
+                List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
+                vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
-                Rack rack = physicalTarget.getRack();
-                VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
-                final NetworkAssignment nb =
-                    new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
-                if (vlanNetwork.getTag() == null)
-                {
+                Integer freeTag = getFreeVLANFromUsedList(vlanTagsUsed, rack);
+                log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                    vlanNetwork.getId(), freeTag);
+                vlanNetwork.setTag(freeTag);
 
-                    List<Integer> vlansUsed = vlanNetworkDao.getVLANsIdUsedInRack(rack);
-                    vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
-                        .findPublicVLANNetworksByRack(rack)));
-                    Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
-                    vlanNetwork.setTag(freeTag);
+                vlanNetworkDao.flush();
+            }
+            Rasd rasd = ipPoolManagement.getRasd();
+            rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
+            rasd.setParent(ipPoolManagement.getNetworkName());
+            rasd.setConnection(physicalTarget.getVirtualSwitch());
+            rasdDao.flush();
 
-                    vlanNetworkDao.flush();
-                    // vlanNetworkDao.persist(vlanNetwork);
-                }
-                Rasd rasd = ipPoolManagement.getRasd();
-                rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
-                rasd.setParent(ipPoolManagement.getNetworkName());
-                rasd.setConnection(physicalTarget.getVirtualSwitch());
-
-                rasdDao.flush();
-                // rasdDao.persist(rasd);
-
-                netAssignDao.persist(nb);
-            }// iterate over VlanNetwork
-        }
-        else
-        {
-            log.debug("The virtual machine has a network assigned, setting networking RASD to virtual machine");
-            for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
+            final NetworkAssignment nb =
+                new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
+            if (!networksAssignedList.contains(nb))
             {
-                VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
-                Rasd rasd = ipPoolManagement.getRasd();
-                final Rack rack = physicalTarget.getRack();
-                if (vlanNetwork.getTag() == null)
-                {
-                    List<Integer> vlansUsed = vlanNetworkDao.getVLANsIdUsedInRack(rack);
-                    vlansUsed.addAll(getPublicVLANIdsFROMVLANNetworkList(vlanNetworkDao
-                        .findPublicVLANNetworksByRack(rack)));
-                    Integer freeTag = getFreeVLANFromUsedList(vlansUsed, rack);
-
-                    log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                        vlanNetwork.getId(), freeTag);
-                    vlanNetwork.setTag(freeTag);
-                    final NetworkAssignment nb =
-                        new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
-
-                    vlanNetworkDao.flush();
-                    netAssignDao.persist(nb);
-                }
-                rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
-                rasd.setParent(vlanNetwork.getName());
-                rasd.setConnection(physicalTarget.getVirtualSwitch());
-
-                rasdDao.flush();
-            }// iterate over VlanNetwork
+                netAssignDao.persist(nb);
+            }
         }
     }
 
@@ -474,7 +440,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             return candidatePort;
         }
-        
+
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanIds);
 
@@ -492,12 +458,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanIdsOrdered.remove(vlanId);
             }
         }
-        
+
         if (vlanIdsOrdered.isEmpty())
         {
             return candidatePort;
         }
-
 
         // Checking the minimal interval
         if (vlanIdsOrdered.get(0).compareTo(rack.getVlanIdMin()) != 0)

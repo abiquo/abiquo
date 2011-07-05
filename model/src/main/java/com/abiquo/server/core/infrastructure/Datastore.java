@@ -141,26 +141,6 @@ public class Datastore extends DefaultEntityBase
         this.directory = directory;
     }
 
-    public final static String SHARED_PROPERTY = "shared";
-
-    private final static String SHARED_COLUMN = "shared";
-
-    private final static boolean SHARED_REQUIRED = true;
-
-    @Column(name = SHARED_COLUMN, nullable = false)
-    private boolean shared;
-
-    @Required(value = SHARED_REQUIRED)
-    public boolean isShared()
-    {
-        return this.shared;
-    }
-
-    public void setShared(final boolean shared)
-    {
-        this.shared = shared;
-    }
-
     public final static String ROOT_PATH_PROPERTY = "rootPath";
 
     private final static boolean ROOT_PATH_REQUIRED = true;
@@ -258,7 +238,7 @@ public class Datastore extends DefaultEntityBase
     {
         this.enabled = enabled;
     }
-    
+
     public final static String DATASTORE_UUID_PROPERTY = "datastoreUUID";
 
     private final static boolean DATASTORE_UUID_REQUIRED = false;

@@ -28,15 +28,12 @@ import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
-import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
@@ -54,7 +51,6 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.sun.ws.management.client.Resource;
@@ -127,7 +123,8 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findByName(name);
     }
 
-    public VirtualMachine getVirtualMachine(final Integer vdcId, final Integer vappId, final Integer vmId)
+    public VirtualMachine getVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
@@ -221,20 +218,17 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Changes the state of the VirtualMachine to the state passed
-     * 
-     * @param vappId Virtual Appliance Id
-     * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change
-     * @throws Exception
+     * @param vmId
+     * @param vappId
+     * @param vdcId
+     * @param state
      */
-    public void changeVirtualMachineState(final Integer vappId, final Integer vdcId,
-        final State state) throws Exception
+    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
-        checkPauseAllowed(vm,state);
-        
+        checkPauseAllowed(vm, state);
+
         State old = vm.getState();
 
         validMachineStateChange(old, state);
@@ -242,7 +236,7 @@ public class VirtualMachineService extends DefaultApiService
         blockVirtualMachine(vm);
 
         try
-        {   
+        {
             Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
             VirtualAppliance vapp = contanerVirtualAppliance(vm);
@@ -326,10 +320,10 @@ public class VirtualMachineService extends DefaultApiService
 
         resource.put(docEnvelopeRunning);
     }
-    
+
     public void checkPauseAllowed(VirtualMachine vm, State state)
     {
-        if((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
+        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();

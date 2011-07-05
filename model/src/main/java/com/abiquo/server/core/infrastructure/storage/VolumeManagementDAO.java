@@ -227,21 +227,6 @@ import com.abiquo.server.core.util.PagedList;
         return volumesList;
     }
 
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
-    {
-        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
-        return getResultList(criteria);
-    }
-
-    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer volumeId)
-    {
-        Criteria criteria =
-            createCriteria(Restrictions.eq("virtualDatacenter", vdc)).add(
-                Restrictions.eq("id", volumeId));
-        return (VolumeManagement) criteria.uniqueResult();
-    }
-    
     public VolumeManagement getVolumeByRasd(final Rasd rasd)
     {
         Criteria criteria = createCriteria(Restrictions.eq("rasd", rasd));
@@ -269,8 +254,8 @@ import com.abiquo.server.core.util.PagedList;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
-            + filters.getFilter() + "%");
+        query.setParameter("filterLike",
+            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 
@@ -286,14 +271,14 @@ import com.abiquo.server.core.util.PagedList;
         return volumes;
 
     }
-    
+
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
         Criteria criteria = createCriteria(Restrictions.eq("virtualImage.id", idImage));
         Object obj = criteria.uniqueResult();
         return (VolumeManagement) obj;
     }
-    
+
     @SuppressWarnings("unchecked")
     private <T> List<T> getSQLQueryResults(final Session session, final Query query,
         final Class<T> objectClass, final int idFieldPosition)
@@ -316,10 +301,12 @@ import com.abiquo.server.core.util.PagedList;
     private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
-        
+
         queryString.append(" order by ");
-        if(orderBy.equalsIgnoreCase("vol.id")) queryString.append("vol.rasd.id");
-        else queryString.append(orderBy);
+        if (orderBy.equalsIgnoreCase("vol.id"))
+            queryString.append("vol.rasd.id");
+        else
+            queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
