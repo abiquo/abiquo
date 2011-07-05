@@ -116,7 +116,7 @@ public class RolesResource extends AbstractResource
                     PagedList<Role> list = (PagedList<Role>) all;
                     roles.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
                         .toString(), list));
-                    roles.setTotalSize(list.getTotalResults());
+                    roles.setTotalSize(roles.getCollection().size());
                 }
             }
 
