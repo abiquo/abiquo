@@ -1323,11 +1323,6 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
-ALTER TABLE `kinton`.`enterprise` ADD `isReservationRestricted` tinyint(1) DEFAULT 0
-
--- [ABICLOUDPREMIUM-1490] Volumes are attached directly. Reserved state disappears.
-update volume_management set state = 1 where state = 2;
-
 -- [ABICLOUDPREMIUM-1933] Change the default value
 UPDATE  `kinton`.`system_properties`  Set value ='1' where name='client.dashboard.showStartUpAlert';
 

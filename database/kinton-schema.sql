@@ -1962,15 +1962,6 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`enterprise_theme` (
 )ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
 
--- The idRole values are taken from the above role table.
-/*!40000 ALTER TABLE `role_ldap` DISABLE KEYS */;
-LOCK TABLES `kinton`.`role_ldap` WRITE;
-insert into `kinton`.`role_ldap` values (1,1, 'LDAP_SYS_ADMIN', 0),
-(2,2, 'LDAP_USER', 0),
-(3,3, 'LDAP_ENTERPRISE_ADMIN', 0);
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `role_ldap` ENABLE KEYS */;
-
 --
 -- STATISTICS MODULE TRIGGERS
 --
