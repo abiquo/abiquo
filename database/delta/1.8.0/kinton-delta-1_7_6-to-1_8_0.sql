@@ -151,3 +151,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
        	END IF;	 
     END IF;
     END;
+
+-- [UCS]Add the specific wiki link for discovering blades form
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");

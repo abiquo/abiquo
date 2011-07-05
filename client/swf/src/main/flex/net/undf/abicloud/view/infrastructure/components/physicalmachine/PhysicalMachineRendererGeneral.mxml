@@ -88,7 +88,7 @@
             {
                 this._physicalMachine = value;
                 
-                this._isUCS = this._physicalMachine.assignedTo is UcsRack;
+                this._isUCS = this._physicalMachine.assignedTo is UcsRack && this._physicalMachine.idState != PhysicalMachine.STATE_MANAGED && this._physicalMachine.idState != PhysicalMachine.STATE_NOT_MANAGED;
                 
                 var size:Object = returnDataStoresSizes();
                 this._physicalMachineHD = size.total+' GB ('+size.used+' GB '+resourceManager.getString('Infrastructure','LABEL_USED').toLowerCase()+')'; 
