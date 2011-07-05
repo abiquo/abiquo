@@ -37,12 +37,13 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import junit.framework.Assert;
+
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.springframework.security.context.SecurityContextHolder;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,7 +57,10 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -83,6 +87,21 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         validMachineUri =
             resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId());
+
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
