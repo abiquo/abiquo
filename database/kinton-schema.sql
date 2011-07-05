@@ -2922,10 +2922,10 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
 				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
 				UPDATE IGNORE enterprise_resources_stats 
-				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    SET     extStorageUsed = extStorageUsed - reservedSize
 				    WHERE idEnterprise = idEnterpriseObj;
 				UPDATE IGNORE dc_enterprise_stats 
-				    SET     extStorageUsed = extStorageUsed +  reservedSize
+				    SET     extStorageUsed = extStorageUsed - reservedSize
 				    WHERE idDataCenter = idDataCenterObj AND idEnterprise = idEnterpriseObj;
 				UPDATE IGNORE vdc_enterprise_stats 
 				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
