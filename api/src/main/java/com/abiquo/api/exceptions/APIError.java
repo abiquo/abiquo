@@ -145,7 +145,8 @@ public enum APIError
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
         "This network doesn't have IPs"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
-        "Parameter IPFrom is greater than IPTo"),
+        "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
