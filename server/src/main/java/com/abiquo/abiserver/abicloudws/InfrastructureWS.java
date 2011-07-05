@@ -318,9 +318,9 @@ public class InfrastructureWS implements IInfrastructureWS
             // [ABICLOUDPREMIUM-1491] When editing a VM we do not perform a state change
             envelope =
                 OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
-                    virtualMachine,
-                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
-                        virtualMachine));
+                    virtualMachine, null, null);
+//                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
+//                        virtualMachine), null);
 
             // envelope =
             // OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
@@ -354,7 +354,7 @@ public class InfrastructureWS implements IInfrastructureWS
 
         EnvelopeType envelope =
             OVFModelFactory.createOVFModelFromVirtualAppliance().changeMachineState(virtualMachine,
-                machineState);
+                machineState, null);
 
         Document doc = ovfSerializer.bindToDocument(envelope, false); // TODO not namespaceaware
 
