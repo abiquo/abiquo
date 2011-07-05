@@ -379,6 +379,28 @@ public class VirtualImage extends DefaultEntityBase
     {
         this.deleted = deleted;
     }
+    
+    public final static String CHEF_PROPERTY = "chef";
+
+    private final static String CHEF_COLUMN = "chef";
+
+    private final static int CHEF_MIN = Integer.MIN_VALUE;
+
+    private final static int CHEF_MAX = Integer.MAX_VALUE;
+
+    @Column(name = CHEF_COLUMN, nullable = true)
+    @Range(min = CHEF_MIN, max = CHEF_MAX)
+    private Integer chef = 0;
+
+    public Integer getChef()
+    {
+        return this.chef;
+    }
+
+    private void setChef(Integer chef)
+    {
+        this.chef = deleted;
+    }
 
     public final static String ID_MASTER_PROPERTY = "idMaster";
 
@@ -573,6 +595,11 @@ public class VirtualImage extends DefaultEntityBase
     public boolean isManaged()
     {
         return getRepository() != null;
+    }
+
+    public boolean isStateful()
+    {
+        return getStateful() != 0;
     }
 
     public String getFileRef()

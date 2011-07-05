@@ -65,6 +65,32 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         this.client = new RestClient(conf);
     }
 
+    public void pause(UserSession userSession, Integer virtualDatacenterId,
+        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
+        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
+        NotEnoughResourcesException
+    {
+
+
+        String vmachineUrl =
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
+
+        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/pause");
+
+        Resource vmachineResource = resource(vmachineUrl);
+
+        ClientResponse response =
+            vmachineResource.contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML).post(null);
+
+        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
+
+        if (response.getStatusCode() / 200 != 1)
+        {
+            onError(userSession, response);
+        }
+    }
+
     @Override
     public void checkEdit(final UserSession userSession, final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
@@ -84,8 +110,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
-                MediaType.APPLICATION_XML).put(newRequirements);
+            vmachineResource.contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML).put(newRequirements);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 

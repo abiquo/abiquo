@@ -270,7 +270,7 @@ public class LibvirtMachine extends AbsVirtualMachine
                 // Clone the source image
                 logger.info("Cloning the virtual machine: {}", getMachineName().toString());
 
-                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
                 {
                     cloneVirtualDisk();
                 }
@@ -601,7 +601,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             dom.undefine();
 
             // [ABICLOUDPREMIUM-1459] Should not be executed in stateful images
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
             {
                 removeImage();
             }

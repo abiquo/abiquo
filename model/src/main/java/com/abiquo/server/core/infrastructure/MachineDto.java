@@ -47,23 +47,30 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     private State state;
 
     private String virtualSwitch;
-    
+
     private Integer port;
 
     private String ip;
-    
+
     private String ipService;
 
     private HypervisorType type;
 
     private String user;
-    
+
     private String password;
-    
+
     private DatastoresDto datastores;
-    
+
     private HypervisorDto hypervisor;
-    
+
+    private String ipmiIp;
+
+    private Integer ipmiPort;
+
+    private String ipmiUser;
+
+    private String ipmiPassword;
 
     /**
      * @return the port
@@ -354,5 +361,45 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public HypervisorDto getHypervisor()
     {
         return hypervisor;
+    }
+
+    public String getIpmiIp()
+    {
+        return ipmiIp;
+    }
+
+    public void setIpmiIp(String ipmiIp)
+    {
+        this.ipmiIp = ipmiIp;
+    }
+
+    public Integer getIpmiPort()
+    {
+        return ipmiPort;
+    }
+
+    public void setIpmiPort(Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+
+    public String getIpmiUser()
+    {
+        return ipmiUser;
+    }
+
+    public void setIpmiUser(String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+
+    public String getIpmiPassword()
+    {
+        return ipmiPassword;
+    }
+
+    public void setIpmiPassword(String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
     }
 }

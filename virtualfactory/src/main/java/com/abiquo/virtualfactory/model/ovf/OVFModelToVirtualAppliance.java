@@ -373,6 +373,13 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                 // The target datastore must be determined for each disk
                 String targetDatastore =
                     fileRef.getOtherAttributes().get(AbicloudConstants.DATASTORE_QNAME);
+                
+                boolean isha = false;
+                if(fileRef.getOtherAttributes().containsKey(AbicloudConstants.HA_DISK))
+                {
+                    logger.debug("Its a HA disk (do not copy or remove)");
+                    isha= true;
+                }
 
                 logger.debug("Registering the virtual disk location:" + path);
 
@@ -400,6 +407,13 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                             d.getFileRef(),
                             d.getFormat());
                 }
+                
+                
+                if(isha)
+                {
+                    virtualDisk.setHa();
+                }
+                
                 virtualDiskMap.put(d.getDiskId(), virtualDisk);
             }
             else

@@ -514,11 +514,18 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 1 - NOT PROVISIONED
 2 - NOT MANAGED
 3 - MANAGED
-4 - HALTED',
+4 - HALTED
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA',
   `vswitchName` VARCHAR(30)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
   `version_c` int(11) default 0,
+  `ipmiIP` varchar(39) default NULL,
+  `ipmiPort` int(5) unsigned default NULL,
+  `ipmiUser` varchar(255) default NULL,
+  `ipmiPassword` varchar(255) default NULL,
   PRIMARY KEY  (`idPhysicalMachine`),
   KEY `PhysicalMachine_FK1` (`idRack`),
   KEY `PhysicalMachine_FK5` (`idDataCenter`),
@@ -557,6 +564,7 @@ CREATE TABLE  `kinton`.`rack` (
   `vlans_id_avoided` varchar(255) default '',
   `vlan_per_vdc_expected` int(15) unsigned default 8,
   `nrsq` int(15) unsigned default 10,
+  `haEnabled` boolean default false COMMENT 'TRUE - This rack is enabled for the HA functionality',
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRack`),
   KEY `Rack_FK1` (`idDataCenter`),
@@ -580,10 +588,10 @@ CREATE TABLE  `kinton`.`datastore` (
   `name` varchar(255) NOT NULL,
   `rootPath` varchar(42) NOT NULL,
   `directory` varchar(255) NOT NULL,
-  `shared` boolean NOT NULL default 0,
   `enabled` boolean NOT NULL default 0,
   `size` bigint(40) unsigned NOT NULL,
   `usedSize` bigint(40) unsigned NOT NULL,
+  `datastoreUuid` VARCHAR(255) default NULL COMMENT 'Datastore UUID set by Abiquo to identify shared datastores.',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idDatastore`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1768,7 +1776,6 @@ CREATE TABLE  `kinton`.`license` (
   PRIMARY KEY (`idLicense`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
 --
 -- THE WONDERFUL WORLD OF TRIGGERS
 --
@@ -2214,7 +2221,7 @@ CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `k
           vStorageUsed=vStorageUsed-OLD.hdUsed
       WHERE idDataCenter = OLD.idDataCenter;
     END IF;
-    IF OLD.idState !=2 THEN
+    IF OLD.idState NOT IN (2, 6, 7) THEN
       UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = OLD.idDataCenter;
       UPDATE IGNORE cloud_usage_stats
         SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
@@ -2238,8 +2245,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
   FOR EACH ROW BEGIN
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF OLD.idState != NEW.idState THEN
-        IF OLD.idState = 2 THEN
-          -- Machine not managed changes into managed
+        IF OLD.idState IN (2, 7) THEN
+          -- Machine not managed changes into managed; or disabled_by_ha to Managed
           UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1 WHERE idDataCenter = NEW.idDataCenter;
           UPDATE IGNORE cloud_usage_stats
           SET vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
@@ -2247,8 +2254,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
             vStorageTotal=vStorageTotal + NEW.hd
           WHERE idDataCenter = NEW.idDataCenter;
         END IF;
-        IF NEW.idState = 2 THEN
-          -- Machine managed changes into not managed
+        IF NEW.idState IN (2,7) THEN
+          -- Machine managed changes into not managed or DisabledByHA
           UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = NEW.idDataCenter;
           UPDATE IGNORE cloud_usage_stats
           SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
@@ -2275,7 +2282,8 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
         END IF;
       ELSE
       -- No State Changes
-        IF NEW.idState != 2 THEN
+        IF NEW.idState NOT IN (2, 6, 7) THEN
+	-- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
           UPDATE IGNORE cloud_usage_stats
             SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
               vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram),

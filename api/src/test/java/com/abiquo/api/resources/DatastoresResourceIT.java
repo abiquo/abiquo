@@ -157,7 +157,6 @@ public class DatastoresResourceIT extends AbstractJpaGeneratorIT
         dto.setName(name);
         dto.setRootPath(rootPath);
         dto.setDirectory(directory);
-        dto.setShared(shared);
         dto.setEnabled(enabled);
 
         return dto;

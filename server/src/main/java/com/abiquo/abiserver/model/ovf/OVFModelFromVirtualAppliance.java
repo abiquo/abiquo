@@ -39,6 +39,7 @@ import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType;
+import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
@@ -47,7 +48,6 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.CIMResourceAllocationSettingDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +85,8 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
-import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
-import com.abiquo.ovfmanager.cim.CIMTypesUtils.ChangeableTypeEnum;
+import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -96,7 +95,6 @@ import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
-import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFDiskUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
@@ -104,8 +102,8 @@ import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 public class OVFModelFromVirtualAppliance
 {
 
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFModelFromVirtualAppliance.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFModelFromVirtualAppliance.class);
 
     // /////////// InfrastructureWS
 
@@ -186,7 +184,7 @@ public class OVFModelFromVirtualAppliance
 
             // Configure AnnotationSection with the RD port
             AnnotationSectionType annotationSection =
-                createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+                createVirtualSystemRDPortAnnotationSection(virtualMachine);
             if (machineState != null)
             {
                 annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
@@ -202,8 +200,8 @@ public class OVFModelFromVirtualAppliance
                 createDiskFromVirtualImage(virtualMachine, virtualImage, "0");
             OVFDiskUtils.addDisk(envelope, virtualDisk);
 
-            OVFReferenceUtils.addFile(references, createFileFromVirtualImage(virtualMachine,
-                virtualImage, false));
+            OVFReferenceUtils.addFile(references,
+                createFileFromVirtualImage(virtualImage, virtualMachine, false, false));
 
             // Setting the virtual system as envelope content
             OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
@@ -211,7 +209,6 @@ public class OVFModelFromVirtualAppliance
         }
         catch (Exception e) // RequiredAttributeException(vs creation) and SectionException
         {
-
             String msg =
                 String
                     .format(
@@ -275,33 +272,8 @@ public class OVFModelFromVirtualAppliance
         return state;
     }
 
-    @Deprecated
-    // this function should be deleted
-    private static DiskSectionType createEnvelopeDisk(final VirtualImage image)
-    {
-        // from the image
-        String diskfileId = image.getName() + "." + image.getId();
-        String diskId = String.valueOf(image.getId());
-        Long capacity = image.getHdRequired();// TODO set capacity !!! (using fileId? )
-
-        DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().getUri());
-
-        // TODO (also capacityUnit and parentRef (populateSize on an empty disk do not matter))
-
-        // Setting the virtual Disk package level element
-        DiskSectionType diskSection = new DiskSectionType();
-        VirtualDiskDescType virtualDescType =
-            OVFDiskUtils.createDiskDescription(diskId, diskfileId, format, capacity, null, null,
-                null);
-
-        diskSection.getDisk().add(virtualDescType);
-
-        return diskSection;
-    }
-
     private static String codifyRepositoryAndPath(final String imagePath, final String repository)
     {
-
         // TODO EBS when the path is formed by IP|IQN avoid using the repository and just the path
         String codify = null;
 
@@ -340,175 +312,6 @@ public class OVFModelFromVirtualAppliance
         return codify;
     }
 
-    /**
-     * Setting the virtualDisk File reference
-     * 
-     * @param targetDatastore the targetDatastore
-     */
-    private static ReferencesType createDiskFileReferences(final VirtualImage virtualImage,
-        final String targetDatastore)
-    {
-        ReferencesType references;
-        FileType fileDisk;
-
-        // Combining the repository path + the virtual machine relative path (TODO AM)
-        String imageRepository = null;
-        if (virtualImage.getRepository() != null)
-        {
-            imageRepository = virtualImage.getRepository().getURL();
-        }
-
-        // from the image
-        String href = codifyRepositoryAndPath(virtualImage.getPath(), imageRepository);// virtualImage.getPath();
-
-        String fileId = virtualImage.getName() + "." + virtualImage.getId();
-        BigInteger fileSize = null; // TODO required size
-
-        fileDisk = OVFReferenceUtils.createFileType(fileId, href, fileSize, null, null);
-        // TODO change datastore from hypervisor
-
-        insertTargetDataStore(fileDisk, targetDatastore);
-
-        references = new ReferencesType();
-        references.getFile().add(fileDisk);
-
-        return references;
-    }
-
-    private static RASDType createMemory(final VirtualMachine virtualMachine)
-    {
-        String elementName = "RAM";
-        String instanceID = "2";
-        CIMResourceTypeEnum resourceType = CIMResourceTypeEnum.Memory;
-        Long virtualQuantity = new Long(virtualMachine.getRam());
-
-        RASDType raMem;
-        CIMResourceAllocationSettingDataType rasd;
-
-        try
-        {
-            rasd =
-                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
-                    elementName, instanceID, resourceType);// TODO parent, description, caption,
-            // generation, subtype
-
-            CIMResourceAllocationSettingDataUtils.setAllocationToRASD(rasd, virtualQuantity); // TODO
-            // units
-
-            raMem = CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(rasd);
-        }
-        catch (RequiredAttributeException e)
-        {
-            // can not happen
-            raMem = null;
-        }
-
-        return raMem;
-    }
-
-    private static RASDType createCPU(final VirtualMachine virtualMachine)
-    {
-        String elementName = "CPU";
-        String instanceID = "1";
-        CIMResourceTypeEnum resourceType = CIMResourceTypeEnum.Processor;
-        Long virtualQuantity = new Long(virtualMachine.getCpu());
-
-        RASDType raCpu;
-        CIMResourceAllocationSettingDataType rasd;
-
-        try
-        {
-            rasd =
-                CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData(
-                    elementName, instanceID, resourceType);// TODO parent, description, caption,
-            // generation, subtype
-
-            CIMResourceAllocationSettingDataUtils.setAllocationToRASD(rasd, virtualQuantity); // TODO
-            // units
-
-            raCpu = CIMResourceAllocationSettingDataUtils.createRASDTypeFromCIMRASD(rasd);
-        }
-        catch (RequiredAttributeException e)
-        {
-            // can not happen
-            raCpu = null;
-        }
-
-        return raCpu;
-    }
-
-    /**
-     * TODO doc Set the VirtualSystemSettingData on the VirtualHardwareSection from the virutual
-     * machine hypervisor configuration (type, address)
-     */
-    private static VirtualHardwareSectionType createVirtualHardware(
-        final VirtualMachine virtualMachine)
-    {
-        VirtualHardwareSectionType hardwareSection;
-        VSSDType vssd;
-
-        // from the hypervisor
-        HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
-        String hypervisorAddress =
-            "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
-        String vsystemType = hypervisor.getType().getName();
-        try
-        {
-            // Setting the virtual machine ID
-            String instanceIdString = virtualMachine.getUUID();
-            String elementName = "Hypervisor";
-
-            String description = null; // TODO
-            Long generation = null;
-            String caption = null;
-            ChangeableTypeEnum changeableType = null;
-
-            vssd =
-                CIMVirtualSystemSettingDataUtils.createVirtualSystemSettingData(elementName,
-                    instanceIdString, description, generation, caption, changeableType);
-
-            insertUserAndPassword(vssd, hypervisor.getUser(), hypervisor.getPassword());
-
-            // Setting the hypervisor address as VirtualSystemIdentifier element
-            String virtualSystemIdentifier = hypervisorAddress;
-
-            // Setting the hypervisor type
-            CIMVirtualSystemSettingDataUtils.setVirtualSystemToVSSettingData(vssd,
-                virtualSystemIdentifier, vsystemType);
-
-            // Creating the VirtualHardware element
-            String info = null; // TODO
-            String transport = null; // TODO
-            hardwareSection =
-                OVFVirtualHadwareSectionUtils.createVirtualHardwareSection(vssd, info, transport);
-
-        }
-        catch (RequiredAttributeException e)
-        {
-            // if the virtual machine do not have UUID
-            hardwareSection = null;
-            // TODO check never occurs (log)
-        }
-
-        return hardwareSection;
-    }
-
-    private static AnnotationSectionType createAnnotationMachineStateAndRDPPort(
-        final String machineState, final String rdpPort)
-    {
-
-        // Creating the Annotation Type
-        AnnotationSectionType annotationSection =
-            OVFAnnotationUtils.createAnnotationSection("Abiquo extension to store machine state",
-                "see OtherAttributes: " + AbiCloudConstants.machineStateQname.toString());
-        annotationSection.getOtherAttributes().put(AbiCloudConstants.remoteDesktopQname, rdpPort);
-
-        annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
-            machineState);
-
-        return annotationSection;
-    }
-
     /**************************
      * VirtualApplianceWS
      *********/
@@ -528,6 +331,18 @@ public class OVFModelFromVirtualAppliance
 
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
         final boolean bundling) throws Exception
+    {
+        return createVirtualApplication(virtualAppliance, bundling, false);
+    }
+
+    public EnvelopeType createVirtualApplicationHA(final VirtualAppliance virtualAppliance)
+        throws Exception
+    {
+        return createVirtualApplication(virtualAppliance, false, true);
+    }
+
+    private EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
+        final boolean bundling, final boolean isHa) throws Exception
     {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
@@ -555,13 +370,13 @@ public class OVFModelFromVirtualAppliance
         // set the network section on the envelope
         OVFEnvelopeUtils.addSection(envelope, netSection);
 
-        // Add the custom network;
+        // Add the custom network
         AbicloudNetworkType customNetwork = createCustomNetwork(virtualAppliance);
         OVFEnvelopeUtils.addSection(envelope, customNetwork);
 
         // Getting the all the virtual Machines
         for (Node node : virtualAppliance.getNodes())
-        {
+        {            
             if (node.isNodeTypeVirtualImage())
             {
                 NodeVirtualImage nodeVirtualImage = (NodeVirtualImage) node;
@@ -571,6 +386,7 @@ public class OVFModelFromVirtualAppliance
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
                     createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
+                
                 OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
                 // Setting the virtual Disk package level element to the envelope
@@ -583,9 +399,10 @@ public class OVFModelFromVirtualAppliance
                 // Adding the virtual disks to references
                 try
                 {
-                    OVFReferenceUtils.addFile(references, createFileFromVirtualImage(
-                        nodeVirtualImage.getVirtualMachine(), nodeVirtualImage.getVirtualImage(),
-                        bundling));
+                    OVFReferenceUtils.addFile(
+                        references,
+                        createFileFromVirtualImage(nodeVirtualImage.getVirtualImage(),
+                            nodeVirtualImage.getVirtualMachine(), bundling, isHa));
                 }
                 catch (IdAlreadyExistsException e)
                 {
@@ -745,8 +562,9 @@ public class OVFModelFromVirtualAppliance
         return networkType;
     }
 
-    private FileType createFileFromVirtualImage(final VirtualMachine virtualMachine,
-        final VirtualImage virtualImage, final boolean bundling) throws RequiredAttributeException
+    private FileType createFileFromVirtualImage(final VirtualImage virtualImage,
+        final VirtualMachine virtualMachine, final boolean bundling, final boolean isHa)
+        throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -796,6 +614,11 @@ public class OVFModelFromVirtualAppliance
         insertTargetDataStore(virtualDiskImageFile, virtualMachine.getDatastore().getUUID()
             + virtualMachine.getDatastore().getDirectory());
 
+        if (isHa)
+        {
+            setHA(virtualDiskImageFile);
+        }
+
         // compression
         // chunk
         VirtualImageDecorator decorator =
@@ -829,6 +652,16 @@ public class OVFModelFromVirtualAppliance
         insertRepositoryManager(virtualDiskImageFile, virtualMachine);
 
         return virtualDiskImageFile;
+    }
+
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(AbiCloudConstants.HA_DISK,
+            Boolean.TRUE.toString());
     }
 
     /**
@@ -909,14 +742,11 @@ public class OVFModelFromVirtualAppliance
         // setting the network name the name of the virtualAppliance
         String networkName = virtualApplianceName + "_network";
 
-        int rdPort = virtualMachine.getVdrpPort();
-
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
         VirtualSystemType virtualSystem =
-            OVFEnvelopeUtils.createVirtualSystem(vsId, virtualMachine.getName(), null); // TODO not
-        // name not
-        // info
+            OVFEnvelopeUtils.createVirtualSystem(vsId, virtualMachine.getName(),
+                nodeVirtualImage.getName()); 
 
         // Create a productSection with the virtual system IP
         // ProductSectionType productSection =
@@ -925,12 +755,12 @@ public class OVFModelFromVirtualAppliance
         // Configure CPU, RAM and Network
         // NodeVirtualImage is a temporal attribute!!!
         VirtualHardwareSectionType hardwareSection =
-            createVirtualSystemSection(virtualMachine, virtualImage, networkName, nodeVirtualImage
-                .getId(), null);
+            createVirtualSystemSection(virtualMachine, virtualImage, networkName,
+                nodeVirtualImage.getId(), null);
 
-        // Configure AnnotationSection with the RD port
+        // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
-            createVirtualSystemRDPortAnnotationSection(rdPort);
+            createVirtualSystemRDPortAnnotationSection(virtualMachine);
 
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -939,19 +769,24 @@ public class OVFModelFromVirtualAppliance
         return virtualSystem;
     }
 
-    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(final int rdPort)
+    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(
+        final VirtualMachine virtualMachine)
     {
-
-        AnnotationSectionType annotationSection;
-
-        annotationSection = new AnnotationSectionType(); // TODO
-        // OVFEnvelopeUtils.createSection(AnnotationSectionType.class,
-        // null);
+        // TODO OVFEnvelopeUtils.createSection(AnnotationSectionType.class, null);
+        AnnotationSectionType annotationSection = new AnnotationSectionType();
 
         Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
 
-        otherAttributes.put(AbiCloudConstants.remoteDesktopQname, String.valueOf(rdPort));
-        logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
+        String rdPort = String.valueOf(virtualMachine.getVdrpPort());
+        otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, rdPort);
+        logger.debug("The remote desktop port is: " + String.valueOf(rdPort));
+
+        if (virtualMachine.getPassword() != null && !virtualMachine.getPassword().equals(""))
+        {
+            String rdPassword = virtualMachine.getPassword();
+            otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);
+            logger.debug("The remote desktop password is: " + rdPassword);
+        }
 
         return annotationSection;
     }
@@ -998,16 +833,16 @@ public class OVFModelFromVirtualAppliance
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
         String virtualImageId = String.valueOf(nodeId);
         String diskId = "disk_" + virtualImageId;
@@ -1064,7 +899,6 @@ public class OVFModelFromVirtualAppliance
     {
         vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, user);
         vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, password);
-
     }
 
     /**
@@ -1248,7 +1082,6 @@ public class OVFModelFromVirtualAppliance
             virtualDiskImageFile.getOtherAttributes().put(new QName("repositoryManager"),
                 repositoryManagerAddress);
         }
-
     }
 
     private static String getRepositoryManagerAddress(final VirtualMachine virtualMachine)

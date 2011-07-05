@@ -984,6 +984,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
+            
+            rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
 
@@ -1238,7 +1240,27 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             HypervisorHB hypervisor = machine.getHypervisor();
 
-            deletePhysicalMachineFromDatabase(physicalMachine.getId(), userSession);
+            try
+            {
+                deletePhysicalMachineFromDatabase(physicalMachine.getId(), userSession);
+            }
+            catch (InfrastructureCommandException ice)
+            {
+                // Captures error messages properly from deletePhysicalMachineFromDatabase en
+                // InfrasctructureCommandPremiumImpl
+                factory.rollbackConnection();
+
+                errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
+                    "deletePhysicalMachine", ice, ice.getMessage());
+
+                basicResult.setMessage(ice.getMessage());
+
+                traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_DELETE,
+                    userSession, physicalMachine.getDataCenter(), null, ice.getMessage(), null,
+                    (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
+
+                return basicResult;
+            }
 
             String user = hypervisor.getUser();
             String password = hypervisor.getPassword();
@@ -1412,6 +1434,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
+            physicalMachineHb.setIpmiIp(pm.getIpmiIp());
+            physicalMachineHb.setIpmiPort(pm.getIpmiPort());
+            physicalMachineHb.setIpmiUser(pm.getIpmiUser());
+            physicalMachineHb.setIpmiPassword(pm.getIpmiPassword());
 
             // Updating virtual machines
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();

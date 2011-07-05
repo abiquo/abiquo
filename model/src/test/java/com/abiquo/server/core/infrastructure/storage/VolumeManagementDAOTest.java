@@ -34,6 +34,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -224,4 +225,20 @@ public class VolumeManagementDAOTest extends
         assertSize(results, 2);
     }
 
+	@Test
+    public void testGetVolumesByRasd()
+    {
+        // Test without filtering
+        VolumeManagement volume = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, volume);
+        Rasd rasd = volume.getRasd();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        VolumeManagement vol = dao.getVolumeByRasd(rasd);
+
+        eg().assertAllPropertiesEqual(vol,volume);
+    }
 }

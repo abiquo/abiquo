@@ -69,6 +69,9 @@ public class StorageRep extends DefaultRepBase
     @Autowired
     private RasdDAO rasdDAO;
 
+    @Autowired
+    private InitiatorMappingDAO initiatorMappingDAO;
+
     public StorageRep()
     {
 
@@ -84,6 +87,7 @@ public class StorageRep extends DefaultRepBase
         this.poolDAO = new StoragePoolDAO(entityManager);
         this.volumeDAO = new VolumeManagementDAO(entityManager);
         this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
+        this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -107,6 +111,12 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolById(deviceId, poolId);
     }
 
+    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
+        final String initiatorIqn)
+    {
+        return initiatorMappingDAO.findByVolumeAndInitiator(idVolumeManagement, initiatorIqn);
+    }
+
     public StoragePool findPoolByName(final Integer deviceId, final String name)
     {
         return poolDAO.findPoolByName(deviceId, name);
@@ -115,6 +125,11 @@ public class StorageRep extends DefaultRepBase
     public VolumeManagement findVolumeById(final Integer volumeId)
     {
         return volumeDAO.findById(volumeId);
+    }
+    
+    public VolumeManagement findVolumeByRasd(final Rasd rasd)
+    {
+        return volumeDAO.getVolumeByRasd(rasd);
     }
 
     public List<StoragePool> findPoolsByTier(final Tier tier)
@@ -157,6 +172,11 @@ public class StorageRep extends DefaultRepBase
     public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
+    }
+    
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        return volumeDAO.getVolumeFromImage(idImage);
     }
 
     public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)

@@ -258,6 +258,34 @@ public class Datastore extends DefaultEntityBase
     {
         this.enabled = enabled;
     }
+    
+    public final static String DATASTORE_UUID_PROPERTY = "datastoreUUID";
+
+    private final static boolean DATASTORE_UUID_REQUIRED = false;
+
+    private final static int DATASTORE_UUID_LENGTH_MIN = 0;
+
+    private final static int DATASTORE_UUID_LENGTH_MAX = 255;
+
+    private final static boolean DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DATASTORE_UUID_COLUMN = "datastoreUuid";
+
+    @Column(name = DATASTORE_UUID_COLUMN, nullable = !DATASTORE_UUID_REQUIRED, length = DATASTORE_UUID_LENGTH_MAX)
+    private String datastoreUUID;
+
+    @Required(value = DATASTORE_UUID_REQUIRED)
+    @Length(min = DATASTORE_UUID_LENGTH_MIN, max = DATASTORE_UUID_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDatastoreUUID()
+    {
+        return this.datastoreUUID;
+    }
+
+    public void setDatastoreUUID(String datastoreUUID)
+    {
+        this.datastoreUUID = datastoreUUID;
+    }
 
     // code in Datastore
     public static final String MACHINES_PROPERTY = "machines";

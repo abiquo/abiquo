@@ -171,5 +171,4 @@ public class VirtualMachineDto extends SingleResourceTransportDto
     {
         this.idType = idType;
     }
-
 }
