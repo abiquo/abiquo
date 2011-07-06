@@ -888,6 +888,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
         RackDAO rackDAO = factory.getRackDAO();
+        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
 
         try
         {
@@ -906,7 +907,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
 
-                    physicalmachineDAO.makeTransient(pmToDelete);
+                    // Datastores deleted here
+                    for (DatastoreHB datastoreHB : pmToDelete.getDatastoresHB())
+                    {
+                        datastoreDAO.makeTransient(datastoreHB);
+                    }
+                    // Physcial machines will be deleted with rack deleted in cascade
+                    // physicalmachineDAO.makeTransient(pmToDelete);
                 }
                 else
                 {
@@ -1065,8 +1072,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null,
-                (Rack) pm.getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
+                    .getAssignedTo(), pm, null, null);
 
         }
 
@@ -2069,6 +2076,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         + virtualMachine.getName() + " because datacenter isn't well configured.",
                     null, machine.getRack(), machine, userSession.getUser(),
                     userSession.getEnterpriseName());
+
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
