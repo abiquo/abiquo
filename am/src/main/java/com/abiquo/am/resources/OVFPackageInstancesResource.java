@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
