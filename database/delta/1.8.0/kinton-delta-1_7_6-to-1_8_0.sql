@@ -173,16 +173,15 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `i
 -- VNC password 
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
 
+ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 
-DELIMITER |
-ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
-DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
+DELIMITER |
 
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
     FOR EACH ROW BEGIN

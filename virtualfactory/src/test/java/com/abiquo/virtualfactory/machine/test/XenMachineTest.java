@@ -73,6 +73,7 @@ public class XenMachineTest extends AbsMachineTest
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -127,7 +128,7 @@ public class XenMachineTest extends AbsMachineTest
      * @param args
      * @throws Exception
      */
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         XenMachineTest test = new XenMachineTest();
         test.setUp();

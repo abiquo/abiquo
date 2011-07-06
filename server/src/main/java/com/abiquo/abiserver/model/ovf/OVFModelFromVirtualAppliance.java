@@ -184,7 +184,7 @@ public class OVFModelFromVirtualAppliance
 
             // Configure AnnotationSection with the RD port
             AnnotationSectionType annotationSection =
-                createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+                createVirtualSystemRDPortAnnotationSection(virtualMachine);
             if (machineState != null)
             {
                 annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
@@ -760,7 +760,7 @@ public class OVFModelFromVirtualAppliance
 
         // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
-            createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+            createVirtualSystemRDPortAnnotationSection(virtualMachine);
 
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -769,17 +769,15 @@ public class OVFModelFromVirtualAppliance
         return virtualSystem;
     }
 
-    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(final int rdPort)
+    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(
+        final VirtualMachine virtualMachine)
     {
-
-        AnnotationSectionType annotationSection;
-
-        annotationSection = new AnnotationSectionType(); // TODO
-        // OVFEnvelopeUtils.createSection(AnnotationSectionType.class,
-        // null);
+        // TODO OVFEnvelopeUtils.createSection(AnnotationSectionType.class, null);
+        AnnotationSectionType annotationSection = new AnnotationSectionType();
 
         Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
 
+        String rdPort = String.valueOf(virtualMachine.getVdrpPort());
         otherAttributes.put(AbiCloudConstants.remoteDesktopQname, String.valueOf(rdPort));
         logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
         
