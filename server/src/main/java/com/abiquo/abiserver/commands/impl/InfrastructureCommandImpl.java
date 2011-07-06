@@ -903,14 +903,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-
-                    // Datastores deleted here
-                    for (DatastoreHB datastoreHB : pmToDelete.getDatastoresHB())
-                    {
-                        datastoreDAO.makeTransient(datastoreHB);
-                    }
-                    // Physcial machines will be deleted with rack deleted in cascade
-                    // physicalmachineDAO.makeTransient(pmToDelete);
+                    
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
                 }
                 else
                 {
