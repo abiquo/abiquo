@@ -145,6 +145,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
 
         old.setName(dto.getName());
+        old.setDescription(dto.getDescription());
+        old.setCpu(dto.getCpu());
+        old.setRam(dto.getRam());
+        old.setPassword(dto.getPassword());
 
         updateVirtualMachine(old);
 
@@ -218,10 +222,12 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * @param vmId
-     * @param vappId
-     * @param vdcId
-     * @param state
+     * Changes the state of the VirtualMachine to the state passed
+     * 
+     * @param vappId Virtual Appliance Id
+     * @param vdcId VirtualDatacenter Id
+     * @param state The state to which change
+     * @throws Exception
      */
     public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
     {

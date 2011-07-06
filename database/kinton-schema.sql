@@ -1095,6 +1095,7 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `idUser` INT(10) unsigned default NULL COMMENT 'User who creates the VM',
   `idEnterprise` int(10) unsigned default NULL COMMENT 'Enterprise of the user',
   `idDatastore` int(10) unsigned default NULL,
+  `password` varchar(32) default NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idVM`),
   KEY `VirtualMachine_FK1` (`idHypervisor`),
