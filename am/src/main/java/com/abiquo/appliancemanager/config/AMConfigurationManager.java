@@ -137,6 +137,10 @@ public class AMConfigurationManager
 
         configuration = setProxyConfiguration(configuration);
 
+        Integer fstimeoutMs =
+            Integer.parseInt(System.getProperty("abiquo.appliancemanager.fstimeoutms", "7000"));
+        configuration.setFsTimeoutMs(fstimeoutMs);
+        
         // set it on the OVFManager serialize utility class
         OVFSerializer.getInstance().setFormatOutput(true);
         OVFSerializer.getInstance().setValidateXML(false);
