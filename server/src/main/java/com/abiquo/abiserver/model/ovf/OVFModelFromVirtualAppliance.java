@@ -782,6 +782,13 @@ public class OVFModelFromVirtualAppliance
 
         otherAttributes.put(AbiCloudConstants.remoteDesktopQname, String.valueOf(rdPort));
         logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
+        
+	if (virtualMachine.getPassword() != null)
+        {
+            String rdPassword = virtualMachine.getPassword();
+            otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);
+            logger.debug("The remote desktop password is: " + rdPassword);
+        }
 
         return annotationSection;
     }
