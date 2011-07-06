@@ -52,6 +52,8 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
 
     private String vdrpIP;
 
+    private String vrdpPassword;
+
     private State state;
 
     private boolean highDisponibility;
@@ -86,7 +88,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return virtualImage;
     }
 
-    public void setVirtualImage(VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
     }
@@ -96,7 +98,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return UUID;
     }
 
-    public void setUUID(String uuid)
+    public void setUUID(final String uuid)
     {
         UUID = uuid;
     }
@@ -106,7 +108,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -116,7 +118,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return ram;
     }
 
-    public void setRam(int ram)
+    public void setRam(final int ram)
     {
         this.ram = ram;
     }
@@ -126,7 +128,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return cpu;
     }
 
-    public void setCpu(int cpu)
+    public void setCpu(final int cpu)
     {
         this.cpu = cpu;
     }
@@ -136,7 +138,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return hd;
     }
 
-    public void setHd(long hd)
+    public void setHd(final long hd)
     {
         this.hd = hd;
     }
@@ -146,7 +148,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return vdrpPort;
     }
 
-    public void setVdrpPort(Integer vdrpPort)
+    public void setVdrpPort(final Integer vdrpPort)
     {
         this.vdrpPort = vdrpPort;
     }
@@ -156,9 +158,19 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return vdrpIP;
     }
 
-    public void setVdrpIP(String vdrpIP)
+    public void setVdrpIP(final String vdrpIP)
     {
         this.vdrpIP = vdrpIP;
+    }
+
+    public String getVrdpPassword()
+    {
+        return vrdpPassword;
+    }
+
+    public void setVrdpPassword(final String vrdpPassword)
+    {
+        this.vrdpPassword = vrdpPassword;
     }
 
     public State getState()
@@ -166,7 +178,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final State state)
     {
         this.state = state;
     }
@@ -181,7 +193,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return highDisponibility;
     }
 
-    public void setHighDisponibility(boolean highDisponibility)
+    public void setHighDisponibility(final boolean highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -191,7 +203,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return idType;
     }
 
-    public void setIdType(int idType)
+    public void setIdType(final int idType)
     {
         this.idType = idType;
     }
@@ -201,7 +213,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return user;
     }
 
-    public void setUser(User user)
+    public void setUser(final User user)
     {
         this.user = user;
     }
@@ -211,7 +223,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -281,12 +293,12 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     /**
      * @param conversion the conversion to set
      */
-    public void setConversion(VirtualImageConversions conversion)
+    public void setConversion(final VirtualImageConversions conversion)
     {
         this.conversion = conversion;
     }
 
-    public void setDatastore(Datastore datastore)
+    public void setDatastore(final Datastore datastore)
     {
         this.datastore = datastore;
     }

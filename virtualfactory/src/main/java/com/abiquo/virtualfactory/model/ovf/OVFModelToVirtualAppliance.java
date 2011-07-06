@@ -39,7 +39,6 @@ import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
 import org.dmtf.schemas.ovf.envelope._1.VSSDType;
@@ -47,7 +46,6 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Property;
 import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +61,6 @@ import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
-import com.abiquo.ovfmanager.ovf.section.OVFProductUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.PluginException;
@@ -241,6 +238,13 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         final VirtualMachineConfiguration vmConfig, final ContentType virtualSystem)
         throws SectionException
     {
+        // Here we will have always a VirtualSystemType instance
+        VirtualSystemType virtualSystemInstance = (VirtualSystemType) virtualSystem;
+
+        String rdPassword =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPasswordQname);
+
         // TODO the default value should be 0, but to avoid errors 256MB is assigned
         long newRam = 256 * 1024 * 1024;
         int newCPUNumber = 1;
@@ -248,6 +252,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
         VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
         newConfig.setHypervisor(vmConfig.getHyper());
+        newConfig.setRdPassword(rdPassword);
 
         VirtualHardwareSectionType hardwareSection =
             OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
@@ -611,190 +616,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         return macAddress;
     }
 
-    /**
-     * Adds virtual disks from a disk resource
-     * 
-     * @param configuration the virtual machine configuration
-     * @param virtualHWSection the virtual hardware section
-     * @return true if reconfiguration is needed
-     */
-    private boolean addVirtualDiskFromDiskResource(final VirtualMachineConfiguration configuration,
-        final VirtualHardwareSectionType virtualHWSection)
+    private String getAttributeFromAnnotation(final VirtualSystemType virtualSystem,
+        final QName attribute) throws SectionException
     {
-        boolean isReconfigureRequired;
-        List<VirtualDisk> extendedDiskList = new ArrayList<VirtualDisk>();
-
-        logger.trace("Checking Disk Section");
-
-        for (RASDType item : virtualHWSection.getItem())
-        {
-            int resourceType = new Integer(item.getResourceType().getValue());
-            // TODO Think what to do if a new disk is added
-            /*
-             * if (CIMResourceTypeEnum.Disk_Drive.getNumericResourceType() == resourceType) { for
-             * (CimString hostResource : item.getHostResource()) { String hostResourceString =
-             * hostResource.getValue(); String diskId =
-             * hostResourceString.replace(OVFVirtualHadwareSectionUtils.OVF_DISK_URI, "");
-             * extendedDiskList.add(virtualDiskMap.get(diskId)); } } else
-             */if (CIMResourceTypeEnum.iSCSI_HBA.getNumericResourceType() == resourceType)
-            {
-                String location;
-                location =
-                    item.getAddress().getValue() + "|" + item.getConnection().get(0).getValue();
-                // Creating the iscsi virtual disk
-                VirtualDisk iscsiVirtualDisk = new VirtualDisk();
-                iscsiVirtualDisk.setId(item.getInstanceID().getValue());
-                iscsiVirtualDisk.setDiskType(VirtualDiskType.ISCSI);
-                iscsiVirtualDisk.setLocation(location);
-                extendedDiskList.add(iscsiVirtualDisk);
-            }
-
-        }
-
-        isReconfigureRequired =
-            checkNewDisk(configuration.getExtendedVirtualDiskList(), extendedDiskList);
-
-        loggVirtualDisks(configuration.getExtendedVirtualDiskList());
-
-        return isReconfigureRequired;
-    }
-
-    /**
-     * Private helper to check if a new disk is added
-     * 
-     * @param extendedVirtualDiskList current extended disk list
-     * @param extendedDiskList new extended disk list
-     * @return true if a new disk is added false otherwise
-     */
-    private boolean checkNewDisk(final List<VirtualDisk> currentExtendedDiskList,
-        final List<VirtualDisk> newExtendedDiskList)
-    {
-        // If the current extended disk list does not contain the new disks. Add it all
-        if (!currentExtendedDiskList.containsAll(newExtendedDiskList))
-        {
-            currentExtendedDiskList.addAll(newExtendedDiskList);
-            return true;
-        }
-        else if (!newExtendedDiskList.containsAll(currentExtendedDiskList))
-        {
-            currentExtendedDiskList.retainAll(newExtendedDiskList);
-            return true;
-        }
-        return false;
-
-        /*
-         * boolean reconfig = false; // Checking added virtualdisks for (VirtualDisk newVd :
-         * newExtendedDiskList) { if (!currentExtendedDiskList.contains(newVd) &&
-         * !currentExtendedDiskList.isEmpty()) { currentExtendedDiskList.add(newVd); reconfig =
-         * true; } } // Checking removed virtualdisks if
-         * (!newExtendedDiskList.containsAll(currentExtendedDiskList)) reconfig = true; return
-         * reconfig;
-         */
-
-    }
-
-    private String getRemoteDesktopPortFromAnnotation(final VirtualSystemType virtualSystem)
-        throws SectionException
-    {
-        String rdPort;
-
-        // from the annotation take the remote desktop
         AnnotationSectionType annotationSection =
             OVFEnvelopeUtils.getSection(virtualSystem, AnnotationSectionType.class);
-        Map<QName, String> attributes = annotationSection.getOtherAttributes();
-        rdPort = attributes.get(VirtualMachineConfiguration.remoteDesktopQname);
-
-        return rdPort;
-    }
-
-    private String getVirtualSystemIPFromProduct(final VirtualSystemType virtualSystem)// throws
-    // SectionException,
-    // IdNotFoundException
-    {
-        String ipAddress;
-
-        // from the product take the ip
-        ProductSectionType productSection;
-        try
-        {
-            productSection = OVFEnvelopeUtils.getSection(virtualSystem, ProductSectionType.class);
-            Property prop =
-                OVFProductUtils.getProperty(productSection, "ip."
-                    + virtualSystem.getName().getValue());
-            ipAddress = prop.getValue().toString();
-        }
-        catch (Exception e) // SectionNotPresentException InvalidSectionException
-        // IdNotFoundException
-        {
-            ipAddress = "ipPropertyNotFoundOnProduct"; // TODO set the ip properly even when not
-            // found on product section
-        }
-
-        return ipAddress;
-    }// update virtual system
-
-    /**
-     * Private helper to logging virtual disks information
-     * 
-     * @param disks
-     */
-    private void loggVirtualDisks(final List<VirtualDisk> disks)
-    {
-        for (VirtualDisk disk : disks)
-        {
-            logger.debug("Disk id[{}]\tlocation[{}] capacity:" + disk.getCapacity(), disk.getId(),
-                disk.getLocation());
-        }
-    }
-
-    /**
-     * Sets the memory and cpu to the new configuration
-     * 
-     * @param configuration the virtual machine configuration
-     * @param hardwareSection the hardware section to extrac the RAM and CPU changes
-     * @return true if reconfiguration is needed
-     */
-    private boolean setMemoryAndCpuFromVirtualHardwareSection(
-        final VirtualMachineConfiguration configuration,
-        final VirtualHardwareSectionType hardwareSection)
-    {
-        boolean isReconfigureRequired = false;
-        long memoryRam = 256 * 1024 * 1024; // TODO configurable default values
-        int cpuNumber = 1; // TODO configurable default value
-
-        logger.trace("Checking VirtualHardwareSectionType object");
-
-        for (RASDType item : hardwareSection.getItem())
-        {
-            Integer resourceTypeNumeric = new Integer(item.getResourceType().getValue());
-
-            if (CIMResourceTypeEnum.Memory.getNumericResourceType() == resourceTypeNumeric)
-            {
-                // from bytes to megabytes
-                memoryRam = item.getVirtualQuantity().getValue().longValue() * 1024 * 1024;
-                // TODO assert item.getAllocationUnits() are bytes
-                if (configuration.getMemoryRAM() != memoryRam)
-                {
-                    configuration.setMemoryRam(memoryRam);
-                    isReconfigureRequired = true;
-                }
-            }
-            else if (CIMResourceTypeEnum.Processor.getNumericResourceType() == resourceTypeNumeric)
-            {
-                cpuNumber = item.getVirtualQuantity().getValue().intValue();
-                if (configuration.getCpuNumber() != cpuNumber)
-                {
-                    configuration.setCpuNumber(cpuNumber);
-                    isReconfigureRequired = true;
-                }
-            }
-            else
-            {
-                // TODO more relevant RASD types ?
-            }
-        }// for RASD items
-
-        return isReconfigureRequired;
+        return annotationSection.getOtherAttributes().get(attribute);
     }
 
     public String getVirtualAppState(final VirtualSystemCollectionType contentInstance)
@@ -945,7 +772,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         throws MalformedURLException, VirtualMachineException, SectionNotPresentException,
         SectionException
     {
-        String rdPort = getRemoteDesktopPortFromAnnotation(virtualSystemInstance);
+        String rdPort =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPortQname);
+        String rdPassword =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPasswordQname);
 
         String virtualSystemName = virtualSystemInstance.getName().getValue();
         logger.trace("Creating a virtual machine from a Virtual System {}", virtualSystemName);
@@ -1067,6 +899,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                 virtualSystemName,
                 virtualDiskBaseList,
                 Integer.parseInt(rdPort),
+                rdPassword,
                 memoryRam,
                 cpuNumber,
                 vnicList);

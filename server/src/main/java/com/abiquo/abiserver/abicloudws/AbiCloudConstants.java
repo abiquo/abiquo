@@ -34,7 +34,10 @@ public class AbiCloudConstants
     public final static QName machineStateQname = new QName("machineStateAction");
 
     // Remote Desktop Port
-    public final static QName remoteDesktopQname = new QName("remoteDesktopPort");
+    public final static QName remoteDesktopPortQname = new QName("remoteDesktopPort");
+
+    // Remote Desktop Password
+    public final static QName remoteDesktopPasswordQname = new QName("remoteDesktopPassword");
 
     /** User QNAME */
     public final static QName ADMIN_USER_QNAME = new QName("adminUser");
