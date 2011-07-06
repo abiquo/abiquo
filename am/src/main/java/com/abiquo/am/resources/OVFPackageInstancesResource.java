@@ -222,7 +222,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         return Response.created(URI.create(diskInfo.getOvfUrl())).build();
     }
 
-<<<<<<< HEAD
+
     /**
      * This Function is needed as long as the HTML 5 states:
      * http://people.w3.org/mike/diffs/html5/spec/Overview.diff.html#common-input-element-apis
