@@ -885,6 +885,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
         RackDAO rackDAO = factory.getRackDAO();
+        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
 
         try
         {
@@ -903,7 +904,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
 
-                    physicalmachineDAO.makeTransient(pmToDelete);
+                    // Datastores deleted here
+                    for (DatastoreHB datastoreHB : pmToDelete.getDatastoresHB())
+                    {
+                        datastoreDAO.makeTransient(datastoreHB);
+                    }
+                    // Physcial machines will be deleted with rack deleted in cascade
+                    // physicalmachineDAO.makeTransient(pmToDelete);
                 }
                 else
                 {
@@ -984,7 +991,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
-            
+
             rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
@@ -1061,8 +1068,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null,
-                (Rack) pm.getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
+                    .getAssignedTo(), pm, null, null);
 
         }
 
@@ -1968,13 +1975,15 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_POWERON, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
-                        + virtualMachine.getName() + " because datacenter isn't well configured.",
-                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
-              
-               // Generating the result
+                    EventType.VM_POWERON, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
+
+                // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
@@ -2047,11 +2056,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
-                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_PAUSED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_PAUSED,
+                    userSession, machine.getDataCenter(), null, "Operation cannot be performed on "
                         + virtualMachine.getName() + " because datacenter isn't well configured.",
-                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
+                    null, machine.getRack(), machine, userSession.getUser(), userSession
+                        .getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2126,11 +2137,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with its old state
                 // updateStateInDB(virtualMachine, oldState);
-                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_RESUMED, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
-                        + virtualMachine.getName() + " because datacenter isn't well configured.",
-                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
+                    EventType.VM_RESUMED, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
@@ -2209,11 +2222,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
-                PhysicalMachine machine = (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
+                PhysicalMachine machine =
+                    (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_POWEROFF, userSession, machine.getDataCenter(),null, "Operation cannot be performed on "
-                        + virtualMachine.getName() + " because datacenter isn't well configured.",
-                    null, machine.getRack(), machine, userSession.getUser(), userSession.getEnterpriseName());
+                    EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because datacenter isn't well configured.", null, machine.getRack(),
+                    machine, userSession.getUser(), userSession.getEnterpriseName());
                 // Generating the result
                 dataResult.setMessage(basicResult.getMessage());
                 dataResult.setSuccess(basicResult.getSuccess());
