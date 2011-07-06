@@ -38,8 +38,7 @@ import org.springframework.util.StringUtils;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.services.stub.VSMStub;
-import com.abiquo.api.services.stub.VSMStubImpl;
+import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -54,6 +53,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.UcsRack;
 
 @Service
 @Transactional(readOnly = false)
@@ -72,6 +72,11 @@ public class MachineService extends DefaultApiService
 
     @Autowired
     protected RemoteServiceService remoteServiceService;
+    
+    private VsmServiceStub vsm;
+
+    @Autowired
+    private InfrastructureService infrastructureService;
 
     @Autowired
     protected VirtualMachineService virtualMachineService;
@@ -88,8 +93,8 @@ public class MachineService extends DefaultApiService
     {
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
-        vsm = new VSMStubImpl();
-        remoteServiceService = new RemoteServiceService(em);
+        vsm = new VsmServiceStub();
+        infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
     }
@@ -97,84 +102,28 @@ public class MachineService extends DefaultApiService
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
-        return repo.findRackMachines(rack);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Machine addMachine(final MachineDto machineDto, final Integer rackId)
-    {
-        Rack rack = repo.findRackById(rackId);
-        Datacenter datacenter = rack.getDatacenter();
-
-        // Part 1: Insert the machine into database
-        Machine machine =
-            datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
-
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
-                machineDto.getVirtualRamUsedInMb(),
-
-                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
-                machineDto.getVirtualHardDiskUsedInMb(),
-
-                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
-                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
-
-                machineDto.getState(), machineDto.getVirtualSwitch());
-
-        machine.setRack(rack);
-
-        isValidMachine(machine);
-
-        // Monitoring machine
-        RemoteService vsmRS =
-            remoteServiceService.getRemoteService(datacenter.getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
-        Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
-                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
-                machineDto.getPassword());
-
-        vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
-            .name(), hypervisor.getUser(), hypervisor.getPassword());
-
-        repo.insertMachine(machine);
-
-        // Part 2: Insert the hypervisor into database.
-        if (repo.existAnyHypervisorWithIp(machineDto.getIp()))
+        List<Machine> machines = repo.findRackMachines(rack);        
+        
+        // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
+        // If they belong to a managed rack, a new {@link RESTLink} will be created
+        // in the Dto informing the managed machines special functionality.
+        
+        UcsRack ucsRack = repo.findUcsRackById(rackId);
+        if (ucsRack != null)
         {
-            addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
-        }
-
-        if (repo.existAnyHypervisorWithIpService(machineDto.getIpService()))
-        {
-            addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
-        }
-        flushErrors();
-
-        if (!hypervisor.isValid())
-        {
-            addValidationErrors(hypervisor.getValidationErrors());
-        }
-        flushErrors();
-
-        // Part 3. Call the Datastores resource to create them also
-        // Add the Remote Services in database in case are informed in the request
-        if (machineDto.getDatastores() != null)
-        {
-            for (DatastoreDto dataDto : machineDto.getDatastores().getCollection())
+            for (Machine machine : machines)
             {
                 // FIXME: All Datastores need to have an UUID in DB
                 if (dataDto.getDatastoreUUID() == null){
                     dataDto.setDatastoreUUID(UUID.randomUUID().toString());
                 }
                 dataService.addDatastore(dataDto, machine.getId());
+                machine.setBelongsToManagedRack(Boolean.TRUE);
             }
         }
+        
 
-        repo.insertHypervisor(hypervisor);
-
-        return machine;
+        return machines;
     }
 
     public Machine getMachine(final Integer id)
@@ -253,7 +202,7 @@ public class MachineService extends DefaultApiService
     {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
-            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
+            infrastructureService.getRemoteService(machine.getDatacenter().getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();

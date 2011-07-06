@@ -41,6 +41,8 @@ package net.undf.abicloud.vo.infrastructure
         
         public var haEnabled:Boolean;
 
+        public static const TYPE:String = "Standard Rack";
+
         /* ------------- Constructor ------------- */
         public function Rack()
         {

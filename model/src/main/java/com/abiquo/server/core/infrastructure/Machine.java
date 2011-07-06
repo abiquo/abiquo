@@ -22,7 +22,6 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -38,6 +37,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -64,7 +64,7 @@ public class Machine extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER*
     // call from business code
-    protected Machine()
+    public Machine()
     {
         // Just for JPA support
     }
@@ -81,6 +81,12 @@ public class Machine extends DefaultEntityBase
     {
         return this.id;
     }
+    
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+    
 
     // ******************************* Properties
     // *******************************
@@ -90,7 +96,7 @@ public class Machine extends DefaultEntityBase
 
     final static int NAME_LENGTH_MIN = 1;
 
-    final static int NAME_LENGTH_MAX = 30;
+    final static int NAME_LENGTH_MAX = 60;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -144,7 +150,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String VIRTUAL_RAM_IN_MB_COLUMN = "ram";
 
-    /* package */final static int VIRTUAL_RAM_IN_MB_MIN = 1;
+    /* package */final static int VIRTUAL_RAM_IN_MB_MIN = 0;
 
     /* package */final static int VIRTUAL_RAM_IN_MB_MAX = Integer.MAX_VALUE;
 
@@ -152,10 +158,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_RAM_IN_MB_COLUMN, nullable = false)
     @Range(min = VIRTUAL_RAM_IN_MB_MIN, max = VIRTUAL_RAM_IN_MB_MAX)
-    private int virtualRamInMb;
+    private Integer virtualRamInMb;
 
     @Required(value = VIRTUAL_RAM_IN_MB_REQUIRED)
-    public int getVirtualRamInMb()
+    public Integer getVirtualRamInMb()
     {
         return this.virtualRamInMb;
     }
@@ -169,7 +175,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String VIRTUAL_CPU_CORES_COLUMN = "cpu";
 
-    /* package */final static int VIRTUAL_CPU_CORES_MIN = 1;
+    /* package */final static int VIRTUAL_CPU_CORES_MIN = 0;
 
     /* package */final static int VIRTUAL_CPU_CORES_MAX = Integer.MAX_VALUE;
 
@@ -177,10 +183,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_CPU_CORES_COLUMN, nullable = false)
     @Range(min = VIRTUAL_CPU_CORES_MIN, max = VIRTUAL_CPU_CORES_MAX)
-    private int virtualCpuCores;
+    private Integer virtualCpuCores;
 
     @Required(value = VIRTUAL_CPU_CORES_REQUIRED)
-    public int getVirtualCpuCores()
+    public Integer getVirtualCpuCores()
     {
         return this.virtualCpuCores;
     }
@@ -194,7 +200,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String VIRTUAL_HARD_DISK_IN_BYTES_COLUMN = "hd";
 
-    /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MIN = 1;
+    /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MIN = 0;
 
     /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
 
@@ -202,10 +208,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
     @Range(min = VIRTUAL_HARD_DISK_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_IN_BYTES_MAX)
-    private long virtualHardDiskInBytes;
+    private Long virtualHardDiskInBytes;
 
     @Required(value = VIRTUAL_HARD_DISK_IN_BYTES_REQUIRED)
-    public long getVirtualHardDiskInBytes()
+    public Long getVirtualHardDiskInBytes()
     {
         return this.virtualHardDiskInBytes;
     }
@@ -227,10 +233,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = REAL_RAM_IN_MB_COLUMN, nullable = false)
     @Range(min = REAL_RAM_IN_MB_MIN, max = REAL_RAM_IN_MB_MAX)
-    private int realRamInMb;
+    private Integer realRamInMb;
 
     @Required(value = REAL_RAM_IN_MB_REQUIRED)
-    public int getRealRamInMb()
+    public Integer getRealRamInMb()
     {
         return this.realRamInMb;
     }
@@ -252,10 +258,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = REAL_CPU_CORES_COLUMN, nullable = false)
     @Range(min = REAL_CPU_CORES_MIN, max = REAL_CPU_CORES_MAX)
-    private int realCpuCores;
+    private Integer realCpuCores;
 
     @Required(value = REAL_CPU_CORES_REQUIRED)
-    public int getRealCpuCores()
+    public Integer getRealCpuCores()
     {
         return this.realCpuCores;
     }
@@ -277,10 +283,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = REAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
     @Range(min = REAL_HARD_DISK_IN_BYTES_MIN, max = REAL_HARD_DISK_IN_BYTES_MAX)
-    private long realHardDiskInBytes;
+    private Long realHardDiskInBytes;
 
     @Required(value = REAL_HARD_DISK_IN_BYTES_REQUIRED)
-    public long getRealHardDiskInBytes()
+    public Long getRealHardDiskInBytes()
     {
         return this.realHardDiskInBytes;
     }
@@ -302,10 +308,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_RAM_USED_IN_MB_COLUMN, nullable = false)
     @Range(min = VIRTUAL_RAM_USED_IN_MB_MIN, max = VIRTUAL_RAM_USED_IN_MB_MAX)
-    private int virtualRamUsedInMb;
+    private Integer virtualRamUsedInMb;
 
     @Required(value = VIRTUAL_RAM_USED_IN_MB_REQUIRED)
-    public int getVirtualRamUsedInMb()
+    public Integer getVirtualRamUsedInMb()
     {
         return this.virtualRamUsedInMb;
     }
@@ -327,10 +333,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_CPUS_USED_COLUMN, nullable = false)
     @Range(min = VIRTUAL_CPUS_USED_MIN, max = VIRTUAL_CPUS_USED_MAX)
-    private int virtualCpusUsed;
+    private Integer virtualCpusUsed;
 
     @Required(value = VIRTUAL_CPUS_USED_REQUIRED)
-    public int getVirtualCpusUsed()
+    public Integer getVirtualCpusUsed()
     {
         return this.virtualCpusUsed;
     }
@@ -353,10 +359,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_HARD_DISK_USED_IN_BYTES_COLUMN, nullable = false)
     @Range(min = VIRTUAL_HARD_DISK_USED_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_USED_IN_BYTES_MAX)
-    private long virtualHardDiskUsedInBytes;
+    private Long virtualHardDiskUsedInBytes;
 
     @Required(value = VIRTUAL_HARD_DISK_USED_IN_BYTES_REQUIRED)
-    public long getVirtualHardDiskUsedInBytes()
+    public Long getVirtualHardDiskUsedInBytes()
     {
         return this.virtualHardDiskUsedInBytes;
     }
@@ -370,7 +376,7 @@ public class Machine extends DefaultEntityBase
 
     /* package */final static String VIRTUAL_CPUS_PER_CORE_COLUMN = "cpuRatio";
 
-    /* package */final static int VIRTUAL_CPUS_PER_CORE_MIN = 1;
+    /* package */final static int VIRTUAL_CPUS_PER_CORE_MIN = 0;
 
     /* package */final static int VIRTUAL_CPUS_PER_CORE_MAX = Integer.MAX_VALUE;
 
@@ -378,10 +384,10 @@ public class Machine extends DefaultEntityBase
 
     @Column(name = VIRTUAL_CPUS_PER_CORE_COLUMN, nullable = false)
     @Range(min = VIRTUAL_CPUS_PER_CORE_MIN, max = VIRTUAL_CPUS_PER_CORE_MAX)
-    private int virtualCpusPerCore = 1; // default value
+    private Integer virtualCpusPerCore = 1; // default value
 
     @Required(value = VIRTUAL_CPUS_PER_CORE_REQUIRED)
-    public int getVirtualCpusPerCore()
+    public Integer getVirtualCpusPerCore()
     {
         return this.virtualCpusPerCore;
     }
@@ -638,7 +644,11 @@ public class Machine extends DefaultEntityBase
 
     public List<Datastore> getDatastores()
     {
-        return Collections.unmodifiableList(this.datastores);
+        if (datastores == null)
+        {
+            datastores = new ArrayList<Datastore>();
+        }
+        return datastores;
     }
 
     /* package */void addToDatastores(final Datastore value)
@@ -756,4 +766,39 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
+    
+    // Transient attributes needed to Management Racks functionality
+    
+    @Transient
+    private List<String> listOfMacs;
+    
+    public void setListOfMacs(List<String> listOfMacs)
+    {
+        this.listOfMacs = listOfMacs;
+    }
+
+    public List<String> getListOfMacs()
+    {
+        if (listOfMacs == null)
+        {
+            listOfMacs = new ArrayList<String>();
+        }
+        return listOfMacs;
+    }
+    
+    @Transient
+    private Boolean belongsToManagedRack = Boolean.FALSE;
+    
+    public void setBelongsToManagedRack(Boolean belongsToManagedRack)
+    {
+        this.belongsToManagedRack = belongsToManagedRack;
+    }
+
+    public Boolean getBelongsToManagedRack()
+    {
+        return belongsToManagedRack;
+    }
+
+    
+
 }

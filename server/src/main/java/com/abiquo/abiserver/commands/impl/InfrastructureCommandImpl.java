@@ -191,23 +191,26 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 Set<PhysicalmachineHB> phyMachines = rackPojo.getPhysicalmachines();
                 for (PhysicalmachineHB phyMachinePojo : phyMachines)
                 {
-                    PhysicalMachine phyMachine = phyMachinePojo.toPojo();
-                    phyMachine.setAssignedTo(rack);
-                    infrastructures.add(phyMachine);
-
-                    // Adding the HyperVisor
-                    HypervisorHB hypervisorPojo = phyMachinePojo.getHypervisor();
-                    HyperVisor hypervisor = hypervisorPojo.toPojo();
-                    hypervisor.setAssignedTo(phyMachine);
-                    infrastructures.add(hypervisor);
-
-                    // Adding the VirtualMachines
-                    Set<VirtualmachineHB> virtualMachines = hypervisorPojo.getVirtualmachines();
-                    for (VirtualmachineHB virtualMachinePojo : virtualMachines)
+                    if (phyMachinePojo.getHypervisor() != null)
                     {
-                        VirtualMachine virtualMachine = virtualMachinePojo.toPojo();
-                        virtualMachine.setAssignedTo(hypervisor);
-                        infrastructures.add(virtualMachine);
+                        PhysicalMachine phyMachine = phyMachinePojo.toPojo();
+                        phyMachine.setAssignedTo(rack);
+                        infrastructures.add(phyMachine);
+
+                        // Adding the HyperVisor
+                        HypervisorHB hypervisorPojo = phyMachinePojo.getHypervisor();
+                        HyperVisor hypervisor = hypervisorPojo.toPojo();
+                        hypervisor.setAssignedTo(phyMachine);
+                        infrastructures.add(hypervisor);
+
+                        // Adding the VirtualMachines
+                        Set<VirtualmachineHB> virtualMachines = hypervisorPojo.getVirtualmachines();
+                        for (VirtualmachineHB virtualMachinePojo : virtualMachines)
+                        {
+                            VirtualMachine virtualMachine = virtualMachinePojo.toPojo();
+                            virtualMachine.setAssignedTo(hypervisor);
+                            infrastructures.add(virtualMachine);
+                        }
                     }
 
                 }

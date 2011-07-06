@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.events.ListEvent;
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import mx.managers.PopUpManager;
             import mx.utils.ObjectUtil;
@@ -63,6 +65,7 @@
 
                 //adding the rack basic info creation form
                 this._rackFormBasicInfo = new RackFormBasicInfo();
+                this._rackFormBasicInfo.addEventListener("validForm",validForm);
                 this._rackFormBasicInfo.percentHeight = 100;
                 this._rackFormBasicInfo.percentWidth = 100;
                 toggledContainer.addContent(this._rackFormBasicInfo, ResourceManager.getInstance().getString("User",
@@ -90,17 +93,28 @@
                     //Editing an existing Rack
                     titleText = ResourceManager.getInstance().getString("Infrastructure",
                                                                         "POPUP_TITLE_RACKEDIT");
+                    if(rack is UcsRack){
+                    	this._rackFormBasicInfo.rackTypeCombo.selectedItem = UcsRack.TYPE;
+                    }else{
+                    	this._rackFormBasicInfo.rackTypeCombo.selectedItem = Rack.TYPE;
+                    }                                                    
                 }
                 else
                 {
                     //Creating a new Rack
                     titleText = ResourceManager.getInstance().getString("Infrastructure",
                     													"POPUP_TITLE_RACKADD");
+					this._rackFormBasicInfo.rackTypeCombo.selectedItem = Rack.TYPE;                    													
                    
                 }
-
+                //Update the rack view
+                this._rackFormBasicInfo.rackTypeCombo.dispatchEvent(new ListEvent(ListEvent.CHANGE));
+				validForm();
             }
 
+			protected function validForm(event:Event = null):void{
+				acceptButton.enabled = this._rackFormBasicInfo.nameInput.length != 0;
+			}
 
             /**
              * When user clicks Accept button, we save the new rack
@@ -187,7 +201,7 @@
             /**
              * To hide contents when a resize effect ends. For performance purposes
              */
-            private function onResizeEffectEnd():void
+            protected function onResizeEffectEnd():void
             {
                 toggledContainer.visible = true;
             }
@@ -212,8 +226,7 @@
         <mx:Button id="acceptButton"
             height="18"
             label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
-            click="onAccept()"
-            enabled="{this._rackFormBasicInfo.isValid }"/>
+            click="onAccept()"/>
 
          <mx:Button id="cancelButton"
             height="18"

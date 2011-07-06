@@ -34,7 +34,7 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.StaticRemoteServiceResource;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.stub.ApplianceManagerStub;
 import com.abiquo.appliancemanager.transport.AMConfigurationDto;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -64,8 +64,7 @@ public class AMResource extends StaticRemoteServiceResource
      * The service that contains business logic.
      */
     //@Autowired
-    @Resource(name = "remoteServiceService")
-    private RemoteServiceService service;
+    private InfrastructureService service;
 
     /**
      * The stub used to connect to the AM module
@@ -94,7 +93,7 @@ public class AMResource extends StaticRemoteServiceResource
     /**
      * 
      */
-    protected static RemoteService getValidAMRemoteService(RemoteServiceService r,
+    protected static RemoteService getValidAMRemoteService(InfrastructureService r,
         String serviceType, Integer datacenterId)
     {
         if (!isApplianceManagerType(serviceType))

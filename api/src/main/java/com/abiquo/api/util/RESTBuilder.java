@@ -172,7 +172,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final MachineDto machine)
+        final Boolean managedRack, final MachineDto machine)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -189,6 +189,16 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+        
+        if (managedRack)
+        {
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_POWER_ON, MachineResource.MACHINE_ACTION_POWER_ON_REL,
+                params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_POWER_OFF, MachineResource.MACHINE_ACTION_POWER_OFF_REL,
+                params));
+        }
 
         return links;
     }

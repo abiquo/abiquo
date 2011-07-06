@@ -39,10 +39,11 @@ public enum APIError
         "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
         "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
         "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
-        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_UNSUPPORTED_MEDIA_TYPE(
-        "415-UNSUPPORTED MEDIA TYPE",
+        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_CONFLICT(
+        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
         "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
-        "500-INTERNAL SERVER ERROR", "Unexpected exception"),
+        "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
+        "412 - Unprovisioned", "Unprovisioned exception"),
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
@@ -117,14 +118,19 @@ public enum APIError
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exist"),
+        "RACK-3", "There is already a rack with that name in this datacenter"),
+        "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
+        "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
+        "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
+        "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
+        "There is a problem with the details of the UCS Rack"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
-        "MACHINE-1", "The machine is not assigned to the datacenter or rack"), INVALID_STATE_CHANGE(
-        "MACHINE-2", "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE(
-        "MACHINE-3", "The requested machine could not be contacted"), MACHINE_CANNOT_BE_DELETED(
+        "MACHINE-1", "The machine is not assigned to the datacenter or rack"), MACHINE_ANY_DATASTORE_DEFINED(
+        "MACHINE-2", "Machine definition should have at least one datastore created and enabled"), MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK(
+        "MACHINE-3", "A machine can not be added this way to a UCS Rack"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
+        "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
         "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
 
@@ -136,7 +142,9 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network doesn't have IPs"),
+        "This network doesn't have IPs"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
@@ -203,7 +211,13 @@ public enum APIError
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
-        "Missing query parameter ip"),
+        "Missing query parameter ip"), NC_BAD_CREDENTIALS_TO_RACK("NC-2",
+        "Bad credentials attempting to retrieve the list of physical machines from rack "), NC_BAD_CREDENTIALS_TO_MACHINE(
+        "NC-3", "Bad credentials attempting to retrieve the machine "), NC_CONNECTION_EXCEPTION(
+        "NC-4", "There is a machine running in the given IP. But any hypervisor responds"), NC_NOT_FOUND_EXCEPTION(
+        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
+        "Unexpected exception building the request to Discovery Manager"), NC_UNAVAILABLE_EXCEPTION(
+        "NC-7", "The discovery manager currently is not available"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(
@@ -278,6 +292,7 @@ public enum APIError
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
+<<<<<<< HEAD
         "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
         "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
         "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
@@ -293,6 +308,9 @@ public enum APIError
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"),
+=======
+        "An unexpected error occured while creating the volume"),
+>>>>>>> ucs
 
     ;
 
@@ -345,8 +363,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

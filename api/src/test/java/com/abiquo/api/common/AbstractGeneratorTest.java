@@ -52,6 +52,7 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.UcsRackGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
@@ -77,6 +78,8 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
         new DatacenterLimitsGenerator(seed);
 
     protected RackGenerator rackGenerator = new RackGenerator(seed);
+    
+    protected UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(seed);
 
     protected MachineGenerator machineGenerator = new MachineGenerator(seed);
 
@@ -160,7 +163,7 @@ public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
             "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
             "remote_service", "datastore_assignment", "datastore", "hypervisor",
-            "workload_machine_load_rule", "physicalmachine", "rack", "datacenter", "repository",
+            "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter", "repository",
             "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
             "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
             "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",

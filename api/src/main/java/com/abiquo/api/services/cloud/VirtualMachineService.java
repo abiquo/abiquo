@@ -37,6 +37,8 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.exceptions.PreconditionFailedException;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -72,6 +74,8 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected RemoteServiceService remoteService;
 
+    InfrastructureService infrastructureService;
+
     @Autowired
     protected OVFGeneratorService ovfService;
 
@@ -88,6 +92,7 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -281,6 +286,8 @@ public class VirtualMachineService extends DefaultApiService
                 new Network("uuid"),
                 HypervisorType.VMX_04,
                 "name");
+        RemoteService vf =
+            infrastructureService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
 
         // TODO do not set VDC network
         VirtualAppliance vapp =
