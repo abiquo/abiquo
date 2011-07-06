@@ -897,7 +897,7 @@ public class LibvirtMachine extends AbsVirtualMachine
         // Only add the VNC port if it is enabled
         if (AddressingUtils.isValidPort(String.valueOf(rdpPort)))
         {
-            if (configuration.getRdPassword() != null)
+            if (configuration.getRdPassword() != null && !configuration.getRdPassword().equals(""))
             {
                 src_xml += "<graphics type='vnc' port='???' listen='???' passwd='???'/>";
             }
@@ -958,7 +958,8 @@ public class LibvirtMachine extends AbsVirtualMachine
                 replaceAttribute(doc, "graphics", "listen", "0.0.0.0");
                 replaceAttribute(doc, "graphics", "port", Integer.toString(rdpPort));
                 
-		if (configuration.getRdPassword() != null)
+		if (configuration.getRdPassword() != null
+                    && !configuration.getRdPassword().equals(""))
                 {
                     replaceAttribute(doc, "graphics", "passwd", configuration.getRdPassword());
                 }

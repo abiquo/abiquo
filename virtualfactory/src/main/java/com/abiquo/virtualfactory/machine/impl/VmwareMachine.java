@@ -103,6 +103,7 @@ public class VmwareMachine extends AbsVmwareMachine
      * 
      * @param vmConfigSpec
      */
+    @Override
     public void configureVNC(VirtualMachineConfigSpec vmConfigSpec) throws VirtualMachineException
     {
         if (AddressingUtils.isValidPort(String.valueOf(config.getRdPort())))
@@ -116,15 +117,12 @@ public class VmwareMachine extends AbsVmwareMachine
             vncPort.setValue(config.getRdPort());
 
             OptionValue vncPwd = null;
-            if (vmConfig.getRdPassword() != null)
+            if (vmConfig.getRdPassword() != null && !vmConfig.getRdPassword().equals(""))
             {
                 vncPwd = new OptionValue();
                 vncPwd.setKey("RemoteDisplay.vnc.password");
                 vncPwd.setValue(this.vmConfig.getRdPassword());
-            }
 
-            if (vncPwd != null)
-            {
                 vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort, vncPwd});
             }
             else
