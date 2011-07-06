@@ -148,6 +148,8 @@ public class VirtualMachineService extends DefaultApiService
         old.setDescription(dto.getDescription());
         old.setCpu(dto.getCpu());
         old.setRam(dto.getRam());
+        old.setHdInBytes(dto.getHd());
+        old.setHighDisponibility(dto.getHighDisponibility());
 
         if (dto.getPassword() != null && !dto.getPassword().equals(""))
         {
