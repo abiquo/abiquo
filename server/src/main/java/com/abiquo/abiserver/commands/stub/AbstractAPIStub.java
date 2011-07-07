@@ -177,12 +177,6 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML).put(dto);
     }
     
-    protected ClientResponse put(final String uri, final Object dto, String mediaType)
-    {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).put(dto);
-    }
-
     // protected ClientResponse put(final String uri, final Object dto, String mediaType)
     // {
     // UserHB user = getCurrentUser();
@@ -586,43 +580,6 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
-            params);
-    }
-
-    protected String createMachineLink(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
-        params.put("rack", rackId.toString());
-        params.put("machine", machineId.toString());
-
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
-            params);
-    }
-
-    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
-        params.put("rack", rackId.toString());
-        params.put("machine", machineId.toString());
-
-        return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
-    }
-
-    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
-        params.put("rack", rackId.toString());
-        params.put("machine", machineId.toString());
-
-        return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
             params);
     }
 

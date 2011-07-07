@@ -21,11 +21,11 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveDatastoresURI;
 import static com.abiquo.api.common.UriTestResolver.resolveMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static com.abiquo.api.common.Assert.assertError;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -35,7 +35,6 @@ import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -44,11 +43,11 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.UcsRack;
 import com.abiquo.server.core.util.network.IPAddress;
 
@@ -103,7 +102,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
-        dto.setShared(Boolean.TRUE);
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
 
@@ -169,7 +167,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
-        dto.setShared(Boolean.TRUE);
         dto.setEnabled(Boolean.TRUE);
         machineDto.getDatastores().getCollection().add(dto);
 
@@ -200,7 +197,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
-        dto.setShared(Boolean.TRUE);
         dto.setEnabled(Boolean.TRUE);
         machineDto.getDatastores().getCollection().add(dto);
 
@@ -238,7 +234,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto2.setName("datastoreNameTwo");
         dto2.setRootPath("/");
         dto2.setDirectory("var/lib/virt");
-        dto2.setShared(Boolean.TRUE);
         dto2.setEnabled(Boolean.TRUE);
         m2.getDatastores().add(dto2);
 
@@ -275,7 +270,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setName("datastoreName");
         dto.setRootPath("/");
         dto.setDirectory("var/lib/virt");
-        dto.setShared(Boolean.TRUE);
         dto.setEnabled(Boolean.TRUE);
         m.getDatastores().getCollection().add(dto);
 
@@ -285,43 +279,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
                 .post(m);
-
-        MachineDto entityPost = response.getEntity(MachineDto.class);
-
-        assertNotNull(entityPost);
-        assertEquals(m.getName(), entityPost.getName());
-        assertEquals(m.getDescription(), entityPost.getDescription());
-        assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
-        assertEquals(m.getVirtualHardDiskInMb(), entityPost.getVirtualHardDiskInMb());
-        assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
-        assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
-        assertEquals(m.getVirtualHardDiskUsedInMb(), entityPost.getVirtualHardDiskUsedInMb());
-        assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
-        assertEquals(m.getType(), entityPost.getType());
-        assertEquals(m.getIp(), entityPost.getIp());
-        assertEquals(m.getIpService(), entityPost.getIpService());
-        assertEquals(m.getUser(), entityPost.getUser());
-        assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealHardDiskInMb(), m.getRealHardDiskInMb());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
-        assertEquals(entityPost.getState(), m.getState());
-        assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
-
-        // Check the datastore was correctly created.
-        datastoresURI =
-            resolveDatastoresURI(machine.getDatacenter().getId(), machine.getRack().getId(),
-                entityPost.getId());
-
-        resource = client.resource(datastoresURI);
-        response =
-            resource.contentType(MediaType.APPLICATION_XML_TYPE).accept(
-                MediaType.APPLICATION_XML_TYPE).get();
-
-        assertEquals(response.getStatusCode(), 200);
-        DatastoresDto datastoresGET = response.getEntity(DatastoresDto.class);
-        assertEquals(datastoresGET.getCollection().size(), 1);
 
         assertError(response, Status.BAD_REQUEST.getStatusCode(),
             APIError.MACHINE_INVALID_VIRTUAL_SWITCH_NAME);

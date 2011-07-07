@@ -63,8 +63,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private DatastoresDto datastores;
 
-    private HypervisorDto hypervisor;
-
     private String ipmiIp;
 
     private Integer ipmiPort;
@@ -352,16 +350,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
             datastores = new DatastoresDto();
         }
         return datastores;
-    }
-
-    public void setHypervisor(HypervisorDto hypervisor)
-    {
-        this.hypervisor = hypervisor;
-    }
-
-    public HypervisorDto getHypervisor()
-    {
-        return hypervisor;
     }
 
     public String getIpmiIp()

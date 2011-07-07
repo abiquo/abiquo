@@ -40,9 +40,8 @@ import org.w3c.dom.Document;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
@@ -106,7 +105,6 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-        this.remoteService = new RemoteServiceService(em);
     	this.vdcService = new VirtualDatacenterService(em);
     	this.infrastructureService = new InfrastructureService(em);
     }

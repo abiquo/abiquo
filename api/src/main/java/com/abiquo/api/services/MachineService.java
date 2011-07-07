@@ -23,7 +23,6 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -46,8 +45,6 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -68,12 +65,7 @@ public class MachineService extends DefaultApiService
     protected DatastoreService dataService;
 
     @Autowired
-    protected VSMStub vsm;
-
-    @Autowired
-    protected RemoteServiceService remoteServiceService;
-    
-    private VsmServiceStub vsm;
+    protected VsmServiceStub vsm;
 
     @Autowired
     private InfrastructureService infrastructureService;
@@ -113,11 +105,6 @@ public class MachineService extends DefaultApiService
         {
             for (Machine machine : machines)
             {
-                // FIXME: All Datastores need to have an UUID in DB
-                if (dataDto.getDatastoreUUID() == null){
-                    dataDto.setDatastoreUUID(UUID.randomUUID().toString());
-                }
-                dataService.addDatastore(dataDto, machine.getId());
                 machine.setBelongsToManagedRack(Boolean.TRUE);
             }
         }

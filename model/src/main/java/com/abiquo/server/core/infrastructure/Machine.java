@@ -166,7 +166,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualRamInMb;
     }
 
-    public void setVirtualRamInMb(final int virtualRamInMb)
+    public void setVirtualRamInMb(final Integer virtualRamInMb)
     {
         this.virtualRamInMb = virtualRamInMb;
     }
@@ -191,7 +191,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpuCores;
     }
 
-    public void setVirtualCpuCores(final int virtualCpuCores)
+    public void setVirtualCpuCores(final Integer virtualCpuCores)
     {
         this.virtualCpuCores = virtualCpuCores;
     }
@@ -216,7 +216,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualHardDiskInBytes;
     }
 
-    public void setVirtualHardDiskInBytes(final long virtualHardDiskInBytes)
+    public void setVirtualHardDiskInBytes(final Long virtualHardDiskInBytes)
     {
         this.virtualHardDiskInBytes = virtualHardDiskInBytes;
     }
@@ -241,7 +241,7 @@ public class Machine extends DefaultEntityBase
         return this.realRamInMb;
     }
 
-    public void setRealRamInMb(final int realRamInMb)
+    public void setRealRamInMb(final Integer realRamInMb)
     {
         this.realRamInMb = realRamInMb;
     }
@@ -266,7 +266,7 @@ public class Machine extends DefaultEntityBase
         return this.realCpuCores;
     }
 
-    public void setRealCpuCores(final int realCpuCores)
+    public void setRealCpuCores(final Integer realCpuCores)
     {
         this.realCpuCores = realCpuCores;
     }
@@ -291,7 +291,7 @@ public class Machine extends DefaultEntityBase
         return this.realHardDiskInBytes;
     }
 
-    public void setRealHardDiskInBytes(final long realHardDiskInBytes)
+    public void setRealHardDiskInBytes(final Long realHardDiskInBytes)
     {
         this.realHardDiskInBytes = realHardDiskInBytes;
     }
@@ -316,7 +316,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualRamUsedInMb;
     }
 
-    public void setVirtualRamUsedInMb(final int virtualRamUsedInMb)
+    public void setVirtualRamUsedInMb(final Integer virtualRamUsedInMb)
     {
         this.virtualRamUsedInMb = virtualRamUsedInMb;
     }
@@ -341,7 +341,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpusUsed;
     }
 
-    public void setVirtualCpusUsed(final int virtualCpusUsed)
+    public void setVirtualCpusUsed(final Integer virtualCpusUsed)
     {
         this.virtualCpusUsed = virtualCpusUsed;
     }
@@ -367,7 +367,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualHardDiskUsedInBytes;
     }
 
-    public void setVirtualHardDiskUsedInBytes(final long virtualHardDiskUsedInMb)
+    public void setVirtualHardDiskUsedInBytes(final Long virtualHardDiskUsedInMb)
     {
         this.virtualHardDiskUsedInBytes = virtualHardDiskUsedInMb;
     }
@@ -392,7 +392,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualCpusPerCore;
     }
 
-    public void setVirtualCpusPerCore(final int virtualCpusPerCore)
+    public void setVirtualCpusPerCore(final Integer virtualCpusPerCore)
     {
         this.virtualCpusPerCore = virtualCpusPerCore;
     }
@@ -446,7 +446,7 @@ public class Machine extends DefaultEntityBase
         return this.virtualSwitch;
     }
 
-    private void setVirtualSwitch(final String virtualSwitch)
+    public void setVirtualSwitch(final String virtualSwitch)
     {
         this.virtualSwitch = virtualSwitch;
     }
@@ -719,7 +719,7 @@ public class Machine extends DefaultEntityBase
 
     // *************************** Mandatory constructors
     // ***********************
-    /* package */Machine(final Datacenter datacenter, final String name, final String description,
+    public Machine(final Datacenter datacenter, final String name, final String description,
         final int virtualRamInMb, final int realRamInMb, final int virtualRamUsedInMb,
         final long virtualHardDiskInMb, final long realHardDiskInMb,
         final long virtualHardDiskUsed, final int realCpuCores, final int virtualCpuCores,

@@ -57,8 +57,6 @@ import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
-import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RackDto;
 
 @Parent(MachinesResource.class)
 @Path(MachineResource.MACHINE_PARAM)
@@ -212,8 +210,9 @@ public class MachineResource extends AbstractResource
         return hypervisor;
     }
 
-    protected static MachineDto addLinks(final IRESTBuilder restBuilder, final Integer datacenterId,
-        final Integer rackId, final MachineDto machine)
+    protected static MachineDto addLinks(final IRESTBuilder restBuilder,
+        final Integer datacenterId, final Integer rackId, Boolean managedRack,
+        final MachineDto machine)
     {
         machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
 
@@ -252,7 +251,8 @@ public class MachineResource extends AbstractResource
         
 
         dto =
-            addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), dto);
+            addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(),
+                machine.getBelongsToManagedRack(), dto);
 
         
         if (machine.getHypervisor() != null)
@@ -274,7 +274,6 @@ public class MachineResource extends AbstractResource
                 dataDto.setId(datastore.getId());
                 dataDto.setName(datastore.getName());
                 dataDto.setRootPath(datastore.getRootPath());
-                dataDto.setShared(datastore.isShared());
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
                 

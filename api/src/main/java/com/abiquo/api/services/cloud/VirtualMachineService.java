@@ -35,10 +35,8 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.UserService;
-import com.abiquo.api.exceptions.PreconditionFailedException;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -72,8 +70,6 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    protected RemoteServiceService remoteService;
-
     InfrastructureService infrastructureService;
 
     @Autowired
@@ -250,7 +246,8 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                remoteService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+                infrastructureService.getRemoteService(datacenterId,
+                    RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 
@@ -286,8 +283,6 @@ public class VirtualMachineService extends DefaultApiService
                 new Network("uuid"),
                 HypervisorType.VMX_04,
                 "name");
-        RemoteService vf =
-            infrastructureService.getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_FACTORY);
 
         // TODO do not set VDC network
         VirtualAppliance vapp =
