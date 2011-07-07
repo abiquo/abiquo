@@ -940,7 +940,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             }
             else if (configuration.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
             {
-                attachIscsiDisk(configuration.getVirtualDiskBase(), doc, "hda", "virtio");
+                attachIscsiDisk(configuration.getVirtualDiskBase(), doc, "hda", "ide");
             }
 
             // replaceAttribute(doc, "source", "file", destinationRepository// + File.separatorChar
