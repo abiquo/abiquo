@@ -287,12 +287,6 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
-    {
-        vm.setState(old);
-        updateVirtualMachine(vm);
-    }
-
     private void restoreVirtualMachineState(VirtualMachine vm, State old)
     {
         vm.setState(old);

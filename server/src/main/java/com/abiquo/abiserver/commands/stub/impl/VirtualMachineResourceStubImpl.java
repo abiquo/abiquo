@@ -67,28 +67,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         this.client = new RestClient(conf);
     }
 
-    @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
-    {
-        BasicResult result = new BasicResult();
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
-
-        ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
-
-        if (response.getStatusCode() == 200)
-        {
-            result.setSuccess(true);
-        }
-        else
-        {
-            populateErrors(response, result, "updateVirtualMachine");
-        }
-
-        return result;
-    }
 
     public void pause(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)

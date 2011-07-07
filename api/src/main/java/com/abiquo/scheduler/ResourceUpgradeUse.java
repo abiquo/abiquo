@@ -100,9 +100,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Autowired
     HypervisorDAO hypervisorDao;
 
-    @Autowired
-    HypervisorDAO hypervisorDao;
-
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
     /**
