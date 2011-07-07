@@ -193,7 +193,13 @@ public class VCenterBridge
             VirtualMachine vm =
                 (VirtualMachine) new InventoryNavigator(fold).searchManagedEntity("VirtualMachine",
                     machineName);
-
+            
+            if (vm == null)
+            {
+                // the machine is not there, so return it.
+                return;
+            }
+                
             // wait until detects the virtual machine is 'orphaned'. This is because the 'metadata'
             // delay between the ESXi and the vCenter.
             VirtualMachineConnectionState state;

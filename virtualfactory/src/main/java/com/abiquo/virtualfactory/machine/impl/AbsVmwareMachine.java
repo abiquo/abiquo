@@ -154,23 +154,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // if (!apputil.getServiceConnection3().isConnected())
             utils.reconnect();
 
-            /**
-             * XXX
-             */
-            // try
-            // {
-            // ManagedObjectReference dsmor =
-            // disks.createVMFSDatastore(vmwareConfig.getXxIscsiTarget(), vmwareConfig.getXxIqn());
-            //
-            // logger.info("---------------------- win datastore VMSF ----------------------------");
-            // }
-            // catch (Exception e)
-            // {
-            // // TODO Auto-generated catch block
-            // e.printStackTrace();
-            // }
-            //
-
             if (!isVMAlreadyCreated())
             {
 
@@ -212,7 +195,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
                     }
                 }
-
+                
                 // Configure the port group in the common way. If a DVS is used, the internal loop,
                 // will not do anything because the list of vnics is empty.
                 configureNetwork();
