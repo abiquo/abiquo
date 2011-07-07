@@ -28,12 +28,12 @@ import org.apache.wink.server.utils.LinkBuilders;
 import org.apache.wink.server.utils.SingleLinkBuilder;
 import org.apache.wink.server.utils.SystemLinksBuilder;
 
-public class RESTLinkBuildersImpl implements LinkBuilders
+public class AbiquoLinkBuildersFactory implements LinkBuilders
 {
 
     private final MessageContext msgContext;
 
-    public RESTLinkBuildersImpl(MessageContext msgContext)
+    public AbiquoLinkBuildersFactory(MessageContext msgContext)
     {
         this.msgContext = msgContext;
     }
@@ -41,7 +41,7 @@ public class RESTLinkBuildersImpl implements LinkBuilders
     @Override
     public SingleLinkBuilder createSingleLinkBuilder()
     {
-        return new RESTLinkBuilder((ServerMessageContext) msgContext);
+        return new AbiquoLinkBuilder((ServerMessageContext) msgContext);
     }
 
     @Override
