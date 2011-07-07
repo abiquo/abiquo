@@ -47,7 +47,6 @@ import com.abiquo.virtualfactory.model.config.Configuration;
 import com.abiquo.virtualfactory.model.config.HyperVHypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
-//import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVConstants;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVUtils;
 import com.abiquo.virtualfactory.utils.hyperv.MsvmImageManagementService;
@@ -104,8 +103,6 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * machine name
      */
     private String machineName;
-    
-  
 
     /**
      * Instantiates a new Hyper-v machine.
@@ -320,6 +317,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
     }
 
+    /**
+     * @see com.abiquo.virtualfactory.model.AbsVirtualMachine#deployMachine()
+     */
     @Override
     public void deployMachine() throws VirtualMachineException
     {

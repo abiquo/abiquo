@@ -87,8 +87,6 @@ public class Allocator implements IAllocator
     @Autowired
     NetworkAssignmentDAO networkAssignmentDao;
 
-    // ///////
-
     @Autowired
     VirtualimageAllocationService allocationService;
 
@@ -175,8 +173,6 @@ public class Allocator implements IAllocator
         VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-
-        // VirtualImage vi = vmachine.getVirtualImage();
 
         final VirtualImage vimage = getVirtualImageWithVirtualMachineResourceRequirements(vmachine);
 

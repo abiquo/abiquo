@@ -23,7 +23,6 @@ package com.abiquo.api.services;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 

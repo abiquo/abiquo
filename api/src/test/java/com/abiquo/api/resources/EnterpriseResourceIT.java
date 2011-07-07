@@ -464,4 +464,5 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(vmDto,
             resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
+
 }
