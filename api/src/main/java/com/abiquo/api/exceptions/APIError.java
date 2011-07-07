@@ -296,11 +296,12 @@ public enum APIError
         "Cannot resize a generic Iscsi volume"),
 
     // RULES
-    NON_EXISTENT_EER("RULE-1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
-        "RULE-2", "The requested fit policy rule does not exist"), NON_EXISTENT_MLR("RULE-3",
-        "The requested machine load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
-        "At least one fit policy rule is required"), ONE_LINK_REQUIRED("RULE-5",
-        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)")
+    NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
+        "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
+        "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
+        "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
+        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)"), INVALID_FPR(
+        "RULE-6", "The load balance type indicated is null or invalid")
 
     ;
 
