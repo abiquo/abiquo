@@ -60,6 +60,9 @@
             //The VirtualAppliance to which this Node belong
             private var _virtualAppliance:VirtualAppliance;
 
+            //Component to manage General Information of a Virtual Image
+            private var vmBasicInfo:NodeBasicInfo;
+            
             //Component to manage the Network of a VirtualMachine
             private var vmNetworkManagement:NetworkManagement;
 
@@ -67,6 +70,12 @@
             {
                 super.createChildren();
 
+                //Creating components
+                vmBasicInfo = new NodeBasicInfo();
+                vmBasicInfo.percentWidth = 100;
+                vmBasicInfo.percentHeight = 100;
+	            toggledContainer.addContent(vmBasicInfo, ResourceManager.getInstance().getString("VirtualAppliance","LABEL_GENERAL_INFO"));                	
+                
                 //Creating components
                 vmNetworkManagement = new NetworkManagement();
                 
@@ -99,6 +108,8 @@
                     this._isEditionAllowed = false;
                 }
 
+                //Initializing the NodeBasicInfo component
+                vmBasicInfo.init(this._node, this._isEditionAllowed, virtualDataCenter);
                 //Initializing the NodeNetworkManagement component
                 vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter);
             }
