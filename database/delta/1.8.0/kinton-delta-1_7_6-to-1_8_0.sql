@@ -170,14 +170,15 @@ insert into kinton.role_ldap(idRole, role_ldap, version_c) values ((select idRol
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `idManagement` int(10) unsigned;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD CONSTRAINT `idManagement_FK4` FOREIGN KEY (`idManagement`) REFERENCES `volume_management` (`idManagement`);
 
+-- VNC password 
+ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `password` VARCHAR(32) DEFAULT NULL;
+
+ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
-
-DELIMITER |
-ALTER TABLE kinton.virtualimage ADD cost_code VARCHAR(50);
 
 
 alter table physicalmachine modify column vswitchName varchar(200) NOT NULL;
@@ -197,7 +198,8 @@ CREATE TABLE  `kinton`.`ucs_rack` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
+
+DELIMITER |
 
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
     FOR EACH ROW BEGIN
@@ -662,7 +664,6 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
     END IF;
     END;
 
-<<<<<<< HEAD
 |
 DELIMITER ;
 

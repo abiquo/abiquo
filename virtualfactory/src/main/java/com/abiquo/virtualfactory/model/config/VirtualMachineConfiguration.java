@@ -36,12 +36,21 @@ import com.abiquo.virtualfactory.network.VirtualNIC;
  */
 public class VirtualMachineConfiguration
 {
+    public final static QName remoteDesktopPortQname = new QName("remoteDesktopPort");
+
+    public final static QName remoteDesktopPasswordQname = new QName("remoteDesktopPassword");
 
     /** The id. */
     protected final UUID id;
 
     /** The remote desktop port */
     protected int rdPort;
+
+    /**
+     * The remote desktop password. A <code>null</code> value means no password used for remote
+     * desktop.
+     */
+    protected String rdPassword;
 
     /** The ram in bytes */
     private long ramMemory;
@@ -66,7 +75,7 @@ public class VirtualMachineConfiguration
     protected String name;
 
     /** The virtual disk base information */
-    //protected VirtualDisk virtualDiskBase;
+    // protected VirtualDisk virtualDiskBase;
 
     /** The virtual disk base list */
     protected List<VirtualDisk> virtualDiskBaseList;
@@ -86,17 +95,14 @@ public class VirtualMachineConfiguration
      */
     private String repositoryManagerAddress;
 
-    // Remote Desktop Port
-    public final static QName remoteDesktopQname = new QName("remoteDesktopPort");
-
     /**
      * Creation by clone
      */
-    public VirtualMachineConfiguration(VirtualMachineConfiguration vmConfig)
+    public VirtualMachineConfiguration(final VirtualMachineConfiguration vmConfig)
     {
         this(vmConfig.getMachineId(), vmConfig.getMachineName(), vmConfig.getVirtualDiskBaseList(),
-            vmConfig.getRdPort(), vmConfig.getMemoryRAM(), vmConfig.getCpuNumber(), vmConfig
-                .getVnicList());
+            vmConfig.getRdPort(), vmConfig.getRdPassword(), vmConfig.getMemoryRAM(), vmConfig
+                .getCpuNumber(), vmConfig.getVnicList());
         this.getExtendedVirtualDiskList().addAll(vmConfig.getExtendedVirtualDiskList());
     }
 
@@ -107,18 +113,20 @@ public class VirtualMachineConfiguration
      * @param name the name
      * @param virtualDiskList the virtual disk
      * @param rdPort the rd port
+     * @param rdPassword The rd password
      * @param ramAllocationUnits the ram allocation units
      * @param cpuNumber the cpu number
-     * @param virtualNIClist TODO
+     * @param virtualNIClist
      */
-    public VirtualMachineConfiguration(UUID id, String name, List<VirtualDisk> virtualDiskList,
-        int rdPort, long ramAllocationUnits, int cpuNumber, List<VirtualNIC> virtualNIClist) // IHypervisor
-    // hyper,
+    public VirtualMachineConfiguration(final UUID id, final String name,
+        final List<VirtualDisk> virtualDiskList, final int rdPort, final String rdPassword,
+        final long ramAllocationUnits, final int cpuNumber, final List<VirtualNIC> virtualNIClist)
     {
         this.id = id;
         this.name = name;
         this.virtualDiskBaseList = virtualDiskList;
         this.rdPort = rdPort;
+        this.rdPassword = rdPassword;
         this.ramMemory = ramAllocationUnits;
         this.cpuNumber = cpuNumber;
         this.extendedVirtualDisk = new ArrayList<VirtualDisk>();
@@ -174,7 +182,7 @@ public class VirtualMachineConfiguration
      * 
      * @param hyper the new hypervisor
      */
-    public void setHypervisor(IHypervisor hyper)
+    public void setHypervisor(final IHypervisor hyper)
     {
         this.hyper = hyper;
     }
@@ -184,7 +192,7 @@ public class VirtualMachineConfiguration
      * 
      * @param name the new machine name
      */
-    public void setMachineName(String name)
+    public void setMachineName(final String name)
     {
         this.name = name;
     }
@@ -219,12 +227,22 @@ public class VirtualMachineConfiguration
         return rdPort;
     }
 
+    public String getRdPassword()
+    {
+        return rdPassword;
+    }
+
+    public void setRdPassword(final String rdPassword)
+    {
+        this.rdPassword = rdPassword;
+    }
+
     /**
      * Sets the remote desktop port
      * 
      * @param rdPort the rdPort to set
      */
-    public void setRdPort(int rdPort)
+    public void setRdPort(final int rdPort)
     {
         this.rdPort = rdPort;
     }
@@ -234,7 +252,7 @@ public class VirtualMachineConfiguration
      * 
      * @param ramMemory the memory ram
      */
-    public void setMemoryRam(long ramMemory)
+    public void setMemoryRam(final long ramMemory)
     {
         this.ramMemory = ramMemory;
         this.ram_set = true;
@@ -255,7 +273,7 @@ public class VirtualMachineConfiguration
      * 
      * @param cpuNumber the cpuNumber to set
      */
-    public void setCpuNumber(int cpuNumber)
+    public void setCpuNumber(final int cpuNumber)
     {
         this.cpuNumber = cpuNumber;
         this.cpu_number_set = true;
@@ -322,7 +340,7 @@ public class VirtualMachineConfiguration
      * 
      * @param repositoryManagerAddress the repositoryManagerAddress to set
      */
-    public void setRepositoryManagerAddress(String repositoryManagerAddress)
+    public void setRepositoryManagerAddress(final String repositoryManagerAddress)
     {
         this.repositoryManagerAddress = repositoryManagerAddress;
     }

@@ -152,6 +152,7 @@ public abstract class AbsMachineTest extends TestCase
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -374,7 +375,7 @@ public abstract class AbsMachineTest extends TestCase
          */
     }
 
-    private void logAndFail(String msg, Exception e)
+    private void logAndFail(final String msg, final Exception e)
     {
         log.error(msg, e);
         fail(msg);
