@@ -885,6 +885,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
         RackDAO rackDAO = factory.getRackDAO();
+        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
 
         try
         {
@@ -902,8 +903,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-
-                    physicalmachineDAO.makeTransient(pmToDelete);
+                    
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
                 }
                 else
                 {
@@ -984,7 +985,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
-            
+
             rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
@@ -1062,8 +1063,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null,
-                (Rack) pm.getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
+                    .getAssignedTo(), pm, null, null);
 
         }
 
