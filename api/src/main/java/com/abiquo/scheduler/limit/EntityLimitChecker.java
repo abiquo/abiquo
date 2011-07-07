@@ -105,7 +105,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
     /**
      * Check the resource allocation limits on the current entity when adding new resource
-     * requirements.
+     * requirements. Overloaded method because en case of deploying VM is not necessary check VLAN
+     * limits.
      * 
      * @param entity, the entity to obtain its resource allocation limits.
      * @param required, new target resource requirements.
@@ -118,6 +119,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
         final boolean force) throws LimitExceededException
     {
+
+        checkLimits(entity, required, force, true);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final Boolean checkVLAN) throws LimitExceededException
+    {
         if (allNoLimits(entity))
         {
             return;
@@ -126,7 +134,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final DefaultEntityCurrentUsed actualAllocated = getCurrentUsed(entity);
 
         Map<LimitResource, LimitStatus> entityResourceStatus =
-            getResourcesLimit(entity, actualAllocated, required);
+            getResourcesLimit(entity, actualAllocated, required, checkVLAN);
 
         entityResourceStatus = getFilterResourcesStatus(entityResourceStatus);
 
@@ -137,7 +145,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      * Gets the list of all resources with his limit status.
      */
     private Map<LimitResource, LimitStatus> getResourcesLimit(final T limits,
-        final DefaultEntityCurrentUsed actualAllocated, final VirtualMachineRequirements required)
+        final DefaultEntityCurrentUsed actualAllocated, final VirtualMachineRequirements required,
+        final Boolean checkVLAN)
     {
 
         Map<LimitResource, LimitStatus> limitStatus =
@@ -147,13 +156,18 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
-        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
+        if (checkVLAN)
+        {
+            int actualAndRequiredVLANs =
+                (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
+            limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
+
+        }
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
-        limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
 
         /**
          * TODO vlan and public ip is not checked there
@@ -229,7 +243,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case NO_DETAIL:
                 if (tracer != null)
                 {
-                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                        traceMessage);
                 }
                 break;
             default:
@@ -242,8 +257,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
-                    || entity instanceof VirtualDatacenter) && tracer != null)
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED) || entity instanceof VirtualDatacenter)
+                    && tracer != null)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }
