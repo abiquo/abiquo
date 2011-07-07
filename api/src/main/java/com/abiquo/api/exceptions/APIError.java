@@ -71,6 +71,7 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
+	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -294,6 +295,13 @@ public enum APIError
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"),
 
+    // RULES
+    NON_EXISTENT_EER("RULE1", "The requested enterprise exclusion rule does not exist"), NON_EXISTENT_FPR(
+        "RULE2", "The requested fit policy rule does not exist"), NON_EXISTENT_MLR("RULE3",
+        "The requeste machine load level rule does not exist"), ONE_FPR_REQUIRED("RULE4",
+        "At least one fit policy rule is required"), ONE_LINK_REQUIRED("RULE5",
+        "It is expected one link with the rel attribute possible values (datacenter/racks/machines)")
+
     ;
 
     /**
@@ -345,8 +353,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

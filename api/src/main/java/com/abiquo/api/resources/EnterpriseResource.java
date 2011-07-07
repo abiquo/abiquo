@@ -88,6 +88,10 @@ public class EnterpriseResource extends AbstractResource
         "/action/virtualdatacenters";
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
+    
+    public static final String ENTERPRISE1 = "enterprise1";
+
+    public static final String ENTERPRISE2 = "enterprise2";
 
     @Autowired
     EnterpriseService service;

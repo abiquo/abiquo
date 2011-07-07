@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "fitPolicyRule")
 public class FitPolicyRuleDto extends SingleResourceTransportDto
 {
     private Integer id;
