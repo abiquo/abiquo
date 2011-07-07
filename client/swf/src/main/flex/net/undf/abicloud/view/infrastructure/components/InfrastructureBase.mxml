@@ -275,7 +275,7 @@
             /**
              * When an InfrastructureElement has been selected
              */
-            private function infrastructureElementSelected(event:InfrastructureEvent):void
+            protected function infrastructureElementSelected(event:InfrastructureEvent):void
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
