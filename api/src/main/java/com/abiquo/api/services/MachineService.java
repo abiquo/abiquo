@@ -195,6 +195,19 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
+    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
+
+        if (machine == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return machine;
+
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
     {
@@ -318,5 +331,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
-       
 }
+
