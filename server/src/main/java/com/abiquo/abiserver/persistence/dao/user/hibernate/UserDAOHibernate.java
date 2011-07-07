@@ -100,14 +100,14 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<UserHB> getUsersByUserPrivileges(final String privileges, final Integer enterprise)
+    public List<UserHB> getUsersByUserPrivileges(final String privilege, final Integer enterprise)
     {
         List<UserHB> requestedUser = new ArrayList<UserHB>();
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         Query userQuery = session.getNamedQuery(GET_USERS_BY_PRIVILEGE);
-        // userQuery.setString("security", privileges);
-        // userQuery.setInteger("enterprise", enterprise);
+        userQuery.setString("privilege", privilege);
+        userQuery.setInteger("enterprise", enterprise);
         requestedUser = userQuery.list();
 
         return requestedUser;

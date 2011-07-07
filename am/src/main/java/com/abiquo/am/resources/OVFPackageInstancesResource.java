@@ -43,6 +43,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
@@ -204,6 +205,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
             
             diskInfo.setDiskFilePath(EnterpriseRepositoryService.OVF_STATUS_ERROR_MARK);
         }
+
         InPart diskFilePart = mp.next();
 
         InputStream isDiskFile = diskFilePart.getBody(InputStream.class, null);
@@ -220,6 +222,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
 
         return Response.created(URI.create(diskInfo.getOvfUrl())).build();
     }
+
 
     /**
      * This Function is needed as long as the HTML 5 states:
@@ -255,27 +258,22 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     // filename="diskInfo.json",Content-Type=application/json]]
     private void fixMediaType(InPart diskInfoPart)
     {
-        if(diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
+        if (diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
         {
             diskInfoPart.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        }        
-    }    
+        }
+    }
 
-    
-    
     private void copy(InputStream fin, File destFile) throws IOException
     {
-
         OutputStream fout = new FileOutputStream(destFile);
-
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = fin.read(buf)) > 0)
+        try
         {
-            fout.write(buf, 0, len);
+            IOUtils.copy(fin, fout);
         }
-
-        // XXX fin.close();
-        fout.close();
+        finally
+        {
+            fout.close();
+        }
     }
 }

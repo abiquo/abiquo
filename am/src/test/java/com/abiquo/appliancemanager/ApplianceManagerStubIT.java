@@ -70,8 +70,7 @@ public class ApplianceManagerStubIT
 
     protected ApplianceManagerStubTestUtils testUtils;
 
-    protected final static String REPO_PATH = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryPath();
+    protected static String REPO_PATH;
 
     
 //    @Test
@@ -95,10 +94,11 @@ public class ApplianceManagerStubIT
      * @throws IOException
      */
     // @BeforeTest
-    @BeforeMethod
+    @BeforeClass // XXX BeforeMethod
     public void initializeRepositoryFileSystem() throws IOException
     {
 
+        REPO_PATH ="/tmp/testrepo/";
         File vmrepo = new File(REPO_PATH);
         if (vmrepo.exists())
         {
@@ -107,6 +107,8 @@ public class ApplianceManagerStubIT
 
         vmrepo.mkdirs();
         new File(REPO_PATH + ".abiquo_repository").createNewFile();
+//        REPO_PATH = AMConfigurationManager.getInstance()
+//        .getAMConfiguration().getRepositoryPath();
     }
 
     @Test

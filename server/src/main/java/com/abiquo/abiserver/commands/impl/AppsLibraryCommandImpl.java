@@ -148,12 +148,25 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause, e);
         }
 
-        final EnterpriseRepositoryDto enterpriseRepo =
-            getEnterpriseRepository(idDatacenter, String.valueOf(idEnterprise));
+        try
+        {
+            final EnterpriseRepositoryDto enterpriseRepo =
+                getEnterpriseRepository(idDatacenter, String.valueOf(idEnterprise));
 
-        repository.setRepositoryCapacityMb(enterpriseRepo.getRepositoryCapacityMb());
-        repository.setRepositoryEnterpriseUsedMb(enterpriseRepo.getRepositoryEnterpriseUsedMb());
-        repository.setRepositoryRemainingMb(enterpriseRepo.getRepositoryRemainingMb());
+            repository.setRepositoryCapacityMb(enterpriseRepo.getRepositoryCapacityMb());
+            repository
+                .setRepositoryEnterpriseUsedMb(enterpriseRepo.getRepositoryEnterpriseUsedMb());
+            repository.setRepositoryRemainingMb(enterpriseRepo.getRepositoryRemainingMb());
+
+        }
+        catch (AppsLibraryCommandException e)
+        {
+            logger.warn("{}",e);
+            
+            repository.setRepositoryCapacityMb(0l);
+            repository.setRepositoryEnterpriseUsedMb(0l);
+            repository.setRepositoryRemainingMb(0l);
+        }
 
         return repository;
     }
@@ -196,7 +209,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         {
             final String cause =
                 String.format("Can not obtain the repository usage info "
-                    + "of the Datacenter [%s] for the Enterprise [%s]", idDatacenter, idEnterprise);
+                    + "of the Datacenter [%s] for the Enterprise [%s]. "
+                    + "NFS could be bussy (check it later).", idDatacenter, idEnterprise);
 
             final String detail = e.getMessage();
 
@@ -263,13 +277,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             // Getting the category that will be deleted
             final CategoryHB category = factory.getCategoryDAO().findById(idCategory);
 
-            if (category.getIsDefault() > 0)
-            {
-                factory.rollbackConnection();
-                throw new AppsLibraryCommandException("'" + category.getName()
-                    + "' is the default Category. Can not delete it");
-            }
-
             if (category == null)
             {
                 factory.rollbackConnection();
@@ -277,6 +284,14 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 final String cause =
                     String.format("There aren't any category with id [%s]", idCategory.toString());
                 throw new AppsLibraryCommandException(cause);
+            }
+
+            
+            if (category.getIsDefault() > 0)
+            {
+                factory.rollbackConnection();
+                throw new AppsLibraryCommandException("'" + category.getName()
+                    + "' is the default Category. Can not delete it");
             }
 
             factory.getCategoryDAO().makeTransient(category);

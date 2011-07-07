@@ -40,6 +40,8 @@ import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
 import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.tracer.ComponentType;
@@ -63,6 +65,29 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         conf.readTimeout(TIMEOUT);
 
         this.client = new RestClient(conf);
+    }
+
+    @Override
+    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
+        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        BasicResult result = new BasicResult();
+        String vmachineUrl =
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
+
+        ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "updateVirtualMachine");
+        }
+
+        return result;
     }
 
     public void pause(UserSession userSession, Integer virtualDatacenterId,
@@ -237,5 +262,22 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 apiUri,
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{vapp}/virtualmachines/{virtualMachine}",
                 params);
+    }
+
+    private VirtualMachineDto createTransferObject(VirtualMachine virtualMachine)
+    {
+        VirtualMachineDto dto = new VirtualMachineDto();
+
+        dto.setCpu(virtualMachine.getCpu());
+        dto.setRam(virtualMachine.getRam());
+        dto.setDescription(virtualMachine.getDescription());
+        dto.setHd((int) virtualMachine.getHd());
+        dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
+        dto.setPassword(virtualMachine.getPassword());
+        dto.setName(virtualMachine.getName());
+        dto.setVdrpIP(virtualMachine.getVdrpIP());
+        dto.setVdrpPort(virtualMachine.getVdrpPort());
+
+        return dto;
     }
 }

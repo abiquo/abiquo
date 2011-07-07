@@ -34,7 +34,6 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
-import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -184,7 +183,7 @@ public class OVFModelFromVirtualAppliance
 
             // Configure AnnotationSection with the RD port
             AnnotationSectionType annotationSection =
-                createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+                createVirtualSystemRDPortAnnotationSection(virtualMachine);
             if (machineState != null)
             {
                 annotationSection.getOtherAttributes().put(AbiCloudConstants.machineStateQname,
@@ -376,7 +375,7 @@ public class OVFModelFromVirtualAppliance
 
         // Getting the all the virtual Machines
         for (Node node : virtualAppliance.getNodes())
-        {            
+        {
             if (node.isNodeTypeVirtualImage())
             {
                 NodeVirtualImage nodeVirtualImage = (NodeVirtualImage) node;
@@ -386,7 +385,7 @@ public class OVFModelFromVirtualAppliance
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
                     createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
-                
+
                 OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
                 // Setting the virtual Disk package level element to the envelope
@@ -746,7 +745,7 @@ public class OVFModelFromVirtualAppliance
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
         VirtualSystemType virtualSystem =
             OVFEnvelopeUtils.createVirtualSystem(vsId, virtualMachine.getName(),
-                nodeVirtualImage.getName()); 
+                nodeVirtualImage.getName());
 
         // Create a productSection with the virtual system IP
         // ProductSectionType productSection =
@@ -760,7 +759,7 @@ public class OVFModelFromVirtualAppliance
 
         // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
-            createVirtualSystemRDPortAnnotationSection(virtualMachine.getVdrpPort());
+            createVirtualSystemRDPortAnnotationSection(virtualMachine);
 
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -769,19 +768,24 @@ public class OVFModelFromVirtualAppliance
         return virtualSystem;
     }
 
-    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(final int rdPort)
+    private static AnnotationSectionType createVirtualSystemRDPortAnnotationSection(
+        final VirtualMachine virtualMachine)
     {
-
-        AnnotationSectionType annotationSection;
-
-        annotationSection = new AnnotationSectionType(); // TODO
-        // OVFEnvelopeUtils.createSection(AnnotationSectionType.class,
-        // null);
+        // TODO OVFEnvelopeUtils.createSection(AnnotationSectionType.class, null);
+        AnnotationSectionType annotationSection = new AnnotationSectionType();
 
         Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
 
-        otherAttributes.put(AbiCloudConstants.remoteDesktopQname, String.valueOf(rdPort));
+        String rdPort = String.valueOf(virtualMachine.getVdrpPort());
+        otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, String.valueOf(rdPort));
         logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
+
+        if (virtualMachine.getPassword() != null && !virtualMachine.getPassword().equals(""))
+        {
+            String rdPassword = virtualMachine.getPassword();
+            otherAttributes.put(AbiCloudConstants.remoteDesktopPasswordQname, rdPassword);
+            logger.debug("The remote desktop password is: " + rdPassword);
+        }
 
         return annotationSection;
     }
