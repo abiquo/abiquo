@@ -21,16 +21,16 @@
 
 package com.abiquo.abiserver.commands.impl.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
@@ -71,7 +71,7 @@ public class InfrastructureCommandImplTest
      * 
      * @throws java.lang.Exception * @throws Exception the exception
      */
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception
     {
         infraCommand = new InfrastructureCommandImpl();
@@ -99,7 +99,7 @@ public class InfrastructureCommandImplTest
      * 
      * @throws java.lang.Exception * @throws Exception the exception
      */
-    @After
+    @AfterMethod
     public void tearDown() throws Exception
     {
     }
@@ -119,7 +119,7 @@ public class InfrastructureCommandImplTest
         DataCenterDAO datacenterDAO = factorytest.getDataCenterDAO();
         DatacenterHB myDatacenter = datacenterDAO.findById(dataCenter.getId());
         Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
-        assertFalse("The remote service list is not properly added", remoteServices.isEmpty());
+        assertFalse(remoteServices.isEmpty());
     }
 
     /**

@@ -46,12 +46,12 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         super(VLANNetwork.class);
     }
 
-    public VLANNetworkDAO(EntityManager em)
+    public VLANNetworkDAO(final EntityManager em)
     {
         super(VLANNetwork.class, em);
     }
 
-    public List<VLANNetwork> findVLANNetworks(VirtualDatacenter virtualDatacenter)
+    public List<VLANNetwork> findVLANNetworks(final VirtualDatacenter virtualDatacenter)
     {
         assert virtualDatacenter != null;
 
@@ -62,38 +62,36 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return result;
     }
 
-    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualDatacenter,
-        Integer vlanId)
+    public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualDatacenter,
+        final Integer vlanId)
     {
-        return findUniqueByCriterions(
-            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
-            Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
+        return findUniqueByCriterions(Restrictions.eq(VLANNetwork.NETWORK_PROPERTY,
+            virtualDatacenter.getNetwork()), Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
     }
 
-    private static Criterion sameNetwork(VirtualDatacenter virtualDatacenter)
+    private static Criterion sameNetwork(final VirtualDatacenter virtualDatacenter)
     {
         return sameNetwork(virtualDatacenter.getNetwork());
     }
 
-    private static Criterion sameNetwork(Network network)
+    private static Criterion sameNetwork(final Network network)
     {
         return Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, network);
     }
 
-    public boolean existsAnyWithName(Network network, String name)
+    public boolean existsAnyWithName(final Network network, final String name)
     {
-        assert !StringUtils.isEmpty(name);
-
-        return existsAnyByCriterions(sameNetwork(network), nameEqual(name));
+        return StringUtils.isEmpty(name) ? false : existsAnyByCriterions(sameNetwork(network),
+            nameEqual(name));
     }
 
-    public VLANNetwork findByDefault(VirtualDatacenter virtualDatacenter)
+    public VLANNetwork findByDefault(final VirtualDatacenter virtualDatacenter)
     {
-        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
-            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()), Restrictions.eq(
+            VLANNetwork.DEFAULT_PROPERTY, true));
     }
 
-    private Criterion nameEqual(String name)
+    private Criterion nameEqual(final String name)
     {
         assert name != null;
 
@@ -106,7 +104,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.enterprise.id = :enterpriseId";
 
-    public List<VLANNetwork> findByEnterprise(int enterpriseId)
+    public List<VLANNetwork> findByEnterprise(final int enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
@@ -114,7 +112,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<Integer> getVLANTagsUsedInRack(Rack rack)
+    public List<Integer> getVLANTagsUsedInRack(final Rack rack)
     {
         String idRack = String.valueOf(rack.getId());
 
@@ -132,10 +130,11 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(Datacenter datacenter)
+    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(final Datacenter datacenter)
     {
-        
-        Criterion inNetwork = Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
+
+        Criterion inNetwork =
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
         Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
 
         return criteria.list();
@@ -147,7 +146,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
             + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
             + "WHERE net.id = vlan.network.id AND vlan.id = :id";
 
-    public boolean isPublic(VLANNetwork vlan)
+    public boolean isPublic(final VLANNetwork vlan)
     {
         Query query = getSession().createQuery(GET_VLAN_DATACENTER);
         query.setParameter("id", vlan.getId());

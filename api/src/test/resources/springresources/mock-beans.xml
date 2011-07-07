@@ -8,6 +8,7 @@
 			<map>
 				<entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
 				<entry key="vsmServiceStub" value="vsmServiceStubMock" />
+				<entry key="remoteServiceService" value="remoteServicesTestService" />
 			</map>
 		</property>
 	</bean>

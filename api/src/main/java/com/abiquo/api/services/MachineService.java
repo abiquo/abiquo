@@ -157,16 +157,16 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
-                machineDto.getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(), machineDto
+                .getVirtualRamUsedInMb(),
 
-                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
-                machineDto.getVirtualHardDiskUsedInMb(),
+            machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(), machineDto
+                .getVirtualHardDiskUsedInMb(),
 
-                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
-                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+            machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(), machineDto
+                .getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
 
-                machineDto.getState(), machineDto.getVirtualSwitch());
+            machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
@@ -178,9 +178,9 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
-                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
-                machineDto.getPassword());
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
+                .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
+                .getPassword());
 
         vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
             .name(), hypervisor.getUser(), hypervisor.getPassword());

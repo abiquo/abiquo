@@ -21,12 +21,11 @@
 
 package com.abiquo.mailman;
 
-import static org.junit.Assert.*;
-
+import static org.testng.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  * 
