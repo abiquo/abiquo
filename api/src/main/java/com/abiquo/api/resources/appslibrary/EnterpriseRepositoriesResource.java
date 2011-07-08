@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.DatacenterResource;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.stub.ApplianceManagerStub;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
@@ -46,9 +45,8 @@ public class EnterpriseRepositoriesResource extends AbstractResource
 {
     public static final String ENTERPRISE_REP_PATH = "er";
 
-    // @Autowired
-    @Resource(name = "remoteServiceService")
-    private RemoteServiceService r;
+    @Autowired
+    private InfrastructureService r;
 
     @Autowired
     private ApplianceManagerStub am;

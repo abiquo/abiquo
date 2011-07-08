@@ -191,23 +191,26 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 Set<PhysicalmachineHB> phyMachines = rackPojo.getPhysicalmachines();
                 for (PhysicalmachineHB phyMachinePojo : phyMachines)
                 {
-                    PhysicalMachine phyMachine = phyMachinePojo.toPojo();
-                    phyMachine.setAssignedTo(rack);
-                    infrastructures.add(phyMachine);
-
-                    // Adding the HyperVisor
-                    HypervisorHB hypervisorPojo = phyMachinePojo.getHypervisor();
-                    HyperVisor hypervisor = hypervisorPojo.toPojo();
-                    hypervisor.setAssignedTo(phyMachine);
-                    infrastructures.add(hypervisor);
-
-                    // Adding the VirtualMachines
-                    Set<VirtualmachineHB> virtualMachines = hypervisorPojo.getVirtualmachines();
-                    for (VirtualmachineHB virtualMachinePojo : virtualMachines)
+                    if (phyMachinePojo.getHypervisor() != null)
                     {
-                        VirtualMachine virtualMachine = virtualMachinePojo.toPojo();
-                        virtualMachine.setAssignedTo(hypervisor);
-                        infrastructures.add(virtualMachine);
+                        PhysicalMachine phyMachine = phyMachinePojo.toPojo();
+                        phyMachine.setAssignedTo(rack);
+                        infrastructures.add(phyMachine);
+
+                        // Adding the HyperVisor
+                        HypervisorHB hypervisorPojo = phyMachinePojo.getHypervisor();
+                        HyperVisor hypervisor = hypervisorPojo.toPojo();
+                        hypervisor.setAssignedTo(phyMachine);
+                        infrastructures.add(hypervisor);
+
+                        // Adding the VirtualMachines
+                        Set<VirtualmachineHB> virtualMachines = hypervisorPojo.getVirtualmachines();
+                        for (VirtualmachineHB virtualMachinePojo : virtualMachines)
+                        {
+                            VirtualMachine virtualMachine = virtualMachinePojo.toPojo();
+                            virtualMachine.setAssignedTo(hypervisor);
+                            infrastructures.add(virtualMachine);
+                        }
                     }
 
                 }
@@ -885,6 +888,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
         RackDAO rackDAO = factory.getRackDAO();
+        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
 
         try
         {
@@ -902,8 +906,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-
-                    physicalmachineDAO.makeTransient(pmToDelete);
+                    
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
                 }
                 else
                 {
@@ -984,7 +988,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
             rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
             rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
-            
+
             rackPojo.setHaEnabled(rack.getHaEnabled());
 
             session.update(rackPojo);
@@ -1062,8 +1066,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null,
-                (Rack) pm.getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
+                    .getAssignedTo(), pm, null, null);
 
         }
 

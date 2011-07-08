@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
@@ -35,21 +35,26 @@ import com.abiquo.vsm.client.VSMClient;
  * 
  * @author pnavarro
  */
-@Service("vsmStub")
-public class VSMStubImpl implements VSMStub
+@Service
+public class VsmServiceStub extends DefaultApiService
 {
 
-    private final static Logger log = LoggerFactory.getLogger(VSMStubImpl.class);
+    private final static Logger log = LoggerFactory.getLogger(VsmServiceStub.class);
 
-    /*
-     * (non-Javadoc)
-     * @see com.abiquo.api.services.stub.VsmStub#monitor(java.lang.String, java.lang.String,
-     * java.lang.Integer, java.lang.String, java.lang.String, java.lang.String)
+    /**
+     * Monitors the physical machine
+     * 
+     * @param serviceUri the vsm uri
+     * @param physicalMachineIP The physical machine to monitor.
+     * @param physicalMachinePort the physical machine port
+     * @param type The hypervisor type of the physical machine.
+     * @param username The username used to connect to the hypervisor.
+     * @param password The password used to connect to the hypervisor.
      */
     public void monitor(String serviceUri, String physicalMachineIP, Integer physicalMachinePort,
         String type, String username, String password)
     {
-        VSMClient vsmClient = new VSMClient(serviceUri);
+        VSMClient vsmClient = initializeVSMClient(serviceUri);
         try
         {
             URL pmURL = new URL("http", physicalMachineIP, physicalMachinePort, "");
@@ -65,19 +70,23 @@ public class VSMStubImpl implements VSMStub
         catch (Exception e)
         {
             log.error(APIError.MONITOR_PROBLEM + e.getMessage());
-            throw new InternalServerErrorException(APIError.MONITOR_PROBLEM);
+            addUnexpectedErrors(APIError.MONITOR_PROBLEM);
+            flushErrors();
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.abiquo.api.services.stub.VsmStub#shutdownMonitor(java.lang.String, java.lang.String,
-     * java.lang.Integer, java.lang.String)
+    /**
+     * Stops monitoring the physical machine
+     * 
+     * @param serviceUri the vsm uri
+     * @param physicalMachineAddress The physical machine to monitor.
+     * @param physicalMachinePort the physical machine port
+     * @param type The hypervisor type of the physical machine.
      */
     public void shutdownMonitor(String serviceUri, String physicalMachineIP,
         Integer physicalMachinePort)
     {
-        VSMClient vsmClient = new VSMClient(serviceUri);
+        VSMClient vsmClient = initializeVSMClient(serviceUri);
         try
         {
             URL pmURL = new URL("http", physicalMachineIP, physicalMachinePort, "");
@@ -85,8 +94,15 @@ public class VSMStubImpl implements VSMStub
         }
         catch (Exception e)
         {
-            throw new InternalServerErrorException(APIError.UNMONITOR_PROBLEM);
+            log.error(APIError.UNMONITOR_PROBLEM + e.getMessage());
+            addUnexpectedErrors(APIError.UNMONITOR_PROBLEM);
+            flushErrors();
         }
 
+    }
+    
+    protected VSMClient initializeVSMClient(String serviceURI)
+    {
+        return new VSMClient(serviceURI);
     }
 }

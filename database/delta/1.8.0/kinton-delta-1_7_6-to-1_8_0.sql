@@ -181,6 +181,24 @@ DROP TRIGGER IF EXISTS `kinton`.`update_volume_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 
 
+alter table physicalmachine modify column vswitchName varchar(200) NOT NULL;
+
+--
+-- Definition of table `kinton`.`ucs_rack`
+--
+DROP TABLE IF EXISTS `kinton`.`ucs_rack`;
+CREATE TABLE  `kinton`.`ucs_rack` (
+  `idRack` int(15) unsigned NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `port` int(5) NOT NULL,
+  `user_rack` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  KEY `id_rack_FK` (`idRack`),
+  CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
 DELIMITER |
 
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
@@ -840,3 +858,6 @@ CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `k
 DELIMITER ;
 
 
+-- [UCS]Add the specific wiki link for discovering blades form
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");

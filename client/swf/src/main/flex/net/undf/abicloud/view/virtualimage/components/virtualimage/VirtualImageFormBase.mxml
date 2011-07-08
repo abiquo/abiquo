@@ -474,6 +474,9 @@
 
             private function onVirtualImageCreated():void
             {
+            	
+            	
+            	
                 creatingVirtualImage = false;
 
                 //Stoping timer

@@ -20,27 +20,28 @@
  */
 package com.abiquo.api.services.stub;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
-import org.mockito.Mockito;
+import org.springframework.stereotype.Service;
+
+import com.abiquo.vsm.client.VSMClient;
 
 /**
  * Mock class to simulate the VSM behavior.
  * 
  * @author pnavarro
  */
-public class MockVSMStub
+@Service
+public class VsmServiceStubMock extends VsmServiceStub
 {
-    public static VSMStub mock()
+    public VSMClient initializeVSMClient(String serviceUri)
     {
-        VSMStub mock = Mockito.mock(VSMStub.class);
-        /*
-         * doNothing().when(mock).monitor(anyString(), anyString(), anyInt(), anyString(),
-         * anyString(), anyString()); doNothing().when(mock).shutdownMonitor(anyString(),
-         * anyString(), anyInt(), anyString());
-         */
-        return mock;
+        VSMClient mockClient = mock(VSMClient.class);
+
+        // set here the mock behaviour.
+        
+        //....
+        
+        return mockClient;
     }
 }
