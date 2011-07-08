@@ -97,12 +97,12 @@ public class MachineService extends DefaultApiService
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);        
-        
+        List<Machine> machines = repo.findRackMachines(rack);
+
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created
         // in the Dto informing the managed machines special functionality.
-        
+
         UcsRack ucsRack = repo.findUcsRackById(rackId);
         if (ucsRack != null)
         {
@@ -111,7 +111,6 @@ public class MachineService extends DefaultApiService
                 machine.setBelongsToManagedRack(Boolean.TRUE);
             }
         }
-        
 
         return machines;
     }
@@ -157,16 +156,16 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(), machineDto
-                .getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
+                machineDto.getVirtualRamUsedInMb(),
 
-            machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(), machineDto
-                .getVirtualHardDiskUsedInMb(),
+                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
+                machineDto.getVirtualHardDiskUsedInMb(),
 
-            machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(), machineDto
-                .getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
+                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
 
-            machineDto.getState(), machineDto.getVirtualSwitch());
+                machineDto.getState(), machineDto.getVirtualSwitch());
 
         machine.setRack(rack);
 
@@ -178,9 +177,9 @@ public class MachineService extends DefaultApiService
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
-            machine.createHypervisor(machineDto.getType(), machineDto.getIp(), machineDto
-                .getIpService(), machineDto.getPort(), machineDto.getUser(), machineDto
-                .getPassword());
+            machine.createHypervisor(machineDto.getType(), machineDto.getIp(),
+                machineDto.getIpService(), machineDto.getPort(), machineDto.getUser(),
+                machineDto.getPassword());
 
         vsm.monitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort(), hypervisor.getType()
             .name(), hypervisor.getUser(), hypervisor.getPassword());
@@ -335,8 +334,8 @@ public class MachineService extends DefaultApiService
             return false;
         }
 
-        return (machine.getDatacenter().getId().equals(datacenterId) && machine.getRack().getId()
-            .equals(rackId));
+        return machine.getDatacenter().getId().equals(datacenterId)
+            && machine.getRack().getId().equals(rackId);
     }
 
     private void isValidMachine(final Machine machine)
@@ -347,6 +346,16 @@ public class MachineService extends DefaultApiService
         }
 
         flushErrors();
+    }
+
+    public VsmServiceStub getVsm()
+    {
+        return vsm;
+    }
+
+    public void setVsm(VsmServiceStub vsm)
+    {
+        this.vsm = vsm;
     }
 
 }

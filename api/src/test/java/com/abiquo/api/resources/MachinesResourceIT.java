@@ -21,11 +21,11 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveDatastoresURI;
 import static com.abiquo.api.common.UriTestResolver.resolveMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static com.abiquo.api.common.Assert.assertError;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -35,7 +35,6 @@ import org.apache.wink.client.Resource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -45,11 +44,11 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.UcsRack;
 import com.abiquo.server.core.util.network.IPAddress;
 
@@ -216,6 +215,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
     /**
      * Create multiple physical machines in the same time.
+     * 
      * @throws Exception
      */
     @Test
@@ -230,20 +230,21 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.getDatastores().getCollection().add(dto);
 
         MachineDto m2 = getValidMachine();
+        m2.setName(m2.getName() + "-second");
         IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
         m2.setIp(nextIP.toString());
         m2.setIpService(nextIP.toString());
         DatastoreDto dto2 = new DatastoreDto();
         dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/");
-        dto2.setDirectory("var/lib/virt");
+        dto2.setRootPath("/anotherRoot");
+        dto2.setDirectory("var/lib/virt/2");
         dto2.setEnabled(Boolean.TRUE);
         m2.getDatastores().add(dto2);
 
         MachinesDto machinesDto = new MachinesDto();
         machinesDto.add(m);
         machinesDto.add(m2);
-        
+
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
             resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)

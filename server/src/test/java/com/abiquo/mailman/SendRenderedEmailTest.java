@@ -53,8 +53,6 @@ public class SendRenderedEmailTest extends MailTestBase
             String body = RendererManager.generateBody(properties, "poweron", "en", "default");
 
             mail.send(mailUser, mailTo, mailCC, "Rendred mail :" + mailSubject, body);
-
-            assertTrue("Message sent", true);
         }
         catch (Exception e)
         {

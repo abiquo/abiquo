@@ -34,14 +34,15 @@ import com.abiquo.vsm.client.VSMClient;
 @Service
 public class VsmServiceStubMock extends VsmServiceStub
 {
+    @Override
     public VSMClient initializeVSMClient(String serviceUri)
     {
         VSMClient mockClient = mock(VSMClient.class);
 
         // set here the mock behaviour.
-        
-        //....
-        
+
+        // ....
+
         return mockClient;
     }
 }
