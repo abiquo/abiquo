@@ -101,7 +101,7 @@
         ]]>
     </mx:Script>
 
-    <mx:Form paddingTop="3">
+    <mx:Form paddingTop="3" width="100%">
 
         <mx:FormItem 
             height="17"
@@ -183,13 +183,13 @@
         </mx:FormItem>
                    
 		<mx:FormItem 
-            height="17"
             label="@Resource(bundle='Infrastructure', key='LABEL_DESCRIPTION')"
-            direction="horizontal">
+            direction="horizontal" width="100%">
 
             <mx:TextArea id="descriptionInput"
                             width="100%"
                             maxChars="255"
+                            minHeight="100"
                             text="{_virtualMachine.description}"/>
 
         </mx:FormItem>
