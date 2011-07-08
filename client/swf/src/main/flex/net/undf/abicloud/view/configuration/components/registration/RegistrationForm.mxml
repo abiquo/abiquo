@@ -32,6 +32,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.binding.utils.ChangeWatcher;
             import mx.core.UIComponent;
             import mx.events.FlexEvent;
@@ -85,6 +87,9 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_ALLOW_MODIFY,"visible",acceptButton);
+                
                 //Setting the configuration manager
                 this._configurationManager = AbiCloudModel.getInstance().configurationManager;
                 loadExternalXMLData();

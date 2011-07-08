@@ -171,11 +171,7 @@ public class ResourceAllocationLimit implements Serializable, IPojo<ResourceAllo
         ralHB.setVlan(vlan.toPojoHB());
         ralHB.setRam(ram.toPojoHB());
         ralHB.setStorage(storage.toPojoHB());
-
-        if (repository != null)
-        {
-            ralHB.setRepository(repository.toPojoHB());
-        }
+        ralHB.setRepository(repository == null ? null : repository.toPojoHB());
 
         return ralHB;
     }
@@ -188,7 +184,7 @@ public class ResourceAllocationLimit implements Serializable, IPojo<ResourceAllo
             storage.toString(), repository.toString(), vlan.toString(), publicIP.toString());
     }
 
-    public static ResourceAllocationLimit create(SingleResourceWithLimitsDto dto)
+    public static ResourceAllocationLimit create(final SingleResourceWithLimitsDto dto)
     {
         ResourceAllocationLimit limits = new ResourceAllocationLimit();
 

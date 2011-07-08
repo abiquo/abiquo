@@ -116,7 +116,13 @@ package net.undf.abicloud.controller
                         break;
 
                     case BasicResult.NOT_AUTHORIZED:
-                        //Not used yet
+                        //The resource is not allowed
+                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_ERROR_TITLE_LABEL"),
+                                                ResourceManager.getInstance().getString("Common",
+                                                                                        "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
+                                                basicResult.message,
+                                                Alert.OK);
                         break;
 
                     case BasicResult.VIRTUAL_IMAGE_IN_USE:
@@ -128,6 +134,16 @@ package net.undf.abicloud.controller
                                                                                         "ALERT_MESSAGE_SESSION_VIRTUAL_IMAGE_IN_USE"),
                                                 Alert.OK);
                         break;
+                    
+                    case BasicResult.HARD_LIMT_EXCEEDED:
+                		AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_ERROR_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_HARD_LIMITS_EXCEEDED_HEADER"),
+                                            ResourceManager.getInstance().getString("VirtualAppliance",
+                                                                                    "ALERT_HARD_LIMITS_EXCEEDED_TEXT") + '\n' + basicResult.message,
+                                            Alert.OK,null,false,basicResult as Object);
+                    	break;
 
                     default:
                         //Default response -> BasicResult.STANDARD_RESULT

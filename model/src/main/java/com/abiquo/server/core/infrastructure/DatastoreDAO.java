@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
@@ -75,15 +76,62 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
         assert machine != null;
         assert isManaged2(machine);
 
-        Criteria criteria =
-            createCriteria().createCriteria(Datastore.MACHINES_PROPERTY).add(
-                Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+        Criteria criteria = inMachine(machine);
+        // createCriteria().createCriteria(Datastore.MACHINES_PROPERTY).add(
+        // Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
 
         criteria.addOrder(Order.asc(Datastore.NAME_PROPERTY));
         List<Datastore> result = getResultList(criteria);
         return result;
     }
+
+    /**
+     * Use the ''datastoreUUID'' property in order to return all the representations of a shared
+     * datastore.
+     * 
+     * @return all the datastores with the same ''datastore uuid'' INCLUDING the provided datastore.
+     */
+    public List<Datastore> findShares(Datastore datastore)
+    {
+        if (datastore.getDatastoreUUID() == null)
+        {
+            throw new PersistenceException("Datastore doesn't have set the UUID");
+        }
+
+        Criteria crit = createCriteria(sharedUuid(datastore.getDatastoreUUID()));
+
+        return getResultList(crit);
+    }
+
+    /***
+     * Get the datastore with the provided UUID mounted on the target machine. (this call is
+     * expected after ''datastoreSelection'' so the target machine will have the datastore)
+     */
+    public Datastore findDatastore(final String uuid, final Machine machine)
+    {
+        Criteria criteria = inMachine(machine, uuid);
+        return getSingleResult(criteria);
+    }
+
+    private Criteria inMachine(Machine machine)
+    {
+        return createCriteria().createCriteria(Datastore.MACHINES_PROPERTY).add(
+            Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+
+    }
     
+    private Criteria inMachine(Machine machine, String uuid)
+    {
+        return createCriteria(sharedUuid(uuid)).createCriteria(Datastore.MACHINES_PROPERTY).add(
+            Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+
+    }
+
+    private static Criterion sharedUuid(String uuid)
+    {
+        return Restrictions.eq(Datastore.DATASTORE_UUID_PROPERTY, uuid);
+    }
+
     private static Criterion equalName(String name)
     {
         assert !StringUtils.isEmpty(name);

@@ -47,7 +47,6 @@ import com.abiquo.virtualfactory.model.config.Configuration;
 import com.abiquo.virtualfactory.model.config.HyperVHypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
-import com.abiquo.virtualfactory.utils.hyperv.CIMDataFile;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVConstants;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVUtils;
 import com.abiquo.virtualfactory.utils.hyperv.MsvmImageManagementService;
@@ -162,7 +161,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         localRepositoryPath =
             localRepositoryPath.endsWith("\\") ? localRepositoryPath : localRepositoryPath + "\\";
 
-        String destinationTemp = localRepositoryPath.replace("\\", "\\\\");
+        String destinationTemp = localRepositoryPath;//.replace("\\", "\\\\"); // What's this for?
 
         destinationImagePath = destinationTemp + machineName + ".vhd";
 
@@ -332,7 +331,10 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 {
                     // Just clones the image if the virtual disk is standard
                     // Cloning the virtual disk
-                    cloneVirtualDisk();
+                    if (!config.getVirtualDiskBase().isHa())
+                    {
+                        cloneVirtualDisk();
+                    }
                 }
 
                 createVirtualMachine();
@@ -608,12 +610,15 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             globalSettingDispatcher.put("ElementName", new JIVariant(new JIString(machineName)));
 
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-            {
-                VirtualDisk diskBase = config.getVirtualDiskBase();
-                globalSettingDispatcher.put("ExternalDataRoot",
-                    new JIVariant(new JIString(getDatastore(diskBase))));
-            }
+            // ExternalDataRoot: The fully-qualified path to the root directory of an external data store. 
+            // This is set to default value to avoid problems with accessing from a networkdrive
+//            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+//            {                
+//                VirtualDisk diskBase = config.getVirtualDiskBase();
+//                globalSettingDispatcher.put("ExternalDataRoot",
+////                    new JIVariant(new JIString(getDatastore(diskBase))));
+//                    new JIVariant(new JIString("C:\\")));
+//            }
 
             String globalSettingDataText =
                 globalSettingDispatcher.callMethodA("GetText_", new Object[] {new Integer(1)})[0]
@@ -636,12 +641,13 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
     private String getDatastore(final VirtualDisk disk)
     {
-        String datastore = disk.getTargetDatastore();
-        if (!datastore.endsWith("/"))
-        {
-            datastore += "/";
-        }
-        return datastore;
+//        String datastore = disk.getTargetDatastore();
+//        if (!datastore.endsWith("/"))
+//        {
+//            datastore += "/";
+//        }
+//        return datastore;
+        return disk.getTargetDatastore();
     }
 
     /**
@@ -1037,7 +1043,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @return The virtual machine object.
      * @throws JIException If the vmDispatch cannot eb retrieved.
      */
-    protected IJIDispatch getVmDispatch(String vmName) throws JIException
+    protected IJIDispatch getVmDispatch(final String vmName) throws JIException
     {
         JIVariant[] tmp =
             execQuery("Select * From Msvm_ComputerSystem Where ElementName='" + vmName + "'");
@@ -1328,6 +1334,12 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         {
             hyperVHypervisor.reconnect();
 
+            // Load the VM in the hypervisor to be used in the called methods
+            if (this.vmDispatch == null)
+            {
+                this.vmDispatch = getVmDispatch(machineName);
+            }
+
             // Setting the new Ram value
             if (newConfiguration.isRam_set())
             {
@@ -1472,7 +1484,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws JIException
      */
 
-    private JIVariant[] eraseVLANFromArray(JIVariant[] trunkArray, int vlanTag) throws JIException
+    private JIVariant[] eraseVLANFromArray(final JIVariant[] trunkArray, final int vlanTag)
+        throws JIException
     {
         List<JIVariant> tagList = new ArrayList<JIVariant>();
         for (int i = 0; i < trunkArray.length; i++)
@@ -1553,8 +1566,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         String query = "SELECT * FROM CIM_DataFile WHERE Name='" + file + "'";
 
         JIVariant[] res =
-            hyperVHypervisor.getCIMService().getObjectDispatcher().callMethodA("ExecQuery",
-                new Object[] {new JIString(query)});
+            hyperVHypervisor.getCIMService().getObjectDispatcher()
+                .callMethodA("ExecQuery", new Object[] {new JIString(query)});
 
         JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
 

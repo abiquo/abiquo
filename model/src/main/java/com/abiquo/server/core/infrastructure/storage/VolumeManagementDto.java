@@ -28,9 +28,11 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "volume")
 @XmlType(propOrder = {"id", "uuid", "name", "description", "state", "sizeInMB",
-"availableSizeInMB", "usedSizeInMB", "idScsi"})
+/* "availableSizeInMB", "usedSizeInMB", */"idScsi", "idImage"})
 public class VolumeManagementDto extends SingleResourceTransportDto
 {
+    public static final String ISCSI_VOLUME_MEDIA_TYPE = "application/iscsivolume+xml";
+
     private static final long serialVersionUID = 1L;
 
     private Integer id;
@@ -45,11 +47,15 @@ public class VolumeManagementDto extends SingleResourceTransportDto
 
     private long sizeInMB;
 
-    private long availableSizeInMB;
-
-    private long usedSizeInMB;
+    // These fields are deprecated. We are only considering the whole volume size
+    // private long availableSizeInMB;
+    //
+    // private long usedSizeInMB;
 
     private String idScsi;
+
+    // TODO: vmahe. Replace this field by a link when the VirtualImage Resource is created
+    private Integer idImage;
 
     public Integer getId()
     {
@@ -81,15 +87,15 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.state = state;
     }
 
-    public long getUsedSizeInMB()
-    {
-        return usedSizeInMB;
-    }
-
-    public void setUsedSizeInMB(final long usedSizeInMB)
-    {
-        this.usedSizeInMB = usedSizeInMB;
-    }
+    // public long getUsedSizeInMB()
+    // {
+    // return usedSizeInMB;
+    // }
+    //
+    // public void setUsedSizeInMB(final long usedSizeInMB)
+    // {
+    // this.usedSizeInMB = usedSizeInMB;
+    // }
 
     public String getUuid()
     {
@@ -121,15 +127,15 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.sizeInMB = sizeInMB;
     }
 
-    public long getAvailableSizeInMB()
-    {
-        return availableSizeInMB;
-    }
-
-    public void setAvailableSizeInMB(final long availableSizeInMB)
-    {
-        this.availableSizeInMB = availableSizeInMB;
-    }
+    // public long getAvailableSizeInMB()
+    // {
+    // return availableSizeInMB;
+    // }
+    //
+    // public void setAvailableSizeInMB(final long availableSizeInMB)
+    // {
+    // this.availableSizeInMB = availableSizeInMB;
+    // }
 
     public String getDescription()
     {
@@ -141,4 +147,13 @@ public class VolumeManagementDto extends SingleResourceTransportDto
         this.description = description;
     }
 
+    public Integer getIdImage()
+    {
+        return idImage;
+    }
+
+    public void setIdImage(final Integer idImage)
+    {
+        this.idImage = idImage;
+    }
 }

@@ -39,6 +39,7 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.State;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.service.RemoteService;
     import net.undf.abicloud.vo.service.RemoteServiceType;
@@ -376,7 +377,6 @@ package net.undf.abicloud.business.managers
         public function set racks(racks:ArrayCollection):void
         {
             this._racks = racks;
-
             //Data Centers list has been updated
             //dispatchEvent(new Event(DATACENTERS_UPDATED, true));
         }

@@ -23,13 +23,18 @@ package com.abiquo.api.services.infrastructure;
 
 import static com.abiquo.server.core.cloud.State.RUNNING;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
-import org.testng.annotations.AfterMethod;
+import org.springframework.security.context.SecurityContextHolder;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
@@ -41,6 +46,10 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -48,13 +57,24 @@ import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 public class MachineServiceTest extends AbstractGeneratorTest
 {
-    @AfterMethod
-    public void tearDown()
+    // @AfterMethod
+    // public void tearDown()
+    // {
+    // tearDown("ip_pool_management", "rasd_management", "virtualapp", "nodevirtualimage", "node",
+    // "virtualmachine", "virtualimage", "virtualdatacenter", "vlan_network",
+    // "network_configuration", "dhcp_service", "remote_service", "hypervisor",
+    // "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
+    // }
+
+    @BeforeMethod
+    public void setupSysadmin()
     {
-        tearDown("ip_pool_management", "rasd_management", "virtualapp", "nodevirtualimage", "node",
-            "virtualmachine", "virtualimage", "virtualdatacenter", "vlan_network",
-            "network_configuration", "dhcp_service", "remote_service", "hypervisor",
-            "physicalmachine", "rack", "datacenter", "network", "user", "role", "enterprise");
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+        setup(e, r, u);
+
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
     }
 
     @Test
@@ -77,9 +97,26 @@ public class MachineServiceTest extends AbstractGeneratorTest
 
         hypervisor.getMachine().setHypervisor(hypervisor);
 
-        setup(vdc.getEnterprise(), datacenter, rm, hypervisor.getMachine().getRack(), hypervisor
-            .getMachine(), hypervisor, vdc, image, vapp, vm.getUser().getRole(), vm.getUser(), vm,
-            node);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(vdc.getEnterprise());
+        entitiesToPersist.add(datacenter);
+        entitiesToPersist.add(rm);
+        entitiesToPersist.add(hypervisor.getMachine().getRack());
+        entitiesToPersist.add(hypervisor.getMachine());
+        entitiesToPersist.add(hypervisor);
+        entitiesToPersist.add(vdc);
+        entitiesToPersist.add(image);
+        entitiesToPersist.add(vapp);
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(vm.getUser().getRole());
+        entitiesToPersist.add(vm.getUser());
+        entitiesToPersist.add(vm);
+        entitiesToPersist.add(node);
+
+        setup(entitiesToPersist.toArray());
 
         int machineId = hypervisor.getMachine().getId();
 
@@ -100,12 +137,14 @@ public class MachineServiceTest extends AbstractGeneratorTest
         }
         catch (NotFoundException e)
         {
-            Assert.assertEquals(e.getErrors().iterator().next().getMessage(), "The requested machine does not exist");
+            Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
+                "The requested machine does not exist");
         }
 
         VirtualMachineService vmService = new VirtualMachineService(em);
 
-        VirtualMachine virtualMachine = vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
+        VirtualMachine virtualMachine =
+            vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         Assert.assertNull(virtualMachine.getHypervisor());
         Assert.assertNull(virtualMachine.getDatastore());
         Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);

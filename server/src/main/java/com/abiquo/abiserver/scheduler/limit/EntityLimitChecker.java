@@ -26,15 +26,18 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
+import com.abiquo.abiserver.commands.BasicCommand;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.scheduler.limit.exception.HardLimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.LimitExceededException;
 import com.abiquo.abiserver.scheduler.limit.exception.SoftLimitExceededException;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
 
 /**
  * Check the current range for the total resource allocation limits on a provided entity, indicating
@@ -48,7 +51,19 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 
     public enum LimitResource
     {
-        STORAGE, VLAN, PUBLICIP;
+        STORAGE("storage"), VLAN("vlan"), PUBLICIP("public ip");
+        
+        private String entityName;
+        
+        private LimitResource(String entityname)
+        {
+            this.entityName = entityname;
+        }
+        
+        public String getEntityName()
+        {
+            return this.entityName;
+        }
     }
 
     /**
@@ -97,7 +112,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      *             the soft limit is exceeded.
      */
     public void checkLimits(final CHECK_ENTITY entity, final LimitResource resourceType,
-        long required, final boolean force)
+        final long required, final boolean force, final UserSession userSession,
+        final VirtualDataCenterHB virtualDatacenter)
     {
 
         ResourceAllocationLimitHB limits = getLimit(entity);
@@ -130,7 +146,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 
         ResourceLimitRange status = limitStatus(actual, required, limit);
 
-        checkResourceLimits(force, status, resourceType, entity, required, actual, limit);
+        checkResourceLimits(force, status, resourceType, entity, required, actual, limit,
+            userSession, virtualDatacenter);
     }
 
     /**
@@ -184,9 +201,10 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
     /**
      * Throws an exception if some of the considered resource limit status exceed some limit.
      */
-    private void checkResourceLimits(final boolean force, ResourceLimitRange status,
-        LimitResource resourceType, final CHECK_ENTITY entity, final long requirements,
-        final long actual, LimitHB limit) throws SoftLimitExceededException,
+    private void checkResourceLimits(final boolean force, final ResourceLimitRange status,
+        final LimitResource resourceType, final CHECK_ENTITY entity, final long requirements,
+        final long actual, final LimitHB limit, final UserSession userSession,
+        final VirtualDataCenterHB virtualDatacenter) throws SoftLimitExceededException,
         HardLimitExceededException
     {
 
@@ -197,27 +215,52 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
                     requirements,
                     actual,
                     limit,
-                    resourceType));
+                    resourceType), userSession, virtualDatacenter);
                 break;
             case SOFT:
                 traceLimit(false, force, entity, new SoftLimitExceededException(entity,
                     requirements,
                     actual,
                     limit,
-                    resourceType));
+                    resourceType), userSession, virtualDatacenter);
                 break;
             default: // OK
                 break;
         }
     }
 
-    private void traceLimit(boolean hard, boolean force, CHECK_ENTITY entity,
-        LimitExceededException except)
+    private void traceLimit(final boolean hard, final boolean force, final CHECK_ENTITY entity,
+        final LimitExceededException except, final UserSession userSession,
+        final VirtualDataCenterHB virtualDatacenter)
     {
+
         final String entityId = getEntityName(entity);
 
         final EventType etype =
             hard ? EventType.WORKLOAD_HARD_LIMIT_EXCEEDED : EventType.WORKLOAD_SOFT_LIMIT_EXCEEDED;
+
+        DAOFactory daoF = HibernateDAOFactory.instance();
+        DatacenterHB dcHB = null;
+        DataCenter dc = null;
+        String vdcName = (virtualDatacenter != null) ? virtualDatacenter.getName() : null;
+        try
+        {
+            daoF.beginConnection();
+            dcHB = daoF.getDataCenterDAO().findById(virtualDatacenter.getIdDataCenter());
+            if (dcHB != null)
+            {
+                dc = dcHB.toPojo();
+            }
+
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            // daoF.endConnection();
+        }
 
         String traceMessage = String.format("Not enough resources on %s", entityId);
         switch (traceSystem(entity))
@@ -225,8 +268,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage, Platform.SYSTEM_PLATFORM);
+                BasicCommand.traceSystemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, dc,
+                    vdcName, traceMessage, null, null, null);
                 break;
             default:
                 break;
@@ -238,8 +281,18 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage);
+                if (etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDataCenterHB)
+                {
+
+                    // TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD,
+                    // etype, traceMessage);
+
+                    BasicCommand.traceLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                        userSession, dc, vdcName, traceMessage, null, null, null,
+                        userSession.getUser(), userSession.getEnterpriseName());
+
+                }
                 break;
             default:
                 break;
@@ -264,7 +317,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         DETAIL, NO_DETAIL, IGNORE;
     }
 
-    private InformationSecurity traceSystem(CHECK_ENTITY entity)
+    private InformationSecurity traceSystem(final CHECK_ENTITY entity)
     {
 
         if (entity instanceof VirtualDatacenter)
@@ -275,7 +328,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         return InformationSecurity.DETAIL;
     }
 
-    private InformationSecurity traceEnterprise(CHECK_ENTITY entity, boolean force)
+    private InformationSecurity traceEnterprise(final CHECK_ENTITY entity, final boolean force)
     {
         if (entity instanceof VirtualDatacenter)
         {
@@ -285,7 +338,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         return InformationSecurity.NO_DETAIL;
     }
 
-    private InformationSecurity returnExcption(CHECK_ENTITY entity, boolean hard, boolean force)
+    private InformationSecurity returnExcption(final CHECK_ENTITY entity, final boolean hard,
+        final boolean force)
     {
 
         if (entity instanceof VirtualDatacenter)

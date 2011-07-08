@@ -10,9 +10,11 @@ database/test/kinton-schema-test.sql
 .actionScriptProperties
 .flexProperties
 bin-debug
+test-output
 client/swf/src/main/resources/config/client-config.xml
 client/swf/src/main/resources/themes
 *~
+*.swp
 api/test-output/
 server/test-output/
 virtualfactory/test-output/

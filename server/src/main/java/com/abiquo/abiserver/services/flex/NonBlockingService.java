@@ -59,7 +59,17 @@ public class NonBlockingService
      */
     public NonBlockingService()
     {
-        infrastructureCommand = new InfrastructureCommandImpl();
+        try
+        {
+            infrastructureCommand =
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                    .newInstance();
+        }
+        catch (Exception e)
+        {
+            infrastructureCommand = new InfrastructureCommandImpl();
+        }
 
         try
         {
@@ -107,7 +117,7 @@ public class NonBlockingService
             BusinessDelegateProxy.getInstance(session, infrastructureCommand,
                 InfrastructureCommand.class);
 
-        return command.startVirtualMachine(virtualMachine);
+        return command.startVirtualMachine(session,virtualMachine);
     }
 
     /**
@@ -122,7 +132,7 @@ public class NonBlockingService
             BusinessDelegateProxy.getInstance(session, infrastructureCommand,
                 InfrastructureCommand.class);
 
-        return command.pauseVirtualMachine(virtualMachine);
+        return command.pauseVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -137,7 +147,7 @@ public class NonBlockingService
             BusinessDelegateProxy.getInstance(session, infrastructureCommand,
                 InfrastructureCommand.class);
 
-        return command.rebootVirtualMachine(virtualMachine);
+        return command.rebootVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -152,7 +162,7 @@ public class NonBlockingService
             BusinessDelegateProxy.getInstance(session, infrastructureCommand,
                 InfrastructureCommand.class);
 
-        return command.shutdownVirtualMachine(virtualMachine);
+        return command.shutdownVirtualMachine(session, virtualMachine);
     }
 
     /* ______________________________ VIRTUAL APPLIANCE _______________________________ */

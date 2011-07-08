@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.utils
 {
+	import mx.formatters.DateFormatter;
+	
 	import net.undf.abicloud.controller.ThemeHandler;
 	
 	
@@ -69,6 +71,24 @@ package net.undf.abicloud.utils
 		public static function getImageFromStyle(CSSSelector:String, c:* = null):void{
 			
 			ThemeHandler.getInstance().getImageFromStyle(CSSSelector,c);
+
+		}
+		
+		/**
+		 * Format a date string into an ISO 8601 format  
+		 * @param dateString a date object
+		 * @param displayHours a boolean indicating if we display hours
+		 * 
+		 */
+		public static function formatDate(dateString:Object, displayHours:Boolean):String{
+			
+			var dateformatter:DateFormatter = new DateFormatter();
+			dateformatter.formatString = "YYYY-MM-DD";				
+			if(displayHours){
+				dateformatter.formatString += " JJ:NN:SS"
+			}
+			
+			return dateformatter.format(dateString);
 
 		}
 		

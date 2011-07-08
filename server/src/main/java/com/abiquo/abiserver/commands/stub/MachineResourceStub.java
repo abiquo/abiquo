@@ -27,4 +27,23 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 public interface MachineResourceStub
 {
     public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine);
+
+    /**
+     * Changes the operPower state to down. Actually turns the blade associated to the provided
+     * logic server off.
+     * 
+     * @param machine machine to shutdown.
+     * @return BasicResult
+     */
+    public BasicResult powerOff(PhysicalMachine machine);
+
+    /**
+     * Changes the operPower state to up. Actually turns the blade associated to the provided logic
+     * server on.
+     * 
+     * @param machine to power on.
+     * @return BasicResult
+     */
+    public BasicResult powerOn(PhysicalMachine machine);
+
 }

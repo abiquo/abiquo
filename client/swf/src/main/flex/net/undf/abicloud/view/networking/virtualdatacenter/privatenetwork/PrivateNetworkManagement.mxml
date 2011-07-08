@@ -35,6 +35,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.collections.ArrayCollection;
             import mx.controls.Alert;
             import mx.core.Application;
@@ -93,6 +95,9 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_NETWORK, "visible", networkTool);
+                
                 //Registering events from model
                 AbiCloudModel.getInstance().networkingManager.addEventListener(NetworkingEvent.VLAN_DELETED,
                                                                                onVLANDeleted);
@@ -184,7 +189,7 @@
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Networking",
-                                                                                    "ALERT_VLAN_DELETE_HEADER"),
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
                                             ResourceManager.getInstance().getString("Networking",
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
                                             Alert.OK);
@@ -195,7 +200,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Networking",
-                                                                                    "ALERT_VLAN_DELETE_HEADER"),
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
                                             ResourceManager.getInstance().getString("Networking",
                                                                                     "ALERT_VLAN_DELETE_TEXT"),
                                             Alert.YES | Alert.NO, deleteVLAN);
@@ -260,22 +265,25 @@
             click="onClickVLANList()"/>
 
         <general:GeneralSubPanelToolBox width="100%">
-            <mx:Button id="addVLANButton"
-                enabled="{_virtualDatacenter != null}" styleName="AddButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                click="addVLAN()"/>
-
-            <mx:Button id="deleteVLANButton"
-                enabled="{_selectedVLAN != null}" styleName="RemoveButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-                click="askVLANDeletion()"/>
-            <mx:Spacer 
-                width="100%" height="10"/>
-
-            <mx:Button id="editVirtualDataCenterButton"
-                styleName="ConfigurationButton"
-                enabled="{_selectedVLAN != null}"
-                click="editVLAN()"/>
+        	<mx:HBox id="networkTool" 
+        		width="100%" verticalAlign="middle">        		
+	            <mx:Button id="addVLANButton"
+	                enabled="{_virtualDatacenter != null}" styleName="AddButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	                click="addVLAN()"/>
+	
+	            <mx:Button id="deleteVLANButton"
+	                enabled="{_selectedVLAN != null}" styleName="RemoveButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	                click="askVLANDeletion()"/>
+	            <mx:Spacer 
+	                width="100%" height="10"/>
+	
+	            <mx:Button id="editVirtualDataCenterButton"
+	                styleName="ConfigurationButton"
+	                enabled="{_selectedVLAN != null}"
+	                click="editVLAN()"/>
+        	</mx:HBox>
         </general:GeneralSubPanelToolBox>
     </general:GeneralSubPanel>
 

@@ -29,7 +29,6 @@ import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
-import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
@@ -51,8 +50,9 @@ public class UserService
         try
         {
             userCommand =
-                (UserCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl").newInstance();
+                (UserCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.UserCommandPremiumImpl")
+                    .newInstance();
         }
         catch (Exception e)
         {
@@ -60,7 +60,7 @@ public class UserService
         }
     }
 
-    protected UserCommand proxyCommand(UserSession userSession)
+    protected UserCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, userCommand, UserCommand.class);
     }
@@ -73,7 +73,7 @@ public class UserService
      *            of users
      * @return A DataResult object containing an UserListResult object
      */
-    public BasicResult getUsers(UserSession userSession, UserListOptions userListOptions)
+    public BasicResult getUsers(final UserSession userSession, final UserListOptions userListOptions)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -95,7 +95,7 @@ public class UserService
      * @return A DataResult object containing the a User object with the user created in the Data
      *         Base
      */
-    public BasicResult createUser(UserSession userSession, User user)
+    public BasicResult createUser(final UserSession userSession, final User user)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -117,7 +117,7 @@ public class UserService
      * @param user The user to be deleted
      * @return A BasicResult object, informing if the user deletion was successful
      */
-    public BasicResult deleteUser(UserSession userSession, User user)
+    public BasicResult deleteUser(final UserSession userSession, final User user)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -138,7 +138,7 @@ public class UserService
      * @param users A list of users to be modified
      * @return A BasicResult object, informing if the user edition was successful
      */
-    public BasicResult editUser(UserSession userSession, ArrayList<User> users)
+    public BasicResult editUser(final UserSession userSession, final ArrayList<User> users)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -160,7 +160,7 @@ public class UserService
      *            sessions will be closed, except the userSession
      * @return A BasicResult object, informing if the operation had success
      */
-    public BasicResult closeSessionUsers(UserSession userSession, ArrayList<User> users)
+    public BasicResult closeSessionUsers(final UserSession userSession, final ArrayList<User> users)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -188,7 +188,8 @@ public class UserService
      *            list of users
      * @return A DataResult object containing an EnterpriseListResult object
      */
-    public BasicResult getEnterprises(UserSession userSession, ListRequest enterpriseListOptions)
+    public BasicResult getEnterprises(final UserSession userSession,
+        final ListRequest enterpriseListOptions)
     {
         UserCommand command = proxyCommand(userSession);
 
@@ -210,7 +211,7 @@ public class UserService
      * @return A DataResult object with success = true and the Enterprise that has been created (if
      *         the creation had success) or success = false otherwise
      */
-    public BasicResult createEnterprise(UserSession userSession, Enterprise enterprise)
+    public BasicResult createEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
 
         UserCommand command = proxyCommand(userSession);
@@ -232,7 +233,7 @@ public class UserService
      * @param enterprise The enterprise that will be updated
      * @return A BasicResult object with success = true if the edition had success
      */
-    public BasicResult editEnterprise(UserSession userSession, Enterprise enterprise)
+    public BasicResult editEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
         UserCommand command = proxyCommand(userSession);
         try
@@ -254,7 +255,7 @@ public class UserService
      * @return A BasicResult object with success = true if the operation had success. success =
      *         false otherwise
      */
-    public BasicResult deleteEnterprise(UserSession userSession, Enterprise enterprise)
+    public BasicResult deleteEnterprise(final UserSession userSession, final Enterprise enterprise)
     {
         UserCommand command = proxyCommand(userSession);
         try
@@ -266,13 +267,88 @@ public class UserService
             return e.getResult();
         }
     }
-    
+
     public BasicResult getEnterprise(final UserSession userSession, final Integer enterpriseId)
     {
-    	UserCommand command = proxyCommand(userSession);
+        UserCommand command = proxyCommand(userSession);
         try
         {
             return command.getEnterprise(userSession, enterpriseId);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
+    /**
+     * Returns a list of roles stored in the Data Base.
+     * 
+     * @param userSession
+     * @param roleListOptions an RoleListOptions object containing the options to retrieve the list
+     *            of users
+     * @return A DataResult object containing an RoleListResult object
+     */
+    public BasicResult getRoles(final UserSession userSession, final ListRequest roleListOptions,
+        final Enterprise enterprise)
+    {
+        UserCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.getRoles(userSession, roleListOptions, enterprise);
+
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
+    public BasicResult getRole(final UserSession userSession, final Integer roleId)
+    {
+        UserCommand command = proxyCommand(userSession);
+        try
+        {
+            return command.getRole(userSession, roleId);
+
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
+    public BasicResult getPrivilegesByRole(final UserSession userSession, final Integer roleId)
+    {
+        UserCommand command = proxyCommand(userSession);
+        try
+        {
+            return command.getPrivilegesByRole(userSession, roleId.intValue());
+
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
+    /**
+     * Checks if a Role has a Privilege
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @param String namePrivilege the name of a Privilege to check
+     * @return A DataResult object containing a Boolean if Role has a Privilege
+     */
+    public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
+        final String namePrivilege)
+    {
+        UserCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.checkRolePrivilege(userSession, idRole, namePrivilege);
         }
         catch (UserSessionException e)
         {

@@ -24,6 +24,7 @@ package net.undf.abicloud.controller.user
     import mx.collections.ArrayCollection;
     
     import net.undf.abicloud.controller.ResultHandler;
+    import net.undf.abicloud.events.UserEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
@@ -78,6 +79,35 @@ package net.undf.abicloud.controller.user
                 super.handleResult(result);
             }
         }
+        
+        public function handleGetPrivilegesByRole(result:BasicResult, callback:Function):void{
+        	if (result.success)
+            {          	
+               	var privilegeList:ArrayCollection = DataResult(result).data.privilegesList as ArrayCollection;
+            	 
+            	callback(privilegeList);            	
+            }
+            else
+            {
+                //There was a problem retrieving the enterprise's resource allocation limits
+                super.handleResult(result);
+            }
+        }
+        
+        public function handleCheckRolePrivilege(result:BasicResult, callback:Function):void{
+        	if (result.success)
+            {          	
+               	var roleHasPrivilege:Boolean = DataResult(result).data as Boolean;
+            	 
+            	callback(roleHasPrivilege);            	
+            }
+            else
+            {
+                //There was a problem retrieving the enterprise's resource allocation limits
+                super.handleResult(result);
+            }
+        }       
+        
 
 
         public function handleDeleteUser(result:BasicResult, deletedUser:User):void
@@ -106,6 +136,25 @@ package net.undf.abicloud.controller.user
             else
                 //There was a problem editing the user
                 super.handleResult(result);
+        }
+        
+        public function handleGetRoles(result:BasicResult):void{
+        	
+            if (result.success)
+            {          	
+               	var roleList:ArrayCollection = DataResult(result).data.rolesList as ArrayCollection;
+               	var totalRoles:int = DataResult(result).data.totalRoles as int;
+            	 
+            	AbiCloudModel.getInstance().userManager.roles = roleList;
+            	AbiCloudModel.getInstance().userManager.totalRoles = totalRoles; 
+            	           
+                AbiCloudModel.getInstance().userManager.dispatchEvent(new UserEvent(UserEvent.ROLE_RETRIEVED));
+            }
+            else
+            {
+                //There was a problem retrieving the enterprise's resource allocation limits
+                super.handleResult(result);
+            }
         }
 
         public function handleCloseSessionUsers(result:BasicResult, users:ArrayCollection):void

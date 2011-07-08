@@ -26,6 +26,7 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
@@ -45,6 +46,7 @@ import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
 
 /**
  * This class defines all services related to Infrastructure management
@@ -59,13 +61,14 @@ public class InfrastructureService
 
     public InfrastructureService()
     {
-        infrastructureCommand = new InfrastructureCommandImpl();
-
         try
         {
             infrastructureCommand =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
+                (InfrastructureCommand) Thread
+                    .currentThread()
+                    .getContextClassLoader()
+                    .loadClass(
+                        "com.abiquo.abiserver.commands.impl.InfrastructureCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -74,7 +77,7 @@ public class InfrastructureService
         }
     }
 
-    private InfrastructureCommand proxyCommand(UserSession userSession)
+    private InfrastructureCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, infrastructureCommand,
             InfrastructureCommand.class);
@@ -156,7 +159,7 @@ public class InfrastructureService
                 command.getPhysicalMachinesByRack(session, rackId, filters);
 
             result.setData(commandResult);
-            
+
             result.setSuccess(Boolean.TRUE);
 
         }
@@ -252,7 +255,11 @@ public class InfrastructureService
         try
         {
 
-            result.setData(command.getHypervisorByPhysicalMachine(session, pmId).toPojo());
+            HypervisorHB hyp = command.getHypervisorByPhysicalMachine(session, pmId);
+            if (hyp != null)
+            {
+                result.setData(hyp.toPojo());
+            }
             result.setSuccess(Boolean.TRUE);
 
         }
@@ -317,8 +324,8 @@ public class InfrastructureService
         try
         {
             instance =
-                (InfrastructureCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    premiumClass).newInstance();
+                (InfrastructureCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass(premiumClass).newInstance();
 
         }
         catch (final Exception e)
@@ -698,7 +705,7 @@ public class InfrastructureService
      * @return a BasicResult containing the Physical machine state
      */
     public BasicResult checkVirtualInfrastructureState(final UserSession userSession,
-        Integer idPhysicalMachine)
+        final Integer idPhysicalMachine)
     {
         BasicResult basicResult = new BasicResult();
         basicResult.setSuccess(true);
@@ -707,8 +714,32 @@ public class InfrastructureService
         return basicResult;
     }
 
-    protected BasicResult deleteNotManagerVirtualMachines(UserSession userSession,
-        PhysicalMachine machine)
+    /**
+     * Retrieves a list of VirtualDataCenter that belongs to the same Enterprise
+     * 
+     * @param userSession The UserSession with the user that called this method
+     * @param enterprise The Enterprise of which the VirtualDataCenter will be returned
+     * @return a BasicResult object, containing an ArrayList<VirtualDataCenter>, with the
+     *         VirtualDataCenter assigned to the enterprise
+     */
+    public BasicResult getVirtualDataCentersByEnterprise(final UserSession userSession,
+        final Enterprise enterprise)
+    {
+
+        InfrastructureCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.getVirtualDataCentersByEnterprise(userSession, enterprise);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
+    protected BasicResult deleteNotManagerVirtualMachines(final UserSession userSession,
+        final PhysicalMachine machine)
     {
         MachineResourceStub proxy =
             APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),

@@ -202,6 +202,9 @@
                 if(limitMessage){
                 	width = 750;
                 	height = 400;
+                }else if(_headerText == ResourceManager.getInstance().getString("Common","LABEL_WELCOME")){
+                	width = 500;
+                	height = 650;
                 }else{
 	                //Making the AbiCloudAlert bigger if mainTextArea does not fit
 	                if (mainText.textHeight > mainText.minHeight)

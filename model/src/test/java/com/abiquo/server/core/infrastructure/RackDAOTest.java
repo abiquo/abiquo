@@ -123,4 +123,29 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         Assert.assertFalse(createDaoForRollbackTransaction().existsAnyOtherWithDatacenterAndName(
             rack2_2, "Rack 3"));
     }
+
+    @Test
+    public void test_findRacksWithHAEnabled() throws IllegalAccessException,
+        InvocationTargetException, NoSuchMethodException
+    {
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        Rack rack1 = datacenter.createRack("Rack_1", 2, 4094, 2, 10);
+        Rack rack2 = datacenter.createRack("Rack_2", 2, 4094, 2, 10);
+        Rack rack3 = datacenter.createRack("Rack_3", 2, 4094, 2, 10);
+
+        rack1.setHaEnabled(true);
+        rack2.setHaEnabled(false);
+        rack3.setHaEnabled(true);
+
+        ds().persistAll(datacenter, rack1, rack2, rack3);
+
+        RackDAO dao = createDaoForRollbackTransaction();
+
+        List<Rack> result = dao.findRacksWithHAEnabled(reload(dao, datacenter));
+
+        Assert.assertEquals(result.size(), 2);
+    }
 }

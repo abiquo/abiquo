@@ -35,13 +35,14 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdapDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -49,6 +50,12 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 public interface IRESTBuilder
@@ -59,12 +66,18 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
-    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, MachineDto machine);
+    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, Boolean managedRack, MachineDto machine);
 
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
 
     public List<RESTLink> buildRoleLinks(RoleDto role);
+
+    public List<RESTLink> buildRoleLinks(Integer enterpriseId, RoleDto role);
+
+    public List<RESTLink> buildRoleLdapLinks(final Integer roleId, final RoleLdapDto roleLdap);
+
+    public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege);
 
     public List<RESTLink> buildEnterpriseLinks(EnterpriseDto enterprise);
 
@@ -122,4 +135,17 @@ public interface IRESTBuilder
     public List<RESTLink> buildVolumeInfrastructureLinks(final VolumeManagement volume);
 
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
+
+    public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer enterpriseId, final Integer userId);
+    
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion);
+
+    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
+        final MachineLoadRule mlr);
+
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
 }

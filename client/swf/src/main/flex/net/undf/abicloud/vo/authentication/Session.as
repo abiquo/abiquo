@@ -41,7 +41,7 @@ package net.undf.abicloud.vo.authentication
 
 	public var userIdDb:int;
 
-        public var authType:String;
+    public var authType:String;
 
         /* ------------- Constructor ------------- */
         public function Session()

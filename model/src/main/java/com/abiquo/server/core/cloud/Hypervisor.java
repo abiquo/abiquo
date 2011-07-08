@@ -140,19 +140,29 @@ public class Hypervisor extends DefaultEntityBase
     private final static long PORT_MIN = Integer.MIN_VALUE;
 
     private final static long PORT_MAX = Integer.MAX_VALUE;
+    
+    private final static Integer DEFAULT_PORT_VALUE = 8889;
 
     @Column(name = PORT_COLUMN, nullable = false)
     @Range(min = PORT_MIN, max = PORT_MAX)
-    private int port;
+    private Integer port;
 
-    public int getPort()
+    @Required(value = true)
+    public Integer getPort()
     {
         return this.port;
     }
 
-    private void setPort(final int port)
+    public void setPort(final Integer port)
     {
-        this.port = port;
+        if (port == null)
+        {
+            this.port = DEFAULT_PORT_VALUE;
+        }
+        else
+        {
+            this.port = port;
+        }
     }
 
     public final static String TYPE_PROPERTY = "type";
@@ -173,7 +183,7 @@ public class Hypervisor extends DefaultEntityBase
         return this.type;
     }
 
-    private void setType(final HypervisorType type)
+    public void setType(final HypervisorType type)
     {
         this.type = type;
     }
@@ -252,7 +262,7 @@ public class Hypervisor extends DefaultEntityBase
     // *************************** Mandatory constructors ***********************
     // TODO: define mandatory constructors
     public Hypervisor(final Machine machine, final HypervisorType type, final String ip,
-        final String ipService, final int port, final String user, final String password)
+        final String ipService, final Integer port, final String user, final String password)
     {
         setMachine(machine);
         setType(type);

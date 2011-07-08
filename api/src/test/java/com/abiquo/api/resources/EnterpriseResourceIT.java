@@ -34,6 +34,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
@@ -51,12 +53,15 @@ import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -74,19 +79,31 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Role r = roleGenerator.createUniqueInstance();
 
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(e);
+
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+
     }
 
     @Test
     public void getEnterpriseDoesntExist() throws ClientWebException
     {
-        Resource resource = client.resource(resolveEnterpriseURI(12345));
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        ClientResponse response =
+            get(resolveEnterpriseURI(12345), "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
+        assertEquals(response.getStatusCode(), 404);
     }
 
     @Test
@@ -185,9 +202,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         while (!ip.equals(lastIP))
         {
@@ -209,8 +226,9 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
-            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0),
+            resolvePrivateNetworkURI(vdc.getId(), vlan.getId()),
+            PrivateNetworkResource.PRIVATE_NETWORK);
         assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
             "virtualdatacenter");
 
@@ -395,10 +413,36 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesByEnterprise()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
-        setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
-            .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(),
-            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm);
+
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(vm.getEnterprise());
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm.getHypervisor().getMachine());
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveEnterpriseActionGetVirtualMachinesURI(vm.getEnterprise().getId());
 
@@ -417,7 +461,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
+
 }

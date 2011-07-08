@@ -799,4 +799,21 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
         return cimStringVal;
     }
+
+    public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile, String errorMsg)
+        throws RepositoryException, IOException, IdNotFoundException, EventException
+    {
+
+        upload(diskinfo, diskFile);
+        if (!StringUtils.isBlank(errorMsg))
+        {
+            // sets the current state to start downloading
+            AMNotifierFactory.getInstance().setOVFStatus(
+                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(),
+                OVFPackageInstanceStatusType.ERROR);
+            AMNotifierFactory.getInstance().setOVFStatusError(
+                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(), errorMsg);
+        }
+
+    }
 }

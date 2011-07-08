@@ -32,23 +32,35 @@ import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
+
+import junit.framework.Assert;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
+import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -59,6 +71,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
     private Machine validMachine;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -72,8 +85,23 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         validMachine = machine;
         validMachineUri =
-            resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(), machine
-                .getId());
+            resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(),
+                machine.getId());
+
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test
@@ -120,11 +148,13 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void machineContainsLink() throws ClientWebException
     {
         assertLinkExist(getValidMachine(), validMachineUri, "edit");
-        assertLinkExist(getValidMachine(), resolveRackURI(validMachine.getDatacenter().getId(),
-            validMachine.getRack().getId()), "rack");
-        assertLinkExist(getValidMachine(), resolveDatastoresURI(validMachine.getDatacenter()
-            .getId(), validMachine.getRack().getId(), validMachine.getId()),
-            DatastoresResource.DATASTORES_PATH);
+        assertLinkExist(getValidMachine(),
+            resolveRackURI(validMachine.getDatacenter().getId(), validMachine.getRack().getId()),
+            "rack");
+        assertLinkExist(
+            getValidMachine(),
+            resolveDatastoresURI(validMachine.getDatacenter().getId(), validMachine.getRack()
+                .getId(), validMachine.getId()), DatastoresResource.DATASTORES_PATH);
     }
 
     @Test
@@ -136,8 +166,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         machine.setName("dummy_name");
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
         assertEquals(200, response.getStatusCode());
 
         MachineDto modified = response.getEntity(MachineDto.class);
@@ -153,8 +183,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(resolveMachineURI(1, 1, 123));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
     }
@@ -168,12 +198,12 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         machine.setName("dummy_name");
 
         Resource resource =
-            client.resource(resolveMachineURI(123, validMachine.getRack().getId(), validMachine
-                .getId()));
+            client.resource(resolveMachineURI(123, validMachine.getRack().getId(),
+                validMachine.getId()));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
 
@@ -198,8 +228,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
                 validMachine.getId()));
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                machine);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(machine);
 
         assertEquals(404, response.getStatusCode());
 
@@ -235,8 +265,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void removeMachineWrongDatacenter() throws ClientWebException
     {
         Resource resource =
-            client.resource(resolveMachineURI(1234, validMachine.getRack().getId(), validMachine
-                .getId()));
+            client.resource(resolveMachineURI(1234, validMachine.getRack().getId(),
+                validMachine.getId()));
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).delete();
         assertEquals(404, response.getStatusCode());
@@ -272,11 +302,36 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getMachineActionVirtualMachines()
     {
+
         VirtualMachine vm = vmGenerator.createUniqueInstance();
-        setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
-            .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(),
-            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm);
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(vm.getEnterprise());
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm.getHypervisor().getMachine());
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
 
         Machine m = vm.getHypervisor().getMachine();
 
@@ -284,8 +339,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             resolveMachineActionGetVirtualMachinesURI(m.getDatacenter().getId(), m.getRack()
                 .getId(), m.getId());
 
-        Resource resource = client.resource(uri);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        // Resource resource = client.resource(uri);
+        // ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        ClientResponse response = get(uri, "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
 
         Assert.assertEquals(response.getStatusCode(), 200);
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
@@ -295,8 +352,8 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(vmDto, resolveEnterpriseURI(vm.getEnterprise().getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(vm.getEnterprise().getId(), vm.getUser().getId()),
             "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test
@@ -307,11 +364,51 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm2 = vmGenerator.createInstance(vm.getHypervisor());
         vm.setIdType(VirtualMachine.MANAGED);
 
-        setup(vm.getEnterprise(), vm.getUser().getRole(), vm.getUser(), vm.getHypervisor()
-            .getMachine().getDatacenter(), vm.getHypervisor().getMachine().getRack(), vm
-            .getHypervisor().getMachine(), vm.getHypervisor(),
-            vm.getVirtualImage().getEnterprise(), vm.getVirtualImage(), vm, vm2.getEnterprise(),
-            vm2.getUser().getRole(), vm2.getUser(), vm2.getVirtualImage(), vm2);
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
+                vm.getEnterprise());
+        VirtualAppliance vapp = vappGenerator.createInstance(vdc);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        VirtualDatacenter vdc2 =
+            vdcGenerator.createInstance(vm2.getHypervisor().getMachine().getDatacenter(),
+                vm2.getEnterprise());
+        VirtualAppliance vapp2 = vappGenerator.createInstance(vdc2);
+        NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp2, vm2);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(vm.getEnterprise());
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
+        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
+        entitiesToSetup.add(vm.getHypervisor().getMachine());
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(vm2.getEnterprise());
+        for (Privilege p : vm2.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(vm2.getUser().getRole());
+        entitiesToSetup.add(vm2.getUser());
+        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+        entitiesToSetup.add(nvi);
+        entitiesToSetup.add(vdc2);
+        entitiesToSetup.add(vapp2);
+        entitiesToSetup.add(nvi2);
+
+        setup(entitiesToSetup.toArray());
 
         Machine m = vm.getHypervisor().getMachine();
 
@@ -319,14 +416,14 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
             resolveMachineActionGetVirtualMachinesURI(m.getDatacenter().getId(), m.getRack()
                 .getId(), m.getId());
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
         VirtualMachinesDto vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 2);
 
         response = delete(uri);
         Assert.assertEquals(response.getStatusCode(), 204);
 
-        response = get(uri);
+        response = get(uri, "sysadmin", "sysadmin");
         vms = response.getEntity(VirtualMachinesDto.class);
         Assert.assertEquals(vms.getCollection().size(), 1);
     }

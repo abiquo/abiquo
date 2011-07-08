@@ -25,48 +25,5 @@
 <mx:CheckBox 
     label="@Resource(bundle='User', key='LABEL_SHOW_LOGGED_USERS')"
     labelPlacement="right"
-    initialize="onInitialize()"
-    xmlns:mx="http://www.adobe.com/2006/mxml"
-    implements="net.undf.abicloud.security.ISecurableComponent">
-
-    <mx:Script>
-        <![CDATA[
-            import net.undf.abicloud.model.AbiCloudModel;
-            import net.undf.abicloud.security.SecurableResource;
-
-            private function onInitialize():void
-            {
-                defineSecurableResources();
-                checkSecurableResources();
-            }
-
-            /////////////////////////////////////////////////////////////////////////////
-            //ISecurableComponent implementation
-
-            //Securable Resources of this Securable Component
-            private var _securableResource:SecurableResource;
-
-            public function defineSecurableResources():void
-            {
-                this._securableResource = new SecurableResource("SEE_LOGGED_USERS",
-                                                                "USER");
-            }
-
-            public function checkSecurableResources():void
-            {
-                //Check if this securable resource is authorized
-                if (!this._securableResource.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
-                    makeUnavailable();
-                else
-                {
-                    //The resource is authorized. Nothing to do
-                }
-            }
-
-            public function makeUnavailable():void
-            {
-                visible = false;
-            }
-        ]]>
-    </mx:Script>
+    xmlns:mx="http://www.adobe.com/2006/mxml">
 </mx:CheckBox>

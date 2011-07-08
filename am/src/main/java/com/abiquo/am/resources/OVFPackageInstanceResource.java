@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,7 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Parent(OVFPackageInstancesResource.class)
@@ -76,19 +78,22 @@ public class OVFPackageInstanceResource extends AbstractResource
     @HEAD
     public Response getOVFPackageDeployProgress(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId) throws DownloadException
+        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn) throws DownloadException
     {
-
+        String ovfId1;
+        String ovfId;
         try
         {
-            ovfId = URLDecoder.decode(ovfId, "UTF-8");
+            // FIXME ABICLOUDPREMIUM-1798
+                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
+                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
         }
         catch (UnsupportedEncodingException e)
         {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfId).build());
+                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
         }
-
+        
         OVFPackageInstanceStatusDto status =
             service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
 
@@ -118,19 +123,23 @@ public class OVFPackageInstanceResource extends AbstractResource
     @GET
     public Response getOVFPackageInstance(@Context UriInfo uriInfo,
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId,
+        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn,
         @QueryParam(QUERY_PARAM_GET_FORMAT) String format)
     {
         // XXX can specify the media type
 
+        String ovfId1;
+        String ovfId;
         try
         {
-            ovfId = URLDecoder.decode(ovfId, "UTF-8");
+            // FIXME ABICLOUDPREMIUM-1798
+                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
+                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
         }
         catch (UnsupportedEncodingException e)
         {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfId).build());
+                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
         }
 
         if (format == null || format.isEmpty() || format.equals("ovfpi"))
@@ -139,7 +148,7 @@ public class OVFPackageInstanceResource extends AbstractResource
         }
         else if (format.equals("status"))
         {
-            return Response.ok(getOVFPackageInstanceStatus(idEnterprise, ovfId)).build();
+            return evalStatus(idEnterprise, ovfId);
         }
         else if (format.equals("envelope"))
         {
@@ -166,6 +175,50 @@ public class OVFPackageInstanceResource extends AbstractResource
         {
             return Response.ok(getOVFEnvelope(idEnterprise, ovfId)).build();
         }
+    }
+
+    /**
+     * Eval the current status. *
+     * 
+     * @param idEnterprise Id of Enterprise to which this OVFPackage belongs.
+     * @param idRepository Id of the Repository to which the OVFPackage belongs.
+     * @return DataResult<OVFPackageInstanceStatus>@return Response
+     */
+    private Response evalStatus(String idEnterprise, String ovfId)
+    {
+        OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
+            getOVFPackageInstanceStatus(idEnterprise, ovfId); 
+        
+        if (ovfPackageInstanceStatus == null)
+        {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        if (!StringUtils.isBlank(ovfPackageInstanceStatus.getErrorCause()))
+        {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        if (OVFPackageInstanceStatusType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        if (OVFPackageInstanceStatusType.ERROR.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            ovfPackageInstanceStatus.setProgress(0d);
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        
+        if (OVFPackageInstanceStatusType.DOWNLOADING.equals(ovfPackageInstanceStatus
+            .getOvfPackageStatus()))
+        {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+        
+        
+        ovfPackageInstanceStatus.setProgress(100d);
+        return Response.ok(ovfPackageInstanceStatus).build();
     }
 
     /**
@@ -233,18 +286,23 @@ public class OVFPackageInstanceResource extends AbstractResource
     @DELETE
     public void deleteOVF(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId)
+        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn)
     {
 
+        String ovfId1;
+        String ovfId;
         try
         {
-            ovfId = URLDecoder.decode(ovfId, "UTF-8");
+            // FIXME ABICLOUDPREMIUM-1798
+                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
+                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
         }
         catch (UnsupportedEncodingException e)
         {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfId).build());
+                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
         }
+        
 
         try
         {

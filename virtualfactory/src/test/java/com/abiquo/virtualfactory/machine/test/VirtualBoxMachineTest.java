@@ -78,6 +78,7 @@ public class VirtualBoxMachineTest extends AbsMachineTest
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -132,7 +133,7 @@ public class VirtualBoxMachineTest extends AbsMachineTest
      * @param args
      * @throws Exception
      */
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         VirtualBoxMachineTest test = new VirtualBoxMachineTest();
         test.setUp();

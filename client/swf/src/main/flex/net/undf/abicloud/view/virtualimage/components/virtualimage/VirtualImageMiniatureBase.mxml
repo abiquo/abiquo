@@ -45,6 +45,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.controls.Alert;
             import mx.controls.Image;
             import mx.core.DragSource;
@@ -91,6 +93,10 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"removeChild",buttonsContainer,imageCanvas);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE,"removeChild",downloadButton,buttonsContainer);
+
                 //Changing the style of this component, depending on the multiplier
                 this.width = DEFAULT_WIDTH * this._sizeMultiplier;
                 this.height = DEFAULT_HEIGHT * this._sizeMultiplier;
@@ -188,7 +194,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("VirtualImage",
-                                                                                "ALERT_DELETE_VIRTUALIMAGE_HEADER"),
+                                                                                "ALERT_DELETE_VIRTUALIMAGE_HEADER")+" '"+this._virtualImage.name+"'",
                                         ResourceManager.getInstance().getString("VirtualImage",
                                                                                 "ALERT_DELETE_VIRTUALIMAGE_TEXT"),
                                         Alert.YES | Alert.NO,
@@ -379,7 +385,6 @@
         <utils:SmoothImage id="masterImage"
             left="0" top="0"
             creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseMasterImage', masterImage)"
-            toolTip="@Resource(bundle='VirtualImage', key='LABEL_MASTER_EXPLANATION')"
             useHandCursor="true"
             visible="{hasSlaveImage}"
             buttonMode="true"

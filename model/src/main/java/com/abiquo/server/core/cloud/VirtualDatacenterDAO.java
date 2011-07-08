@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -44,6 +45,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 @Repository("jpaVirtualDatacenterDAO")
 @SuppressWarnings("unchecked")
@@ -54,22 +56,22 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         super(VirtualDatacenter.class);
     }
 
-    public VirtualDatacenterDAO(EntityManager entityManager)
+    public VirtualDatacenterDAO(final EntityManager entityManager)
     {
         super(VirtualDatacenter.class, entityManager);
     }
 
-    private static Criterion sameEnterprise(Enterprise enterprise)
+    private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(VirtualDatacenter.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private static Criterion sameDatacenter(Datacenter datacenter)
+    private static Criterion sameDatacenter(final Datacenter datacenter)
     {
         return Restrictions.eq(VirtualDatacenter.DATACENTER_PROPERTY, datacenter);
     }
 
-    private static Criterion availableToUser(User user)
+    private static Criterion availableToUser(final User user)
     {
         Collection<String> idsStrings =
             Arrays.asList(user.getAvailableVirtualDatacenters().split(","));
@@ -77,7 +79,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         Collection<Integer> ids = CollectionUtils.collect(idsStrings, new Transformer()
         {
             @Override
-            public Object transform(Object input)
+            public Object transform(final Object input)
             {
                 return Integer.valueOf(input.toString());
             }
@@ -86,8 +88,8 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return Restrictions.in(VirtualDatacenter.ID_PROPERTY, ids);
     }
 
-    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter, User user)
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter, final User user)
     {
         Collection<Criterion> restrictions = new ArrayList<Criterion>();
         if (enterprise != null)
@@ -106,14 +108,14 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return findVirtualDatacentersByCriterions(restrictions);
     }
 
-    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter)
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         return findByEnterpriseAndDatacenter(enterprise, datacenter, null);
     }
 
     private Collection<VirtualDatacenter> findVirtualDatacentersByCriterions(
-        Collection<Criterion> criterions)
+        final Collection<Criterion> criterions)
     {
         Criteria criteria = getSession().createCriteria(VirtualDatacenter.class);
 
@@ -127,7 +129,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return result;
     }
 
-    public Collection<VirtualDatacenter> findByEnterprise(Enterprise enterprise)
+    public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert isManaged2(enterprise);
@@ -139,44 +141,60 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     }
 
     private static final String SUM_VM_RESOURCES =
-        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a  "
+        "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, nodevirtualimage vi, node n, virtualapp a "        
             + "where vi.idVM = vm.idVM and vi.idNode = n.idNode and n.idVirtualApp = a.idVirtualApp "
-            + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0";
+            + "and a.idVirtualDataCenter = :virtualDatacenterId and STRCMP(vm.state, :not_deployed) != 0"; 
+            // + "and hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine and pm.idState != 7"; // not HA_DISABLED
+    
 
     private static final String SUM_VOLUMES_RESOURCES =
-        "select sum(r.limitResource) from rasd r, rasd_management rm where r.resourceType = rm.idResourceType "
+        "select sum(r.limitResource) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
     private static final String COUNT_PUBLIC_IP_RESOURCES =
-        "select count(rm.idManagement) from rasd r, rasd_management rm where r.resourceType = rm.idResourceType "
+        "select count(rm.idManagement) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '10' and r.resourceSubType = '1' and rm.idVirtualDatacenter = :virtualDatacenterId";
+    
+    private static final String COUNT_PRIVATE_VLANS_RESOURCES = " SELECT vlan "//
+            + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
+            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+            + "WHERE vlan.network.id = vdc.network.id "//
+            + "and vdc.id = :virtualDatacenterId";
 
-    public DefaultEntityCurrentUsed getCurrentResourcesAllocated(int virtualDatacenterId)
+    public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
-                .uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).setParameter("not_deployed",
+                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES)
-                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES).setParameter(
+                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
-        used.setStorage(storage == null ? 0 : storage.longValue());
+        // Storage usage is stored in MB
+        used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
         used.setPublicIp(publicIps == null ? 0 : publicIps.longValue());
-        used.setVlanCount(0); // TODO
+        used.setVlanCount(getVLANUsage(virtualDatacenterId).size());    
 
         return used;
+    }
+    
+    private List<VLANNetwork> getVLANUsage(final Integer virtualdatacenterId)
+    {
+        Query query = getSession().createQuery(COUNT_PRIVATE_VLANS_RESOURCES);
+        query.setParameter("virtualDatacenterId", virtualdatacenterId);
+
+        return query.list();
     }
 }

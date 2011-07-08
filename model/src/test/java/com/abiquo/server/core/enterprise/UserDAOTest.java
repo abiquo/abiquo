@@ -21,7 +21,9 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
@@ -45,7 +47,7 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     }
 
     @Override
-    protected UserDAO createDao(EntityManager entityManager)
+    protected UserDAO createDao(final EntityManager entityManager)
     {
         return new UserDAO(entityManager);
     }
@@ -73,17 +75,29 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     {
         User user = eg().createUserWithSession();
         User userWithoutSession = eg().createInstance(user.getEnterprise(), user.getRole());
-        ds().persistAll(user.getEnterprise(), user.getRole(), user, userWithoutSession);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        for (Privilege privilege : user.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(privilege);
+        }
+        entitiesToPersist.add(user.getEnterprise());
+        entitiesToPersist.add(user.getRole());
+        entitiesToPersist.add(user);
+        entitiesToPersist.add(userWithoutSession);
+
+        ds().persistAll(entitiesToPersist.toArray());
 
         UserDAO dao = createDaoForRollbackTransaction();
 
-        Collection<User> users = dao.find(user.getEnterprise(), null, null, false, true, 0, 25);
+        Collection<User> users =
+            dao.find(user.getEnterprise(), null, null, null, false, true, 0, 25);
         AssertEx.assertSize(users, 1);
 
-        users = dao.find(null, null, null, false, true, 0, 25);
+        users = dao.find(null, null, null, null, false, true, 0, 25);
         AssertEx.assertSize(users, 1);
 
-        users = dao.find(user.getEnterprise(), null, null, false, false, 0, 25);
+        users = dao.find(user.getEnterprise(), null, null, null, false, false, 0, 25);
         AssertEx.assertSize(users, 2);
     }
 
@@ -91,7 +105,15 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     public void getAbiquoUserByLogin()
     {
         User user1 = eg().createInstance(User.AuthType.ABIQUO);
-        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(user1.getEnterprise());
+        for (Privilege p : user1.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(user1.getRole());
+        entitiesToPersist.add(user1);
+        ds().persistAll(entitiesToPersist.toArray());
 
         UserDAO dao = createDaoForRollbackTransaction();
 
@@ -103,7 +125,15 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     public void getUserByAuth()
     {
         User user1 = eg().createInstance(User.AuthType.ABIQUO);
-        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(user1.getEnterprise());
+        for (Privilege p : user1.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(user1.getRole());
+        entitiesToPersist.add(user1);
+        ds().persistAll(entitiesToPersist.toArray());
 
         UserDAO dao = createDaoForRollbackTransaction();
 
@@ -115,7 +145,15 @@ public class UserDAOTest extends DefaultDAOTestBase<UserDAO, User>
     public void existAnyUserWithNickAndAuth()
     {
         User user1 = eg().createInstance(User.AuthType.ABIQUO);
-        ds().persistAll(user1.getEnterprise(), user1.getRole(), user1);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(user1.getEnterprise());
+        for (Privilege p : user1.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(user1.getRole());
+        entitiesToPersist.add(user1);
+        ds().persistAll(entitiesToPersist.toArray());
 
         UserDAO dao = createDaoForRollbackTransaction();
 

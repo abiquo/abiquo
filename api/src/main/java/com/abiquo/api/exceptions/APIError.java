@@ -24,6 +24,9 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.infrastructure.management.Rasd;
+
 /**
  * Contains all the errors notified by the API.
  * 
@@ -36,14 +39,15 @@ public enum APIError
         "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
         "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
         "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
-        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_UNSUPPORTED_MEDIA_TYPE(
-        "415-UNSUPPORTED MEDIA TYPE",
+        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_CONFLICT(
+        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
         "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
-        "500-INTERNAL SERVER ERROR", "Unexpected exception"),
+        "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
+        "412 - Unprovisioned", "Unprovisioned exception"),
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
-        "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
+        "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
         "Invalid credentials"),
@@ -65,11 +69,14 @@ public enum APIError
         "ENTERPRISE-4", "Duplicated name for an enterprise"), ENTERPRISE_DELETE_ERROR_WITH_VDCS(
         "ENTERPRISE-5", "Cannot delete enterprise with associated virtual datacenters"), ENTERPRISE_DELETE_OWN_ENTERPRISE(
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
-        "ENTERPRISE-7", "Enterprise name can't be empty"),
+        "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
+        "ENTERPRISE-8",
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
+	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
-        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter"), LIMITS_DUPLICATED(
+        "Invalid vlan hard limit, it cannot be bigger than the number of vlans per virtual datacenter: {0}"), LIMITS_DUPLICATED(
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
@@ -78,7 +85,9 @@ public enum APIError
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
         "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"),
+            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "LIMIT-11",
+        "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
     // VIRTUAL DATACENTER
     NON_EXISTENT_VIRTUAL_DATACENTER("VDC-0", "The requested virtual datacenter does not exist"), VIRTUAL_DATACENTER_INVALID_HYPERVISOR_TYPE(
@@ -99,7 +108,7 @@ public enum APIError
         "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
         "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
-        "VLAN-4", "This Networks allow a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
+        "VLAN-4", "This network allows a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
         "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
         "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
         "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
@@ -110,12 +119,23 @@ public enum APIError
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exist"),
+        "RACK-3", "There is already a rack with that name in this datacenter"),
+        NON_EXISTENT_RACK("RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
+        "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
+        "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
+        "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
+        "There is a problem with the details of the UCS Rack"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
-        "MACHINE-1", "The machine is not assigned to the datacenter or rack"),
+        "MACHINE-1", "The machine is not assigned to the datacenter or rack"), MACHINE_ANY_DATASTORE_DEFINED(
+        "MACHINE-2", "Machine definition should have at least one datastore created and enabled"), MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK(
+        "MACHINE-3", "A machine can not be added this way to a UCS Rack"), INVALID_STATE_CHANGE(
+        "MACHINE-5", "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE(
+        "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
+        "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
+        "MACHINE-7",
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -125,22 +145,46 @@ public enum APIError
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
         "Invalid network configuration for the virtual datacenter"), NETWORK_WITHOUT_IPS("NET-8",
-        "This network doesn't have IPs"),
+        "This network doesn't have IPs"), NETWORK_IP_FROM_BIGGER_THAN_IP_TO("NET-9",
+        "Parameter IPFrom is greater than IPTo"), NETWORK_IP_FROM_ERROR("NET-10",
+        "Parameter IPFrom is invalid"), NETWORK_IP_TO_ERROR("NET-11", "Parameter IPTo is invalid"),
 
     // VIRTUAL MACHINE
     VIRTUAL_MACHINE_WITHOUT_HYPERVISOR("VM-0", "The virtual machine not have a hypervisor assigned"), NON_EXISTENT_VIRTUALMACHINE(
         "VM-1", "The requested virtual machine does not exist"), VIRTUAL_MACHINE_ALREADY_IN_PROGRESS(
-        "VM-2", "The virtual machine is already in progress"),
+        "VM-2", "The virtual machine is already in progress"), VIRTUAL_MACHINE_NOT_DEPLOYED("VM-3",
+        "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
+        "The virtual machine cannot change the state to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
+        "VM-5", "The virtual machine cannot change the state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
+        "VM-6", "The virtual machine does not support the action PAUSE"),
 
     // ROLE
-    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"),
+    NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
+        "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",
+        "Missing privilege parameter"), DELETE_ERROR("ROLE-3",
+        "The requested role is blocked. Cannot be deleted"), DELETE_ERROR_WITH_USER("ROLE-4",
+        "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
+        "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
+        "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"),
+
+    // PRIVILEGE
+    NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
+
+    // ROLE_LDAP
+    NON_EXISTENT_ROLELDAP("ROLELDAP-0", "The requested roleLdap does not exist"), MULTIPLE_ENTRIES_ROLELDAP(
+        "ROLELDAP-1", "There are multiple entries for the requested roleLdap"), NOT_ASSIGNED_ROLE(
+        "ROLELDAP-2", "The roleLdap must have a Role"),
 
     // USER
     NOT_ASSIGNED_USER_ENTERPRISE("USER-0", "The user is not assigned to the enterprise"), MISSING_ROLE_LINK(
         "USER-1", "Missing link to the role"), ROLE_PARAM_NOT_FOUND("USER-2",
         "Missing roles parameter"), USER_NON_EXISTENT("USER-3", "The requested user does not exist"), USER_DUPLICATED_NICK(
         "USER-4", "Duplicated nick for the user"), EMAIL_IS_INVALID("USER-5",
-        "The email isn't valid"),
+        "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
+        "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
+        "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
+        "In Ldap mode can not modify user's enterprise"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -170,7 +214,13 @@ public enum APIError
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
-        "Missing query parameter ip"),
+        "Missing query parameter ip"), NC_BAD_CREDENTIALS_TO_RACK("NC-2",
+        "Bad credentials attempting to retrieve the list of physical machines from rack "), NC_BAD_CREDENTIALS_TO_MACHINE(
+        "NC-3", "Bad credentials attempting to retrieve the machine "), NC_CONNECTION_EXCEPTION(
+        "NC-4", "There is a machine running in the given IP. But any hypervisor responds"), NC_NOT_FOUND_EXCEPTION(
+        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
+        "Unexpected exception building the request to Discovery Manager"), NC_UNAVAILABLE_EXCEPTION(
+        "NC-7", "The discovery manager currently is not available"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(
@@ -181,7 +231,10 @@ public enum APIError
         "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
         "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
-        "Tier is disabled"),
+        "Tier is disabled"), STORAGE_POOL_PARAM_NOT_FOUND("SP-10", "Missing storage pool parameter"), STORAGE_POOL_LINK_DATACENTER_PARAM_NOT_FOUND(
+        "SP-11", "Datacenter param in storage pool link not found"), STORAGE_POOL_LINK_DEVICE_PARAM_NOT_FOUND(
+        "SP-12", "Storage device param in storage pool link not found"), MISSING_POOL_LINK("SP-13",
+        "Missing storage pool link"),
 
     // DATASTORE
     DATASTORE_NON_EXISTENT("DATASTORE-0", "The requested datastore does not exist"), DATASTORE_DUPLICATED_NAME(
@@ -195,7 +248,7 @@ public enum APIError
 
     // ALLOCATOR
     LIMIT_EXCEEDED("LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
-        "ALLOC-0", "There isn't enough resources to create the virtual machine"), //
+        "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
     CHECK_EDIT_NO_TARGET_MACHINE("EDIT-01",
@@ -224,7 +277,7 @@ public enum APIError
         "TIER-6", "Can not disable a Tier with associated Storage Pools"),
 
     // DEVICES
-    NON_EXISTENT_DEVICE("DEVICE-0", "The requested tier does not exist"), DEVICE_DUPLICATED(
+    NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
         "DEVICE-1", "Duplicated Storage Device"),
 
     // STATISTICS
@@ -242,7 +295,29 @@ public enum APIError
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
         "VOL-2", "The name of the volume is required"), NON_EXISTENT_VOLUME("VOL-3",
         "The volume does not exist"), VOLUME_CREATE_ERROR("VOL-4",
-        "An unexpected error occured while creating the volume")
+        "An unexpected error occured while creating the volume"), VOLUME_MOUNTED_OR_RESERVED(
+        "VOL-5", "The volume cannot be deleted because it is associated to a virtual machine"), VOLUME_SSM_DELETE_ERROR(
+        "VOL-6", "Could not physically delete the volume from the target storage device"), VOLUME_DELETE_STATEFUL(
+        "VOL-7", "The volume cannot be deleted because it is in a persistent image process"), VOLUME_DELETE_IN_VIRTUALAPPLIANCE(
+        "VOL-8",
+        "The stateful volume cannot be deleted because it is being used in a virtual appliance"), VOLUME_ISCSI_NOT_FOUND(
+        "VOL-9", "The idScsi of the volume is required"), VOLUME_DECREASE_SIZE_LIMIT_ERROR(
+        "VOL-10", "The size of the volume cannot be decreased"), VOLUME_NAME_LENGTH_ERROR("VOL-11",
+        "The size of the 'name' field of the volume cannot exceed 256 characters"), VOLUME_ISCSI_INVALID(
+        "VOL-12", "The property idScsi " + IscsiPath.ERROR_MESSAGE), VOLUME_SIZE_INVALID("VOL-13",
+        "The size property must be a non-zero integer up to " + Rasd.LIMIT_MAX), VOLUME_IN_USE(
+        "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
+        "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
+        "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
+        "Cannot resize a generic Iscsi volume"),
+
+    // RULES
+    NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
+        "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
+        "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
+        "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
+        "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
+        "RULE-6", "The load balance type indicated is null or invalid")
 
     ;
 

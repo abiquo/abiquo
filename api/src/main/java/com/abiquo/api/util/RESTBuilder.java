@@ -54,8 +54,10 @@ import com.abiquo.api.resources.cloud.PrivateNetworksResource;
 import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -67,13 +69,14 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleLdapDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -81,6 +84,12 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
+import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDto;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
@@ -169,7 +178,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
-        final MachineDto machine)
+        final Boolean managedRack, final MachineDto machine)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -186,6 +195,16 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+        
+        if (managedRack)
+        {
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_POWER_ON, MachineResource.MACHINE_ACTION_POWER_ON_REL,
+                params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_POWER_OFF, MachineResource.MACHINE_ACTION_POWER_OFF_REL,
+                params));
+        }
 
         return links;
     }
@@ -219,6 +238,20 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
     public List<RESTLink> buildRoleLinks(final RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -228,6 +261,27 @@ public class RESTBuilder implements IRESTBuilder
 
         RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildRoleLinks(final Integer enterpriseId, final RoleDto role)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        params.put(RoleResource.ROLE, role.getId().toString());
+        links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+        links.add(builder.buildActionLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
 
         return links;
     }
@@ -266,6 +320,11 @@ public class RESTBuilder implements IRESTBuilder
             .add(builder.buildActionLink(EnterpriseResource.class,
                 EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
                 params));
+
+        // action get virtual datacenters by enterprise
+        links.add(builder.buildActionLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+            VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
     }
@@ -474,14 +533,22 @@ public class RESTBuilder implements IRESTBuilder
                 .add(builder.buildRestLink(MachineResource.class, MachineResource.MACHINE, params));
         }
 
-        params = new HashMap<String, String>();
-        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
-        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
-            params));
+        if (enterpriseId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+            links.add(builder.buildRestLink(EnterpriseResource.class,
+                EnterpriseResource.ENTERPRISE, params));
 
-        params = new HashMap<String, String>();
-        params.put(UserResource.USER, userId.toString());
-        links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+        }
+
+        if (userId != null)
+        {
+            params = new HashMap<String, String>();
+            params.put(UserResource.USER, userId.toString());
+            links.add(builder.buildRestLink(UserResource.class, UserResource.USER, params));
+
+        }
 
         return links;
     }
@@ -529,6 +596,37 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
+        links.add(builder.buildActionLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON,
+            "power on", params));
+        links.add(builder.buildActionLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF,
+            "power off", params));
+        links.add(builder.buildActionLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME,
+            "resume", params));
+        links.add(builder.buildActionLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE,
+            "pause", params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer enterpriseId, final Integer userId)
+    {
+
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        links.addAll(buildVirtualMachineAdminLinks(datacenterId, rackId, machineId, enterpriseId,
+            userId));
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId));
 
         return links;
     }
@@ -538,6 +636,12 @@ public class RESTBuilder implements IRESTBuilder
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
+        // If the list is empty, we don't return the links
+        if (list.size() == 0)
+        {
+            return links;
+        }
+
         // Add FIRST element
         links.add(new RESTLink(FIRST, absolutePath));
 
@@ -545,7 +649,9 @@ public class RESTBuilder implements IRESTBuilder
         {
             // Previous using the page size avoiding to be less than 0.
             Integer previous = list.getCurrentElement() - list.getPageSize();
-            previous = (previous > list.getTotalResults()) ? (list.getTotalResults()-2*list.getPageSize()): previous;
+            previous =
+                (previous > list.getTotalResults()) ? (list.getTotalResults() - 2 * list
+                    .getPageSize()) : previous;
             previous = (previous < 0) ? 0 : previous;
 
             links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
@@ -677,9 +783,36 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
+        EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        EnterpriseExclusionRule enterpriseExclusion)
+    {
+        // TODO Auto-generated method stub
+	return null;
+    }
+
+
     @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
     {
+        return null;
+    }
+    
+    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildRoleLdapLinks(final Integer roleId, final RoleLdapDto roleLdap)
+    {
+        return null;
+    }
+
+    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 

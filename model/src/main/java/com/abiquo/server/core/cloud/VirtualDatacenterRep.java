@@ -141,8 +141,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
         return vlanDAO.findById(id);
     }
-    
-    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualdatacenter, Integer vlanId)
+
+    public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualdatacenter,
+        final Integer vlanId)
     {
         return vlanDAO.findVlanByVirtualDatacenterId(virtualdatacenter, vlanId);
     }
@@ -151,7 +152,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         return vlanDAO.findUniqueByProperty(VLANNetwork.NAME_PROPERTY, name);
     }
-    
+
     public Collection<VLANNetwork> findAllVlans()
     {
         return this.vlanDAO.findAll();
@@ -165,12 +166,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findVLANNetworks(virtualDatacenter);
     }
 
-
-    public VLANNetwork findVlanByDefault(VirtualDatacenter virtualDatacenter)
+    public VLANNetwork findVlanByDefault(final VirtualDatacenter virtualDatacenter)
     {
         return vlanDAO.findByDefault(virtualDatacenter);
     }
-    
+
     public void insertNetwork(final Network network)
     {
         networkDAO.persist(network);
@@ -206,8 +206,8 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         vlanDAO.persist(vlan);
     }
-    
-    public void updateVlan(VLANNetwork vlan)
+
+    public void updateVlan(final VLANNetwork vlan)
     {
         vlanDAO.flush();
     }
@@ -309,7 +309,8 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @return list of IpPoolManagement.
      */
     public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+        final Boolean asc)
     {
         return ipManagementDAO.findByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
@@ -321,7 +322,8 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @return list of IpPoolManagement.
      */
     public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, final Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+        final Boolean asc)
     {
         return ipManagementDAO.findByEnterprise(entId, firstElem, numElem, has, orderBy, asc);
     }
@@ -366,6 +368,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine vmachine)
     {
         return nodeviDao.findVirtualAppliance(vmachine);
+    }
+
+    public Collection<NodeVirtualImage> findNodeVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return nodeviDao.findByEnterprise(enterprise);
     }
 
     public VirtualMachine findVirtualMachineByName(final String name)

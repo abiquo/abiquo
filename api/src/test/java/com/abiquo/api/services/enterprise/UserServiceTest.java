@@ -21,53 +21,51 @@
 
 package com.abiquo.api.services.enterprise;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import org.springframework.security.context.SecurityContextHolder;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
 import com.abiquo.api.common.Assert;
-import com.abiquo.api.common.SysadminAuthenticationStub;
+import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
 
 public class UserServiceTest extends AbstractGeneratorTest
 {
+    private Enterprise e;
 
-    Enterprise e;
+    private Role r;
 
-    Role r;
-
-    User u;
+    private User u;
 
     @BeforeMethod
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
+        Privilege p1 = new Privilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(SecurityService.USERS_MANAGE_USERS);
+        r = roleGenerator.createInstance(p1, p2);
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
 
-        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthenticationStub());
-    }
+        setup(e, p1, p2, r, u);
 
-    @Override
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("virtualapp", "ip_pool_management", "rasd_management", "virtualdatacenter",
-            "vlan_network", "network_configuration", "dhcp_service", "virtualmachine",
-            "hypervisor", "physicalmachine", "rack", "datacenter", "virtualimage", "user",
-            "enterprise", "role");
+        SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
+
     }
 
     @Test
@@ -78,7 +76,23 @@ public class UserServiceTest extends AbstractGeneratorTest
         User u1 = userGenerator.createInstance(e1);
         User u2 = userGenerator.createInstance(e2);
 
-        setup(e1, e2, u1.getRole(), u2.getRole(), u1, u2);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        for (Privilege p : u1.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        for (Privilege p : u2.getRole().getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(u1.getRole());
+        entitiesToPersist.add(u2.getRole());
+        entitiesToPersist.add(u1);
+        entitiesToPersist.add(u2);
+
+        setup(entitiesToPersist.toArray());
 
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
@@ -95,7 +109,18 @@ public class UserServiceTest extends AbstractGeneratorTest
         User u1 = userGenerator.createInstance(e1, r, "p1", "u1", "s1", "e1", "n1");
         User u2 = userGenerator.createInstance(e2, r, "p2", "u2", "s2", "e2", "n2");
 
-        setup(e1, e2, r, u1, u2);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(r);
+        entitiesToPersist.add(u1);
+        entitiesToPersist.add(u2);
+
+        setup(entitiesToPersist.toArray());
 
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
@@ -121,7 +146,18 @@ public class UserServiceTest extends AbstractGeneratorTest
         User u1 = userGenerator.createInstance(e1, r, "p1", "u1", "s1", "e1", "nick");
         User u2 = userGenerator.createInstance(e2, r, "p2", "u2", "s2", "e2", "nack");
 
-        setup(e1, e2, r, u1, u2);
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        entitiesToPersist.add(e1);
+        entitiesToPersist.add(e2);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToPersist.add(p);
+        }
+        entitiesToPersist.add(r);
+        entitiesToPersist.add(u1);
+        entitiesToPersist.add(u2);
+
+        setup(entitiesToPersist.toArray());
 
         UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
 
@@ -137,7 +173,8 @@ public class UserServiceTest extends AbstractGeneratorTest
     @Test
     public void addUserWithDuplicatedNick()
     {
-        UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        UserService service = new UserService(em);
 
         UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "", User.AuthType.ABIQUO.name());
 
@@ -150,6 +187,10 @@ public class UserServiceTest extends AbstractGeneratorTest
         {
             Assert.assertSize(e.getErrors(), 1);
         }
+        finally
+        {
+            rollbackActiveTransaction(em);
+        }
     }
 
     @Test
@@ -159,7 +200,8 @@ public class UserServiceTest extends AbstractGeneratorTest
 
         setup(u2);
 
-        UserService service = new UserService(getEntityManagerWithAnActiveTransaction());
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        UserService service = new UserService(em);
 
         UserDto dto = new UserDto("foo", "foo", "foo@foo.com", u.getNick(), "foo", "ES", "",  User.AuthType.ABIQUO.name());
         String roleURI = UriTestResolver.resolveRoleURI(r.getId());
@@ -175,6 +217,10 @@ public class UserServiceTest extends AbstractGeneratorTest
         catch (APIException e)
         {
             Assert.assertSize(e.getErrors(), 1);
+        }
+        finally
+        {
+            rollbackActiveTransaction(em);
         }
     }
 }
