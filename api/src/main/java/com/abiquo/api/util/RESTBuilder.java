@@ -787,14 +787,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
-        EnterpriseExclusionRuleDto enterpriseExclusionDto,
-        EnterpriseExclusionRule enterpriseExclusion)
-    {
-        // TODO Auto-generated method stub
-	return null;
-    }
-
 
     @Override
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
@@ -810,11 +802,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
     
-    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
@@ -823,11 +810,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
-    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
-    {
-        return null;
-    }
 
     public List<RESTLink> buildRoleLdapLinks(final Integer roleId, final RoleLdapDto roleLdap)
     {

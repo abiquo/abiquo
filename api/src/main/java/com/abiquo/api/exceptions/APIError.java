@@ -72,7 +72,6 @@ public enum APIError
         "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
-	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",

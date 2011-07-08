@@ -136,15 +136,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume);
 
-    public List<RESTLink> buildEnterpriseExclusionRuleLinks(
-        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
-        EnterpriseExclusionRule enterpriseExclusion);
-
-    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
-        final MachineLoadRule mlr);
-
-    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
-
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId);
