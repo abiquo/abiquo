@@ -64,6 +64,12 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
         return fitPolicyRule;
     }
 
+    public FitPolicyRule createGlobalFitPolicyInstance()
+    {
+        return new FitPolicyRule(FitPolicy.PROGRESSIVE);
+    }
+    
+
     @Override
     public void addAuxiliaryEntitiesToPersist(FitPolicyRule entity, List<Object> entitiesToPersist)
     {

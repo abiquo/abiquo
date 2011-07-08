@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
-import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
@@ -288,7 +287,7 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
+    private void restoreVirtualMachineState(VirtualMachine vm, State old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);

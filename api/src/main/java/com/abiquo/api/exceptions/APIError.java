@@ -310,7 +310,6 @@ public enum APIError
         "Cannot resize a generic Iscsi volume"),
 
     // RULES
-
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
         "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",

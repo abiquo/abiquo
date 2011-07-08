@@ -67,6 +67,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         this.client = new RestClient(conf);
     }
 
+
     public void pause(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,

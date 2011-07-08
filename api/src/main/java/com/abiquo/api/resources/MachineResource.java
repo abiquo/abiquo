@@ -57,8 +57,6 @@ import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
-import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RackDto;
 
 @Parent(MachinesResource.class)
 @Path(MachineResource.MACHINE_PARAM)

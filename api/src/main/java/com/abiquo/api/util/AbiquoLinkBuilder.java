@@ -31,10 +31,10 @@ import org.apache.wink.server.utils.LinkBuilders;
 
 import com.abiquo.model.rest.RESTLink;
 
-public class RESTLinkBuilder extends SingleLinkBuilderImpl
+public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
 {
 
-    public RESTLinkBuilder(ServerMessageContext context)
+    public AbiquoLinkBuilder(ServerMessageContext context)
     {
         super(context);
     }
@@ -67,34 +67,31 @@ public class RESTLinkBuilder extends SingleLinkBuilderImpl
         return link;
     }
 
-    public RESTLinkBuilder pathParams(Map<String, String> params)
+    public AbiquoLinkBuilder pathParams(Map<String, String> params)
     {
         if (params != null && !params.isEmpty())
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-//                if (!pathParams.containsKey(entry.getKey()))
-//                {
                     pathParam(entry.getKey(), entry.getValue());
-//                }
             }
         }
         return this;
     }
 
     @Override
-    public RESTLinkBuilder rel(String rel)
+    public AbiquoLinkBuilder rel(String rel)
     {
-        return (RESTLinkBuilder) super.rel(rel);
+        return (AbiquoLinkBuilder) super.rel(rel);
     }
 
-    public RESTLinkBuilder setResource(Class< ? > resource)
+    public AbiquoLinkBuilder setResource(Class< ? > resource)
     {
-        return (RESTLinkBuilder) super.resource(resource);
+        return (AbiquoLinkBuilder) super.resource(resource);
     }
 
-    public static RESTLinkBuilder createBuilder(LinkBuilders linkProcessor)
+    public static AbiquoLinkBuilder createBuilder(LinkBuilders linkProcessor)
     {
-        return (RESTLinkBuilder) linkProcessor.createSingleLinkBuilder().relativize(false);
+        return (AbiquoLinkBuilder) linkProcessor.createSingleLinkBuilder().relativize(false);
     }
 }

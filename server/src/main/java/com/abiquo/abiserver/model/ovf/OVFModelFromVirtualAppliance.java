@@ -34,7 +34,6 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
-import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -778,8 +777,8 @@ public class OVFModelFromVirtualAppliance
         Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
 
         String rdPort = String.valueOf(virtualMachine.getVdrpPort());
-        otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, rdPort);
-        logger.debug("The remote desktop port is: " + String.valueOf(rdPort));
+        otherAttributes.put(AbiCloudConstants.remoteDesktopPortQname, String.valueOf(rdPort));
+        logger.debug("The remote desktop port included is: " + String.valueOf(rdPort));
 
         if (virtualMachine.getPassword() != null && !virtualMachine.getPassword().equals(""))
         {

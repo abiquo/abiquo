@@ -550,42 +550,27 @@ public class AbstractAPIStub
             params);
     }
 
-    protected String createMachineLink(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
+    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId, final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
-            params);
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn",
+                params);
     }
 
-    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
+    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId, final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
-    }
-
-    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
-        final Integer machineId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
-        params.put("rack", rackId.toString());
-        params.put("machine", machineId.toString());
-
-        return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
-            params);
-    }
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+                params);
+    } 
 
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
@@ -683,5 +668,13 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
+    }
+
+    protected String createRackLink(final Integer datacenterId, final Integer rackId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
 }

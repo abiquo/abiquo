@@ -347,15 +347,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
-
-    public VsmServiceStub getVsm()
-    {
-        return vsm;
-    }
-
-    public void setVsm(VsmServiceStub vsm)
-    {
-        this.vsm = vsm;
-    }
-
 }
+

@@ -38,8 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -71,12 +69,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
  * <li>network resources on the virtual datacenter</li>
  * </ul>
  */
-// @Transactional(readOnly = false, propagation = Propagation.REQUIRED, isolation =
-// Isolation.READ_UNCOMMITTED)
-// @Transactional//(readOnly=false)
-
 @Component
-//@Transactional(readOnly=false, propagation=Propagation.REQUIRED)
 public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
 
@@ -109,6 +102,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
+    /**
+     * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
+     *             resources to allocate the virtual machine, the virtual appliances is not on any
+     *             virtual datacenter.
+     */
     @Override
     public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
         throws ResourceUpgradeUseException
@@ -443,7 +441,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             return candidatePort;
         }
-        
+
         // Create a HashSet which allows no duplicates
         HashSet<Integer> hashSet = new HashSet<Integer>(vlanTags);
 
