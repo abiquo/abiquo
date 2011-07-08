@@ -285,13 +285,13 @@ public class RulesRepTest extends DefaultJpaDataAccessTestBase
     @Test
     public void test_getGlobalRules()
     {
-        FitPolicyRule fpr = fitPolicyRuleGenerator.createUniqueInstance();
+        FitPolicyRule fpr = fitPolicyRuleGenerator.createGlobalFitPolicyInstance();
 
         EnterpriseExclusionRule eeRule1 = enterpriseExclusionRuleGenerator.createUniqueInstance();
         EnterpriseExclusionRule eeRule2 = enterpriseExclusionRuleGenerator.createUniqueInstance();
 
         List<Object> allToPersist = new ArrayList<Object>();
-        fitPolicyRuleGenerator.addAuxiliaryEntitiesToPersist(fpr, allToPersist);
+
         enterpriseExclusionRuleGenerator.addAuxiliaryEntitiesToPersist(eeRule1, allToPersist);
         enterpriseExclusionRuleGenerator.addAuxiliaryEntitiesToPersist(eeRule2, allToPersist);
 
@@ -311,9 +311,8 @@ public class RulesRepTest extends DefaultJpaDataAccessTestBase
     @Test
     public void test_getGlobalFitPolicy()
     {
-        FitPolicyRule fpr = fitPolicyRuleGenerator.createUniqueInstance();
+        FitPolicyRule fpr = fitPolicyRuleGenerator.createGlobalFitPolicyInstance();
         List<Object> allToPersist = new ArrayList<Object>();
-        fitPolicyRuleGenerator.addAuxiliaryEntitiesToPersist(fpr, allToPersist);
 
         persistAll(ds(), allToPersist, fpr);
 

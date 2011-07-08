@@ -778,7 +778,7 @@ public class RESTBuilder implements IRESTBuilder
         EnterpriseExclusionRule enterpriseExclusion)
     {
         // TODO Auto-generated method stub
-	return null
+	return null;
     }
 
 
