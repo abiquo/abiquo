@@ -348,5 +348,5 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
-
 }
+

@@ -73,10 +73,7 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-//                if (!pathParams.containsKey(entry.getKey()))
-//                {
                     pathParam(entry.getKey(), entry.getValue());
-//                }
             }
         }
         return this;

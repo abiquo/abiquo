@@ -646,6 +646,7 @@ public class InfrastructureRep extends DefaultRepBase
         return machineDao.findRackEnabledForHAMachines(rack);
     }
 
+
     /**
      * Return all {@links UcsRack} associated to a
      * 
@@ -672,4 +673,5 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
     }
+
 }

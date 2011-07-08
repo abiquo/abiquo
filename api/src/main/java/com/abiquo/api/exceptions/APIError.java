@@ -72,6 +72,7 @@ public enum APIError
         "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
+	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -310,7 +311,6 @@ public enum APIError
         "Cannot resize a generic Iscsi volume"),
 
     // RULES
-
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
         "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
