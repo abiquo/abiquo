@@ -57,8 +57,8 @@ public enum EventType implements Serializable
         220, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(221, "VIRTUAL_APPLIANCE_STATE",
         "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
         "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
-        "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(224, "VAPP_BUNDLE",
-        "Virtual Appliance bundle started"),
+        "Virtual Appliance turned into 'unknown' state"), VAPP_INSTANCE(224, "VAPP_INSTANCE",
+        "Virtual Appliance instance started"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
@@ -102,6 +102,7 @@ public enum EventType implements Serializable
         605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), PERSISTENT_PROCESS_FAILED(
         606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), PERSISTENT_INITIATOR_ADDED(
         607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
+
 
     // License related events
     LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), LICENSE_REMOVED(
@@ -213,4 +214,5 @@ public enum EventType implements Serializable
         }
     }
 }
+
 
