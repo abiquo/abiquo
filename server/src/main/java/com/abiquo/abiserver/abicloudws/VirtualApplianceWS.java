@@ -472,7 +472,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 			}
 		} catch (FaultException e) {
 			encapsulateAndRethrowFault(virtualAppliance, e,
-					EventType.VAPP_BUNDLE);
+					EventType.VAPP_INSTANCE);
 		} catch (RemoteServiceException e) {
 			errorManager.reportError(VirtualApplianceWS.resourceManager,
 					result, "virtualFactoryError", e, virtualAppliance
@@ -715,7 +715,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS {
 			}
 		} catch (FaultException e) {
 			encapsulateAndRethrowFault(virtualAppliance, e,
-					EventType.VAPP_BUNDLE);
+					EventType.VAPP_INSTANCE);
 		}
 
 		return result;
