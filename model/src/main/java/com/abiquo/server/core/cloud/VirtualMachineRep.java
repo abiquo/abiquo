@@ -44,6 +44,9 @@ public class VirtualMachineRep extends DefaultRepBase
 
     @Autowired
     private RasdManagementDAO rasdDao;
+    
+    @Autowired
+    private ChefCookbookDAO chefDao;
 
     public VirtualMachineRep()
     {
@@ -102,5 +105,11 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
-
+    
+    public List<ChefCookbook> findCookbooksByVirtualMachine(
+        final VirtualMachine virtualMachine)
+    {
+        return chefDao.findByVirtualMachine(virtualMachine);
+    }
+    
 }

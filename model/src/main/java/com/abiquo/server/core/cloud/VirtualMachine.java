@@ -447,6 +447,27 @@ public class VirtualMachine extends DefaultEntityBase
         this.user = user;
     }
 
+    
+    public final static String SUB_STATE_PROPERTY = "subState";
+
+    private final static boolean SUB_STATE_REQUIRED = false;
+
+    private final static String SUB_STATE_COLUMN = "subState";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    private State subState;
+
+    @Required(value = SUB_STATE_REQUIRED)
+    public State getSubState()
+    {
+        return this.subState;
+    }
+
+    public void setSubState(State subState)
+    {
+        this.subState = subState;
+    }
     //
     public final static String STATE_PROPERTY = "state";
 

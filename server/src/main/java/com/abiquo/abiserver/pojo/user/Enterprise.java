@@ -58,6 +58,12 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
     private ResourceAllocationLimit limits;
 
+    private String chefURL;
+
+    private String chefClientCertificate;
+
+    private String chefValidatorCertificate;
+
     private Collection<PhysicalMachine> reservedMachines;
 
     private Set<DatacenterLimit> dcLimits;
@@ -110,6 +116,36 @@ public class Enterprise implements IPojo<EnterpriseHB>
     public void setReservedMachines(Collection<PhysicalMachine> reservedMachines)
     {
         this.reservedMachines = reservedMachines;
+    }
+
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(final String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate;
+    }
+
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate;
     }
 
     public Collection<PhysicalMachine> getReservedMachines()
@@ -193,6 +229,9 @@ public class Enterprise implements IPojo<EnterpriseHB>
         }
 
         enterpriseHB.setReservedMachines(reservedMachinesHB);
+        enterpriseHB.setChefURL(getChefURL());
+        enterpriseHB.setChefClientCertificate(getChefClientCertificate());
+        enterpriseHB.setChefValidatorCertificate(getChefValidatorCertificate());
 
         return enterpriseHB;
     }

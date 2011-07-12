@@ -67,6 +67,10 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private int stateful;
 
+    private boolean test;
+
+    private boolean chefEnabled;
+
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -274,6 +278,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.shared = shared;
     }
 
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
+    }
+
     @Override
     public VirtualimageHB toPojoHB()
     {
@@ -309,6 +323,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         virtualImageHB.setStateful(stateful);
         virtualImageHB.setDiskFileSize(diskFileSize);
         virtualImageHB.setShared(shared);
+        virtualImageHB.setChefEnabled(chefEnabled);
 
         if (master != null)
         {

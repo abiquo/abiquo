@@ -54,6 +54,12 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     private ResourceAllocationLimitHB limits;
 
+    private String chefURL;
+
+    private String chefClientCertificate;
+
+    private String chefValidatorCertificate;
+
     private Collection<PhysicalmachineHB> reservedMachines;
 
     /** List of limits established by Datacenter */
@@ -90,6 +96,35 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         this.name = name;
     }
 
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(final String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate;
+    }
+
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate;
+    }
     /**
      * @return the limits
      */
@@ -154,6 +189,10 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         }
 
         enterprise.setReservedMachines(rMachines);
+        enterprise.setChefURL(getChefURL());
+        enterprise.setChefClientCertificate(getChefClientCertificate());
+        enterprise.setChefValidatorCertificate(getChefValidatorCertificate());
+
 
         return enterprise;
     }

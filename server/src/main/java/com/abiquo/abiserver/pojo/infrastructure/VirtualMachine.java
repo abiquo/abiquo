@@ -63,6 +63,8 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     private VirtualImageConversions conversion;
 
     private Datastore datastore;
+    
+    private State subState;
 
     /* ------------- Constructor ------------- */
     public VirtualMachine()
@@ -169,6 +171,16 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
+    public State getSubState()
+    {
+        return subState;
+    }
+
+    public void setSubState(State subState)
+    {
+        this.subState = subState;
+    }
+
     public boolean isHighDisponibility()
     {
         return highDisponibility;
@@ -255,6 +267,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         virtualMachineHB.setEnterpriseHB((enterprise == null) ? null : enterprise.toPojoHB());
         virtualMachineHB.setIdType(this.idType);
         virtualMachineHB.setDatastore((datastore == null) ? null : datastore.toPojoHB());
+        virtualMachineHB.setSubState(subState);
 
         return virtualMachineHB;
     }

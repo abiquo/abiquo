@@ -89,6 +89,8 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
 
     private int highDisponibility;
 
+    private State subState;
+
     private VirtualImageConversionsHB conversion;
 
     private final List<ResourceAllocationSettingData> rasds =
@@ -141,6 +143,16 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
     public String getName()
     {
         return name;
+    }
+
+    public State getSubState()
+    {
+        return subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
     }
 
     public List<ResourceAllocationSettingData> getRasds()
@@ -342,6 +354,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         virtualMachine.setEnterprise(enterpriseHB == null ? null : enterpriseHB.toPojo());
         virtualMachine.setIdType(idType);
         virtualMachine.setDatastore(datastore == null ? null : datastore.toPojo());
+        virtualMachine.setSubState(getSubState());
         return virtualMachine;
     }
 

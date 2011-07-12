@@ -358,6 +358,9 @@ CREATE TABLE  `kinton`.`enterprise` (
   `repositoryHard` bigint(20)  NOT NULL default 0,
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
+  `chef_url` varchar(255) default NULL,
+  `chef_client_certificate` text default NULL,
+  `chef_validator_certificate` text default NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
@@ -368,7 +371,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL,1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
@@ -987,6 +990,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `ovfid` varchar(255),
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
+  `chefEnabled` boolean NOT NULL default false,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
@@ -1027,6 +1031,7 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `vdrpPort` int(5) unsigned default NULL,
   `vdrpIP` varchar(39) default NULL,
   `state` varchar(50) NOT NULL,
+  `subState` varchar(50) DEFAULT NULL,
   `high_disponibility` int(1) unsigned NOT NULL,
   `idConversion` INT(10) UNSIGNED,
   `idType` INT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - NOT MANAGED BY ABICLOUD  1 - MANAGED BY ABICLOUD',
@@ -1075,6 +1080,25 @@ CREATE TABLE  `kinton`.`remote_service` (
   CONSTRAINT `idDatecenter_FK` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
+--
+-- Definition of table `kinton`.`chefcookbook`
+--
+
+DROP TABLE IF EXISTS `kinton`.`chefcookbook`;
+CREATE TABLE  `kinton`.`chefcookbook` (
+  `chefCookbookId` int(10) unsigned NOT NULL auto_increment,
+  `idVM` int(10) unsigned NOT NULL,
+  `cookbook` varchar(255) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`chefCookbookId`),
+  KEY `chefcookbook_FK1` (`idVM`),
+  CONSTRAINT `chefcookbook_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*!40000 ALTER TABLE `chefcookbook` DISABLE KEYS */;
+LOCK TABLES `chefcookbook` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `chefcookbook` ENABLE KEYS */;
 
 /**
  *  Definition of table `kinton`.`metering`

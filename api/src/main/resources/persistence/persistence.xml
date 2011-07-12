@@ -33,7 +33,8 @@
 		<class>com.abiquo.server.core.cloud.VirtualMachine</class>
 		<class>com.abiquo.server.core.cloud.VirtualImage</class>
 		<class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
-		<class>com.abiquo.server.core.cloud.NodeVirtualImage</class>		
+		<class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
+		<class>com.abiquo.server.core.cloud.ChefCookbook</class>		
 		<!-- end: cloud infrastructure -->
 
 		<!-- enterprise -->

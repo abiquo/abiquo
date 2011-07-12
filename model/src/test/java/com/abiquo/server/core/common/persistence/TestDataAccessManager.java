@@ -24,6 +24,7 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.cloud.ChefCookbook;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -131,7 +132,7 @@ public class TestDataAccessManager
          */
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
-            VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
+            VirtualAppResources.class, VirtualAppliance.class, ChefCookbook.class, VirtualMachine.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
