@@ -27,8 +27,6 @@ import java.util.List;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
@@ -120,24 +118,7 @@ public class InfrastructureService
 
         InfrastructureCommand command = proxyCommand(userSession);
 
-        try
-        {
-            ArrayList<RackHB> commandResult =
-                command.getRacksByDatacenter(userSession, datacenterId, filters);
-            dataResult.setData(new ArrayList<Rack>());
-            for (RackHB singleResult : commandResult)
-            {
-                dataResult.getData().add(singleResult.toPojo());
-            }
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return command.getRacksByDatacenter(userSession, datacenterId, filters);
     }
 
     /**

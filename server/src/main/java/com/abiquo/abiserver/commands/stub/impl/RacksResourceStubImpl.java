@@ -21,7 +21,10 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.wink.client.ClientResponse;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
@@ -32,6 +35,8 @@ import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.infrastructure.RackDto;
+import com.abiquo.server.core.infrastructure.RacksDto;
 
 public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResourceStub
 {
@@ -39,7 +44,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
      */
     @Override
-    public DataResult<UcsRack> createUcsRack(UcsRack ucsRack)
+    public DataResult<UcsRack> createUcsRack(final UcsRack ucsRack)
     {
         // PREMIUM
 
@@ -49,40 +54,101 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getAllNotManagedRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
      */
-    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter)
+    @Override
+    public DataResult<List<Rack>> getAllNotManagedRacks(final DataCenter datacenter)
+    {
+        // PREMIUM
+        return getAllNotManagedRacks(datacenter, null);
+    }
+
+    @Override
+    public DataResult<List<Rack>> getAllNotManagedRacks(final DataCenter datacenter,
+        final String filter)
     {
         // PREMIUM
         return null;
     }
 
     @Override
-    public BasicResult associateBlades(Integer datacenterId, Integer rackId, IPAddress ipFrom,
-        IPAddress ipTo, HypervisorType hypervisorType, String user, String password, Integer port,
-        String vSwitchName)
+    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId,
+        final IPAddress ipFrom, final IPAddress ipTo, final HypervisorType hypervisorType,
+        final String user, final String password, final Integer port, final String vSwitchName)
     {
         return null;
     }
 
     @Override
-    public BasicResult powerOnMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public BasicResult powerOffMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         // TODO Auto-generated method stub
         return null;
     }
- 
+
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getUcsRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
      */
-    public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter)
+    @Override
+    public DataResult<List<UcsRack>> getUcsRacks(final DataCenter datacenter)
+    {
+        // PREMIUM
+        return getUcsRacks(datacenter, null);
+    }
+
+    @Override
+    public DataResult<List<UcsRack>> getUcsRacks(final DataCenter datacenter, final String fitler)
     {
         // PREMIUM
         return null;
+    }
+
+    @Override
+    public DataResult<List<Rack>> getRacksByDatacenter(final DataCenter datacenter)
+    {
+        return getRacksByDatacenter(datacenter, null);
+    }
+
+    @Override
+    public DataResult<List<Rack>> getRacksByDatacenter(final DataCenter datacenter,
+        final String filter)
+    {
+
+        DataResult<List<Rack>> result = new DataResult<List<Rack>>();
+
+        String uri = createRacksLink(datacenter.getId());
+
+        if (filter != null && filter.isEmpty())
+        {
+            uri += filter;
+        }
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            RacksDto responseDto = response.getEntity(RacksDto.class);
+            List<Rack> racks = new ArrayList<Rack>();
+
+            for (RackDto rack : responseDto.getCollection())
+            {
+                racks.add(Rack.create(rack, datacenter));
+            }
+            result.setSuccess(true);
+            result.setData(racks);
+        }
+        else
+        {
+            populateErrors(response, result, "getRacksByDatacenter");
+        }
+
+        return result;
     }
 }

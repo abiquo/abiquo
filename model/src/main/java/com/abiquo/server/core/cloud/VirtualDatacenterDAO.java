@@ -108,6 +108,17 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return findVirtualDatacentersByCriterions(restrictions);
     }
 
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        Collection<Criterion> restrictions = new ArrayList<Criterion>();
+        if (datacenter != null)
+        {
+            restrictions.add(sameDatacenter(datacenter));
+        }
+
+        return findVirtualDatacentersByCriterions(restrictions);
+    }
+
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
         final Datacenter datacenter)
     {
@@ -154,42 +165,43 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     private static final String COUNT_PUBLIC_IP_RESOURCES =
         "select count(rm.idManagement) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
             + "and rm.idResourceType = '10' and r.resourceSubType = '1' and rm.idVirtualDatacenter = :virtualDatacenterId";
-    
+
     private static final String COUNT_PRIVATE_VLANS_RESOURCES = " SELECT vlan "//
-            + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
-            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-            + "WHERE vlan.network.id = vdc.network.id "//
-            + "and vdc.id = :virtualDatacenterId";
+        + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
+        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+        + "WHERE vlan.network.id = vdc.network.id "//
+        + "and vdc.id = :virtualDatacenterId";
 
     public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).setParameter("not_deployed",
-                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId)
+                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
+                .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_VOLUMES_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES).setParameter(
-                "virtualDatacenterId", virtualDatacenterId).uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_PUBLIC_IP_RESOURCES)
+                .setParameter("virtualDatacenterId", virtualDatacenterId).uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
         // Storage usage is stored in MB
         used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
         used.setPublicIp(publicIps == null ? 0 : publicIps.longValue());
-        used.setVlanCount(getVLANUsage(virtualDatacenterId).size());    
+        used.setVlanCount(getVLANUsage(virtualDatacenterId).size());
 
         return used;
     }
-    
+
     private List<VLANNetwork> getVLANUsage(final Integer virtualdatacenterId)
     {
         Query query = getSession().createQuery(COUNT_PRIVATE_VLANS_RESOURCES);

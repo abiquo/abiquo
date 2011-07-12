@@ -35,7 +35,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 {
 
     @Override
-    protected RackDAO createDao(EntityManager arg0)
+    protected RackDAO createDao(final EntityManager arg0)
     {
         return new RackDAO(arg0);
     }
@@ -62,6 +62,30 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         Assert.assertEquals(dao.findRacks(reload(dao, datacenter1)).size(), 0);
         List<Rack> result = dao.findRacks(reload(dao, datacenter2));
         assertEqualsPropertyForList(Rack.NAME_PROPERTY, result, "aRack_2", "bRack_1");
+    }
+
+    public void test_findfilteredRacks() throws IllegalAccessException, InvocationTargetException,
+        NoSuchMethodException
+    {
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+
+        Datacenter datacenter1 = generator.createUniqueInstance();
+        Datacenter datacenter2 = generator.createUniqueInstance();
+        Rack rack2_1 = datacenter2.createRack("bRack_1", 2, 4094, 2, 10);
+        Rack rack2_2 = datacenter2.createRack("aRack_2", 2, 4094, 2, 10);
+        Rack rack2_3 = datacenter2.createRack("cRack_3_filter", 2, 4094, 2, 10);
+        ds().persistAll(datacenter1, datacenter2, rack2_1, rack2_2, rack2_3);
+
+        RackDAO dao = createDaoForRollbackTransaction();
+        List<Rack> racks1 = dao.findRacks(reload(dao, datacenter1));
+        List<Rack> racks2 = dao.findRacks(reload(dao, datacenter2));
+        List<Rack> racks2filter = dao.findRacks(reload(dao, datacenter2), "filter");
+        Assert.assertEquals(racks1.size(), 0);
+        Assert.assertEquals(racks2.size(), 3);
+        Assert.assertEquals(racks2filter.size(), 1);
+        assertEqualsPropertyForList(Rack.NAME_PROPERTY, racks2, "aRack_2", "bRack_1",
+            "cRack_3_filter");
+        assertEqualsPropertyForList(Rack.NAME_PROPERTY, racks2filter, "cRack_3_filter");
     }
 
     @Test

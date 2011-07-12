@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -86,15 +87,14 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    public DatacenterDto modifyDatacenter(final DatacenterDto datacenter,
+    public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        Datacenter d = service.getDatacenter(datacenterId);
+        Datacenter datacenter = createPersistenceObject(datacenterDto);
+        datacenter = service.modifyDatacenter(datacenterId, datacenter);
 
-        d = service.modifyDatacenter(datacenterId, datacenter);
-
-        return createTransferObject(d, restBuilder);
+        return createTransferObject(datacenter, restBuilder);
     }
 
     @GET
@@ -121,7 +121,7 @@ public class DatacenterResource extends AbstractResource
         }
         enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
         enterprisesDto.addLinks(buildEnterprisesLinks(uriInfo.getAbsolutePath().toString(),
-            (PagedList) enterprises, network,numElem));
+            (PagedList) enterprises, network, numElem));
         return enterprisesDto;
 
     }
@@ -143,11 +143,11 @@ public class DatacenterResource extends AbstractResource
     }
 
     // FIXME: Not allowed right now
-    // @DELETE
-    // public void deleteDatacenter(@PathParam(DATACENTER) Integer datacenterId)
-    // {
-    // service.removeDatacenter(datacenterId);
-    // }
+    @DELETE
+    public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        service.removeDatacenter(datacenterId);
+    }
 
     public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
@@ -165,6 +165,7 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
+    // Create the persistence object.
     public static Datacenter createPersistenceObject(final DatacenterDto datacenter)
         throws Exception
     {
@@ -172,7 +173,7 @@ public class DatacenterResource extends AbstractResource
     }
 
     private List<RESTLink> buildEnterprisesLinks(final String Path, final PagedList< ? > list,
-        Boolean network, Integer numElem)
+        final Boolean network, final Integer numElem)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -184,13 +185,15 @@ public class DatacenterResource extends AbstractResource
             previous = (previous < 0) ? 0 : previous;
 
             links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + previous + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + previous + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
         Integer next = list.getCurrentElement() + list.getPageSize();
         if (next < list.getTotalResults())
         {
             links.add(new RESTLink("next", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + next + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + next + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
 
         Integer last = list.getTotalResults() - list.getPageSize();
@@ -199,7 +202,9 @@ public class DatacenterResource extends AbstractResource
             last = 0;
         }
         links.add(new RESTLink("last", Path + "?" + NETWORK + "=" + network.toString() + '&'
-            + AbstractResource.START_WITH + "=" + last + '&' +AbstractResource.LIMIT +"=" + numElem));
+            + AbstractResource.START_WITH + "=" + last + '&' + AbstractResource.LIMIT + "="
+            + numElem));
         return links;
     }
+
 }

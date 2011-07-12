@@ -204,8 +204,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -415,8 +415,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -448,8 +448,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -599,12 +599,22 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createDatacenterLink()
+    {
+        return createDatacenterLink(null);
+    }
+
     protected String createDatacenterLink(final Integer datacenterId)
     {
+        String uri = "admin/datacenters";
         Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
+        if (datacenterId != null)
+        {
+            params.put("datacenter", datacenterId.toString());
+            uri += "/{datacenter}";
+        }
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}", params);
+        return resolveURI(apiUri, uri, params);
     }
 
     protected String createPrivateNetworksLink(final Integer vdcId)

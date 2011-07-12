@@ -132,12 +132,19 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter)
     {
-        List<RESTLink> links = new ArrayList<RESTLink>();
+        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
 
+        return buildDatacenterLinks(datacenter, builder);
+    }
+
+    @Override
+    public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter,
+        final RESTLinkBuilder builder)
+    {
         Map<String, String> params =
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenter.getId().toString());
+        List<RESTLink> links = new ArrayList<RESTLink>();
 
-        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(DatacenterResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(RacksResource.class, RacksResource.RACKS_PATH, params));
         links.add(builder.buildRestLink(RemoteServicesResource.class,
@@ -195,15 +202,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
-        
+
         if (managedRack)
         {
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_ON, MachineResource.MACHINE_ACTION_POWER_ON_REL,
-                params));
+                MachineResource.MACHINE_ACTION_POWER_ON,
+                MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_OFF, MachineResource.MACHINE_ACTION_POWER_OFF_REL,
-                params));
+                MachineResource.MACHINE_ACTION_POWER_OFF,
+                MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
         }
 
         return links;
@@ -597,17 +604,13 @@ public class RESTBuilder implements IRESTBuilder
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON,
-            "power on", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON, "power on", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF,
-            "power off", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF, "power off", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME,
-            "resume", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME, "resume", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE,
-            "pause", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
 
         return links;
     }
@@ -783,22 +786,24 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
-        EnterpriseExclusionRuleDto enterpriseExclusionDto,
-        EnterpriseExclusionRule enterpriseExclusion)
+        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        final EnterpriseExclusionRule enterpriseExclusion)
     {
         // TODO Auto-generated method stub
-	return null;
+        return null;
     }
-
 
     @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
     {
         return null;
     }
-    
-    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
+
+    @Override
+    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
+        final MachineLoadRule mlr)
     {
         // TODO Auto-generated method stub
         return null;
@@ -810,7 +815,9 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
+    @Override
+    public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
+        final FitPolicyRule fpr)
     {
         // TODO Auto-generated method stub
         return null;

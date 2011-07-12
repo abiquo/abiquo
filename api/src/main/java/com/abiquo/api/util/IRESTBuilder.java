@@ -64,9 +64,12 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter);
 
+    public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter, RESTLinkBuilder builder);
+
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
-    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, Boolean managedRack, MachineDto machine);
+    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId,
+        Boolean managedRack, MachineDto machine);
 
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
@@ -139,7 +142,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId);
-    
+
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         EnterpriseExclusionRule enterpriseExclusion);
@@ -148,4 +151,5 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
 }

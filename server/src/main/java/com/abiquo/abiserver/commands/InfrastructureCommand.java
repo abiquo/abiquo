@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
@@ -70,7 +69,7 @@ public interface InfrastructureCommand
      * @param filters String value to filter the search.
      * @return the list of the Racks.
      */
-    public ArrayList<RackHB> getRacksByDatacenter(final UserSession userSession,
+    public DataResult<List<Rack>> getRacksByDatacenter(final UserSession userSession,
         final Integer datacenterId, final String filters) throws InfrastructureCommandException;
 
     /**
@@ -286,7 +285,8 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> startVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
+    public abstract DataResult<State> startVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Pause" action in the Virtual Machine
@@ -294,7 +294,8 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Paused"
      */
-    public abstract DataResult<State> pauseVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
+    public abstract DataResult<State> pauseVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Reboot" action in the Virtual Machine
@@ -302,7 +303,8 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> rebootVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
+    public abstract DataResult<State> rebootVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Shutdown" action in the Virtual Machine
@@ -310,7 +312,8 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Powered Off"
      */
-    public abstract DataResult<State> shutdownVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
+    public abstract DataResult<State> shutdownVirtualMachine(final UserSession userSession,
+        final VirtualMachine virtualMachine);
 
     /**
      * Moves a virtual machine from a Physical Machine to another virtualMachine's "assignedTo"
