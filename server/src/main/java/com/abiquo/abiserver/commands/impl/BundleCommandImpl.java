@@ -151,7 +151,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (BundleException e)
         {
             factory.rollbackConnection();
-            traceBundleError("Error bundling VirtualAppliance (" + va.getId() + ") "
+            traceBundleError("Error instantiating VirtualAppliance (" + va.getId() + ") "
                 + e.getMessage());
 
             updateVirtualAppliance(va.toPojoHB(), e.getPreviousState(), e.getPreviousState());
@@ -160,7 +160,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (PersistenceException e)
         {
             factory.rollbackConnection();
-            traceBundleError("Error bundling VirtualAppliance: " + va.getId());
+            traceBundleError("Error instantiating VirtualAppliance: " + va.getId());
 
             State notDeployed = new State(StateEnum.NOT_DEPLOYED);
             updateVirtualAppliance(va.toPojoHB(), notDeployed, notDeployed);
@@ -432,9 +432,9 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             {
                 for(Node node:virtualApp.getNodes())
                 {
-                    String message = "Bundle process started in "+ node.getName();
+                    String message = "Instance process started in "+ node.getName();
                     TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                        EventType.VAPP_BUNDLE, message, user, platform);
+                        EventType.VAPP_INSTANCE, message, user, platform);
                 }
                 BasicResult result = virtualApplianceWs.bundleVirtualAppliance(virtualApp);
                 done = result.getSuccess();
@@ -443,7 +443,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            traceBundleError("Error bundling virtual appliance " + virtualApp.getName() + "("
+            traceBundleError("Error instantiating virtual appliance " + virtualApp.getName() + "("
                 + virtualApp.getId() + "). " + e.getMessage());
             done = false;
         }
@@ -598,7 +598,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     private void traceBundleError(final String message)
     {
         TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-            EventType.VAPP_BUNDLE, message, user, platform);
+            EventType.VAPP_INSTANCE, message, user, platform);
     }
 
     private void uploadNotManagedMachines(final VirtualappHB vapp,
