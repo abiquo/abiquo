@@ -46,6 +46,10 @@ public interface NetworkResourceStub
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
+	public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId, Integer vlanId,
+			Integer offset, Integer numberOfNodes, String filterLike,
+			String orderBy, Boolean asc, Boolean onlyAvailable);
+	
     public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
@@ -71,4 +75,5 @@ public interface NetworkResourceStub
      */
     public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
         throws NetworkCommandException;
+
 }

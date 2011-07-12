@@ -614,6 +614,24 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
     }
+    
+    protected String createPrivateNetworkLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}", params);
+    }
+    
+    protected String createPrivateNetworkIPsLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips", params);
+    }
 
     protected Resource resource(final String uri, final String user, final String password,
         final ClientHandler... handlers)

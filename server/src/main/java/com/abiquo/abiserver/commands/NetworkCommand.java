@@ -115,69 +115,6 @@ public interface NetworkCommand
     public List<IPAddress> getListGatewaysByVirtualMachine(UserSession userSession, Integer vmId)
         throws NetworkCommandException;
 
-    /**
-     * Return the list of available network resources of a given VLAN.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vlanId identifier of the VLAN.
-     * @param offset first element to return.
-     * @param numElem number of elements to return.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address or VLAN name.
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolAvailableByVLAN(UserSession userSession,
-        Integer vlanId, Integer offset, Integer numElem, String filterLike)
-        throws NetworkCommandException;
-
-    /**
-     * Return the list of network resources of a given VLAN.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vlanId VLAN identifier.
-     * @param offset first element to return.
-     * @param numElem number of elements to return
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @param orderBy the order preferences of the query.
-     * @param asc tell him if we want to order ascendant or descendant
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolByVLAN(UserSession userSession,
-        Integer vlanId, Integer offset, Integer numElem, String filterLike, String orderBy,
-        Boolean asc) throws NetworkCommandException;
-
-    /**
-     * Return the number of available network resources of a given VLAN. Used by paging purposes.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method.
-     * @param vlanId identifier of the VLAN.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address or VLAN name.
-     * @return a number of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolAvailableByVLAN(UserSession userSession, Integer vlanId,
-        String filterLike) throws NetworkCommandException;
-
-    /**
-     * Return the number of network resources of a given VLAN.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vlanId VLAN identifier.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolByVLAN(UserSession userSession, Integer vlanId,
-        String filterLike) throws NetworkCommandException;
 
     /**
      * Lists all the NICs used by a Virtual Machine.

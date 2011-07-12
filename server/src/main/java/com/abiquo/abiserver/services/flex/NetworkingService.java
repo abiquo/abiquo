@@ -188,57 +188,6 @@ public class NetworkingService
 
     }
 
-    /**
-     * Get the available IPs of the given VLAN.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vlanId identifier of the VLAN.
-     * @param listRequest object that stores the options to filter the search.
-     * @return a DataResult containing the list of available IPs in its Data.
-     */
-    public DataResult<ListResponse<IpPoolManagement>> getAvailableVirtualMachineNICsByVLAN(
-        UserSession userSession, Integer vlanId, ListRequest listRequest)
-    {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolAvailableByVLAN(userSession, vlanId,
-                    listRequest.getOffset(), listRequest.getNumberOfNodes(),
-                    listRequest.getFilterLike());
-            Integer listPoolNumberAvailable =
-                proxy.getNumberNetworkPoolAvailableByVLAN(userSession, vlanId,
-                    listRequest.getFilterLike());
-
-            List<IpPoolManagement> listOfAddress = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB ipPool : listPoolAvailable)
-            {
-                listOfAddress.add(ipPool.toPojo());
-            }
-
-            listResult.setList(listOfAddress);
-            listResult.setTotalNumEntities(listPoolNumberAvailable);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-    }
-
     public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
     {
         return proxyStub(userSession).getInfoDHCPServer(userSession, vdcId);
@@ -368,52 +317,31 @@ public class NetworkingService
      * @param listRequest object that stores the options to filter the search.
      * @return a list of all the IPs managed by a Virtual DataCenter.
      */
-    public DataResult<ListResponse<IpPoolManagement>> getNetworkPoolInfoByVLAN(
-        UserSession userSession, Integer vlanId, ListRequest listRequest)
+    public BasicResult getNetworkPoolInfoByVLAN(
+        UserSession userSession, Integer vdcId, Integer vlanId, ListRequest listRequest)
     {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            String orderBy =
-                (listRequest.getOrderBy() != null) ? listRequest.getOrderBy() : new String();
-
-            // Get the responses from the command (proxy var)
-            List<IpPoolManagementHB> listPoolAvailable =
-                proxy.getListNetworkPoolByVLAN(userSession, vlanId, listRequest.getOffset(),
-                    listRequest.getNumberOfNodes(), listRequest.getFilterLike(), orderBy,
-                    listRequest.getAsc());
-            Integer netmanValues =
-                proxy.getNumberNetworkPoolByVLAN(userSession, vlanId, listRequest.getFilterLike());
-
-            // Build the response
-            List<IpPoolManagement> listResp = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB currentNetman : listPoolAvailable)
-            {
-                listResp.add(currentNetman.toPojo());
-            }
-
-            ListResponse<IpPoolManagement> listResult = new ListResponse<IpPoolManagement>();
-            listResult.setList(listResp);
-            listResult.setTotalNumEntities(netmanValues);
-
-            dataResult.setData(listResult);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
+                listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+                listRequest.getOrderBy(), listRequest.getAsc(), Boolean.FALSE);
     }
 
+    /**
+     * Get the available IPs of the given VLAN.
+     * 
+     * @param userSession UserSession object with the information of the user that called this
+     *            method
+     * @param vlanId identifier of the VLAN.
+     * @param listRequest object that stores the options to filter the search.
+     * @return a DataResult containing the list of available IPs in its Data.
+     */
+    public BasicResult getAvailableVirtualMachineNICsByVLAN(
+        UserSession userSession, Integer vdcId, Integer vlanId, ListRequest listRequest)
+    {
+        return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
+                listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+                listRequest.getOrderBy(), listRequest.getAsc(), Boolean.TRUE);
+    }
+    
     /**
      * Lists all the NICs used by a Virtual Machine.
      * 

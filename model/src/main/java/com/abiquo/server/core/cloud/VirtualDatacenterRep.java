@@ -296,10 +296,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param vlanId identifier of the vlan
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByVLAN(final Integer vlanId, final Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId, final Integer firstElem,
+            final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+            final Boolean asc, final Boolean available)
     {
-        return ipManagementDAO.findByVLAN(vlanId, page, numElem);
+        return ipManagementDAO.findByPrivateVLAN(vdcId, vlanId, firstElem, numElem, has, orderBy, asc, available);
     }
 
     /**

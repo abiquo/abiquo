@@ -26,6 +26,10 @@ package com.abiquo.api.services;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.cloud.PrivateNetworkResource;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -53,10 +59,19 @@ public class IpAddressService extends DefaultApiService
     @Autowired
     VirtualDatacenterRep repo;
 
-    public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vlanId,
-        final Integer page, final Integer numElem)
+    public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vdcId,
+            final Integer vlanId, final Integer startwith, final String orderBy,
+            final String filter,  final Integer limit, final Boolean descOrAsc, final Boolean available)
     {        
-        return repo.findIpsByVLAN(vlanId, page, numElem);
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER.info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
+        }
+        return repo.findIpsByPrivateVLAN(vdcId, vlanId, startwith, limit, filter, orderByEnum, descOrAsc, available);
     }
 
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,

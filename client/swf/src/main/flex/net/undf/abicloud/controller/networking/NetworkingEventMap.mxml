@@ -287,7 +287,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getNetworkPoolInfoByVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -355,7 +355,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getAvailableVirtualMachineNICsByVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event. virtualDatacenter.id, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
