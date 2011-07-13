@@ -176,7 +176,7 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
-    
+
     // protected ClientResponse put(final String uri, final Object dto, String mediaType)
     // {
     // UserHB user = getCurrentUser();
@@ -549,8 +549,9 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLink(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -560,26 +561,29 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn",
-            params);
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
     }
-    
-    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
             params);
     }
 
@@ -667,10 +671,22 @@ public class AbstractAPIStub
 
     protected String createRacksLink(final Integer datacenterId)
     {
+        return createRacksLink(datacenterId, null);
+    }
+
+    protected String createRacksLink(final Integer datacenterId, final Integer rackId)
+    {
         Map<String, String> params = new HashMap<String, String>();
+        String uri = "admin/datacenters/{datacenter}/racks";
         params.put("datacenter", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks", params);
+        if (rackId != null)
+        {
+            uri += "/{rack}";
+            params.put("rack", rackId.toString());
+        }
+
+        return resolveURI(apiUri, uri, params);
     }
 
     protected String createMachinesLink(final Rack rack)
@@ -681,7 +697,7 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
     }
-    
+
     protected String createMachinesLink(final Integer datacenterId, final Integer rackId)
     {
         Map<String, String> params = new HashMap<String, String>();

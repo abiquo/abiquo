@@ -47,7 +47,6 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     public DataResult<UcsRack> createUcsRack(final UcsRack ucsRack)
     {
         // PREMIUM
-
         return null;
     }
 
@@ -74,6 +73,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         final IPAddress ipFrom, final IPAddress ipTo, final HypervisorType hypervisorType,
         final String user, final String password, final Integer port, final String vSwitchName)
     {
+        // PREMIUM
         return null;
     }
 
@@ -81,7 +81,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        // TODO Auto-generated method stub
+        // PREMIUM
         return null;
     }
 
@@ -89,7 +89,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        // TODO Auto-generated method stub
+        // PREMIUM
         return null;
     }
 
@@ -109,6 +109,8 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         // PREMIUM
         return null;
     }
+
+    // ___________ COMMUNITY _____________ //
 
     @Override
     public DataResult<List<Rack>> getRacksByDatacenter(final DataCenter datacenter)
@@ -150,5 +152,101 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         }
 
         return result;
+    }
+
+    @Override
+    public DataResult<Rack> createRack(final Rack rack)
+    {
+        DataResult<Rack> result = new DataResult<Rack>();
+
+        String uri = createRacksLink(rack.getDataCenter().getId());
+
+        RackDto dto = fromRackToDto(rack);
+        dto.setId(null);
+
+        ClientResponse response = post(uri, dto);
+
+        if (response.getStatusCode() == 201)
+        {
+            RackDto rdto = response.getEntity(RackDto.class);
+
+            result.setData(Rack.create(rdto, rack.getDataCenter()));
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "createRack");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Rack> modifyRack(final Rack rack)
+    {
+        DataResult<Rack> result = new DataResult<Rack>();
+
+        String uri = createRacksLink(rack.getDataCenter().getId(), rack.getId());
+
+        RackDto dto = fromRackToDto(rack);
+
+        ClientResponse response = put(uri, dto);
+
+        if (response.getStatusCode() == 200)
+        {
+            RackDto rdto = response.getEntity(RackDto.class);
+
+            result.setData(Rack.create(rdto, rack.getDataCenter()));
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "modifyRack");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult deleteRack(final Rack rack)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createRacksLink(rack.getDataCenter().getId(), rack.getId());
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteRack");
+        }
+
+        return result;
+    }
+
+    private RackDto fromRackToDto(final Rack rack)
+    {
+        RackDto dto = new RackDto();
+
+        dto.setId(rack.getId());
+        dto.setHaEnabled(rack.getHaEnabled());
+        dto.setName(rack.getName());
+        dto.setLongDescription(rack.getLargeDescription());
+        dto.setShortDescription(rack.getShortDescription());
+
+        if (rack.getVlanNetworkParameters() != null)
+        {
+            dto.setNrsq(rack.getVlanNetworkParameters().getNRSQ());
+            dto.setVlanIdMax(rack.getVlanNetworkParameters().getVlan_id_max());
+            dto.setVlanIdMin(rack.getVlanNetworkParameters().getVlan_id_min());
+            dto.setVlanPerVdcExpected(rack.getVlanNetworkParameters().getVlan_per_vdc_expected());
+            dto.setVlansIdAvoided(rack.getVlanNetworkParameters().getVlans_id_avoided());
+        }
+
+        return dto;
     }
 }

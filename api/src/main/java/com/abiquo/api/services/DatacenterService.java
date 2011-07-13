@@ -37,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
-import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -74,12 +73,6 @@ public class DatacenterService extends DefaultApiService
     @Autowired
     VirtualDatacenterService virtualDatacenterService;
 
-    @Autowired
-    MachineService machineService;
-
-    @Autowired
-    VirtualMachineService virtualMachineService;
-
     public DatacenterService()
     {
 
@@ -91,8 +84,6 @@ public class DatacenterService extends DefaultApiService
         infrastructureService = new InfrastructureService(em);
         remoteServiceService = new RemoteServiceService(em);
         virtualDatacenterService = new VirtualDatacenterService(em);
-        machineService = new MachineService(em);
-        virtualMachineService = new VirtualMachineService(em);
         tracer = new TracerLogger();
     }
 
@@ -185,9 +176,9 @@ public class DatacenterService extends DefaultApiService
 
         repo.update(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY,
-            "Datacenter '" + old.getName() + "' has been modified [Name: " + datacenter.getName()
-                + ", Situation: " + datacenter.getLocation() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY, "Datacenter '"
+            + old.getName() + "' has been modified [Name: " + datacenter.getName()
+            + ", Situation: " + datacenter.getLocation() + "]");
 
         return old;
     }
@@ -223,11 +214,6 @@ public class DatacenterService extends DefaultApiService
         return repo.findRacksWithHAEnabled(datacenter);
     }
 
-    public List<Machine> getMachines(final Rack rack)
-    {
-        return repo.findRackMachines(rack);
-    }
-
     public List<Machine> getEnabledMachines(final Rack rack)
     {
         return repo.findRackEnabledForHAMachines(rack);
@@ -255,18 +241,7 @@ public class DatacenterService extends DefaultApiService
                 {
                     for (Rack rack : racks)
                     {
-                        List<Machine> machines = getMachines(rack);
-                        if (machines != null)
-                        {
-                            for (Machine machine : machines)
-                            {
-                                virtualMachineService.deleteNotManagedVirtualMachines(machine
-                                    .getHypervisor());
-                                machineService.removeMachine(machine.getId());
-                            }
-                        }
-
-                        repo.deleteRack(rack);
+                        infrastructureService.removeRack(rack);
                     }
                 }
 

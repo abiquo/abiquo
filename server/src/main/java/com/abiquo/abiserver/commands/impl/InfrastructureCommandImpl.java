@@ -74,10 +74,8 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DatastoreDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
-import com.abiquo.abiserver.persistence.dao.infrastructure.RackDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
-import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -90,7 +88,6 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
-import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
@@ -470,76 +467,82 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     @Override
     public DataResult<Rack> createRack(final UserSession userSession, final Rack rack)
     {
-        DataResult<Rack> dataResult;
-        dataResult = new DataResult<Rack>();
-        dataResult.setSuccess(true);
+        RacksResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new RacksResourceStubImpl(),
+                RacksResourceStub.class);
 
-        Session session = null;
-        Transaction transaction = null;
+        return proxy.createRack(rack);
 
-        try
-        {
-            if (rack.getName() != null && rack.getName().trim().length() == 0)
-            {
-
-                dataResult.setSuccess(false);
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                    "createRack_noname");
-                // Log the event
-                traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
-                    userSession, null, null, "Rack without name", null, rack, null, null, null);
-                return dataResult;
-            }
-        }
-        catch (Exception e)
-        {
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "_noname", e);
-            // Log the event
-            traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                null, null, e.getMessage(), null, rack, null, null, null);
-        }
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            VlanNetworkParameters vlanNetParameters = rack.getVlanNetworkParameters();
-            if (vlanNetParameters == null)
-            {
-                vlanNetParameters = new VlanNetworkParameters(2, 4094, "", 80, 8);
-                rack.setVlanNetworkParameters(vlanNetParameters);
-            }
-
-            RackHB rackHB = rack.toPojoHB();
-            session.save(rackHB);
-
-            rack.setId(rackHB.getIdRack());
-            dataResult.setData(rack);
-
-            transaction.commit();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                rack.getDataCenter(), null, "Rack '" + rack.getName() + "' has been created", null,
-                rack, null, null, null);
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "createRack", e);
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
-
-        }
-
-        return dataResult;
+        // DataResult<Rack> dataResult;
+        // dataResult = new DataResult<Rack>();
+        // dataResult.setSuccess(true);
+        //
+        // Session session = null;
+        // Transaction transaction = null;
+        //
+        // try
+        // {
+        // if (rack.getName() != null && rack.getName().trim().length() == 0)
+        // {
+        //
+        // dataResult.setSuccess(false);
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+        // "createRack_noname");
+        // // Log the event
+        // traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
+        // userSession, null, null, "Rack without name", null, rack, null, null, null);
+        // return dataResult;
+        // }
+        // }
+        // catch (Exception e)
+        // {
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+        // "_noname", e);
+        // // Log the event
+        // traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+        // null, null, e.getMessage(), null, rack, null, null, null);
+        // }
+        //
+        // try
+        // {
+        // session = HibernateUtil.getSession();
+        // transaction = session.beginTransaction();
+        //
+        // VlanNetworkParameters vlanNetParameters = rack.getVlanNetworkParameters();
+        // if (vlanNetParameters == null)
+        // {
+        // vlanNetParameters = new VlanNetworkParameters(2, 4094, "", 80, 8);
+        // rack.setVlanNetworkParameters(vlanNetParameters);
+        // }
+        //
+        // RackHB rackHB = rack.toPojoHB();
+        // session.save(rackHB);
+        //
+        // rack.setId(rackHB.getIdRack());
+        // dataResult.setData(rack);
+        //
+        // transaction.commit();
+        //
+        // traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+        // rack.getDataCenter(), null, "Rack '" + rack.getName() + "' has been created", null,
+        // rack, null, null, null);
+        // }
+        // catch (HibernateException e)
+        // {
+        // if (transaction != null && transaction.isActive())
+        // {
+        // transaction.rollback();
+        // }
+        //
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+        // "createRack", e);
+        //
+        // traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_CREATE, userSession,
+        // rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
+        //
+        // }
+        //
+        // return dataResult;
     }
 
     /*
@@ -551,70 +554,76 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     @Override
     public BasicResult deleteRack(final UserSession userSession, final Rack rack)
     {
-        BasicResult basicResult;
-        basicResult = new BasicResult();
+        RacksResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new RacksResourceStubImpl(),
+                RacksResourceStub.class);
 
-        PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
-        RackDAO rackDAO = factory.getRackDAO();
-        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
+        return proxy.deleteRack(rack);
 
-        try
-        {
-            factory.beginConnection();
-
-            RackHB rackHB = rackDAO.findById(rack.getId());
-
-            // Delete rack allocation rules
-            MachineLoadRuleDAO ruleDAO = factory.getMachineLoadRuleDAO();
-            ruleDAO.deleteRulesForRack(rack.getId());
-
-            for (PhysicalmachineHB pmToDelete : rackHB.getPhysicalmachines())
-            {
-                if (physicalmachineDAO.getNumberOfDeployedVirtualMachines(pmToDelete) == 0)
-                {
-                    // VMs not managed must be deleted too
-                    deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
-                        userSession);
-                }
-                else
-                {
-                    basicResult.setSuccess(false);
-
-                    errorManager.reportError(resourceManager, basicResult,
-                        "deleterack_deployedmachines");
-
-                    factory.rollbackConnection();
-
-                    return basicResult;
-
-                }
-            }
-
-            // once the physical machines are deleted, delete the rack
-            rackDAO.makeTransient(rackHB);
-
-            basicResult.setSuccess(true);
-
-            factory.endConnection();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, userSession,
-                rack.getDataCenter(), null, null, null, rack, null, null, null);
-
-        }
-        catch (Exception e)
-        {
-            factory.rollbackConnection();
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "deleteRack", e);
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_DELETE, userSession,
-                rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
-        }
-
-        return basicResult;
+        // BasicResult basicResult;
+        // basicResult = new BasicResult();
+        //
+        // PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
+        // RackDAO rackDAO = factory.getRackDAO();
+        // DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
+        //
+        // try
+        // {
+        // factory.beginConnection();
+        //
+        // RackHB rackHB = rackDAO.findById(rack.getId());
+        //
+        // // Delete rack allocation rules
+        // MachineLoadRuleDAO ruleDAO = factory.getMachineLoadRuleDAO();
+        // ruleDAO.deleteRulesForRack(rack.getId());
+        //
+        // for (PhysicalmachineHB pmToDelete : rackHB.getPhysicalmachines())
+        // {
+        // if (physicalmachineDAO.getNumberOfDeployedVirtualMachines(pmToDelete) == 0)
+        // {
+        // // VMs not managed must be deleted too
+        // deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
+        //
+        // deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
+        // userSession);
+        // }
+        // else
+        // {
+        // basicResult.setSuccess(false);
+        //
+        // errorManager.reportError(resourceManager, basicResult,
+        // "deleterack_deployedmachines");
+        //
+        // factory.rollbackConnection();
+        //
+        // return basicResult;
+        //
+        // }
+        // }
+        //
+        // // once the physical machines are deleted, delete the rack
+        // rackDAO.makeTransient(rackHB);
+        //
+        // basicResult.setSuccess(true);
+        //
+        // factory.endConnection();
+        //
+        // traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, userSession,
+        // rack.getDataCenter(), null, null, null, rack, null, null, null);
+        //
+        // }
+        // catch (Exception e)
+        // {
+        // factory.rollbackConnection();
+        //
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
+        // "deleteRack", e);
+        //
+        // traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_DELETE, userSession,
+        // rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
+        // }
+        //
+        // return basicResult;
     }
 
     /*
@@ -626,71 +635,77 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     public BasicResult editRack(final UserSession userSession, final Rack rack)
     {
 
-        BasicResult basicResult;
-        basicResult = new BasicResult();
-        basicResult.setSuccess(true);
+        RacksResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new RacksResourceStubImpl(),
+                RacksResourceStub.class);
 
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            RackHB rackPojo =
-                (RackHB) session.get(
-                    com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
-                    rack.getId());
-
-            // Auxiliar rack object, used to keep a copy of the object before
-            // the modification
-            Rack rackAux = rackPojo.toPojo();
-
-            rackPojo.setName(rack.getName());
-            rackPojo.setShortDescription(rack.getShortDescription());
-            rackPojo.setLargeDescription(rack.getLargeDescription());
-
-            VlanNetworkParameters vlanNetworkParameters = rack.getVlanNetworkParameters();
-            rackPojo.setVlan_id_max(vlanNetworkParameters.getVlan_id_max());
-            rackPojo.setVlan_id_min(vlanNetworkParameters.getVlan_id_min());
-            rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
-            rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
-            rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
-
-            rackPojo.setHaEnabled(rack.getHaEnabled());
-
-            session.update(rackPojo);
-
-            transaction.commit();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackAux.getDataCenter(), null,
-                "Rack '" + rackAux.getName() + "' has been modified [Name: " + rack.getName()
-                    + ", Short description: " + rack.getShortDescription()
-                    + ", Large description: " + rack.getLargeDescription() + "]", null, rackAux,
-                null, null, null);
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "editRack", e);
-
-            RackHB rackPojo =
-                (RackHB) session.get(
-                    com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
-                    rack.getId());
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackPojo.toPojo().getDataCenter(), null, e.getMessage(), null, rackPojo.toPojo(),
-                null, null, null);
-        }
-        return basicResult;
+        return proxy.modifyRack(rack);
+        //
+        // BasicResult basicResult;
+        // basicResult = new BasicResult();
+        // basicResult.setSuccess(true);
+        //
+        // Session session = null;
+        // Transaction transaction = null;
+        //
+        // try
+        // {
+        // session = HibernateUtil.getSession();
+        // transaction = session.beginTransaction();
+        //
+        // RackHB rackPojo =
+        // (RackHB) session.get(
+        // com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
+        // rack.getId());
+        //
+        // // Auxiliar rack object, used to keep a copy of the object before
+        // // the modification
+        // Rack rackAux = rackPojo.toPojo();
+        //
+        // rackPojo.setName(rack.getName());
+        // rackPojo.setShortDescription(rack.getShortDescription());
+        // rackPojo.setLargeDescription(rack.getLargeDescription());
+        //
+        // VlanNetworkParameters vlanNetworkParameters = rack.getVlanNetworkParameters();
+        // rackPojo.setVlan_id_max(vlanNetworkParameters.getVlan_id_max());
+        // rackPojo.setVlan_id_min(vlanNetworkParameters.getVlan_id_min());
+        // rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
+        // rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
+        // rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
+        //
+        // rackPojo.setHaEnabled(rack.getHaEnabled());
+        //
+        // session.update(rackPojo);
+        //
+        // transaction.commit();
+        //
+        // traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
+        // rackAux.getDataCenter(), null,
+        // "Rack '" + rackAux.getName() + "' has been modified [Name: " + rack.getName()
+        // + ", Short description: " + rack.getShortDescription()
+        // + ", Large description: " + rack.getLargeDescription() + "]", null, rackAux,
+        // null, null, null);
+        // }
+        // catch (HibernateException e)
+        // {
+        // if (transaction != null && transaction.isActive())
+        // {
+        // transaction.rollback();
+        // }
+        //
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
+        // "editRack", e);
+        //
+        // RackHB rackPojo =
+        // (RackHB) session.get(
+        // com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
+        // rack.getId());
+        //
+        // traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
+        // rackPojo.toPojo().getDataCenter(), null, e.getMessage(), null, rackPojo.toPojo(),
+        // null, null, null);
+        // }
+        // return basicResult;
     }
 
     /*

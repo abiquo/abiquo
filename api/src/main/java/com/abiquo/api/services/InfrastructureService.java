@@ -38,13 +38,17 @@ import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -58,6 +62,9 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -71,6 +78,8 @@ import com.abiquo.server.core.infrastructure.UcsRack;
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class InfrastructureService extends DefaultApiService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureService.class);
+
     public static final String CHECK_RESOURCE = "check";
 
     // Declare the Repo. It only should use ONE repo.
@@ -79,6 +88,12 @@ public class InfrastructureService extends DefaultApiService
 
     @Autowired
     RemoteServiceService remoteServiceService;
+
+    @Autowired
+    VirtualMachineService virtualMachineService;
+
+    @Autowired
+    MachineService machineService;
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
@@ -92,6 +107,9 @@ public class InfrastructureService extends DefaultApiService
     {
         repo = new InfrastructureRep(em);
         remoteServiceService = new RemoteServiceService(em);
+        virtualMachineService = new VirtualMachineService(em);
+        machineService = new MachineService(em);
+        tracer = new TracerLogger();
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -102,6 +120,8 @@ public class InfrastructureService extends DefaultApiService
         // Check if there is a rack with the same name in the Datacenter
         if (repo.existsAnyRackWithName(datacenter, rack.getName()))
         {
+            tracer.log(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
+                "Rack with duplicated name " + rack.getName());
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
             flushErrors();
         }
@@ -134,6 +154,9 @@ public class InfrastructureService extends DefaultApiService
         // Call the inherited 'validate' function in the DefaultApiService
         validate(rack);
         repo.insertRack(rack);
+
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
+            "Rack '" + rack.getName() + "' has been created succesfully");
 
         return rack;
     }
@@ -297,6 +320,8 @@ public class InfrastructureService extends DefaultApiService
         // Check
         if (repo.existsAnyOtherRackWithName(old, rack.getName()))
         {
+            tracer.log(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
+                "Rack with duplicated name " + rack.getName());
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
             flushErrors();
         }
@@ -304,16 +329,58 @@ public class InfrastructureService extends DefaultApiService
         old.setName(rack.getName());
         old.setShortDescription(rack.getShortDescription());
         old.setLongDescription(rack.getLongDescription());
+        old.setHaEnabled(rack.isHaEnabled());
+
+        if (hasVlanConfig(rack))
+        {
+            old.setNrsq(rack.getNrsq());
+            old.setVlanIdMax(rack.getVlanIdMax());
+            old.setVlanIdMin(rack.getVlanIdMin());
+            old.setVlanPerVdcExpected(rack.getVlanPerVdcExpected());
+            old.setVlansIdAvoided(rack.getVlansIdAvoided());
+        }
 
         validate(old);
         repo.updateRack(old);
+
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY,
+            "Rack '" + old.getName() + "' has been modified [Name: " + rack.getName()
+                + ", Short description: " + rack.getShortDescription() + ", Large description: "
+                + rack.getLongDescription() + "]");
+
         return old;
     }
 
-    public void removeRack(final Integer datacenterId, final Integer rackId)
+    public void removeRack(final Rack rack)
     {
-        Rack rack = getRack(datacenterId, rackId);
+
+        List<Machine> machines = getMachines(rack);
+        if (machines != null)
+        {
+            for (Machine machine : machines)
+            {
+                if (machine.getHypervisor() != null)
+                {
+                    virtualMachineService.deleteNotManagedVirtualMachines(machine.getHypervisor());
+                    machineService.removeMachine(machine.getId());
+                }
+            }
+        }
+
         repo.deleteRack(rack);
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE,
+            "Rack " + rack.getName() + " deleted");
+    }
+
+    // public void removeRack(final Integer datacenterId, final Integer rackId)
+    // {
+    // Rack rack = getRack(datacenterId, rackId);
+    // repo.deleteRack(rack);
+    // }
+
+    public List<Machine> getMachines(final Rack rack)
+    {
+        return repo.findRackMachines(rack);
     }
 
     public List<RemoteService> getRemoteServices()
@@ -668,6 +735,12 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+    }
+
+    public boolean hasVlanConfig(final Rack rack)
+    {
+        return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
+            && rack.getVlanPerVdcExpected() != null;
     }
 
 }

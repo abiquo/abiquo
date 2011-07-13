@@ -35,7 +35,7 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -70,10 +70,10 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    protected OVFGeneratorService ovfService;
 
     @Autowired
-    protected OVFGeneratorService ovfService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     UserService userService;
@@ -88,7 +88,7 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.infrastructureService = new InfrastructureService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -114,12 +114,12 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
 
-    public VirtualMachine findByUUID(String uuid)
+    public VirtualMachine findByUUID(final String uuid)
     {
         return repo.findByUUID(uuid);
     }
 
-    public VirtualMachine findByName(String name)
+    public VirtualMachine findByName(final String name)
     {
         return repo.findByName(name);
     }
@@ -216,7 +216,7 @@ public class VirtualMachineService extends DefaultApiService
         updateVirtualMachine(vm);
     }
 
-    public void validMachineStateChange(State oldState, State newState)
+    public void validMachineStateChange(final State oldState, final State newState)
     {
         if (oldState == State.NOT_DEPLOYED)
         {
@@ -240,7 +240,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
-    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
+    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final State state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
@@ -262,7 +263,7 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                infrastructureService.getRemoteService(datacenterId,
+                remoteServiceService.getRemoteService(datacenterId,
                     RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
@@ -283,14 +284,14 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
     }
 
     @Deprecated
-    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    private VirtualAppliance contanerVirtualAppliance(final VirtualMachine vmachine)
     {
 
         VirtualDatacenter vdc =
@@ -339,7 +340,7 @@ public class VirtualMachineService extends DefaultApiService
         resource.put(docEnvelopeRunning);
     }
 
-    public void checkPauseAllowed(VirtualMachine vm, State state)
+    public void checkPauseAllowed(final VirtualMachine vm, final State state)
     {
         if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
         {
@@ -347,4 +348,5 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
     }
+
 }

@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -84,14 +84,14 @@ public class VirtualApplianceService extends DefaultApiService
     OVFGeneratorService ovfService;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    RemoteServiceService remoteServiceService;
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
@@ -105,8 +105,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.infrastructureService = new InfrastructureService(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
     }
 
     /**
@@ -121,7 +121,7 @@ public class VirtualApplianceService extends DefaultApiService
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
     }
 
-    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
@@ -170,11 +170,11 @@ public class VirtualApplianceService extends DefaultApiService
                 Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
                 RemoteService vsm =
-                    infrastructureService.getRemoteService(datacenter.getId(),
+                    remoteServiceService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
                 RemoteService vf =
-                    infrastructureService.getRemoteService(datacenter.getId(),
+                    remoteServiceService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
                 long timeout = Long.valueOf(ConfigService.getServerTimeout());

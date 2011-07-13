@@ -71,4 +71,10 @@ public interface RacksResourceStub
 
     public DataResult<List<Rack>> getRacksByDatacenter(DataCenter datacenter, String filter);
 
+    public DataResult<Rack> createRack(Rack rack);
+
+    public DataResult<Rack> modifyRack(final Rack rack);
+
+    public BasicResult deleteRack(Rack rack);
+
 }
