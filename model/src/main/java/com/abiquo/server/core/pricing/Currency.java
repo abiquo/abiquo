@@ -26,6 +26,12 @@ public class Currency extends DefaultEntityBase
         // Just for JPA support
     }
 
+    public Currency(final String name, final String simbol)
+    {
+        this.name = name;
+        this.simbol = simbol;
+    }
+
     private final static String ID_COLUMN = "idCurrency";
 
     @Id

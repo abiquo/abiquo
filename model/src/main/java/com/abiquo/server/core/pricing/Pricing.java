@@ -15,7 +15,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -40,7 +39,29 @@ public class Pricing extends DefaultEntityBase
         // Just for JPA support
     }
 
-    private final static String ID_COLUMN = "idPricing";
+    /* package */Pricing(final int standingChargePeriod, final Enterprise enterprise,
+        final int limitMaximumDeployedCharged, final String vlan, final boolean showMinimumCharge,
+        final int chargingPeriod, final int minimumChargePeriod, final int minimumCharge,
+        final boolean showChangesBefore, final Currency currency, final String publicIp,
+        final int vCpu, final int memoryMb)
+    {
+
+        this.setStandingChargePeriod(standingChargePeriod);
+        this.setEnterprise(enterprise);
+        this.setLimitMaximumDeployedCharged(limitMaximumDeployedCharged);
+        this.setVlan(vlan);
+        this.setShowMinimumCharge(showMinimumCharge);
+        this.setChargingPeriod(chargingPeriod);
+        this.setMinimumCharge(minimumCharge);
+        this.setMinimumChargePeriod(minimumChargePeriod);
+        this.setShowChangesBefore(showChangesBefore);
+        this.setCurrency(currency);
+        this.setPublicIp(publicIp);
+        this.setVCpu(vCpu);
+        this.setMemoryMB(memoryMb);
+    }
+
+    public final static String ID_COLUMN = "idPricing";
 
     @Id
     @GeneratedValue
@@ -85,7 +106,6 @@ public class Pricing extends DefaultEntityBase
 
     @JoinColumn(name = ENTERPRISE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
     private Enterprise enterprise;
 
     @Required(value = ENTERPRISE_REQUIRED)
@@ -245,26 +265,24 @@ public class Pricing extends DefaultEntityBase
         this.minimumCharge = minimumCharge;
     }
 
-    public final static String SHOW_CHANGES_BEFORE_DEPLOYEMENT_PROPERTY =
-        "showChangesBeforeDeployement";
+    public final static String SHOW_CHANGES_BEFORE_PROPERTY = "showChangesBefore";
 
-    private final static boolean SHOW_CHANGES_BEFORE_DEPLOYEMENT_REQUIRED = true;
+    private final static boolean SHOW_CHANGES_BEFORE_REQUIRED = true;
 
-    private final static String SHOW_CHANGES_BEFORE_DEPLOYEMENT_COLUMN =
-        "ShowChangesBeforeDeployement";
+    private final static String SHOW_CHANGES_BEFORE_COLUMN = "ShowChangesBefore";
 
-    @Column(name = SHOW_CHANGES_BEFORE_DEPLOYEMENT_COLUMN, nullable = !SHOW_CHANGES_BEFORE_DEPLOYEMENT_REQUIRED)
-    private boolean showChangesBeforeDeployement;
+    @Column(name = SHOW_CHANGES_BEFORE_COLUMN, nullable = !SHOW_CHANGES_BEFORE_REQUIRED)
+    private boolean showChangesBefore;
 
-    @Required(value = SHOW_CHANGES_BEFORE_DEPLOYEMENT_REQUIRED)
-    public boolean getShowChangesBeforeDeployement()
+    @Required(value = SHOW_CHANGES_BEFORE_REQUIRED)
+    public boolean getShowChangesBefore()
     {
-        return this.showChangesBeforeDeployement;
+        return this.showChangesBefore;
     }
 
-    private void setShowChangesBeforeDeployement(final boolean showChangesBeforeDeployement)
+    private void setShowChangesBefore(final boolean showChangesBefore)
     {
-        this.showChangesBeforeDeployement = showChangesBeforeDeployement;
+        this.showChangesBefore = showChangesBefore;
     }
 
     public final static String CURRENCY_PROPERTY = "currency";
@@ -275,7 +293,6 @@ public class Pricing extends DefaultEntityBase
 
     @JoinColumn(name = CURRENCY_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_currency")
     private Currency currency;
 
     @Required(value = CURRENCY_REQUIRED)

@@ -26,6 +26,11 @@ public class CosteCode extends DefaultEntityBase
         // Just for JPA support
     }
 
+    public CosteCode(final String variable)
+    {
+        this.variable = variable;
+    }
+
     /* package */final static String ID_COLUMN = "idCosteCode";
 
     @Id

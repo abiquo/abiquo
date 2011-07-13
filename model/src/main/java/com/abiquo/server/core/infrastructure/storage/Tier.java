@@ -64,7 +64,7 @@ public class Tier extends DefaultEntityBase
         this.setEnabled(Boolean.TRUE);
     }
 
-    /* package */public final static String ID_COLUMN = "id";
+    public final static String ID_COLUMN = "id";
 
     @Id
     @GeneratedValue
