@@ -86,7 +86,7 @@ public class Currency extends DefaultEntityBase
     private final static String SYMBOL_COLUMN = "symbol";
 
     @Column(name = SYMBOL_COLUMN, nullable = !SYMBOL_REQUIRED, length = SYMBOL_LENGTH_MAX)
-    private String simbol;
+    private String symbol;
 
     @Required(value = SYMBOL_REQUIRED)
     @Length(min = SYMBOL_LENGTH_MIN, max = SYMBOL_LENGTH_MAX)
