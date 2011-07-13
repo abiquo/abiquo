@@ -22,6 +22,7 @@ import org.hibernate.validator.constraints.Range;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -380,6 +381,20 @@ public class Pricing extends DefaultEntityBase
         this.costeCodes = costeCodes;
     }
 
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = Tier.ID_COLUMN))
+    private List<Tier> tiers = new ArrayList<Tier>();
+
+    public List<Tier> getTiers()
+    {
+        return tiers;
+    }
+
+    public void setTiers(final List<Tier> tiers)
+    {
+        this.tiers = tiers;
+    }
+
     // ************************* Helper methods ****************************
 
     public void addCosteCode(final CosteCode costeCode)
@@ -389,6 +404,15 @@ public class Pricing extends DefaultEntityBase
             costeCodes = new ArrayList<CosteCode>();
         }
         costeCodes.add(costeCode);
+    }
+
+    public void addTier(final Tier tier)
+    {
+        if (tiers == null)
+        {
+            tiers = new ArrayList<Tier>();
+        }
+        tiers.add(tier);
     }
 
 }

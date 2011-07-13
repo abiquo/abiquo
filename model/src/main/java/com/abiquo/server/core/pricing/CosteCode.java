@@ -26,8 +26,7 @@ public class CosteCode extends DefaultEntityBase
         // Just for JPA support
     }
 
-    /** protected **/
-    final static String ID_COLUMN = "idCosteCode";
+    /* package */final static String ID_COLUMN = "idCosteCode";
 
     @Id
     @GeneratedValue
