@@ -43,7 +43,7 @@ public class Pricing extends DefaultEntityBase
         final int limitMaximumDeployedCharged, final String vlan, final boolean showMinimumCharge,
         final int chargingPeriod, final int minimumChargePeriod, final int minimumCharge,
         final boolean showChangesBefore, final Currency currency, final String publicIp,
-        final int vCpu, final int memoryMb)
+        final int vCpu, final int memoryMb, final int hdGB)
     {
 
         this.setStandingChargePeriod(standingChargePeriod);
@@ -59,6 +59,7 @@ public class Pricing extends DefaultEntityBase
         this.setPublicIp(publicIp);
         this.setVCpu(vCpu);
         this.setMemoryMB(memoryMb);
+        this.setHdGB(hdGB);
     }
 
     public final static String ID_COLUMN = "idPricing";
@@ -76,7 +77,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String STANDING_CHARGE_PERIOD_PROPERTY = "standingChargePeriod";
 
-    private final static boolean STANDING_CHARGE_PERIOD_REQUIRED = false;
+    private final static boolean STANDING_CHARGE_PERIOD_REQUIRED = true;
 
     private final static String STANDING_CHARGE_PERIOD_COLUMN = "standingChargePeriod";
 
@@ -100,7 +101,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String ENTERPRISE_PROPERTY = "enterprise";
 
-    private final static boolean ENTERPRISE_REQUIRED = true;
+    private final static boolean ENTERPRISE_REQUIRED = false;
 
     private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
 
@@ -122,7 +123,7 @@ public class Pricing extends DefaultEntityBase
     public final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_PROPERTY =
         "limitMaximumDeployedCharged";
 
-    private final static boolean LIMIT_MAXIMUM_DEPLOYED_CHARGED_REQUIRED = false;
+    private final static boolean LIMIT_MAXIMUM_DEPLOYED_CHARGED_REQUIRED = true;
 
     private final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN =
         "limitMaximumDeployedCharged";
@@ -147,7 +148,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String VLAN_PROPERTY = "vlan";
 
-    private final static boolean VLAN_REQUIRED = false;
+    private final static boolean VLAN_REQUIRED = true;
 
     private final static int VLAN_LENGTH_MIN = 1;
 
@@ -195,7 +196,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String CHARGING_PERIOD_PROPERTY = "chargingPeriod";
 
-    private final static boolean CHARGING_PERIOD_REQUIRED = false;
+    private final static boolean CHARGING_PERIOD_REQUIRED = true;
 
     private final static String CHARGING_PERIOD_COLUMN = "chargingPeriod";
 
@@ -219,7 +220,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String MINIMUM_CHARGE_PERIOD_PROPERTY = "minimumChargePeriod";
 
-    private final static boolean MINIMUM_CHARGE_PERIOD_REQUIRED = false;
+    private final static boolean MINIMUM_CHARGE_PERIOD_REQUIRED = true;
 
     private final static String MINIMUM_CHARGE_PERIOD_COLUMN = "minimumChargePeriod";
 
@@ -243,7 +244,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String MINIMUM_CHARGE_PROPERTY = "minimumCharge";
 
-    private final static boolean MINIMUM_CHARGE_REQUIRED = false;
+    private final static boolean MINIMUM_CHARGE_REQUIRED = true;
 
     private final static String MINIMUM_CHARGE_COLUMN = "minimumCharge";
 
@@ -308,7 +309,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String PUBLIC_IP_PROPERTY = "publicIp";
 
-    private final static boolean PUBLIC_IP_REQUIRED = false;
+    private final static boolean PUBLIC_IP_REQUIRED = true;
 
     private final static int PUBLIC_IP_LENGTH_MIN = 0;
 
@@ -336,7 +337,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String V_CPU_PROPERTY = "vCpu";
 
-    private final static boolean V_CPU_REQUIRED = false;
+    private final static boolean V_CPU_REQUIRED = true;
 
     private final static String V_CPU_COLUMN = "vCpu";
 
@@ -360,7 +361,7 @@ public class Pricing extends DefaultEntityBase
 
     public final static String MEMORY_MB_PROPERTY = "memoryMb";
 
-    private final static boolean MEMORY_MB_REQUIRED = false;
+    private final static boolean MEMORY_MB_REQUIRED = true;
 
     private final static String MEMORY_MB_COLUMN = "memoryMb";
 
@@ -382,20 +383,44 @@ public class Pricing extends DefaultEntityBase
         this.memoryMb = memoryMb;
     }
 
+    public final static String HD_GB_PROPERTY = "hdGB";
+
+    private final static boolean HD_GB_REQUIRED = true;
+
+    private final static String HD_GB_COLUMN = "hdGB";
+
+    private final static int HD_GB_MIN = Integer.MIN_VALUE;
+
+    private final static int HD_GB_MAX = Integer.MAX_VALUE;
+
+    @Column(name = HD_GB_COLUMN, nullable = !HD_GB_REQUIRED)
+    @Range(min = HD_GB_MIN, max = HD_GB_MAX)
+    private int hdGB;
+
+    public int getHdGB()
+    {
+        return hdGB;
+    }
+
+    public void setHdGB(final int hdGB)
+    {
+        this.hdGB = hdGB;
+    }
+
     public final static String ASSOCIATION_TABLE = "pricing_costecode";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = CosteCode.ID_COLUMN))
-    private List<CosteCode> costeCodes = new ArrayList<CosteCode>();
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = CostCode.ID_COLUMN))
+    private List<CostCode> costCodes = new ArrayList<CostCode>();
 
-    public List<CosteCode> getCosteCodes()
+    public List<CostCode> getCostCodes()
     {
-        return costeCodes;
+        return costCodes;
     }
 
-    public void setCosteCodes(final List<CosteCode> costeCodes)
+    public void setCostCodes(final List<CostCode> costCodes)
     {
-        this.costeCodes = costeCodes;
+        this.costCodes = costCodes;
     }
 
     public final static String ASSOCIATION_TABLE_TIER = "pricing_tier";
@@ -416,13 +441,13 @@ public class Pricing extends DefaultEntityBase
 
     // ************************* Helper methods ****************************
 
-    public void addCosteCode(final CosteCode costeCode)
+    public void addCostCode(final CostCode costCode)
     {
-        if (costeCodes == null)
+        if (costCodes == null)
         {
-            costeCodes = new ArrayList<CosteCode>();
+            costCodes = new ArrayList<CostCode>();
         }
-        costeCodes.add(costeCode);
+        costCodes.add(costCode);
     }
 
     public void addTier(final Tier tier)

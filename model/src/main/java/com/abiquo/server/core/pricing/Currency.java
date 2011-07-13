@@ -26,10 +26,10 @@ public class Currency extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public Currency(final String name, final String simbol)
+    public Currency(final String name, final String symbol)
     {
-        this.name = name;
-        this.simbol = simbol;
+        this.setName(name);
+        this.setSymbol(symbol);
     }
 
     private final static String ID_COLUMN = "idCurrency";
@@ -73,32 +73,32 @@ public class Currency extends DefaultEntityBase
         this.name = name;
     }
 
-    public final static String SIMBOL_PROPERTY = "simbol";
+    public final static String SYMBOL_PROPERTY = "symbol";
 
-    private final static boolean SIMBOL_REQUIRED = false;
+    private final static boolean SYMBOL_REQUIRED = true;
 
-    private final static int SIMBOL_LENGTH_MIN = 0;
+    private final static int SYMBOL_LENGTH_MIN = 0;
 
-    private final static int SIMBOL_LENGTH_MAX = 255;
+    private final static int SYMBOL_LENGTH_MAX = 255;
 
-    private final static boolean SIMBOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean SYMBOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String SIMBOL_COLUMN = "simbol";
+    private final static String SYMBOL_COLUMN = "symbol";
 
-    @Column(name = SIMBOL_COLUMN, nullable = !SIMBOL_REQUIRED, length = SIMBOL_LENGTH_MAX)
+    @Column(name = SYMBOL_COLUMN, nullable = !SYMBOL_REQUIRED, length = SYMBOL_LENGTH_MAX)
     private String simbol;
 
-    @Required(value = SIMBOL_REQUIRED)
-    @Length(min = SIMBOL_LENGTH_MIN, max = SIMBOL_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = SIMBOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getSimbol()
+    @Required(value = SYMBOL_REQUIRED)
+    @Length(min = SYMBOL_LENGTH_MIN, max = SYMBOL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = SYMBOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getSymbol()
     {
-        return this.simbol;
+        return this.symbol;
     }
 
-    private void setSimbol(final String simbol)
+    private void setSymbol(final String symbol)
     {
-        this.simbol = simbol;
+        this.symbol = symbol;
     }
 
 }
