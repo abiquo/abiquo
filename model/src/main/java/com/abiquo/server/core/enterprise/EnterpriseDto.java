@@ -35,6 +35,12 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     private long repositorySoft;
 
     private long repositoryHard;
+    
+    private String chefURL;
+
+    private String chefClientCertificate;
+
+    private String chefValidatorCertificate;
 
     public Integer getId()
     {
@@ -81,4 +87,36 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         this.repositorySoft = soft;
         this.repositoryHard = hard;
     }
+
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate;
+    }
+
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate;
+    }
+    
+    
 }
