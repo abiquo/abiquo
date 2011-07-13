@@ -74,6 +74,9 @@ package net.undf.abicloud.vo.user
 		public static const USERS_MANAGE_LDAP_GROUP:String = "USERS_MANAGE_LDAP_GROUP";
 		public static const USERS_ENUMERATE_CONNECTED:String = "USERS_ENUMERATE_CONNECTED";
 		public static const USERS_DEFINE_AS_MANAGER:String = "USERS_DEFINE_AS_MANAGER";
+		//PRICING
+		public static const PRICING_VIEW:String = "PRICING_VIEW";
+		public static const PRICING_MANAGE_PRICING:String = "PRICING_MANAGE_PRICING";
 		//SYSTEM CONFIG
 		public static const SYSCONFIG_VIEW:String = "SYSCONFIG_VIEW";
 		public static const SYSCONFIG_ALLOW_MODIFY:String = "SYSCONFIG_ALLOW_MODIFY";
