@@ -18,39 +18,33 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
+/**
+ * 
+ */
 package com.abiquo.server.core.cloud;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "cookbook")
-public class ChefCookbookDto extends SingleResourceTransportDto
+/**
+ * Represents a collection of {@link ChefCookbookDto}
+ * 
+ * @author ibarrera
+ */
+@XmlRootElement(name = "cookbooks")
+public class ChefCookbooksDto extends WrapperDto<ChefCookbookDto>
 {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
-
-    public Integer getId()
+    @Override
+    @XmlElement(name = "cookbook")
+    public List<ChefCookbookDto> getCollection()
     {
-        return id;
+        return collection;
     }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-    private String cookbook;
-
-    public String getCookbook()
-    {
-        return cookbook;
-    }
-
-    public void setCookbook(String cookbook)
-    {
-        this.cookbook = cookbook;
-    }
-
 }
