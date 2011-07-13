@@ -381,8 +381,10 @@ public class Pricing extends DefaultEntityBase
         this.costeCodes = costeCodes;
     }
 
+    public final static String ASSOCIATION_TABLE_TIER = "pricing_tier";
+
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = Tier.ID_COLUMN))
+    @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = Tier.ID_COLUMN))
     private List<Tier> tiers = new ArrayList<Tier>();
 
     public List<Tier> getTiers()
