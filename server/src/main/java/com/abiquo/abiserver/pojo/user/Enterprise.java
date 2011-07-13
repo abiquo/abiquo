@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.velocity.runtime.parser.node.GetExecutor;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
@@ -36,6 +38,7 @@ import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.pricing.Pricing;
 
 /**
  * This pojo class store the information of the enterprise. On abiCloud, an user belongs to an
@@ -66,6 +69,11 @@ public class Enterprise implements IPojo<EnterpriseHB>
     private Set<DatacenterLimit> dcLimits;
 
     private String defaultTheme;
+    
+    private Pricing pricing; 
+    
+
+
 
     public Enterprise()
     {
@@ -150,6 +158,16 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.defaultTheme = defaultTheme;
     }
 
+    public Pricing getPricing()
+    {
+        return pricing;
+    }
+
+    public void setPricing(Pricing pricing)
+    {
+        this.pricing = pricing;
+    }
+    
     public void addDatacenterLimit(DatacenterLimit limit)
     {
         if (dcLimits == null)
@@ -178,6 +196,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         EnterpriseHB enterpriseHB = new EnterpriseHB();
 
         enterpriseHB.setIdEnterprise(getId());
+        enterpriseHB.setPricingHB((pricing == null) ? null : pricing.toPojoHB());
         enterpriseHB.setName(getName());
         enterpriseHB.setIsReservationRestricted(getIsReservationRestricted());
 

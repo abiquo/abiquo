@@ -870,7 +870,7 @@ INSERT INTO `privilege` VALUES
  (47,'SYSCONFIG_SHOW_REPORTS',0),
  (48,'USERS_DEFINE_AS_MANAGER',0),
  (49,'PRICING_VIEW',0),
- (50,'PRICING_MANAGE_PRICING',0);
+ (50,'PRICING_MANAGE',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -4079,5 +4079,96 @@ CREATE TABLE `tasks` (
   `action` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+-- ******************************************************************************************
+-- PRICING RELATED TABLES
+-- ******************************************************************************************
+
+--
+-- Definition of table `kinton`.`currency`
+--
+
+DROP TABLE IF EXISTS `kinton`.`currency`;
+CREATE TABLE `kinton`.`currency` (
+  `idCurrency` INT(3) NOT NULL AUTO_INCREMENT ,
+  `symbol` varchar(256) NOT NULL ,
+  `name` varchar(256) NOT NULL ,
+  `blocked` boolean default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCurrency`) ,
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`costCode`
+--  
+  
+DROP TABLE IF EXISTS `kinton`.`costCode`;
+CREATE TABLE `kinton`.`costCode` (
+  `idCostCode` INT(3) NOT NULL AUTO_INCREMENT ,
+  `variable` varchar(256) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCostCode`) ,
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`pricing`
+--
+  
+DROP TABLE IF EXISTS `kinton`.`pricing`;
+CREATE TABLE `kinton`.`pricing` (
+  `idPricing` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idEnterprise` INT(10) UNSIGNED NOT NULL ,
+  `idCurrency` INT(10) UNSIGNED NOT NULL ,
+  `chargingPeriod`  INT(10) UNSIGNED NOT NULL ,
+  `minimumCharge` INT(10) UNSIGNED NOT NULL ,
+  `showChangesBefore` boolean NOT NULL default 0,
+  `showMinimumCharge` boolean NOT NULL default 0,
+  `limitMaximumDeployedCharged` INT(10) UNSIGNED NOT NULL ,
+  `standingChargePeriod` INT(10) UNSIGNED NOT NULL ,
+  `minimumChargePeriod` INT(10) UNSIGNED NOT NULL ,
+  `vCPU` INT(10) UNSIGNED NOT NULL ,
+  `memoryMb` INT(10) UNSIGNED NOT NULL ,
+  `hdGB` INT(10) UNSIGNED NOT NULL ,
+  `vlan` varchar(256) NOT NULL ,
+  `publicIp` varchar(256) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricing`) ,
+  KEY `Pricing_FK1_Enterprise` (`idEnterprise`),
+  KEY `Pricing_FK2_Currency` (`idCurrency`),
+  CONSTRAINT `Pricing_FK1_Enterprise` FOREIGN KEY (`idEnterprise` ) REFERENCES `kinton`.`enterprise` (`idEnterprise` ) ON DELETE NO ACTION
+  CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  
+
+--
+-- Definition of table `kinton`.`pricing_costCode`
+--  
+  
+DROP TABLE IF EXISTS `kinton`.`pricing_costcode`;
+CREATE TABLE `kinton`.`pricing_costcode` (
+  `idPricing` INT(3) UNSIGNED NOT NULL,
+  `idCostCode` INT(3) UNSIGNED NOT NULL,
+  `price` INT(10) UNSIGNED NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricing`, `idCostCode`) ,
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
+  
+  
+--
+-- Definition of table `kinton`.`pricing_tier`
+--  
+
+DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
+CREATE TABLE `kinton`.`pricing_costcode` (
+  `idPricing` INT(3) UNSIGNED NOT NULL,
+  `idTier` INT(3) UNSIGNED NOT NULL,
+  `price` INT(10) UNSIGNED NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricing`, `idTier`) ,
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
+  
+
 
 CALL `kinton`.`add_version_column_to_all`();
