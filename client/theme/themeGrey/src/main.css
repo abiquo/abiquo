@@ -178,6 +178,32 @@
 		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
 	}
 	
+	.MainHeaderPricingButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:				#212121;
+		text-roll-over-color:		#212121;
+		text-selected-color:		#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/pricingbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/pricingbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/pricingbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/pricingbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/pricingbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/pricingbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
 	.MainHeaderDocumentationButton
 	{
 		padding-left:			5;
