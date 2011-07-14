@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.resources;
+package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;

@@ -23,7 +23,11 @@ package com.abiquo.server.core.infrastructure.network;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.hibernate.validator.constraints.Length;
+
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
+import com.softwarementors.validation.constraints.Required;
 
 @XmlRootElement(name = "ipPoolManagement")
 public class IpPoolManagementDto extends SingleResourceTransportDto
@@ -98,6 +102,18 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
     public void setIp(String ip)
     {
         this.ip = ip;
+    }
+    
+    private String networkName;
+
+    public String getNetworkName()
+    {
+        return this.networkName;
+    }
+
+    public void setNetworkName(final String networkName)
+    {
+        this.networkName = networkName;
     }
 
 }

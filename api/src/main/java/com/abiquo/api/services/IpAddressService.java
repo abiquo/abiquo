@@ -59,6 +59,19 @@ public class IpAddressService extends DefaultApiService
     @Autowired
     VirtualDatacenterRep repo;
 
+    /**
+     * Return the list of IPs by a private VLAN.
+     * 
+     * @param vdcId
+     * @param vlanId
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param descOrAsc
+     * @param available
+     * @return
+     */
     public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vdcId,
             final Integer vlanId, final Integer startwith, final String orderBy,
             final String filter,  final Integer limit, final Boolean descOrAsc, final Boolean available)
@@ -71,7 +84,15 @@ public class IpAddressService extends DefaultApiService
             addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
             flushErrors();
         }
-        return repo.findIpsByPrivateVLAN(vdcId, vlanId, startwith, limit, filter, orderByEnum, descOrAsc, available);
+        
+        if (available)
+        {
+            return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter, orderByEnum, descOrAsc);
+        }   
+        else
+        {
+            return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter, orderByEnum, descOrAsc);
+        }
     }
 
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,

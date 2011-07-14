@@ -567,9 +567,7 @@ public class OVFGeneratorService {
 		networkToDeploy.setUuid(network.getUuid());
 		for (VLANNetwork vlan : listOfVLANidentifiers) {
 			Integer numberOfRules = 0;
-			Collection<IpPoolManagement> ips = vdcRepo.findIpsByPrivateVLAN(
-					vdc.getId(), vlan.getId(), 0, null, "", IpPoolManagement.OrderByEnum.IP,
-					Boolean.TRUE, Boolean.FALSE);
+			Collection<IpPoolManagement> ips = vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
 
 			RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp()
 					.getRemoteService();

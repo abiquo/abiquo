@@ -166,9 +166,16 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findVLANNetworks(virtualDatacenter);
     }
 
-    public VLANNetwork findVlanByDefault(final VirtualDatacenter virtualDatacenter)
+    public VLANNetwork findVlanByDefaultInVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
-        return vlanDAO.findByDefault(virtualDatacenter);
+        return vlanDAO.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
+    }
+    
+    public void deleteVLAN(VLANNetwork vlanToDelete)
+    {
+        dhcpDAO.remove(vlanToDelete.getConfiguration().getDhcp());
+        vlanDAO.remove(vlanToDelete);
+        networkConfigDAO.remove(vlanToDelete.getConfiguration());
     }
 
     public void insertNetwork(final Network network)
@@ -191,6 +198,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         rasdDAO.persist(ipManagement.getRasd());
         ipManagementDAO.persist(ipManagement);
     }
+    
+    public void updateIpManagement(IpPoolManagement ip)
+    {
+        ipManagementDAO.flush();
+    }
+
 
     public boolean existAnyIpWithMac(final String mac)
     {
@@ -293,14 +306,50 @@ public class VirtualDatacenterRep extends DefaultRepBase
     /**
      * Return all the private IPs by VLAN.
      * 
+     * @param vdcId virtual datacenter identifier.
+     * @param vlanId vlan identifier.
+     * @return All the IPs of the VLAN.
+     */
+    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
+    {
+        return ipManagementDAO.findByPrivateVLAN(vdcId, vlanId);
+    }
+    
+    /**
+     * Return all the private IPs by VLAN with filter options.
+     * 
      * @param vlanId identifier of the vlan
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId, final Integer firstElem,
+    public List<IpPoolManagement> findIpsByPrivateVLANFiltered(final Integer vdcId, final Integer vlanId, final Integer firstElem,
             final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
-            final Boolean asc, final Boolean available)
+            final Boolean asc)
     {
-        return ipManagementDAO.findByPrivateVLAN(vdcId, vlanId, firstElem, numElem, has, orderBy, asc, available);
+        return ipManagementDAO.findByPrivateVLANFiltered(vdcId, vlanId, firstElem, numElem, has, orderBy, asc);
+    }
+    
+    /**
+     * Return all the available private IPs by VLAN with filter options.
+     * 
+     * @param vlanId identifier of the vlan
+     * @return list of IpPoolManagement.
+     */
+    public List<IpPoolManagement> findIpsByPrivateVLANAvailableFiltered(final Integer vdcId, final Integer vlanId, final Integer firstElem,
+            final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+            final Boolean asc)
+    {
+        return ipManagementDAO.findByPrivateVLANAvailableFiltered(vdcId, vlanId, firstElem, numElem, has, orderBy, asc);
+    }
+    
+    /**
+     * Return the used Ips of a private VLAN
+     * @param vdcId virtual datacenter identifier.
+     * @param vlanId vlan identifier.
+     * @return List of IpPoolManagement used by an virtual machine.
+     */
+    public List<IpPoolManagement> findUsedIpsByPrivateVLAN(Integer vdcId, Integer vlanId)
+    {
+        return ipManagementDAO.findUsedIpsByPrivateVLAN(vdcId, vlanId);
     }
 
     /**
@@ -415,6 +464,18 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void insertVirtualAppliance(final VirtualAppliance vapp)
     {
         virtualApplianceDAO.persist(vapp);
+    }
+
+    /**
+     * Find a VLAN in a VDC by its name
+     * 
+     * @param vdc virtual datacenter that stores the VLAN
+     * @param name name of the VLAN.
+     * @return the VLAN.
+     */
+    public VLANNetwork findVlanByNameInVDC(VirtualDatacenter vdc, String name)
+    {
+        return vlanDAO.findVlanByNameInVDC(vdc, name);
     }
 
 }

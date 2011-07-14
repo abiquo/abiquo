@@ -56,7 +56,7 @@ public class NetworkConfiguration extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected NetworkConfiguration()
+    public NetworkConfiguration()
     {
         // Just for JPA support
     }
@@ -127,7 +127,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.address;
     }
 
-    private void setAddress(String address)
+    public void setAddress(String address)
     {
         this.address = address;
     }
@@ -152,7 +152,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.mask;
     }
 
-    private void setMask(Integer mask)
+    public void setMask(Integer mask)
     {
         this.mask = mask;
     }

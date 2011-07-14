@@ -74,8 +74,8 @@ public class IpAddressesResource extends AbstractResource {
 	public IpsPoolManagementDto getIPAddresses(
 			@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
 			@PathParam(PrivateNetworkResource.PRIVATE_NETWORK) Integer vlanId,
-			@QueryParam(START_WITH) @Min(0) final Integer startwith,
-			@QueryParam(BY) final String orderBy,
+			@QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+			@QueryParam(BY) @DefaultValue("ip") final String orderBy,
 			@QueryParam(FILTER) @DefaultValue("") final String filter,
 			@QueryParam(LIMIT) @Min(0) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
 			@QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,

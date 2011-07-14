@@ -71,8 +71,8 @@ public enum APIError
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
-        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
-	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
+        "ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -100,7 +100,8 @@ public enum APIError
         "VDC-5",
         "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
-        "VDC-6", "Virtual Datacenter must be created with a private network"),
+        "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
+        "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
     // VLANS
     VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
@@ -112,15 +113,19 @@ public enum APIError
         "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
         "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
         "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
-        "VLAN-8", "The requested virtual network does not exist"),
+        "VLAN-8", "The requested virtual network does not exist"), VLANS_AT_LEAST_ONE_DEFAULT_NETWORK(
+        "VLAN-9", "There must be at least one default VLAN in each Virtual Datacenter"), VLANS_EDIT_INVALID_VALUES(
+        "VLAN-10", "Attributes 'address', 'mask' and 'tag' can not be changed by the Edit process."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
+        "VLAN-11", "Default VLAN can not be deleted."), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
+        "VLAN-12", "Can not delete a VLAN with IPs used by Virtual Machines"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"),
-        NON_EXISTENT_RACK("RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
+        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
+        "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
@@ -317,7 +322,7 @@ public enum APIError
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
-        "RULE-6", "The load balance type indicated is null or invalid")
+        "RULE-6", "The load balance type indicated is null or invalid"),
 
     ;
 

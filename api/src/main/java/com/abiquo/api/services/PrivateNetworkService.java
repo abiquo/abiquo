@@ -162,7 +162,7 @@ public class PrivateNetworkService extends DefaultApiService
         // put the previous default one as non-default.
         if (networkdto.getDefaultNetwork())
         {
-            VLANNetwork vlanDefault = repo.findVlanByDefault(virtualDatacenter);
+            VLANNetwork vlanDefault = repo.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
             if (vlanDefault != null)
             {
                 vlanDefault.setDefaultNetwork(Boolean.FALSE);
@@ -187,7 +187,14 @@ public class PrivateNetworkService extends DefaultApiService
         return vlan;
     }
 
-    public VLANNetwork getNetwork(final Integer virtualdatacenterId, final Integer vlanId)
+    /**
+     * Retrieve a Private Network.
+     * 
+     * @param virtualdatacenterId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan.
+     * @return an instance of the requested {@link VLANNetwork}
+     */
+    public VLANNetwork getPrivateNetwork(final Integer virtualdatacenterId, final Integer vlanId)
     {
         VirtualDatacenter vdc = repo.findById(virtualdatacenterId);
         if (vdc == null)
@@ -203,19 +210,165 @@ public class PrivateNetworkService extends DefaultApiService
         }
         return vlan;
     }
-
-    public boolean isAssignedTo(final Integer virtualDatacenterId, final Integer networkId)
+    
+    /**
+     * Edit an existing VLAN.
+     * 
+     * @param vdcId identifier of the virtual datacenter the VLAN belongs to.
+     * @param vlanId identifier of the VLAN
+     * @param newNetwork new object to edit.
+     * @return an instance of the modified {@link VLANNetwork}
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VLANNetwork updatePrivateNetwork(Integer vdcId, Integer vlanId, VLANNetwork newNetwork)
     {
-        VLANNetwork nw = repo.findVlanById(networkId);
-        VirtualDatacenter vdc = repo.findById(virtualDatacenterId);
 
-        return nw != null && vdc != null
-            && nw.getNetwork().getId().equals(vdc.getNetwork().getId());
+        // Check if the fields are ok.
+        VLANNetwork oldNetwork = getPrivateNetwork(vdcId, vlanId);
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        newNetwork.setNetwork(vdc.getNetwork());
+        validate(newNetwork);
+        if (!vlanId.equals(newNetwork.getId()))
+        {
+            addValidationErrors(APIError.INCOHERENT_IDS);
+            flushErrors();
+        }
+        
+        // Values 'address', 'mask', and 'tag' can not be changed by the edit process
+        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(newNetwork.getConfiguration().getAddress()) ||
+            !oldNetwork.getConfiguration().getMask().equals(newNetwork.getConfiguration().getMask()) ||
+            oldNetwork.getTag() == null && newNetwork.getTag() != null ||
+            oldNetwork.getTag() != null && newNetwork.getTag() == null ||
+            ( oldNetwork.getTag() != null && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())) 
+            )
+        {
+            addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
+            flushErrors();
+        }
+        
+        // If we want to set the default network as non-default, and the network is
+        // actually the default one, raise an error: it should be at least one default vlan
+        if (!newNetwork.getDefaultNetwork() && oldNetwork.getDefaultNetwork())
+        {
+            addConflictErrors(APIError.VLANS_AT_LEAST_ONE_DEFAULT_NETWORK);
+            flushErrors();
+        }
+
+        // In the same order: if we put the newNetwork as default, set the previous one
+        // as non-default
+        if (newNetwork.getDefaultNetwork() && !oldNetwork.getDefaultNetwork())
+        {
+            VLANNetwork defaultVLAN =
+                repo.findVlanByDefaultInVirtualDatacenter(vdc);
+            defaultVLAN.setDefaultNetwork(Boolean.FALSE);
+            repo.updateVlan(defaultVLAN);
+        }
+
+        // Check the new gateway is inside the range of IPs.
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
+        {
+            IPAddress networkIP = IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
+            String newGateway = newNetwork.getConfiguration().getGateway();
+            Integer mask = newNetwork.getConfiguration().getMask();
+            
+            if (!IPAddress.isIntoRange(IPNetworkRang.calculateWholeRange(networkIP, mask), newGateway))
+            {
+                addConflictErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+                flushErrors();
+            }
+        }
+
+        // Check if the network name has changed. If it has:
+        // 1 - Check there is not another VLAN in the same VDC with the same name.
+        // 2 - Change all the IpPoolManagement entities with the new network name
+        if (!newNetwork.getName().equalsIgnoreCase(oldNetwork.getName()))
+        {
+            VLANNetwork duplicatedVLAN = repo.findVlanByNameInVDC(vdc, newNetwork.getName());
+            if (duplicatedVLAN != null)
+            {
+                addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME);
+                flushErrors();
+            }
+            
+            // update the ips with the new values.
+            List<IpPoolManagement> ips = repo.findIpsByPrivateVLAN(vdcId, vlanId);
+            for (IpPoolManagement ip : ips)
+            {
+                ip.setNetworkName(newNetwork.getName());
+            }
+            // the updates flushes the session. Due we have so many IPs to update,
+            // better wait until it finishes.
+            repo.updateIpManagement(null);
+
+        }
+        
+        // Set the new values and update the VLAN
+        oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
+        oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
+        oldNetwork.getConfiguration().setSecondaryDNS(newNetwork.getConfiguration().getSecondaryDNS());
+        oldNetwork.getConfiguration().setSufixDNS(newNetwork.getConfiguration().getSufixDNS());
+        oldNetwork.setName(newNetwork.getName());
+        oldNetwork.setDefaultNetwork(newNetwork.getDefaultNetwork());
+        
+        repo.updateVlan(oldNetwork);
+
+        // Trace log.
+        String messageTrace =
+            "The Private VLAN with id '" + oldNetwork.getId()
+                + "' has been modified in Virtual Datacenter " + vdc.getName();
+        if (tracer != null)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_EDITED,
+                messageTrace);
+        }
+        
+        return oldNetwork;
+    }
+    
+    /**
+     * Delete a VLAN identified by its virtual datacenter id and its vlan id
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the VLAN.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deletePrivateNetwork(final Integer vdcId, final Integer vlanId)
+    {
+        VLANNetwork vlanToDelete = getPrivateNetwork(vdcId, vlanId);
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        
+        // If it is the last VLAN, can not be deleted
+        if (repo.findVlansByVirtualDatacener(vdc).size() == 1)
+        {
+            addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
+            flushErrors();
+        }
+        
+        // Default VLAN can not be deleted.
+        if (vlanToDelete.getDefaultNetwork())
+        {
+            addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
+            flushErrors();
+        }
+        
+        // If any virtual machine is using by any IP of the VLAN, raise an exception
+        if (repo.findUsedIpsByPrivateVLAN(vdcId, vlanId).size() != 0)
+        {
+            addConflictErrors(APIError.VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED);
+            flushErrors();
+        }
+        
+        repo.deleteVLAN(vlanToDelete);
     }
 
+    /**
+     * Check if the VLANs used have reached the maximum.
+     * 
+     * @param vdc each virtualdatacenter has a maximum of VLANs.
+     */
     protected void checkNumberOfCurrentVLANs(final VirtualDatacenter vdc)
     {
-        // TODO Auto-generated method stub
         Integer maxVLANs = Integer.valueOf(ConfigService.getVlanPerVdc());
         Integer currentVLANs = repo.findVlansByVirtualDatacener(vdc).size();
         if (currentVLANs >= maxVLANs)
