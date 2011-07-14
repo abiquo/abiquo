@@ -125,15 +125,3 @@ CREATE TABLE `kinton`.`pricing_costcode` (
   PRIMARY KEY (`idPricing`, `idTier`) ,
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
---
--- Adding new privileges
--- 
-LOCK TABLES `kinton`.`privilege` WRITE;
-INSERT INTO  `kinton`.`privilege` VALUES (49,'PRICING_VIEW',0);
-INSERT INTO  `kinton`.`privilege` VALUES (50,'PRICING_MANAGE',0);
-UNLOCK TABLES;
-
-LOCK TABLES `kinton`.`roles_privileges` WRITE;
-INSERT INTO `kinton`.`roles_privileges` VALUES
- (1,49,0), (1,50,0);
-UNLOCK TABLES;

@@ -76,7 +76,7 @@ package net.undf.abicloud.vo.user
 		public static const USERS_DEFINE_AS_MANAGER:String = "USERS_DEFINE_AS_MANAGER";
 		//PRICING
 		public static const PRICING_VIEW:String = "PRICING_VIEW";
-		public static const PRICING_MANAGE_PRICING:String = "PRICING_MANAGE_PRICING";
+		public static const PRICING_MANAGE:String = "PRICING_MANAGE";
 		//SYSTEM CONFIG
 		public static const SYSCONFIG_VIEW:String = "SYSCONFIG_VIEW";
 		public static const SYSCONFIG_ALLOW_MODIFY:String = "SYSCONFIG_ALLOW_MODIFY";
