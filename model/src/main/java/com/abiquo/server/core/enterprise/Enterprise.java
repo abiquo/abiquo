@@ -217,7 +217,7 @@ public class Enterprise extends DefaultEntityWithLimits
 
     public void setChefClientCertificate(String chefClientCertificate)
     {
-        this.chefClientCertificate = chefClientCertificate;
+        this.chefClientCertificate = chefClientCertificate.trim();
     }
 
     public final static String CHEF_VALIDATOR_CERT_PROPERTY = "chefValidatorCertificate";
@@ -241,7 +241,7 @@ public class Enterprise extends DefaultEntityWithLimits
 
     public void setChefValidatorCertificate(String chefValidatorCertificate)
     {
-        this.chefValidatorCertificate = chefValidatorCertificate;
+        this.chefValidatorCertificate = chefValidatorCertificate.trim();
     }
 
     // *************************** Mandatory constructors ***********************
