@@ -4089,27 +4089,25 @@ CREATE TABLE `tasks` (
 --
 -- Definition of table `kinton`.`currency`
 --
-
 DROP TABLE IF EXISTS `kinton`.`currency`;
 CREATE TABLE `kinton`.`currency` (
-  `idCurrency` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idCurrency` int(3) NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
   `name` varchar(256) NOT NULL ,
   `blocked` boolean default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idCurrency`) ,
+  PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-
+    
 --
 -- Definition of table `kinton`.`costCode`
 --  
-  
 DROP TABLE IF EXISTS `kinton`.`costCode`;
 CREATE TABLE `kinton`.`costCode` (
-  `idCostCode` INT(3) NOT NULL AUTO_INCREMENT ,
+  `idCostCode` int(3) NOT NULL AUTO_INCREMENT ,
   `variable` varchar(256) NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idCostCode`) ,
+  PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
@@ -4118,26 +4116,26 @@ CREATE TABLE `kinton`.`costCode` (
   
 DROP TABLE IF EXISTS `kinton`.`pricing`;
 CREATE TABLE `kinton`.`pricing` (
-  `idPricing` INT(3) NOT NULL AUTO_INCREMENT ,
-  `idEnterprise` INT(10) UNSIGNED NOT NULL ,
-  `idCurrency` INT(10) UNSIGNED NOT NULL ,
-  `chargingPeriod`  INT(10) UNSIGNED NOT NULL ,
-  `minimumCharge` INT(10) UNSIGNED NOT NULL ,
+  `idPricing` int(3) NOT NULL AUTO_INCREMENT ,
+  `idEnterprise` int(10) UNSIGNED NOT NULL ,
+  `idCurrency` int(10) UNSIGNED NOT NULL ,
+  `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
+  `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `limitMaximumDeployedCharged` INT(10) UNSIGNED NOT NULL ,
-  `standingChargePeriod` INT(10) UNSIGNED NOT NULL ,
-  `minimumChargePeriod` INT(10) UNSIGNED NOT NULL ,
-  `vCPU` INT(10) UNSIGNED NOT NULL ,
-  `memoryMb` INT(10) UNSIGNED NOT NULL ,
-  `hdGB` INT(10) UNSIGNED NOT NULL ,
+  `limitMaximumDeployedCharged` int(10) UNSIGNED NOT NULL ,
+  `standingChargePeriod` int(10) UNSIGNED NOT NULL ,
+  `minimumChargePeriod` int(10) UNSIGNED NOT NULL ,
+  `vCPU` int(10) UNSIGNED NOT NULL ,
+  `memoryMb` int(10) UNSIGNED NOT NULL ,
+  `hdGB` int(10) UNSIGNED NOT NULL ,
   `vlan` varchar(256) NOT NULL ,
   `publicIp` varchar(256) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricing`) ,
   KEY `Pricing_FK1_Enterprise` (`idEnterprise`),
   KEY `Pricing_FK2_Currency` (`idCurrency`),
-  CONSTRAINT `Pricing_FK1_Enterprise` FOREIGN KEY (`idEnterprise` ) REFERENCES `kinton`.`enterprise` (`idEnterprise` ) ON DELETE NO ACTION
+  CONSTRAINT `Pricing_FK1_Enterprise` FOREIGN KEY (`idEnterprise` ) REFERENCES `kinton`.`enterprise` (`idEnterprise` ) ON DELETE NO ACTION,
   CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
   
@@ -4148,11 +4146,11 @@ CREATE TABLE `kinton`.`pricing` (
   
 DROP TABLE IF EXISTS `kinton`.`pricing_costcode`;
 CREATE TABLE `kinton`.`pricing_costcode` (
-  `idPricing` INT(3) UNSIGNED NOT NULL,
-  `idCostCode` INT(3) UNSIGNED NOT NULL,
-  `price` INT(10) UNSIGNED NOT NULL ,
+  `idPricing` int(3) UNSIGNED NOT NULL,
+  `idCostCode` int(3) UNSIGNED NOT NULL,
+  `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricing`, `idCostCode`) ,
+  PRIMARY KEY (`idPricing`, `idCostCode`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
   
@@ -4162,11 +4160,11 @@ CREATE TABLE `kinton`.`pricing_costcode` (
 
 DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
 CREATE TABLE `kinton`.`pricing_tier` (
-  `idPricing` INT(3) UNSIGNED NOT NULL,
-  `idTier` INT(3) UNSIGNED NOT NULL,
-  `price` INT(10) UNSIGNED NOT NULL ,
+  `idPricing` int(3) UNSIGNED NOT NULL,
+  `idTier` int(3) UNSIGNED NOT NULL,
+  `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricing`, `idTier`) ,
+  PRIMARY KEY (`idPricing`, `idTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
 
