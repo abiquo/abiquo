@@ -87,7 +87,7 @@ CREATE TABLE `kinton`.`pricing_costcode` (
 --  
 
 DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
-CREATE TABLE `kinton`.`pricing_costcode` (
+CREATE TABLE `kinton`.`pricing_tier` (
   `idPricing` INT(3) UNSIGNED NOT NULL,
   `idTier` INT(3) UNSIGNED NOT NULL,
   `price` INT(10) UNSIGNED NOT NULL ,
