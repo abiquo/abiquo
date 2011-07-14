@@ -4126,6 +4126,7 @@ CREATE TABLE `kinton`.`pricing` (
   `idPricing` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idEnterprise` int(10) UNSIGNED NOT NULL ,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
+  `name` varchar(256) NOT NULL ,
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
