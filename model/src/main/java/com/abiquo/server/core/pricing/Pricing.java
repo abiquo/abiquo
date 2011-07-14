@@ -339,7 +339,7 @@ public class Pricing extends DefaultEntityBase
 
     private final static boolean V_CPU_REQUIRED = true;
 
-    private final static String V_CPU_COLUMN = "vCpu";
+    private final static String V_CPU_COLUMN = "vCPU";
 
     private final static int V_CPU_MIN = Integer.MIN_VALUE;
 
