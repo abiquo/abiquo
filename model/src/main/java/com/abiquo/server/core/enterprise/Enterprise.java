@@ -37,6 +37,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
+import org.hibernate.validator.constraints.URL;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
@@ -185,6 +186,7 @@ public class Enterprise extends DefaultEntityWithLimits
     @Required(value = CHEF_URL_REQUIRED)
     @Length(min = CHEF_URL_LENGTH_MIN, max = CHEF_URL_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = CHEF_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @URL
     public String getChefURL()
     {
         return chefURL;
