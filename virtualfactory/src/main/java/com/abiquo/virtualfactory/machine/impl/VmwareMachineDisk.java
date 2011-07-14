@@ -80,8 +80,8 @@ public class VmwareMachineDisk
     /**
      * Default constructor with the configuration from the VmwareMachine
      */
-    public VmwareMachineDisk(VmwareMachineUtils utils, VirtualMachineConfiguration vmConfig,
-        VmwareHypervisorConfiguration vmwareConfig)
+    public VmwareMachineDisk(final VmwareMachineUtils utils,
+        final VirtualMachineConfiguration vmConfig, final VmwareHypervisorConfiguration vmwareConfig)
     {
         this.utils = utils;
         this.vmConfig = vmConfig;
@@ -99,7 +99,7 @@ public class VmwareMachineDisk
         }
     }
 
-    public void setVMConfig(VirtualMachineConfiguration vmConfig)
+    public void setVMConfig(final VirtualMachineConfiguration vmConfig)
     {
         this.vmConfig = vmConfig;
     }
@@ -189,8 +189,8 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    public void bundleVirtualDisk(String sourcePath, String destinationPath, String snapShotName,
-        boolean isManaged) throws VirtualMachineException
+    public void bundleVirtualDisk(final String sourcePath, final String destinationPath,
+        final String snapShotName, final boolean isManaged) throws VirtualMachineException
     {
         bundleVirtualDisk(sourcePath, vmConfig.getVirtualDiskBase().getTargetDatastore(),
             vmwareConfig.getDatastoreSanName(), destinationPath, snapShotName, isManaged);
@@ -206,9 +206,9 @@ public class VmwareMachineDisk
      * @param isManaged
      * @throws VirtualMachineException
      */
-    private void bundleVirtualDisk(String sourcePath, String sourceDatastoreName,
-        String destinationDatastoreName, String destinationPath, String snapShotName,
-        boolean isManaged) throws VirtualMachineException
+    private void bundleVirtualDisk(final String sourcePath, final String sourceDatastoreName,
+        final String destinationDatastoreName, final String destinationPath,
+        final String snapShotName, final boolean isManaged) throws VirtualMachineException
     {
         ManagedObjectReference dcmor;
         ManagedObjectReference fileManager;
@@ -264,8 +264,8 @@ public class VmwareMachineDisk
      * @param snapShotName
      * @return
      */
-    private String getDestinationPathToBundle(String destinationDatastoreName,
-        String destinationPath, String snapShotName)
+    private String getDestinationPathToBundle(final String destinationDatastoreName,
+        final String destinationPath, final String snapShotName)
     {
         String finalPath = destinationPath;
 
@@ -293,8 +293,8 @@ public class VmwareMachineDisk
      * @param isManaged
      * @return
      */
-    private String getSourceDiskPathToBundle(String sourceDatastoreName, String sourcePath,
-        boolean isManaged)
+    private String getSourceDiskPathToBundle(final String sourceDatastoreName,
+        final String sourcePath, final boolean isManaged)
     {
         if (isManaged)
         {
@@ -335,18 +335,13 @@ public class VmwareMachineDisk
      * @throws Exception
      */
     public VirtualDeviceConfigSpec[] getDiskDeviceConfigSpec(
-        VirtualMachineConfiguration newConfiguration) throws Exception
+        final VirtualMachineConfiguration newConfiguration) throws Exception
     {
         ArrayList<VirtualDeviceConfigSpec> deviceConfig = new ArrayList<VirtualDeviceConfigSpec>();
 
         // Compares the two lists and adds or remove the disks
         List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
         List<VirtualDisk> oldExtendedDiskList = vmConfig.getExtendedVirtualDiskList();
-
-        /*
-         * // If there are no more extended disks, I remove the existent ones if
-         * ((newExtendedDiskList.size() == 0) && (oldExtendedDiskList.size() == 0)) { return null; }
-         */
 
         // all the previously added disk id.
         Map<String, VirtualDisk> htOldDiskId = new Hashtable<String, VirtualDisk>();
@@ -425,7 +420,8 @@ public class VmwareMachineDisk
      * 
      * @throws Exception
      */
-    public VirtualDeviceConfigSpec addVirtualDiskFromConfiguration(VirtualDisk vd) throws Exception
+    public VirtualDeviceConfigSpec addVirtualDiskFromConfiguration(final VirtualDisk vd)
+        throws Exception
     {
         com.vmware.vim25.VirtualDisk virtualDisk;
         VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
@@ -455,7 +451,8 @@ public class VmwareMachineDisk
      * 
      * @throws Exception
      */
-    public VirtualDeviceConfigSpec removeVirtualDiskFromConfig(VirtualDisk vd) throws Exception
+    public VirtualDeviceConfigSpec removeVirtualDiskFromConfig(final VirtualDisk vd)
+        throws Exception
     {
         com.vmware.vim25.VirtualDisk virtualDisk;
         VirtualDeviceConfigSpec diskSpec = new VirtualDeviceConfigSpec();
@@ -479,7 +476,7 @@ public class VmwareMachineDisk
      * @throws Exception
      */
     @Deprecated
-    public com.vmware.vim25.VirtualDisk createStandardDisk(VirtualDisk newVirtualDisk)
+    public com.vmware.vim25.VirtualDisk createStandardDisk(final VirtualDisk newVirtualDisk)
         throws Exception
     {
         ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
@@ -573,8 +570,8 @@ public class VmwareMachineDisk
      * @throws Exception
      */
     @Deprecated
-    protected String reduceVirtualDisk(VirtualDisk newVirtualDisk, VirtualDeviceConfigSpec diskSpec)
-        throws Exception
+    protected String reduceVirtualDisk(final VirtualDisk newVirtualDisk,
+        final VirtualDeviceConfigSpec diskSpec) throws Exception
     {
         ManagedObjectReference _virtualMachine = utils.getVmMor(vmConfig.getMachineName());
         VirtualMachineConfigInfo vmConfigInfo =
@@ -624,7 +621,8 @@ public class VmwareMachineDisk
      * @deprecated resize not considered
      */
     @Deprecated
-    protected void shrinkVirtualDisk(String virtualDiskLocation, long diffSize) throws Exception
+    protected void shrinkVirtualDisk(final String virtualDiskLocation, final long diffSize)
+        throws Exception
     {
         ManagedObjectReference virtualDiskManager =
             utils.getServiceContent().getVirtualDiskManager();

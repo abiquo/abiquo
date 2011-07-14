@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
@@ -56,7 +57,13 @@ public class EnterpriseRep extends DefaultRepBase
     private VirtualImageDAO virtualImageDAO;
 
     @Autowired
+    private PrivilegeDAO privilegeDAO;
+
+    @Autowired
     private RoleDAO roleDAO;
+
+    @Autowired
+    private RoleLdapDAO roleLdapDAO;
 
     @Autowired
     private UserDAO userDAO;
@@ -75,7 +82,7 @@ public class EnterpriseRep extends DefaultRepBase
 
     }
 
-    public EnterpriseRep(EntityManager entityManager)
+    public EnterpriseRep(final EntityManager entityManager)
     {
         assert entityManager != null;
         assert entityManager.isOpen();
@@ -86,9 +93,11 @@ public class EnterpriseRep extends DefaultRepBase
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
         ottSessionDAO = new OneTimeTokenSessionDAO(entityManager);
+        privilegeDAO = new PrivilegeDAO(entityManager);
+        roleLdapDAO = new RoleLdapDAO(entityManager);
     }
 
-    public void insert(Enterprise enterprise)
+    public void insert(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert !enterpriseDAO.isManaged(enterprise);
@@ -98,7 +107,7 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
-    public void update(Enterprise enterprise)
+    public void update(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert enterpriseDAO.isManaged(enterprise);
@@ -107,7 +116,12 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
-    public Enterprise findById(Integer id)
+    public RoleLdap findLdapRoleByType(final String type)
+    {
+        return roleLdapDAO.findByType(type);
+    }
+
+    public Enterprise findById(final Integer id)
     {
         assert id != null;
 
@@ -119,12 +133,12 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.findAll();
     }
 
-    public List<Enterprise> findAll(Integer offset, Integer numResults)
+    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
     {
         return this.enterpriseDAO.findAll(offset, numResults);
     }
 
-    public List<Enterprise> findByNameAnywhere(String name)
+    public List<Enterprise> findByNameAnywhere(final String name)
     {
         assert name != null;
 
@@ -132,7 +146,7 @@ public class EnterpriseRep extends DefaultRepBase
         return result;
     }
 
-    public boolean existsAnyOtherWithName(Enterprise enterprise, String name)
+    public boolean existsAnyOtherWithName(final Enterprise enterprise, final String name)
     {
         assert enterprise != null;
         assert !StringUtils.isEmpty(name);
@@ -140,14 +154,14 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.existsAnyOtherWithName(enterprise, name);
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return this.enterpriseDAO.existsAnyWithName(name);
     }
 
-    public void delete(Enterprise enterprise)
+    public void delete(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert enterpriseDAO.isManaged(enterprise);
@@ -161,53 +175,64 @@ public class EnterpriseRep extends DefaultRepBase
         return userDAO.findAll();
     }
 
-    public Collection<User> findUsersByEnterprise(Enterprise enterprise)
+    public Collection<User> findUsersByRole(final Role role)
+    {
+        return userDAO.findByRole(role);
+    }
+
+    public Collection<User> findUsersByEnterprise(final Enterprise enterprise)
     {
         return userDAO.findByEnterprise(enterprise);
     }
 
-    public Collection<User> findUsersByEnterprise(Enterprise enterprise, String filter,
-        String order, boolean desc, boolean connected, Integer page, Integer numResults)
+    public Collection<User> findUsersByEnterprise(final Enterprise enterprise, final String filter,
+        final String order, final boolean desc, final boolean connected, final Integer page,
+        final Integer numResults)
     {
-        return userDAO.find(enterprise, filter, order, desc, connected, page, numResults);
+        return userDAO.find(enterprise, null, filter, order, desc, connected, page, numResults);
     }
 
-    public User findUserByEnterprise(Integer userId, Enterprise enterprise)
+    public User findUserByEnterprise(final Integer userId, final Enterprise enterprise)
     {
         return userDAO.findByEnterprise(userId, enterprise);
     }
 
-    public boolean existAnyUserWithNick(String nick)
+    public boolean existAnyUserWithNick(final String nick)
     {
         return userDAO.existAnyUserWithNick(nick);
     }
 
-    public boolean existAnyOtherUserWithNick(User user, String nick)
+    public boolean existAnyOtherUserWithNick(final User user, final String nick)
     {
         return userDAO.existAnyOtherUserWithNick(user, nick);
     }
 
-    public void insertUser(User user)
+    public boolean existAnyUserWithRole(final Role role)
+    {
+        return userDAO.existAnyUserWithRole(role);
+    }
+
+    public void insertUser(final User user)
     {
         userDAO.persist(user);
     }
 
-    public void updateUser(User user)
+    public void updateUser(final User user)
     {
         userDAO.flush();
     }
 
-    public void removeUser(User user)
+    public void removeUser(final User user)
     {
         userDAO.remove(user);
     }
 
-    public User findUserById(Integer id)
+    public User findUserById(final Integer id)
     {
         return userDAO.findById(id);
     }
 
-    public Role findRoleById(Integer id)
+    public Role findRoleById(final Integer id)
     {
         return roleDAO.findById(id);
     }
@@ -217,89 +242,173 @@ public class EnterpriseRep extends DefaultRepBase
         return roleDAO.findAll();
     }
 
-    public void insertRole(Role role)
+    public Collection<Role> findRolesByEnterprise(final Enterprise enterprise, final String filter,
+        final String order, final boolean desc, final Integer page, final Integer numResults)
+    {
+        return roleDAO.find(enterprise, filter, order, desc, page, numResults);
+    }
+
+    public Collection<Role> findRolesByEnterpriseNotNull(final Enterprise enterprise,
+        final String filter, final String order, final boolean desc, final Integer page,
+        final Integer numResults)
+    {
+        return roleDAO.find(enterprise, filter, order, desc, page, numResults, true);
+    }
+
+    public Collection<Role> findRolesByEnterpriseAndName(final Enterprise enterprise,
+        final String filter, final String order, final boolean desc, final Integer page,
+        final Integer numResults, final boolean discardNullEnterprises)
+    {
+        return roleDAO.findExactly(enterprise, filter, order, desc, page, numResults,
+            discardNullEnterprises);
+    }
+
+    public Collection<Role> findRolesByEnterpriseAndName(final Enterprise enterprise,
+        final String filter, final String order, final boolean desc, final Integer page,
+        final Integer numResults)
+    {
+        return findRolesByEnterpriseAndName(enterprise, filter, order, desc, page, numResults, true);
+    }
+
+    public void insertRole(final Role role)
     {
         roleDAO.persist(role);
     }
 
-    public void updateRole(Role role)
+    public void updateRole(final Role role)
     {
         roleDAO.flush();
     }
 
-    public void deleteRole(Role role)
+    public void deleteRole(final Role role)
     {
         roleDAO.remove(role);
     }
 
-    public DefaultEntityCurrentUsed getEnterpriseResourceUsage(int enterpriseId)
+    public List<Privilege> findPrivilegesByRole(final Role role)
+    {
+        return roleDAO.findPrivilegesByIdRole(role.getId());
+    }
+
+    public Collection<Privilege> findAllPrivileges()
+    {
+        return privilegeDAO.findAll();
+    }
+
+    public Privilege findPrivilegeById(final Integer id)
+    {
+        return privilegeDAO.findById(id);
+    }
+
+    public Collection<RoleLdap> findRolesLdap(final String filter, final String order,
+        final boolean desc, final Integer page, final Integer numResults)
+    {
+        return roleLdapDAO.find(filter, order, desc, page, numResults);
+    }
+
+    public Collection<RoleLdap> findRoleLdapByRole(final Role role)
+    {
+        return roleLdapDAO.findByRole(role);
+    }
+
+    public RoleLdap findRoleLdapById(final Integer id)
+    {
+        return roleLdapDAO.findById(id);
+    }
+
+    public List<RoleLdap> findRoleLdapByRoleLdap(final String roleLdap)
+    {
+        return roleLdapDAO.findByRoleLdap(roleLdap);
+    }
+
+    public void insertRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.persist(roleLdap);
+    }
+
+    public void updateRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.flush();
+    }
+
+    public void deleteRoleLdap(final RoleLdap roleLdap)
+    {
+        roleLdapDAO.remove(roleLdap);
+    }
+
+    public boolean existAnyRoleLdapWithRole(final Role role)
+    {
+        return roleLdapDAO.existAnyRoleLdapWithRole(role);
+    }
+
+    public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         return enterpriseDAO.getEnterpriseResourceUsage(enterpriseId);
     }
 
-    public Enterprise findByName(String name)
+    public Enterprise findByName(final String name)
     {
         return enterpriseDAO.findUniqueByProperty(Enterprise.NAME_PROPERTY, name);
     }
 
-    public User getUserByUserName(String nick)
+    public User getUserByUserName(final String nick)
     {
         return userDAO.findUniqueByProperty(User.NICK_PROPERTY, nick);
     }
 
-    public List<Machine> findReservedMachines(Enterprise enterprise)
+    public List<Machine> findReservedMachines(final Enterprise enterprise)
     {
         return machineDAO.findReservedMachines(enterprise);
     }
 
-    public Machine findReservedMachine(Enterprise enterprise, Integer machineId)
+    public Machine findReservedMachine(final Enterprise enterprise, final Integer machineId)
     {
         return machineDAO.findReservedMachine(enterprise, machineId);
     }
 
-    public void reserveMachine(Machine machine, Enterprise enterprise)
+    public void reserveMachine(final Machine machine, final Enterprise enterprise)
     {
         machineDAO.reserveMachine(machine, enterprise);
     }
 
-    public void releaseMachine(Machine machine)
+    public void releaseMachine(final Machine machine)
     {
         machineDAO.releaseMachine(machine);
     }
 
-    public DatacenterLimits findLimitsByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter)
+    public DatacenterLimits findLimitsByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         return limitsDAO.findByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
-    public DatacenterLimits findLimitsByEnterpriseAndIdentifier(Enterprise enterprise,
-        Integer limitId)
+    public DatacenterLimits findLimitsByEnterpriseAndIdentifier(final Enterprise enterprise,
+        final Integer limitId)
     {
         return limitsDAO.findByEnterpriseAndIdentifier(enterprise, limitId);
     }
 
-    public Collection<DatacenterLimits> findLimitsByEnterprise(Enterprise enterprise)
+    public Collection<DatacenterLimits> findLimitsByEnterprise(final Enterprise enterprise)
     {
         return limitsDAO.findByEnterprise(enterprise);
     }
 
-    public Collection<DatacenterLimits> findLimitsByDatacenter(Datacenter datacenter)
+    public Collection<DatacenterLimits> findLimitsByDatacenter(final Datacenter datacenter)
     {
         return limitsDAO.findByDatacenter(datacenter);
     }
 
-    public void insertLimit(DatacenterLimits limit)
+    public void insertLimit(final DatacenterLimits limit)
     {
         limitsDAO.persist(limit);
     }
 
-    public void updateLimit(DatacenterLimits limit)
+    public void updateLimit(final DatacenterLimits limit)
     {
         limitsDAO.flush();
     }
 
-    public void deleteLimit(DatacenterLimits limit)
+    public void deleteLimit(final DatacenterLimits limit)
     {
         limitsDAO.remove(limit);
     }
@@ -324,5 +433,33 @@ public class EnterpriseRep extends DefaultRepBase
     {
         OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
         ottSessionDAO.persist(ottSession);
+    }
+
+    /**
+     * {@see UserDAO#getAbiquoUserByLogin(String)}
+     */
+    public User getAbiquoUserByUserName(final String nick)
+    {
+        return userDAO.getAbiquoUserByLogin(nick);
+    }
+
+    /**
+     * {@see UserDAO#getUserByAuth(String, authType)}
+     */
+    public User getUserByAuth(final String nick, final AuthType authType)
+    {
+        return userDAO.getUserByAuth(nick, authType);
+    }
+
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param nick login.
+     * @param authType an {@link AuthType} value.
+     * @return boolean false if there is no other user with same nick + authType. False otherwise.
+     */
+    public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
+    {
+        return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }
 }

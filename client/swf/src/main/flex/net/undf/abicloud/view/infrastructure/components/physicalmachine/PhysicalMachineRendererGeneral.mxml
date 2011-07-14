@@ -36,6 +36,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import net.undf.abicloud.vo.infrastructure.Datastore;
         	import net.undf.abicloud.events.InfrastructureEvent;
             import net.undf.abicloud.utils.AbicloudUtils;
@@ -55,6 +56,9 @@
             
             [Bindable]
             private var _physicalMachineHD:String;
+            
+            [Bindable]
+            private var _isUCS:Boolean;
 
             public function set editMode(value:Boolean):void
             {
@@ -83,6 +87,8 @@
             public function set physicalMachine(value:PhysicalMachine):void
             {
                 this._physicalMachine = value;
+                
+                this._isUCS = this._physicalMachine.assignedTo is UcsRack && this._physicalMachine.idState != PhysicalMachine.STATE_MANAGED && this._physicalMachine.idState != PhysicalMachine.STATE_NOT_MANAGED;
                 
                 var size:Object = returnDataStoresSizes();
                 this._physicalMachineHD = size.total+' GB ('+size.used+' GB '+resourceManager.getString('Infrastructure','LABEL_USED').toLowerCase()+')'; 
@@ -215,7 +221,7 @@
         direction="horizontal">
 
         <mx:Label id="cpuLabel"
-            text="{_physicalMachine.cpu.toString()}"
+            text="{this._isUCS ? '-':_physicalMachine.cpu.toString()}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 
@@ -232,7 +238,7 @@
         direction="horizontal">
 
         <mx:Label id="ramLabel"
-            text="{_physicalMachine.ram.toString() + ' MB'}"
+            text="{this._isUCS ? '-':_physicalMachine.ram.toString() + ' MB'}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 
@@ -259,7 +265,7 @@
         direction="horizontal">
 
         <mx:Label id="hdLabel"
-            text="{this._physicalMachineHD}"
+            text="{this._isUCS ? '-':this._physicalMachineHD}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 
@@ -286,7 +292,7 @@
 
         <mx:Label id="ipLabel"
             selectable="true"
-            text="{this._hypervisor.ip}"
+            text="{this._isUCS ? '-':this._hypervisor.ip}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 
@@ -301,7 +307,7 @@
         height="18"
         label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
         <mx:Label id="virtualSwitchNameLabel"
-            selectable="true" text="{_physicalMachine.vswitchName}"/>
+            selectable="true" text="{this._isUCS ? '-':_physicalMachine.vswitchName}"/>
     </mx:FormItem>
 
     <mx:FormItem 
@@ -309,7 +315,7 @@
         label="@Resource(bundle='Infrastructure', key='LABEL_HYPERVISOR_TYPE')">
 
         <mx:Label id="hypervisorTypeLabel"
-            text="{this._hypervisorName}"
+            text="{this._isUCS ? '-':this._hypervisorName}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
              <!--this._hypervisors.length > 0 ? HyperVisorType.HYPERVISOR_NAMES[HyperVisor(this._hypervisors.getItemAt(0)).type.id] : ResourceManager.getInstance().getString('Common', 'LABEL_NOT_AVAILABLE')-->
@@ -329,7 +335,7 @@
 
         <mx:Label id="hypervisorPortLabel"
             selectable="true"
-            text="{this._hypervisor.port.toString()}"
+            text="{this._isUCS ? '-':this._hypervisor.port.toString()}"
             includeInLayout="{! _editMode}"
             visible="{! _editMode}"/>
 

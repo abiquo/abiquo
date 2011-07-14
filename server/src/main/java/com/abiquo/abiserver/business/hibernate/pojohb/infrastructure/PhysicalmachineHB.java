@@ -68,6 +68,14 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     private String vswitchName;
 
     private String initiatorIQN;
+    
+    private String ipmiIp;
+
+    private Integer ipmiPort;
+
+    private String ipmiUser;
+
+    private String ipmiPassword;
 
     private Set<DatastoreHB> datastoresHB;
 
@@ -82,6 +90,10 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     public static final int STATE_HALTED = 4;
 
     public static final int STATE_UNLICENSED = 5;
+    
+    public static final int STATE_HA_IN_PROGRESS = 6;
+    
+    public static final int STATE_DISABLED_FOR_HA = 7;
 
     /**
      * How many virtual CPU are supported for each physical core, so ''cpuUsed'' always below
@@ -352,6 +364,46 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     {
         return idEnterprise;
     }
+    
+    public String getIpmiIp()
+    {
+        return ipmiIp;
+    }
+
+    public void setIpmiIp(final String ipmiIp)
+    {
+        this.ipmiIp = ipmiIp;
+    }
+
+    public Integer getIpmiPort()
+    {
+        return ipmiPort;
+    }
+
+    public void setIpmiPort(final Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+
+    public String getIpmiUser()
+    {
+        return ipmiUser;
+    }
+
+    public void setIpmiUser(final String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+
+    public String getIpmiPassword()
+    {
+        return ipmiPassword;
+    }
+
+    public void setIpmiPassword(final String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
+    }
 
     @Override
     public PhysicalMachine toPojo()
@@ -376,6 +428,10 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         physicalMachine.setIdState(idState);
         physicalMachine.setVswitchName(vswitchName);
         physicalMachine.setInitiatorIQN(initiatorIQN);
+        physicalMachine.setIpmiIp(ipmiIp);
+        physicalMachine.setIpmiPort(ipmiPort);
+        physicalMachine.setIpmiUser(ipmiUser);
+        physicalMachine.setIpmiPassword(ipmiPassword);
         Set<Datastore> datastores = new HashSet<Datastore>();
         if (datastoresHB != null)
         {

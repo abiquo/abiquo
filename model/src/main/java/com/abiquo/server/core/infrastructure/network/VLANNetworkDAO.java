@@ -35,6 +35,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Rack;
 
 @Repository
@@ -102,7 +103,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     private final String FIND_BY_ENTERPRISE = " SELECT vlan "//
         + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
         + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "WHERE vlan.id = vdc.network.id "//
+        + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.enterprise.id = :enterpriseId";
 
     public List<VLANNetwork> findByEnterprise(int enterpriseId)
@@ -113,15 +114,16 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<Integer> getVLANsIdUsedInRack(Rack rack)
+    public List<Integer> getVLANTagsUsedInRack(Rack rack)
     {
         String idRack = String.valueOf(rack.getId());
 
-        Query query = getSession().createQuery("SELECT vn.id FROM " //
+        Query query = getSession().createQuery("SELECT vn.tag FROM " //
             + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
             + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
             + "WHERE vn.id = vna.vlanNetwork.id " + //
-            "AND vna.rack.id = " + idRack);
+            "AND vna.rack.id = " + idRack +
+            " AND vn.tag IS NOT NULL");
 
         // FIXME
         // Query query = getSession().createQuery(VLAN_ID_TAG_USED);
@@ -130,22 +132,13 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<VLANNetwork> findPublicVLANNetworksByRack(Rack rack)
+    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(Datacenter datacenter)
     {
+        
+        Criterion inNetwork = Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
+        Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
 
-        String idRack = String.valueOf(rack.getId());
-
-        Query query = getSession().createQuery("SELECT vn FROM " //
-            + "com.abiquo.server.core.infrastructure.network.VLANNetwork vn, " //
-            + "com.abiquo.server.core.infrastructure.network.NetworkAssignment vna " //
-            + "WHERE vn.id = vna.vlanNetwork.id " + //
-            "AND vna.rack.id = " + idRack);
-
-        // FIXME
-        // Query query = getSession().createQuery(VLAN_TAG_USED);
-        // query.setParameter("idRack", rack.getId());
-
-        return query.list();
+        return criteria.list();
     }
 
     private final String GET_VLAN_DATACENTER =

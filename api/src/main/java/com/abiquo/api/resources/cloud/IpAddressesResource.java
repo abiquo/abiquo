@@ -26,6 +26,7 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -68,17 +69,13 @@ public class IpAddressesResource extends AbstractResource
     @GET
     public IpsPoolManagementDto getIPAddresses(
         @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) Integer vlanId,
-        @QueryParam(START_WITH) Integer startwith, @Context IRESTBuilder restBuilder)
+        @QueryParam(START_WITH) @Min(0) Integer startwith,
+        @QueryParam(LIMIT) @Min(0) Integer limit, @Context IRESTBuilder restBuilder)
         throws Exception
     {
         List<IpPoolManagement> all =
             service.getListIpPoolManagementByVLAN(vlanId, (startwith == null) ? 0 : startwith,
-                DEFAULT_PAGE_LENGTH);
-
-        if (all == null || all.isEmpty())
-        {
-            throw new InternalServerErrorException(APIError.NETWORK_WITHOUT_IPS);
-        }
+                (limit == null) ? DEFAULT_PAGE_LENGTH : limit);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
@@ -89,6 +86,7 @@ public class IpAddressesResource extends AbstractResource
 
         ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
             (PagedList) all));
+        ips.setTotalSize(((PagedList) all).getTotalResults());
 
         return ips;
     }

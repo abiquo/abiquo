@@ -69,6 +69,8 @@ package net.undf.abicloud.vo.infrastructure
         public var conversion:VirtualImageConversions;
 
         public var datastore:Datastore;
+        
+        public var password:String;
 
 
         /* ------------- Constructor ------------- */
@@ -87,6 +89,7 @@ package net.undf.abicloud.vo.infrastructure
             highDisponibility = false;
             user = new User();
             idType = 0;
+            password = "";
         }
 
 

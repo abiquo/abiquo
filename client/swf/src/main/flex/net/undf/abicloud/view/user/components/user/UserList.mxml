@@ -22,8 +22,13 @@
 
 -->
 
-<mx:Canvas 
+<mx:VBox 
     width="100%" height="100%"
+    paddingBottom="0"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="10"
+    verticalGap="0"
     creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -36,6 +41,10 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.effects.Resize;
+        	import mx.events.EffectEvent;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -108,6 +117,8 @@
             private var _userAdd:UserAdd;
 
             private var _userEdit:UserEdit;
+            
+            private var _resizeEffect:Resize;
 
 
             //Needed variables for user's pagination
@@ -123,6 +134,13 @@
 
             private function onCreationComplete():void
             {
+                //Checking privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",addButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",deleteButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",editButton,userAction);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_USERS,"removeChild",moreActionsButton,userList);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_ENUMERATE_CONNECTED,"removeChild",loggedUsersCheckbox,loggedUsers);
+                
                 //Initializing variables
                 this._users = new ArrayCollection();
 
@@ -142,6 +160,12 @@
                                                                          onUsersSessionClosed);
                 AbiCloudModel.getInstance().userManager.addEventListener(UserEvent.USER_DELETED,
                                                                          onUserDeleted);
+                                                                         
+				//Resize effect used to show or hide the More info container
+                this._resizeEffect = new Resize();
+                this._resizeEffect.duration = 300;
+                this._resizeEffect.heightFrom = 0;
+                this._resizeEffect.heightTo = 160;                                                                         
             }
 
             public function init():void
@@ -171,6 +195,10 @@
                 userListOptions.filter = usersFilter.text;
                 userListOptions.asc = this._usersAsc;
                 userListOptions.orderBy = this._usersOrderBy;
+                //If the user can manage only users from its enterprise
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)){
+                	this._enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                }
                 userListOptions.byEnterprise = this._enterprise;
                 userListOptions.loggedOnly = loggedUsersCheckbox.selected;
 
@@ -296,7 +324,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("User",
-                                                                                    "ALERT_DELETE_USER_HEADER"),
+                                                                                    "ALERT_DELETE_USER_HEADER")+" '"+User(usersDataGrid.selectedItem).name+" "+User(usersDataGrid.selectedItem).surname+"'",
                                             ResourceManager.getInstance().getString("User",
                                                                                     "ALERT_DELETE_USER_TEXT"),
                                             Alert.YES | Alert.NO,
@@ -338,7 +366,7 @@
                 	this._userEdit.roleEditable = false;
                 }else{
                 	this._userEdit.activeEditable = true;
-                	this._userEdit.roleEditable = false;
+                	this._userEdit.roleEditable = User(usersDataGrid.selectedItem).authType == User.ABIQUO;
                 }
                 PopUpManager.addPopUp(this._userEdit, this, true);
                 PopUpManager.centerPopUp(this._userEdit);
@@ -389,14 +417,12 @@
              **/
             private function usersDataGridRoleColumnLabel(item:User, column:DataGridColumn):String
             {
-                var label:String = item.role.shortDescription;
-                if(item.role.id == Role.USER_ROLE){
-                	if(item.availableVirtualDatacenters){
-                		if(item.availableVirtualDatacenters.length > 0){
-                			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
-                		}
-                	}
-                }
+                var label:String = item.role.name;
+            	if(item.availableVirtualDatacenters){
+            		if(item.availableVirtualDatacenters.length > 0){
+            			label += " ("+resourceManager.getString('User','LABEL_WITH_RESTRICTION')+")";
+            		}
+            	}
                 return label;
             }
 
@@ -584,13 +610,62 @@
                 DragManager.doDrag(UIComponent(Application.application), dragSource,
                                    mouseEvent, dragProxy, -mouseEvent.stageX, -mouseEvent.stageY);
             }
+            
+             /**
+             * Shows a User, using an UserRenderer component
+             **/
+            public function showUser(user:User):void 
+            {
+                if (!moreInfoContainer.visible)
+                {
+                    moreInfoContainer.visible = true;
+                    this._resizeEffect.play([ moreInfoContainer ]);
+                }
+
+                userRenderer.init(user);
+            }
+
+            /**
+             * Hides the MoreInfoContainer component
+             */
+            public function hideMoreInfoContainer():void
+            {
+                 if (moreInfoContainer.visible)
+                {
+                    this._resizeEffect.addEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                    this._resizeEffect.play([ moreInfoContainer ], true);
+                }
+            }
+
+            private function onEndResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideButton():void
+            {
+                hideMoreInfoContainer();
+            }
+            
+            private function onEndUserResizeEffect(effectEvent:EffectEvent):void
+            {
+                this._resizeEffect.removeEventListener(EffectEvent.EFFECT_END, onEndUserResizeEffect);
+                moreInfoContainer.visible = false;
+            }
+
+            private function onClickHideUserButton():void
+            {
+                hideMoreInfoContainer();
+            }
+
         ]]>
     </mx:Script>
 
     <!-- Search & More actions Bar -->
     <mx:HBox 
+    	id="userList"
         width="100%" height="32"
-        top="0"
         paddingLeft="6"
         paddingRight="6"
         verticalAlign="middle"
@@ -609,6 +684,7 @@
             width="100%" height="10"/>
 
         <mx:HBox 
+        	id="loggedUsers"
             width="100%"
             horizontalAlign="right"
             horizontalGap="3"
@@ -642,8 +718,7 @@
 
     <!-- Data Grid -->
     <mx:DataGrid id="usersDataGrid"
-        width="100%"
-        top="31" bottom="31"
+        width="100%" height="100%"
         dataProvider="{this._users}" allowMultipleSelection="true"
         click="onClickUsersDataGrid()"
         mouseDown="onMouseDownUsersDataGrid()"
@@ -710,7 +785,7 @@
 
     <!-- Tool Box -->
     <general:GeneralPanelToolBox 
-        bottom="0"
+    	id="userAction"
         styleName="GeneralDataPanelBottomSkin">
         <mx:Button id="addButton"
             styleName="AddButton" enabled="{this._enterprise != null}"
@@ -753,4 +828,24 @@
             click="editUser()"
             visible="{! loggedUsersCheckbox.selected}"/>
     </general:GeneralPanelToolBox>
-</mx:Canvas>
+    
+    <!-- More info -->
+    <mx:VBox id="moreInfoContainer"
+        width="100%" height="0"
+        horizontalAlign="center"
+        paddingBottom="0"
+        paddingLeft="0"
+        paddingRight="0"
+        paddingTop="0"
+        verticalGap="0"
+        visible="false">
+
+        <mx:Button id="hideUserButton"
+            width="49" height="10"
+            styleName="UpDownButton"
+            click="onClickHideUserButton()"/>
+
+        <user:UserRenderer id="userRenderer"
+            width="100%" height="100%"/>
+    </mx:VBox>
+</mx:VBox>

@@ -26,6 +26,10 @@ import java.util.Map;
 
 import javax.jms.ResourceAllocationException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
@@ -34,9 +38,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.client.TracerFactory;
 
 /**
  * Check the current range for the total resource allocation limits on a provided entity, indicating
@@ -45,8 +47,11 @@ import com.abiquo.tracer.client.TracerFactory;
  * 
  * @param T {@link Enterprise}, {@link Datacenter} or {@link VirtualDataCenter}
  */
+@Component
 public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 {
+    @Autowired
+    private TracerLogger tracer;
 
     enum LimitResource
     {
@@ -142,11 +147,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
+        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
+        limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
 
         /**
          * TODO vlan and public ip is not checked there
@@ -201,11 +208,13 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
                     actual,
                     getEntityIdentifier(entity));
 
+            // don't trace anything in tests.
             traceLimit(totalLimitStatus == LimitStatus.HARD_LIMIT, force, entity, exc);
         }
     }
 
-    private void traceLimit(boolean hard, boolean force, T entity, LimitExceededException except)
+    private void traceLimit(final boolean hard, final boolean force, final T entity,
+        final LimitExceededException except)
     {
         final String entityId = getEntityIdentifier(entity);
 
@@ -218,8 +227,10 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage, Platform.SYSTEM_PLATFORM);
+                if (tracer != null)
+                {
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                }
                 break;
             default:
                 break;
@@ -231,8 +242,12 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                TracerFactory.getTracer().log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
-                    traceMessage);
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
+                    || entity instanceof VirtualDatacenter) && tracer != null)
+                {
+                    tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                }
+
                 break;
             default:
                 break;
@@ -257,7 +272,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         DETAIL, NO_DETAIL, IGNORE;
     }
 
-    private InformationSecurity traceSystem(T entity)
+    private InformationSecurity traceSystem(final T entity)
     {
 
         if (entity instanceof VirtualDatacenter)
@@ -268,7 +283,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         return InformationSecurity.DETAIL;
     }
 
-    private InformationSecurity traceEnterprise(T entity, boolean force)
+    private InformationSecurity traceEnterprise(final T entity, final boolean force)
     {
         if (entity instanceof VirtualDatacenter)
         {
@@ -278,7 +293,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         return InformationSecurity.NO_DETAIL;
     }
 
-    private InformationSecurity returnExcption(T entity, boolean hard, boolean force)
+    private InformationSecurity returnExcption(final T entity, final boolean hard,
+        final boolean force)
     {
 
         if (entity instanceof VirtualDatacenter)

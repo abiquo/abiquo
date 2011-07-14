@@ -153,7 +153,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and pm.idState != 7" // not HA_DISABLED
             + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
@@ -167,7 +167,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
-        Long storage = getStorageUsage(enterpriseId);
+        Long storage = getStorageUsage(enterpriseId) * 1024 * 1024; // Storage usage is stored in MB
         Long publiIp = getPublicIPUsage(enterpriseId);
         Long vlanCount = getVLANUsage(enterpriseId);
 

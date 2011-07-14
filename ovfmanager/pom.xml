@@ -15,7 +15,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <!--    Depencences                       -->
@@ -95,6 +95,9 @@
                     <plugin>
                         <groupId>org.jvnet.jaxb2.maven2</groupId>
                         <artifactId>maven-jaxb2-plugin</artifactId>
+			<configuration>
+				<strict>false</strict>
+			</configuration>
                         <executions>
                             <execution>
                                 <goals>

@@ -83,6 +83,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
+    private String costCode;
+
     public VirtualimageHB()
     {
     }
@@ -112,6 +114,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         final Integer cpuRequired, final int treaty, final int deleted,
         final VirtualimageHB master, final int idEnterprise, final String ovfId,
         final Long diskFileSize)
+        final Long diskFileSize, final String costCode)
     {
         this.repository = repository;
         this.icon = icon;
@@ -130,6 +133,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.ovfId = ovfId;
         this.stateful = 0;
         this.diskFileSize = diskFileSize;
+        this.costCode = costCode;
     }
 
     public Integer getIdImage()
@@ -312,6 +316,16 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.chefEnabled = chefEnabled;
     }
 
+    public String getCostCode()
+    {
+        return costCode;
+    }
+
+    public void setCostCode(String costCode)
+    {
+        this.costCode = costCode;
+    }
+
     @Override
     public VirtualImage toPojo()
     {
@@ -366,6 +380,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         virtualImage.setStateful(stateful);
         virtualImage.setDiskFileSize(diskFileSize);
         virtualImage.setChefEnabled(chefEnabled);
+        virtualImage.setCostCode(costCode);
 
         return virtualImage;
     }
@@ -410,6 +425,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         imageBundled.setPathName(getPathName());
         imageBundled.setDiskFileSize(getDiskFileSize());
         imageBundled.setChefEnabled(isChefEnabled());
+        imageBundled.setCostCode(getCostCode());
 
         if (getMaster() == null)
         {

@@ -21,13 +21,22 @@
 
 package com.abiquo.appliancemanager.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
+import org.apache.wink.common.internal.uri.UriEncoder;
+import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.appliancemanager.util.URIResolver;
 
@@ -39,29 +48,44 @@ public class ApplianceManagerResourceStub
 
     private final String serviceUri;
 
-    public ApplianceManagerResourceStub(String serviceUri)
+    /**
+     * Timeout only of ''slow nfs filesystem access'' (getting the repository usage or refresh the
+     * available packages)
+     */
+    private final static Integer CLIENT_TIMEOUT_MS = Integer.parseInt(System.getProperty(
+        "abiquo.appliancemanager.timeout", "5000")); // default 5seconds
+
+    public ApplianceManagerResourceStub(final String serviceUri)
     {
         super();
         this.serviceUri = serviceUri;
         this.client = new RestClient();
 
         ClientConfig confTimeout = new ClientConfig();
-        confTimeout.readTimeout(5000); // 5seconds
+        confTimeout.readTimeout(CLIENT_TIMEOUT_MS);
         this.clientTimeout = new RestClient(confTimeout);
     }
 
     Resource ovfPackage(final String idEnterprise, final String idOVF)
     {
-        Map<String, String> params = new HashMap<String, String>()
+        Map<String, String> params;
+        try
         {
+            params = new HashMap<String, String>()
             {
-                put("erepo", idEnterprise);
-                put("ovfpi", idOVF);
-            }
-        };
+                {
+                    // FIXME ABICLOUDPREMIUM-1798
+                    put("erepo", idEnterprise);
+                    put("ovfpi", URLEncoder.encode(idOVF, "UTF-8"));
+                }
+            };
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new RuntimeException("Can not encode", e);
+        }
 
-        final String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovfpi}", params);
+        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovfpi}", params);
 
         Resource resource = client.resource(url);
 
@@ -89,14 +113,29 @@ public class ApplianceManagerResourceStub
 
         return resource;
     }
-    
+
     Resource repository(final String idEnterprise)
     {
-        final String url =
+        return repository(idEnterprise, false);
+    }
+
+    /**
+     * Timeout
+     */
+    Resource repository(final String idEnterprise, final boolean checkCanWrite)
+    {
+        String url =
             URIResolver.resolveURI(serviceUri, "erepos/{erepo}",
                 Collections.singletonMap("erepo", idEnterprise));
 
-        Resource resource = client.resource(url);
+        if (checkCanWrite)
+        {
+            Map<String, String[]> queryParams = new HashMap<String, String[]>();
+            queryParams.put("checkCanWrite", new String[] {String.valueOf(checkCanWrite)});
+            url = UriHelper.appendQueryParamsToPath(url, queryParams, false);
+        }
+
+        Resource resource = clientTimeout.resource(url);
 
         return resource;
     }

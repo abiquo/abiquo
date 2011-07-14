@@ -37,8 +37,7 @@ public class SoftLimitExceededException extends LimitExceededException
     public SoftLimitExceededException(Object entity, long required, long actual, LimitHB limit,
         LimitResource resource)
     {
-        super(entity, required, actual, limit, resource);
-
+        super(entity, required, actual, limit, resource); 
     }
 
 }

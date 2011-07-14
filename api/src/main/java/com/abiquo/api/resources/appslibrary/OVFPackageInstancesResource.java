@@ -34,7 +34,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.DatacenterResource;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.stub.ApplianceManagerStub;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
@@ -48,9 +48,8 @@ public class OVFPackageInstancesResource extends AbstractResource
 {
     public static final String OVF_PACKAGE_INSTANCES_PATH = "ovfPackageInstances";
 
-    // @Autowired
-    @Resource(name = "remoteServiceService")
-    private RemoteServiceService r;
+    @Autowired
+    private InfrastructureService r;
 
     @Autowired
     private ApplianceManagerStub am;

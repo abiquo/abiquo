@@ -25,10 +25,12 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualAppliancesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,6 +40,9 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 /**
@@ -51,11 +56,27 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
 
     private Datacenter datacenter;
 
+    private static final String SYSADMIN = "sysadmin";
+
     @BeforeMethod
-    public void setUp()
+    public void setupSysadmin()
     {
         ent = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin("sysRole");
+        User u = userGenerator.createInstance(ent, r, "sysadmin", "sysadmin");
         datacenter = datacenterGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     /**
@@ -72,10 +93,11 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         VirtualAppliance vapp1 = vappGenerator.createInstance(vdc1);
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc1);
 
-        setup(ent, datacenter, vdc1, vdc2, vapp1, vapp2);
+        setup(vdc1, vdc2, vapp1, vapp2);
 
         // Check for vdc1
-        ClientResponse response = get(resolveVirtualAppliancesURI(vdc1.getId()));
+        ClientResponse response =
+            get(resolveVirtualAppliancesURI(vdc1.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualAppliancesDto vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -83,7 +105,7 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(vapps.getCollection().size(), 2);
 
         // Check for vdc2
-        response = get(resolveVirtualAppliancesURI(vdc2.getId()));
+        response = get(resolveVirtualAppliancesURI(vdc2.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vapps = response.getEntity(VirtualAppliancesDto.class);
         assertNotNull(vapps);
@@ -95,12 +117,13 @@ public class VirtualAppliancesResourceIT extends AbstractJpaGeneratorIT
     public void createVirtualAppliance()
     {
         VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, ent);
-        setup(ent, datacenter, vdc1);
+        setup(vdc1);
 
         VirtualApplianceDto dto = new VirtualApplianceDto();
         dto.setName("wadus");
 
-        ClientResponse response = post(resolveVirtualAppliancesURI(vdc1.getId()), dto);
+        ClientResponse response =
+            post(resolveVirtualAppliancesURI(vdc1.getId()), dto, SYSADMIN, SYSADMIN);
 
         assertEquals(201, response.getStatusCode());
     }

@@ -19,6 +19,9 @@
     <property name="userIdDb" type="integer">
     	<column name="idUser"/>
     </property>
+    <property name="authType" type="string">
+      <column length="20" name="`authType`"/>
+    </property>
   </class>
   <sql-query name="checkSession">
    		<return class="com.abiquo.abiserver.pojo.authentication.UserSession"/>

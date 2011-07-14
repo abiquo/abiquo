@@ -103,6 +103,11 @@ public class AbiConfig
         return System.getProperty("abiquo.server.api.location");
     }
 
+    public String getCostCode()
+    {
+        return System.getProperty("abiquo.server.costCode");
+    }
+
     private LimitHB createLimit(String type)
     {
         long hard =
@@ -111,5 +116,18 @@ public class AbiConfig
             Long.valueOf(System.getProperty("abiquo.server.resourcelimits." + type + ".soft", "0"));
 
         return new LimitHB(hard, soft);
+    }
+
+    /**
+     * Whether Abiquo should try to connecto to DB or LDAP/Active Directory and DB.
+     * 
+     * @return <ul>
+     *         <li>abiquo: if DB login only</li>
+    *         <li>ldap: if LDAP and DB authentication</li>
+     *         </ul>
+     */
+    public String getAbiquoSecurityMode()
+    {
+        return System.getProperty("abiquo.auth.module");
     }
 }

@@ -37,7 +37,8 @@
 
     <mx:Script>
         <![CDATA[
-        	import net.undf.abicloud.security.SecurableResource;
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.user.Role;
         	import mx.effects.Resize;
         	import mx.events.EffectEvent;
@@ -87,7 +88,6 @@
             
             private var _resizeEffect:Resize;
             
-            private var _categoriesButtons:SecurableResource;
 
             //The selected Datacenter
             [Bindable]
@@ -111,22 +111,8 @@
                 this._resizeEffect.heightTo = 230;
                 
                 BindingUtils.bindSetter(showHideBundleContainer,this,"hasSlaveImage");
-                
-                //Secure buttons to manage categories
-                 this._categoriesButtons = new SecurableResource("MANAGE_CATEGORIES_BUTTONS","APPLIANCE_LIBRARY");
-                 makeUnavailable();
-            }
-            
-            private function makeUnavailable():void{
-            	if (!_categoriesButtons || !_categoriesButtons.applyAuthorization(AbiCloudModel.getInstance().authorizationManager))
-                {
-                	this.addCategoryButton.visible = false;
-                	this.addCategoryButton.includeInLayout = false;
-                	this.deleteCategoryButton.visible = false;
-                	this.deleteCategoryButton.includeInLayout = false;	
-                }            
-            }
-            
+            }           
+         
             private function showHideBundleContainer(value:Boolean):void{
             	if(datacenterList.selectedIndex != -1){
             		if(value){
@@ -151,6 +137,25 @@
 
             private function onInitialize():void
             {
+                
+                //Checking privilege for managing categories
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_CATEGORIES, "visible", addCategoryButton);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_MANAGE_CATEGORIES, "visible", deleteCategoryButton);
+                
+                //Checking privilege for uploading image
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)){
+                	delete XMLList(addButtonDataProvider)[1];
+                }
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_ALLOW_MODIFY)){
+                	delete XMLList(addButtonDataProvider)[0];
+                }
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_UPLOAD_IMAGE)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_ALLOW_MODIFY)){
+                	SecuredPrivilegeAccess.checkElementAccess("removeVappAction","condition",addButton,vappAction);
+                }
+                
                 //Catching model
                 virtualImageManager = AbiCloudModel.getInstance().virtualImageManager;
 
@@ -234,7 +239,7 @@
             private function onClickDatacenterList():void
             {
                 //clean the virtual images list when selecting the datacenter
-                virtualImageList.removeAllChildren();
+				//virtualImageList.removeAllChildren();
                 
                 if (datacenterList.selectedIndex > -1)
                 {
@@ -345,7 +350,7 @@
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualImage",
-                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER")+" '"+Category(categoriesCombo.selectedItem).name+"'",
                                             ResourceManager.getInstance().getString("VirtualImage",
                                                                                     "ALERT_UNABLE_DELETE_CATEGORY_TEXT"),
                                             Alert.OK, null);
@@ -353,7 +358,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualImage",
-                                                                                    "ALERT_DELETE_CATEGORY_HEADER"),
+                                                                                    "ALERT_DELETE_CATEGORY_HEADER")+" '"+Category(categoriesCombo.selectedItem).name+"'",
                                             ResourceManager.getInstance().getString("VirtualImage",
                                                                                     "ALERT_DELETE_CATEGORY_TEXT"),
                                             Alert.YES | Alert.NO,
@@ -457,10 +462,10 @@
             	if(event.virtualImage.shared == 1){
             		downloadEnable = true;
         		//else if the user is a sysadmin, he can download the image
-            	}else if(AbiCloudModel.getInstance().loginManager.user.role.id == Role.SYS_ADMIN_ROLE){
+            	}else if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_DOWNLOAD_IMAGE)){
             		downloadEnable = true;
         		//else if the user enterprise id == virtualImage enterprise id
-            	}else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
+            	} else if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == enterpriseId){
             		downloadEnable = true;
             	}                
                 
@@ -687,14 +692,16 @@
 	                visible="{datacenterList.selectedIndex == -1}"/>
         </mx:Canvas>
         <general:GeneralPanelToolBox styleName="GeneralDataPanelBottomSkin">
-            <mx:PopUpMenuButton id="addButton"
-                width="40" height="22"
-                styleName="AddButtonPlus" label="" labelField="@label"
-                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                dataProvider="{addButtonDataProvider}"
-                enabled="{selectedDatacenter != null}"
-                itemClick="{selectedDatacenter != null ? onItemClickAddButton(event):null}"
-                closeDuration="0"/>
+        	<mx:HBox id="vappAction" width="100%" verticalAlign="middle">
+	            <mx:PopUpMenuButton id="addButton"
+	                width="40" height="22"
+	                styleName="AddButtonPlus" label="" labelField="@label"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	                dataProvider="{addButtonDataProvider}"
+	                enabled="{selectedDatacenter != null}"
+                	itemClick="{selectedDatacenter != null ? onItemClickAddButton(event):null}"
+	                closeDuration="0"/>
+        	</mx:HBox>
         </general:GeneralPanelToolBox>
     </general:GeneralPanel>
 </mx:HDividedBox>

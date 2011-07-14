@@ -47,8 +47,9 @@ public class StoragePool extends GenericEnityBase<String>
     protected StoragePool()
     {
     }
-    
-    public StoragePool(String id, String name, Long availableSize, Long totalSize, Long usedSize, StorageDevice device, Tier tier)
+
+    public StoragePool(final String id, final String name, final Long availableSize,
+        final Long totalSize, final Long usedSize, final StorageDevice device, final Tier tier)
     {
         this.setIdStorage(id);
         this.setName(name);
@@ -83,7 +84,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.idStorage;
     }
 
-    public void setIdStorage(String idStorage)
+    public void setIdStorage(final String idStorage)
     {
         this.idStorage = idStorage;
     }
@@ -92,9 +93,9 @@ public class StoragePool extends GenericEnityBase<String>
 
     private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -111,7 +112,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -135,7 +136,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.totalSizeInMb;
     }
 
-    public void setTotalSizeInMb(long totalSizeInMb)
+    public void setTotalSizeInMb(final long totalSizeInMb)
     {
         this.totalSizeInMb = totalSizeInMb;
     }
@@ -157,7 +158,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.device;
     }
 
-    public void setDevice(StorageDevice device)
+    public void setDevice(final StorageDevice device)
     {
         this.device = device;
     }
@@ -181,7 +182,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.usedSizeInMb;
     }
 
-    public void setUsedSizeInMb(long usedSizeInMb)
+    public void setUsedSizeInMb(final long usedSizeInMb)
     {
         this.usedSizeInMb = usedSizeInMb;
     }
@@ -205,7 +206,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.availableSizeInMb;
     }
 
-    public void setAvailableSizeInMb(long availableSizeInMb)
+    public void setAvailableSizeInMb(final long availableSizeInMb)
     {
         this.availableSizeInMb = availableSizeInMb;
     }
@@ -227,7 +228,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.tier;
     }
 
-    public void setTier(Tier tier)
+    public void setTier(final Tier tier)
     {
         this.tier = tier;
     }
@@ -247,7 +248,7 @@ public class StoragePool extends GenericEnityBase<String>
         return this.enabled;
     }
 
-    public void setEnabled(boolean enabled)
+    public void setEnabled(final boolean enabled)
     {
         this.enabled = enabled;
     }

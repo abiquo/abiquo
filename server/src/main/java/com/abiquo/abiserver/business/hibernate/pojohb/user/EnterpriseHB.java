@@ -52,13 +52,15 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     /** The enterprise name */
     private String name;
 
-    private ResourceAllocationLimitHB limits;
-
     private String chefURL;
 
     private String chefClientCertificate;
 
     private String chefValidatorCertificate;
+    /** kind of reservation */
+    private Boolean isReservationRestricted;
+
+    private ResourceAllocationLimitHB limits;
 
     private Collection<PhysicalmachineHB> reservedMachines;
 
@@ -125,6 +127,17 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     {
         this.chefValidatorCertificate = chefValidatorCertificate;
     }
+    
+    public Boolean getIsReservationRestricted()
+    {
+        return isReservationRestricted;
+    }
+
+    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
+    }
+
     /**
      * @return the limits
      */
@@ -164,6 +177,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     /**
      * This method create a generic enterprise pojo object.
      */
+    @Override
     public Enterprise toPojo()
     {
         Enterprise enterprise = new Enterprise();
@@ -171,6 +185,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         enterprise.setId(getIdEnterprise());
         enterprise.setName(getName());
         enterprise.setLimits(limits.toPojo());
+        enterprise.setIsReservationRestricted(isReservationRestricted);
 
         Set<DatacenterLimit> dcLimitsPojo = new HashSet<DatacenterLimit>();
 
@@ -192,7 +207,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         enterprise.setChefURL(getChefURL());
         enterprise.setChefClientCertificate(getChefClientCertificate());
         enterprise.setChefValidatorCertificate(getChefValidatorCertificate());
-
 
         return enterprise;
     }

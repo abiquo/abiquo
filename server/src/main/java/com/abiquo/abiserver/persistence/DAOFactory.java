@@ -41,6 +41,7 @@ import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.user.EnterpriseDAO;
 import com.abiquo.abiserver.persistence.dao.user.RoleDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
+import com.abiquo.abiserver.persistence.dao.user.UserSessionDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.NodeVirtualImageDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceConversionsDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -156,6 +157,8 @@ public interface DAOFactory
     public abstract MachineLoadRuleDAO getMachineLoadRuleDAO();
 
     public abstract FitPolicyRuleDAO getFitPolicyRuleDAO();
+
+    public abstract UserSessionDAO getUserSessionDAO();
 
     public abstract NetworkAssigmntDAO getNetworkAssigmentDAO();
 

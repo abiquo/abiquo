@@ -48,8 +48,8 @@ public class ESXiNotifier extends GenericNotifier
     public List<VirtualSystemEvent> processEvent(final VirtualMachine virtualMachine,
         final PhysicalMachine machine, final VMEventType event)
     {
-        logger.trace(String.format("Processing %s %s event from machine %s", virtualMachine
-            .getName(), event.name(), machine.getAddress()));
+        logger.trace(String.format("Processing %s %s event from machine %s",
+            virtualMachine.getName(), event.name(), machine.getAddress()));
 
         List<VirtualSystemEvent> notifications = new ArrayList<VirtualSystemEvent>();
 
@@ -78,11 +78,5 @@ public class ESXiNotifier extends GenericNotifier
         }
 
         return notifications;
-    }
-
-    protected boolean samePhysicalMachineAddress(final PhysicalMachine one,
-        final PhysicalMachine other)
-    {
-        return one.getAddress().equals(other.getAddress());
     }
 }

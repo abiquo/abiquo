@@ -78,6 +78,9 @@ public class InfrastructureRep extends DefaultRepBase
     private RackDAO rackDao;
 
     @Autowired
+    private UcsRackDAO ucsRackDao;
+
+    @Autowired
     private MachineDAO machineDao;
 
     @Autowired
@@ -118,6 +121,7 @@ public class InfrastructureRep extends DefaultRepBase
 
         this.dao = new DatacenterDAO(entityManager);
         this.rackDao = new RackDAO(entityManager);
+        this.ucsRackDao = new UcsRackDAO(entityManager);
         this.machineDao = new MachineDAO(entityManager);
         this.hypervisorDao = new HypervisorDAO(entityManager);
         this.datastoreDao = new DatastoreDAO(entityManager);
@@ -222,7 +226,10 @@ public class InfrastructureRep extends DefaultRepBase
 
         for (Machine machine : findMachines(datacenter))
         {
-            types.add(machine.getHypervisor().getType());
+            if (machine.getHypervisor() != null)
+            {
+                types.add(machine.getHypervisor().getType());
+            }
         }
 
         return types;
@@ -232,23 +239,10 @@ public class InfrastructureRep extends DefaultRepBase
         final Boolean network, final Integer firstElem, final Integer numElem)
     {
         PagedList<Enterprise> enterprises = new PagedList<Enterprise>();
-        if (network)
-        {
-            enterprises =
-                (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter,
-                    firstElem, numElem);
-        }
-        else
-        {
-            Collection<DatacenterLimits> dlimits =
-                this.datacenterLimitDao.findByDatacenter(datacenter);
-            for (DatacenterLimits d : dlimits)
-            {
-                Enterprise e = d.getEnterprise();
-                enterprises.add(e);
-            }
-            enterprises.setTotalResults(enterprises.size());
-        }
+
+        enterprises =
+            (PagedList<Enterprise>) this.dao.findEnterprisesByDatacenters(datacenter, firstElem,
+                numElem, network);
 
         return enterprises;
     }
@@ -275,6 +269,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
+    public boolean existsAnyUcsRackWithIp(String ip)
+    {
+        return this.ucsRackDao.existAnyOtherWithIP(ip);
+    }
+    
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
@@ -296,6 +295,17 @@ public class InfrastructureRep extends DefaultRepBase
         assert id != null;
 
         return this.rackDao.findById(id);
+    }
+
+    public void insertUcsRack(final UcsRack UcsRack)
+    {
+        this.ucsRackDao.persist(UcsRack);
+        this.ucsRackDao.flush();
+    }
+
+    public UcsRack findUcsRackById(Integer rackId)
+    {
+        return ucsRackDao.findById(rackId);
     }
 
     public void insertRack(final Rack rack)
@@ -334,6 +344,11 @@ public class InfrastructureRep extends DefaultRepBase
         assert id != null;
 
         return this.machineDao.findById(id);
+    }
+
+    public Machine findMachineByIds(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
 
     public void insertMachine(final Machine machine)
@@ -525,6 +540,13 @@ public class InfrastructureRep extends DefaultRepBase
             enterprise);
     }
 
+    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
+        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    {
+        return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
+            datastoreUuid, originalHypervisorId);
+    }
+
     public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
     {
         return rackDao.getRackIdByMinVLANCount(idDatacenter);
@@ -571,6 +593,11 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
+    
+    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+    {
+        return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
+    }
 
     public void createRepository(final Datacenter datacenter, final String repositoryLocation)
     {
@@ -608,4 +635,43 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
+
+    public List<Rack> findRacksWithHAEnabled(Datacenter dc)
+    {
+        return rackDao.findRacksWithHAEnabled(dc);
+    }
+
+    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    {
+        return machineDao.findRackEnabledForHAMachines(rack);
+    }
+
+
+    /**
+     * Return all {@links UcsRack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
+    {
+        return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return all not managed {@link Rack} associated to a
+     * 
+     * @param datacenterId id.
+     * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
+     */
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
+    {
+        return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
+    }
+
+    public boolean existAnyHypervisorWithIpInDatacenter(String ip, Integer datacenterId)
+    {
+        return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
+    }
+
 }

@@ -21,12 +21,15 @@
 
 package com.abiquo.virtualfactory.machine.impl;
 
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.util.AddressingUtils;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
+import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.OptionValue;
 import com.vmware.vim25.VirtualMachineConfigSpec;
@@ -72,6 +75,11 @@ public class VmwareMachine extends AbsVmwareMachine
                 vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
                     .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
                     computerResMOR, hostMOR, config.getVnicList(), rdmIQN, disks);
+            
+          vmConfigSpec =
+          vmUtils.createVmConfigSpec(machineName, config.getVirtualDiskBase()
+              .getTargetDatastore(), config.getVirtualDiskBase().getCapacity(),
+              computerResMOR, hostMOR, new ArrayList<VirtualNIC>(), rdmIQN, disks);
 
             vmConfigSpec.setName(machineName);
             vmConfigSpec.setAnnotation("VirtualMachine Annotation");
@@ -79,21 +87,7 @@ public class VmwareMachine extends AbsVmwareMachine
             vmConfigSpec.setNumCPUs(config.getCpuNumber());
             vmConfigSpec.setGuestId(utils.getOption("guestosid"));
 
-            if (AddressingUtils.isValidPort(String.valueOf(config.getRdPort())))
-            {
-                OptionValue vncEnabled = new OptionValue();
-                vncEnabled.setKey("RemoteDisplay.vnc.enabled");
-                vncEnabled.setValue("true");
-
-                OptionValue vncPort = new OptionValue();
-                vncPort.setKey("RemoteDisplay.vnc.port");
-                vncPort.setValue(config.getRdPort());
-
-                OptionValue[] values = new OptionValue[] {vncEnabled, vncPort};
-
-                vmConfigSpec.setExtraConfig(values);
-            }
-
+            configureVNC(vmConfigSpec);
         }
         catch (Exception e)
         {
@@ -102,6 +96,43 @@ public class VmwareMachine extends AbsVmwareMachine
         }
 
         return vmConfigSpec;
+    }
+
+    /**
+     * Used to configure VNC (enable, port, password)
+     * 
+     * @param vmConfigSpec
+     */
+    @Override
+    public void configureVNC(VirtualMachineConfigSpec vmConfigSpec) throws VirtualMachineException
+    {
+        if (AddressingUtils.isValidPort(String.valueOf(config.getRdPort())))
+        {
+            OptionValue vncEnabled = new OptionValue();
+            vncEnabled.setKey("RemoteDisplay.vnc.enabled");
+            vncEnabled.setValue("true");
+
+            OptionValue vncPort = new OptionValue();
+            vncPort.setKey("RemoteDisplay.vnc.port");
+            vncPort.setValue(config.getRdPort());
+
+            OptionValue vncPwd = null;
+            if (vmConfig.getRdPassword() != null && !vmConfig.getRdPassword().equals(""))
+            {
+                vncPwd = new OptionValue();
+                vncPwd.setKey("RemoteDisplay.vnc.password");
+                vncPwd.setValue(this.vmConfig.getRdPassword());
+
+                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort, vncPwd});
+            }
+            else
+            {
+                vncPwd = new OptionValue();
+                vncPwd.setKey("RemoteDisplay.vnc.password");
+                vncPwd.setValue("");
+                vmConfigSpec.setExtraConfig(new OptionValue[] {vncEnabled, vncPort, vncPwd});
+            }
+        }
     }
 
 }

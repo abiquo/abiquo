@@ -56,7 +56,6 @@ package net.undf.abicloud.model
                 countdownManager = new CountdownManager();
                 notificationManager = new NotificationManager();
                 loginManager = new LoginManager();
-                authorizationManager = new AuthorizationManager();
                 infrastructureManager = new InfrastructureManager();
                 userManager = new UserManager();
                 virtualApplianceManager = new VirtualApplianceManager();
@@ -92,9 +91,6 @@ package net.undf.abicloud.model
 
         //Login
         public var loginManager:LoginManager;
-
-        //Authorization
-        public var authorizationManager:AuthorizationManager;
 
         //Infrastructure
         public var infrastructureManager:InfrastructureManager;

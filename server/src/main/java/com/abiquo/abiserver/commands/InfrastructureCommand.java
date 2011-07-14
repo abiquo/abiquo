@@ -21,11 +21,11 @@
 package com.abiquo.abiserver.commands;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
@@ -44,6 +44,8 @@ import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 
 public interface InfrastructureCommand
 {
@@ -79,9 +81,8 @@ public interface InfrastructureCommand
      * @throws PersistenceException
      * @throws InfrastructureCommandException
      */
-    public abstract List<PhysicalMachine> getPhysicalMachinesByRack(
-        final UserSession userSession, final Integer rackId, final String filters)
-        throws InfrastructureCommandException;
+    public abstract List<PhysicalMachine> getPhysicalMachinesByRack(final UserSession userSession,
+        final Integer rackId, final String filters) throws InfrastructureCommandException;
 
     /**
      * Gets the list of filtered virtual machines deployed in a single physical machine
@@ -285,7 +286,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> startVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> startVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Pause" action in the Virtual Machine
@@ -293,7 +294,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Paused"
      */
-    public abstract DataResult<State> pauseVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> pauseVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Reboot" action in the Virtual Machine
@@ -301,7 +302,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Running"
      */
-    public abstract DataResult<State> rebootVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> rebootVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Performs a "Shutdown" action in the Virtual Machine
@@ -309,7 +310,7 @@ public interface InfrastructureCommand
      * @param virtualMachine
      * @return a DataResult object, with a State object that represents the state "Powered Off"
      */
-    public abstract DataResult<State> shutdownVirtualMachine(final VirtualMachine virtualMachine);
+    public abstract DataResult<State> shutdownVirtualMachine(final UserSession userSession,final VirtualMachine virtualMachine);
 
     /**
      * Moves a virtual machine from a Physical Machine to another virtualMachine's "assignedTo"
@@ -413,4 +414,22 @@ public interface InfrastructureCommand
      * @param vMachine the vMachine to update
      */
     public void deletePhysicalMachineReference(VirtualmachineHB vMachine, UserSession user);
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.VirtualApplianceCommand#getVirtualDataCentersByEnterprise(com
+     * .abiquo.abiserver.pojo.user.Enterprise)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
+        final UserSession userSession, final Enterprise enterprise);
+
+    /*
+     * (non-Javadoc)
+     * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
+     * getVirtualDataCentersByEnterpriseAndDatacenter(com.abiquo.abiserver.pojo.user.Enterprise,
+     * com.abiquo.abiserver.pojo.infrastructure.DataCenter)
+     */
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
+        final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
 }

@@ -565,7 +565,7 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static boolean ELEMENT_NAME_REQUIRED = true;
 
-    public final static int ELEMENT_NAME_LENGTH_MIN = 0;
+    public final static int ELEMENT_NAME_LENGTH_MIN = 1;
 
     public final static int ELEMENT_NAME_LENGTH_MAX = 255;
 
@@ -593,7 +593,7 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static boolean DESCRIPTION_REQUIRED = false;
 
-    private final static int DESCRIPTION_LENGTH_MIN = 0;
+    private final static int DESCRIPTION_LENGTH_MIN = 1;
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
@@ -643,9 +643,9 @@ public class Rasd extends GenericEnityBase<String>
 
     private final static String LIMIT_COLUMN = "limitResource";
 
-    private final static long LIMIT_MIN = Integer.MIN_VALUE;
+    public final static long LIMIT_MIN = Integer.MIN_VALUE;
 
-    private final static long LIMIT_MAX = Integer.MAX_VALUE;
+    public final static long LIMIT_MAX = Integer.MAX_VALUE;
 
     @Column(name = LIMIT_COLUMN, nullable = true)
     @Range(min = LIMIT_MIN, max = LIMIT_MAX)

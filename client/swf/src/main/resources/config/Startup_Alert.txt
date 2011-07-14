@@ -1,10 +1,2 @@
-<!-- ***************************************************************************************************
-     Write here the text you want to appear automatically 
-	 when you successfully log in the application
-	 Remember to set to 1 the SHOW_START_UP_ALERT 
-	 variable in client-config.xml
-	 
-	 Basic HTML tags, like <b>, <i>, <a> and so on, are accepted
-	 
-	 *************************************************************************************************** -->
-This is the <b>Start Up</b> Alert!
+<b>Welcome to Abiquo</b>
+<p>Change your password and user details:</p><p><ul><li>Click your username in top right corner of the screen</li></ul></p><p>Add the license provided by Abiquo to use the software:</p><p><ul><li>Go to <b>Configuration View</b>, open License tab, paste license key</li></ul></p><p>Quick tutorial:</p><p><ul><li>Do the <b>Abiquo(R) Quick Tutorial</b> on <b>wiki.abiquo.com</b></li></ul></p><p>Create physical infrastructure:</p><p><ul><li>Go to <b>Infrastructure View</b></li><p><li>Add physical datacenter, racks, physical machines, networks, storage</li></ul></p><p>Create users:</p><p><ul><li>Go to <b>Users View</b></li><p><li>Add enterprises, roles, users</li></ul></p><p>Log in and create the cloud environment:</p><p><ul><li>Go to <b>Virtual Datacenters view</b></li><p><li>Add virtual datacenters, virtual appliances and virtual machines</li></ul></p><p>This message displaying Startup_Alert.txt is currently visible to all users.</p><br><p>To hide the message, go to <b>Configuration View</b> and open the System Properties tab, then Dashboard tab and set <b>Display Pop-up after login</b> to <b>false</b>.</p>

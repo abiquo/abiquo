@@ -77,6 +77,15 @@ public class RepositoryDAO extends
         Long count = (Long) criteria.uniqueResult();
         return count != null && count.intValue() > 0;
     }
+    
+    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+    {
+        Criteria criteria = createCriteria(thisDatacenter(datacenter), thisLocation(repositoryLocation));
+        criteria.setProjection(Projections.projectionList().add(Projections.rowCount()));
+        
+        Long count = (Long) criteria.uniqueResult();
+        return count != null && count.intValue() > 0;
+    }
 
     public com.abiquo.server.core.infrastructure.Repository findByRepositoryLocation(
         String repositoryLocation)

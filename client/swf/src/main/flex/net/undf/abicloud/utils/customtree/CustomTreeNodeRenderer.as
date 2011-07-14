@@ -33,6 +33,7 @@ package net.undf.abicloud.utils.customtree
     import mx.managers.DragManager;
     
     import net.undf.abicloud.controller.ThemeHandler;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
 
 
     public class CustomTreeNodeRenderer extends HBox implements IListItemRenderer
@@ -87,7 +88,8 @@ package net.undf.abicloud.utils.customtree
             this._nodeIcon.scaleContent = false;
             this._nodeIcon.setStyle("verticalAlign", "middle");
             this._nodeIcon.setStyle("horizontalAlign", "center");
-            this._nodeIcon.addEventListener(MouseEvent.CLICK, clickHandler);
+            //this._nodeIcon.addEventListener(MouseEvent.CLICK, clickHandler);
+            addEventListener(MouseEvent.CLICK, clickHandler);
 
             addChild(this._nodeIcon);
 
@@ -110,6 +112,9 @@ package net.undf.abicloud.utils.customtree
             {
                 //Setting the proper Label text
                 this._label.text = this._customTreeNode.labelText;
+                if(this._customTreeNode.item is UcsRack){
+	            	this._label.text += " ["+UcsRack.TYPE+"]";                	
+                }
                 
                 //Setting the proper node icon
                 if (this._customTreeNode.customTreeDataDescriptor.isBranch(this._customTreeNode.item))

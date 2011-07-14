@@ -24,6 +24,7 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -42,6 +43,7 @@ import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -70,6 +72,9 @@ public class VirtualDatacenterResource extends AbstractResource
     @Autowired
     IpAddressService ipService;
 
+    @Autowired
+    UserService userService;
+    
     @Context
     UriInfo uriInfo;
 
@@ -88,6 +93,7 @@ public class VirtualDatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualDatacenter vdc = service.updateVirtualDatacenter(id, dto);
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
         return createTransferObject(vdc, restBuilder);
     }
 
@@ -102,8 +108,8 @@ public class VirtualDatacenterResource extends AbstractResource
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
-        @QueryParam(START_WITH) final Integer startwith, @QueryParam(BY) final String orderBy,
-        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) final Integer limit,
+        @QueryParam(START_WITH) @Min(0) final Integer startwith, @QueryParam(BY) final String orderBy,
+        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) @Min(0)final Integer limit,
         @QueryParam(ASC) final Boolean desc_or_asc, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
@@ -116,11 +122,11 @@ public class VirtualDatacenterResource extends AbstractResource
 
         List<IpPoolManagement> all =
             ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
-
+        /*
         if (all == null || all.isEmpty())
         {
             throw new ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS);
-        }
+        }*/
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 

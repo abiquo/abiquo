@@ -31,10 +31,11 @@
     xmlns:components="net.undf.abicloud.view.infrastructure.components.*"
     xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
     xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
-    xmlns:general="net.undf.abicloud.view.general.*">
+    xmlns:general="net.undf.abicloud.view.general.*" xmlns:rack="net.undf.abicloud.view.infrastructure.components.rack.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.binding.utils.BindingUtils;
             import mx.collections.ArrayCollection;
@@ -72,8 +73,9 @@
             private var _moreInfoResizeEffect:Resize;
 
             //The Datacenter to manage its physical infrastructure
+            [Bindable]
             protected var _dataCenter:DataCenter;
-
+            
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
 
@@ -165,7 +167,7 @@
              * When this component loads for the first time
              */
             private function onCreationComplete():void
-            {
+            {               
                 //Listening for new Infrastructure available in model
                 BindingUtils.bindSetter(setInfrastructure, AbiCloudModel.getInstance().infrastructureManager,
                                         "infrastructure");
@@ -174,6 +176,9 @@
                 //Listening for updates in datacenter used resources information
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.USED_RESOURCES_BY_DATACENTER_UPDATED,
                                                                                    onResourcesByDatacenterUpdated);
+				
+				AbiCloudModel.getInstance().infrastructureManager.addEventListener('liveMotionDone',getVirtualMachine);
+				                                                                                   
             }
 
             public function set dataCenter(value:DataCenter):void
@@ -182,7 +187,7 @@
             }
             
             
-            private function getRacksByDatacenter():void{
+            protected function getRacksByDatacenter():void{
             	var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RACKS_BY_DATACENTER);
                 event.dataCenter = this._dataCenter;
                 if(physicalServersFilter.text.length != 0){
@@ -270,29 +275,35 @@
             /**
              * When an InfrastructureElement has been selected
              */
-            private function infrastructureElementSelected():void
+            protected function infrastructureElementSelected(event:InfrastructureEvent):void
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
-                	
-                    showPhysicalMachine();
+                    //remove the selected virtual machine reference
+                    if(!event.automaticUpdate){
+                        virtualMachineList.selectedVirtualMachine = null;
+	                    virtualMachineList.selectedIndex = -1;                    	
+                    }
                     
-                    //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
-                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
-                    event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                    event.callback = setVirtualMachine;
-                    /* if(physicalServersFilter.text.length != 0){
-	                	event.filters = physicalServersFilter.text;
-	                }else{
-	                	event.filters = null;
-	                } */
-                    dispatchEvent(event);
+                    
+                    showPhysicalMachine();
+                    getVirtualMachine();
+                    
                 }else
                     //Hiding more info container
                     hideMoreInfoContainer();
 
                 //Setting the Virtual Machines that will be shown
                 setVirtualMachines(false);
+            }
+            
+            private function getVirtualMachine(eventInfra:Event = null):void{
+            	
+                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+                event.callback = setVirtualMachine;
+                dispatchEvent(event);
             }
             
             private function setVirtualMachine(value:ArrayCollection):void{
@@ -380,9 +391,20 @@
              */
             private function showPhysicalMachine():void
             {
-                physicalMachineRenderer.init();
-                showMoreInfoContainer(0);
+                //Need to preserve the state when the background process update data
+                if(virtualMachineList.selectedVirtualMachine){
+                	virtualMachineList.virtualMachinesDataGrid.selectedIndex = virtualMachineList.selectedIndex;
+                	if(virtualMachineList.virtualMachinesTile){
+	                	virtualMachineList.virtualMachinesTile.selectedIndex = virtualMachineList.selectedIndex;                		
+                	}
+                	
+                }else{
+	                physicalMachineRenderer.init();
+	                showMoreInfoContainer(0);                	
+                }
             }
+            
+            
 
             /////////////////////////////////////////////////////////
             //VIRTUAL MACHINES
@@ -390,7 +412,7 @@
             /**
              * Sets the Virtual Machines that will be displayed, depending on the selected Infrastructure Element
              */
-            private function setVirtualMachines(preserveState:Boolean = false):void
+            protected function setVirtualMachines(preserveState:Boolean = false):void
             {
                 var virtualMachines:ArrayCollection;
                 var currentlySelectedVirtualMachine:VirtualMachine = virtualMachineList.selectedVirtualMachine;
@@ -437,7 +459,7 @@
 
                 //Setting the VirtualMachines in the VirtualMachineManagement component
                 virtualMachineList.virtualMachines = virtualMachines;
-                virtualMachineList.selectedVirtualMachine = currentlySelectedVirtualMachine;
+                //virtualMachineList.selectedVirtualMachine = currentlySelectedVirtualMachine;
             }
 
 
@@ -446,7 +468,7 @@
              * Shows a Virtual Machine, using a VirtualMachineRenderer component
              **/
             private function showVirtualMachine():void
-            {
+            {                             
                 virtualMachineRenderer.init();
                 showMoreInfoContainer(1);
             }
@@ -594,7 +616,7 @@
             addPhysicalMachine="addPhysicalMachine()"
             editPhysicalMachine="editPhysicalMachine()"
             searchFilter="{physicalServersFilter.text}"
-            infrastructureElementSelected="infrastructureElementSelected()"
+            infrastructureElementSelected="infrastructureElementSelected(event)"
             refreshDatacenterResources="refreshDatacenterResources()"/>
     </general:GeneralSubPanel>
 
@@ -635,6 +657,7 @@
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
+             
             </mx:ViewStack>
         </mx:VBox>
     </general:GeneralSubPanel>

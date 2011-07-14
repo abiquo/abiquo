@@ -92,6 +92,7 @@ public class XenServerMachineTest extends TestCase
             MACHINE_NAME, // Name
             disks, // Virtual disks
             9999, // RD Port
+            null, // RD Password
             512 * 1024 * 1024, // RAM (in bytes)
             1, // CPUs
             vlans); // VLANS
@@ -107,7 +108,7 @@ public class XenServerMachineTest extends TestCase
         return new XenServerHypervisor();
     }
 
-    protected void configureExternalStorage(VirtualMachineConfiguration config)
+    protected void configureExternalStorage(final VirtualMachineConfiguration config)
     {
         // Do nothing
     }

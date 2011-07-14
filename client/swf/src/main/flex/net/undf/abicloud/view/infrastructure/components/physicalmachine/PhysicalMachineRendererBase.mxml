@@ -43,6 +43,10 @@
             //The Physical Machine that will be rendered
             [Bindable]
             protected var _physicalMachine:PhysicalMachine;
+            
+            //Need to preserve the state when the background process update data
+            private var _previousPhysicalMachine:PhysicalMachine;
+            private var _saveState:int;
 
             [Bindable]
             private var _editMode:Boolean;
@@ -50,6 +54,21 @@
 
             public function set physicalMachine(value:PhysicalMachine):void
             {
+                //Iniciate the previous physical machine object
+                if(!this._previousPhysicalMachine){
+                	this._previousPhysicalMachine = new PhysicalMachine();
+                	this._saveState = 0;
+                }
+                
+                //update the previous physical machine object
+                if(value){
+                	if(this._previousPhysicalMachine.id != value.id){
+                		this._previousPhysicalMachine = value;
+                		this._saveState = 0;
+                	}
+                	physicalMachineVS.selectedIndex = this._saveState;
+                	                	
+                }
                 this._physicalMachine = value;
                 dispatchEvent(new Event("physicalMachineChange"));
             }
@@ -67,8 +86,8 @@
             {
                 this._editMode = false;
 
-                if (physicalMachineVS != null)
-                    physicalMachineVS.selectedIndex = 0;
+                /* if (physicalMachineVS != null)
+                    physicalMachineVS.selectedIndex = 0; */
             }
 
             /**
@@ -128,6 +147,22 @@
             {
                 this._editMode = false;
             }
+            
+            /**
+             * Update some info when changing the physical machine state
+             */
+            private function updatePhysicalMachineInfo(event:Event):void{
+            	this._editMode = false ; 
+            	this._saveState = ViewStack(event.currentTarget).selectedIndex;
+            }
+            
+            private function childChange():void{
+            	
+            }
+        	
+        	private function updateTab():void{
+        		
+        	}
         ]]>
     </mx:Script>
 
@@ -192,7 +227,9 @@
 
     <mx:ViewStack id="physicalMachineVS"
         width="100%" height="100%"
-        change="this._editMode = false">
+        childIndexChange="childChange()"
+        tabChildrenChange="updateTab()"
+        change="updatePhysicalMachineInfo(event)">
 
         <!-- General Info -->
         <componentsPM:PhysicalMachineRendererGeneral id="physicalMachineRendererGeneral"

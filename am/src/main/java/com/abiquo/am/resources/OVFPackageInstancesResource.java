@@ -21,16 +21,13 @@
 
 package com.abiquo.am.resources;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -42,16 +39,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.InPart;
-import org.apache.wink.providers.json.JsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -171,14 +167,44 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     @Consumes("multipart/form-data")
     public Response uploadOVFPackage(@Context HttpHeaders headers,
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        InMultiPart mp) throws RepositoryException, IOException, IdNotFoundException,
+        InMultiPart mp, @Context Providers providers) throws RepositoryException, IOException,
+        IdNotFoundException,
         EventException
     {
-        InPart diskInfoPart = mp.next();
-        
-        fixMediaType(diskInfoPart);
-        
-        OVFPackageInstanceDto diskInfo = diskInfoPart.getBody(OVFPackageInstanceDto.class, null);
+        OVFPackageInstanceDto diskInfo = null;
+        String errorMsg = null;
+        String json = "";
+        try
+        {
+            InPart diskInfoPart = mp.next();
+
+            fixMediaType(diskInfoPart);
+
+            json = diskInfoPart.getBody(String.class, null);
+            // we replace the \ with / because a fail parsing strings with \ followed by a char that
+            // might resemble a control char. (C:\f... ends up as C:[ctrl-L]...)
+            String json2 = removeFakePath(removeControlChar(json));
+            
+            diskInfo =
+                providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
+                MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
+                MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
+                    new ByteArrayInputStream(json2.getBytes()));
+            
+        }
+        catch (Exception e)
+        {
+            if (!StringUtils.isBlank(e.getMessage()))
+            {
+                errorMsg = e.getMessage();
+            }
+            else
+            {
+                errorMsg = "Error uploading the image";
+            }
+            
+            diskInfo.setDiskFilePath(EnterpriseRepositoryService.OVF_STATUS_ERROR_MARK);
+        }
 
         InPart diskFilePart = mp.next();
 
@@ -192,37 +218,62 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
          */
 
         diskInfo.setDiskFileSize(diskFile.length());
-        service.upload(diskInfo, diskFile);
+        service.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getOvfUrl())).build();
     }
-    
-    
+
+
+    /**
+     * This Function is needed as long as the HTML 5 states:
+     * http://people.w3.org/mike/diffs/html5/spec/Overview.diff.html#common-input-element-apis
+     * browsers prepend C:\fakepath\
+     * 
+     * @param in string.
+     * @return with no '\' characters.
+     */
+    private String removeFakePath(String in)
+    {
+        // TODO this is a hack as the server adds the fake path somehow
+        return in.replace("C:\\fakepath\\", "").replace("\\", "/");
+    }
+
+    /**
+     * The parse fails if any.
+     * 
+     * @param in a String that might contain control caracters.
+     * @return same String that does not contains any control caracters.
+     */
+    private String removeControlChar(String in) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : in.toCharArray())
+        {
+            if(!Character.isISOControl(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
     // CaseInsensitiveMultivaluedMap [map=[Content-Disposition=form-data; name="diskInfo";
     // filename="diskInfo.json",Content-Type=application/json]]
     private void fixMediaType(InPart diskInfoPart)
     {
-        if(diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
+        if (diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
         {
             diskInfoPart.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-        }        
-    }    
+        }
+    }
 
-    
-    
     private void copy(InputStream fin, File destFile) throws IOException
     {
-
         OutputStream fout = new FileOutputStream(destFile);
-
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = fin.read(buf)) > 0)
+        try
         {
-            fout.write(buf, 0, len);
+            IOUtils.copy(fin, fout);
         }
-
-        // XXX fin.close();
-        fout.close();
+        finally
+        {
+            fout.close();
+        }
     }
 }

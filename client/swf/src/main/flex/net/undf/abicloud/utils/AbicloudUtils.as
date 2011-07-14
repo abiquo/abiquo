@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.utils
 {
+	import mx.formatters.DateFormatter;
+	
 	import net.undf.abicloud.controller.ThemeHandler;
 	
 	
@@ -70,6 +72,49 @@ package net.undf.abicloud.utils
 			
 			ThemeHandler.getInstance().getImageFromStyle(CSSSelector,c);
 
+		}
+		
+		/**
+		 * Format a date string into an ISO 8601 format  
+		 * @param dateString a date object
+		 * @param displayHours a boolean indicating if we display hours
+		 * 
+		 */
+		public static function formatDate(dateString:Object, displayHours:Boolean):String{
+			
+			var dateformatter:DateFormatter = new DateFormatter();
+			dateformatter.formatString = "YYYY-MM-DD";				
+			if(displayHours){
+				dateformatter.formatString += " JJ:NN:SS"
+			}
+			
+			return dateformatter.format(dateString);
+
+		}
+		
+		/**
+		 * Format a string into an MAC address format  
+		 * @param macAddress a date object
+		 * 
+		 */
+		public static function formatMac(macAddress:String):String{
+			
+			if(macAddress){
+				//This is a non formated MAC
+				if(macAddress.length != 17){
+					return macAddress.slice(0,2)
+					+":"+macAddress.slice(2,4)
+					+":"+macAddress.slice(4,6)
+					+":"+macAddress.slice(6,8)
+					+":"+macAddress.slice(8,10)
+					+":"+macAddress.slice(10,12);
+				}else{
+					return macAddress;
+				}
+			}else{
+				return "-";
+			}
+			
 		}
     }
 }

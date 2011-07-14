@@ -19,48 +19,49 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.scheduler;
+package com.abiquo.server.core.scheduler;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class MachineLoadRuleDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private int cpuLoadPercentage;
-
-public int getCpuLoadPercentage()
+@XmlRootElement(name = "machineLoadRule")
+public class MachineLoadRuleDto extends SingleResourceTransportDto
 {
-    return cpuLoadPercentage;
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private Integer cpuLoadPercentage;
+
+    public Integer getCpuLoadPercentage()
+    {
+        return cpuLoadPercentage;
+    }
+
+    public void setCpuLoadPercentage(Integer cpuLoadPercentage)
+    {
+        this.cpuLoadPercentage = cpuLoadPercentage;
+    }
+
+    private Integer ramLoadPercentage;
+
+    public Integer getRamLoadPercentage()
+    {
+        return ramLoadPercentage;
+    }
+
+    public void setRamLoadPercentage(Integer ramLoadPercentage)
+    {
+        this.ramLoadPercentage = ramLoadPercentage;
+    }
+
 }
-
-public void setCpuLoadPercentage(int cpuLoadPercentage)
-{
-    this.cpuLoadPercentage = cpuLoadPercentage;
-}
-
-private int ramLoadPercentage;
-
-public int getRamLoadPercentage()
-{
-    return ramLoadPercentage;
-}
-
-public void setRamLoadPercentage(int ramLoadPercentage)
-{
-    this.ramLoadPercentage = ramLoadPercentage;
-}
-
-  }

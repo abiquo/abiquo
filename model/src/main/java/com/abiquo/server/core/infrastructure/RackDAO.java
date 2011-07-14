@@ -49,7 +49,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     {
         super(Rack.class, entityManager);
     }
-
+    
     private static Criterion sameDatacenter(Datacenter datacenter)
     {
         assert datacenter != null;
@@ -72,6 +72,17 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
         List<Rack> result = getResultList(criteria);
+        return result;
+    }
+
+    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    {
+        Criteria criteria = createCriteria(sameDatacenter(datacenter));
+        criteria.add(Restrictions.eq(Rack.HAENABLED_PROPERTY, true));
+        criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
+
+        List<Rack> result = getResultList(criteria);
+
         return result;
     }
 
@@ -149,5 +160,23 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
             Restrictions.eq(Rack.ID_PROPERTY, rackId));
+    }
+
+    private final static String HQL_NOT_MANAGED_RACKS_BY_DATACENTER = //
+        "SELECT nmr " + //
+            "FROM Rack nmr WHERE " + //
+            "nmr.datacenter.id = :idDatacenter and nmr.class = " + Rack.class.getName();
+
+    /**
+     * Returns all not managed racks.
+     * 
+     * @param datacenter
+     * @return List<Rack>
+     */
+    public List<Rack> findAllNotManagedRacksByDatacenter(Integer datacenterId)
+    {
+        Query q = getSession().createQuery(HQL_NOT_MANAGED_RACKS_BY_DATACENTER);
+        q.setInteger("idDatacenter", datacenterId);
+        return q.list();
     }
 }

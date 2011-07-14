@@ -34,13 +34,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -54,7 +55,7 @@ public class DatacenterService extends DefaultApiService
     InfrastructureRep repo;
 
     @Autowired
-    RemoteServiceService remoteServiceService;
+    InfrastructureService infrastructureService;
 
     public DatacenterService()
     {
@@ -64,7 +65,7 @@ public class DatacenterService extends DefaultApiService
     public DatacenterService(final EntityManager em)
     {
         repo = new InfrastructureRep(em);
-        remoteServiceService = new RemoteServiceService(em);
+        infrastructureService = new InfrastructureService(em);
     }
 
     public Collection<Datacenter> getDatacenters()
@@ -109,7 +110,7 @@ public class DatacenterService extends DefaultApiService
             for (RemoteServiceDto rsd : dto.getRemoteServices().getCollection())
             {
                 RemoteServiceDto rsDto =
-                    remoteServiceService.addRemoteService(rsd, datacenter.getId());
+                    infrastructureService.addRemoteService(rsd, datacenter.getId());
                 responseRemoteService.add(rsDto);
             }
             responseDto.setRemoteServices(responseRemoteService);
@@ -170,6 +171,26 @@ public class DatacenterService extends DefaultApiService
             addValidationErrors(datacenter.getValidationErrors());
         }
         flushErrors();
+    }
+
+    public List<Rack> getRacks(Datacenter datacenter)
+    {
+        return repo.findRacks(datacenter);
+    }
+
+    public List<Rack> getRacksWithHAEnabled(Datacenter datacenter)
+    {
+        return repo.findRacksWithHAEnabled(datacenter);
+    }
+
+    public List<Machine> getMachines(Rack rack)
+    {
+        return repo.findRackMachines(rack);
+    }
+
+    public List<Machine> getEnabledMachines(Rack rack)
+    {
+        return repo.findRackEnabledForHAMachines(rack);
     }
 
     // FIXME: Delete is now allowed right now

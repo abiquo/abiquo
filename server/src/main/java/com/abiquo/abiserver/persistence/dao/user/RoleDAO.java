@@ -34,6 +34,6 @@ import com.abiquo.abiserver.persistence.DAO;
 public interface RoleDAO extends DAO<RoleHB, Integer>
 {
 
-    public RoleHB getRoleByShortDescription(String description);
+    public RoleHB getRoleByName(String name);
 
 }

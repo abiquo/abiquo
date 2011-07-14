@@ -56,13 +56,16 @@ public class Enterprise implements IPojo<EnterpriseHB>
      */
     private String name;
 
-    private ResourceAllocationLimit limits;
-
     private String chefURL;
 
     private String chefClientCertificate;
 
     private String chefValidatorCertificate;
+    
+    /** kind of reservation */
+    private Boolean isReservationRestricted;
+
+    private ResourceAllocationLimit limits;
 
     private Collection<PhysicalMachine> reservedMachines;
 
@@ -97,6 +100,16 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.name = name;
     }
 
+    public Boolean getIsReservationRestricted()
+    {
+        return isReservationRestricted;
+    }
+
+    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
+    }
+
     /**
      * @return the limits
      */
@@ -118,8 +131,6 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.reservedMachines = reservedMachines;
     }
 
-    public String getChefURL()
-    {
         return chefURL;
     }
 
@@ -195,12 +206,14 @@ public class Enterprise implements IPojo<EnterpriseHB>
      * This method transform the current enterprise pojo object to a enterprise hibernate pojo
      * object
      */
+    @Override
     public EnterpriseHB toPojoHB()
     {
         EnterpriseHB enterpriseHB = new EnterpriseHB();
 
         enterpriseHB.setIdEnterprise(getId());
         enterpriseHB.setName(getName());
+        enterpriseHB.setIsReservationRestricted(getIsReservationRestricted());
 
         if (limits != null)
         {

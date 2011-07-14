@@ -26,10 +26,13 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 
 @Repository("jpaMachineLoadRuleDAO")
@@ -53,6 +56,7 @@ public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
             + // Find rules from racks hosting the machines
             "obj.datacenter IN (SELECT obj3.datacenter FROM com.abiquo.server.core.infrastructure.Machine obj3 WHERE obj3 IN (:machines)) ";
 
+    @SuppressWarnings("unchecked")
     public List<MachineLoadRule> findCandidateMachineLoadRules(
         Collection<Machine> firstPassCandidateMachines)
     {
@@ -61,4 +65,12 @@ public class MachineLoadRuleDAO extends DefaultDAOBase<Integer, MachineLoadRule>
 
         return query.list();
     }
+
+    public List<MachineLoadRule> getRulesForDatacenter(final Integer idDatacenter)
+    {
+        Criteria crit = createNestedCriteria(MachineLoadRule.DATACENTER_PROPERTY);
+        crit.add(Restrictions.eq(Datacenter.ID_PROPERTY, idDatacenter));
+        return getResultList(crit);
+    }
+
 }

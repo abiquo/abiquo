@@ -56,7 +56,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
     // //////////////////////////////////////////////////////////////
     // REGISTRATION
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationStatusNo()
      */
     public BasicResult setRegistrationStatusNo()
@@ -69,7 +70,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationStatusLater()
      */
     public BasicResult setRegistrationStatusLater()
@@ -82,7 +84,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#mustShowRegistrationReminder()
      */
     public BasicResult mustShowRegistrationReminder()
@@ -97,7 +100,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return dataResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getRegistrationData()
      */
     public BasicResult getRegistrationData()
@@ -121,8 +125,11 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return dataResult;
     }
 
-    /* (non-Javadoc)
-     * @see com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationData(com.abiquo.heartbeat.shared.dto.RegisterDTO)
+    /*
+     * (non-Javadoc)
+     * @see
+     * com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationData(com.abiquo.heartbeat
+     * .shared.dto.RegisterDTO)
      */
     public BasicResult setRegistrationData(RegisterDTO registrationData)
     {
@@ -136,7 +143,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         catch (Exception e)
         {
             basicResult.setSuccess(false);
-            basicResult.setMessage("Connection refused: unabled to connect to the configuration server");
+            basicResult
+                .setMessage("Connection refused: unabled to connect to the configuration server");
             logger.error("error sending the registration data", e);
         }
 
@@ -146,7 +154,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
     // //////////////////////////////////////////////////////////////
     // HEARTBEAT
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#mustShowHeartbeatReminder()
      */
     public BasicResult mustShowHeartbeatReminder()
@@ -160,7 +169,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return dataResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#isHeartbeatEnabled()
      */
     public BasicResult isHeartbeatEnabled()
@@ -173,7 +183,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return dataResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setHeartbeatStatusNo()
      */
     public BasicResult setHeartbeatStatusNo()
@@ -186,7 +197,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setHeartbeatStatusLater()
      */
     public BasicResult setHeartbeatStatusLater()
@@ -199,51 +211,57 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#enableHeartbeat()
      */
     public BasicResult enableHeartbeat()
     {
         BasicResult basicResult = new BasicResult();
 
-        try 
+        try
         {
-        	heartbeat.setStatusYes();
-        	basicResult = getLastHeartbeat();
-        } catch (Exception e)
+            heartbeat.setStatusYes();
+            basicResult = getLastHeartbeat();
+        }
+        catch (Exception e)
         {
-        	basicResult.setSuccess(false);
-        	basicResult.setMessage("Connection refused: unabled to connect to the configuration server");
+            basicResult.setSuccess(false);
+            basicResult
+                .setMessage("Connection refused: unabled to connect to the configuration server");
             logger.error("error activating the heartbeat", e);
         }
 
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#disableHeartbeat()
      */
     public BasicResult disableHeartbeat()
     {
-    	BasicResult basicResult = new BasicResult();
-    	
-    	try
-    	{
-    		heartbeat.setStatusNo();
-	        heartbeat.stopHeartbeat();
-	        basicResult.setSuccess(true);
-    	}
+        BasicResult basicResult = new BasicResult();
+
+        try
+        {
+            heartbeat.setStatusNo();
+            heartbeat.stopHeartbeat();
+            basicResult.setSuccess(true);
+        }
         catch (Exception e)
         {
-        	basicResult.setSuccess(false);
-        	basicResult.setMessage("Connection refused: unabled to connect to the configuration server");            
+            basicResult.setSuccess(false);
+            basicResult
+                .setMessage("Connection refused: unabled to connect to the configuration server");
             logger.error("error setting the heartbeating data", e);
         }
-        
+
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getLastHeartbeat()
      */
     public BasicResult getLastHeartbeat()
@@ -252,45 +270,66 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
 
         try
         {
-            heartbeat.send();
-            HeartbeatDTO data = heartbeat.getLast();
+            if (!heartbeat.isConfigured())
+            {
+                basicResult.setSuccess(false);
+                basicResult.setMessage("Connection refused: Heartbeat is not configured");
+                logger.error("error getting the heartbeating data");
+            }
+            else
+            {
+                heartbeat.send();
+                HeartbeatDTO data = heartbeat.getLast();
 
-            basicResult.setSuccess(true);
-            basicResult.setData(data);
+                basicResult.setSuccess(true);
+                basicResult.setData(data);
+            }
         }
         catch (HeartbeatException e)
         {
             basicResult.setSuccess(false);
-            basicResult.setMessage("Connection refused: unabled to connect to the configuration server");            
-            logger.error("error sending the heartbeating data", e);
+            basicResult
+                .setMessage("Connection refused: unabled to connect to the configuration server");
+            logger.error("error sending the heartbeating data", "Heartbeat not enabled");
         }
 
         return basicResult;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getLastHeartbeat(java.lang.Integer)
      */
     public BasicResult getLastHeartbeat(Integer rows)
     {
         DataResult<List<HeartbeatDTO>> dataResult = new DataResult<List<HeartbeatDTO>>();
 
-        try 
+        try
         {
-	        List<HeartbeatDTO> data = heartbeat.getLast(rows);
-	        if (data != null && !data.isEmpty())
-	        {
-	            dataResult.setData(data);
-	            dataResult.setSuccess(true);
-	        }
+            if (!heartbeat.isConfigured())
+            {
+                dataResult.setSuccess(false);
+                dataResult.setMessage("Connection refused: Heartbeat is not configured");
+                logger.error("error getting the heartbeating data","Heartbeat not enabled");
+            }
+            else
+            {
+                List<HeartbeatDTO> data = heartbeat.getLast(rows);
+                if (data != null && !data.isEmpty())
+                {
+                    dataResult.setData(data);
+                    dataResult.setSuccess(true);
+                }
+            }
         }
         catch (Exception e)
         {
-        	dataResult.setSuccess(false);
-        	dataResult.setMessage("Connection refused: unabled to connect to the configuration server");            
+            dataResult.setSuccess(false);
+            dataResult
+                .setMessage("Connection refused: unabled to connect to the configuration server");
             logger.error("error getting the heartbeating data", e);
         }
-        
+
         return dataResult;
     }
 }

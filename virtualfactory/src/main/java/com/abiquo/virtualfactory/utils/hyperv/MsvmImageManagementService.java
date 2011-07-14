@@ -44,6 +44,8 @@ public class MsvmImageManagementService extends MsvmObject
 {
     private SWbemMethod convertVirtualHardDisk;
 
+    private SWbemMethod createVirtualHardDisk;
+
     public static final int Fixed = 2;
 
     public static final int Dynamic = 3;
@@ -196,6 +198,90 @@ public class MsvmImageManagementService extends MsvmObject
                     + destinationPath);
             }
         }
+    }
+
+    public void createFixedVirtualHardDisk(String destinationPath) throws JIException
+    {
+
+        // Execute the method.
+        JIVariant[] results =
+            dispatch.callMethodA("CreateDynamicVirtualHardDisk", new Object[] {
+            new JIVariant(destinationPath), new JIVariant(new Long(500))});
+
+        int result = results[0].getObjectAsInt();
+        if (result == 0)
+        {
+            logger.debug("VHD created in " + destinationPath);
+        }
+        else
+        {
+            if (result == 4096)
+            {
+                logger.debug("Creating disk resources...");
+                String jobPath = results[2].getObjectAsVariant().getObjectAsString2();
+                HyperVUtils.monitorJob(jobPath, service.getObjectDispatcher());
+                // catch (JIException e)
+                // {
+                // int errorCode = e.getErrorCode();
+                // if (errorCode == 32768)
+                // {
+                // //TODO analyze if the file exists
+                // }
+                // else
+                // {
+                // throw e;
+                // }
+                // }
+            }
+            else
+            {
+                logger.error("VHD couldn't be created in " + destinationPath
+                    + " failed with error code " + result);
+                throw new IllegalStateException("VHD couldn't be created in " + destinationPath);
+            }
+        }
+    }
+
+    public void createFixedVirtualHardDisk2(String destinationPath) throws JIException
+    {
+        if (this.createVirtualHardDisk == null)
+        {
+            for (final SWbemMethod m : super.getMethods())
+            {
+                if (m.getName().equals("CreateFixedVirtualHardDisk"))
+                {
+                    this.createVirtualHardDisk = m;
+                }
+            }
+        }
+
+        SWbemObject inParams = this.createVirtualHardDisk.getInParameters();
+
+        long mega = 1048576; // This is needed to provide a valid value to MaxInternalSize parameter 
+        
+        inParams.getObjectDispatcher().put("Path", new JIVariant(destinationPath));
+        inParams.getObjectDispatcher().put("MaxInternalSize", new JIVariant(3*mega));
+
+        Object[] methodParams =
+            new Object[] {new JIString("CreateFixedVirtualHardDisk"),
+            new JIVariant(inParams.getObjectDispatcher()), new Integer(0), JIVariant.NULL(),};
+
+        // Execute the method.
+        JIVariant[] results = super.objectDispatcher.callMethodA("ExecMethod_", methodParams);
+        
+        // TODO: ErrorCode: 32768 ErrorDescription: 'The system failed to create 'C:\aquimismo.vhd'. Error Code: The file exists
+
+        // Get the out parameters.
+        JIVariant outParamsVar = results[0];
+        IJIComObject co = outParamsVar.getObjectAsComObject();
+        IJIDispatch outParamsDisp = (IJIDispatch) JIObjectFactory.narrowObject(co);
+
+        // Get the out parameter virtualSystemResources and convert it into an
+        // array of JIVariants.
+        JIVariant jobVariant = outParamsDisp.get("Job");
+        String jobPath = jobVariant.getObjectAsString2();
+
+         HyperVUtils.monitorJob(jobPath, service.getObjectDispatcher());
     }
 
 }

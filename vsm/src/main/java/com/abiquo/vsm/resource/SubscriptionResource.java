@@ -20,6 +20,8 @@
  */
 package com.abiquo.vsm.resource;
 
+import static com.abiquo.vsm.resource.ResourceUtils.decodeParameter;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -99,6 +101,8 @@ public class SubscriptionResource extends AbstractResource
         }
         else
         {
+            virtualMachineName = decodeParameter(virtualMachineName);
+
             VirtualMachine vm = dao.findVirtualMachineByName(virtualMachineName);
             if (vm == null)
             {
@@ -148,6 +152,8 @@ public class SubscriptionResource extends AbstractResource
     public void unsubscribe(@PathParam(SUBSCRIPTION_PARAM) String subscriptionId)
     {
         checkSystem();
+
+        subscriptionId = decodeParameter(subscriptionId);
 
         VirtualMachine vm = dao.getVirtualMachine(Integer.valueOf(subscriptionId));
         if (vm == null)

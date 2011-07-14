@@ -55,8 +55,8 @@ public abstract class GenericNotifier
     public List<VirtualSystemEvent> processEvent(final VirtualMachine virtualMachine,
         final PhysicalMachine machine, final VMEventType event)
     {
-        logger.trace(String.format("Processing %s %s event from machine %s", virtualMachine
-            .getName(), event.name(), machine.getAddress()));
+        logger.trace(String.format("Processing %s %s event from machine %s",
+            virtualMachine.getName(), event.name(), machine.getAddress()));
 
         // Deduce if a MOVED event must be notified
         List<VirtualSystemEvent> notifications = deduceMoveEvent(virtualMachine, machine, event);
@@ -179,5 +179,18 @@ public abstract class GenericNotifier
         notification.setEventType(event.name());
 
         return notification;
+    }
+
+    /**
+     * Checks if a two physical machines have the same address.
+     * 
+     * @param one The first machine
+     * @param other The second machine
+     * @return True if have the same address.
+     */
+    protected boolean samePhysicalMachineAddress(final PhysicalMachine one,
+        final PhysicalMachine other)
+    {
+        return one.getAddress().equals(other.getAddress());
     }
 }

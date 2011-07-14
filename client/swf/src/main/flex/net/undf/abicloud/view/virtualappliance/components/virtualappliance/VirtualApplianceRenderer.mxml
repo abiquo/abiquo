@@ -26,6 +26,7 @@
     width="100%" height="100%"
     backgroundColor="#F4F4F4"
     borderStyle="solid"
+    creationComplete="onCreationComplete()"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     styleName="VirtualApplianceRendererCanvas"
     xmlns:mx="http://www.adobe.com/2006/mxml"
@@ -33,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
        	import net.undf.abicloud.view.main.StateIcons;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -59,6 +62,10 @@
             private var _virtualAppliance:VirtualAppliance;
 
 
+            private function onCreationComplete():void{
+            	//Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_DEPLOY_UNDEPLOY, "removeChild",powerOnOffButton,vappAction);
+            }
             /**
              * Sets the virtual appliance that this component will render
              */
@@ -230,7 +237,7 @@
             private function dateLabelFunction(item:Object, column:DataGridColumn):String
             {
                 var date:Date = Log(item).logDate;
-                return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+                return AbicloudUtils.formatDate(date,true);
             }
         ]]>
     </mx:Script>
@@ -446,6 +453,7 @@
 
     <!-- Virtual Appliance actions -->
     <mx:VBox 
+    	id="vappAction"
         width="57" height="100%"
         right="0"
         verticalAlign="top"

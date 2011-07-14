@@ -29,6 +29,7 @@
     paddingRight="0"
     paddingTop="10"
     verticalGap="0"
+    creationComplete="onCreationComplete()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*"
     xmlns:general="net.undf.abicloud.view.general.*"
@@ -43,6 +44,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.utils.ObjectUtil;
             import mx.collections.ArrayCollection;
 
@@ -84,6 +87,12 @@
             {
                 this._virtualAppliances = value;
             }
+            
+            private function onCreationComplete():void{
+            	//Checking privilege
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
+            }
+            
 
             /**
              * Initializes this component
@@ -139,9 +148,11 @@
             {
                 if (virtualApplianceDataGrid.selectedIndex > -1)
                 {
-                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
-                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
-                    dispatchEvent(virtualApplianceEvent);
+                	if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
+	                    var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_APPLIANCE_SELECTED);
+	                    virtualApplianceEvent.virtualAppliance = virtualApplianceDataGrid.selectedItem as VirtualAppliance;
+	                    dispatchEvent(virtualApplianceEvent);                		
+                	}
                 }
             }
 
@@ -181,7 +192,7 @@
                     //Filtering virtualAppliances by virtualDataCenter
                     var virtualAppliancesFiltered:ArrayCollection = new ArrayCollection();
                     var virtualAppliance:VirtualAppliance;
-                    var length:int = this._virtualAppliances.length;
+                    var length:int = this._virtualAppliances ? this._virtualAppliances.length:0;
                     var i:int;
                     for (i = 0; i < length; i++)
                     {
@@ -196,10 +207,13 @@
                     this._virtualAppliancesFiltered = virtualAppliancesFiltered;
                 }
 
-                if (virtualApplianceDataGrid)
-                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
-                if (virtualApplianceTile)
-                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
+                //Update view if _virtualAppliancesFiltered is not null
+                if(this._virtualAppliancesFiltered){
+	                if (virtualApplianceDataGrid)
+	                    virtualApplianceDataGrid.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);
+	                if (virtualApplianceTile)
+	                    virtualApplianceTile.selectedIndex = this._virtualAppliancesFiltered.getItemIndex(this._selectedVirtualAppliance);                	
+                }
             }
 
             /**
@@ -292,6 +306,7 @@
                             <mx:Component>
                             	<!-- GaB do not change this styles, they are here to force rollover over the background-->
                                 <mx:Canvas width="100%" height="100%"
+                                	creationComplete="onCreationComplete()"
                                 	rollOver="onRollOver()"
                                     rollOut="onRollOut()"
                                     backgroundColor="#FFFFFF"
@@ -299,11 +314,17 @@
                                 	>
                                     <mx:Script>
                                         <![CDATA[
+                                        	import net.undf.abicloud.vo.user.PrivilegeType;
+                                        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
                                             import net.undf.abicloud.events.VirtualApplianceEvent;
                                             import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
 
                                             [Bindable]
                                             private var _virtualAppliance:VirtualAppliance;
+                                            
+                                            private function onCreationComplete():void{
+                                            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",accessButton,vappBox);
+                                            }
 
                                             override public function set data(value:Object):void
                                             {
@@ -330,16 +351,14 @@
                                         ]]>
                                     </mx:Script>
                                     <mx:HBox
-									styleName="VirtualApplianceListBase"
-									
-									horizontalGap="0"
-
-									paddingBottom="0"
-									paddingLeft="5"
-									paddingRight="0"
-									paddingTop="0"
-									verticalAlign="middle"
-                                    >
+                                    	id="vappBox"
+										styleName="VirtualApplianceListBase"										
+										horizontalGap="0"	
+										paddingBottom="0"
+										paddingLeft="5"
+										paddingRight="0"
+										paddingTop="0"
+										verticalAlign="middle">
 	                                    <mx:Label 
 	                                        height="16"
 	                                        text="{this._virtualAppliance.name}"
@@ -480,27 +499,29 @@
     <general:GeneralPanelToolBox 
         width="100%" height="32"
         styleName="GeneralDataPanelBottomSkin">
-        <mx:Button id="addVirtualApplianceButton"
-            styleName="AddButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-            click="addVirtualAppliance()"/>
-
-        <mx:Button id="deleteVirtualApplianceButton"
-            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-				   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
-				   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
-            styleName="RemoveButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-            click="deleteVirtualAppliance()"/>
-
-        <mx:Spacer width="100%"/>
-
-        <mx:Button id="editVirtualApplianceButton"
-            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-				   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
-            styleName="ConfigurationButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-            click="editVirtualAppliance()"/>
+        <mx:HBox id="vappTools" width="100%" verticalAlign="middle">        	
+	        <mx:Button id="addVirtualApplianceButton"
+	            styleName="AddButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	            click="addVirtualAppliance()"/>
+	
+	        <mx:Button id="deleteVirtualApplianceButton"
+	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
+					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
+					   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
+	            styleName="RemoveButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	            click="deleteVirtualAppliance()"/>
+	
+	        <mx:Spacer width="100%"/>
+	
+	        <mx:Button id="editVirtualApplianceButton"
+	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
+					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
+	            styleName="ConfigurationButton"
+	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+	            click="editVirtualAppliance()"/>
+        </mx:HBox>
     </general:GeneralPanelToolBox>
 
 </mx:VBox>

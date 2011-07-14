@@ -39,7 +39,6 @@ import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
 import org.dmtf.schemas.ovf.envelope._1.VSSDType;
@@ -47,7 +46,6 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Property;
 import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +61,6 @@ import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.OVFAnnotationUtils;
-import com.abiquo.ovfmanager.ovf.section.OVFProductUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.PluginException;
@@ -87,6 +84,9 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 {
 
     private final static Logger logger = LoggerFactory.getLogger(OVFModelToVirtualAppliance.class);
+
+    final static Integer applyStateDelayMs = Integer.valueOf(System.getProperty(
+        "abiquo.virtualfactory.applyStateDelayMs", "0"));
 
     /**
      * Default constructor
@@ -180,7 +180,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     // Define the inner class to sort the vnicList
     class VNICSequence implements Comparator<VirtualNIC>
     {
-        public int compare(VirtualNIC vn1, VirtualNIC vn2)
+        public int compare(final VirtualNIC vn1, final VirtualNIC vn2)
         {
             return vn1.getOrder() - vn2.getOrder();
         }
@@ -193,50 +193,111 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * .virtualfactory.model.AbsVirtualMachine, org.dmtf.schemas.ovf.envelope._1.ContentType,
      * boolean)
      */
-    public VirtualMachineConfiguration configureVirtualSystem(
-        final AbsVirtualMachine virtualMachine, final ContentType virtualSystem,
-        boolean configureDisks) throws VirtualMachineException, SectionException, Exception
+    public void reconfigureVirtualSystem(final AbsVirtualMachine virtualMachine,
+        final ContentType virtualSystem, final HypervisorConfiguration hvConfig)
+        throws VirtualMachineException, SectionException, Exception
     {
-        boolean reconfig = false;
+        final String poweron = "PowerUp";
 
-        VirtualMachineConfiguration vmConfig = virtualMachine.getConfiguration();
-        // It clones de current configuration
-        VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
-
-        // Getting state property
-
-        // from annotation section take the machine state if present on 'OtherAttributes'
-        // AnnotationSectionType annotationSection = OVFEnvelopeUtils.getSection(virtualSystem,
-        // AnnotationSectionType.class);
-        // uptateMachineStateFromAnnotationSection(annotationSection, virtualMachine,
-        // newConfig.getMachineId().toString());
-
+        // We will change the state or reconfigure the machine depending on the state field value
         String machineState = getMachineStateFromAnnotation(virtualSystem);
-        virtualMachine.applyState(State.fromValue(machineState));
-        VirtualHardwareSectionType virtualHWSection =
-            OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
 
-        // Force a false value: A Virtual Machine will never have disk attached on the fly. To
-        // attach a new disk the Virtual Appliance must be NOT_DEPLOYED
-        configureDisks = false;
-        if (configureDisks)
+        if (machineState != null)
         {
-            // TODO Reconfigure when a new disk is added and is not in the Disk Section
-            // from Disk section
+            // Apply the new state to the virtual machine
+            virtualMachine.applyState(State.fromValue(machineState));
 
-            reconfig = addVirtualDiskFromDiskResource(newConfig, virtualHWSection);
+            if (machineState.equalsIgnoreCase(poweron) && applyStateDelayMs != 0)
+            {
+                try
+                {
+                    Thread.sleep(applyStateDelayMs);
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error while apply state delay", e);
+                }
+            }
+
         }
-
-        // from VirtualHardwareSection
-        // TODO Control more than one VirtualHardwareSectionType instances
-        VirtualHardwareSectionType hardwareSection =
-            OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
-        reconfig |= setMemoryAndCpuFromVirtualHardwareSection(newConfig, hardwareSection);
-
-        if (reconfig)
+        else
         {
+            // Get the new virtual machine configuration
+            VirtualMachineConfiguration newConfig =
+                buildUpdateConfiguration(virtualMachine.getConfiguration(), virtualSystem);
+
+            // AbsVirtualMachine newVirtualMachine =
+            // VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
+
+            // Apply the new configuration to the machine in the hypervisor
             virtualMachine.reconfigVM(newConfig);
         }
+    }
+
+    private VirtualMachineConfiguration buildUpdateConfiguration(
+        final VirtualMachineConfiguration vmConfig, final ContentType virtualSystem)
+        throws SectionException
+    {
+        // Here we will have always a VirtualSystemType instance
+        VirtualSystemType virtualSystemInstance = (VirtualSystemType) virtualSystem;
+
+        String rdPassword =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPasswordQname);
+
+        // TODO the default value should be 0, but to avoid errors 256MB is assigned
+        long newRam = 256 * 1024 * 1024;
+        int newCPUNumber = 1;
+        List<VirtualDisk> newDisks = new ArrayList<VirtualDisk>();
+
+        VirtualMachineConfiguration newConfig = new VirtualMachineConfiguration(vmConfig);
+        newConfig.setHypervisor(vmConfig.getHyper());
+        newConfig.setRdPassword(rdPassword);
+
+        VirtualHardwareSectionType hardwareSection =
+            OVFEnvelopeUtils.getSection(virtualSystem, VirtualHardwareSectionType.class);
+
+        for (RASDType item : hardwareSection.getItem())
+        {
+            int resourceType = Integer.valueOf(item.getResourceType().getValue());
+
+            // Only add the new volumes
+            if (CIMResourceTypeEnum.Memory.getNumericResourceType() == resourceType)
+            {
+                newRam = item.getVirtualQuantity().getValue().longValue() * 1024 * 1024;
+            }
+            else if (CIMResourceTypeEnum.Processor.getNumericResourceType() == resourceType)
+            {
+                newCPUNumber = item.getVirtualQuantity().getValue().intValue();
+            }
+            else if (CIMResourceTypeEnum.iSCSI_HBA.getNumericResourceType() == resourceType
+                && changingStorageAndIsType(item, "NEW"))
+            {
+                String location;
+                location =
+                    item.getAddress().getValue() + "|" + item.getConnection().get(0).getValue();
+                // Creating the iscsi virtual disk
+                VirtualDisk iscsiVirtualDisk = new VirtualDisk();
+                iscsiVirtualDisk.setId(item.getInstanceID().getValue());
+                iscsiVirtualDisk.setDiskType(VirtualDiskType.ISCSI);
+                iscsiVirtualDisk.setLocation(location);
+
+                // Attachement sequence
+                int gen = 0;
+                if (item.getGeneration() != null && item.getGeneration().getValue() != null)
+                {
+                    gen = item.getGeneration().getValue().intValue();
+                }
+
+                iscsiVirtualDisk.setSequence(gen);
+                newDisks.add(iscsiVirtualDisk);
+            }
+        }
+
+        newConfig.setCpuNumber(newCPUNumber);
+        newConfig.setMemoryRam(newRam);
+        newConfig.getExtendedVirtualDiskList().clear();
+        newConfig.getExtendedVirtualDiskList().addAll(newDisks);
 
         return newConfig;
     }
@@ -336,6 +397,13 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                 String targetDatastore =
                     fileRef.getOtherAttributes().get(AbicloudConstants.DATASTORE_QNAME);
 
+                boolean isha = false;
+                if (fileRef.getOtherAttributes().containsKey(AbicloudConstants.HA_DISK))
+                {
+                    logger.debug("Its a HA disk (do not copy or remove)");
+                    isha = true;
+                }
+
                 logger.debug("Registering the virtual disk location:" + path);
 
                 VirtualDisk virtualDisk;
@@ -362,6 +430,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                             d.getFileRef(),
                             d.getFormat());
                 }
+
+                if (isha)
+                {
+                    virtualDisk.setHa();
+                }
+
                 virtualDiskMap.put(d.getDiskId(), virtualDisk);
             }
             else
@@ -542,190 +616,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         return macAddress;
     }
 
-    /**
-     * Adds virtual disks from a disk resource
-     * 
-     * @param configuration the virtual machine configuration
-     * @param virtualHWSection the virtual hardware section
-     * @return true if reconfiguration is needed
-     */
-    private boolean addVirtualDiskFromDiskResource(final VirtualMachineConfiguration configuration,
-        final VirtualHardwareSectionType virtualHWSection)
+    private String getAttributeFromAnnotation(final VirtualSystemType virtualSystem,
+        final QName attribute) throws SectionException
     {
-        boolean isReconfigureRequired;
-        List<VirtualDisk> extendedDiskList = new ArrayList<VirtualDisk>();
-
-        logger.trace("Checking Disk Section");
-
-        for (RASDType item : virtualHWSection.getItem())
-        {
-            int resourceType = new Integer(item.getResourceType().getValue());
-            // TODO Think what to do if a new disk is added
-            /*
-             * if (CIMResourceTypeEnum.Disk_Drive.getNumericResourceType() == resourceType) { for
-             * (CimString hostResource : item.getHostResource()) { String hostResourceString =
-             * hostResource.getValue(); String diskId =
-             * hostResourceString.replace(OVFVirtualHadwareSectionUtils.OVF_DISK_URI, "");
-             * extendedDiskList.add(virtualDiskMap.get(diskId)); } } else
-             */if (CIMResourceTypeEnum.iSCSI_HBA.getNumericResourceType() == resourceType)
-            {
-                String location;
-                location =
-                    item.getAddress().getValue() + "|" + item.getConnection().get(0).getValue();
-                // Creating the iscsi virtual disk
-                VirtualDisk iscsiVirtualDisk = new VirtualDisk();
-                iscsiVirtualDisk.setId(item.getInstanceID().getValue());
-                iscsiVirtualDisk.setDiskType(VirtualDiskType.ISCSI);
-                iscsiVirtualDisk.setLocation(location);
-                extendedDiskList.add(iscsiVirtualDisk);
-            }
-
-        }
-
-        isReconfigureRequired =
-            checkNewDisk(configuration.getExtendedVirtualDiskList(), extendedDiskList);
-
-        loggVirtualDisks(configuration.getExtendedVirtualDiskList());
-
-        return isReconfigureRequired;
-    }
-
-    /**
-     * Private helper to check if a new disk is added
-     * 
-     * @param extendedVirtualDiskList current extended disk list
-     * @param extendedDiskList new extended disk list
-     * @return true if a new disk is added false otherwise
-     */
-    private boolean checkNewDisk(final List<VirtualDisk> currentExtendedDiskList,
-        final List<VirtualDisk> newExtendedDiskList)
-    {
-        // If the current extended disk list does not contain the new disks. Add it all
-        if (!currentExtendedDiskList.containsAll(newExtendedDiskList))
-        {
-            currentExtendedDiskList.addAll(newExtendedDiskList);
-            return true;
-        }
-        else if (!newExtendedDiskList.containsAll(currentExtendedDiskList))
-        {
-            currentExtendedDiskList.retainAll(newExtendedDiskList);
-            return true;
-        }
-        return false;
-
-        /*
-         * boolean reconfig = false; // Checking added virtualdisks for (VirtualDisk newVd :
-         * newExtendedDiskList) { if (!currentExtendedDiskList.contains(newVd) &&
-         * !currentExtendedDiskList.isEmpty()) { currentExtendedDiskList.add(newVd); reconfig =
-         * true; } } // Checking removed virtualdisks if
-         * (!newExtendedDiskList.containsAll(currentExtendedDiskList)) reconfig = true; return
-         * reconfig;
-         */
-
-    }
-
-    private String getRemoteDesktopPortFromAnnotation(final VirtualSystemType virtualSystem)
-        throws SectionException
-    {
-        String rdPort;
-
-        // from the annotation take the remote desktop
         AnnotationSectionType annotationSection =
             OVFEnvelopeUtils.getSection(virtualSystem, AnnotationSectionType.class);
-        Map<QName, String> attributes = annotationSection.getOtherAttributes();
-        rdPort = attributes.get(VirtualMachineConfiguration.remoteDesktopQname);
-
-        return rdPort;
-    }
-
-    private String getVirtualSystemIPFromProduct(final VirtualSystemType virtualSystem)// throws
-    // SectionException,
-    // IdNotFoundException
-    {
-        String ipAddress;
-
-        // from the product take the ip
-        ProductSectionType productSection;
-        try
-        {
-            productSection = OVFEnvelopeUtils.getSection(virtualSystem, ProductSectionType.class);
-            Property prop =
-                OVFProductUtils.getProperty(productSection, "ip."
-                    + virtualSystem.getName().getValue());
-            ipAddress = prop.getValue().toString();
-        }
-        catch (Exception e) // SectionNotPresentException InvalidSectionException
-        // IdNotFoundException
-        {
-            ipAddress = "ipPropertyNotFoundOnProduct"; // TODO set the ip properly even when not
-            // found on product section
-        }
-
-        return ipAddress;
-    }// update virtual system
-
-    /**
-     * Private helper to logging virtual disks information
-     * 
-     * @param disks
-     */
-    private void loggVirtualDisks(final List<VirtualDisk> disks)
-    {
-        for (VirtualDisk disk : disks)
-        {
-            logger.debug("Disk id[{}]\tlocation[{}] capacity:" + disk.getCapacity(), disk.getId(),
-                disk.getLocation());
-        }
-    }
-
-    /**
-     * Sets the memory and cpu to the new configuration
-     * 
-     * @param configuration the virtual machine configuration
-     * @param hardwareSection the hardware section to extrac the RAM and CPU changes
-     * @return true if reconfiguration is needed
-     */
-    private boolean setMemoryAndCpuFromVirtualHardwareSection(
-        final VirtualMachineConfiguration configuration,
-        final VirtualHardwareSectionType hardwareSection)
-    {
-        boolean isReconfigureRequired = false;
-        long memoryRam = 256 * 1024 * 1024; // TODO configurable default values
-        int cpuNumber = 1; // TODO configurable default value
-
-        logger.trace("Checking VirtualHardwareSectionType object");
-
-        for (RASDType item : hardwareSection.getItem())
-        {
-            Integer resourceTypeNumeric = new Integer(item.getResourceType().getValue());
-
-            if (CIMResourceTypeEnum.Memory.getNumericResourceType() == resourceTypeNumeric)
-            {
-                // from bytes to megabytes
-                memoryRam = item.getVirtualQuantity().getValue().longValue() * 1024 * 1024;
-                // TODO assert item.getAllocationUnits() are bytes
-                if (configuration.getMemoryRAM() != memoryRam)
-                {
-                    configuration.setMemoryRam(memoryRam);
-                    isReconfigureRequired = true;
-                }
-            }
-            else if (CIMResourceTypeEnum.Processor.getNumericResourceType() == resourceTypeNumeric)
-            {
-                cpuNumber = item.getVirtualQuantity().getValue().intValue();
-                if (configuration.getCpuNumber() != cpuNumber)
-                {
-                    configuration.setCpuNumber(cpuNumber);
-                    isReconfigureRequired = true;
-                }
-            }
-            else
-            {
-                // TODO more relevant RASD types ?
-            }
-        }// for RASD items
-
-        return isReconfigureRequired;
+        return annotationSection.getOtherAttributes().get(attribute);
     }
 
     public String getVirtualAppState(final VirtualSystemCollectionType contentInstance)
@@ -876,7 +772,12 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         throws MalformedURLException, VirtualMachineException, SectionNotPresentException,
         SectionException
     {
-        String rdPort = getRemoteDesktopPortFromAnnotation(virtualSystemInstance);
+        String rdPort =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPortQname);
+        String rdPassword =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                VirtualMachineConfiguration.remoteDesktopPasswordQname);
 
         String virtualSystemName = virtualSystemInstance.getName().getValue();
         logger.trace("Creating a virtual machine from a Virtual System {}", virtualSystemName);
@@ -947,7 +848,8 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                     virtualDiskBaseList.add(virtualDiskMap.get(diskId));
                 }
             }
-            else if (CIMResourceTypeEnum.iSCSI_HBA.getNumericResourceType() == resourceType)
+            else if (CIMResourceTypeEnum.iSCSI_HBA.getNumericResourceType() == resourceType
+                && changingStorageAndIsType(item, "OLD"))
             {
                 String location;
                 location =
@@ -965,9 +867,6 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                     gen = item.getGeneration().getValue().intValue();
                 }
 
-                // logger.info("GENERATION item [{}] for vol [{}]", gen, location); // XXX remove
-                // XXXXXXXXXXXX
-
                 iscsiVirtualDisk.setSequence(gen);
 
                 extendedDiskList.add(iscsiVirtualDisk);
@@ -982,15 +881,15 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
         for (VirtualDisk vd : extendedDiskList)
         {
-            logger.debug("Attaching disk [{}] generation sequence [{}]", vd.getLocation(), vd
-                .getSequence());
+            logger.debug("Attaching disk [{}] generation sequence [{}]", vd.getLocation(),
+                vd.getSequence());
         }
         // Sort the vnicList
         Collections.sort(vnicList, new VNICSequence());
         for (VirtualNIC vn : vnicList)
         {
-            logger.debug("Attaching NIC [{}] generation sequence [{}]", vn.getMacAddress(), vn
-                .getOrder());
+            logger.debug("Attaching NIC [{}] generation sequence [{}]", vn.getMacAddress(),
+                vn.getOrder());
         }
 
         logger.debug("The remote desktop port is : " + rdPort);
@@ -1000,6 +899,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
                 virtualSystemName,
                 virtualDiskBaseList,
                 Integer.parseInt(rdPort),
+                rdPassword,
                 memoryRam,
                 cpuNumber,
                 vnicList);
@@ -1011,6 +911,35 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         virtualConfig.setRepositoryManagerAddress(repositoryManagerAddress);
 
         return virtualConfig;
+    }
+
+    /**
+     * [ABICLOUDPREMIUM-1491] Check if the disk being processed is a new disk (in a deploy
+     * operation) or a disk already attached to the machine (put operation). This is needed because
+     * in the PUT operation volumes are managed in a different way. The OVF will have the old
+     * volumes and the new volumes, so the virtualfactory can know which volumes to add and which
+     * volumes to remove.
+     * 
+     * @param item The item being processed.
+     * @return
+     */
+    private static boolean changingStorageAndIsType(final RASDType item, final String value)
+    {
+        // The volume must be included depending on what we are doing.
+        // The plugins will reconfigure the disks based on the disks they are provided in the
+        // current config and the new config.
+
+        // When changing storage: current config and newconfig have different disks and the plugins
+        // will apply the difference
+
+        // When changing the state or reconfiguring ram, current config and new config must have the
+        // same disks so the plugins do not try to reconfigure the storage
+
+        boolean changingStorage =
+            item.getConfigurationName() != null && item.getConfigurationName().getValue() != null
+                && item.getConfigurationName().getValue().length() > 0;
+
+        return !changingStorage || item.getConfigurationName().getValue().equals(value);
     }
 
     /**
@@ -1067,7 +996,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
     @Override
     public HypervisorConfiguration getHypervisorConfigurationFromVirtualSystem(
-        ContentType virtualSystemInstance) throws SectionNotPresentException,
+        final ContentType virtualSystemInstance) throws SectionNotPresentException,
         InvalidSectionException
     {
         VirtualHardwareSectionType hardwareSection =
