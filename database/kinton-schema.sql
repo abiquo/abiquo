@@ -4086,12 +4086,19 @@ CREATE TABLE `tasks` (
 -- PRICING RELATED TABLES
 -- ******************************************************************************************
 
+-- DROP THE TABLES RELATED TO PRICING --
+DROP TABLE IF EXISTS `kinton`.`pricing`;
+DROP TABLE IF EXISTS `kinton`.`costCode`;
+DROP TABLE IF EXISTS `kinton`.`pricing_costcode`;
+DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
+DROP TABLE IF EXISTS `kinton`.`currency`;
+
 --
 -- Definition of table `kinton`.`currency`
 --
-DROP TABLE IF EXISTS `kinton`.`currency`;
+
 CREATE TABLE `kinton`.`currency` (
-  `idCurrency` int(3) NOT NULL AUTO_INCREMENT ,
+  `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
   `name` varchar(256) NOT NULL ,
   `blocked` boolean default 0,
@@ -4102,9 +4109,9 @@ CREATE TABLE `kinton`.`currency` (
 --
 -- Definition of table `kinton`.`costCode`
 --  
-DROP TABLE IF EXISTS `kinton`.`costCode`;
+
 CREATE TABLE `kinton`.`costCode` (
-  `idCostCode` int(3) NOT NULL AUTO_INCREMENT ,
+  `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
   `variable` varchar(256) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCostCode`)
@@ -4114,9 +4121,9 @@ CREATE TABLE `kinton`.`costCode` (
 -- Definition of table `kinton`.`pricing`
 --
   
-DROP TABLE IF EXISTS `kinton`.`pricing`;
+
 CREATE TABLE `kinton`.`pricing` (
-  `idPricing` int(3) NOT NULL AUTO_INCREMENT ,
+  `idPricing` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idEnterprise` int(10) UNSIGNED NOT NULL ,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
@@ -4144,10 +4151,10 @@ CREATE TABLE `kinton`.`pricing` (
 -- Definition of table `kinton`.`pricing_costCode`
 --  
   
-DROP TABLE IF EXISTS `kinton`.`pricing_costcode`;
+
 CREATE TABLE `kinton`.`pricing_costcode` (
-  `idPricing` int(3) UNSIGNED NOT NULL,
-  `idCostCode` int(3) UNSIGNED NOT NULL,
+  `idPricing` int(10) UNSIGNED NOT NULL,
+  `idCostCode` int(10) UNSIGNED NOT NULL,
   `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricing`, `idCostCode`) 
@@ -4158,10 +4165,10 @@ CREATE TABLE `kinton`.`pricing_costcode` (
 -- Definition of table `kinton`.`pricing_tier`
 --  
 
-DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
+
 CREATE TABLE `kinton`.`pricing_tier` (
-  `idPricing` int(3) UNSIGNED NOT NULL,
-  `idTier` int(3) UNSIGNED NOT NULL,
+  `idPricing` int(10) UNSIGNED NOT NULL,
+  `idTier` int(10) UNSIGNED NOT NULL,
   `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricing`, `idTier`) 
