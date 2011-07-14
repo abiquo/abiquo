@@ -45,7 +45,7 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
-import com.abiquo.server.core.pricing.Pricing;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -192,19 +192,19 @@ public class Enterprise extends DefaultEntityWithLimits
 
     private final static boolean PRICING_REQUIRED = false;
 
-    @JoinColumn(name = Pricing.ID_COLUMN)
+    @JoinColumn(name = PricingTemplate.ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    private Pricing pricing;
+    private PricingTemplate pricingTemplate;
 
     @Required(value = PRICING_REQUIRED)
-    public Pricing getPricing()
+    public PricingTemplate getPricing()
     {
-        return pricing;
+        return pricingTemplate;
     }
 
-    public void setPricing(final Pricing pricing)
+    public void setPricing(final PricingTemplate pricingTemplate)
     {
-        this.pricing = pricing;
+        this.pricingTemplate = pricingTemplate;
     }
 
     // *************************** Mandatory constructors ***********************

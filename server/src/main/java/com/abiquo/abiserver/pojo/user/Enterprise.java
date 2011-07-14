@@ -38,7 +38,7 @@ import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.pricing.Pricing;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 /**
  * This pojo class store the information of the enterprise. On abiCloud, an user belongs to an
@@ -70,7 +70,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
     private String defaultTheme;
     
-    private Pricing pricing; 
+    private PricingTemplate pricing; 
     
 
 
@@ -158,12 +158,12 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.defaultTheme = defaultTheme;
     }
 
-    public Pricing getPricing()
+    public PricingTemplate getPricing()
     {
         return pricing;
     }
 
-    public void setPricing(Pricing pricing)
+    public void setPricing(PricingTemplate pricing)
     {
         this.pricing = pricing;
     }

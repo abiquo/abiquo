@@ -11,7 +11,7 @@ import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class PricingDAOTest extends DefaultDAOTestBase<PricingDAO, Pricing>
+public class PricingTemplateDAOTest extends DefaultDAOTestBase<PricingTemplateDAO, PricingTemplate>
 {
 
     @BeforeMethod
@@ -24,15 +24,15 @@ public class PricingDAOTest extends DefaultDAOTestBase<PricingDAO, Pricing>
     }
 
     @Override
-    protected PricingDAO createDao(EntityManager entityManager)
+    protected PricingTemplateDAO createDao(EntityManager entityManager)
     {
-        return new PricingDAO(entityManager);
+        return new PricingTemplateDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<Pricing> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<PricingTemplate> createEntityInstanceGenerator()
     {
-        return new PricingGenerator(getSeed());
+        return new PricingTemplateGenerator(getSeed());
     }
 
     @Override
@@ -42,9 +42,9 @@ public class PricingDAOTest extends DefaultDAOTestBase<PricingDAO, Pricing>
     }
 
     @Override
-    public PricingGenerator eg()
+    public PricingTemplateGenerator eg()
     {
-        return (PricingGenerator) super.eg();
+        return (PricingTemplateGenerator) super.eg();
     }
 
     

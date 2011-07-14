@@ -4087,10 +4087,10 @@ CREATE TABLE `tasks` (
 -- ******************************************************************************************
 
 -- DROP THE TABLES RELATED TO PRICING --
-DROP TABLE IF EXISTS `kinton`.`pricing`;
+DROP TABLE IF EXISTS `kinton`.`pricing_template`;
 DROP TABLE IF EXISTS `kinton`.`costCode`;
-DROP TABLE IF EXISTS `kinton`.`pricing_costcode`;
-DROP TABLE IF EXISTS `kinton`.`pricing_tier`;
+DROP TABLE IF EXISTS `kinton`.`pricingTemplate_costcode`;
+DROP TABLE IF EXISTS `kinton`.`pricingTemplate_tier`;
 DROP TABLE IF EXISTS `kinton`.`currency`;
 
 --
@@ -4122,8 +4122,8 @@ CREATE TABLE `kinton`.`costCode` (
 --
   
 
-CREATE TABLE `kinton`.`pricing` (
-  `idPricing` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
+CREATE TABLE `kinton`.`pricing_template` (
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idEnterprise` int(10) UNSIGNED NOT NULL ,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `name` varchar(256) NOT NULL ,
@@ -4131,16 +4131,16 @@ CREATE TABLE `kinton`.`pricing` (
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `limitMaximumDeployedCharged` int(10) UNSIGNED NOT NULL ,
-  `standingChargePeriod` int(10) UNSIGNED NOT NULL ,
-  `minimumChargePeriod` int(10) UNSIGNED NOT NULL ,
-  `vCPU` int(10) UNSIGNED NOT NULL ,
-  `memoryMb` int(10) UNSIGNED NOT NULL ,
-  `hdGB` int(10) UNSIGNED NOT NULL ,
-  `vlan` varchar(256) NOT NULL ,
-  `publicIp` varchar(256) NOT NULL ,
+  `limitMaximumDeployedCharged` DECIMAL(20) NOT NULL default 0,
+  `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
+  `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
+  `vCPU` DECIMAL(20) NOT NULL default 0,
+  `memoryMb` DECIMAL(20) NOT NULL default 0,
+  `hdGB` DECIMAL(20) NOT NULL default 0,
+  `vlan` DECIMAL(20) NOT NULL default 0,
+  `publicIp` DECIMAL(20) NOT NULL default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricing`) ,
+  PRIMARY KEY (`idPricingTemplate`) ,
   KEY `Pricing_FK1_Enterprise` (`idEnterprise`),
   KEY `Pricing_FK2_Currency` (`idCurrency`),
   CONSTRAINT `Pricing_FK1_Enterprise` FOREIGN KEY (`idEnterprise` ) REFERENCES `kinton`.`enterprise` (`idEnterprise` ) ON DELETE NO ACTION,
@@ -4149,32 +4149,35 @@ CREATE TABLE `kinton`.`pricing` (
   
 
 --
--- Definition of table `kinton`.`pricing_costCode`
+-- Definition of table `kinton`.`pricingTemplate_costcode`
 --  
   
 
-CREATE TABLE `kinton`.`pricing_costcode` (
-  `idPricing` int(10) UNSIGNED NOT NULL,
+CREATE TABLE `kinton`.`pricingTemplate_costcode` (
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idCostCode` int(10) UNSIGNED NOT NULL,
   `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricing`, `idCostCode`) 
+  PRIMARY KEY (`idPricingTemplate`, `idCostCode`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
   
 --
--- Definition of table `kinton`.`pricing_tier`
+-- Definition of table `kinton`.`pricingTemplate_tier`
 --  
 
 
-CREATE TABLE `kinton`.`pricing_tier` (
-  `idPricing` int(10) UNSIGNED NOT NULL,
+CREATE TABLE `kinton`.`pricingTemplate_tier` (
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
   `price` int(10) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricing`, `idTier`) 
+  PRIMARY KEY (`idPricingTemplate`, `idTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
+-- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
+ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
+ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricing_template` (`idPricingTemplate`);
 
 
 CALL `kinton`.`add_version_column_to_all`();

@@ -1,7 +1,5 @@
 package com.abiquo.server.core.pricing;
 
-import static org.testng.Assert.assertEquals;
-
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -11,18 +9,17 @@ import com.softwarementors.commons.testng.AssertEx;
 public class CurrencyGenerator extends DefaultEntityGenerator<Currency>
 {
 
-    
-
-    public CurrencyGenerator(SeedGenerator seed)
+    public CurrencyGenerator(final SeedGenerator seed)
     {
         super(seed);
-        
+
     }
 
     @Override
-    public void assertAllPropertiesEqual(Currency obj1, Currency obj2)
+    public void assertAllPropertiesEqual(final Currency obj1, final Currency obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, Currency.NAME_PROPERTY,Currency.SIMBOL_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Currency.NAME_PROPERTY,
+            Currency.SYMBOL_PROPERTY);
     }
 
     @Override
@@ -32,17 +29,15 @@ public class CurrencyGenerator extends DefaultEntityGenerator<Currency>
 
         Currency currency = new Currency();
 
-        
-
         return currency;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Currency entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Currency entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
+
     }
 
 }
