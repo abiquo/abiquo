@@ -254,8 +254,8 @@ public class MachineService extends DefaultApiService
             return false;
         }
 
-        return (machine.getDatacenter().getId().equals(datacenterId) && machine.getRack().getId()
-            .equals(rackId));
+        return machine.getDatacenter().getId().equals(datacenterId)
+            && machine.getRack().getId().equals(rackId);
     }
 
     private void isValidMachine(final Machine machine)
@@ -266,5 +266,17 @@ public class MachineService extends DefaultApiService
         }
 
         flushErrors();
+    }
+
+    // Needed in unit testing
+
+    public VsmServiceStub getVsm()
+    {
+        return vsm;
+    }
+
+    public void setVsm(final VsmServiceStub vsm)
+    {
+        this.vsm = vsm;
     }
 }

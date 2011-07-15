@@ -21,14 +21,17 @@
 
 package com.abiquo.ovfmanager.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
@@ -37,16 +40,16 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 public class OVFNetworkUtilsTest
 {
-    
+
     NetworkSectionType networkSectionType;
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception
     {
         networkSectionType = new NetworkSectionType();
     }
 
-    @After
+    @AfterMethod
     public void tearDown() throws Exception
     {
     }
@@ -55,38 +58,45 @@ public class OVFNetworkUtilsTest
     @Test
     public void testNetworkUtils()
     {
-        //Correct creating sections.
+        // Correct creating sections.
         try
         {
-            Network netOne = OVFEnvelopeUtils.networkSection.createNetwork("eth0", "Network Interface number one");
+            Network netOne =
+                OVFEnvelopeUtils.networkSection.createNetwork("eth0",
+                    "Network Interface number one");
             Network netTwo = OVFEnvelopeUtils.networkSection.createNetwork("eth1", null);
-            assertTrue (netOne.getName().equalsIgnoreCase("eth0"));
-            assertTrue (netOne.getDescription().getValue().equalsIgnoreCase("Network Interface Number One"));
-            assertTrue (netTwo.getName().equalsIgnoreCase("eth1"));
+            assertTrue(netOne.getName().equalsIgnoreCase("eth0"));
+            assertTrue(netOne.getDescription().getValue().equalsIgnoreCase(
+                "Network Interface Number One"));
+            assertTrue(netTwo.getName().equalsIgnoreCase("eth1"));
         }
         catch (RequiredAttributeException e)
         {
             e.printStackTrace();
             fail();
         }
-        
-        //Incorrect creating section
-         try
+
+        // Incorrect creating section
+        try
         {
             OVFEnvelopeUtils.networkSection.createNetwork(null, null);
             fail();
         }
         catch (RequiredAttributeException e)
         {
-            //Do nothing
+            // Do nothing
         }
-        
+
         NetworkSectionType networkSection = new NetworkSectionType();
 
         OVFSerializer serializer = OVFSerializer.getInstance();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baos);
+
         try
         {
-            serializer.writeXML(networkSection, System.out);
+            serializer.writeXML(networkSection, out);
         }
         catch (XMLException e)
         {

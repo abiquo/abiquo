@@ -21,10 +21,10 @@
 
 package com.abiquo.abiserver.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -32,15 +32,19 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 public class HibernateDAOFactoryTest
 {
     @Test
-    public void loadDAOFactory() {
-        try {
+    public void loadDAOFactory()
+    {
+        try
+        {
             DAOFactory factory = HibernateDAOFactory.instance();
             factory.beginConnection();
-            
+
             assertEquals(true, HibernateDAOFactory.getSessionFactory().getCurrentSession().isOpen());
-            
+
             factory.endConnection();
-        } catch (Exception e) {           
+        }
+        catch (Exception e)
+        {
             fail();
         }
     }
