@@ -1,14 +1,8 @@
--- WARNING
--- Please maintain order of delta when merging or adding new lines
--- 1st -> alter existing schema tables
--- 2st -> new created schema tables
--- 3rd -> insert/update data
--- 4th -> Triggers
--- 5th -> SQL Procedures
+-- ---------------------------------------------- --
+--                 TABLE DROP                     --
+-- ---------------------------------------------- --
 
 -- PRICING --
-
-
 -- DROP THE TABLES RELATED TO PRICING --
 DROP TABLE IF EXISTS `kinton`.`pricing_template`;
 DROP TABLE IF EXISTS `kinton`.`costCode`;
@@ -16,10 +10,13 @@ DROP TABLE IF EXISTS `kinton`.`pricingTemplate_costcode`;
 DROP TABLE IF EXISTS `kinton`.`pricingTemplate_tier`;
 DROP TABLE IF EXISTS `kinton`.`currency`;
 
---
--- Definition of table `kinton`.`currency`
---
 
+-- ---------------------------------------------- --
+--                  TABLE CREATION                --
+-- ---------------------------------------------- --
+
+-- PRICING --
+-- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
@@ -29,10 +26,8 @@ CREATE TABLE `kinton`.`currency` (
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
     
---
+-- PRICING --
 -- Definition of table `kinton`.`costCode`
---  
-
 CREATE TABLE `kinton`.`costCode` (
   `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
   `variable` varchar(256) NOT NULL ,
@@ -40,11 +35,8 @@ CREATE TABLE `kinton`.`costCode` (
   PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
---
+-- PRICING --
 -- Definition of table `kinton`.`pricing`
---
-  
-
 CREATE TABLE `kinton`.`pricing_template` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idEnterprise` int(10) UNSIGNED,
@@ -57,7 +49,7 @@ CREATE TABLE `kinton`.`pricing_template` (
   `limitMaximumDeployedCharged` DECIMAL(20) NOT NULL default 0,
   `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
-  `vCPU` DECIMAL(20) NOT NULL default 0,
+  `vcpu` DECIMAL(20) NOT NULL default 0,
   `memoryMb` DECIMAL(20) NOT NULL default 0,
   `hdGB` DECIMAL(20) NOT NULL default 0,
   `vlan` DECIMAL(20) NOT NULL default 0,
@@ -70,12 +62,8 @@ CREATE TABLE `kinton`.`pricing_template` (
   CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
-
---
+-- PRICING --
 -- Definition of table `kinton`.`pricingTemplate_costcode`
---  
-  
-
 CREATE TABLE `kinton`.`pricingTemplate_costcode` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idCostCode` int(10) UNSIGNED NOT NULL,
@@ -84,12 +72,8 @@ CREATE TABLE `kinton`.`pricingTemplate_costcode` (
   PRIMARY KEY (`idPricingTemplate`, `idCostCode`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
-  
---
+-- PRICING --
 -- Definition of table `kinton`.`pricingTemplate_tier`
---  
-
-
 CREATE TABLE `kinton`.`pricingTemplate_tier` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
@@ -97,15 +81,23 @@ CREATE TABLE `kinton`.`pricingTemplate_tier` (
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`, `idTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
-  
+
+-- ---------------------------------------------- --
+--         CONSTRAINTS (alter table, etc)         --
+-- ---------------------------------------------- --
+
+-- PRICING --
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
 ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
 ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricing_template` (`idPricingTemplate`);
 
-  
---
+
+-- ---------------------------------------------- --
+--   DATA CHANGES (insert, update, delete, etc)   --
+-- ---------------------------------------------- --
+
+-- PRICING --
 -- Dumping data for table `kinton`.`privilege`
---
 
 /*!40000 ALTER TABLE `kinton`.`privilege` DISABLE KEYS */;
 LOCK TABLES `kinton`.`privilege` WRITE;
@@ -115,7 +107,7 @@ INSERT INTO `kinton`.`privilege` VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`privilege` ENABLE KEYS */;
 
---
+-- PRICING --
 -- Dumping data for table `kinton`.`roles_privileges`
 --
 
@@ -133,4 +125,29 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.pricing.createCurrency","","Currency creation wiki");
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
---  
+
+
+
+-- --------------------------------------------- --
+--                  PROCEDURES                    --
+-- ---------------------------------------------- --
+
+
+-- ---------------------------------------------- --
+--                   TRIGGERS                     --
+-- ---------------------------------------------- --
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
