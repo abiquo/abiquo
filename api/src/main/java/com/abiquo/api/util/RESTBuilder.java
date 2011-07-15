@@ -95,7 +95,8 @@ import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)  // This bean must not be singleton
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+// This bean must not be singleton
 public class RESTBuilder implements IRESTBuilder
 {
     public static final String REL_EDIT = "edit";
@@ -123,7 +124,8 @@ public class RESTBuilder implements IRESTBuilder
         return buildDatacenterLink(datacenterId, builder);
     }
 
-    protected RESTLink buildDatacenterLink(final Integer datacenterId, final AbiquoLinkBuilder builder)
+    protected RESTLink buildDatacenterLink(final Integer datacenterId,
+        final AbiquoLinkBuilder builder)
     {
         Map<String, String> params =
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString());
@@ -135,18 +137,10 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter)
     {
-        RESTLinkBuilder builder = RESTLinkBuilder.createBuilder(linkProcessor);
+        List<RESTLink> links = new ArrayList<RESTLink>();
 
-        return buildDatacenterLinks(datacenter, builder);
-    }
-
-    @Override
-    public List<RESTLink> buildDatacenterLinks(final DatacenterDto datacenter,
-        final RESTLinkBuilder builder)
-    {
         Map<String, String> params =
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenter.getId().toString());
-        List<RESTLink> links = new ArrayList<RESTLink>();
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(DatacenterResource.class, REL_EDIT, params));
@@ -657,9 +651,9 @@ public class RESTBuilder implements IRESTBuilder
             // Previous using the page size avoiding to be less than 0.
             Integer previous = list.getCurrentElement() - list.getPageSize();
             previous =
-                (previous > list.getTotalResults()) ? (list.getTotalResults() - 2 * list
-                    .getPageSize()) : previous;
-            previous = (previous < 0) ? 0 : previous;
+                previous > list.getTotalResults() ? list.getTotalResults() - 2 * list.getPageSize()
+                    : previous;
+            previous = previous < 0 ? 0 : previous;
 
             links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
                 + previous));
@@ -729,7 +723,8 @@ public class RESTBuilder implements IRESTBuilder
         return buildEnterpriseLink(enterpriseId, builder);
     }
 
-    protected RESTLink buildEnterpriseLink(final Integer enterpriseId, final AbiquoLinkBuilder builder)
+    protected RESTLink buildEnterpriseLink(final Integer enterpriseId,
+        final AbiquoLinkBuilder builder)
     {
         Map<String, String> params =
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString());

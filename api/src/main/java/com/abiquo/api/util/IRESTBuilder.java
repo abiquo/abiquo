@@ -64,8 +64,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter);
 
-    public List<RESTLink> buildDatacenterLinks(DatacenterDto datacenter, RESTLinkBuilder builder);
-
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
     public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId,
