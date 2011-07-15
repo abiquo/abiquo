@@ -28,11 +28,11 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.server.core.infrastructure.Rack;
 
-public class ResourceUpgradeUseTest extends AbstractGeneratorTest
+public class ResourceUpgradeUseTest extends AbstractUnitTest
 {
     ResourceUpgradeUse resourceUpgrade;
 
@@ -56,14 +56,14 @@ public class ResourceUpgradeUseTest extends AbstractGeneratorTest
         Rack rack = rackGenerator.createUniqueInstance();
         rack.setVlanIdMin(2);
         rack.setVlanIdMax(10);
-        
+
         rack.setVlansIdAvoided("");
         int[] arrayInt7 = {1, 2};
         vlanListUsed = new ArrayList<Integer>();
         arrayToList(arrayInt7, vlanListUsed);
         freeVlan = resourceUpgrade.getFreeVLANFromUsedList(vlanListUsed, rack);
         Assert.assertEquals(3, freeVlan);
-        
+
         rack.setVlansIdAvoided("");
         vlanListUsed = new ArrayList<Integer>();
         int[] arrayInt = {3, 4, 5};
@@ -99,13 +99,12 @@ public class ResourceUpgradeUseTest extends AbstractGeneratorTest
         freeVlan = resourceUpgrade.getFreeVLANFromUsedList(vlanListUsed, rack);
         Assert.assertEquals(9, freeVlan);
 
-         rack.setVlansIdAvoided("2-8,9");
-         int[] arrayInt6 = {};
-         vlanListUsed = new ArrayList<Integer>();
-         arrayToList(arrayInt6, vlanListUsed);
-         freeVlan = resourceUpgrade.getFreeVLANFromUsedList(vlanListUsed, rack);
-         Assert.assertEquals(10, freeVlan);
-         
+        rack.setVlansIdAvoided("2-8,9");
+        int[] arrayInt6 = {};
+        vlanListUsed = new ArrayList<Integer>();
+        arrayToList(arrayInt6, vlanListUsed);
+        freeVlan = resourceUpgrade.getFreeVLANFromUsedList(vlanListUsed, rack);
+        Assert.assertEquals(10, freeVlan);
 
         // rack.setVlansIdAvoided("2-10");
         // int[] arrayInt7 = {};
@@ -116,7 +115,7 @@ public class ResourceUpgradeUseTest extends AbstractGeneratorTest
 
     }
 
-    private void arrayToList(int[] arrayInt, List<Integer> listInt)
+    private void arrayToList(final int[] arrayInt, final List<Integer> listInt)
     {
         int[] array = arrayInt;
         for (int i = 0; i < array.length; i++)

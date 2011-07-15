@@ -1,0 +1,4 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="VIRTUAL FACTORY all unit tests" verbose="1">
+	<test name="All unit tests" />
+</suite>
