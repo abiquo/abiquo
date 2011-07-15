@@ -33,7 +33,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageH
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.listener.ProxyContextLoaderListener;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -57,13 +56,11 @@ public class AppsLibraryService
 
     public AppsLibraryService()
     {
-        appsLibraryCommand = ProxyContextLoaderListener.getCtx().getBean(AppsLibraryCommand.class);
-
         try
         {
             appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
                     .newInstance();
         }
         catch (Exception e)
