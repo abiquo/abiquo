@@ -1,0 +1,4 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Ignore unit tests" verbose="1">
+    <test name="Empty test" />
+</suite>

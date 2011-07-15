@@ -20,9 +20,11 @@
  */
 package com.abiquo.abicloud.taskservice.impl.test;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertTrue;
 
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.abicloud.taskservice.TaskService;
 import com.abiquo.abicloud.taskservice.factory.TaskServiceFactory;
@@ -35,20 +37,20 @@ import com.abiquo.abicloud.taskservice.test.LogTask;
  * 
  * @author ibarrera
  */
-public class AbstractTaskServiceTest extends TestCase
+public class AbstractTaskServiceTest
 {
     /**
      * The task service to test.
      */
     private TaskService taskService;
 
-    @Override
+    @BeforeMethod
     protected void setUp() throws Exception
     {
         taskService = TaskServiceFactory.getService();
     }
 
-    @Override
+    @AfterMethod
     protected void tearDown() throws Exception
     {
         taskService.unschedule(LogTask.class);
@@ -61,7 +63,7 @@ public class AbstractTaskServiceTest extends TestCase
      * @throws Exception If task scheduling fails.
      */
     @Test
-    public void test0scheduleAll() throws Exception
+    public void testScheduleAll() throws Exception
     {
         taskService.scheduleAll();
         Thread.sleep(5000);

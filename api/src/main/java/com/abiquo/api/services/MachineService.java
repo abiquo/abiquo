@@ -57,7 +57,7 @@ import com.abiquo.server.core.infrastructure.UcsRack;
 public class MachineService extends DefaultApiService
 {
     protected static final Logger logger = LoggerFactory.getLogger(MachineService.class);
-    
+
     @Autowired
     protected InfrastructureRep repo;
 
@@ -74,7 +74,7 @@ public class MachineService extends DefaultApiService
     protected VirtualMachineService virtualMachineService;
 
     @Autowired
-    protected VirtualDatacenterRep virtualDatacenterRep;    
+    protected VirtualDatacenterRep virtualDatacenterRep;
 
     public MachineService()
     {
@@ -94,12 +94,12 @@ public class MachineService extends DefaultApiService
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);        
-        
+        List<Machine> machines = repo.findRackMachines(rack);
+
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created
         // in the Dto informing the managed machines special functionality.
-        
+
         UcsRack ucsRack = repo.findUcsRackById(rackId);
         if (ucsRack != null)
         {
@@ -108,7 +108,6 @@ public class MachineService extends DefaultApiService
                 machine.setBelongsToManagedRack(Boolean.TRUE);
             }
         }
-        
 
         return machines;
     }
@@ -254,8 +253,8 @@ public class MachineService extends DefaultApiService
             return false;
         }
 
-        return (machine.getDatacenter().getId().equals(datacenterId) && machine.getRack().getId()
-            .equals(rackId));
+        return machine.getDatacenter().getId().equals(datacenterId)
+            && machine.getRack().getId().equals(rackId);
     }
 
     private void isValidMachine(final Machine machine)
@@ -267,5 +266,16 @@ public class MachineService extends DefaultApiService
 
         flushErrors();
     }
-}
 
+    // Needed in unit testing
+
+    public VsmServiceStub getVsm()
+    {
+        return vsm;
+    }
+
+    public void setVsm(final VsmServiceStub vsm)
+    {
+        this.vsm = vsm;
+    }
+}
