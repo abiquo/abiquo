@@ -47,7 +47,7 @@ CREATE TABLE `kinton`.`costCode` (
 
 CREATE TABLE `kinton`.`pricing_template` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `idEnterprise` int(10) UNSIGNED NOT NULL ,
+  `idEnterprise` int(10) UNSIGNED,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `name` varchar(256) NOT NULL ,
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,

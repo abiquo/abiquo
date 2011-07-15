@@ -4122,9 +4122,9 @@ CREATE TABLE `kinton`.`costCode` (
 --
   
 
-CREATE TABLE `kinton`.`pricing_template` (
+CREATE TABLE `kinton`.`pricingTemplate` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `idEnterprise` int(10) UNSIGNED NOT NULL ,
+  `idEnterprise` int(10) UNSIGNED,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `name` varchar(256) NOT NULL ,
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
@@ -4177,7 +4177,7 @@ CREATE TABLE `kinton`.`pricingTemplate_tier` (
   
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
 ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
-ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricing_template` (`idPricingTemplate`);
+ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricingTemplate` (`idPricingTemplate`);
 
 
 CALL `kinton`.`add_version_column_to_all`();

@@ -1,17 +1,26 @@
 package com.abiquo.server.core.pricing;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemplate>
 {
 
+    EnterpriseGenerator enterpriseGenerator;
+
+    CurrencyGenerator currencyGenerator;
+
     public PricingTemplateGenerator(final SeedGenerator seed)
     {
         super(seed);
+        enterpriseGenerator = new EnterpriseGenerator(seed);
+        currencyGenerator = new CurrencyGenerator(seed);
 
     }
 
@@ -31,9 +40,52 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
     @Override
     public PricingTemplate createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
+        // Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        return createInstance(null);
+    }
 
-        PricingTemplate pricingTemplate = new PricingTemplate();
+    public PricingTemplate createInstance(final Enterprise enterprise)
+    {
+        Currency currency = currencyGenerator.createUniqueInstance();
+
+        return createInstance(enterprise, currency);
+    }
+
+    public PricingTemplate createInstance(final Enterprise enterprise, final Currency currency)
+    {
+        BigDecimal seed = newBigDecimal();
+        int seedint = nextSeed();
+
+        final String name = newString(nextSeed(), 0, 255);
+        final BigDecimal hdGb = seed;
+        final BigDecimal standingChargePeriod = seed;
+        final BigDecimal limitMaximumDeployedCharged = seed;
+        final BigDecimal vlan = seed;
+        final boolean showMinimumCharge = true;
+        final int chargingPeriod = seedint;
+        final BigDecimal minimumChargePeriod = seed;
+        final boolean showChangesBefore = true;
+        final int minimumCharge = seedint;
+        final BigDecimal publicIp = seed;
+        final BigDecimal vCpu = seed;
+        final BigDecimal memoryMb = seed;
+
+        PricingTemplate pricingTemplate =
+            new PricingTemplate(name,
+                hdGb,
+                standingChargePeriod,
+                enterprise,
+                limitMaximumDeployedCharged,
+                vlan,
+                showMinimumCharge,
+                chargingPeriod,
+                minimumChargePeriod,
+                showChangesBefore,
+                minimumCharge,
+                currency,
+                publicIp,
+                vCpu,
+                memoryMb);
 
         return pricingTemplate;
     }
@@ -43,6 +95,14 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        // Enterprise enterprise = entity.getEnterprise();
+        // enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
+        // entitiesToPersist.add(enterprise);
+
+        Currency currency = entity.getCurrency();
+        currencyGenerator.addAuxiliaryEntitiesToPersist(currency, entitiesToPersist);
+        entitiesToPersist.add(currency);
 
     }
 

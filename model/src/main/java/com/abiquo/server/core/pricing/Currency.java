@@ -101,4 +101,23 @@ public class Currency extends DefaultEntityBase
         this.symbol = symbol;
     }
 
+    public final static String BLOCKED_PROPERTY = "blocked";
+
+    private final static String BLOCKED_COLUMN = "blocked";
+
+    private final static boolean BLOCKED_REQUIRED = true;
+
+    @Column(name = BLOCKED_COLUMN, nullable = !BLOCKED_REQUIRED)
+    private boolean blocked;
+
+    @Required(value = BLOCKED_REQUIRED)
+    public boolean isBlocked()
+    {
+        return blocked;
+    }
+
+    public void setBlocked(final boolean blocked)
+    {
+        this.blocked = blocked;
+    }
 }

@@ -49,25 +49,25 @@ public class PricingTemplate extends DefaultEntityBase
         final int minimumCharge, final Currency currency, final BigDecimal publicIp,
         final BigDecimal vCpu, final BigDecimal memoryMb)
     {
-        super();
-        this.name = name;
-        this.hdGb = hdGb;
-        this.standingChargePeriod = standingChargePeriod;
-        this.enterprise = enterprise;
-        this.limitMaximumDeployedCharged = limitMaximumDeployedCharged;
-        this.vlan = vlan;
-        this.showMinimumCharge = showMinimumCharge;
-        this.chargingPeriod = chargingPeriod;
-        this.minimumChargePeriod = minimumChargePeriod;
-        this.showChangesBefore = showChangesBefore;
-        this.minimumCharge = minimumCharge;
-        this.currency = currency;
-        this.publicIp = publicIp;
-        this.vCpu = vCpu;
-        this.memoryMb = memoryMb;
+
+        setName(name);
+        setHdGB(hdGb);
+        setStandingChargePeriod(standingChargePeriod);
+        setEnterprise(enterprise);
+        setLimitMaximumDeployedCharged(limitMaximumDeployedCharged);
+        setVlan(vlan);
+        setShowChangesBefore(showChangesBefore);
+        setShowMinimumCharge(showMinimumCharge);
+        setChargingPeriod(chargingPeriod);
+        setMinimumCharge(minimumCharge);
+        setMinimumChargePeriod(minimumChargePeriod);
+        setCurrency(currency);
+        setPublicIp(publicIp);
+        setVCpu(vCpu);
+        setMemoryMB(memoryMb);
     }
 
-    public final static String ID_COLUMN = "pricingTemplateId";
+    public final static String ID_COLUMN = "idPricingTemplate";
 
     @Id
     @GeneratedValue
@@ -108,28 +108,28 @@ public class PricingTemplate extends DefaultEntityBase
         this.name = name;
     }
 
-    public final static String HD_GB_PROPERTY = "hdGb";
+    public final static String HD_GB_PROPERTY = "hdGB";
 
-    private final static String HD_GB_COLUMN = "hdGb";
+    private final static String HD_GB_COLUMN = "hdGB";
 
-    @Column(name = HD_GB_COLUMN, nullable = true)
-    private BigDecimal hdGb;
+    @Column(name = HD_GB_COLUMN, nullable = false)
+    private BigDecimal hdGB;
 
     public BigDecimal getHdGB()
     {
-        return this.hdGb;
+        return this.hdGB;
     }
 
     private void setHdGB(final BigDecimal hdGb)
     {
-        this.hdGb = hdGb;
+        this.hdGB = hdGb;
     }
 
     public final static String STANDING_CHARGE_PERIOD_PROPERTY = "standingChargePeriod";
 
     private final static String STANDING_CHARGE_PERIOD_COLUMN = "standingChargePeriod";
 
-    @Column(name = STANDING_CHARGE_PERIOD_COLUMN, nullable = true)
+    @Column(name = STANDING_CHARGE_PERIOD_COLUMN, nullable = false)
     private BigDecimal standingChargePeriod;
 
     public BigDecimal getStandingChargePeriod()
@@ -144,7 +144,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String ENTERPRISE_PROPERTY = "enterprise";
 
-    private final static boolean ENTERPRISE_REQUIRED = true;
+    private final static boolean ENTERPRISE_REQUIRED = false;
 
     private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
 
@@ -170,7 +170,7 @@ public class PricingTemplate extends DefaultEntityBase
     private final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN =
         "limitMaximumDeployedCharged";
 
-    @Column(name = LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN, nullable = true)
+    @Column(name = LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN, nullable = false)
     private BigDecimal limitMaximumDeployedCharged;
 
     public BigDecimal getLimitMaximumDeployedCharged()
@@ -187,7 +187,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static String VLAN_COLUMN = "vlan";
 
-    @Column(name = VLAN_COLUMN, nullable = true)
+    @Column(name = VLAN_COLUMN, nullable = false)
     private BigDecimal vlan;
 
     public BigDecimal getVlan()
@@ -222,7 +222,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String CHARGING_PERIOD_PROPERTY = "chargingPeriod";
 
-    private final static boolean CHARGING_PERIOD_REQUIRED = false;
+    private final static boolean CHARGING_PERIOD_REQUIRED = true;
 
     private final static String CHARGING_PERIOD_COLUMN = "chargingPeriod";
 
@@ -248,7 +248,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static String MINIMUM_CHARGE_PERIOD_COLUMN = "minimumChargePeriod";
 
-    @Column(name = MINIMUM_CHARGE_PERIOD_COLUMN, nullable = true)
+    @Column(name = MINIMUM_CHARGE_PERIOD_COLUMN, nullable = false)
     private BigDecimal minimumChargePeriod;
 
     public BigDecimal getMinimumChargePeriod()
@@ -283,7 +283,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String MINIMUM_CHARGE_PROPERTY = "minimumCharge";
 
-    private final static boolean MINIMUM_CHARGE_REQUIRED = false;
+    private final static boolean MINIMUM_CHARGE_REQUIRED = true;
 
     private final static String MINIMUM_CHARGE_COLUMN = "minimumCharge";
 
@@ -331,7 +331,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static String PUBLIC_IP_COLUMN = "publicIp";
 
-    @Column(name = PUBLIC_IP_COLUMN, nullable = true)
+    @Column(name = PUBLIC_IP_COLUMN, nullable = false)
     private BigDecimal publicIp;
 
     public BigDecimal getPublicIp()
@@ -344,28 +344,28 @@ public class PricingTemplate extends DefaultEntityBase
         this.publicIp = publicIp;
     }
 
-    public final static String V_CPU_PROPERTY = "vCpu";
+    public final static String V_CPU_PROPERTY = "vCPU";
 
-    private final static String V_CPU_COLUMN = "vCpu";
+    private final static String V_CPU_COLUMN = "vCPU";
 
-    @Column(name = V_CPU_COLUMN, nullable = true)
-    private BigDecimal vCpu;
+    @Column(name = V_CPU_COLUMN, nullable = false)
+    private BigDecimal vCPU;
 
     public BigDecimal getVCpu()
     {
-        return this.vCpu;
+        return this.vCPU;
     }
 
     private void setVCpu(final BigDecimal vCpu)
     {
-        this.vCpu = vCpu;
+        this.vCPU = vCpu;
     }
 
     public final static String MEMORY_MB_PROPERTY = "memoryMb";
 
     private final static String MEMORY_MB_COLUMN = "memoryMb";
 
-    @Column(name = MEMORY_MB_COLUMN, nullable = true)
+    @Column(name = MEMORY_MB_COLUMN, nullable = false)
     private BigDecimal memoryMb;
 
     public BigDecimal getMemoryMB()
@@ -378,7 +378,7 @@ public class PricingTemplate extends DefaultEntityBase
         this.memoryMb = memoryMb;
     }
 
-    public final static String ASSOCIATION_TABLE = "pricing_costecode";
+    public final static String ASSOCIATION_TABLE = "pricingTemplate_costcode";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
     @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = CostCode.ID_COLUMN))
@@ -394,10 +394,10 @@ public class PricingTemplate extends DefaultEntityBase
         this.costCodes = costCodes;
     }
 
-    public final static String ASSOCIATION_TABLE_TIER = "pricing_tier";
+    public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = Tier.ID_COLUMN))
+    @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = "idTier"))
     private List<Tier> tiers = new ArrayList<Tier>();
 
     public List<Tier> getTiers()

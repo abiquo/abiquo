@@ -37,6 +37,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -194,6 +195,7 @@ public class Enterprise extends DefaultEntityWithLimits
 
     @JoinColumn(name = PricingTemplate.ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_pricingTemp")
     private PricingTemplate pricingTemplate;
 
     @Required(value = PRICING_REQUIRED)
