@@ -29,7 +29,7 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.BasicUserAuthentication;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
@@ -46,7 +46,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
-public class VirtualDatacenterServiceTest extends AbstractGeneratorTest
+public class VirtualDatacenterServiceTest extends AbstractUnitTest
 {
     @BeforeMethod
     public void setupBasicUser()

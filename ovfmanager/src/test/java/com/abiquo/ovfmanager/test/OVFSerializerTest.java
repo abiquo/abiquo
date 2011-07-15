@@ -21,7 +21,7 @@
 
 package com.abiquo.ovfmanager.test;
 
-import static org.junit.Assert.fail;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,11 +30,11 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
@@ -43,26 +43,25 @@ public class OVFSerializerTest
     private final static Logger log = LoggerFactory.getLogger(OVFSerializerTest.class);
 
     private final static URI testOVFPath = new File("src/test/resources/myservice.ovf").toURI();
-    
-    private EnvelopeType envelope;
-    
 
-    @Before
+    private EnvelopeType envelope;
+
+    @BeforeMethod
     public void setUp() throws Exception
     {
     }
 
-    @After
+    @AfterMethod
     public void tearDown() throws Exception
     {
     }
 
     @Test
-    public void testWriteXMLEnvelopeTypeOutputStream() //throws IOException
+    public void testWriteXMLEnvelopeTypeOutputStream() // throws IOException
     {
-        
+
         testReadXMLEnvelope();
-        
+
         File envFile = new File("src/test/resources/testWrite.xml");
         try
         {
@@ -73,9 +72,7 @@ public class OVFSerializerTest
             e1.printStackTrace();
             fail();
         }
-        
-        
-        
+
         try
         {
             OVFSerializer.getInstance().writeXML(envelope, new FileOutputStream(envFile));
@@ -90,8 +87,8 @@ public class OVFSerializerTest
     @Test
     public void testReadXMLEnvelope()
     {
-File envFile = new File(testOVFPath);           
-        
+        File envFile = new File(testOVFPath);
+
         try
         {
             envelope = OVFSerializer.getInstance().readXMLEnvelope(new FileInputStream(envFile));
@@ -100,7 +97,7 @@ File envFile = new File(testOVFPath);
         {
             e.printStackTrace();
             fail("can create envelope");
-        }   
+        }
     }
 
 }

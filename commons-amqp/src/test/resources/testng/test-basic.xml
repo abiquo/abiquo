@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="COMMONS-AMQP basic unit tests" verbose="1">
+    <test name="Basic unit tests">
+        <packages>
+            <package name="com.abiquo.commons.ampq.*" />
+        </packages>
+    </test>
+</suite>
