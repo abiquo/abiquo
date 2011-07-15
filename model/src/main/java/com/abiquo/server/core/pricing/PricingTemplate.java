@@ -63,8 +63,8 @@ public class PricingTemplate extends DefaultEntityBase
         setMinimumChargePeriod(minimumChargePeriod);
         setCurrency(currency);
         setPublicIp(publicIp);
-        setVCpu(vCpu);
-        setMemoryMB(memoryMb);
+        setVcpu(vCpu);
+        setMemoryMb(memoryMb);
     }
 
     public final static String ID_COLUMN = "idPricingTemplate";
@@ -336,29 +336,29 @@ public class PricingTemplate extends DefaultEntityBase
 
     public BigDecimal getPublicIp()
     {
-        return this.publicIp;
+        return publicIp;
     }
 
-    private void setPublicIp(final BigDecimal publicIp)
+    public void setPublicIp(final BigDecimal publicIp)
     {
         this.publicIp = publicIp;
     }
 
-    public final static String V_CPU_PROPERTY = "vCPU";
+    public final static String V_CPU_PROPERTY = "vcpu";
 
-    private final static String V_CPU_COLUMN = "vCPU";
+    private final static String V_CPU_COLUMN = "vcpu";
 
     @Column(name = V_CPU_COLUMN, nullable = false)
-    private BigDecimal vCPU;
+    private BigDecimal vcpu;
 
-    public BigDecimal getVCpu()
+    public BigDecimal getVcpu()
     {
-        return this.vCPU;
+        return vcpu;
     }
 
-    private void setVCpu(final BigDecimal vCpu)
+    public void setVcpu(final BigDecimal vcpu)
     {
-        this.vCPU = vCpu;
+        this.vcpu = vcpu;
     }
 
     public final static String MEMORY_MB_PROPERTY = "memoryMb";
@@ -368,12 +368,12 @@ public class PricingTemplate extends DefaultEntityBase
     @Column(name = MEMORY_MB_COLUMN, nullable = false)
     private BigDecimal memoryMb;
 
-    public BigDecimal getMemoryMB()
+    public BigDecimal getMemoryMb()
     {
-        return this.memoryMb;
+        return memoryMb;
     }
 
-    private void setMemoryMB(final BigDecimal memoryMb)
+    public void setMemoryMb(final BigDecimal memoryMb)
     {
         this.memoryMb = memoryMb;
     }
