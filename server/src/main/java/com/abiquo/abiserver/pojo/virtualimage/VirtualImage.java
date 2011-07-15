@@ -199,16 +199,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.deleted = deleted;
     }
 
-    public Boolean isChef()
-    {
-        return chef;
-    }
-
-    public void setChef(final Boolean isChef)
-    {
-        this.chef = isChef;
-    }
-
     public DiskFormatType getDiskFormatType()
     {
         return diskFormatType;

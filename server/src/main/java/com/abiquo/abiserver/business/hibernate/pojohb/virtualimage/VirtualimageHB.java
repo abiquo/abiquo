@@ -113,7 +113,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         final String pathName, final Long hdRequired, final Integer ramRequired,
         final Integer cpuRequired, final int treaty, final int deleted,
         final VirtualimageHB master, final int idEnterprise, final String ovfId,
-        final Long diskFileSize)
         final Long diskFileSize, final String costCode)
     {
         this.repository = repository;

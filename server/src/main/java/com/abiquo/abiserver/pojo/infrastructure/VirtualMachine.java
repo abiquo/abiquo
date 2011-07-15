@@ -67,8 +67,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     private VirtualImageConversions conversion;
 
     private Datastore datastore;
-    
-    private State subState;
 
     private String password;
 
@@ -188,16 +186,6 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
-    public State getSubState()
-    {
-        return subState;
-    }
-
-    public void setSubState(State subState)
-    {
-        this.subState = subState;
-    }
-
     public boolean isHighDisponibility()
     {
         return highDisponibility;
@@ -289,7 +277,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
             virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
         }
 
-        virtualMachineHB.setImage((virtualImage == null) ? null : virtualImage.toPojoHB());
+        virtualMachineHB.setImage(virtualImage == null ? null : virtualImage.toPojoHB());
 
         virtualMachineHB.setUuid(UUID);
         virtualMachineHB.setName(getName());
@@ -300,11 +288,10 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         virtualMachineHB.setVdrpIp(vdrpIP);
         virtualMachineHB.setVdrpPort(vdrpPort);
         virtualMachineHB.setHighDisponibility(highDisponibility ? 1 : 0);
-        virtualMachineHB.setUserHB((user == null) ? null : user.toPojoHB());
-        virtualMachineHB.setEnterpriseHB((enterprise == null) ? null : enterprise.toPojoHB());
+        virtualMachineHB.setUserHB(user == null ? null : user.toPojoHB());
+        virtualMachineHB.setEnterpriseHB(enterprise == null ? null : enterprise.toPojoHB());
         virtualMachineHB.setIdType(this.idType);
-        virtualMachineHB.setDatastore((datastore == null) ? null : datastore.toPojoHB());
-        virtualMachineHB.setSubState(subState);
+        virtualMachineHB.setDatastore(datastore == null ? null : datastore.toPojoHB());
         virtualMachineHB.setPassword(password);
 
         return virtualMachineHB;

@@ -61,7 +61,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
     private String chefClientCertificate;
 
     private String chefValidatorCertificate;
-    
+
     /** kind of reservation */
     private Boolean isReservationRestricted;
 
@@ -131,6 +131,8 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.reservedMachines = reservedMachines;
     }
 
+    public String getChefURL()
+    {
         return chefURL;
     }
 
