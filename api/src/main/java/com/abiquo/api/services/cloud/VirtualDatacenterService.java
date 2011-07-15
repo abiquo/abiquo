@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.PrivateNetworkService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -76,7 +76,7 @@ public class VirtualDatacenterService extends DefaultApiService
     DatacenterLimitsDAO datacenterLimitsDao;
 
     @Autowired
-    PrivateNetworkService networkService;
+    NetworkService networkService;
 
     @Autowired
     SecurityService securityService;
@@ -95,7 +95,7 @@ public class VirtualDatacenterService extends DefaultApiService
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         securityService = new SecurityService();
-        networkService = new PrivateNetworkService(em);
+        networkService = new NetworkService(em);
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,

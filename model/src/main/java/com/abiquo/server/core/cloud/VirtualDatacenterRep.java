@@ -163,7 +163,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         assert virtualDatacenter != null;
 
-        return this.vlanDAO.findVLANNetworks(virtualDatacenter);
+        return this.vlanDAO.findVlanNetworks(virtualDatacenter);
     }
 
     public VLANNetwork findVlanByDefaultInVirtualDatacenter(final VirtualDatacenter virtualDatacenter)

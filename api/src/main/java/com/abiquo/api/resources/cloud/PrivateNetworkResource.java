@@ -34,10 +34,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.PrivateNetworkService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
@@ -55,16 +53,15 @@ public class PrivateNetworkResource extends AbstractResource
     public static final String PRIVATE_NETWORK_PARAM = "{" + PRIVATE_NETWORK + "}";
 
     @Autowired
-    PrivateNetworkService service;
+    NetworkService service;
 
     @GET
     public VLANNetworkDto getPrivateNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) Integer virtualDatacenterId,
-        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) Integer vlanId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) final Integer vlanId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VLANNetwork network = service.getPrivateNetwork(virtualDatacenterId, vlanId);
-
         return createTransferObject(network, virtualDatacenterId, restBuilder);
     }
 
@@ -80,9 +77,9 @@ public class PrivateNetworkResource extends AbstractResource
      */
     @PUT
     public VLANNetworkDto updatePrivateNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) Integer vdcId,
-        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) Integer vlanId, VLANNetworkDto dto,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) final Integer vlanId,
+        final VLANNetworkDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VLANNetwork newNetwork = createPersistenceObject(dto);
         newNetwork = service.updatePrivateNetwork(vdcId, vlanId, newNetwork);
@@ -98,22 +95,22 @@ public class PrivateNetworkResource extends AbstractResource
      */
     @DELETE
     public void deletePrivateNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) Integer vdcId,
-        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) Integer vlanId,
-        @Context IRESTBuilder restBuilder)
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(1) final Integer vlanId,
+        @Context final IRESTBuilder restBuilder)
     {
         service.deletePrivateNetwork(vdcId, vlanId);
     }
 
-    private static VLANNetworkDto addLinks(IRESTBuilder restBuilder, VLANNetworkDto network,
-        Integer virtualDatacenterId)
+    private static VLANNetworkDto addLinks(final IRESTBuilder restBuilder,
+        final VLANNetworkDto network, final Integer virtualDatacenterId)
     {
         network.setLinks(restBuilder.buildPrivateNetworkLinks(virtualDatacenterId, network));
         return network;
     }
 
-    public static VLANNetworkDto createTransferObject(VLANNetwork network,
-        Integer virtualDatacenterId, IRESTBuilder restBuilder) throws Exception
+    public static VLANNetworkDto createTransferObject(final VLANNetwork network,
+        final Integer virtualDatacenterId, final IRESTBuilder restBuilder) throws Exception
     {
         VLANNetworkDto dto =
             ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
@@ -131,7 +128,7 @@ public class PrivateNetworkResource extends AbstractResource
         return dto;
     }
 
-    public static VLANNetwork createPersistenceObject(VLANNetworkDto dto) throws Exception
+    public static VLANNetwork createPersistenceObject(final VLANNetworkDto dto) throws Exception
     {
 
         VLANNetwork vlan = ModelTransformer.persistenceFromTransport(VLANNetwork.class, dto);
@@ -141,11 +138,11 @@ public class PrivateNetworkResource extends AbstractResource
             IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString(),
             dto.getGateway(),
             "bridge"));
-        
+
         vlan.getConfiguration().setPrimaryDNS(dto.getPrimaryDNS());
         vlan.getConfiguration().setSecondaryDNS(dto.getSecondaryDNS());
         vlan.getConfiguration().setSufixDNS(dto.getSufixDNS());
-        
+
         return vlan;
     }
 }

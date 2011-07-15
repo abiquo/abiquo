@@ -22,7 +22,7 @@ import com.abiquo.api.common.BasicUserAuthentication;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
-import com.abiquo.api.services.PrivateNetworkService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -76,7 +76,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
 
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         vlan.setName("newname");
         vlan.getConfiguration().setPrimaryDNS("45.45.45.0");
         vlan = service.updatePrivateNetwork(vdc.getId(), vlan.getId(), vlan);
@@ -95,7 +95,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     public void updateNetworkRandomVDCTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(new Random().nextInt(1000), vlan.getId(), vlan);
     }
 
@@ -106,7 +106,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     public void updateNetworkRandomVlanTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), new Random().nextInt(1000), vlan);
     }
 
@@ -121,7 +121,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         setup(vdc2.getEnterprise(), vdc2.getNetwork(), vdc2);
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc2.getId(), vlan.getId(), vlan);
     }
 
@@ -135,7 +135,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VLANNetwork copy = performCopy(vlan);
         copy.setId(new Random().nextInt(1000));
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), vlan.getId(), copy);
 
     }
@@ -150,7 +150,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VLANNetwork copy = performCopy(vlan);
         copy.getConfiguration().setAddress("12.12.12.12");
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), copy.getId(), copy);
     }
     
@@ -164,7 +164,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VLANNetwork copy = performCopy(vlan);
         copy.getConfiguration().setMask(20);
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), copy.getId(), copy);
     }
     
@@ -178,7 +178,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VLANNetwork copy = performCopy(vlan);
         copy.setTag(45);
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), copy.getId(), copy);
     }
     
@@ -192,7 +192,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         VLANNetwork copy = performCopy(vlan);
         copy.setDefaultNetwork(Boolean.FALSE);
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.updatePrivateNetwork(vdc.getId(), copy.getId(), copy);
     }
     
@@ -220,14 +220,14 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         
         // Update the VLAN2 and put it as default.
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         VLANNetwork copy = performCopy(vlan2);
         copy.setDefaultNetwork(Boolean.TRUE);
         service.updatePrivateNetwork(vdc.getId(), vlan2.getId(), copy);
         commitActiveTransaction(em);
         
         em = getEntityManagerWithAnActiveTransaction();
-        service = new PrivateNetworkService(em);
+        service = new NetworkService(em);
         
         // Update the vlan object.
         vlan = service.getPrivateNetwork(vdc.getId(), vlan.getId());
@@ -252,7 +252,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     public void updateNetworkGatewayOutsideTheRange()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         
         // Put an invalid gateway (out of range) and check a ConflictException is raised.
         VLANNetwork copy = performCopy(vlan);
@@ -300,7 +300,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         
         // STEP 1
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         try
         {
             // Set the same name.
@@ -314,7 +314,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         }
         
         // STEP 2
-        service = new PrivateNetworkService(em);
+        service = new NetworkService(em);
 
         // Set the same name and update vlan3
         VLANNetwork copy = performCopy(vlan3);
@@ -342,7 +342,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
         copy.setName("newname");
         
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         vlan = service.updatePrivateNetwork(vdc.getId(), copy.getId(), copy);
         commitActiveTransaction(em);
         
@@ -363,7 +363,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     public void deleteNetworkUniqueRaisesExceptionTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         service.deletePrivateNetwork(vdc.getId(), vlan.getId());
     }
     
@@ -376,7 +376,7 @@ public class PrivateNetworkServiceTest extends AbstractGeneratorTest
     public void deleteNetworkDefaultRaisesExceptionTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        PrivateNetworkService service = new PrivateNetworkService(em);
+        NetworkService service = new NetworkService(em);
         
         // Create the second one
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");

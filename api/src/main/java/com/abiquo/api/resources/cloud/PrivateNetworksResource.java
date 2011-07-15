@@ -39,7 +39,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.PrivateNetworkService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -53,14 +53,14 @@ public class PrivateNetworksResource extends AbstractResource
     public static final String PRIVATE_NETWORKS_PATH = "privatenetworks";
 
     @Autowired
-    private PrivateNetworkService service;
+    private NetworkService service;
 
     @GET
     public VLANNetworksDto getPrivateNetworks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer virtualDatacenterId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        Collection<VLANNetwork> all = service.getNetworksByVirtualDatacenter(virtualDatacenterId);
+        Collection<VLANNetwork> all = service.getPrivateNetworks(virtualDatacenterId);
 
         if (all == null)
         {

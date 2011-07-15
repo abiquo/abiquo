@@ -55,7 +55,7 @@ import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
-public class PrivateNetworkService extends DefaultApiService
+public class NetworkService extends DefaultApiService
 {
     @Autowired
     VirtualDatacenterRep repo;
@@ -71,12 +71,12 @@ public class PrivateNetworkService extends DefaultApiService
     @Autowired
     UserService userService;
 
-    public PrivateNetworkService()
+    public NetworkService()
     {
 
     }
 
-    public PrivateNetworkService(final EntityManager em)
+    public NetworkService(final EntityManager em)
     {
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
@@ -86,19 +86,6 @@ public class PrivateNetworkService extends DefaultApiService
     public Collection<VLANNetwork> getNetworks()
     {
         return repo.findAllVlans();
-    }
-
-    public Collection<VLANNetwork> getNetworksByVirtualDatacenter(final Integer virtualDatacenterId)
-    {
-        VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
-        Collection<VLANNetwork> networks = null;
-
-        if (virtualDatacenter != null)
-        {
-            networks = repo.findVlansByVirtualDatacener(virtualDatacenter);
-        }
-
-        return networks;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -143,7 +130,7 @@ public class PrivateNetworkService extends DefaultApiService
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkAddressAndMaskCoherency(IPAddress.newIPAddress(networkdto.getAddress()),
+        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(networkdto.getAddress()),
             networkdto.getMask());
         repo.insertNetworkConfig(config);
 
@@ -173,7 +160,7 @@ public class PrivateNetworkService extends DefaultApiService
 
         // Calculate all the IPs of the VLAN and generate the DHCP entity that stores these IPs
         Collection<IPAddress> addressRange = calculateIPRange(networkdto);
-        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, vlan, config, addressRange);
+        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, vlan, addressRange);
 
         // Trace the creation.
         String messageTrace =
@@ -185,6 +172,19 @@ public class PrivateNetworkService extends DefaultApiService
                 messageTrace);
         }
         return vlan;
+    }
+
+    public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
+    {
+        VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
+        Collection<VLANNetwork> networks = null;
+
+        if (virtualDatacenter != null)
+        {
+            networks = repo.findVlansByVirtualDatacener(virtualDatacenter);
+        }
+
+        return networks;
     }
 
     /**
@@ -210,7 +210,7 @@ public class PrivateNetworkService extends DefaultApiService
         }
         return vlan;
     }
-    
+
     /**
      * Edit an existing VLAN.
      * 
@@ -220,7 +220,8 @@ public class PrivateNetworkService extends DefaultApiService
      * @return an instance of the modified {@link VLANNetwork}
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VLANNetwork updatePrivateNetwork(Integer vdcId, Integer vlanId, VLANNetwork newNetwork)
+    public VLANNetwork updatePrivateNetwork(final Integer vdcId, final Integer vlanId,
+        final VLANNetwork newNetwork)
     {
 
         // Check if the fields are ok.
@@ -233,19 +234,23 @@ public class PrivateNetworkService extends DefaultApiService
             addValidationErrors(APIError.INCOHERENT_IDS);
             flushErrors();
         }
-        
+
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(newNetwork.getConfiguration().getAddress()) ||
-            !oldNetwork.getConfiguration().getMask().equals(newNetwork.getConfiguration().getMask()) ||
-            oldNetwork.getTag() == null && newNetwork.getTag() != null ||
-            oldNetwork.getTag() != null && newNetwork.getTag() == null ||
-            ( oldNetwork.getTag() != null && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag())) 
-            )
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
+            || oldNetwork.getTag() == null
+            && newNetwork.getTag() != null
+            || oldNetwork.getTag() != null
+            && newNetwork.getTag() == null
+            || oldNetwork.getTag() != null
+            && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
         }
-        
+
         // If we want to set the default network as non-default, and the network is
         // actually the default one, raise an error: it should be at least one default vlan
         if (!newNetwork.getDefaultNetwork() && oldNetwork.getDefaultNetwork())
@@ -258,8 +263,7 @@ public class PrivateNetworkService extends DefaultApiService
         // as non-default
         if (newNetwork.getDefaultNetwork() && !oldNetwork.getDefaultNetwork())
         {
-            VLANNetwork defaultVLAN =
-                repo.findVlanByDefaultInVirtualDatacenter(vdc);
+            VLANNetwork defaultVLAN = repo.findVlanByDefaultInVirtualDatacenter(vdc);
             defaultVLAN.setDefaultNetwork(Boolean.FALSE);
             repo.updateVlan(defaultVLAN);
         }
@@ -268,11 +272,13 @@ public class PrivateNetworkService extends DefaultApiService
         if (!newNetwork.getConfiguration().getGateway()
             .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
-            IPAddress networkIP = IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
+            IPAddress networkIP =
+                IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
             String newGateway = newNetwork.getConfiguration().getGateway();
             Integer mask = newNetwork.getConfiguration().getMask();
-            
-            if (!IPAddress.isIntoRange(IPNetworkRang.calculateWholeRange(networkIP, mask), newGateway))
+
+            if (!IPAddress.isIntoRange(IPNetworkRang.calculateWholeRange(networkIP, mask),
+                newGateway))
             {
                 addConflictErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
                 flushErrors();
@@ -290,7 +296,7 @@ public class PrivateNetworkService extends DefaultApiService
                 addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME);
                 flushErrors();
             }
-            
+
             // update the ips with the new values.
             List<IpPoolManagement> ips = repo.findIpsByPrivateVLAN(vdcId, vlanId);
             for (IpPoolManagement ip : ips)
@@ -302,15 +308,16 @@ public class PrivateNetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
-        
+
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
-        oldNetwork.getConfiguration().setSecondaryDNS(newNetwork.getConfiguration().getSecondaryDNS());
+        oldNetwork.getConfiguration().setSecondaryDNS(
+            newNetwork.getConfiguration().getSecondaryDNS());
         oldNetwork.getConfiguration().setSufixDNS(newNetwork.getConfiguration().getSufixDNS());
         oldNetwork.setName(newNetwork.getName());
         oldNetwork.setDefaultNetwork(newNetwork.getDefaultNetwork());
-        
+
         repo.updateVlan(oldNetwork);
 
         // Trace log.
@@ -322,10 +329,10 @@ public class PrivateNetworkService extends DefaultApiService
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_EDITED,
                 messageTrace);
         }
-        
+
         return oldNetwork;
     }
-    
+
     /**
      * Delete a VLAN identified by its virtual datacenter id and its vlan id
      * 
@@ -337,28 +344,28 @@ public class PrivateNetworkService extends DefaultApiService
     {
         VLANNetwork vlanToDelete = getPrivateNetwork(vdcId, vlanId);
         VirtualDatacenter vdc = repo.findById(vdcId);
-        
+
         // If it is the last VLAN, can not be deleted
         if (repo.findVlansByVirtualDatacener(vdc).size() == 1)
         {
             addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
             flushErrors();
         }
-        
+
         // Default VLAN can not be deleted.
         if (vlanToDelete.getDefaultNetwork())
         {
             addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
             flushErrors();
         }
-        
+
         // If any virtual machine is using by any IP of the VLAN, raise an exception
         if (repo.findUsedIpsByPrivateVLAN(vdcId, vlanId).size() != 0)
         {
             addConflictErrors(APIError.VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED);
             flushErrors();
         }
-        
+
         repo.deleteVLAN(vlanToDelete);
     }
 
@@ -387,7 +394,8 @@ public class PrivateNetworkService extends DefaultApiService
      * @throws NetworkCommandException if the values are not coherent into a public or private
      *             network environment.
      */
-    protected void checkAddressAndMaskCoherency(final IPAddress netAddress, final Integer netmask)
+    protected void checkPrivateAddressAndMaskCoherency(final IPAddress netAddress,
+        final Integer netmask)
     {
 
         // Parse the correct IP. (avoid 127.00.00.01), for instance
@@ -398,8 +406,8 @@ public class PrivateNetworkService extends DefaultApiService
         Integer secondOctet = Integer.parseInt(networkAddress.getSecondOctet());
 
         // if the value is a private network.
-        if (firstOctet == 10 || (firstOctet == 192 && secondOctet == 168)
-            || (firstOctet == 172 && (secondOctet >= 16 && secondOctet < 32)))
+        if (firstOctet == 10 || firstOctet == 192 && secondOctet == 168 || firstOctet == 172
+            && secondOctet >= 16 && secondOctet < 32)
         {
             // check the mask is coherent with the server.
             if (firstOctet == 10 && netmask < 22)
@@ -455,9 +463,18 @@ public class PrivateNetworkService extends DefaultApiService
         return range;
     }
 
-    private Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
-        final VLANNetwork vlan, final NetworkConfiguration networkConfiguration,
-        final Collection<IPAddress> range)
+    /**
+     * Create the {@link DhcpService} object and stores all the IPs of the network in database.
+     * 
+     * @param datacenter datacenter where the network is created. Needed to get the DHCP.
+     * @param vdc virtual dataceneter where the network are assigned. Can be null for public
+     *            networks.
+     * @param vlan vlan to assign its ips.
+     * @param range list of ips to create inside the DHCP
+     * @return the created {@link DHCP} object
+     */
+    protected Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
+        final VLANNetwork vlan, final Collection<IPAddress> range)
     {
         List<RemoteService> dhcpServiceList =
             datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
@@ -497,13 +514,17 @@ public class PrivateNetworkService extends DefaultApiService
                     vlan.getName(),
                     IpPoolManagement.Type.PRIVATE);
 
-            ipManagement.setVirtualDatacenter(vdc);
+            if (vdc != null)
+            {
+                // public network does not have VDC by default.
+                ipManagement.setVirtualDatacenter(vdc);
+            }
 
             repo.insertIpManagement(ipManagement);
         }
 
         // check the gateway belongs to the networks.
-        networkConfiguration.setDhcp(dhcp);
+        // networkConfiguration.setDhcp(dhcp);
 
         return dhcp;
     }

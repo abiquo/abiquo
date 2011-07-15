@@ -66,7 +66,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
-    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, Boolean managedRack, MachineDto machine);
+    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId,
+        Boolean managedRack, MachineDto machine);
 
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
@@ -96,6 +97,9 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPrivateNetworkLinks(Integer virtualDatacenterId,
         VLANNetworkDto network);
+
+    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
+        final VLANNetworkDto network);
 
     public List<RESTLink> buildIPAddressLink(Integer vlanId, IpPoolManagementDto ip);
 
@@ -139,7 +143,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId);
-    
+
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         EnterpriseExclusionRule enterpriseExclusion);
