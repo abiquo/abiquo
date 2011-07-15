@@ -20,9 +20,11 @@
  */
 package com.abiquo.abicloud.taskservice.impl.quartz.test;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertTrue;
 
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.abicloud.taskservice.TaskService;
 import com.abiquo.abicloud.taskservice.impl.quartz.QuartzTaskService;
@@ -33,20 +35,20 @@ import com.abiquo.abicloud.taskservice.test.LogTask;
  * 
  * @author ibarrera
  */
-public class QuartzTaskServiceTest extends TestCase
+public class QuartzTaskServiceTest
 {
     /**
      * The task service to test.
      */
     private TaskService taskService;
 
-    @Override
+    @BeforeMethod
     protected void setUp() throws Exception
     {
         taskService = new QuartzTaskService();
     }
 
-    @Override
+    @AfterMethod
     protected void tearDown() throws Exception
     {
         taskService.unschedule(LogTask.class);
@@ -59,7 +61,7 @@ public class QuartzTaskServiceTest extends TestCase
      * @throws Exception If task scheduling fails.
      */
     @Test
-    public void test0schedule() throws Exception
+    public void testSchedule() throws Exception
     {
         taskService.schedule(LogTask.class);
         taskService.schedule(CronTask.class);

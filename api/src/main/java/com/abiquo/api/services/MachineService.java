@@ -109,7 +109,6 @@ public class MachineService extends DefaultApiService
             }
         }
         
-
         return machines;
     }
 
@@ -266,6 +265,18 @@ public class MachineService extends DefaultApiService
         }
 
         flushErrors();
+    }
+
+    // Needed in unit testing
+
+    public VSMStub getVsm()
+    {
+        return vsm;
+    }
+
+    public void setVsm(final VSMStub vsm)
+    {
+        this.vsm = vsm;
     }
 }
 

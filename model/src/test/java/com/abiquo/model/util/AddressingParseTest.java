@@ -21,6 +21,8 @@
 
 package com.abiquo.model.util;
 
+import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -29,6 +31,7 @@ import org.testng.annotations.Test;
  * 
  * @author ibarrera
  */
+@Test(groups = BASIC_UNIT_TESTS)
 public class AddressingParseTest
 {
     @Test
