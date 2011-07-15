@@ -32,11 +32,11 @@ import com.abiquo.model.transport.error.ErrorsDto;
  * @author ibarrera
  */
 @Service
-public class RemoteServicesTestService extends RemoteServiceService
+public class InfrastructureTestService extends InfrastructureService
 {
 
     @Override
-    public ErrorsDto checkStatus(final RemoteServiceType type, final String url)
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
         // During tests the target remote service may not be up and running
         // Do not return errors to simulate a normal behavior
