@@ -77,4 +77,5 @@ public interface RacksResourceStub
 
     public BasicResult deleteRack(Rack rack);
 
+    public DataResult<UcsRack> editUcsRack(UcsRack ucsRack);
 }
