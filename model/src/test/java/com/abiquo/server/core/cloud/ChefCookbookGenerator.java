@@ -21,10 +21,10 @@
 
 package com.abiquo.server.core.cloud;
 
-import static org.testng.Assert.assertEquals;
-
 import java.util.List;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.chef.ChefCookbook;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -34,7 +34,7 @@ public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
 
     VirtualMachineGenerator virtualMachineGenerator;
 
-    public ChefCookbookGenerator(SeedGenerator seed)
+    public ChefCookbookGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -43,7 +43,7 @@ public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
     }
 
     @Override
-    public void assertAllPropertiesEqual(ChefCookbook obj1, ChefCookbook obj2)
+    public void assertAllPropertiesEqual(final ChefCookbook obj1, final ChefCookbook obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, ChefCookbook.COOKBOOK_PROPERTY);
     }
@@ -51,17 +51,26 @@ public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
     @Override
     public ChefCookbook createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
         VirtualMachine virtualMachine = virtualMachineGenerator.createUniqueInstance();
 
+        String version = newString(nextSeed(), 0, 5);
         String cookbook = newString(nextSeed(), 0, 255);
-        ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook);
+        ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook, version);
+
+        return chefCookbook;
+    }
+
+    public ChefCookbook createInstance(final VirtualMachine virtualMachine, final String cookbook,
+        final String version)
+    {
+        ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook, version);
 
         return chefCookbook;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(ChefCookbook entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final ChefCookbook entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

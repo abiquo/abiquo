@@ -22,7 +22,7 @@
 /**
  * 
  */
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud.chef;
 
 import java.util.List;
 

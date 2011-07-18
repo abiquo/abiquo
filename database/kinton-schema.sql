@@ -1166,6 +1166,7 @@ CREATE TABLE  `kinton`.`chefcookbook` (
   `chefCookbookId` int(10) unsigned NOT NULL auto_increment,
   `idVM` int(10) unsigned NOT NULL,
   `cookbook` varchar(255) NOT NULL,
+  `cookbookVersion` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`chefCookbookId`),
   KEY `chefcookbook_FK1` (`idVM`),

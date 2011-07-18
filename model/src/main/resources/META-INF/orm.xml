@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<orm:entity-mappings 
-    version="2.0" 
-    xmlns:orm="http://java.sun.com/xml/ns/persistence/orm" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd ">
+<orm:entity-mappings version="2.0"
+	xmlns:orm="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd ">
 
     <!-- enterprise -->
     <orm:entity class="com.abiquo.server.core.enterprise.Enterprise"></orm:entity>
@@ -46,7 +44,7 @@
     <orm:entity class="com.abiquo.server.core.cloud.Node"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.NodeVirtualImage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.VirtualAppliance"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.cloud.ChefCookbook"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.chef.ChefCookbook"></orm:entity>
     
     <!-- end: cloud infrastructure -->
     
@@ -94,5 +92,6 @@
     <!-- tasks -->
     <orm:entity class="com.abiquo.server.core.tasks.Task"/>
     <!-- end: tasks -->
+
 
 </orm:entity-mappings>
