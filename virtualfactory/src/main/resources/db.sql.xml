@@ -1,345 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-    <comment>
-        Properties for the DB class 
+    <comment> Properties for the DB class 
     </comment>
-    
     <!--
-    ==================================================================
-    Information on  the Derby database
-    ==================================================================  
-     -->
+        ==================================================================
+        Information on the Derby database
+        ==================================================================
+    -->
     <entry key="db.driver">org.apache.derby.jdbc.EmbeddedDriver</entry>
-    
     <entry key="db.name">virtualfactory</entry>
-    
     <entry key="db.url">jdbc:derby:virtualfactory</entry>
-
-
     <!-- Print out the sql statements true/false -->
     <entry key="showSQL">true</entry>
-    
-    
-    <!--  The list of tables to be created, separated by a comma  -->
+    <!-- The list of tables to be created, separated by a comma -->
     <entry key="db.tables">virtualApp,virtualAppMachineState,physicalMachineIP,repositoryLocation,imagePath</entry>
-    
-    
-    <!--  
-    	The list of indexes to for each table : separated by commas 
-    	
-    	Format: db.table.[TABLE_NAME].indexes 
-    	where TABLE_NAME is one of the values in the list from the entry "db.tables"
-    	each value separated by a comma corresponds to an "entry" key in this file
+    <!--
+        The list of indexes to for each table : separated by commas
+
+        Format: db.table.[TABLE_NAME].indexes
+        where TABLE_NAME is one of the values in the list from the entry "db.tables"
+        each value separated by a comma corresponds to an "entry" key in this file
     -->
     <entry key="db.table.virtualApp.indexes">virtualApp.createIndex</entry>
-    
-    
     <!--
-    ===================================================================================
-    Operations that are pertinent to the table "virtualApp"
-    
-    These are:
-    	1. Creation of the table
-    	2. Creation of the index
-    	3. Addition of a new entry 
-    	4. Retrieval of all the entries
-    	5. Modification of the state of the virtual appliance
-    	6. Deletion of a virtual appliance
-    =================================================================================== 
-     -->    
+        ===================================================================================
+        Operations that are pertinent to the table "virtualApp"
+
+        These are:
+        1. Creation of the table
+        2. Creation of the index
+        3. Addition of a new entry
+        4. Retrieval of all the entries
+        5. Modification of the state of the virtual appliance
+        6. Deletion of a virtual appliance
+        ===================================================================================
+    -->
     <!-- Creates the virtualapp table -->
-    <entry key="virtualApp.createTable">
-        CREATE TABLE "virtualApp"(
-            "idVirtualApp" VARCHAR(200) NOT NULL ,
-            "virtualAppState" CHAR(1) NOT NULL DEFAULT 'F',
-            "xmlDoc" long VARCHAR,
-            PRIMARY KEY("idVirtualApp")
-        )     
-    </entry>  
-    
+    <entry key="virtualApp.createTable"> CREATE TABLE "virtualApp"( "idVirtualApp" VARCHAR(200) NOT NULL ,
+        "virtualAppState" CHAR(1) NOT NULL DEFAULT 'F', "xmlDoc" long VARCHAR, PRIMARY
+        KEY("idVirtualApp") ) 
+    </entry>
     <!-- Creation of an index on the virtualAppState column -->
-    <entry key="virtualApp.createIndex">
-        CREATE index "virtualapp_idx_virtualAppState" ON "virtualApp"("virtualAppState")     
+    <entry key="virtualApp.createIndex"> CREATE index "virtualapp_idx_virtualAppState" ON
+        "virtualApp"("virtualAppState") 
     </entry>
-
-    <entry key="virtualApp.addNewEntry">
-        INSERT
-        INTO "virtualApp"(
-            "idVirtualApp",
-            "xmlDoc"
-        )
-        values(
-            ''{0}'',
-            ''{1}''
-        )
+    <entry key="virtualApp.addNewEntry"> INSERT INTO "virtualApp"( "idVirtualApp", "xmlDoc" ) values( ''{0}'', ''{1}''
+        ) 
     </entry>
-
-
-    <entry key="virtualApp.getEntries">
-        SELECT * FROM "virtualApp"
+    <entry key="virtualApp.getEntries"> SELECT * FROM "virtualApp" 
     </entry>
-
-
-    <entry key="virtualApp.updateState">
-        UPDATE "virtualApp" SET "virtualAppState"=''{0}'' WHERE "idVirtualApp"=''{1}''
+    <entry key="virtualApp.updateState"> UPDATE "virtualApp" SET "virtualAppState"=''{0}'' WHERE "idVirtualApp"=''{1}'' 
     </entry>
-
-
-    <entry key="virtualApp.deleteEntry">
-        DELETE FROM "virtualApp" WHERE "idVirtualApp"=''{0}''
+    <entry key="virtualApp.deleteEntry"> DELETE FROM "virtualApp" WHERE "idVirtualApp"=''{0}'' 
     </entry>
-
-
     <!-- entry key="virtualApp.updateXML">
         UPDATE "virtualApp" SET "xmlDoc"=''{0}'' WHERE "idVirtualApp"=''{1}''
-    </entry-->
-    
-    
-    
+        </entry -->
     <!--
-    ====================================================================================
-    Operations for the table virtualAppMachineState
-    This is a basically a lookup table
-    ==================================================================================== 
-     -->
-
-    <!-- 
-    	virtualAppMachineState table 
-    	Columns: 
-    		idVirtualAppMachine : The id of the virtual machine
-    		machineState		: The state of the virtual machine 'PowerOff/PowerUp'
-    		clonedImagePath     : The path to the cloned image
+        ====================================================================================
+        Operations for the table virtualAppMachineState
+        This is a basically a lookup table
+        ====================================================================================
     -->
-    <entry key="virtualAppMachineState.createTable">
-        CREATE TABLE "virtualAppMachineState"(
-            "idVirtualAppMachine" VARCHAR(200) NOT NULL ,
-            "machineState" VARCHAR(10) NOT NULL DEFAULT 'PowerOff',
-            "clonedImagePath" VARCHAR(250) NOT NULL DEFAULT '', 	
-            PRIMARY KEY("idVirtualAppMachine")   	           	
-        )     
-    </entry>     
-    
-    <!--  Add a new image to the  -->
-    <entry key="virtualAppMachineState.addEntry">
-    	INSERT INTO "virtualAppMachineState"("idVirtualAppMachine") VALUES(''{0}'')
-    </entry>
-    
-    
-     <entry key="virtualAppMachineState.updateEntry">
-    	UPDATE "virtualAppMachineState" SET "machineState"=''{0}'' WHERE "idVirtualAppMachine"=''{1}''
-    </entry>
-    
-    
-    <entry key="virtualAppMachineState.updateEntry.clonedImagePath">
-    	UPDATE "virtualAppMachineState" SET "clonedImagePath"=''{0}'' WHERE "idVirtualAppMachine"=''{1}''
-    </entry>  
-    
-       
-    <entry key="virtualAppMachineState.getEntries">
-        SELECT * FROM "virtualAppMachineState"
-    </entry>   
-    
-    
-    <entry key="virtualAppMachineState.getEntry">
-        SELECT * FROM "virtualAppMachineState" WHERE "idVirtualAppMachine"=''{0}''
-    </entry>   
-    
-    <entry key="virtualAppMachineState.deleteEntries">
-    	DELETE FROM "virtualAppMachineState" WHERE "idVirtualAppMachine" IN ({0})
-    </entry>
-    
-    
-    
-    
-     <!--
-    ====================================================================================
-    Operations for the table physicalMachineIP
-    ==================================================================================== 
-     -->  
-     <!-- Creates the physicalMachineIP table -->
-    <entry key="physicalMachineIP.createTable">
-        CREATE TABLE "physicalMachineIP"(
-            "ip" VARCHAR(200) NOT NULL ,
-            PRIMARY KEY("ip")   	           	
-        )     
-    </entry> 
-       
-    <entry key="physicalMachineIP.addNewEntry">
-        INSERT INTO "physicalMachineIP"("ip") VALUES(''{0}'')
-    </entry> 
-    
-    <entry key="physicalMachineIP.getEntry">
-      SELECT  * FROM  "physicalMachineIP"   WHERE "ip"=''{0}''
-   </entry>      
-     
-     <!--
-    ====================================================================================
-    Operations for the table repositoryLocation
-    ==================================================================================== 
-     -->   
-      <!-- Creates the repositoryLocation table -->
-    <entry key="repositoryLocation.createTable">
-        CREATE TABLE "repositoryLocation"(
-            "location" VARCHAR(200) NOT NULL ,
-            "ip" VARCHAR(200) NOT NULL,
-            PRIMARY KEY("location","ip"),
-            FOREIGN KEY("ip")  REFERENCES "physicalMachineIP"("ip") ON DELETE CASCADE ON UPDATE RESTRICT 	           	
-        )     
-    </entry>      
-     
-    <entry key="repositoryLocation.addNewEntry">
-       INSERT
-       INTO "repositoryLocation"(
-           "location",
-           "ip"
-       )
-       values(
-           ''{0}'',
-           ''{1}''
-       )
-   </entry>    
-
-    <entry key="repositoryLocation.getEntry">
-      SELECT 
-      	*
-      FROM 
-      	"repositoryLocation" 
-      WHERE 
-      	"location"=''{0}'' 
-      	AND "ip"=''{1}''
-   </entry>   
-         
     <!--
-    ====================================================================================
-    Operations for the table imagePath
-    ==================================================================================== 
-     -->   
-     <!-- Creates the imagePath table 
-     
-     	location : the repository 
-     	ip : hypervisor location
-     -->
-    <entry key="imagePath.createTable">
-        CREATE TABLE "imagePath"(
-            MAP_ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1,INCREMENT BY 1),
-            "path" VARCHAR(200) NOT NULL ,
-            "clonedImagePath" VARCHAR(250) NOT NULL DEFAULT '',
-            "location" VARCHAR(200) NOT NULL,  
-            "ip" VARCHAR(200) NOT NULL,
-            -- PRIMARY KEY("path","location","ip"),
-            FOREIGN KEY("ip")  REFERENCES "physicalMachineIP"("ip") ON DELETE CASCADE ON UPDATE RESTRICT, 
-            FOREIGN KEY("location","ip")  REFERENCES "repositoryLocation" ("location","ip")  ON DELETE CASCADE ON UPDATE RESTRICT 	           	
-        )     
-    </entry> 
-    
-      
-    <entry key="imagePath.addNewEntry">
-       INSERT
-       INTO "imagePath"(
-       	   "path",
-           "location",
-           "ip",
-           "clonedImagePath"
-       )
-       values(
-           ''{0}'',
-           ''{1}'',
-           ''{2}'',
-           ''local''           
-       )
-   </entry>  
-   
-   
-   
-   
-   <entry key="imagePath.updateEntry.clonedImagePath">   
-   		INSERT
-       	INTO "imagePath"(       	
-       	   "clonedImagePath",
-       	   "path",
-           "location",
-           "ip"           
-       )
-       values(
-           ''{0}'',
-           ''{1}'',
-           ''{2}'',
-           ''{3}''
-       )     	    	
-   </entry>
-   
-   
-   <!--  Deletes a clonedImagePath which is unique for each entry -->
-   <entry key="imagePath.deleteEntry.clonedImagePath">
-   		DELETE  FROM "imagePath" WHERE  "clonedImagePath"=''{0}''  			
-   </entry>
-   
-   
-           
-   <entry key="imagePath.getEntry">
-      SELECT 
-      	*
-      FROM 
-      	"imagePath" 
-      WHERE 
-      	"path"=''{0}'' 
-      	AND "location"=''{1}'' 
-      	AND "ip"=''{2}''
-      	AND "clonedImagePath" = ''local''
-      	
-   </entry>   
-   
-	<entry key="imagePath.getAllEntry">
-      SELECT 
-      	*
-      FROM 
-      	"imagePath" 
-      WHERE 
-      	"location"=''{0}'' 
-      	AND "ip"=''{1}''
-      	AND "clonedImagePath" != ''local'' 
-   </entry>  
-   
-   
-   
- 	<entry key="imagePath.getEntry.clonedImagePath">
-       SELECT  * FROM  "imagePath"  WHERE  "clonedImagePath"=''{0}''		
- 	</entry>  
-   
-   <!--  Gets the number of cloned images for a specific image  -->
-  	<entry key="imagePath.getImage.clonedImageCount">
-      SELECT 
-      	*
-      FROM 
-      	"imagePath" 
-      WHERE 
-        "path"=''{0}''
-      	AND "location"=''{1}'' 
-      	AND "ip"=''{2}''
-      	AND "clonedImagePath" != ''local'' 
-   </entry>   
-
-	<entry key="imagePath.deleteEntry">
-		DELETE 
-		FROM 
-			"imagePath" 
-		WHERE 
-	      	"path"=''{0}''
-	      	AND "location"=''{1}''
-	      	AND "ip"=''{2}''
-	</entry>
-
-
-	<entry key="repositoryLocation.deleteEntry">
-        DELETE 
-        FROM 
-        	"repositoryLocation" 
-        WHERE 
-			"location"=''{0}''
-	      	AND "ip"=''{1}''
+        virtualAppMachineState table
+        Columns:
+        idVirtualAppMachine : The id of the virtual machine
+        machineState : The state of the virtual machine 'PowerOff/PowerUp'
+        clonedImagePath : The path to the cloned image
+    -->
+    <entry key="virtualAppMachineState.createTable"> CREATE TABLE "virtualAppMachineState"( "idVirtualAppMachine" VARCHAR(200) NOT
+        NULL , "machineState" VARCHAR(10) NOT NULL DEFAULT 'PowerOff', "clonedImagePath"
+        VARCHAR(250) NOT NULL DEFAULT '', PRIMARY KEY("idVirtualAppMachine") ) 
     </entry>
+    <!-- Add a new image to the -->
+    <entry key="virtualAppMachineState.addEntry"> INSERT INTO "virtualAppMachineState"("idVirtualAppMachine") VALUES(''{0}'') 
+    </entry>
+    <entry key="virtualAppMachineState.updateEntry"> UPDATE "virtualAppMachineState" SET "machineState"=''{0}'' WHERE
+        "idVirtualAppMachine"=''{1}'' 
+    </entry>
+    <entry key="virtualAppMachineState.updateEntry.clonedImagePath"> UPDATE "virtualAppMachineState" SET "clonedImagePath"=''{0}'' WHERE
+        "idVirtualAppMachine"=''{1}'' 
+    </entry>
+    <entry key="virtualAppMachineState.getEntries"> SELECT * FROM "virtualAppMachineState" 
+    </entry>
+    <entry key="virtualAppMachineState.getEntry"> SELECT * FROM "virtualAppMachineState" WHERE "idVirtualAppMachine"=''{0}'' 
+    </entry>
+    <entry key="virtualAppMachineState.deleteEntries"> DELETE FROM "virtualAppMachineState" WHERE "idVirtualAppMachine" IN ({0}) 
+    </entry>
+    <!--
+        ====================================================================================
+        Operations for the table physicalMachineIP
+        ====================================================================================
+    -->
+    <!-- Creates the physicalMachineIP table -->
+    <entry key="physicalMachineIP.createTable"> CREATE TABLE "physicalMachineIP"( "ip" VARCHAR(200) NOT NULL , PRIMARY
+        KEY("ip") ) 
+    </entry>
+    <entry key="physicalMachineIP.addNewEntry"> INSERT INTO "physicalMachineIP"("ip") VALUES(''{0}'') 
+    </entry>
+    <entry key="physicalMachineIP.getEntry"> SELECT * FROM "physicalMachineIP" WHERE "ip"=''{0}'' 
+    </entry>
+    <!--
+        ====================================================================================
+        Operations for the table repositoryLocation
+        ====================================================================================
+    -->
+    <!-- Creates the repositoryLocation table -->
+    <entry key="repositoryLocation.createTable"> CREATE TABLE "repositoryLocation"( "location" VARCHAR(200) NOT NULL , "ip"
+        VARCHAR(200) NOT NULL, PRIMARY KEY("location","ip"), FOREIGN KEY("ip") REFERENCES
+        "physicalMachineIP"("ip") ON DELETE CASCADE ON UPDATE RESTRICT ) 
+    </entry>
+    <entry key="repositoryLocation.addNewEntry"> INSERT INTO "repositoryLocation"( "location", "ip" ) values( ''{0}'', ''{1}''
+        ) 
+    </entry>
+    <entry key="repositoryLocation.getEntry"> SELECT * FROM "repositoryLocation" WHERE "location"=''{0}'' AND "ip"=''{1}'' 
+    </entry>
+    <!--
+        ====================================================================================
+        Operations for the table imagePath
+        ====================================================================================
+    -->
+    <!-- Creates the imagePath table
 
-
-     
+        location : the repository
+        ip : hypervisor location
+    -->
+    <entry key="imagePath.createTable"> CREATE TABLE "imagePath"( MAP_ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY
+        (START WITH 1,INCREMENT BY 1), "path" VARCHAR(200) NOT NULL , "clonedImagePath" VARCHAR(250)
+        NOT NULL DEFAULT '', "location" VARCHAR(200) NOT NULL, "ip" VARCHAR(200) NOT NULL, --
+        PRIMARY KEY("path","location","ip"), FOREIGN KEY("ip") REFERENCES "physicalMachineIP"("ip")
+        ON DELETE CASCADE ON UPDATE RESTRICT, FOREIGN KEY("location","ip") REFERENCES
+        "repositoryLocation" ("location","ip") ON DELETE CASCADE ON UPDATE RESTRICT ) 
+    </entry>
+    <entry key="imagePath.addNewEntry"> INSERT INTO "imagePath"( "path", "location", "ip", "clonedImagePath" ) values(
+        ''{0}'', ''{1}'', ''{2}'', ''local'' ) 
+    </entry>
+    <entry key="imagePath.updateEntry.clonedImagePath"> INSERT INTO "imagePath"( "clonedImagePath", "path", "location", "ip" ) values(
+        ''{0}'', ''{1}'', ''{2}'', ''{3}'' ) 
+    </entry>
+    <!-- Deletes a clonedImagePath which is unique for each entry -->
+    <entry key="imagePath.deleteEntry.clonedImagePath"> DELETE FROM "imagePath" WHERE "clonedImagePath"=''{0}'' 
+    </entry>
+    <entry key="imagePath.getEntry"> SELECT * FROM "imagePath" WHERE "path"=''{0}'' AND "location"=''{1}'' AND
+        "ip"=''{2}'' AND "clonedImagePath" = ''local'' 
+    </entry>
+    <entry key="imagePath.getAllEntry"> SELECT * FROM "imagePath" WHERE "location"=''{0}'' AND "ip"=''{1}'' AND
+        "clonedImagePath" != ''local'' 
+    </entry>
+    <entry key="imagePath.getEntry.clonedImagePath"> SELECT * FROM "imagePath" WHERE "clonedImagePath"=''{0}'' 
+    </entry>
+    <!-- Gets the number of cloned images for a specific image -->
+    <entry key="imagePath.getImage.clonedImageCount"> SELECT * FROM "imagePath" WHERE "path"=''{0}'' AND "location"=''{1}'' AND
+        "ip"=''{2}'' AND "clonedImagePath" != ''local'' 
+    </entry>
+    <entry key="imagePath.deleteEntry"> DELETE FROM "imagePath" WHERE "path"=''{0}'' AND "location"=''{1}'' AND
+        "ip"=''{2}'' 
+    </entry>
+    <entry key="repositoryLocation.deleteEntry"> DELETE FROM "repositoryLocation" WHERE "location"=''{0}'' AND "ip"=''{1}'' 
+    </entry>
 </properties>

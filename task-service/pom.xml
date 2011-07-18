@@ -1,18 +1,15 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
     <artifactId>task-service</artifactId>
     <groupId>com.abiquo.abicloud</groupId>
-
     <dependencies>
-    
         <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -29,7 +26,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.6</version>
         </dependency>
-        
         <!-- Quartz -->
         <dependency>
             <groupId>opensymphony</groupId>
@@ -37,7 +33,6 @@
             <version>1.6.3</version>
             <optional>true</optional>
         </dependency>
-        
         <!-- Apache Commons -->
         <dependency>
             <groupId>commons-logging</groupId>
@@ -49,14 +44,12 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
         </dependency>
-
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <version>${spring.version}</version>
         </dependency>
-
         <!-- Testing -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -72,7 +65,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <name>Task Service</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -82,7 +74,6 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
     <build>
         <finalName>task-service</finalName>
         <testSourceDirectory>src/test/java</testSourceDirectory>
@@ -93,5 +84,4 @@
             </resource>
         </resources>
     </build>
-
 </project>

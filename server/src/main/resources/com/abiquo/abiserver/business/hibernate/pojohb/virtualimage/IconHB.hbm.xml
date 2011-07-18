@@ -2,16 +2,17 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB" table="icon">
-    <id name="idIcon" type="java.lang.Integer">
-      <column name="idIcon"/>
-      <generator class="identity"/>
-    </id>
-    <property name="path" type="string">
-      <column length="200" name="path" not-null="true"/>
-    </property>
-    <property name="name" type="string">
-      <column length="20" name="name" not-null="true"/>
-    </property>
-  </class>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB"
+        table="icon">
+        <id name="idIcon" type="java.lang.Integer">
+            <column name="idIcon" />
+            <generator class="identity" />
+        </id>
+        <property name="path" type="string">
+            <column length="200" name="path" not-null="true" />
+        </property>
+        <property name="name" type="string">
+            <column length="20" name="name" not-null="true" />
+        </property>
+    </class>
 </hibernate-mapping>

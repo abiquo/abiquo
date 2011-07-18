@@ -3,17 +3,16 @@
     <listeners>
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
     </listeners>
-    
-	<test name="All unit tests">
-		<groups>
-			<run>
+    <test name="All unit tests">
+        <groups>
+            <run>
                 <include name="model" />
-				<include name="dataaccess" />
-			</run>
-		</groups>
-		<packages>
+                <include name="dataaccess" />
+            </run>
+        </groups>
+        <packages>
             <package name="com.abiquo.model.util.*" />
-			<package name="com.abiquo.server.core.*" />
-		</packages>
-	</test>
+            <package name="com.abiquo.server.core.*" />
+        </packages>
+    </test>
 </suite>

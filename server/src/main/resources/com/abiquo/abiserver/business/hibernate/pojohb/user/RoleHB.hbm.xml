@@ -2,32 +2,28 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" lazy="false" name="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" table="role">
-    <id name="idRole" type="java.lang.Integer">
-      <column name="idRole"/>
-      <generator class="identity"/>
-    </id>
-    <property name="name" type="string">
-      <column length="20" name="name" not-null="true"/>
-    </property>
- 
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
-      <column name="idEnterprise"/>
-    </many-to-one>
-   <set name="privilegesHB" table="roles_privileges" lazy="false" cascade="all">
-			<key>
-				<column name="idRole" not-null="true" />
-			</key>
-			<many-to-many column="idPrivilege"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB" />
-		</set>
-		
-  </class>
-  
-	<query name="GET_ROLE_BY_NAME">
-	    from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB
-	    where name like :name
-  	</query>
-  
-  
+    <class catalog="kinton" lazy="false" name="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB"
+        table="role">
+        <id name="idRole" type="java.lang.Integer">
+            <column name="idRole" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column length="20" name="name" not-null="true" />
+        </property>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
+            fetch="select" lazy="false" name="enterpriseHB">
+            <column name="idEnterprise" />
+        </many-to-one>
+        <set name="privilegesHB" table="roles_privileges" lazy="false" cascade="all">
+            <key>
+                <column name="idRole" not-null="true" />
+            </key>
+            <many-to-many column="idPrivilege"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB" />
+        </set>
+    </class>
+    <query name="GET_ROLE_BY_NAME"> from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB where name
+        like :name
+    </query>
 </hibernate-mapping>

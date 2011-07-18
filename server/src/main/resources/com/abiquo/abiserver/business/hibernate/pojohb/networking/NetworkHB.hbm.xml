@@ -2,24 +2,23 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB" table="network" >
-    <id name="networkId" type="java.lang.Integer">
-      <column name="network_id"/>
-      <generator class="identity"/>     
-    </id>    
-    <property name="uuid" type="string">
-      <column length="40" name="uuid"/>
-    </property> 
-    <bag lazy="false" name="networks" inverse="true" cascade="all">
-      <key>
-        <column name="network_id" not-null="false"/>
-      </key>
-      <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB"/>
-    </bag>
-  </class>
-  <query name="GET_VLAN_WITH_NAME_BY_NETWORK_ID">
-		from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB
-		where network_id = :network_id
-		  and networkName = :vlan_network_name
-  </query>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB"
+        table="network">
+        <id name="networkId" type="java.lang.Integer">
+            <column name="network_id" />
+            <generator class="identity" />
+        </id>
+        <property name="uuid" type="string">
+            <column length="40" name="uuid" />
+        </property>
+        <bag lazy="false" name="networks" inverse="true" cascade="all">
+            <key>
+                <column name="network_id" not-null="false" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" />
+        </bag>
+    </class>
+    <query name="GET_VLAN_WITH_NAME_BY_NETWORK_ID"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB
+        where network_id = :network_id and networkName = :vlan_network_name
+    </query>
 </hibernate-mapping>
