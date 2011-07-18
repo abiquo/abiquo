@@ -2,164 +2,141 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <!-- VirtualappHB 
-  	   This entity does not include the list of nodes
-  	   Useful to retrieve a list of Virtual Appliance, when the nodes list may not be necessary
-  	   Better performance -->
-  <class catalog="kinton" entity-name="VirtualappHB" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB" table="virtualapp">
-    <id name="idVirtualApp" type="java.lang.Integer">
-      <column name="idVirtualApp"/>
-      <generator class="identity"/>
-    </id>    
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB" lazy="false" fetch="select" name="virtualDataCenterHB">
-      <column name="idVirtualDataCenter" not-null="true"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" lazy="false" fetch="select" name="enterpriseHB">
-      <column name="idEnterprise" not-null="false"/>
-    </many-to-one>
-    <property name="name" type="string">
-      <column length="30" name="name" not-null="true"/>
-    </property>
-    
-    <property name="state" type="State" not-null="true"/>
-    <property name="subState" type="State" not-null="true"/>
-    
-    <property name="public_" type="int">
-      <column name="public" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="highDisponibility" type="int">
-      <column name="high_disponibility" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="error" type="int">
-      <column name="error" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="nodeConnections" type="string">
-      <column name="nodeconnections" not-null="false"/>
-    </property>
-    <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC" where="deleted=0">
-      <key>
-        <column name="idVirtualApp" not-null="true"/>
-      </key>
-      <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB"/>
-    </set>
-  </class>
-  <!-- VirtualappExtendedHB 
-  	   Same fields than VirtualappHB, with the addition of the nodes list
-  	   Use this entity to retrieve only once Virtual Appliance at the same time
-  	   Not recommended to retrieve a list of Virtual Appliances -->
-  <class catalog="kinton" entity-name="VirtualappExtendedHB" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB" table="virtualapp">
-    <id name="idVirtualApp" type="java.lang.Integer">
-      <column name="idVirtualApp"/>
-      <generator class="identity"/>
-    </id>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB" fetch="select" lazy="false" name="virtualDataCenterHB">
-      <column name="idVirtualDataCenter" not-null="true"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" lazy="false" fetch="select" name="enterpriseHB">
-      <column name="idEnterprise" not-null="false"/>
-    </many-to-one>
-    
-    <property name="state" type="State" not-null="true"/>
-    <property name="subState" type="State" not-null="true"/>
-    
-    <property name="name" type="string">
-      <column length="30" name="name" not-null="true"/>
-    </property>
-    <property name="public_" type="int">
-      <column name="public" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="highDisponibility" type="int">
-      <column name="high_disponibility" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="error" type="int">
-      <column name="error" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="nodeConnections" type="string">
-      <column name="nodeconnections" not-null="false"/>
-    </property>
-    <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC">
-      <key>
-        <column name="idVirtualApp" not-null="true"/>
-      </key>
-      <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB"/>
-    </set>
-    <set inverse="true" lazy="false" name="nodesHB" order-by="name" cascade="all">
-      <key>
-        <column name="idVirtualApp" not-null="true"/>
-      </key>
-      <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB"/>
-    </set>
-  </class>
-  
-  <!-- NAMED QUERIES -->
-  
-  	<query name="FIND_BY_USED_VIRTUAL_IMAGE">  	      
-	    SELECT va FROM 
-	    VirtualappExtendedHB as va
-	    inner join va.nodesHB as n,  	    
-	    com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi
-	    inner join nvi.virtualImageHB as vi
-	    WHERE 	    
-	    n.type=:type AND nvi.idNode=n.idNode AND vi.idImage=:usedVIId    
-    </query>    
-
-
-  	<query name="FIND_BY_USED_VIRTUAL_IMAGE_ON_REPOSITORY">  	      
-	    SELECT va FROM 
-	    VirtualappExtendedHB as va
-	    inner join va.nodesHB as n,          	    
-	    com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi
-	    inner join nvi.virtualImageHB as vi	    
-	    WHERE 	    
-	    n.type=:type AND nvi.idNode=n.idNode AND vi.repository.idRepository=:idRepo    
+    <!-- VirtualappHB
+        This entity does not include the list of nodes
+        Useful to retrieve a list of Virtual Appliance, when the nodes list may not be necessary
+        Better performance -->
+    <class catalog="kinton" entity-name="VirtualappHB"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB" table="virtualapp">
+        <id name="idVirtualApp" type="java.lang.Integer">
+            <column name="idVirtualApp" />
+            <generator class="identity" />
+        </id>
+        <many-to-one
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB"
+            lazy="false" fetch="select" name="virtualDataCenterHB">
+            <column name="idVirtualDataCenter" not-null="true" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
+            lazy="false" fetch="select" name="enterpriseHB">
+            <column name="idEnterprise" not-null="false" />
+        </many-to-one>
+        <property name="name" type="string">
+            <column length="30" name="name" not-null="true" />
+        </property>
+        <property name="state" type="State" not-null="true" />
+        <property name="subState" type="State" not-null="true" />
+        <property name="public_" type="int">
+            <column name="public" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="highDisponibility" type="int">
+            <column name="high_disponibility" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="error" type="int">
+            <column name="error" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="nodeConnections" type="string">
+            <column name="nodeconnections" not-null="false" />
+        </property>
+        <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC" where="deleted=0">
+            <key>
+                <column name="idVirtualApp" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB" />
+        </set>
+    </class>
+    <!-- VirtualappExtendedHB
+        Same fields than VirtualappHB, with the addition of the nodes list
+        Use this entity to retrieve only once Virtual Appliance at the same time
+        Not recommended to retrieve a list of Virtual Appliances -->
+    <class catalog="kinton" entity-name="VirtualappExtendedHB"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB" table="virtualapp">
+        <id name="idVirtualApp" type="java.lang.Integer">
+            <column name="idVirtualApp" />
+            <generator class="identity" />
+        </id>
+        <many-to-one
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB"
+            fetch="select" lazy="false" name="virtualDataCenterHB">
+            <column name="idVirtualDataCenter" not-null="true" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
+            lazy="false" fetch="select" name="enterpriseHB">
+            <column name="idEnterprise" not-null="false" />
+        </many-to-one>
+        <property name="state" type="State" not-null="true" />
+        <property name="subState" type="State" not-null="true" />
+        <property name="name" type="string">
+            <column length="30" name="name" not-null="true" />
+        </property>
+        <property name="public_" type="int">
+            <column name="public" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="highDisponibility" type="int">
+            <column name="high_disponibility" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="error" type="int">
+            <column name="error" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="nodeConnections" type="string">
+            <column name="nodeconnections" not-null="false" />
+        </property>
+        <set inverse="true" lazy="false" name="logsHB" order-by="logDate DESC">
+            <key>
+                <column name="idVirtualApp" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB" />
+        </set>
+        <set inverse="true" lazy="false" name="nodesHB" order-by="name" cascade="all">
+            <key>
+                <column name="idVirtualApp" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB" />
+        </set>
+    </class>
+    <!-- NAMED QUERIES -->
+    <query name="FIND_BY_USED_VIRTUAL_IMAGE"> SELECT va FROM VirtualappExtendedHB as va inner join va.nodesHB as n,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi
+        inner join nvi.virtualImageHB as vi WHERE n.type=:type AND nvi.idNode=n.idNode AND
+        vi.idImage=:usedVIId
     </query>
-    
-    
-    <query name="VIRTUAL_APPLIANCE_BY_VIRTUAL_MACHINE_ID">
-    	Select vapp
-    	from VirtualappExtendedHB vapp,
-    	com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB node,
-    	com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB vm
-    	where vm.idVm = :vmId
-    	  and vm.idVm = node.virtualMachineHB.idVm    	
-    	  and node.idVirtualApp = vapp.idVirtualApp
+    <query name="FIND_BY_USED_VIRTUAL_IMAGE_ON_REPOSITORY"> SELECT va FROM VirtualappExtendedHB as va inner join va.nodesHB as n,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi
+        inner join nvi.virtualImageHB as vi WHERE n.type=:type AND nvi.idNode=n.idNode AND
+        vi.repository.idRepository=:idRepo
     </query>
-    
-    <query name="VIRTUAL_APPLIANCES_BY_ENTERPRISE">
-    	from VirtualappHB app
-    	where app.enterpriseHB.idEnterprise = :enterpriseId
-    	order by app.name asc
+    <query name="VIRTUAL_APPLIANCE_BY_VIRTUAL_MACHINE_ID"> Select vapp from VirtualappExtendedHB vapp,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB node,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB vm where
+        vm.idVm = :vmId and vm.idVm = node.virtualMachineHB.idVm and node.idVirtualApp =
+        vapp.idVirtualApp
     </query>
-    
-    <query name="VIRTUAL_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER">
-    	from VirtualappHB app
-    	where app.enterpriseHB.idEnterprise = :enterpriseId and app.virtualDataCenterHB.idDataCenter = :datacenterId
-    	order by app.name asc
+    <query name="VIRTUAL_APPLIANCES_BY_ENTERPRISE"> from VirtualappHB app where app.enterpriseHB.idEnterprise = :enterpriseId
+        order by app.name asc
     </query>
-    
-    <query name="VIRTUAL_DATACENTER_ID_BY_VIRTUAL_APP_ID">
-    	SELECT vapp.virtualDataCenterHB.idVirtualDataCenter
-    	FROM VirtualappHB vapp
-    	WHERE vapp.idVirtualApp = :idVirtualApp
+    <query name="VIRTUAL_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER"> from VirtualappHB app where app.enterpriseHB.idEnterprise = :enterpriseId and
+        app.virtualDataCenterHB.idDataCenter = :datacenterId order by app.name asc
     </query>
-    
-    <!-- 
-    <query name="VIRTUAL_DATACENTER_ID_BY_VIRTUAL_APP_ID">
-    	Select vdc.idVirtualDataCenter
-        FROM  virtualapp va, virtualdatacenter vdc
+    <query name="VIRTUAL_DATACENTER_ID_BY_VIRTUAL_APP_ID"> SELECT vapp.virtualDataCenterHB.idVirtualDataCenter FROM VirtualappHB vapp
+        WHERE vapp.idVirtualApp = :idVirtualApp
+    </query>
+    <!--
+        <query name="VIRTUAL_DATACENTER_ID_BY_VIRTUAL_APP_ID">
+        Select vdc.idVirtualDataCenter
+        FROM virtualapp va, virtualdatacenter vdc
         WHERE va.idVirtualDataCenter = vdc.idVirtualDataCenter AND va.idVirtualApp =:idVirtualApp
-    </query>
-     -->
+        </query>
+    -->
 </hibernate-mapping>

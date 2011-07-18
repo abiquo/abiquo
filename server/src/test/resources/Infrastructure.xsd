@@ -1,73 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.abicloud.com/model/test/infrastructure"
-	xmlns:abi="http://www.abicloud.com/model/test/infrastructure" elementFormDefault="qualified">
-
-<!-- 
-	<complexType name="VirtualMachine">
-		<attribute name="name" type="string" />
-		<attribute name="imagePath" type="string" />
-		<attribute name="RAM" type="int" use="optional" />
-		<attribute name="CPU" type="int" use="optional" />
-		<attribute name="HD" type="int" use="optional" />
-	</complexType>
- -->
- 
-	<complexType name="VirtualAppliance">
-	<!-- 
-		<sequence>
-			<element name="VirtualMachine" type="abi:VirtualMachine" maxOccurs="unbounded"/>
-		</sequence>
-	-->
-		<attribute name="Name" type="string" />
-	</complexType>
-
-	<complexType name="VirtualDatacenter">
-		<sequence>
-			<element name="VirtualAppliance" type="abi:VirtualAppliance" maxOccurs="unbounded"/>
-		</sequence>
-		<attribute name="Name" type="string" />
-		<attribute name="HypervisorType" type="abi:HypervisorType" />
-		<!-- TODO volume and network -->
-	</complexType>
-
-
-	<simpleType name="HypervisorType">
-		<restriction base="string">
-			<enumeration value="vBox" />
-			<enumeration value="KVM" />
-			<enumeration value="xen-3" />
-			<enumeration value="vmx-04" />
-			<enumeration value="hyperv-301" />			 
-		</restriction>
-	</simpleType>
-
-	<complexType name="Machine">
-		<attribute name="Name" type="string" />
-		<attribute name="IP" type="string" />
-		<attribute name="HypervisorType" type="abi:HypervisorType" />
-		<attribute name="RAM" type="int" use="optional" default="4"/>
-		<attribute name="CPU" type="int" use="optional" default="2"/>
-		<attribute name="HD" type="int" use="optional" default="80"/>
-	</complexType>
-
-
-	<complexType name="Datacenter">
-		<sequence>
-			<element name="Machine" type="abi:Machine" maxOccurs="unbounded"/>
-			<element name="VirtualDatacenter" type="abi:VirtualDatacenter" maxOccurs="unbounded"/>
-		</sequence>
-		<attribute name="Name" type="string" />
-		<attribute name="RemoteServicesBaseURI" type="string" />
-	</complexType>
-
-	<element name="Infrastructure">
-		<complexType>
-			<sequence>
-				<element name="Datacenter" type="abi:Datacenter" maxOccurs="unbounded" />				
-			</sequence>
-			<attribute name="Enterprise" type="string" use="optional" default="abiquo"/>
-			<attribute name="User" type="string" use="optional" default="admin"/>
-		</complexType>
-	</element>
-
+    xmlns:abi="http://www.abicloud.com/model/test/infrastructure" elementFormDefault="qualified">
+    <!--
+        <complexType name="VirtualMachine">
+        <attribute name="name" type="string" />
+        <attribute name="imagePath" type="string" />
+        <attribute name="RAM" type="int" use="optional" />
+        <attribute name="CPU" type="int" use="optional" />
+        <attribute name="HD" type="int" use="optional" />
+        </complexType>
+    -->
+    <complexType name="VirtualAppliance">
+        <!--
+            <sequence>
+            <element name="VirtualMachine" type="abi:VirtualMachine" maxOccurs="unbounded"/>
+            </sequence>
+        -->
+        <attribute name="Name" type="string" />
+    </complexType>
+    <complexType name="VirtualDatacenter">
+        <sequence>
+            <element name="VirtualAppliance" type="abi:VirtualAppliance" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="Name" type="string" />
+        <attribute name="HypervisorType" type="abi:HypervisorType" />
+        <!-- TODO volume and network -->
+    </complexType>
+    <simpleType name="HypervisorType">
+        <restriction base="string">
+            <enumeration value="vBox" />
+            <enumeration value="KVM" />
+            <enumeration value="xen-3" />
+            <enumeration value="vmx-04" />
+            <enumeration value="hyperv-301" />
+        </restriction>
+    </simpleType>
+    <complexType name="Machine">
+        <attribute name="Name" type="string" />
+        <attribute name="IP" type="string" />
+        <attribute name="HypervisorType" type="abi:HypervisorType" />
+        <attribute name="RAM" type="int" use="optional" default="4" />
+        <attribute name="CPU" type="int" use="optional" default="2" />
+        <attribute name="HD" type="int" use="optional" default="80" />
+    </complexType>
+    <complexType name="Datacenter">
+        <sequence>
+            <element name="Machine" type="abi:Machine" maxOccurs="unbounded" />
+            <element name="VirtualDatacenter" type="abi:VirtualDatacenter" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="Name" type="string" />
+        <attribute name="RemoteServicesBaseURI" type="string" />
+    </complexType>
+    <element name="Infrastructure">
+        <complexType>
+            <sequence>
+                <element name="Datacenter" type="abi:Datacenter" maxOccurs="unbounded" />
+            </sequence>
+            <attribute name="Enterprise" type="string" use="optional" default="abiquo" />
+            <attribute name="User" type="string" use="optional" default="admin" />
+        </complexType>
+    </element>
 </schema>

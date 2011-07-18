@@ -18,431 +18,401 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+.InfrastructurePhysicalMachineList {
+	borderColor: #cccccc;
+	border-style: solid;
+	background-color: #E9E9E9;
+}
 
-	.InfrastructurePhysicalMachineList
-	{
-		borderColor: 		   #cccccc;
-		border-style:          solid;
-		background-color:	   #E9E9E9;
-	}
-	
-	
-	.PMListOpenButton
-	{
-		up-skin:				Embed("/assets/infrastructure/pmlistopenbutton/openButton.png");
-		over-skin:				Embed("/assets/infrastructure/pmlistopenbutton/openButton.png");
-		down-skin:				Embed("/assets/infrastructure/pmlistopenbutton/openButton_mouseDown.png");
-		selected-up-skin:   	Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected.png");
-		selected-over-skin: 	Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected.png");
-		selected-down-skin: 	Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected_mouseDown.png");
-	}
-	
-	
-	.RemoteAccessButton
-	{
-		up-skin:				Embed("/assets/infrastructure/remoteaccessbutton/up_skin.png");
-		over-skin:				Embed("/assets/infrastructure/remoteaccessbutton/over_skin.png");
-		down-skin:				Embed("/assets/infrastructure/remoteaccessbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/infrastructure/remoteaccessbutton/disabled_skin.png");	
-	}
-	
-	.RemoteAccessButtonTransparent
-	{
-		up-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_mouseDown.png");
-		disabled-skin:			Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_disabled.png");
-	}
-	
-	.GoogleMapMark
-	{
-		background-image:	Embed("/assets/infrastructure/mapmark_background_image.png", scaleGridTop="17", scaleGridBottom="20", scaleGridLeft="17", scaleGridRight="21");
-		background-size:	"100%";
-	}
+.PMListOpenButton {
+	up-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton.png");
+	over-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton.png");
+	down-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton_mouseDown.png"
+		);
+	selected-up-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected.png");
+	selected-over-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected.png");
+	selected-down-skin: Embed("/assets/infrastructure/pmlistopenbutton/openButton_selected_mouseDown.png"
+		);
+}
 
+.RemoteAccessButton {
+	up-skin: Embed("/assets/infrastructure/remoteaccessbutton/up_skin.png");
+	over-skin: Embed("/assets/infrastructure/remoteaccessbutton/over_skin.png");
+	down-skin: Embed("/assets/infrastructure/remoteaccessbutton/down_skin.png");
+	disabled-skin: Embed("/assets/infrastructure/remoteaccessbutton/disabled_skin.png");
+}
 
-	.PhysicalMachineRenderer
-	{
-		padding-left:	0;
-		padding-right:	0;
-		padding-top:	0;
-		padding-bottom:	0;
-		
-		horizontal-gap:	0;
-		vertical-align:	middle;
-		
-		background-color:#F4F4F4;
-		background-alpha:0.9;
-		borderThickness: 1;
-	   	borderColor: #cccccc;
-	   	border-style:solid;
-	}
+.RemoteAccessButtonTransparent {
+	up-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall.png"
+		);
+	over-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_mouseDown.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_disabled.png"
+		);
+}
 
+.GoogleMapMark {
+	background-image: Embed("/assets/infrastructure/mapmark_background_image.png",
+		scaleGridTop = "17", scaleGridBottom = "20", scaleGridLeft = "17",
+		scaleGridRight = "21");
+	background-size: "100%";
+}
 
-	.VirtualMachineRenderer
-	{
-		background-color:#F4F4F4;
-		background-alpha:0.9;
-		borderThickness: 1;
-	   	borderColor: #cccccc;
-	   	border-style:solid;
-	}
-	
-	
-	.PowerOnOffButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_mouseDown.png");
-		
-		selected-up-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png");
-		selected-down-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png");
-		selected-over-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected_over.png");
-		
-		disabled-skin:			Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png");
-		selected-disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png");
-	}
-	
-	.PauseButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_mouseDown.png");
-		
-		selected-up-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png");
-		selected-down-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png");
-		selected-over-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected_over.png");
-		
-		disabled-skin:			Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png");
-		selected-disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png");
-	}
-	
-	.RebootButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_mouseDown.png");
-		disabled-skin:			Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_disabled.png");
-	}
-	
-	.RecoverVMButton
-	{
-		up-skin:				Embed("/assets/infrastructure/recovervmbutton/up_skin.png");
-		over-skin:				Embed("/assets/infrastructure/recovervmbutton/over_skin.png");
-		down-skin:				Embed("/assets/infrastructure/recovervmbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/infrastructure/recovervmbutton/disabled_skin.png");
-	}
-	
-	.RemoveVMButton
-	{
-		up-skin:				Embed("/assets/infrastructure/removevmbutton/up_skin.png");
-		over-skin:				Embed("/assets/infrastructure/removevmbutton/over_skin.png");
-		down-skin:				Embed("/assets/infrastructure/removevmbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/infrastructure/removevmbutton/disabled_skin.png");
-	}
-	
-	
-	
+.PhysicalMachineRenderer {
+	padding-left: 0;
+	padding-right: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	horizontal-gap: 0;
+	vertical-align: middle;
+	background-color: #F4F4F4;
+	background-alpha: 0.9;
+	borderThickness: 1;
+	borderColor: #cccccc;
+	border-style: solid;
+}
+
+.VirtualMachineRenderer {
+	background-color: #F4F4F4;
+	background-alpha: 0.9;
+	borderThickness: 1;
+	borderColor: #cccccc;
+	border-style: solid;
+}
+
+.PowerOnOffButtonSmall {
+	up-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall.png"
+		);
+	over-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_mouseDown.png"
+		);
+	selected-up-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png"
+		);
+	selected-down-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png"
+		);
+	selected-over-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected_over.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png"
+		);
+	selected-disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png"
+		);
+}
+
+.PauseButtonSmall {
+	up-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall.png");
+	over-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_mouseDown.png"
+		);
+	selected-up-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png"
+		);
+	selected-down-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png"
+		);
+	selected-over-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected_over.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png"
+		);
+	selected-disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png"
+		);
+}
+
+.RebootButtonSmall {
+	up-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall.png");
+	over-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_mouseDown.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_disabled.png"
+		);
+}
+
+.RecoverVMButton {
+	up-skin: Embed("/assets/infrastructure/recovervmbutton/up_skin.png");
+	over-skin: Embed("/assets/infrastructure/recovervmbutton/over_skin.png");
+	down-skin: Embed("/assets/infrastructure/recovervmbutton/down_skin.png");
+	disabled-skin: Embed("/assets/infrastructure/recovervmbutton/disabled_skin.png");
+}
+
+.RemoveVMButton {
+	up-skin: Embed("/assets/infrastructure/removevmbutton/up_skin.png");
+	over-skin: Embed("/assets/infrastructure/removevmbutton/over_skin.png");
+	down-skin: Embed("/assets/infrastructure/removevmbutton/down_skin.png");
+	disabled-skin: Embed("/assets/infrastructure/removevmbutton/disabled_skin.png");
+}
+
 /* CSS for VirtualMachine Component in 
 * 
 */
-	.VirtualMachineEditButtonIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/pencil.png");	
-	}
-	.VirtualMachineMiniature
-	{
-		/**custom property**/
-		source:Embed("/assets/infrastructure/virtualMachine.png");	
-	}
-	.VirtualMachineIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/infrastructure/virtualMachine.png");	
-	}
-	.VirtualMachineLoadingBigIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/loading_big.swf");	
-	}
-	.VirtualMachineMiniatureCanvas1{
-		background-alpha:"0.8";
-        background-color:"#F4F4F4";
-        border-color:"#cccccc";
-        border-style:"solid";
-        border-thickness:"1";
-	}
-	
-	.VirtualMachineStateRunning{
-		source:Embed("/assets/application/icons/green_ball.png");
-	}
-	.VirtualMachineStatePaused{
-		source:Embed("/assets/application/icons/yellow_ball.png");
-	}
-	.VirtualMachineStateDisabled{
-		source:Embed("/assets/application/icons/grey_ball.png");
-	}
-	.VirtualMachineStateStopped{
-		source:Embed("/assets/application/icons/red_ball.png");
-	}
-	.VirtualMachineBusyIcon{
-		source:Embed("/assets/application/icons/loading_big.swf");
-	}
+.VirtualMachineEditButtonIcon { /**custom property**/
+	source: Embed("/assets/application/icons/pencil.png");
+}
 
+.VirtualMachineMiniature { /**custom property**/
+	source: Embed("/assets/infrastructure/virtualMachine.png");
+}
 
-	.VirtualMachineButtonsContainer
-	{
-		background-alpha:"0.7";
-		background-color:"#000000";
-	}
-	.RemoteAccessButton
-	{
-		up-skin:				Embed("/assets/infrastructure/remoteaccessbutton/up_skin.png");
-		over-skin:				Embed("/assets/infrastructure/remoteaccessbutton/over_skin.png");
-		down-skin:				Embed("/assets/infrastructure/remoteaccessbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/infrastructure/remoteaccessbutton/disabled_skin.png");	
-	}
+.VirtualMachineIcon { /**custom property**/
+	source: Embed("/assets/infrastructure/virtualMachine.png");
+}
 
-	.PowerOnOffButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_mouseDown.png");
-		
-		selected-up-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png");
-		selected-down-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png");
-		selected-over-skin:		Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected_over.png");
-		
-		disabled-skin:			Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png");
-		selected-disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png");
-	}
-	.PauseButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_mouseDown.png");
-		
-		selected-up-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png");
-		selected-down-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png");
-		selected-over-skin:		Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected_over.png");
-		
-		disabled-skin:			Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png");
-		selected-disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png");
-	}
+.VirtualMachineLoadingBigIcon { /**custom property**/
+	source: Embed("/assets/application/icons/loading_big.swf");
+}
 
-	.RebootButtonSmall
-	{
-		up-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_mouseDown.png");
-		disabled-skin:			Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_disabled.png");
-	}
+.VirtualMachineMiniatureCanvas1 {
+	background-alpha: "0.8";
+	background-color: "#F4F4F4";
+	border-color: "#cccccc";
+	border-style: "solid";
+	border-thickness: "1";
+}
 
-	.RemoteAccessButtonTransparent
-	{
-		up-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall.png");
-		over-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_over.png");
-		down-skin:				Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_mouseDown.png");
-		disabled-skin:			Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_disabled.png");
-	}
+.VirtualMachineStateRunning {
+	source: Embed("/assets/application/icons/green_ball.png");
+}
 
-	
-	.VirtualMachineLabel1
-	{
-		font-weight:"bold";
-	}
+.VirtualMachineStatePaused {
+	source: Embed("/assets/application/icons/yellow_ball.png");
+}
 
+.VirtualMachineStateDisabled {
+	source: Embed("/assets/application/icons/grey_ball.png");
+}
 
-	.VirtualMachinesListHBox1
-	{
-		horizontal-gap:"0";
-		padding-bottom:"6";
-		padding-left:"6";
-		vertical-align:"middle";
+.VirtualMachineStateStopped {
+	source: Embed("/assets/application/icons/red_ball.png");
+}
 
-	}
+.VirtualMachineBusyIcon {
+	source: Embed("/assets/application/icons/loading_big.swf");
+}
 
-		.VirtualMachinesListHBox2
-	{
-		horizontal-align:"right";
-		horizontal-gap:"3";
-	}
+.VirtualMachineButtonsContainer {
+	background-alpha: "0.7";
+	background-color: "#000000";
+}
 
-	.VirtualMachinesTile
-	{
-		padding-bottom:"0";
-		padding-left:"0";
-		padding-right:"0";
-		padding-top:"0";
-	}
+.RemoteAccessButton {
+	up-skin: Embed("/assets/infrastructure/remoteaccessbutton/up_skin.png");
+	over-skin: Embed("/assets/infrastructure/remoteaccessbutton/over_skin.png");
+	down-skin: Embed("/assets/infrastructure/remoteaccessbutton/down_skin.png");
+	disabled-skin: Embed("/assets/infrastructure/remoteaccessbutton/disabled_skin.png");
+}
 
+.PowerOnOffButtonSmall {
+	up-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall.png"
+		);
+	over-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_mouseDown.png"
+		);
+	selected-up-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png"
+		);
+	selected-down-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected.png"
+		);
+	selected-over-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_selected_over.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png"
+		);
+	selected-disabled-skin: Embed("/assets/infrastructure/poweronoffbuttonsmall/powerButtonSmall_disabled.png"
+		);
+}
 
-	/**
+.PauseButtonSmall {
+	up-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall.png");
+	over-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_mouseDown.png"
+		);
+	selected-up-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png"
+		);
+	selected-down-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected.png"
+		);
+	selected-over-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_selected_over.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png"
+		);
+	selected-disabled-skin: Embed("/assets/infrastructure/pausebuttonsmall/pauseButtonSmall_disabled.png"
+		);
+}
+
+.RebootButtonSmall {
+	up-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall.png");
+	over-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_mouseDown.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/rebootbuttonsmall/refreshButtonSmall_disabled.png"
+		);
+}
+
+.RemoteAccessButtonTransparent {
+	up-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall.png"
+		);
+	over-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_over.png"
+		);
+	down-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_mouseDown.png"
+		);
+	disabled-skin: Embed("/assets/infrastructure/remoteaccessbutton/accessVRDPButtonSmall_disabled.png"
+		);
+}
+
+.VirtualMachineLabel1 {
+	font-weight: "bold";
+}
+
+.VirtualMachinesListHBox1 {
+	horizontal-gap: "0";
+	padding-bottom: "6";
+	padding-left: "6";
+	vertical-align: "middle";
+}
+
+.VirtualMachinesListHBox2 {
+	horizontal-align: "right";
+	horizontal-gap: "3";
+}
+
+.VirtualMachinesTile {
+	padding-bottom: "0";
+	padding-left: "0";
+	padding-right: "0";
+	padding-top: "0";
+}
+
+/**
 	* VirtualMAchineListStateItemRenderer
-	**/	
-	.VirtualMachineLoadingIcon{
-		source:Embed("/assets/application/icons/loading_small.swf");
-	}
-	
-	/**
+	**/
+.VirtualMachineLoadingIcon {
+	source: Embed("/assets/application/icons/loading_small.swf");
+}
+
+/**
 	* VirtualMachineRendererBase
 	**/
-	.VirtualMachineRendererBaseVBox1
-	{
-		horizontal-align:"center";
-		padding-left:"2";
-		vertical-align:"middle";
-		vertical-gap:"3";
+.VirtualMachineRendererBaseVBox1 {
+	horizontal-align: "center";
+	padding-left: "2";
+	vertical-align: "middle";
+	vertical-gap: "3";
+}
 
-	}
-	.VirtualMachineVmMoreActions
-	{
-		padding-bottom:"0";
-		padding-left:"0";
-		padding-right:"0";
-		padding-top:"1";
-		vertical-align:"top";
-		vertical-gap:"0";
-	}
+.VirtualMachineVmMoreActions {
+	padding-bottom: "0";
+	padding-left: "0";
+	padding-right: "0";
+	padding-top: "1";
+	vertical-align: "top";
+	vertical-gap: "0";
+}
 
-	.VirtualMachineLabel1
-	{
-		font-size:"16";
-		font-weight:"bold";
-	}
+.VirtualMachineLabel1 {
+	font-size: "16";
+	font-weight: "bold";
+}
 
-	.VirtualMachineLabel2
-	{
-		font-size:"14";
-		font-weight:"bold";
-		padding-top:"4";
+.VirtualMachineLabel2 {
+	font-size: "14";
+	font-weight: "bold";
+	padding-top: "4";
+}
 
-	}
-	
 /* CSS for ComponentsPhysicalMachine*/
+.PhysicalMachineHBox1 {
+	padding-left: "5";
+	padding-top: "3";
+	vertical-align: "middle";
+}
 
-	.PhysicalMachineHBox1
-	{
-		padding-left:"5";
-		padding-top:"3";
-		vertical-align:"middle";
-	}
+.PhysicalMachinesList {
+	border-style: "none";
+}
 
-	.PhysicalMachinesList
-	{
-		border-style:"none";
-	}
-	.PhysicalMachinesRendererBaseTesttt
-	{
-		horizontal-align:"center";
-		padding-left:"0";
-		padding-right:"6";
-		padding-top:"6";
+.PhysicalMachinesRendererBaseTesttt {
+	horizontal-align: "center";
+	padding-left: "0";
+	padding-right: "6";
+	padding-top: "6";
+}
 
-	}	
-	
-	.PhysicalMachinesRendererBaseNameLabel
-	{
-		font-size:"16";
-		font-weight:"bold";
+.PhysicalMachinesRendererBaseNameLabel {
+	font-size: "16";
+	font-weight: "bold";
+}
 
-	}
-	
-	.PhysicalMachineIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/infrastructure/physicalMachine.png");	
-	}
-	.PhysicalMachineEditIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/pencil.png");	
-	}
+.PhysicalMachineIcon { /**custom property**/
+	source: Embed("/assets/infrastructure/physicalMachine.png");
+}
 
-	.PhysicalMachinesRendererDescriptionLabel1
-	{
-		font-size:"14";
-		font-weight:"bold";
-		padding-top:"4";
+.PhysicalMachineEditIcon { /**custom property**/
+	source: Embed("/assets/application/icons/pencil.png");
+}
 
+.PhysicalMachinesRendererDescriptionLabel1 {
+	font-size: "14";
+	font-weight: "bold";
+	padding-top: "4";
+}
 
-	}
-	.PhysicalMachinesRendererGeneralNumericStepper
-	{
-		font-size:"10";
-
-
-	}
-		
+.PhysicalMachinesRendererGeneralNumericStepper {
+	font-size: "10";
+}
 
 /* CSS for ComponentsDataCenter */
-	.DataCenterFormAddBaseLabel
-	{
-		font-size:"12";
-		font-weight:"bold";
-	}
+.DataCenterFormAddBaseLabel {
+	font-size: "12";
+	font-weight: "bold";
+}
 
-	.DataCenterListRendererIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/alert.png");	
-	}
+.DataCenterListRendererIcon { /**custom property**/
+	source: Embed("/assets/application/icons/alert.png");
+}
 
-	
-		.DataCenterMapMarkLabel1
-	{
-		font-size:"12";
-		font-weight:"bold";
-		horizontal-center:"0";
-		vertical-center:"0";
-	}
-	.DataCenterMapMarkLabel2
-	{
-		font-size:"12";
-		font-weight:"bold";
-	}
+.DataCenterMapMarkLabel1 {
+	font-size: "12";
+	font-weight: "bold";
+	horizontal-center: "0";
+	vertical-center: "0";
+}
 
-	.DataCenterMapMarkTextArea1
-	{
-		border-style:"none";
-		font-size:"11";
-	}
-	
-	.DataCenterMapMarkRemoteServiceFormItemLabel1
-	{
-		font-size:"11";
-		font-weight:"bold";
-		text-align:"center";
-	}
+.DataCenterMapMarkLabel2 {
+	font-size: "12";
+	font-weight: "bold";
+}
 
-	.DataCenterMapMarkRemoteServiceFormItemLabel2
-	{
-		font-size:"11";
-		font-weight:"bold";
-		text-align:"center";
-	}
+.DataCenterMapMarkTextArea1 {
+	border-style: "none";
+	font-size: "11";
+}
 
-	
- 	.infrastructureNodeRendererClosedBranchIcon
-	{
-		/**custom property**/
-		source:Embed('/assets/customcomponents/customtree/closed_branch_arrow.png');
-	}
+.DataCenterMapMarkRemoteServiceFormItemLabel1 {
+	font-size: "11";
+	font-weight: "bold";
+	text-align: "center";
+}
 
- 	.infrastructureNodeRendererOpenBranchIcon
-	{
-		/**custom property**/
-		source:Embed('/assets/customcomponents/customtree/opened_branch_arrow.png');
-	}
+.DataCenterMapMarkRemoteServiceFormItemLabel2 {
+	font-size: "11";
+	font-weight: "bold";
+	text-align: "center";
+}
 
-	.infrastructureNodeRendererLeafIcon
-	{
-		/**custom property**/
-		source:Embed('/assets/infrastructure/leafIcon.png');
-	}
-	
-	.DataCenterCreationWarning{ 
-		font-weight:bold;
-		color:#fd820e;
-	}
+.infrastructureNodeRendererClosedBranchIcon { /**custom property**/
+	source: Embed('/assets/customcomponents/customtree/closed_branch_arrow.png');
+}
+
+.infrastructureNodeRendererOpenBranchIcon { /**custom property**/
+	source: Embed('/assets/customcomponents/customtree/opened_branch_arrow.png');
+}
+
+.infrastructureNodeRendererLeafIcon { /**custom property**/
+	source: Embed('/assets/infrastructure/leafIcon.png');
+}
+
+.DataCenterCreationWarning {
+	font-weight: bold;
+	color: #fd820e;
+}

@@ -1,25 +1,21 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <!-- Define the parent -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
     <!-- Setting the basic POM configuration -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo</groupId>
     <artifactId>nodecollector</artifactId>
     <packaging>war</packaging>
-
     <!-- Set project properties -->
     <name>Node Collector</name>
-
     <!-- Set dependences -->
     <url>http://maven.apache.org</url>
-
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -27,7 +23,6 @@
             <version>2.5</version>
             <scope>provided</scope>
         </dependency>
-
         <!-- Abiquo Internal Dependences -->
         <dependency>
             <groupId>com.abiquo</groupId>
@@ -50,7 +45,6 @@
             <artifactId>wiseman-tools</artifactId>
             <version>1.0</version>
         </dependency>
-
         <!-- Configuration support -->
         <dependency>
             <groupId>commons-configuration</groupId>
@@ -105,7 +99,7 @@
             <artifactId>wink-client</artifactId>
             <version>${wink.version}</version>
         </dependency>
-        <!--  JAXB and JSON incoming providers dependency -->
+        <!-- JAXB and JSON incoming providers dependency -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
@@ -121,12 +115,12 @@
             <artifactId>woodstox-core-asl</artifactId>
             <version>4.0.4</version>
         </dependency>
-		<!--  JAXWS dependencies por VirtualBox -->
+        <!-- JAXWS dependencies por VirtualBox -->
         <dependency>
-			<groupId>com.sun.xml.ws</groupId>
-    		<artifactId>jaxws-rt</artifactId>
-    		<version>2.1.4</version>
-		</dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.1.4</version>
+        </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -139,12 +133,12 @@
             <version>0.9.11</version>
         </dependency>
         <!-- Hibernate method validator -->
-		<dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>4.2.0.Beta2</version>
         </dependency>
-        <!--  Plugin dependences -->
+        <!-- Plugin dependences -->
         <dependency>
             <groupId>org.virtualbox</groupId>
             <artifactId>vboxjws</artifactId>
@@ -247,9 +241,9 @@
         </dependency>
         <!-- Stonith resource dependencies -->
         <dependency>
-        	<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-exec</artifactId>
-    		<version>1.1</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.1</version>
         </dependency>
         <!-- TODELETE -->
         <dependency>
@@ -258,7 +252,6 @@
             <version>3.1</version>
         </dependency>
     </dependencies>
-
     <!-- Build properties -->
     <build>
         <finalName>nodecollector</finalName>
@@ -314,5 +307,4 @@
             </resource>
         </resources>
     </build>
-
 </project>

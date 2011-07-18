@@ -1,23 +1,20 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <!--                                      -->
-    <!--        POM RELATIONSHIPS             -->
-    <!--                                      -->
-
-    <!--       Maven coordinates              -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <artifactId>server</artifactId>
     <packaging>war</packaging>
-
-    <!--      Inheritances                    -->
+    <!-- Inheritances -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
-    <!--      Dependences                    -->
+    <!-- Dependences -->
     <dependencies>
         <dependency>
             <groupId>com.abiquo</groupId>
@@ -98,7 +95,7 @@
             <artifactId>vsm</artifactId>
             <version>${pom.version}</version>
             <classifier>client</classifier>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
@@ -283,7 +280,7 @@
             <artifactId>cglib-nodep</artifactId>
             <version>2.1_3</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.apache.wink</groupId>
             <artifactId>wink-client</artifactId>
             <version>${wink.version}</version>
@@ -294,7 +291,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -310,10 +306,9 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <!--                                      -->
-    <!--       PROJECT INFORMATION            -->
-    <!--                                      -->
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
     <name>Server</name>
     <url>http://maven.apache.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -323,10 +318,9 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
-    <!--                                      -->
-    <!--       BUILD SETTINGS                 -->
-    <!--                                      -->
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <finalName>server</finalName>
@@ -395,12 +389,10 @@
                 <filtering>true</filtering>
             </testResource>
         </testResources>
-
     </build>
-
-    <!--                                      -->
-    <!--       ENVIRONMENT SETTINGS           -->
-    <!--                                      -->
+    <!-- -->
+    <!-- ENVIRONMENT SETTINGS -->
+    <!-- -->
     <issueManagement>
         <system>JIRA</system>
         <url>http://jira.abicloud.org/browse/ABICLOUD</url>
@@ -409,5 +401,4 @@
         <system>Hudson</system>
         <url>http://hudson.abicloud.org</url>
     </ciManagement>
-
 </project>

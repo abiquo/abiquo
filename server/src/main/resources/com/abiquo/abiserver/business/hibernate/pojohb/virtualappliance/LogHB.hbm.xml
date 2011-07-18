@@ -2,25 +2,26 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB"  table="log">
-    <id name="idLog" type="java.lang.Integer">
-      <column name="idLog"/>
-      <generator class="identity"/>
-    </id>
-    <property name="idVirtualAppliance" type="java.lang.Integer">
-      <column name="idVirtualApp" not-null="true"/>
-    </property>
-    <property name="description" type="string">
-      <column name="description" not-null="true"/>
-    </property>
-    <property name="logDate" type="timestamp">
-      <column name="logDate" not-null="true"/>
-    </property>
-    <property name="deleted" type="java.lang.Integer">
-      <column name="deleted" not-null="false"/>
-    </property> 
-    <!-- property name="logDate" type="string">
-      <column name="date" not-null="true"/>
-    </property-->
-  </class>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB"
+        table="log">
+        <id name="idLog" type="java.lang.Integer">
+            <column name="idLog" />
+            <generator class="identity" />
+        </id>
+        <property name="idVirtualAppliance" type="java.lang.Integer">
+            <column name="idVirtualApp" not-null="true" />
+        </property>
+        <property name="description" type="string">
+            <column name="description" not-null="true" />
+        </property>
+        <property name="logDate" type="timestamp">
+            <column name="logDate" not-null="true" />
+        </property>
+        <property name="deleted" type="java.lang.Integer">
+            <column name="deleted" not-null="false" />
+        </property>
+        <!-- property name="logDate" type="string">
+            <column name="date" not-null="true"/>
+            </property -->
+    </class>
 </hibernate-mapping>
