@@ -22,10 +22,6 @@
         	<column name="isReservationRestricted" />
         </property>
     
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.pricing.PricingHB" lazy="false" name="pricing">
-      		<column name="idPricing"/>
-    	</many-to-one>
-		
 		<set name="dcLimits" lazy="false" cascade="all-delete-orphan">
 			<key>
 				<column name="idEnterprise" not-null="true" />
