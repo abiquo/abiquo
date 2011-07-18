@@ -47,9 +47,10 @@ public class CostCode extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public CostCode(final String variable)
+    public CostCode(final String variable, final String description)
     {
-        this.setVariable(variable);
+        this.setName(name);
+        this.setDescription(description);
     }
 
     /* package */final static String ID_COLUMN = "idCostCode";
@@ -65,32 +66,60 @@ public class CostCode extends DefaultEntityBase
         return this.id;
     }
 
-    public final static String VARIABLE_PROPERTY = "variable";
+    public final static String NAME_PROPERTY = "name";
 
-    private final static boolean VARIABLE_REQUIRED = true;
+    private final static boolean NAME_REQUIRED = false;
 
-    private final static int VARIABLE_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 0;
 
-    private final static int VARIABLE_LENGTH_MAX = 255;
+    private final static int NAME_LENGTH_MAX = 255;
 
-    private final static boolean VARIABLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String VARIABLE_COLUMN = "variable";
+    private final static String NAME_COLUMN = "name";
 
-    @Column(name = VARIABLE_COLUMN, nullable = !VARIABLE_REQUIRED, length = VARIABLE_LENGTH_MAX)
-    private String variable;
+    @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
+    private String name;
 
-    @Required(value = VARIABLE_REQUIRED)
-    @Length(min = VARIABLE_LENGTH_MIN, max = VARIABLE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = VARIABLE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getVariable()
+    @Required(value = NAME_REQUIRED)
+    @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getName()
     {
-        return this.variable;
+        return this.name;
     }
 
-    private void setVariable(final String variable)
+    private void setName(final String name)
     {
-        this.variable = variable;
+        this.name = name;
+    }
+
+    public final static String DESCRIPTION_PROPERTY = "description";
+
+    private final static boolean DESCRIPTION_REQUIRED = false;
+
+    private final static int DESCRIPTION_LENGTH_MIN = 0;
+
+    private final static int DESCRIPTION_LENGTH_MAX = 255;
+
+    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DESCRIPTION_COLUMN = "description";
+
+    @Column(name = DESCRIPTION_COLUMN, nullable = !DESCRIPTION_REQUIRED, length = DESCRIPTION_LENGTH_MAX)
+    private String description;
+
+    @Required(value = DESCRIPTION_REQUIRED)
+    @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDescription()
+    {
+        return this.description;
+    }
+
+    private void setDescription(final String description)
+    {
+        this.description = description;
     }
 
 }

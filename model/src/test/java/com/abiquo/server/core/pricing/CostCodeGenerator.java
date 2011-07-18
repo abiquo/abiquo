@@ -39,15 +39,17 @@ public class CostCodeGenerator extends DefaultEntityGenerator<CostCode>
     @Override
     public void assertAllPropertiesEqual(final CostCode obj1, final CostCode obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, CostCode.VARIABLE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, CostCode.NAME_PROPERTY,
+            CostCode.DESCRIPTION_PROPERTY);
     }
 
     @Override
     public CostCode createUniqueInstance()
     {
         String name = newString(nextSeed(), 0, 255);
+        String description = newString(nextSeed(), 0, 255);
 
-        CostCode costeCode = new CostCode(name);
+        CostCode costeCode = new CostCode(name, description);
 
         return costeCode;
     }

@@ -32,7 +32,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.pricing.PricingTemplate;
 import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
@@ -67,8 +66,6 @@ public class Enterprise implements IPojo<EnterpriseHB>
     private Set<DatacenterLimit> dcLimits;
 
     private String defaultTheme;
-
-    private PricingTemplate pricingTemplate;
 
     public Enterprise()
     {
@@ -151,16 +148,6 @@ public class Enterprise implements IPojo<EnterpriseHB>
     public void setDefaultTheme(final String defaultTheme)
     {
         this.defaultTheme = defaultTheme;
-    }
-
-    public PricingTemplate getPricingTemplate()
-    {
-        return pricingTemplate;
-    }
-
-    public void setPricingTemplate(final PricingTemplate pricingTemplate)
-    {
-        this.pricingTemplate = pricingTemplate;
     }
 
     public void addDatacenterLimit(final DatacenterLimit limit)

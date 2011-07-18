@@ -18,68 +18,29 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
 package com.abiquo.server.core.pricing;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "costCode")
-public class CostCodeDto extends SingleResourceTransportDto
+@XmlRootElement(name = "pricingTemplates")
+public class PricingTemplatesDto extends WrapperDto<PricingTemplateDto>
 {
+
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
 
-    public CostCodeDto()
+    @Override
+    @XmlElement(name = "role")
+    public List<PricingTemplateDto> getCollection()
     {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
-    public CostCodeDto(final String name, final String description)
-    {
-        super();
-        this.name = name;
-        this.description = description;
-    }
-
-    private Integer id;
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
-
-    private String name;
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(final String name)
-    {
-        this.name = name;
-    }
-
-    private String description;
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(final String description)
-    {
-        this.description = description;
+        return collection;
     }
 
 }

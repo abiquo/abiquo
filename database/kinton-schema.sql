@@ -4112,7 +4112,8 @@ CREATE TABLE `kinton`.`currency` (
 
 CREATE TABLE `kinton`.`costCode` (
   `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
-  `variable` varchar(256) NOT NULL ,
+   `name` varchar(256) NOT NULL ,
+  `description` varchar(256) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;

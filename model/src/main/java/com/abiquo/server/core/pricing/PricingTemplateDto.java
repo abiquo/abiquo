@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "pricingTemplate")
 public class PricingTemplateDto extends SingleResourceTransportDto
 {
     /**
