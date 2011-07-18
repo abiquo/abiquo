@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud.chef;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -37,7 +37,7 @@ public class ChefCookbookDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -49,9 +49,21 @@ public class ChefCookbookDto extends SingleResourceTransportDto
         return cookbook;
     }
 
-    public void setCookbook(String cookbook)
+    public void setCookbook(final String cookbook)
     {
         this.cookbook = cookbook;
+    }
+
+    private String cookbookVersion;
+
+    public String getCookbookVersion()
+    {
+        return cookbookVersion;
+    }
+
+    public void setCookbookVersion(final String cookbookVersion)
+    {
+        this.cookbookVersion = cookbookVersion;
     }
 
 }

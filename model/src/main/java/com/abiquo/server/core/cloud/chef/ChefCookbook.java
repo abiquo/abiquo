@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud.chef;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +33,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -49,11 +50,13 @@ public class ChefCookbook extends DefaultEntityBase
         super();
     }
 
-    public ChefCookbook(VirtualMachine virtualmachine, String cookbook)
+    public ChefCookbook(final VirtualMachine virtualmachine, final String cookbook,
+        final String version)
     {
         super();
         setVirtualmachine(virtualmachine);
         setCookbook(cookbook);
+        setCookbook(version);
     }
 
     private final static String ID_COLUMN = "chefCookbookId";
@@ -89,6 +92,34 @@ public class ChefCookbook extends DefaultEntityBase
     public void setVirtualmachine(final VirtualMachine virtualmachine)
     {
         this.virtualmachine = virtualmachine;
+    }
+
+    public final static String COOKBOOK_VERSION_PROPERTY = "cookbookVersion";
+
+    private final static boolean COOKBOOK_VERSION_REQUIRED = true;
+
+    private final static int COOKBOOK_VERSION_LENGTH_MIN = 0;
+
+    private final static int COOKBOOK_VERSION_LENGTH_MAX = 20;
+
+    private final static boolean COOKBOOK_VERSION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String COOKBOOK_VERSION_COLUMN = "CookbookVersion";
+
+    @Column(name = COOKBOOK_VERSION_COLUMN, nullable = !COOKBOOK_VERSION_REQUIRED, length = COOKBOOK_VERSION_LENGTH_MAX)
+    private String cookbookVersion = "";
+
+    @Required(value = COOKBOOK_VERSION_REQUIRED)
+    @Length(min = COOKBOOK_VERSION_LENGTH_MIN, max = COOKBOOK_VERSION_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = COOKBOOK_VERSION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getCookbookVersion()
+    {
+        return this.cookbookVersion;
+    }
+
+    public void setCookbookVersion(final String cookbookVersion)
+    {
+        this.cookbookVersion = cookbookVersion;
     }
 
     public final static String COOKBOOK_PROPERTY = "cookbook";

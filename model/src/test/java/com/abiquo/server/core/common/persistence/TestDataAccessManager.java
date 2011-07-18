@@ -24,7 +24,6 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.cloud.ChefCookbook;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -35,6 +34,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
+import com.abiquo.server.core.cloud.chef.ChefCookbook;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
