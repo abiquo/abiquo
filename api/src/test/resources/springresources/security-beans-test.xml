@@ -11,10 +11,6 @@
         <security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
     </security:http>
 
-    <security:authentication-provider user-service-ref="userDetailsService">        
-        <security:password-encoder hash="md5" />
-    </security:authentication-provider>
-
     <bean id="tokenService" class="org.springframework.security.ui.rememberme.TokenBasedRememberMeServices">
         <property name="userDetailsService" ref="userDetailsService" />
         <property name="alwaysRemember" value="true" />

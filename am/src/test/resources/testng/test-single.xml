@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Single unit test" verbose="1">
+    <test name="Single class unit test">
+        <classes>
+            <class name="com.abiquo.testng.TestFactory" />
+        </classes>
+    </test>
+</suite>

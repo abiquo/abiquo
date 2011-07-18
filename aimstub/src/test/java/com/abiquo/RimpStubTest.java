@@ -21,27 +21,33 @@
 
 package com.abiquo;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.thrift.TException;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import com.abiquo.aimstub.Aim.Iface;
 import com.abiquo.aimstub.Datastore;
 import com.abiquo.aimstub.NetInterface;
 import com.abiquo.aimstub.RimpException;
 import com.abiquo.aimstub.TTransportProxy;
+import com.abiquo.aimstub.Aim.Iface;
 
 /**
  * To run the test : an instance of ''AIM'' agent MUST be running on ''host'':''port'' and assure
  * its configuration have the same values for ''datastore'' and ''repository''.
  */
-public class RimpStubTest extends TestCase
+public class RimpStubTest
 {
 
     protected static String datastore = "/opt/test/datastore";
@@ -67,6 +73,7 @@ public class RimpStubTest extends TestCase
 
     private Iface aimclient = TTransportProxy.getInstance(host, port);
 
+    @BeforeMethod
     public void setUp()
     {
         createFolder(reposirory);
@@ -77,6 +84,7 @@ public class RimpStubTest extends TestCase
 
     }
 
+    @AfterMethod
     public void tearDown()
     {
         clearVirtualImageFile(reposirory);
@@ -128,6 +136,7 @@ public class RimpStubTest extends TestCase
         }
     }
 
+    @Test
     public void testCopyToDatastoreAndDelete() throws RimpException, TException
     {
         aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachineUUID);
@@ -142,6 +151,7 @@ public class RimpStubTest extends TestCase
         assertFalse(viDatastore.exists());
     }
 
+    @Test
     public void testDoubleCopyToDatastoreAndDelete() throws RimpException, TException
     {
         aimclient.copyFromRepositoryToDatastore(viPath, datastoreDefault, vmachineUUID);
@@ -167,6 +177,7 @@ public class RimpStubTest extends TestCase
         assertFalse(viDatastore2.exists());
     }
 
+    @Test
     public void testCopyToRepository() throws RimpException, TException
     {
         aimclient.copyFromDatastoreToRepository(viPath, snapshot, "algo", datastore);
@@ -180,11 +191,13 @@ public class RimpStubTest extends TestCase
         assertTrue(viDatastore.delete());
     }
 
+    @Test
     public void testGetRimpConf() throws RimpException, TException
     {
         aimclient.checkRimpConfiguration();
     }
 
+    @Test
     public void testGetDatastireSize() throws RimpException, TException
     {
         Long expectedAvailableKb = new File(datastore).getUsableSpace() / 1024l;
@@ -195,18 +208,19 @@ public class RimpStubTest extends TestCase
         assertEquals(expectedAvailableKb, availableKb);
     }
 
+    @Test
     public void testGetDatastores() throws RimpException, TException
     {
         List<Datastore> stores = aimclient.getDatastores();
 
         assertTrue(stores.size() >= 1);
     }
-    
-    
+
+    @Test
     public void testGetNetInterfaces() throws RimpException, TException
     {
         List<NetInterface> netfaces = aimclient.getNetInterfaces();
 
         assertTrue(netfaces.size() >= 1);
-    } 
+    }
 }

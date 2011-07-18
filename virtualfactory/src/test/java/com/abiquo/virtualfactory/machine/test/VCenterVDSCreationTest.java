@@ -26,24 +26,20 @@ import static junit.framework.Assert.fail;
 
 import java.net.URL;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 import com.abiquo.virtualfactory.machine.impl.vcenter.DistrubutedPortGroupActions;
-import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.ServiceInstance;
 
 /**
- * Class that test the {@link DistrubutedPortGroupActions} class.
- * In order to check this class you need.
- * 
- * 1. Have a vCenter remote, with correct license and enough permissions.
- * 2. Create a 'dvSwitch' there.
- * 3. Remove all the @Test(enabled=false) here.
- * 4. Put it again because otherwise they always be executed.
+ * Class that test the {@link DistrubutedPortGroupActions} class. In order to check this class you
+ * need. 1. Have a vCenter remote, with correct license and enough permissions. 2. Create a
+ * 'dvSwitch' there. 3. Remove all the @Test(enabled=false) here. 4. Put it again because otherwise
+ * they always be executed.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -55,9 +51,10 @@ public class VCenterVDSCreationTest
     private final String user = "root";
 
     private final String password = "temporal";
-    
+
     // Name of the already-created dvSwitch in the remote vCenter.
     private final String dvSwitchName = "dvSwitch";
+
     private final String wrongSwitchName = "veintemillonedename";
 
     private ServiceInstance serviceInstance;
@@ -67,7 +64,7 @@ public class VCenterVDSCreationTest
     /**
      * Open the connection
      */
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception
     {
         System.setProperty("org.apache.axis.components.net.SecureSocketFactory",
@@ -82,7 +79,7 @@ public class VCenterVDSCreationTest
     /**
      * Clean the connection.
      */
-    @After
+    @AfterMethod
     public void tearDown() throws Exception
     {
         if (serviceInstance != null && serviceInstance.getServerConnection() != null)
@@ -99,12 +96,13 @@ public class VCenterVDSCreationTest
     {
         String portGroupName = vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
         Thread.sleep(1000);
-        DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
+        DistributedVirtualPortgroup portGroup =
+            vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
         Thread.sleep(1000);
         vcenterDVS.deletePortGroup(portGroup);
     }
 
-    @Test(expected = VirtualMachineException.class)
+    @Test(expectedExceptions = VirtualMachineException.class)
     public void createPortGroupFailsWhenDVSwitchDoesNotExist() throws VirtualMachineException
     {
         vcenterDVS.createPortGroupInDVS(wrongSwitchName, "dvs_network", 34);
@@ -147,45 +145,45 @@ public class VCenterVDSCreationTest
         // The second one should not fail
         fail("Failed because the second one has been created!");
     }
-    
+
     /**
      * Ensure the exception is controlled even if we have an invalid session
      */
-    @Test(expected = VirtualMachineException.class)
+    @Test(expectedExceptions = VirtualMachineException.class)
     public void createPortGroupFailsWhenSessionInvalid() throws VirtualMachineException
     {
         serviceInstance = null;
         vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
     }
-        
+
     /**
      * Assert the get returns null when the port group does not exist.
      */
     @Test
     public void getPortGroupReturnsNullWhenPortGroupDoesNotExist() throws VirtualMachineException
     {
-        DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, "dvs_network_34");
+        DistributedVirtualPortgroup portGroup =
+            vcenterDVS.getPortGroup(dvSwitchName, "dvs_network_34");
         assertNull(portGroup);
     }
-    
+
     /**
-     * When you provide a good port group name (it exists) but the switch name does not exist, 
-     * throws an exception.
+     * When you provide a good port group name (it exists) but the switch name does not exist,
+     * throws an exception. 1. Create a port group. 2. Get the port group but with the incorrect
+     * dvSwitch name. 3. Be sure the
      * 
-     * 1. Create a port group.
-     * 2. Get the port group but with the incorrect dvSwitch name.
-     * 3. Be sure the 
-     * @throws VirtualMachineException 
+     * @throws VirtualMachineException
      */
     @Test
-    public void getPortGroupRaisesWhenDVSwitchWrong() throws InterruptedException, VirtualMachineException
+    public void getPortGroupRaisesWhenDVSwitchWrong() throws InterruptedException,
+        VirtualMachineException
     {
         String portGroupName = null;
         try
         {
             portGroupName = vcenterDVS.createPortGroupInDVS(dvSwitchName, "dvs_network", 34);
         }
-        catch(VirtualMachineException e)
+        catch (VirtualMachineException e)
         {
             fail("Creation should not fail!");
         }
@@ -197,19 +195,21 @@ public class VCenterVDSCreationTest
         catch (VirtualMachineException e)
         {
             // IT SHOULD THROW THIS EXCEPTION. Clean the port group.
-            DistributedVirtualPortgroup portGroup = vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
+            DistributedVirtualPortgroup portGroup =
+                vcenterDVS.getPortGroup(dvSwitchName, portGroupName);
             Thread.sleep(1000);
             vcenterDVS.deletePortGroup(portGroup);
             return;
-            
+
         }
         fail("Failed because it should raise an exception!");
     }
-    
+
     @Test
     public void testAttachNicToVM() throws VirtualMachineException
     {
-        vcenterDVS.attachVirtualMachineNICToPortGroup("vm_name", "default_network", "00:50:56:a4:00:03");
+        vcenterDVS.attachVirtualMachineNICToPortGroup("vm_name", "default_network",
+            "00:50:56:a4:00:03");
     }
 
 }

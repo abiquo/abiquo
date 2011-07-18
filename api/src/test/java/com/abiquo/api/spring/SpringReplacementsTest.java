@@ -20,12 +20,15 @@
  */
 package com.abiquo.api.spring;
 
+import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+@Test(groups = ALL_UNIT_TESTS)
 public class SpringReplacementsTest
 {
     private ApplicationContext springContext;

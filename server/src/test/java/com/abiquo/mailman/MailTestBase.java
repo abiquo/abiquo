@@ -21,8 +21,8 @@
 
 package com.abiquo.mailman;
 
-import org.junit.After;
-import org.junit.Before;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 public class MailTestBase
 {
@@ -47,7 +47,7 @@ public class MailTestBase
     /**
      * @throws java.lang.Exception
      */
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception
     {
         mail = new MailManager(mailServer, mailUser, mailPass, defaultEncoding, true, true);
@@ -56,7 +56,7 @@ public class MailTestBase
     /**
      * @throws java.lang.Exception
      */
-    @After
+    @AfterMethod
     public void tearDown() throws Exception
     {
 

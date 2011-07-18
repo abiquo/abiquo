@@ -62,7 +62,7 @@ import com.softwarementors.commons.test.SeedGenerator;
 @TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
-public class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
+public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
 {
     protected SeedGenerator seed = new SeedGenerator();
 
