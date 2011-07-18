@@ -191,11 +191,15 @@ public class Enterprise extends DefaultEntityWithLimits
         setRepositoryHard(limit.hard);
     }
 
+    public final static String PRICING_PROPERTY = "pricing";
+
     private final static boolean PRICING_REQUIRED = false;
 
-    @JoinColumn(name = PricingTemplate.ID_COLUMN)
+    private final static String PRICING_ID_COLUMN = "idPricingTemplate";
+
+    @JoinColumn(name = PRICING_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_pricingTemp")
+    @ForeignKey(name = "enterprise_pricingTemp_fk")
     private PricingTemplate pricingTemplate;
 
     @Required(value = PRICING_REQUIRED)
