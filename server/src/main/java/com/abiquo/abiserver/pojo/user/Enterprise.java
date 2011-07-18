@@ -27,18 +27,16 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.velocity.runtime.parser.node.GetExecutor;
-
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.pricing.PricingTemplate;
 import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 import com.abiquo.abiserver.pojo.virtualhardware.Limit;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
-import com.abiquo.server.core.pricing.PricingTemplate;
 
 /**
  * This pojo class store the information of the enterprise. On abiCloud, an user belongs to an
@@ -69,11 +67,8 @@ public class Enterprise implements IPojo<EnterpriseHB>
     private Set<DatacenterLimit> dcLimits;
 
     private String defaultTheme;
-    
-    private PricingTemplate pricing; 
-    
 
-
+    private PricingTemplate pricingTemplate;
 
     public Enterprise()
     {
@@ -107,7 +102,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    public void setIsReservationRestricted(final Boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -128,7 +123,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.limits = limits;
     }
 
-    public void setReservedMachines(Collection<PhysicalMachine> reservedMachines)
+    public void setReservedMachines(final Collection<PhysicalMachine> reservedMachines)
     {
         this.reservedMachines = reservedMachines;
     }
@@ -143,7 +138,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return dcLimits;
     }
 
-    public void setDcLimits(Set<DatacenterLimit> dcLimits)
+    public void setDcLimits(final Set<DatacenterLimit> dcLimits)
     {
         this.dcLimits = dcLimits;
     }
@@ -153,22 +148,22 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return this.defaultTheme;
     }
 
-    public void setDefaultTheme(String defaultTheme)
+    public void setDefaultTheme(final String defaultTheme)
     {
         this.defaultTheme = defaultTheme;
     }
 
-    public PricingTemplate getPricing()
+    public PricingTemplate getPricingTemplate()
     {
-        return pricing;
+        return pricingTemplate;
     }
 
-    public void setPricing(PricingTemplate pricing)
+    public void setPricingTemplate(final PricingTemplate pricingTemplate)
     {
-        this.pricing = pricing;
+        this.pricingTemplate = pricingTemplate;
     }
-    
-    public void addDatacenterLimit(DatacenterLimit limit)
+
+    public void addDatacenterLimit(final DatacenterLimit limit)
     {
         if (dcLimits == null)
         {
@@ -177,7 +172,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         dcLimits.add(limit);
     }
 
-    public void addReservedMachine(PhysicalMachine machine)
+    public void addReservedMachine(final PhysicalMachine machine)
     {
         if (reservedMachines == null)
         {
@@ -196,7 +191,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         EnterpriseHB enterpriseHB = new EnterpriseHB();
 
         enterpriseHB.setIdEnterprise(getId());
-        enterpriseHB.setPricingHB((pricing == null) ? null : pricing.toPojoHB());
+
         enterpriseHB.setName(getName());
         enterpriseHB.setIsReservationRestricted(getIsReservationRestricted());
 
@@ -231,7 +226,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return enterpriseHB;
     }
 
-    public static Enterprise create(EnterpriseDto dto)
+    public static Enterprise create(final EnterpriseDto dto)
     {
         Enterprise enterprise = new Enterprise();
 

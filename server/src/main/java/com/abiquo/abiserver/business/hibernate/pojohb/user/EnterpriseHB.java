@@ -62,9 +62,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     /** List of limits established by Datacenter */
     private Set<DatacenterLimitHB> dcLimits;
 
-    /** assigned pricing */
-    private PricingHB pricingHB;
-
     public EnterpriseHB()
     {
         super();
@@ -142,16 +139,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         return dcLimits;
     }
 
-    public PricingHB getPricingHB()
-    {
-        return pricingHB;
-    }
-
-    public void setPricingHB(final PricingHB pricingHB)
-    {
-        this.pricingHB = pricingHB;
-    }
-
     /**
      * This method create a generic enterprise pojo object.
      */
@@ -164,7 +151,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         enterprise.setName(getName());
         enterprise.setLimits(limits.toPojo());
         enterprise.setIsReservationRestricted(isReservationRestricted);
-        enterprise.setPricing(pricingHB == null ? null : pricingHB.toPojo());
 
         Set<DatacenterLimit> dcLimitsPojo = new HashSet<DatacenterLimit>();
 

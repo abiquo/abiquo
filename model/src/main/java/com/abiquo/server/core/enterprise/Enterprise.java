@@ -199,12 +199,12 @@ public class Enterprise extends DefaultEntityWithLimits
     private PricingTemplate pricingTemplate;
 
     @Required(value = PRICING_REQUIRED)
-    public PricingTemplate getPricing()
+    public PricingTemplate getPricingTemplate()
     {
         return pricingTemplate;
     }
 
-    public void setPricing(final PricingTemplate pricingTemplate)
+    public void setPricingTemplate(final PricingTemplate pricingTemplate)
     {
         this.pricingTemplate = pricingTemplate;
     }
