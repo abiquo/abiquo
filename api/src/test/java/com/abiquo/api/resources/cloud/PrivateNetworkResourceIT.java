@@ -23,10 +23,10 @@ package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.Assert.assertLinkExist;
-import static com.abiquo.api.common.Assert.assertNonEmptyErrors;
+import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
-import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkIPsURI;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -39,18 +39,13 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.api.resources.cloud.IpAddressesResource;
-import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.transformer.ModelTransformer;
-import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -73,6 +68,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 
     RemoteService rs;
 
+    @Override
     @BeforeMethod
     public void setup()
     {
@@ -154,23 +150,22 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 
     }
 
+    // PUT VLAN Related Tests //
 
-    // PUT VLAN Related Tests       //
-   
     /**
      * Updates VLAN in the right way.
      * 
      * @throws Exception
      */
-    @Test
+    @Test(groups = {BASIC_INTEGRATION_TESTS})
     public void updateVLANTestEndToEnd() throws Exception
     {
         // Now we create the IPs of the VLAN.
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         ArrayList<Object> ipsObjects = new ArrayList<Object>();
         while (!ip.equals(lastIP))
@@ -181,16 +176,18 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
             ip = ip.nextIPAddress();
         }
         setup(ipsObjects.toArray());
-        
+
         VLANNetworkDto dto = createTransferObject(vlan, vdc.getId());
         // modify the name and the primary DNS.
         dto.setName("newname");
         dto.setPrimaryDNS("45.45.45.0");
-        
+
         Resource resource = client.resource(validURI);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(dto);
+        ClientResponse response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(dto);
         assertEquals(200, response.getStatusCode());
-        
+
         // Ensure the VLAN has changed.
         VLANNetworkDto dtoResponse = response.getEntity(VLANNetworkDto.class);
         assertNotNull(dtoResponse);
@@ -200,8 +197,9 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         assertEquals(dto.getAddress(), dtoResponse.getAddress());
         assertEquals("45.45.45.0", dtoResponse.getPrimaryDNS());
         assertEquals(dto.getSecondaryDNS(), dtoResponse.getSecondaryDNS());
-        
-        // Ensure the IPs of the VLAN have changed its 'vlanname' attribute. Get a random IP and check it
+
+        // Ensure the IPs of the VLAN have changed its 'vlanname' attribute. Get a random IP and
+        // check it
         String ipsUri = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
         resource = client.resource(ipsUri);
         response = resource.accept(MediaType.APPLICATION_XML).get();
@@ -209,11 +207,12 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dtoIPs);
         IpPoolManagementDto dtoIP = dtoIPs.getCollection().get(new Random().nextInt(24));
         assertEquals(dtoIP.getNetworkName(), "newname");
-        
+
     }
-    
+
     /**
      * Throw several request to ensure it controls the path parameter constraints.
+     * 
      * @throws Exception
      */
     @Test
@@ -221,67 +220,87 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     {
         VLANNetworkDto dto = createTransferObject(vlan, vdc.getId());
         Resource resource = client.resource(resolvePrivateNetworkURI(0, vlan.getId()));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(dto);
+        ClientResponse response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(dto);
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(-400, vlan.getId()));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(dto);
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(dto);
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), 0));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(dto);
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(dto);
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), -1000));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(dto);
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(dto);
         assertEquals(response.getStatusCode(), 400);
     }
-    
+
     // DELETE-related VLAN tests.
-    @Test 
+    @Test
     public void deleteVLANparamsInvalids() throws Exception
     {
         Resource resource = client.resource(resolvePrivateNetworkURI(0, vlan.getId()));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).delete();
+        ClientResponse response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .delete();
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(-400, vlan.getId()));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).delete();
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .delete();
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), 0));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).delete();
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .delete();
         assertEquals(response.getStatusCode(), 400);
-        
+
         resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), -1000));
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).delete();
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .delete();
         assertEquals(response.getStatusCode(), 400);
     }
-    
+
     /**
      * Performs and end-to-end test for a deletion.
      */
-    @Test
+    @Test(groups = {BASIC_INTEGRATION_TESTS})
     public void deleteVLANTestEndToEnd() throws Exception
     {
-        // Save the second network. The first one is the default, and you can not delete neither unique nor default-network.
+        // Save the second network. The first one is the default, and you can not delete neither
+        // unique nor default-network.
         // So we need to save another VLAN befor create the test
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs);
         vlan2.setEnterprise(vdc.getEnterprise());
         setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
-        
+
         Resource resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), vlan2.getId()));
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).delete();
+        ClientResponse response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .delete();
         // Response ok.
         assertEquals(Status.NO_CONTENT.getStatusCode(), response.getStatusCode());
-        
+
         // Perform a GET to ensure the entity has been deleted
-        response = resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).get();
+        response =
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).get();
         assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
-        
+
     }
-    
-    // DTO-LInk VLAN Related Tests       //
+
+    // DTO-LInk VLAN Related Tests //
     @Test
     public void vlanContainsEditLink()
     {
@@ -319,8 +338,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
      * @return the {@link VLANNetworkDto} transfer object.
      * @throws Exception pim-pam-pum
      */
-    public static VLANNetworkDto createTransferObject(VLANNetwork network,
-        Integer virtualDatacenterId) throws Exception
+    public static VLANNetworkDto createTransferObject(final VLANNetwork network,
+        final Integer virtualDatacenterId) throws Exception
     {
         VLANNetworkDto dto =
             ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);

@@ -23,6 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -124,7 +125,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         assertEquals(404, response.getStatusCode());
     }
 
-    @Test
+    @Test(groups = {BASIC_INTEGRATION_TESTS})
     public void createPrivateNetwork()
     {
         VLANNetworkDto dto = createValidNetworkDto();
@@ -154,7 +155,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         VLANNetworkDto dto = createValidNetworkDto();
         Integer integer = new Random().nextInt();
-        integer = (integer < 0) ? integer * (-1) : integer;
+        integer = integer < 0 ? integer * -1 : integer;
         ClientResponse response =
             post(resolvePrivateNetworksURI(integer), dto, "sysadmin", "sysadmin");
         assertErrors(response, 404, APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
