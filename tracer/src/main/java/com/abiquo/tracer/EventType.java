@@ -213,8 +213,3 @@ public enum EventType implements Serializable
         }
     }
 }
-
-<<<<<<< HEAD
-=======
-
->>>>>>> ABICLOUDPREMIUM-1994
