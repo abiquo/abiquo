@@ -128,7 +128,7 @@ public class ChefCookbook extends DefaultEntityBase
 
     private final static int COOKBOOK_LENGTH_MIN = 0;
 
-    private final static int COOKBOOK_LENGTH_MAX = 255;
+    private final static int COOKBOOK_LENGTH_MAX = 50;
 
     private final static boolean COOKBOOK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
