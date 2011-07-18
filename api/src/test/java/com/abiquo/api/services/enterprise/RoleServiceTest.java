@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.services.RoleService;
@@ -44,7 +44,7 @@ import com.abiquo.server.core.enterprise.User;
 
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-public class RoleServiceTest extends AbstractGeneratorTest
+public class RoleServiceTest extends AbstractUnitTest
 {
     private Enterprise e;
 
@@ -142,11 +142,11 @@ public class RoleServiceTest extends AbstractGeneratorTest
 
         Collection<Role> roles = service.getRolesByEnterprise(e1.getId(), null, "name", false);
         Role r = roles.iterator().next();
-        Assert.assertEquals(r.getName(), "r1");
+        org.testng.Assert.assertEquals(r.getName(), "r1");
 
         roles = service.getRolesByEnterprise(e1.getId(), null, "name", true);
         r = roles.iterator().next();
-        Assert.assertEquals(u.getNick(), "sysadmin");
+        org.testng.Assert.assertEquals(u.getNick(), "sysadmin");
     }
 
 }

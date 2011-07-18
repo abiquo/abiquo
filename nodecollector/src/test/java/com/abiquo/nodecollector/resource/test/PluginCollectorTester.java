@@ -20,17 +20,17 @@
  */
 package com.abiquo.nodecollector.resource.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -79,8 +79,7 @@ public abstract class PluginCollectorTester
 
     private String password;
 
-
-    @Before
+    @BeforeMethod
     public void getAnnotations() throws Exception
     {
         CollectorTest collectorTest = this.getClass().getAnnotation(CollectorTest.class);
@@ -116,10 +115,11 @@ public abstract class PluginCollectorTester
     public void getHostTest() throws Exception
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         HostDto host = response.getEntity(HostDto.class);
 
@@ -132,10 +132,12 @@ public abstract class PluginCollectorTester
     public void getVirtualSystemListTest() throws Exception
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
-                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         VirtualSystemCollectionDto vsc = response.getEntity(VirtualSystemCollectionDto.class);
 
@@ -220,16 +222,17 @@ public abstract class PluginCollectorTester
         String wrongFormedIp = "222.22.444";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + wrongFormedIp + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + wrongFormedIp + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
         assertNotNull(errorResponse);
-        
+
     }
 
     /**
@@ -241,16 +244,17 @@ public abstract class PluginCollectorTester
     {
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
         assertNotNull(errorResponse);
-        
+
     }
 
     /**
@@ -262,9 +266,11 @@ public abstract class PluginCollectorTester
     {
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
@@ -280,10 +286,11 @@ public abstract class PluginCollectorTester
     public void badRequestMissingPasswordHostResourceTest()
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                USER_KEY, user);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(USER_KEY, user);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
@@ -301,10 +308,11 @@ public abstract class PluginCollectorTester
         String fakePassword = "fakePassword";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                USER_KEY, fakeUser).queryParam(PASSWORD_KEY, fakePassword);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(USER_KEY, fakeUser).queryParam(PASSWORD_KEY, fakePassword);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
@@ -312,8 +320,8 @@ public abstract class PluginCollectorTester
         // KVM and XEN have a strange behaviour when the correct password is already informed
         // before.
         // So, this conditional 'if' avoid the asserts make the JUnit fault.
-        if (hypervisorType != HypervisorType.KVM
-            && hypervisorType != HypervisorType.XEN_3 && hypervisorType != HypervisorType.VBOX)
+        if (hypervisorType != HypervisorType.KVM && hypervisorType != HypervisorType.XEN_3
+            && hypervisorType != HypervisorType.VBOX)
         {
             assertTrue(response.getStatusCode() == 401);
             assertTrue(errorResponse.getMessage().equalsIgnoreCase(MessageValues.LOG_EXCP));
@@ -331,10 +339,11 @@ public abstract class PluginCollectorTester
         String notFoundIp = "10.60.2.200";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + notFoundIp + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(
-                USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + notFoundIp + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
@@ -364,10 +373,11 @@ public abstract class PluginCollectorTester
         }
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, wrongHypervisor.getValue()).queryParam(
-                USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, wrongHypervisor.getValue())
+                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
 
@@ -392,48 +402,51 @@ public abstract class PluginCollectorTester
         String wrongFormedIp = "222.22.444";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + wrongFormedIp + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
-                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + wrongFormedIp + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
         assertNotNull(errorResponse);
     }
-    
-    
+
     /**
-     * Test the 400 Bad Request response error when the hypervisor type is not one of the
-     * types in the values of the enum {@link HypervisorType} in the HostResource
+     * Test the 400 Bad Request response error when the hypervisor type is not one of the types in
+     * the values of the enum {@link HypervisorType} in the HostResource
      */
     @Test
     public void badRequestWrongHypervisorTypeHostResourceTest()
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, "mierdahypervisor").queryParam(
-                USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + HOST_RESOURCE).queryParam(HYPERVISOR_KEY, "mierdahypervisor")
+                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
-        
+
         assertTrue(response.getStatusCode() == 400);
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
         assertEquals(errorResponse.getMessage(), MessageValues.UNKNOWN_HYPERVISOR);
     }
-    
+
     /**
-     * Test the 400 Bad Request response error when the hypervisor type is not one of the
-     * types in the values of the enum {@link HypervisorType} in the VirtualSystemResource
+     * Test the 400 Bad Request response error when the hypervisor type is not one of the types in
+     * the values of the enum {@link HypervisorType} in the VirtualSystemResource
      */
     @Test
     public void badRequestWrongHypervisorTypeVirtualSystemResourceTest() throws Exception
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, "mierdahypervisor")
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, "mierdahypervisor")
                 .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
 
@@ -451,10 +464,11 @@ public abstract class PluginCollectorTester
     {
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(USER_KEY, user).queryParam(PASSWORD_KEY,
-                password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
@@ -471,9 +485,11 @@ public abstract class PluginCollectorTester
     {
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
                 .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
@@ -490,10 +506,11 @@ public abstract class PluginCollectorTester
     public void badRequestMissingPasswordVirtualSystemResourceTest()
     {
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
-                .queryParam(USER_KEY, user);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(USER_KEY, user);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         assertTrue(response.getStatusCode() == 400);
@@ -511,9 +528,11 @@ public abstract class PluginCollectorTester
         String fakePassword = "fakePassword";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + hypervisorIP + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
                 .queryParam(USER_KEY, fakeUser).queryParam(PASSWORD_KEY, fakePassword);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
@@ -522,8 +541,8 @@ public abstract class PluginCollectorTester
         // KVM and XEN have a strange behaviour when the correct password is already informed
         // before.
         // So, this conditional 'if' avoid the asserts make the JUnit fault.
-        if (hypervisorType != HypervisorType.KVM
-            && hypervisorType != HypervisorType.XEN_3 && hypervisorType != HypervisorType.VBOX)
+        if (hypervisorType != HypervisorType.KVM && hypervisorType != HypervisorType.XEN_3
+            && hypervisorType != HypervisorType.VBOX)
         {
             assertTrue(response.getStatusCode() == 401);
             assertTrue(errorResponse.getMessage().equalsIgnoreCase(MessageValues.LOG_EXCP));
@@ -541,10 +560,12 @@ public abstract class PluginCollectorTester
         String notFoundIp = "10.60.2.200";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + notFoundIp + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
-                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + notFoundIp + "/"
+                        + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
 
@@ -559,10 +580,12 @@ public abstract class PluginCollectorTester
         String preconditionFailedIp = "10.60.1.225";
 
         Resource resource =
-            client.resource(
-                "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + preconditionFailedIp + "/"
-                    + VIRTUAL_SYSTEM_RESOURCE).queryParam(HYPERVISOR_KEY, hypervisorType.getValue())
-                .queryParam(USER_KEY, user).queryParam(PASSWORD_KEY, password);
+            client
+                .resource(
+                    "http://" + HOST_NAME + ":" + PORT + "/nodecollector/" + preconditionFailedIp
+                        + "/" + VIRTUAL_SYSTEM_RESOURCE)
+                .queryParam(HYPERVISOR_KEY, hypervisorType.getValue()).queryParam(USER_KEY, user)
+                .queryParam(PASSWORD_KEY, password);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         ErrorDto errorResponse = response.getEntity(ErrorDto.class);
