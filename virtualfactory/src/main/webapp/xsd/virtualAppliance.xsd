@@ -498,7 +498,8 @@
         <xs:attribute name="format" type="xs:string" use="required">
             <xs:annotation>
                 <xs:documentation>Format of virtual disk given as a URI that identifies the disk
-                    type</xs:documentation>
+                    type
+                </xs:documentation>
             </xs:annotation>
         </xs:attribute>
         <xs:attribute name="populatedSize" type="xs:long" use="optional">

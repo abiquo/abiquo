@@ -25,11 +25,8 @@ hr {
 	<table>
 		<c:forEach items="${checks}" var="checkEntry">
 			<tr>
-				<td><b><c:out value="${checkEntry.key}" />
-				</b>
-				</td>
-				<td><c:out value="${checkEntry.value}" />
-				</td>
+				<td><b><c:out value="${checkEntry.key}" /> </b></td>
+				<td><c:out value="${checkEntry.value}" /></td>
 			</tr>
 		</c:forEach>
 	</table>
@@ -39,11 +36,8 @@ hr {
 	<table>
 		<c:forEach items="${config}" var="configEntry">
 			<tr>
-				<td><b><c:out value="${configEntry.key}" />
-				</b>
-				</td>
-				<td><c:out value="${configEntry.value}" />
-				</td>
+				<td><b><c:out value="${configEntry.key}" /> </b></td>
+				<td><c:out value="${configEntry.value}" /></td>
 			</tr>
 		</c:forEach>
 	</table>
@@ -60,10 +54,8 @@ hr {
 			<th>Type</th>
 			<c:forEach items="${pms}" var="pm">
 				<tr>
-					<td><c:out value="${pm.address}" />
-					</td>
-					<td><c:out value="${pm.type}" />
-					</td>
+					<td><c:out value="${pm.address}" /></td>
+					<td><c:out value="${pm.type}" /></td>
 				</tr>
 			</c:forEach>
 		</table>
@@ -80,12 +72,9 @@ hr {
 			<th>Last known state</th>
 			<c:forEach items="${vms}" var="vm">
 				<tr>
-					<td><c:out value="${vm.name}" />
-					</td>
-					<td><c:out value="${vm.physicalMachine.address}" />
-					</td>
-					<td><c:out value="${vm.lastKnownState}" />
-					</td>
+					<td><c:out value="${vm.name}" /></td>
+					<td><c:out value="${vm.physicalMachine.address}" /></td>
+					<td><c:out value="${vm.lastKnownState}" /></td>
 				</tr>
 			</c:forEach>
 		</table>

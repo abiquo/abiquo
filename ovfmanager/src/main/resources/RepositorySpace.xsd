@@ -38,7 +38,7 @@
                 <xs:attribute name="RepositoryURI" type="xs:anyURI" use="optional" />
                 <!-- if not present the RepositorySpace RepositoryName is taken as the default -->
                 <xs:attribute name="RepositoryName" type="xs:string" use="optional" />
-                <!-- repository relative path to the OVF envelope document (RepositoryURI+OVFFile = OVF 
+                <!-- repository relative path to the OVF envelope document (RepositoryURI+OVFFile = OVF
                     identifier and locator) -->
                 <!-- RepositoryURI+OVFFile identify the OVF envelope file -->
                 <xs:attribute name="OVFFile" type="xs:string" use="required" />

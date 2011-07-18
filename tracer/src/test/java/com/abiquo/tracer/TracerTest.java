@@ -21,6 +21,7 @@
 
 package com.abiquo.tracer;
 
+import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
 import static com.abiquo.tracer.Datacenter.datacenter;
 import static com.abiquo.tracer.Enterprise.enterprise;
 import static com.abiquo.tracer.Machine.machine;
@@ -75,10 +76,10 @@ public class TracerTest
             }
         }
         t.destroy();
-        assert true;
+        assert (true);
     }
 
-    @Test
+    @Test(groups = BASIC_UNIT_TESTS)
     public void testFluentInterface() throws Exception
     {
         Platform platform =
@@ -129,6 +130,6 @@ public class TracerTest
                     virtualDatacenter("myVirtualDatacenter").virtualAppliance(
                         virtualAppliance("myVirtualAppliance").network(network("myNetwork")))));
 
-        assert true;
+        assert (true);
     }
 }

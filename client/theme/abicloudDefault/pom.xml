@@ -138,7 +138,7 @@
                             <goal>wrapper</goal>
                         </goals>
                     </execution>
-                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos 
+                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos
                         issue -->
                     <!-- application CSS file -->
                     <execution>

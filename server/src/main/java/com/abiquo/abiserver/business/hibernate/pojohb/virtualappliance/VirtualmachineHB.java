@@ -346,6 +346,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         virtualMachine.setIdType(idType);
         virtualMachine.setDatastore(datastore == null ? null : datastore.toPojo());
         virtualMachine.setPassword(password);
+
         return virtualMachine;
     }
 

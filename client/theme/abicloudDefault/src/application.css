@@ -40,9 +40,10 @@ CursorManager {
 }
 
 ToolTip {
-	background-image: Embed("/assets/flexcomponents/tooltip/background.png", scaleGridTop =
-		"7", scaleGridBottom = "16", scaleGridLeft = "7", scaleGridRight =
-		"10");
+	background-image: Embed("/assets/flexcomponents/tooltip/background.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "16", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	background-size: "100%";
 	padding-top: 2;
 	padding-left: 5;
@@ -121,23 +122,31 @@ ScrollBar {
 	down-arrow-over-skin: Embed("/assets/flexcomponents/scrollbar/downarrow_up.png");
 	down-arrow-down-skin: Embed("/assets/flexcomponents/scrollbar/downarrow_down.png");
 	thumb-icon: Embed("/assets/flexcomponents/scrollbar/thumb_icon.png");
-	thumb-up-skin: Embed("/assets/flexcomponents/scrollbar/thumb_up.png", scaleGridTop =
-		"3", scaleGridBottom = "7", scaleGridLeft = "2", scaleGridRight = "11"
-		);
-	thumb-over-skin: Embed("/assets/flexcomponents/scrollbar/thumb_over.png", scaleGridTop =
-		"3", scaleGridBottom = "7", scaleGridLeft = "2", scaleGridRight = "11"
-		);
-	thumb-down-skin: Embed("/assets/flexcomponents/scrollbar/thumb_down.png", scaleGridTop =
-		"3", scaleGridBottom = "7", scaleGridLeft = "2", scaleGridRight = "11"
-		);
-	track-skin: Embed("/assets/flexcomponents/scrollbar/track.png", scaleGridTop = "17",
-		scaleGridBottom = "28", scaleGridLeft = "3", scaleGridRight = "12");
+	thumb-up-skin: Embed("/assets/flexcomponents/scrollbar/thumb_up.png", scaleGridTop =   
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	thumb-over-skin: Embed("/assets/flexcomponents/scrollbar/thumb_over.png", scaleGridTop = 
+		 
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	thumb-down-skin: Embed("/assets/flexcomponents/scrollbar/thumb_down.png", scaleGridTop = 
+		 
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	track-skin: Embed("/assets/flexcomponents/scrollbar/track.png", scaleGridTop =    
+		  "17", scaleGridBottom =       "28", scaleGridLeft =       "3",
+		scaleGridRight =       "12");
 }
 
 TextArea {
 	background-image: Embed("/assets/flexcomponents/textarea/background.png", scaleGridTop =
-		"10", scaleGridBottom = "11", scaleGridLeft = "11", scaleGridRight =
-		"15");
+		  
+		   "10", scaleGridBottom =       "11", scaleGridLeft =       "11",
+		scaleGridRight =   
+		   "15");
 	background-size: "100%";
 	border-style: none;
 	background-color: none;
@@ -161,8 +170,9 @@ NumericStepper {
 	down-arrow-down-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_down.png");
 	down-arrow-disabled-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
 	background-image: Embed("/assets/flexcomponents/numericstepper/background.png",
-		scaleGridTop = "2", scaleGridBottom = "15", scaleGridLeft = "7",
-		scaleGridRight = "10");
+		scaleGridTop =       "2", scaleGridBottom =       "15", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	background-size: "100%";
 	border-style: none;
 	disabled-color: #999999;
@@ -196,23 +206,29 @@ AccordionHeader {
 	text-roll-over-color: #505050;
 	text-selected-color: #000000;
 	up-skin: Embed("/assets/flexcomponents/accordionheader/up_skin.png", scaleGridTop
-		= "3", scaleGridBottom = "19", scaleGridLeft = "17", scaleGridRight =
-		"19");
+		=       "3", scaleGridBottom =       "19", scaleGridLeft =       "17",
+		scaleGridRight =   
+		   "19");
 	over-skin: Embed("/assets/flexcomponents/accordionheader/over_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "17",
-		scaleGridRight = "19");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
 	down-skin: Embed("/assets/flexcomponents/accordionheader/down_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "17",
-		scaleGridRight = "19");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
 	selected-up-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "17",
-		scaleGridRight = "19");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
 	selected-over-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "17",
-		scaleGridRight = "19");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
 	selected-down-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "17",
-		scaleGridRight = "19");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
 	padding-left: 15;
 	padding-top: 1;
 	font-weight: bold;
@@ -221,11 +237,14 @@ AccordionHeader {
 
 HSlider {
 	thumb-skin: Embed("/assets/flexcomponents/hslider/thumb_skin.png");
-	thumb-down-skin: Embed(source = "/assets/flexcomponents/hslider/thumb_down_skin.png");
-	thumb-disabled-skin: Embed(source = "/assets/flexcomponents/hslider/thumb_disabled_skin.png");
-	track-skin: Embed(source = "/assets/flexcomponents/hslider/track_skin.png",
-		scaleGridTop = "2", scaleGridBottom = "3", scaleGridLeft = "4",
-		scaleGridRight = "50");
+	thumb-down-skin: Embed(source =      
+		"/assets/flexcomponents/hslider/thumb_down_skin.png");
+	thumb-disabled-skin: Embed(source =    
+		  "/assets/flexcomponents/hslider/thumb_disabled_skin.png");
+	track-skin: Embed(source =       "/assets/flexcomponents/hslider/track_skin.png",
+		scaleGridTop =       "2", scaleGridBottom =       "3", scaleGridLeft =
+		    
+		 "4", scaleGridRight =       "50");
 	data-tip-offset: 0;
 }
 
@@ -243,15 +262,23 @@ RadioButton {
 }
 
 Button {
-	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop = "5",
-		scaleGridBottom = "13", scaleGridLeft = "5", scaleGridRight = "12");
-	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop = "5",
-		scaleGridBottom = "13", scaleGridLeft = "5", scaleGridRight = "12");
-	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop = "5",
-		scaleGridBottom = "13", scaleGridLeft = "5", scaleGridRight = "12");
-	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop =
-		"5", scaleGridBottom = "13", scaleGridLeft = "5", scaleGridRight =
-		"12");
+	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop =     
+		 "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =    
+		  "12");
+	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop = 
+		 
+		   "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =   
+		   "12");
 	/*
 		font-weight:			normal;
 		font-size:				11;
@@ -269,17 +296,24 @@ Button {
 
 .AlternativeButton {
 	up-skin: Embed("/assets/customcomponents/buttons/alternativebutton/up_skin.png",
-		scaleGridTop = "5", scaleGridBottom = "13", scaleGridLeft = "5",
-		scaleGridRight = "12");
+		scaleGridTop =       "5", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "12");
 	over-skin: Embed("/assets/customcomponents/buttons/alternativebutton/over_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "13", scaleGridLeft = "5",
-		scaleGridRight = "12");
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
 	down-skin: Embed("/assets/customcomponents/buttons/alternativebutton/down_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "13", scaleGridLeft = "5",
-		scaleGridRight = "12");
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
 	disabled-skin: Embed("/assets/customcomponents/buttons/alternativebutton/disabled_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "13", scaleGridLeft = "5",
-		scaleGridRight = "12");
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
 	font-weight: normal;
 	font-size: 11;
 	color: #505050;
@@ -315,7 +349,12 @@ List {
 	selectionColor: #cccccc;
 	cornerRadius: 0;
 	background-image: Embed("/assets/flexcomponents/list/background_image.png", scaleGridTop =
-		"1", scaleGridBottom = "8", scaleGridLeft = "1", scaleGridRight = "8");
+		
+		
+		
+		   "1", scaleGridBottom =       "8", scaleGridLeft =       "1",
+		scaleGridRight =  
+		    "8");
 	background-size: "100%";
 	padding-bottom: 0;
 	padding-left: 5;
@@ -329,8 +368,9 @@ List {
 	selectionColor: #cccccc;
 	cornerRadius: 0;
 	background-image: Embed("/assets/flexcomponents/list/background_image2.png", scaleGridTop
-		= "1", scaleGridBottom = "8", scaleGridLeft = "1", scaleGridRight =
-		"8");
+		=       "1", scaleGridBottom =       "8", scaleGridLeft =       "1",
+		scaleGridRight =   
+		   "8");
 	background-size: "100%";
 	padding-bottom: 0;
 	padding-left: 5;
@@ -371,92 +411,130 @@ List {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab.png",
-		scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		scaleGridTop =       "6", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "6", scaleGridRight =       "10");
 	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_over.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
 	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
 	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "6",
-		scaleGridRight = "10");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
 }
 
 .HorizontalTabBarTab {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
 	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
 }
 
 .HorizontalTabBarTabOneTab {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "10", scaleGridLeft = "5",
-		scaleGridRight = "10");
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
 }
 
 .HorizontalTabBarLastTab {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab.png",
-		scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		scaleGridTop =       "6", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "15");
 	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_over.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
 	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
 	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
 	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
 	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
-		, scaleGridTop = "6", scaleGridBottom = "10", scaleGridLeft = "4",
-		scaleGridRight = "15");
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
 }
 
 .CustomVerticalTabBar {
@@ -475,69 +553,95 @@ List {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
 	over-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_over.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
 	down-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 }
 
 .VerticalTabBarTab {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customverticaltabbar/Tab.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 	over-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_over.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 	down-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
-		scaleGridTop = "4", scaleGridBottom = "14", scaleGridLeft = "4",
-		scaleGridRight = "50");
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
 }
 
 .VerticalTabBarLastTab {
 	color: #505050;
 	text-roll-over-color: #505050;
 	skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab.png",
-		scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		scaleGridTop =       "4", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
 	over-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_over.png",
-		scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		scaleGridTop =       "4", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
 	down-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
-		, scaleGridTop = "4", scaleGridBottom = "13", scaleGridLeft = "7",
-		scaleGridRight = "47");
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
 }
 
 .AlternativeTabBar {
@@ -564,29 +668,38 @@ List {
 	color: #000000;
 	text-roll-over-color: #000000;
 	skin: Embed("/assets/customcomponents/alternativetabbar/Tab_up.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 	over-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_over.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 	down-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_over.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 	selected-up-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 	selected-over-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 	selected-down-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
-		scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
 }
 
 .AbiCloudBlindContainer {
 	background-image: Embed("/assets/customcomponents/abicloudblind/background_image.png",
-		scaleGridTop = "15", scaleGridBottom = "20", scaleGridLeft = "15",
-		scaleGridRight = "20");
+		scaleGridTop =       "15", scaleGridBottom =       "20", scaleGridLeft
+		= 
+		  
+		  "15", scaleGridRight =       "20");
+>>>>>>> standarize
 	background-size: "100%";
 	horizontal-center: 0;
 	padding-left: 15;
@@ -603,8 +716,10 @@ List {
 
 .GeneralToggleContainerVS {
 	background-image: Embed("/assets/customcomponents/generaltoggledcontainer/viewstack/background.png"
-		, scaleGridTop = "39", scaleGridBottom = "40", scaleGridLeft = "22",
-		scaleGridRight = "28");
+		, scaleGridTop =       "39", scaleGridBottom =       "40",
+		scaleGridLeft = 
+		  
+		  "22", scaleGridRight =       "28");
 	background-size: "100%";
 }
 
@@ -634,23 +749,35 @@ List {
 	color: #000000;
 	text-roll-over-color: #000000;
 	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "10", scaleGridLeft = "7",
-		scaleGridRight = "9");
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
 }
 
 .GeneralToggleButtonBarTab {
@@ -662,23 +789,29 @@ List {
 	color: #000000;
 	text-roll-over-color: #000000;
 	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab.png",
-		scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "7");
 	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
 	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
 	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
 	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
 	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "7");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
 }
 
 .GeneralToggleButtonBarLastTab {
@@ -690,23 +823,29 @@ List {
 	color: #000000;
 	text-roll-over-color: #000000;
 	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
-		, scaleGridTop = "7", scaleGridBottom = "8", scaleGridLeft = "2",
-		scaleGridRight = "4");
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
 }
 
 .FullScreenButton {
@@ -800,8 +939,9 @@ List {
 
 .GeneralPanelHeaderSkin {
 	background-image: Embed("/assets/application/skins/generalpanel_header_skin.png",
-		scaleGridTop = "9", scaleGridBottom = "13", scaleGridLeft = "9",
-		scaleGridRight = "12");
+		scaleGridTop =       "9", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "9", scaleGridRight =       "12");
 	background-size: "100%";
 	padding-top: 1;
 	font-weight: bold;
@@ -814,30 +954,34 @@ List {
 
 .GeneralDataPanelTopSkin {
 	background-image: Embed("/assets/application/skins/generaldatapanel_top_skin.png",
-		scaleGridTop = "1", scaleGridBottom = "8", scaleGridLeft = "1",
-		scaleGridRight = "8");
+		scaleGridTop =       "1", scaleGridBottom =       "8", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "8");
 	background-size: "100%";
 }
 
 .GeneralDataPanelTopFullSkin {
 	background-image: Embed("/assets/application/skins/generaldatapanel_top_full_skin.png",
-		scaleGridTop = "1", scaleGridBottom = "8", scaleGridLeft = "1",
-		scaleGridRight = "8");
+		scaleGridTop =       "1", scaleGridBottom =       "8", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "8");
 	background-size: "100%";
 }
 
 .GeneralPanelBottomSkin {
 	background-image: Embed("/assets/application/skins/generalpanel_bottom_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "8",
-		scaleGridRight = "22");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
 	background-size: "100%";
 	vertical-align: middle;
 }
 
 .GeneralSubPanelBottomSkin {
 	background-image: Embed("/assets/application/skins/general_subpanel_bottom_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "8",
-		scaleGridRight = "22");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
 	background-size: "100%";
 	vertical-align: middle;
 	horizontal-gap: "5";
@@ -847,8 +991,9 @@ List {
 
 .GeneralDataPanelBottomSkin {
 	background-image: Embed("/assets/application/skins/generaldatapanel_bottom_skin.png",
-		scaleGridTop = "3", scaleGridBottom = "19", scaleGridLeft = "8",
-		scaleGridRight = "22");
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
 	background-size: "100%";
 	/*padding-top:			5px;*/
 }
@@ -869,8 +1014,9 @@ List {
 
 .VerticalStateBlackBarSkin {
 	background-image: Embed("/assets/application/skins/verticalstateblackbar_skin.png",
-		scaleGridTop = "1", scaleGridBottom = "2", scaleGridLeft = "1",
-		scaleGridRight = "26");
+		scaleGridTop =       "1", scaleGridBottom =       "2", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "26");
 	background-size: "100%";
 }
 
@@ -880,8 +1026,11 @@ List {
 }
 
 .VerticalGreyBarSkin {
-	background-image: Embed("/assets/application/skins/gray_skin.png", scaleGridTop = "3",
-		scaleGridBottom = "12", scaleGridLeft = "3", scaleGridRight = "30");
+	background-image: Embed("/assets/application/skins/gray_skin.png", scaleGridTop =      
+		"3", scaleGridBottom =       "12", scaleGridLeft =       "3",
+		scaleGridRight = 
+		  
+		  "30");
 	background-size: "100%";
 }
 
@@ -965,23 +1114,29 @@ List {
 
 .MoreActionsButton {
 	up-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png",
-		scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "25");
 	over-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png",
-		scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "25");
 	down-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/down_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
 	pop-up-over-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_over_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
 	pop-up-down-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_down_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
 	disabled-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/disabled_skin.png"
-		, scaleGridTop = "5", scaleGridBottom = "7", scaleGridLeft = "5",
-		scaleGridRight = "25");
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
 	font-weight: normal;
 	font-size: 11;
 	color: #505050;

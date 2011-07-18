@@ -122,7 +122,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/users/*"
             method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*"
-            method="PUT" access="ROLE_USERS_MANAGE_USERS, ROLE_ENTERPRISE_ADMINISTER_ALL" />
+            method="PUT" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_USERS, ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <security:intercept-url pattern="/admin/enterprises/*/users/*/action/virtualmachines"
             method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <!-- LIMITS -->
@@ -560,6 +560,9 @@
         <security:http-basic />
         <security:remember-me services-ref="tokenService" key="abiquo-auth-key" />
     </security:http>
+    <security:authentication-provider user-service-ref="userDetailsService">
+        <security:password-encoder hash="md5" />
+    </security:authentication-provider>
     <bean id="tokenService" class="com.abiquo.api.spring.security.rememberme.AbiquoTokenBasedRememberMe">
         <!-- This must be an AbiquoUserDetailsService -->
         <property name="userDetailsService" ref="userDetailsService" />
