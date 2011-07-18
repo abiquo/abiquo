@@ -4,7 +4,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                             http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd">
     <import resource="commonbeaninjection.xml" />
-    <!-- applicationContextProvider: provides the application context in any place of the virtualfactory's 
+    <!-- applicationContextProvider: provides the application context in any place of the virtualfactory's
         project -->
     <bean id="applicationContextProvider" class="com.abiquo.virtualfactory.context.ApplicationContextProvider" />
 </beans>

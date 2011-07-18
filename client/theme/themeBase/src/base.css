@@ -50,10 +50,11 @@ Label {
 }
 
 .MainLoginStyle {
-	background-image: Embed("/assets/application/login/background_image.png", scaleGridTop =  
-		  "62", scaleGridBottom =     "80", scaleGridLeft =     "17",
-		scaleGridRight =  
-		  "80");
+	background-image: Embed("/assets/application/login/background_image.png", scaleGridTop =
+		  
+		   "62", scaleGridBottom =       "80", scaleGridLeft =       "17",
+		scaleGridRight =   
+		   "80");
 	background-size: "100%";
 	padding-bottom: 16;
 	padding-left: 20;
@@ -63,8 +64,9 @@ Label {
 
 .MainLoginStyleIntern {
 	background-image: Embed("/assets/application/login/intern_background_image.jpg",
-		scaleGridTop =     "7", scaleGridBottom =     "9", scaleGridLeft =    
-		"6", scaleGridRight =     "8");
+		scaleGridTop =       "7", scaleGridBottom =       "9", scaleGridLeft =
+		    
+		 "6", scaleGridRight =       "8");
 	background-size: "100%";
 	padding-bottom: 18;
 	padding-left: 15;
@@ -73,11 +75,11 @@ Label {
 }
 
 TextInput {
-	background-image: Embed("/assets/flexcomponents/textinput/background.png", scaleGridTop =
+	background-image: Embed("/assets/flexcomponents/textinput/background.png", scaleGridTop = 
 		 
-		  "10", scaleGridBottom =     "11", scaleGridLeft =     "11",
-		scaleGridRight =  
-		  "15");
+		   "10", scaleGridBottom =       "11", scaleGridLeft =       "11",
+		scaleGridRight =   
+		   "15");
 	background-size: "100%";
 	border-style: none;
 	background-color: none;
@@ -92,9 +94,10 @@ TextInput {
 
 .TextInputInvalid {
 	background-image: Embed("/assets/flexcomponents/textinput/background_error.png",
-		scaleGridTop =     "10", scaleGridBottom =     "11", scaleGridLeft =
+		scaleGridTop =       "10", scaleGridBottom =       "11", scaleGridLeft
+		= 
 		  
-		 "11", scaleGridRight =     "15");
+		  "11", scaleGridRight =       "15");
 	background-size: "100%";
 	border-style: none;
 	background-color: none;
@@ -143,23 +146,23 @@ Alert {
 	 * by default, but is overwritten in the main theme
 	 **/
 Button {
-	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop =    
-		"5", scaleGridBottom =     "13", scaleGridLeft =     "5",
-		scaleGridRight =   
-		 "12");
-	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop =   
-		 "5", scaleGridBottom =     "13", scaleGridLeft =     "5",
-		scaleGridRight = 
-		   "12");
-	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop =   
-		 "5", scaleGridBottom =     "13", scaleGridLeft =     "5",
-		scaleGridRight = 
-		   "12");
-	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop =
-		 
-		  "5", scaleGridBottom =     "13", scaleGridLeft =     "5",
-		scaleGridRight =  
+	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop =     
+		 "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =    
 		  "12");
+	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop = 
+		 
+		   "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =   
+		   "12");
 	font-weight: normal;
 	font-size: 11;
 	color: #ffffff;
@@ -175,35 +178,35 @@ Button {
 }
 
 ComboBox {
-	up-skin: Embed("/assets/flexcomponents/combobox/up_skin.png", scaleGridTop =   
-		 "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight = 
+	up-skin: Embed("/assets/flexcomponents/combobox/up_skin.png", scaleGridTop =    
+		  "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =  
+		    "13");
+	over-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =   
+		   "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
 		   "13");
-	over-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =  
-		  "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight =  
-		  "13");
-	down-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =  
-		  "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight =  
-		  "13");
+	down-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =   
+		   "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
 	border-alpha: 0;
 	background-alpha: 0;
 }
 
 .ComboBoxInvalid {
 	up-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
-		=     "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight =  
-		  "13");
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
 	over-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
-		=     "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight =  
-		  "13");
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
 	down-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
-		=     "6", scaleGridBottom =     "13", scaleGridLeft =     "6",
-		scaleGridRight =  
-		  "13");
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
 	border-alpha: 0;
 	background-alpha: 0;
 }
@@ -214,9 +217,10 @@ CursorManager {
 
 .AbiCloudAlert {
 	background-image: Embed("/assets/customcomponents/abicloudalert/background_image.png",
-		scaleGridTop =     "29", scaleGridBottom =     "113", scaleGridLeft =
+		scaleGridTop =       "29", scaleGridBottom =       "113",
+		scaleGridLeft = 
 		  
-		 "48", scaleGridRight =     "231");
+		  "48", scaleGridRight =       "231");
 	background-size: "100%";
 }
 
@@ -247,9 +251,10 @@ CursorManager {
 
 .AbiCloudPopUp {
 	background-image: Embed("/assets/customcomponents/abicloudpopup/background_image.png",
-		scaleGridTop =     "29", scaleGridBottom =     "113", scaleGridLeft =
+		scaleGridTop =       "29", scaleGridBottom =       "113",
+		scaleGridLeft = 
 		  
-		 "48", scaleGridRight =     "231");
+		  "48", scaleGridRight =       "231");
 	background-size: "100%";
 	padding-bottom: "30";
 	padding-left: "21";

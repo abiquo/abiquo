@@ -55,9 +55,10 @@
 
 .GoogleMapMark {
 	background-image: Embed("/assets/infrastructure/mapmark_background_image.png",
-		scaleGridTop =     "17", scaleGridBottom =     "20", scaleGridLeft =
+		scaleGridTop =       "17", scaleGridBottom =       "20", scaleGridLeft
+		= 
 		  
-		 "17", scaleGridRight =     "21");
+		  "17", scaleGridRight =       "21");
 	background-size: "100%";
 }
 

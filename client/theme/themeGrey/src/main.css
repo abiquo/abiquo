@@ -60,19 +60,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/startbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderInfrastructureButton {
@@ -97,19 +100,22 @@
 		);
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderVirtualAppButton {
@@ -128,19 +134,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/virtualappbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderVirtualImageButton {
@@ -163,19 +172,22 @@
 		);
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderUsersButton {
@@ -194,19 +206,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/usersbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderDocumentationButton {
@@ -229,19 +244,22 @@
 		);
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderReportButton {
@@ -260,19 +278,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/reportbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderSupportButton {
@@ -291,19 +312,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/supportbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderMeteringButton {
@@ -322,19 +346,22 @@
 	selected-down-icon: Embed("/assets/application/main/header/meteringbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderConfigurationButton {
@@ -357,19 +384,22 @@
 		);
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =     "7", scaleGridBottom =     "45", scaleGridLeft =
-		    "7", scaleGridRight =     "10");
+		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
 }
 
 .MainHeaderLogoutButton {
@@ -391,28 +421,29 @@
 	selected-down-icon: Embed("/assets/application/main/header/logoutbutton/down_icon.png");
 	up-skin: Embed("/assets/nullPixel.png");
 	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =  
-		  "7", scaleGridBottom =     "45", scaleGridLeft =     "7",
-		scaleGridRight =  
-		  "10");
+	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
 	selected-up-skin: Embed("/assets/nullPixel.png");
 	selected-over-skin: Embed("/assets/nullPixel.png");
 	selected-down-skin: Embed("/assets/nullPixel.png");
 }
 
 .MainWindow {
-	background-image: Embed("/assets/application/main/background_image.png", scaleGridTop =  
-		  "62", scaleGridBottom =     "80", scaleGridLeft =     "17",
-		scaleGridRight =  
-		  "80");
+	background-image: Embed("/assets/application/main/background_image.png", scaleGridTop =   
+		   "62", scaleGridBottom =       "80", scaleGridLeft =       "17",
+		scaleGridRight =   
+		   "80");
 	background-size: "100%";
 	background-color: none;
 }
 
 .MainFooterSkin {
 	background-image: Embed("/assets/application/main/footer/background_image.png",
-		scaleGridTop =     "8", scaleGridBottom =     "15", scaleGridLeft =
-		    "8", scaleGridRight =     "19");
+		scaleGridTop =       "8", scaleGridBottom =       "15", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "19");
 	background-size: "100%";
 	color: #cccccc;
 	horizontal-gap: "0";

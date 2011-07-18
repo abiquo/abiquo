@@ -344,7 +344,8 @@
                     <xs:element name="AppUrl" type="cim:cimString" minOccurs="0">
                         <xs:annotation>
                             <xs:documentation>Experimental: URL resolving to deployed product
-                                instance</xs:documentation>
+                                instance
+                            </xs:documentation>
                         </xs:annotation>
                     </xs:element>
                     <xs:element name="Icon" minOccurs="0" maxOccurs="unbounded">

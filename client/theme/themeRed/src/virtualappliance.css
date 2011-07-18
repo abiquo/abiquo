@@ -20,9 +20,10 @@
  */
 .VirtualApplianceDeployingSkin {
 	background-image: Embed("/assets/virtualappliance/virtualappliancedeploying_background.png"
-		, scaleGridTop =     "7", scaleGridBottom =     "11", scaleGridLeft =
+		, scaleGridTop =       "7", scaleGridBottom =       "11",
+		scaleGridLeft = 
 		  
-		 "7", scaleGridRight =     "11");
+		  "7", scaleGridRight =       "11");
 	background-size: "100%";
 	padding-bottom: "15";
 	padding-left: "15";
@@ -148,20 +149,22 @@
 	up-skin: Embed("/assets/virtualappliance/erasebutton/up_skin.png", scaleGridTop =
 		
 		
-		  "8", scaleGridBottom =     "9", scaleGridLeft =     "8",
-		scaleGridRight = 
-		   "12");
+		
+		   "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =  
+		    "12");
 	over-skin: Embed("/assets/virtualappliance/erasebutton/over_skin.png", scaleGridTop
-		=     "8", scaleGridBottom =     "9", scaleGridLeft =     "8",
-		scaleGridRight =  
-		  "12");
+		=       "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =   
+		   "12");
 	down-skin: Embed("/assets/virtualappliance/erasebutton/down_skin.png", scaleGridTop
-		=     "8", scaleGridBottom =     "9", scaleGridLeft =     "8",
-		scaleGridRight =  
-		  "12");
+		=       "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =   
+		   "12");
 	disabled-skin: Embed("/assets/virtualappliance/erasebutton/disabled_skin.png",
-		scaleGridTop =     "8", scaleGridBottom =     "9", scaleGridLeft =    
-		"8", scaleGridRight =     "12");
+		scaleGridTop =       "8", scaleGridBottom =       "9", scaleGridLeft =
+		    
+		 "8", scaleGridRight =       "12");
 	font-size: 9;
 	color: #333333;
 	roll-over-color: #333333;
