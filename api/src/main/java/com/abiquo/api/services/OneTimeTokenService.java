@@ -45,20 +45,22 @@ public class OneTimeTokenService extends DefaultApiService
     private Logger LOGGER = LoggerFactory.getLogger(OneTimeTokenService.class);
 
     @Autowired
-    EnterpriseRep repo;
+    private EnterpriseRep repo;
 
     /**
      * Generates a valid and persisted one time token to be used as an authentication header in http
      * petitions.
      */
     @Transactional(readOnly = false)
-    public void generateOneTimeToken()
+    public String generateOneTimeToken()
     {
         LOGGER.debug("generateOneTimeToken: generating token... ");
         String token = generateToken();
 
         repo.persistToken(token);
         LOGGER.debug("generateOneTimeToken: token generated!");
+
+        return token;
     }
 
     /**

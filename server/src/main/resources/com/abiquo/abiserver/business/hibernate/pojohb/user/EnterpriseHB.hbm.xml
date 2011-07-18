@@ -17,10 +17,20 @@
 		<property name="name" type="string">
 			<column length="40" name="name" not-null="true" />
 		</property>
-		
 		<property name="isReservationRestricted" type="boolean">
         	<column name="isReservationRestricted" />
         </property>
+        <property name="chefURL" type="string">
+            <column name="chef_url" length="255" not-null="false" />
+        </property>
+        <property name="chefClientCertificate" type="string">
+            <column name="chef_client_certificate" sql-type="TEXT" not-null="false"/>
+        </property>
+        <property name="chefValidatorCertificate" type="string">
+            <column name="chef_validator_certificate" sql-type="TEXT" not-null="false" />
+        </property>
+        
+		<!-- Limits -->
 		
 		<set name="dcLimits" lazy="false" cascade="all-delete-orphan">
 			<key>
@@ -29,7 +39,6 @@
 			<one-to-many
 				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
 		</set>
-		<!-- Limits -->
 
 		<component name="limits"
 			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
@@ -92,6 +101,7 @@
 			<one-to-many
 				class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
 		</set>
+		
 	</class>
 
 
