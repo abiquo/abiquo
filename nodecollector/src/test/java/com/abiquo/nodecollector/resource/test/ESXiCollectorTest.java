@@ -23,7 +23,6 @@ package com.abiquo.nodecollector.resource.test;
 
 import com.abiquo.model.enumerator.HypervisorType;
 
-
 /**
  * This test case tries to be an end-to-end test to be executed before the deployment of the
  * platform for the Hypervisor ESXi.

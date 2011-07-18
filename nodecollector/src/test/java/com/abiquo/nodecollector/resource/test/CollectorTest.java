@@ -28,7 +28,6 @@ import java.lang.annotation.Target;
 
 import com.abiquo.model.enumerator.HypervisorType;
 
-
 /**
  * The values that should be informed in the Collector plugins to identify the Hypervisor and its
  * IPs in the environment.
