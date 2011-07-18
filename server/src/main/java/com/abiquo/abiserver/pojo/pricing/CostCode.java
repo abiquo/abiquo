@@ -23,51 +23,35 @@ package com.abiquo.abiserver.pojo.pricing;
 
 import java.io.Serializable;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.pricing.CostCodeHB;
-import com.abiquo.abiserver.pojo.IPojo;
-
-public class CostCode implements IPojo<CostCodeHB>, Serializable
+public class CostCode implements Serializable
 {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    
-    private Integer id;
-    
-    private String variable;
-    
 
-    
-    
+    private Integer id;
+
+    private String variable;
+
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
-
 
     public String getVariable()
     {
         return variable;
     }
 
-    public void setVariable(String variable)
+    public void setVariable(final String variable)
     {
         this.variable = variable;
-    }
-
-    public CostCodeHB toPojoHB(){
-        
-        CostCodeHB costCodeHB = new CostCodeHB();
-        costCodeHB.setId(id);
-        costCodeHB.setVariable(variable);
-        
-        return costCodeHB;
     }
 
 }

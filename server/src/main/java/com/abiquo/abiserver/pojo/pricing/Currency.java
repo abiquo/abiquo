@@ -23,31 +23,27 @@ package com.abiquo.abiserver.pojo.pricing;
 
 import java.io.Serializable;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.pricing.CurrencyHB;
-import com.abiquo.abiserver.pojo.IPojo;
-
-public class Currency implements IPojo<CurrencyHB>, Serializable
+public class Currency implements Serializable
 {
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    
+
     private Integer id;
-    
+
     private String symbol;
-    
+
     private String name;
-    
+
     private boolean blocked;
-    
-    
+
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -57,7 +53,7 @@ public class Currency implements IPojo<CurrencyHB>, Serializable
         return symbol;
     }
 
-    public void setSymbol(String symbol)
+    public void setSymbol(final String symbol)
     {
         this.symbol = symbol;
     }
@@ -67,7 +63,7 @@ public class Currency implements IPojo<CurrencyHB>, Serializable
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -77,21 +73,9 @@ public class Currency implements IPojo<CurrencyHB>, Serializable
         return blocked;
     }
 
-    public void setBlocked(boolean blocked)
+    public void setBlocked(final boolean blocked)
     {
         this.blocked = blocked;
-    }
-
-
-    public CurrencyHB toPojoHB(){
-        
-        CurrencyHB currencyHB = new CurrencyHB();
-        currencyHB.setId(id);
-        currencyHB.setName(name);
-        currencyHB.setSymbol(symbol);
-        currencyHB.setBlocked(blocked);
-        
-        return currencyHB;
     }
 
 }
