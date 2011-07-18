@@ -348,12 +348,14 @@ public class MachineService extends DefaultApiService
         flushErrors();
     }
 
+    // Needed in unit testing
+
     public VsmServiceStub getVsm()
     {
         return vsm;
     }
 
-    public void setVsm(VsmServiceStub vsm)
+    public void setVsm(final VsmServiceStub vsm)
     {
         this.vsm = vsm;
     }

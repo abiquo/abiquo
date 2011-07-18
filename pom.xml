@@ -46,6 +46,7 @@
         <module>client</module>
         <module>virtualfactory</module>
         <module>api</module>
+        <module>nodecollector</module>
         <module>commons-amqp</module>
     </modules>
 
