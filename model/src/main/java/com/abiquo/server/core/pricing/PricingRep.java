@@ -1,6 +1,5 @@
 package com.abiquo.server.core.pricing;
 
-import java.util.Currency;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
