@@ -95,6 +95,9 @@ public class VirtualMachineConfiguration
      */
     private String repositoryManagerAddress;
 
+    /** Bootstrap configuration. */
+    private BootstrapConfiguration bootstrapConfig;
+
     /**
      * Creation by clone
      */
@@ -343,6 +346,16 @@ public class VirtualMachineConfiguration
     public void setRepositoryManagerAddress(final String repositoryManagerAddress)
     {
         this.repositoryManagerAddress = repositoryManagerAddress;
+    }
+
+    public BootstrapConfiguration getBootstrapConfig()
+    {
+        return bootstrapConfig;
+    }
+
+    public void setBootstrapConfig(final BootstrapConfiguration bootstrapConfig)
+    {
+        this.bootstrapConfig = bootstrapConfig;
     }
 
 }

@@ -50,8 +50,8 @@ import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
+import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
@@ -72,6 +72,7 @@ import com.abiquo.virtualfactory.model.VirtualAppliance;
 import com.abiquo.virtualfactory.model.VirtualDisk;
 import com.abiquo.virtualfactory.model.VirtualDiskType;
 import com.abiquo.virtualfactory.model.VirtualSystemModel;
+import com.abiquo.virtualfactory.model.config.BootstrapConfiguration;
 import com.abiquo.virtualfactory.model.config.HypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
@@ -104,6 +105,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * org.dmtf.schemas.ovf.envelope._1.VirtualSystemType, java.util.Map, java.lang.String,
      * java.lang.String, boolean[])
      */
+    @Override
     public void addMachinesToVirtualAppliance(final VirtualAppliance virtualAppliance,
         final VirtualSystemType virtualSystemInstance,
         final Map<String, VirtualDisk> virtualDiskMap, final EnvelopeType envelope)
@@ -180,6 +182,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     // Define the inner class to sort the vnicList
     class VNICSequence implements Comparator<VirtualNIC>
     {
+        @Override
         public int compare(final VirtualNIC vn1, final VirtualNIC vn2)
         {
             return vn1.getOrder() - vn2.getOrder();
@@ -193,6 +196,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * .virtualfactory.model.AbsVirtualMachine, org.dmtf.schemas.ovf.envelope._1.ContentType,
      * boolean)
      */
+    @Override
     public void reconfigureVirtualSystem(final AbsVirtualMachine virtualMachine,
         final ContentType virtualSystem, final HypervisorConfiguration hvConfig)
         throws VirtualMachineException, SectionException, Exception
@@ -308,6 +312,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * com.abiquo.virtualfactory.model.ovf.OVFModelConvertable#createVirtualAppliance(org.dmtf.schemas
      * .ovf.envelope._1.EnvelopeType, boolean[])
      */
+    @Override
     public VirtualAppliance createVirtualAppliance(final EnvelopeType envelope,
         final VirtualAppliance virtualAppliance, final Map<String, VirtualDisk> virtualDiskMap)
         throws MalformedURLException, VirtualMachineException, IdNotFoundException,
@@ -364,6 +369,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * com.abiquo.virtualfactory.model.ovf.OVFModelConvertable#createVirtualDisks(org.dmtf.schemas
      * .ovf.envelope._1.EnvelopeType)
      */
+    @Override
     public Map<String, VirtualDisk> createVirtualDisks(final EnvelopeType envelope)
         throws IdNotFoundException, SectionException
     {
@@ -453,6 +459,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * @seecom.abiquo.virtualfactory.model.ovf.OVFModelConvertable#createVirtualSystem(com.abiquo.
      * virtualfactory.model.AbsVirtualMachine)
      */
+    @Override
     public VirtualSystemType createVirtualSystem(final AbsVirtualMachine machine)
         throws RequiredAttributeException, SectionAlreadyPresentException, SectionException
     {
@@ -511,6 +518,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * com.abiquo.virtualfactory.model.ovf.OVFModelConvertable#getMachineStateFromAnnotation(org
      * .dmtf.schemas.ovf.envelope._1.ContentType)
      */
+    @Override
     public String getMachineStateFromAnnotation(final ContentType virtualSystem)
         throws SectionException
     {
@@ -531,6 +539,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * com.abiquo.virtualfactory.model.ovf.OVFModelConvertable#getVSSDInstanceId(org.dmtf.schemas
      * .ovf.envelope._1.ContentType)
      */
+    @Override
     public String getVSSDInstanceId(final ContentType virtualSystem) throws SectionException
     {
         String virtualSystemId;
@@ -557,6 +566,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
      * .dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType,
      * com.abiquo.virtualfactory.model.VirtualAppliance, java.util.Map, boolean[])
      */
+    @Override
     public void updateVirtualSystemCollection(
         final VirtualSystemCollectionType virtualSystemCollection,
         final VirtualAppliance virtualAppliance, final Map<String, VirtualDisk> virtualDiskMap,
@@ -624,6 +634,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         return annotationSection.getOtherAttributes().get(attribute);
     }
 
+    @Override
     public String getVirtualAppState(final VirtualSystemCollectionType contentInstance)
         throws SectionException
     {
@@ -910,6 +921,8 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         String repositoryManagerAddress = getRepositoryManagerAddress(envelope);
         virtualConfig.setRepositoryManagerAddress(repositoryManagerAddress);
 
+        addBootstrapConfiguration(virtualConfig, virtualSystemInstance);
+
         return virtualConfig;
     }
 
@@ -992,6 +1005,28 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         FileType file = files.get(0);
 
         return file.getOtherAttributes().get(repositoryManagerPath);
+    }
+
+    private void addBootstrapConfiguration(final VirtualMachineConfiguration virtualConfig,
+        final VirtualSystemType virtualSystemInstance) throws SectionException
+    {
+        String bootstrapURI =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                BootstrapConfiguration.bootstrapConfigURIQname);
+        String bootstrapAuth =
+            getAttributeFromAnnotation(virtualSystemInstance,
+                BootstrapConfiguration.bootstrapConfigAuthQname);
+
+        if (bootstrapURI != null)
+        {
+            // We assume bootstrapAuth can be null if the bootstrapURI does not require
+            // authentication
+            BootstrapConfiguration bootstrapConfig = new BootstrapConfiguration();
+            bootstrapConfig.setConfigURI(bootstrapURI);
+            bootstrapConfig.setAuth(bootstrapAuth);
+
+            virtualConfig.setBootstrapConfig(bootstrapConfig);
+        }
     }
 
     @Override

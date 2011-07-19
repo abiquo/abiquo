@@ -63,6 +63,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
+import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
@@ -384,7 +385,7 @@ public class OVFModelFromVirtualAppliance
 
                 // Creates the virtual system inside the virtual system collection
                 VirtualSystemType virtualSystem =
-                    createVirtualSystem(nodeVirtualImage, virtualAppliance.getName());
+                    createVirtualSystem(nodeVirtualImage, virtualAppliance);
 
                 OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
@@ -733,13 +734,13 @@ public class OVFModelFromVirtualAppliance
      * @throws Exception
      */
     public VirtualSystemType createVirtualSystem(final NodeVirtualImage nodeVirtualImage,
-        final String virtualApplianceName) throws Exception
+        final VirtualAppliance virtualAppliance) throws Exception
     {
         VirtualMachine virtualMachine = nodeVirtualImage.getVirtualMachine();
         VirtualImage virtualImage = nodeVirtualImage.getVirtualImage();
 
         // setting the network name the name of the virtualAppliance
-        String networkName = virtualApplianceName + "_network";
+        String networkName = virtualAppliance.getName() + "_network";
 
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
@@ -760,6 +761,10 @@ public class OVFModelFromVirtualAppliance
         // Configure AnnotationSection with the RD port and password
         AnnotationSectionType annotationSection =
             createVirtualSystemRDPortAnnotationSection(virtualMachine);
+
+        // Add Bootstrap configuration, if the virtual machine requires it.
+        // This should be added only in deployment; not in VM state change calls
+        addBootstrapConfiguration(nodeVirtualImage, virtualAppliance, annotationSection);
 
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
@@ -788,6 +793,31 @@ public class OVFModelFromVirtualAppliance
         }
 
         return annotationSection;
+    }
+
+    private void addBootstrapConfiguration(final NodeVirtualImage node,
+        final VirtualAppliance virtualAppliance, final AnnotationSectionType annotationSection)
+    {
+        if (node.getVirtualImage().isChefEnabled())
+        {
+            // Build the bootstrap configuration URI
+            String bootstrapURITemplate =
+                "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/bootstrapconfig";
+
+            String apiLocation = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
+            Integer idVDC = virtualAppliance.getVirtualDataCenter().getId();
+            Integer idVApp = virtualAppliance.getId();
+            Integer idVM = node.getVirtualMachine().getId();
+
+            String bootstrapURI =
+                String.format(bootstrapURITemplate, apiLocation, idVDC, idVApp, idVM);
+
+            // Add the bootstrap configuration to the annotation section
+            Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
+            otherAttributes.put(AbiCloudConstants.bootstrapConfigURIQname, bootstrapURI);
+            // TODO: OneTimeToken
+            otherAttributes.put(AbiCloudConstants.bootstrapConfigAuthQname, "TODO: ONETIMETOKEN");
+        }
     }
 
     /**

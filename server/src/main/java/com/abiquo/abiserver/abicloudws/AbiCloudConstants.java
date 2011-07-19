@@ -47,8 +47,14 @@ public class AbiCloudConstants
 
     /** Datastore QNAME */
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
-    
+
     public final static QName HA_DISK = new QName("ha");
+
+    /** Api URI to download bootstrap configuration */
+    public final static QName bootstrapConfigURIQname = new QName("bootstrapConfigURI");
+
+    /** One time use Auth token to download the bootstrap configuration */
+    public final static QName bootstrapConfigAuthQname = new QName("bootstrapConfigAuth");
 
     // PowerUp action
     public final static String POWERUP_ACTION = "PowerUp";
