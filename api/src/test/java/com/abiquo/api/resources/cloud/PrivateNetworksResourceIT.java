@@ -70,7 +70,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
     Enterprise sysEnterprise;
 
-    @BeforeMethod
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS})
     public void setUp()
     {
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
