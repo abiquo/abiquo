@@ -324,11 +324,20 @@
         
         <!-- PRICING -->
         <security:intercept-url pattern="/config/currencies" method="GET" access="ROLE_PRICING_VIEW" />
-        <security:intercept-url pattern="/config/currencies" method="POST" access="ROLE_PRICING_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/config/currencies/*" method="GET" access="ROLE_PRICING_VIEW" />
-        <security:intercept-url pattern="/config/currencies/*" method="PUT" access="ROLE_PRICING_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/config/currencies/*" method="DELETE" access="ROLE_PRICING_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/currencies" method="POST" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/currencies" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
+        <security:intercept-url pattern="/config/currencies/*" method="GET" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/currencies/*" method="PUT" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/currencies/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
 		
+		<security:intercept-url pattern="/config/pricingTemplates" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/pricingTemplates" method="POST" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
+        <security:intercept-url pattern="/config/pricingTemplates/*" method="GET" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*" method="PUT" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
+        
+        
 		<!--===================================-->
 		<!--============= LOGIN ===============-->
 		<!--===================================-->

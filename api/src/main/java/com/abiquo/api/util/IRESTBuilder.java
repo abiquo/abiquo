@@ -52,6 +52,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingTemplateDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
@@ -153,5 +154,11 @@ public interface IRESTBuilder
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
 
     public List<RESTLink> buildCurrencyLinks(CurrencyDto currencyDto, Currency currency);
+
+    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
+        final PricingTemplateDto pricingTemplate);
+
+    public List<RESTLink> buildPricingTemplateLinks(Integer enterpriseId, Integer currencyId,
+        PricingTemplateDto pricingTemplate);
 
 }

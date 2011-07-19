@@ -84,7 +84,12 @@ public class PricingRep extends DefaultRepBase
 
     public void insertPricingTemplate(final PricingTemplate pricingTemplate)
     {
-        pricingTemplateDao.persist(pricingTemplate);
+
+        if (pricingTemplate != null)
+        {
+            pricingTemplateDao.persist(pricingTemplate);
+            pricingTemplateDao.flush();
+        }
     }
 
 }

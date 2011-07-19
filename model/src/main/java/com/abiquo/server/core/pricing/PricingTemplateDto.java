@@ -47,11 +47,11 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final int minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
-        final BigDecimal memoryMb)
+        final BigDecimal memoryMB)
     {
         super();
         this.name = name;
-        this.hdGb = hdGb;
+        this.hdGB = hdGb;
         this.standingChargePeriod = standingChargePeriod;
         this.limitMaximumDeployedCharged = limitMaximumDeployedCharged;
         this.vlan = vlan;
@@ -61,8 +61,8 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.showChangesBefore = showChangesBefore;
         this.minimumCharge = minimumCharge;
         this.publicIp = publicIp;
-        this.vCpu = vCpu;
-        this.memoryMb = memoryMb;
+        this.vcpu = vCpu;
+        this.memoryMB = memoryMB;
         this.lastUpdate = new Date();
     }
 
@@ -90,16 +90,28 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private BigDecimal hdGb;
+    private BigDecimal hdGB;
 
     public BigDecimal getHdGB()
     {
-        return hdGb;
+        return hdGB;
     }
 
-    public void setHdGB(final BigDecimal hdGb)
+    public void setHdGB(final BigDecimal hdGB)
     {
-        this.hdGb = hdGb;
+        this.hdGB = hdGB;
+    }
+
+    private BigDecimal vcpu;
+
+    public BigDecimal getVcpu()
+    {
+        return vcpu;
+    }
+
+    public void setVcpu(final BigDecimal vcpu)
+    {
+        this.vcpu = vcpu;
     }
 
     private BigDecimal standingChargePeriod;
@@ -210,28 +222,16 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.publicIp = publicIp;
     }
 
-    private BigDecimal vCpu;
-
-    public BigDecimal getVCpu()
-    {
-        return vCpu;
-    }
-
-    public void setVCpu(final BigDecimal vCpu)
-    {
-        this.vCpu = vCpu;
-    }
-
-    private BigDecimal memoryMb;
+    private BigDecimal memoryMB;
 
     public BigDecimal getMemoryMB()
     {
-        return memoryMb;
+        return memoryMB;
     }
 
-    public void setMemoryMB(final BigDecimal memoryMb)
+    public void setMemoryMB(final BigDecimal memoryMB)
     {
-        this.memoryMb = memoryMb;
+        this.memoryMB = memoryMB;
     }
 
     private Date lastUpdate;

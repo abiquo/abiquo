@@ -71,8 +71,8 @@ public enum APIError
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
-        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
-	MISSING_ENTERPRISE_LINK("ENTERPRISE-9", "Missing link to the enterprise"),
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
+        "ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -119,8 +119,8 @@ public enum APIError
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"),
-        NON_EXISTENT_RACK("RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
+        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
+        "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
@@ -317,9 +317,11 @@ public enum APIError
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
-        "RULE-6", "The load balance type indicated is null or invalid")
+        "RULE-6", "The load balance type indicated is null or invalid"),
 
-    ;
+    // PRICING TEMPLATE
+    CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
+        "PRICINGTEMPLATE-1", "Missing enterprise parameter"), ;
 
     /**
      * Internal error code

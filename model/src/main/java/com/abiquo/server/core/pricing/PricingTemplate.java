@@ -69,7 +69,7 @@ public class PricingTemplate extends DefaultEntityBase
         final boolean showMinimumCharge, final int chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final int minimumCharge, final Currency currency, final BigDecimal publicIp,
-        final BigDecimal vCpu, final BigDecimal memoryMb)
+        final BigDecimal vCpu, final BigDecimal memoryMB)
     {
 
         setName(name);
@@ -86,8 +86,8 @@ public class PricingTemplate extends DefaultEntityBase
         setCurrency(currency);
         setPublicIp(publicIp);
         setVcpu(vCpu);
-        setMemoryMb(memoryMb);
-        setLastUpdated(new Date());
+        setMemoryMB(memoryMB);
+        setLastUpdate(new Date());
     }
 
     public final static String ID_COLUMN = "idPricingTemplate";
@@ -384,21 +384,21 @@ public class PricingTemplate extends DefaultEntityBase
         this.vcpu = vcpu;
     }
 
-    public final static String MEMORY_MB_PROPERTY = "memoryMb";
+    public final static String MEMORY_MB_PROPERTY = "memoryMB";
 
-    private final static String MEMORY_MB_COLUMN = "memoryMb";
+    private final static String MEMORY_MB_COLUMN = "memoryMB";
 
     @Column(name = MEMORY_MB_COLUMN, nullable = false)
-    private BigDecimal memoryMb;
+    private BigDecimal memoryMB;
 
-    public BigDecimal getMemoryMb()
+    public BigDecimal getMemoryMB()
     {
-        return memoryMb;
+        return memoryMB;
     }
 
-    public void setMemoryMb(final BigDecimal memoryMb)
+    public void setMemoryMB(final BigDecimal memoryMB)
     {
-        this.memoryMb = memoryMb;
+        this.memoryMB = memoryMB;
     }
 
     private final static String LAST_UPDATE_COLUMN = "last_update";
@@ -406,12 +406,12 @@ public class PricingTemplate extends DefaultEntityBase
     @Column(name = LAST_UPDATE_COLUMN, nullable = false)
     private Date lastUpdate;
 
-    public Date getLastUpdated()
+    public Date getLastUpdate()
     {
         return lastUpdate;
     }
 
-    public void setLastUpdated(final Date lastUpdate)
+    public void setLastUpdate(final Date lastUpdate)
     {
         this.lastUpdate = lastUpdate;
     }

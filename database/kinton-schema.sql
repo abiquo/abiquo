@@ -4136,7 +4136,7 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
   `vcpu` DECIMAL(20) NOT NULL default 0,
-  `memoryMb` DECIMAL(20) NOT NULL default 0,
+  `memoryMB` DECIMAL(20) NOT NULL default 0,
   `hdGB` DECIMAL(20) NOT NULL default 0,
   `vlan` DECIMAL(20) NOT NULL default 0,
   `publicIp` DECIMAL(20) NOT NULL default 0,
