@@ -35,6 +35,9 @@ public class PricingRep extends DefaultRepBase
     @Autowired
     private CurrencyDAO currencyDao;
 
+    @Autowired
+    private PricingTemplateDAO pricingTemplateDao;
+
     public PricingRep()
     {
 
@@ -45,4 +48,8 @@ public class PricingRep extends DefaultRepBase
         return currencyDao.findAll();
     }
 
+    public void insertPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        pricingTemplateDao.persist(pricingTemplate);
+    }
 }
