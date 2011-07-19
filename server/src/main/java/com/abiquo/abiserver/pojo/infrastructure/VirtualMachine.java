@@ -56,6 +56,8 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
 
     private State state;
 
+    private State subState;
+
     private boolean highDisponibility;
 
     private int idType;
@@ -186,6 +188,16 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         this.state = state;
     }
 
+    public State getSubState()
+    {
+        return subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
+
     public boolean isHighDisponibility()
     {
         return highDisponibility;
@@ -236,7 +248,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -275,6 +287,16 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         else
         {
             virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
+        }
+
+        // Client sends sometimes a description null or ""
+        if (StringUtils.isEmpty(subState.getDescription()))
+        {
+            virtualMachineHB.setSubState(StateEnum.fromId(subState.getId()));
+        }
+        else
+        {
+            virtualMachineHB.setSubState(StateEnum.valueOf(subState.getDescription()));
         }
 
         virtualMachineHB.setImage(virtualImage == null ? null : virtualImage.toPojoHB());
