@@ -46,7 +46,7 @@ public class VirtualMachineRep extends DefaultRepBase
 
     @Autowired
     private RasdManagementDAO rasdDao;
-    
+
     @Autowired
     private ChefCookbookDAO chefDao;
 
@@ -55,7 +55,7 @@ public class VirtualMachineRep extends DefaultRepBase
 
     }
 
-    public VirtualMachineRep(EntityManager entityManager)
+    public VirtualMachineRep(final EntityManager entityManager)
     {
         assert entityManager != null;
         assert entityManager.isOpen();
@@ -63,57 +63,60 @@ public class VirtualMachineRep extends DefaultRepBase
         this.entityManager = entityManager;
 
         this.dao = new VirtualMachineDAO(entityManager);
+        this.rasdDao = new RasdManagementDAO(entityManager);
+        this.chefDao = new ChefCookbookDAO(entityManager);
     }
 
-    public Collection<VirtualMachine> findByHypervisor(Hypervisor hypervisor)
+    public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         return dao.findVirtualMachines(hypervisor);
     }
 
-    public Collection<VirtualMachine> findManagedByHypervisor(Hypervisor hypervisor)
+    public Collection<VirtualMachine> findManagedByHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         return dao.findManagedVirtualMachines(hypervisor);
     }
 
-    public Collection<VirtualMachine> findByEnterprise(Enterprise enterprise)
+    public Collection<VirtualMachine> findByEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
         return dao.findVirtualMachinesByEnterprise(enterprise);
     }
 
-    public List<VirtualMachine> findVirtualMachinesByUser(Enterprise enterprise, User user)
+    public List<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
+        final User user)
     {
         return dao.findVirtualMachinesByUser(enterprise, user);
     }
 
-    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(Integer vappId)
+    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
     {
         return dao.findVirtualMachinesByVirtualAppliance(vappId);
     }
 
-    public VirtualMachine findByUUID(String uuid)
+    public VirtualMachine findByUUID(final String uuid)
     {
         return dao.findByUUID(uuid);
     }
-    
-    public VirtualMachine findByName(String name)
+
+    public VirtualMachine findByName(final String name)
     {
         return dao.findByName(name);
     }
 
-    public VirtualMachine findVirtualMachineById(Integer vmId)
+    public VirtualMachine findVirtualMachineById(final Integer vmId)
     {
         return dao.findById(vmId);
     }
 
-    public void deleteNotManagedVirtualMachines(Hypervisor hypervisor)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         dao.deleteNotManagedVirtualMachines(hypervisor);
     }
 
-    public void update(VirtualMachine vm)
+    public void update(final VirtualMachine vm)
     {
         dao.flush();
     }
@@ -123,11 +126,10 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
-    
-    public List<ChefCookbook> findCookbooksByVirtualMachine(
-        final VirtualMachine virtualMachine)
+
+    public List<ChefCookbook> findCookbooksByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return chefDao.findByVirtualMachine(virtualMachine);
     }
-    
+
 }

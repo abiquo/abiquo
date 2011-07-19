@@ -23,7 +23,6 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.chef.ChefCookbook;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -64,6 +63,16 @@ public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
         final String version)
     {
         ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook, version);
+
+        return chefCookbook;
+    }
+
+    public ChefCookbook createInstanceWithoutVirtualMachine()
+    {
+        String version = newString(nextSeed(), 0, 5);
+        String cookbook = newString(nextSeed(), 0, 255);
+        ChefCookbook chefCookbook = new ChefCookbook(null, cookbook, version);
+        chefCookbook.setCookbookVersion(version);
 
         return chefCookbook;
     }
