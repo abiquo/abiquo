@@ -22,6 +22,7 @@
 package com.abiquo.server.core.pricing;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -62,6 +63,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.publicIp = publicIp;
         this.vCpu = vCpu;
         this.memoryMb = memoryMb;
+        this.lastUpdate = new Date();
     }
 
     private Integer id;
@@ -230,6 +232,18 @@ public class PricingTemplateDto extends SingleResourceTransportDto
     public void setMemoryMB(final BigDecimal memoryMb)
     {
         this.memoryMb = memoryMb;
+    }
+
+    private Date lastUpdate;
+
+    public Date getLastUpdate()
+    {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(final Date lastUpdate)
+    {
+        this.lastUpdate = lastUpdate;
     }
 
 }

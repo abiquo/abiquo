@@ -23,6 +23,7 @@ package com.abiquo.server.core.pricing;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -86,6 +87,7 @@ public class PricingTemplate extends DefaultEntityBase
         setPublicIp(publicIp);
         setVcpu(vCpu);
         setMemoryMb(memoryMb);
+        setLastUpdated(new Date());
     }
 
     public final static String ID_COLUMN = "idPricingTemplate";
@@ -397,6 +399,21 @@ public class PricingTemplate extends DefaultEntityBase
     public void setMemoryMb(final BigDecimal memoryMb)
     {
         this.memoryMb = memoryMb;
+    }
+
+    private final static String LAST_UPDATE_COLUMN = "last_update";
+
+    @Column(name = LAST_UPDATE_COLUMN, nullable = false)
+    private Date lastUpdate;
+
+    public Date getLastUpdated()
+    {
+        return lastUpdate;
+    }
+
+    public void setLastUpdated(final Date lastUpdate)
+    {
+        this.lastUpdate = lastUpdate;
     }
 
     public final static String ASSOCIATION_TABLE = "pricingTemplate_costcode";

@@ -55,6 +55,7 @@ CREATE TABLE `kinton`.`pricing_template` (
   `hdGB` DECIMAL(20) NOT NULL default 0,
   `vlan` DECIMAL(20) NOT NULL default 0,
   `publicIp` DECIMAL(20) NOT NULL default 0,
+   `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`) ,
   KEY `Pricing_FK1_Enterprise` (`idEnterprise`),
