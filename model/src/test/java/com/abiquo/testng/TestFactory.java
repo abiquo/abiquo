@@ -131,7 +131,7 @@ public class TestFactory
                     return clazz;
                 }
             }
-            else if (file.getName().endsWith(simpleClassName + ".class"))
+            else if (file.getName().equals(simpleClassName + ".class"))
             {
                 return Class.forName(packageName + '.'
                     + file.getName().substring(0, file.getName().length() - 6));
