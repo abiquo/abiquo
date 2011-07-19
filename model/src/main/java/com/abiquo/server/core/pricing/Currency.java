@@ -89,7 +89,7 @@ public class Currency extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(final String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -117,7 +117,7 @@ public class Currency extends DefaultEntityBase
         return this.symbol;
     }
 
-    private void setSymbol(final String symbol)
+    public void setSymbol(final String symbol)
     {
         this.symbol = symbol;
     }

@@ -39,11 +39,12 @@ public class CurrencyDto extends SingleResourceTransportDto
         // TODO Auto-generated constructor stub
     }
 
-    public CurrencyDto(final String name, final String symbol)
+    public CurrencyDto(final String name, final String symbol, final boolean blocked)
     {
         super();
         this.name = name;
         this.symbol = symbol;
+        this.blocked = blocked;
     }
 
     private Integer id;
@@ -80,6 +81,18 @@ public class CurrencyDto extends SingleResourceTransportDto
     public void setSymbol(final String symbol)
     {
         this.symbol = symbol;
+    }
+
+    private boolean blocked;
+
+    public boolean isBlocked()
+    {
+        return blocked;
+    }
+
+    public void setBlocked(final boolean blocked)
+    {
+        this.blocked = blocked;
     }
 
 }
