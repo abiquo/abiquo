@@ -74,7 +74,7 @@ public class ChefCookbook extends DefaultEntityBase
 
     public final static String VIRTUALMACHINE_PROPERTY = "virtualmachine";
 
-    private final static boolean VIRTUALMACHINE_REQUIRED = true;
+    private final static boolean VIRTUALMACHINE_REQUIRED = false;
 
     private final static String VIRTUALMACHINE_ID_COLUMN = "idVM";
 
