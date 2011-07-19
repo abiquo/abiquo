@@ -48,8 +48,43 @@ public class PricingRep extends DefaultRepBase
         return currencyDao.findAll();
     }
 
+    public void insertCurrency(final Currency currency)
+    {
+        if (currency != null)
+        {
+            currencyDao.persist(currency);
+            currencyDao.flush();
+        }
+    }
+
+    public Currency findCurrencyById(final Integer currencyId)
+    {
+        return currencyDao.findById(currencyId);
+    }
+
+    public void removeCurrency(final Currency currency)
+    {
+        if (currency != null)
+        {
+            currencyDao.remove(currency);
+            currencyDao.flush();
+        }
+    }
+
+    public void updateCurrency(final Currency currency)
+    {
+        assert currency != null;
+        assert currencyDao.isManaged(currency);
+        // assert !existsAnyOtherRackWithName(rack, rack.getName()) :
+        // BUG_UPDATE_RACK_NAME_MUST_BE_UNIQUE;
+
+        this.currencyDao.flush();
+
+    }
+
     public void insertPricingTemplate(final PricingTemplate pricingTemplate)
     {
         pricingTemplateDao.persist(pricingTemplate);
     }
+
 }

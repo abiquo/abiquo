@@ -321,6 +321,13 @@
 		<security:intercept-url pattern="/config/properties/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
 		<security:intercept-url pattern="/config/properties/*" method="OPTIONS" access="ROLE_AUTHENTICATED"/>
 		<security:intercept-url pattern="/config/properties/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        
+        <!-- PRICING -->
+        <security:intercept-url pattern="/config/currencies" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/currencies" method="POST" access="ROLE_PRICING_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/currencies/*" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/currencies/*" method="PUT" access="ROLE_PRICING_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/currencies/*" method="DELETE" access="ROLE_PRICING_ALLOW_MODIFY" />
 		
 		<!--===================================-->
 		<!--============= LOGIN ===============-->
