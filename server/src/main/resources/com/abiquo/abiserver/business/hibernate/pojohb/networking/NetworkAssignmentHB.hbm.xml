@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB"
-		table="vlan_network_assignment" lazy="false">
-		<id name="id" type="java.lang.Integer">
-			<column name="id" />
-			<generator class="identity" />
-		</id>
-		<property name="vlanNetworkId" type="java.lang.Integer">
-			<column name="vlan_network_id" not-null="true" />
-		</property>
-		<property name="idRack" type="java.lang.Integer">
-			<column name="idRack" not-null="true" />
-		</property>
-		<property name="idVirtualDataCenter" type="java.lang.Integer">
-			<column length="10" name="idVirtualDataCenter" not-null="true" />
-		</property>
-	</class>
-	
-	
-	<query name="NET_ASSIG.GET_BY_VDC">	
-	SELECT na
-		FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na
-		WHERE na.idVirtualDataCenter =:idVirtualDataCenter
-	</query>
-
-	<query name="NET_ASSIG.GET_BY_VLAN">	
-	SELECT na 
-		FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na
-		WHERE na.vlanNetworkId =:vlanNetworkId
-	</query>
-	
+    <class catalog="kinton"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB" table="vlan_network_assignment"
+        lazy="false">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="vlanNetworkId" type="java.lang.Integer">
+            <column name="vlan_network_id" not-null="true" />
+        </property>
+        <property name="idRack" type="java.lang.Integer">
+            <column name="idRack" not-null="true" />
+        </property>
+        <property name="idVirtualDataCenter" type="java.lang.Integer">
+            <column length="10" name="idVirtualDataCenter" not-null="true" />
+        </property>
+    </class>
+    <query name="NET_ASSIG.GET_BY_VDC"> SELECT na FROM
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE
+        na.idVirtualDataCenter =:idVirtualDataCenter
+    </query>
+    <query name="NET_ASSIG.GET_BY_VLAN"> SELECT na FROM
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE
+        na.vlanNetworkId =:vlanNetworkId
+    </query>
 </hibernate-mapping>

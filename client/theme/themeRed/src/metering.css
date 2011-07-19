@@ -18,13 +18,8 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-	.MeteringSeverityBar
-	{
-		bar-color:"#fe9608";
-		border-color:"#666666";
-		font-size:"10";
-	}
-
-
-
+.MeteringSeverityBar {
+	bar-color: "#fe9608";
+	border-color: "#666666";
+	font-size: "10";
+}
