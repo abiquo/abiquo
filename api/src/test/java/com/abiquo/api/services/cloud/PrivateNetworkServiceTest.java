@@ -25,6 +25,7 @@
 package com.abiquo.api.services.cloud;
 
 import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_UNIT_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -35,6 +36,7 @@ import java.util.Random;
 import javax.persistence.EntityManager;
 
 import org.springframework.security.context.SecurityContextHolder;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -59,6 +61,7 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 /**
  * @author jdevesa
  */
+@Test(groups = {NETWORK_UNIT_TESTS})
 public class PrivateNetworkServiceTest extends AbstractUnitTest
 {
     VirtualDatacenter vdc;
@@ -67,7 +70,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
 
     RemoteService rs;
 
-    @BeforeMethod(groups = {BASIC_UNIT_TESTS})
+    @BeforeMethod(groups = {BASIC_UNIT_TESTS, NETWORK_UNIT_TESTS})
     public void setupBasicUser()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
@@ -86,6 +89,13 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, dclimit);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_UNIT_TESTS, NETWORK_UNIT_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 
     /**

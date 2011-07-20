@@ -24,6 +24,7 @@ package com.abiquo.api.resources.cloud;
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
 import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -36,6 +37,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -59,6 +61,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
  * 
  * @author jdevesa@abiquo.com
  */
+@Test(groups = {NETWORK_INTEGRATION_TESTS})
 public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 {
 
@@ -70,7 +73,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
     Enterprise sysEnterprise;
 
-    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS})
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setUp()
     {
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -95,6 +98,13 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vdc);
 
         setup(entitiesToSetup.toArray());
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 
     @Test

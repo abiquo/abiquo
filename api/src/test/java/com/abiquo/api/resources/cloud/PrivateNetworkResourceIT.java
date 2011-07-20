@@ -27,6 +27,7 @@ import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
 import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,6 +59,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
+@Test(groups = {NETWORK_INTEGRATION_TESTS})
 public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 {
 
@@ -69,7 +72,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     RemoteService rs;
 
     @Override
-    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS})
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setup()
     {
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -83,6 +86,13 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
 
         validURI = resolvePrivateNetworkURI(vdc.getId(), vlan.getId());
 
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 
     @Test

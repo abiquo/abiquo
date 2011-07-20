@@ -494,16 +494,21 @@ public class NetworkService extends DefaultApiService
         for (IPAddress address : range)
         {
             String macAddress = null;
-            do
+            String name = null;
+            if (vdc != null)
             {
-                macAddress = IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType());
-            }
-            while (allMacAddresses.contains(macAddress));
-            allMacAddresses.add(macAddress);
+                do
+                {
+                    macAddress = IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType());
+                }
+                while (allMacAddresses.contains(macAddress));
+                allMacAddresses.add(macAddress);
 
-            // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
-            // leases with the ':' char in the lease name)
-            String name = macAddress.replace(":", "") + "_host";
+                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when
+                // reload
+                // leases with the ':' char in the lease name)
+                name = macAddress.replace(":", "") + "_host";
+            }
 
             IpPoolManagement ipManagement =
                 new IpPoolManagement(dhcp,
