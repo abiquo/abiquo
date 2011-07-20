@@ -4101,7 +4101,6 @@ CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
   `name` varchar(256) NOT NULL ,
-  `blocked` boolean default 0,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
