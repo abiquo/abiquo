@@ -1,76 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://www.abiquo.com/appliancemanager/repositoryspace"
-	xmlns="http://www.abiquo.com/appliancemanager/repositoryspace"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
-
-	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0"  	
-  	xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-
-	attributeFormDefault="qualified" elementFormDefault="qualified">
-
-	<xs:import namespace="http://schemas.dmtf.org/ovf/envelope/1"
-		schemaLocation="OVFEnvelope_dsp8023_1.0.0e.xsd" />
-
-<!--
-jaxb:extensionBindingPrefixes="xjc"
-<xs:annotation><xs:appinfo><jaxb:globalBindings>
-<xjc:simple />
-</jaxb:globalBindings></xs:appinfo></xs:annotation>
- -->
-
-	<!-- TODO set the element/attribute comments as javadoc annotations -->
-
-
-	<!-- The description of a location serving a set of OVFPackages (virtual appliances) -->
-	<xs:complexType name="RepositorySpace">
-		<xs:sequence>
-			<xs:element name="OVFDescription" type="OVFDescription" minOccurs="1" maxOccurs="unbounded" />
-		</xs:sequence>
-		<!--
-			The export location of the repository (where the ovfindex.xml
-			document where accessed). Its the RS identifier.
-		-->
-		<xs:attribute name="RepositoryURI" type="xs:anyURI" use="required" />
-		<!--  A short name for the RepositorySpace -->
-		<xs:attribute name="RepositoryName" type="xs:string" use="required" />
-		<!-- Using CSV for multiple categories -->
-		<xs:attribute name="OVFCategories" type ="xs:string" use="optional"/> 
-	</xs:complexType>
-
-	<!--
-		An OVF package description, extending the Product section attributes
-		and holding the state of the package on the index.
-	-->
-	<xs:complexType name="OVFDescription">
-		<xs:complexContent>
-			<xs:extension base="ovf:ProductSection_Type">
-				<!-- if not present the RepositorySpace RepositoryURI is taken as the default -->
-				<xs:attribute name="RepositoryURI" type="xs:anyURI" use="optional" />
-				<!-- if not present the RepositorySpace RepositoryName is taken as the default -->
-				<xs:attribute name="RepositoryName" type="xs:string" use="optional" />
-				<!-- repository relative path to the OVF envelope document (RepositoryURI+OVFFile = OVF identifier and locator) -->
-				<!-- RepositoryURI+OVFFile identify the OVF envelope file -->
-				<xs:attribute name="OVFFile" type="xs:string" use="required" />
-				<!-- using CSV for multiple categories -->
-				<xs:attribute name="OVFCategories" type ="xs:string" use="optional"/>
-				<!-- Format of the Virtual disk(s)  -->
-				<xs:attribute name="DiskFormat" type="xs:string" use="required" />				
-				<!-- TODO TBD  -->
-				<xs:attribute name="DiskSize" 	type="xs:string" use="required" />
-
-				<!--
-					Only used on OVFIndex (AM's internal RS), to know the deployment
-					status of OVF package
-					<xs:attribute name="OVFStatus" type="OVFStatus"	 use="optional" default="NOT_DOWNLOAD"/>
-				-->
-				<!-- On OVFStatus.ERROR this attribute contains the error cause. 
-				<xs:attribute name="ErrorCause" type="xs:string" use="optional" />
-				-->
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-
-	<!--  Definition of the elements -->
-	<xs:element name="RepositorySpace" 	type="RepositorySpace" />
-	<xs:element name="OVFDescription" 	type="OVFDescription" />
+<xs:schema targetNamespace="http://www.abiquo.com/appliancemanager/repositoryspace" xmlns="http://www.abiquo.com/appliancemanager/repositoryspace"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    attributeFormDefault="qualified" elementFormDefault="qualified">
+    <xs:import namespace="http://schemas.dmtf.org/ovf/envelope/1" schemaLocation="OVFEnvelope_dsp8023_1.0.0e.xsd" />
+    <!--
+        jaxb:extensionBindingPrefixes="xjc"
+        <xs:annotation><xs:appinfo><jaxb:globalBindings>
+        <xjc:simple />
+        </jaxb:globalBindings></xs:appinfo></xs:annotation>
+    -->
+    <!-- TODO set the element/attribute comments as javadoc annotations -->
+    <!-- The description of a location serving a set of OVFPackages (virtual appliances) -->
+    <xs:complexType name="RepositorySpace">
+        <xs:sequence>
+            <xs:element name="OVFDescription" type="OVFDescription" minOccurs="1"
+                maxOccurs="unbounded" />
+        </xs:sequence>
+        <!--
+            The export location of the repository (where the ovfindex.xml
+            document where accessed). Its the RS identifier.
+        -->
+        <xs:attribute name="RepositoryURI" type="xs:anyURI" use="required" />
+        <!-- A short name for the RepositorySpace -->
+        <xs:attribute name="RepositoryName" type="xs:string" use="required" />
+        <!-- Using CSV for multiple categories -->
+        <xs:attribute name="OVFCategories" type="xs:string" use="optional" />
+    </xs:complexType>
+    <!--
+        An OVF package description, extending the Product section attributes
+        and holding the state of the package on the index.
+    -->
+    <xs:complexType name="OVFDescription">
+        <xs:complexContent>
+            <xs:extension base="ovf:ProductSection_Type">
+                <!-- if not present the RepositorySpace RepositoryURI is taken as the default -->
+                <xs:attribute name="RepositoryURI" type="xs:anyURI" use="optional" />
+                <!-- if not present the RepositorySpace RepositoryName is taken as the default -->
+                <xs:attribute name="RepositoryName" type="xs:string" use="optional" />
+                <!-- repository relative path to the OVF envelope document (RepositoryURI+OVFFile = OVF
+                    identifier and locator) -->
+                <!-- RepositoryURI+OVFFile identify the OVF envelope file -->
+                <xs:attribute name="OVFFile" type="xs:string" use="required" />
+                <!-- using CSV for multiple categories -->
+                <xs:attribute name="OVFCategories" type="xs:string" use="optional" />
+                <!-- Format of the Virtual disk(s) -->
+                <xs:attribute name="DiskFormat" type="xs:string" use="required" />
+                <!-- TODO TBD -->
+                <xs:attribute name="DiskSize" type="xs:string" use="required" />
+                <!--
+                    Only used on OVFIndex (AM's internal RS), to know the deployment
+                    status of OVF package
+                    <xs:attribute name="OVFStatus" type="OVFStatus" use="optional" default="NOT_DOWNLOAD"/>
+                -->
+                <!-- On OVFStatus.ERROR this attribute contains the error cause.
+                    <xs:attribute name="ErrorCause" type="xs:string" use="optional" />
+                -->
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <!-- Definition of the elements -->
+    <xs:element name="RepositorySpace" type="RepositorySpace" />
+    <xs:element name="OVFDescription" type="OVFDescription" />
 </xs:schema>

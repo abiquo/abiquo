@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="COMMONS-AMQP all unit tests" verbose="1">
-	<test name="All unit tests">
-		<packages>
+    <test name="All unit tests">
+        <packages>
             <package name="com.abiquo.commons.ampq.*" />
-		</packages>
-	</test>
+        </packages>
+    </test>
 </suite>

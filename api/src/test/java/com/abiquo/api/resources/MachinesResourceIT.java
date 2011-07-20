@@ -232,12 +232,13 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         MachineDto m2 = getValidMachine();
         m2.setName(m2.getName() + "-second");
         IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
+        m2.setName(m2.getName() + "-two");
         m2.setIp(nextIP.toString());
         m2.setIpService(nextIP.toString());
         DatastoreDto dto2 = new DatastoreDto();
         dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/anotherRoot");
-        dto2.setDirectory("var/lib/virt/2");
+        dto2.setRootPath("/another-root");
+        dto2.setDirectory("var/lib/virt2");
         dto2.setEnabled(Boolean.TRUE);
         m2.getDatastores().add(dto2);
 

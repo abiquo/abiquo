@@ -18,83 +18,66 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+Application {
+	font-family: "Arial";
+	modal-transparency-duration: 500;
+	modal-transparency-blur: 1;
+	modal-transparency-color: #000000;
+	modal-transparency: 0.4;
+	font-size: 11;
+	theme-color: #000000;
+	color: #000000;
+}
 
-	Application{
-		font-family: 					"Arial";
-		modal-transparency-duration:	500;
-		modal-transparency-blur:		1;
-		modal-transparency-color:		#000000;
-		modal-transparency:				0.4;
-		
-		font-size:						11;
-		theme-color:					#000000;
-		color:							#000000;
-	}
-	
-	HBox
-	{
-		font-family:					"Arial";
-	}
-	
-	TextInput
-	{
-		font-family:					"Arial";
-	}
-	
-	DataGrid {
-		font-family:					"Arial";
-	}
-	
-	Label
-	{
-		font-family:					"Arial";
-		/* theme-color:					#FFFFFF; */
-	}
+HBox {
+	font-family: "Arial";
+}
 
-	VBox
-	{
-		font-family:					"Arial";
-	}
+TextInput {
+	font-family: "Arial";
+}
 
-	Button
-	{
-		font-family:					"Arial";
-	}		
+DataGrid {
+	font-family: "Arial";
+}
 
-	ComboBox
-	{
-		font-family:					"Arial";
-	}
-	
-	ToolTip
-	{
-		font-family: 					"Arial";
-		
-	}
-	
-	.errorTip
-	{
-		font-family: 					"Arial";
-	}
-	
-	NumericStepper
-	{
-		font-family: 					"Arial";
-	}
-	
-	.AbicloudAlertMainText
-	{
-		font-family:					"Arial";
-	}
+Label {
+	font-family: "Arial";
+	/* theme-color:					#FFFFFF; */
+}
 
-	.AbiCloudAlertSubtitle
-	{
-		font-family:					"Arial";
-	}
+VBox {
+	font-family: "Arial";
+}
 
-	.AbicloudAlertMainText
-	{
-		font-family:					"Arial";
-	}
-	
-	
+Button {
+	font-family: "Arial";
+}
+
+ComboBox {
+	font-family: "Arial";
+}
+
+ToolTip {
+	font-family: "Arial";
+}
+
+.errorTip {
+	font-family: "Arial";
+}
+
+NumericStepper {
+	font-family: "Arial";
+}
+
+.AbicloudAlertMainText {
+	font-family: "Arial";
+}
+
+.AbiCloudAlertSubtitle {
+	font-family: "Arial";
+}
+
+.AbicloudAlertMainText {
+	font-family: "Arial";
+}

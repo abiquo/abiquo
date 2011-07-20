@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-	<enterprise idEnterprise="1" name="entreprise_1" ramSoft="1"
-		cpuSoft="2" hdSoft="3" ramHard="4" cpuHard="5" hdHard="6" version_c="0" 
-		repositorySoft="0"
-		repositoryHard="0"
-		vlanSoft="0"
-              vlanHard="0"
-              storageSoft="0"
-              storageHard="0"
-              publicIpSoft="0"
-              publicIpHard="0"/>
-
-	<datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1"
-		version_c="1" />
-
-	<remote_service idRemoteService="1" uri="http://localhost:9009/am" 
-		idDataCenter="1" status="1" remoteServiceType="APPLIANCE_MANAGER" version_c="0" />
-
+    <enterprise idEnterprise="1" name="entreprise_1" ramSoft="1" cpuSoft="2" hdSoft="3"
+        ramHard="4" cpuHard="5" hdHard="6" version_c="0" repositorySoft="0" repositoryHard="0"
+        vlanSoft="0" vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1"
+        version_c="1" />
+    <remote_service idRemoteService="1" uri="http://localhost:9009/am" idDataCenter="1"
+        status="1" remoteServiceType="APPLIANCE_MANAGER" version_c="0" />
 </dataset>

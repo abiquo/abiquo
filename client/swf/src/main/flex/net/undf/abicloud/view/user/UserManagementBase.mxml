@@ -125,8 +125,12 @@
 
             private function onInitialize():void
             {
-                //Check privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES,"removeChild",enterprisePanel,this);
+                //Checking privilege
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_ENTERPRISE)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)){
+                	SecuredPrivilegeAccess.checkElementAccess("removeEnterpriseList","condition",enterprisePanel,this);
+                }
+                
                 
                 //Listening for changes in model related to VirtualAppliances
                	userToggledContainer.selectedIndex = 0;

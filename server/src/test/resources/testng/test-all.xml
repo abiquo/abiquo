@@ -1,4 +1,4 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="SERVER all unit tests" verbose="1">
-	<test name="All unit tests" />
+    <test name="All unit tests" />
 </suite>

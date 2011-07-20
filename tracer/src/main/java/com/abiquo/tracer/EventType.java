@@ -70,7 +70,8 @@ public enum EventType implements Serializable
         "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
         311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL", "Retrieve Rack"),
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL",
+        "Retrieve Rack"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -102,7 +103,6 @@ public enum EventType implements Serializable
         605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), PERSISTENT_PROCESS_FAILED(
         606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), PERSISTENT_INITIATOR_ADDED(
         607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
-
 
     // License related events
     LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), LICENSE_REMOVED(
@@ -214,5 +214,3 @@ public enum EventType implements Serializable
         }
     }
 }
-
-

@@ -24,6 +24,9 @@ update `kinton`.`volume_management` set state = 1 where state = 2;
 ALTER TABLE `kinton`.`virtualimage` ADD cost_code VARCHAR(50);
 
 
+
+
+
 DELETE FROM `kinton`.`system_properties` WHERE name = 'client.infra.useVirtualBox';
 
 -- [ABICLOUDPREMIUM-1476] Changes to fit the LDAP integration.
@@ -1343,4 +1346,6 @@ CALL `kinton`.`CalculateVdcEnterpriseStats`();
 -- [UCS]Add the specific wiki link for discovering blades form
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");
+
+
 

@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<typedef name="HypervisorType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.model.enumerator.HypervisorType</param>
-       	<param name="identifierMethod">name</param>
-   	</typedef>
-   	
-   	<typedef name="DiskFormatType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.model.enumerator.DiskFormatType</param>
-       	<param name="identifierMethod">name</param>
-   	</typedef>
-   	
-   	<typedef name="RemoteServiceType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+    <typedef name="HypervisorType"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.model.enumerator.HypervisorType</param>
+        <param name="identifierMethod">name</param>
+    </typedef>
+    <typedef name="DiskFormatType"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.model.enumerator.DiskFormatType</param>
+        <param name="identifierMethod">name</param>
+    </typedef>
+    <typedef name="RemoteServiceType"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
         <param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType</param>
         <param name="identifierMethod">toString</param>
     </typedef>
-    
-    <typedef name="NodeType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeTypeEnum</param>
-       	<param name="identifierMethod">toString</param>
-   	</typedef>
-   	
-   	<typedef name="State" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum</param>
-       	<param name="identifierMethod">toString</param>
-   	</typedef>
-   	
-   	<typedef name="StateConversion" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.StateConversionEnum</param>
-       	<param name="identifierMethod">toString</param>
-   	</typedef>
-   	
-   	<typedef name="FitPolicy" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-		<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.workload.engine.core.FitPolicy</param>
-	</typedef>
-	
-<!-- 	<typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType"> -->
-<!-- 		<param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param> -->
-<!-- 	</typedef> -->
+    <typedef name="NodeType"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeTypeEnum</param>
+        <param name="identifierMethod">toString</param>
+    </typedef>
+    <typedef name="State"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum</param>
+        <param name="identifierMethod">toString</param>
+    </typedef>
+    <typedef name="StateConversion"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.StateConversionEnum</param>
+        <param name="identifierMethod">toString</param>
+    </typedef>
+    <typedef name="FitPolicy"
+        class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
+        <param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.workload.engine.core.FitPolicy</param>
+    </typedef>
+    <!-- <typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType"> -->
+    <!-- <param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param> -->
+    <!-- </typedef> -->
 </hibernate-mapping>

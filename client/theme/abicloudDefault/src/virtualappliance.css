@@ -18,325 +18,278 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+.VirtualApplianceDeployingSkin {
+	background-image: Embed("/assets/virtualappliance/virtualappliancedeploying_background.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "11",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "11");
+	background-size: "100%";
+	padding-bottom: "15";
+	padding-left: "15";
+	padding-right: "15";
+	padding-top: "15";
+}
 
-	.VirtualApplianceDeployingSkin
-	{
-		background-image:			Embed("/assets/virtualappliance/virtualappliancedeploying_background.png", scaleGridTop="7", scaleGridBottom="11", scaleGridLeft="7", scaleGridRight="11");
-		background-size:			"100%";
-		padding-bottom:"15";
-		padding-left:"15";
-		padding-right:"15";
-		padding-top:"15";
+.NodeRenderer {
+	background-color: #FFFFFF;
+	background-alpha: 0;
+	border-color: "#cccccc";
+	border-style: "none";
+	border-thickness: "1";
+}
 
-	}
-	
-	.NodeRenderer
-	{
-		background-color:			#FFFFFF;
-		background-alpha:			0;
-		border-color:			"#cccccc";
-		border-style:			"none";
-		border-thickness:			"1";
+.VirtualApplianceEraseNodeButton {
+	up-skin: Embed("/assets/virtualappliance/erasenodebutton/buttonErase.png");
+	over-skin: Embed("/assets/virtualappliance/erasenodebutton/buttonErase1.png");
+	down-skin: Embed("/assets/virtualappliance/erasenodebutton/buttonErase2.png");
+}
 
+.VirtualApplianceConfigNodeButton {
+	up-skin: Embed("/assets/virtualappliance/confignodebutton/buttonConfig.png");
+	over-skin: Embed("/assets/virtualappliance/confignodebutton/buttonConfig_over.png");
+	down-skin: Embed("/assets/virtualappliance/confignodebutton/buttonConfig_down.png");
+}
 
-	}
-	
-	.VirtualApplianceEraseNodeButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/erasenodebutton/buttonErase.png");
-		over-skin: 				Embed("/assets/virtualappliance/erasenodebutton/buttonErase1.png");
-		down-skin: 				Embed("/assets/virtualappliance/erasenodebutton/buttonErase2.png");
-	}
-	
-	.VirtualApplianceConfigNodeButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/confignodebutton/buttonConfig.png");
-		over-skin: 				Embed("/assets/virtualappliance/confignodebutton/buttonConfig_over.png");
-		down-skin: 				Embed("/assets/virtualappliance/confignodebutton/buttonConfig_down.png");
-	}
-	
-	
-	.NodeTypeViewEven
-	{
-		background-color: #FFFFFF;
-	}
-	
-	
-	.NodeTypeViewOdd
-	{
-		background-color: #F4F4F4;
-	}
-	
+.NodeTypeViewEven {
+	background-color: #FFFFFF;
+}
 
+.NodeTypeViewOdd {
+	background-color: #F4F4F4;
+}
 
-	.VirtualApplianceSaveButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/savebutton/save.png");
-		over-skin:				Embed("/assets/virtualappliance/savebutton/save1.png");
-		down-skin:				Embed("/assets/virtualappliance/savebutton/save2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/savebutton/save_dis.png");
-	}
-	
-	.VirtualApplianceNewButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/newbutton/new.png");
-		over-skin:				Embed("/assets/virtualappliance/newbutton/new1.png");
-		down-skin:				Embed("/assets/virtualappliance/newbutton/new2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/newbutton/new_dis.png");
-	}
-	
-	.VirtualApplianceOpenButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/openbutton/open.png");
-		over-skin:				Embed("/assets/virtualappliance/openbutton/open1.png");
-		down-skin:				Embed("/assets/virtualappliance/openbutton/open2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/openbutton/open_dis.png");
-	}
-	
-	.VirtualAppliancePrintButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/printbutton/print.png");
-		over-skin:				Embed("/assets/virtualappliance/printbutton/print1.png");
-		down-skin:				Embed("/assets/virtualappliance/printbutton/print2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/printbutton/print_dis.png");
-	}
+.VirtualApplianceSaveButton {
+	up-skin: Embed("/assets/virtualappliance/savebutton/save.png");
+	over-skin: Embed("/assets/virtualappliance/savebutton/save1.png");
+	down-skin: Embed("/assets/virtualappliance/savebutton/save2.png");
+	disabled-skin: Embed("/assets/virtualappliance/savebutton/save_dis.png");
+}
 
-	.VirtualApplianceUndoButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/undobutton/back.png");
-		over-skin:				Embed("/assets/virtualappliance/undobutton/back1.png");
-		down-skin:				Embed("/assets/virtualappliance/undobutton/back2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/undobutton/back_dis.png");
-	}
-	
-	.VirtualApplianceRedoButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/redobutton/go.png");
-		over-skin:				Embed("/assets/virtualappliance/redobutton/go1.png");
-		down-skin:				Embed("/assets/virtualappliance/redobutton/go2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/redobutton/go_dis.png");
-	}
-	
-	.VirtualApplianceZoominButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/zoominbutton/mas.png");
-		over-skin:				Embed("/assets/virtualappliance/zoominbutton/mas1.png");
-		down-skin:				Embed("/assets/virtualappliance/zoominbutton/mas2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/zoominbutton/mas_dis.png");
-	}
+.VirtualApplianceNewButton {
+	up-skin: Embed("/assets/virtualappliance/newbutton/new.png");
+	over-skin: Embed("/assets/virtualappliance/newbutton/new1.png");
+	down-skin: Embed("/assets/virtualappliance/newbutton/new2.png");
+	disabled-skin: Embed("/assets/virtualappliance/newbutton/new_dis.png");
+}
 
-	.VirtualApplianceZoomoutButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/zoomoutbutton/menos.png");
-		over-skin:				Embed("/assets/virtualappliance/zoomoutbutton/menos1.png");
-		down-skin:				Embed("/assets/virtualappliance/zoomoutbutton/menos2.png");
-		disabled-skin:			Embed("/assets/virtualappliance/zoomoutbutton/menos_dis.png");
-	}
-	
-	.VirtualAppliancePointerButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/pointerbutton/puntero.png");
-		over-skin:				Embed("/assets/virtualappliance/pointerbutton/punteroOver.png");
-		down-skin:				Embed("/assets/virtualappliance/pointerbutton/punteroDown.png");
-		disabled-skin:			Embed("/assets/virtualappliance/pointerbutton/puntero.png");
+.VirtualApplianceOpenButton {
+	up-skin: Embed("/assets/virtualappliance/openbutton/open.png");
+	over-skin: Embed("/assets/virtualappliance/openbutton/open1.png");
+	down-skin: Embed("/assets/virtualappliance/openbutton/open2.png");
+	disabled-skin: Embed("/assets/virtualappliance/openbutton/open_dis.png");
+}
+
+.VirtualAppliancePrintButton {
+	up-skin: Embed("/assets/virtualappliance/printbutton/print.png");
+	over-skin: Embed("/assets/virtualappliance/printbutton/print1.png");
+	down-skin: Embed("/assets/virtualappliance/printbutton/print2.png");
+	disabled-skin: Embed("/assets/virtualappliance/printbutton/print_dis.png");
+}
+
+.VirtualApplianceUndoButton {
+	up-skin: Embed("/assets/virtualappliance/undobutton/back.png");
+	over-skin: Embed("/assets/virtualappliance/undobutton/back1.png");
+	down-skin: Embed("/assets/virtualappliance/undobutton/back2.png");
+	disabled-skin: Embed("/assets/virtualappliance/undobutton/back_dis.png");
+}
+
+.VirtualApplianceRedoButton {
+	up-skin: Embed("/assets/virtualappliance/redobutton/go.png");
+	over-skin: Embed("/assets/virtualappliance/redobutton/go1.png");
+	down-skin: Embed("/assets/virtualappliance/redobutton/go2.png");
+	disabled-skin: Embed("/assets/virtualappliance/redobutton/go_dis.png");
+}
+
+.VirtualApplianceZoominButton {
+	up-skin: Embed("/assets/virtualappliance/zoominbutton/mas.png");
+	over-skin: Embed("/assets/virtualappliance/zoominbutton/mas1.png");
+	down-skin: Embed("/assets/virtualappliance/zoominbutton/mas2.png");
+	disabled-skin: Embed("/assets/virtualappliance/zoominbutton/mas_dis.png");
+}
+
+.VirtualApplianceZoomoutButton {
+	up-skin: Embed("/assets/virtualappliance/zoomoutbutton/menos.png");
+	over-skin: Embed("/assets/virtualappliance/zoomoutbutton/menos1.png");
+	down-skin: Embed("/assets/virtualappliance/zoomoutbutton/menos2.png");
+	disabled-skin: Embed("/assets/virtualappliance/zoomoutbutton/menos_dis.png");
+}
+
+.VirtualAppliancePointerButton {
+	up-skin: Embed("/assets/virtualappliance/pointerbutton/puntero.png");
+	over-skin: Embed("/assets/virtualappliance/pointerbutton/punteroOver.png");
+	down-skin: Embed("/assets/virtualappliance/pointerbutton/punteroDown.png");
+	disabled-skin: Embed("/assets/virtualappliance/pointerbutton/puntero.png");
+	selected-up-skin: Embed("/assets/virtualappliance/pointerbutton/punteroDown.png");
+	selected-over-skin: Embed("/assets/virtualappliance/pointerbutton/punteroOver.png");
+	selected-down-skin: Embed("/assets/virtualappliance/pointerbutton/puntero.png");
+}
+
+.VirtualApplianceDrawLineButton {
+	up-skin: Embed("/assets/virtualappliance/drawlinebutton/linea.png");
+	over-skin: Embed("/assets/virtualappliance/drawlinebutton/lineaOver.png");
+	down-skin: Embed("/assets/virtualappliance/drawlinebutton/lineaDown.png");
+	disabled-skin: Embed("/assets/virtualappliance/drawlinebutton/linea_dis.png");
+	selected-up-skin: Embed("/assets/virtualappliance/drawlinebutton/lineaDown.png");
+	selected-over-skin: Embed("/assets/virtualappliance/drawlinebutton/lineaOver.png");
+	selected-down-skin: Embed("/assets/virtualappliance/drawlinebutton/linea.png");
+}
+
+.VirtualAppliancePowerButton {
+	up-skin: Embed("/assets/virtualappliance/powerbutton/power_off.png");
+	over-skin: Embed("/assets/virtualappliance/powerbutton/power_off1.png");
+	down-skin: Embed("/assets/virtualappliance/powerbutton/power_off.png");
+	disabled-skin: Embed("/assets/virtualappliance/powerbutton/power_no.png");
+	selected-over-skin: Embed("/assets/virtualappliance/powerbutton/power.png");
+	selected-down-skin: Embed("/assets/virtualappliance/powerbutton/power1.png");
+	selected-up-skin: Embed("/assets/virtualappliance/powerbutton/power2.png");
+}
+
+.VirtualApplianceEraseButton {
+	up-skin: Embed("/assets/virtualappliance/erasebutton/up_skin.png", scaleGridTop =
 		
-		selected-up-skin:		Embed("/assets/virtualappliance/pointerbutton/punteroDown.png");
-		selected-over-skin:		Embed("/assets/virtualappliance/pointerbutton/punteroOver.png");
-		selected-down-skin:		Embed("/assets/virtualappliance/pointerbutton/puntero.png");
-	}
-	
-	.VirtualApplianceDrawLineButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/drawlinebutton/linea.png");
-		over-skin:				Embed("/assets/virtualappliance/drawlinebutton/lineaOver.png");
-		down-skin:				Embed("/assets/virtualappliance/drawlinebutton/lineaDown.png");
-		disabled-skin:			Embed("/assets/virtualappliance/drawlinebutton/linea_dis.png");	
 		
-		selected-up-skin:		Embed("/assets/virtualappliance/drawlinebutton/lineaDown.png");
-		selected-over-skin:		Embed("/assets/virtualappliance/drawlinebutton/lineaOver.png");
-		selected-down-skin:		Embed("/assets/virtualappliance/drawlinebutton/linea.png");
-	}
-	
-	.VirtualAppliancePowerButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/powerbutton/power_off.png");
-		over-skin:				Embed("/assets/virtualappliance/powerbutton/power_off1.png");
-		down-skin:				Embed("/assets/virtualappliance/powerbutton/power_off.png");
-		disabled-skin:			Embed("/assets/virtualappliance/powerbutton/power_no.png");
-		selected-over-skin:     Embed("/assets/virtualappliance/powerbutton/power.png");
-		selected-down-skin:		Embed("/assets/virtualappliance/powerbutton/power1.png");
-		selected-up-skin:		Embed("/assets/virtualappliance/powerbutton/power2.png");
-	}
-
-	.VirtualApplianceEraseButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/erasebutton/up_skin.png", scaleGridTop="8", scaleGridBottom="9", scaleGridLeft="8", scaleGridRight="12");
-		over-skin:				Embed("/assets/virtualappliance/erasebutton/over_skin.png", scaleGridTop="8", scaleGridBottom="9", scaleGridLeft="8", scaleGridRight="12");
-		down-skin:				Embed("/assets/virtualappliance/erasebutton/down_skin.png", scaleGridTop="8", scaleGridBottom="9", scaleGridLeft="8", scaleGridRight="12");
-		disabled-skin:			Embed("/assets/virtualappliance/erasebutton/disabled_skin.png", scaleGridTop="8", scaleGridBottom="9", scaleGridLeft="8", scaleGridRight="12");
-		font-size:				9;
-		color:					#333333;
-		roll-over-color:		#333333;
-		text-roll-over-color:	#333333;
-		text-selected-color:	#000000;
-		padding-left:			5;
-		padding-right:			5;
-		padding-top:			4;
-	}
-
-	.VirtualApplianceDeployButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/deploybutton/up_skin.png");
-		over-skin:				Embed("/assets/virtualappliance/deploybutton/over_skin.png");
-		down-skin:				Embed("/assets/virtualappliance/deploybutton/down_skin.png");
-		disabled-skin:			Embed("/assets/virtualappliance/deploybutton/disabled_skin.png");
-		selected-over-skin:     Embed("/assets/virtualappliance/deploybutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/virtualappliance/deploybutton/selected_down_skin.png");
-		selected-up-skin:		Embed("/assets/virtualappliance/deploybutton/selected_skin.png");
-	}
-	
-	
-	
-	.NodeVirtualImageContainerLabel1
-	{
-		font-size:"12";
-		font-weight:"bold";
-		padding-left:"10";
-
-	}
-	
-	.NodeRenedererBase
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/alert.png");
-	}
-
-	
-	.VirtualApplianceRendererCanvas
-	{
-		background-color:#F4F4F4;
-		background-alpha:0.9;
-		borderThickness: 1;
-	   	borderColor: #cccccc;
-	   	border-style:solid;
-
-	}
-
-
-	.VirtualApplianceRendererStateRunning{
-		source:Embed("/assets/application/icons/green_ball.png");
-	}
-	.VirtualApplianceRendererStatePaused{
-		source:Embed("/assets/application/icons/yellow_ball.png");
-	}
-	.VirtualApplianceRendererStateDisabled{
-		source:Embed("/assets/application/icons/grey_ball.png");
-	}
-	.VirtualApplianceRendererStateStopped{
-		source:Embed("/assets/application/icons/red_ball.png");
-	}
-	
-	.VirtualApplianceIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/virtualappliance/VirtualAppliance.png");
-	}
-	.VirtualApplianceBusyIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/loading_big.swf");
-	}
-	.VirtualApplianceBusyIconSmall
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/loading_small.swf");
-	}
-	
-	.VirtualApplianceRendererLabel1
-	{
-		font-size:"16";
-		font-weight:"bold";
-
-	}
-	.VirtualApplianceRendererLabel2
-	{
-		font-size:"14";
-/* 		font-style:"italic";
- */	}
-	
-	.VirtualApplianceRendererVRule1
-	{
-		stroke-color:"#cccccc";
-	}
-
-
-
-	.VirtualApplianceMiniatureCanvas
-	{
-		background-alpha:"0.8";
-		background-color:"#f4f4f4";
-		border-color:"#cccccc";
-		border-style:"solid";
-		border-thickness:"1";
-
-	}
-
-
-	.VirtualApplianceMiniatureAlertIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/alert.png");
-	}
-
-
-	.VirtualApplianceListBase
-	{
-		background-alpha:"0";
-		background-color:"#ff0000";
-	}
-
-	.VirtualApplianceMiniatureAlertIcon
-	{
-		/**custom property**/
-		source:Embed("assets/application/icons/loading_small.swf");
-	}
-
-	.VirtualApplianceDrawToolSeparator
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/separator.png");
-	}
-
-
-
-	.VirtualDataCenterManagementBaseCanvas1
-	{
-		background-color:"#e9e9e9";
-
-
-	}
-	
-	.VirtualApplianceDeployBigButton
-	{
-		up-skin:				Embed("/assets/virtualappliance/deployBigButton/up_skin.png");
-		over-skin:				Embed("/assets/virtualappliance/deployBigButton/over_skin.png");
-		down-skin:				Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
-		disabled-skin:			Embed("/assets/virtualappliance/deployBigButton/disabled_skin.png");
 		
-		selected-over-skin:     Embed("/assets/virtualappliance/deployBigButton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
-		selected-up-skin:		Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
-		selected-disabled-skin: Embed("/assets/virtualappliance/deployBigButton/selected_over_skin.png");
-	}
+		   "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =  
+		    "12");
+	over-skin: Embed("/assets/virtualappliance/erasebutton/over_skin.png", scaleGridTop
+		=       "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =   
+		   "12");
+	down-skin: Embed("/assets/virtualappliance/erasebutton/down_skin.png", scaleGridTop
+		=       "8", scaleGridBottom =       "9", scaleGridLeft =       "8",
+		scaleGridRight =   
+		   "12");
+	disabled-skin: Embed("/assets/virtualappliance/erasebutton/disabled_skin.png",
+		scaleGridTop =       "8", scaleGridBottom =       "9", scaleGridLeft =
+		    
+		 "8", scaleGridRight =       "12");
+	font-size: 9;
+	color: #333333;
+	roll-over-color: #333333;
+	text-roll-over-color: #333333;
+	text-selected-color: #000000;
+	padding-left: 5;
+	padding-right: 5;
+	padding-top: 4;
+}
 
-	.NodeVirtualImageAdded
-	{
-		/**custom property**/
-		source:Embed("/assets/virtualappliance/added.png");
-	}
+.VirtualApplianceDeployButton {
+	up-skin: Embed("/assets/virtualappliance/deploybutton/up_skin.png");
+	over-skin: Embed("/assets/virtualappliance/deploybutton/over_skin.png");
+	down-skin: Embed("/assets/virtualappliance/deploybutton/down_skin.png");
+	disabled-skin: Embed("/assets/virtualappliance/deploybutton/disabled_skin.png");
+	selected-over-skin: Embed("/assets/virtualappliance/deploybutton/selected_over_skin.png");
+	selected-down-skin: Embed("/assets/virtualappliance/deploybutton/selected_down_skin.png");
+	selected-up-skin: Embed("/assets/virtualappliance/deploybutton/selected_skin.png");
+}
 
-	.NodeVirtualImageDeleted
-	{
-		/**custom property**/
-		source:Embed("/assets/virtualappliance/deleted.png");
-	}
+.NodeVirtualImageContainerLabel1 {
+	font-size: "12";
+	font-weight: "bold";
+	padding-left: "10";
+}
+
+.NodeRenedererBase { /**custom property**/
+	source: Embed("/assets/application/icons/alert.png");
+}
+
+.VirtualApplianceRendererCanvas {
+	background-color: #F4F4F4;
+	background-alpha: 0.9;
+	borderThickness: 1;
+	borderColor: #cccccc;
+	border-style: solid;
+}
+
+.VirtualApplianceRendererStateRunning {
+	source: Embed("/assets/application/icons/green_ball.png");
+}
+
+.VirtualApplianceRendererStatePaused {
+	source: Embed("/assets/application/icons/yellow_ball.png");
+}
+
+.VirtualApplianceRendererStateDisabled {
+	source: Embed("/assets/application/icons/grey_ball.png");
+}
+
+.VirtualApplianceRendererStateStopped {
+	source: Embed("/assets/application/icons/red_ball.png");
+}
+
+.VirtualApplianceIcon { /**custom property**/
+	source: Embed("/assets/virtualappliance/VirtualAppliance.png");
+}
+
+.VirtualApplianceBusyIcon { /**custom property**/
+	source: Embed("/assets/application/icons/loading_big.swf");
+}
+
+.VirtualApplianceBusyIconSmall { /**custom property**/
+	source: Embed("/assets/application/icons/loading_small.swf");
+}
+
+.VirtualApplianceRendererLabel1 {
+	font-size: "16";
+	font-weight: "bold";
+}
+
+.VirtualApplianceRendererLabel2 {
+	font-size: "14";
+	/* 		font-style:"italic";
+ */
+}
+
+.VirtualApplianceRendererVRule1 {
+	stroke-color: "#cccccc";
+}
+
+.VirtualApplianceMiniatureCanvas {
+	background-alpha: "0.8";
+	background-color: "#f4f4f4";
+	border-color: "#cccccc";
+	border-style: "solid";
+	border-thickness: "1";
+}
+
+.VirtualApplianceMiniatureAlertIcon { /**custom property**/
+	source: Embed("/assets/application/icons/alert.png");
+}
+
+.VirtualApplianceListBase {
+	background-alpha: "0";
+	background-color: "#ff0000";
+}
+
+.VirtualApplianceMiniatureAlertIcon { /**custom property**/
+	source: Embed("assets/application/icons/loading_small.swf");
+}
+
+.VirtualApplianceDrawToolSeparator { /**custom property**/
+	source: Embed("/assets/application/icons/separator.png");
+}
+
+.VirtualDataCenterManagementBaseCanvas1 {
+	background-color: "#e9e9e9";
+}
+
+.VirtualApplianceDeployBigButton {
+	up-skin: Embed("/assets/virtualappliance/deployBigButton/up_skin.png");
+	over-skin: Embed("/assets/virtualappliance/deployBigButton/over_skin.png");
+	down-skin: Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
+	disabled-skin: Embed("/assets/virtualappliance/deployBigButton/disabled_skin.png");
+	selected-over-skin: Embed("/assets/virtualappliance/deployBigButton/selected_over_skin.png");
+	selected-down-skin: Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
+	selected-up-skin: Embed("/assets/virtualappliance/deployBigButton/down_skin.png");
+	selected-disabled-skin: Embed("/assets/virtualappliance/deployBigButton/selected_over_skin.png");
+}
+
+.NodeVirtualImageAdded { /**custom property**/
+	source: Embed("/assets/virtualappliance/added.png");
+}
+
+.NodeVirtualImageDeleted { /**custom property**/
+	source: Embed("/assets/virtualappliance/deleted.png");
+}
