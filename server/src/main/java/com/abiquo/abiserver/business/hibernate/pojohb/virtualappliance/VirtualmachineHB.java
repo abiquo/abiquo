@@ -352,7 +352,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         virtualMachine.setVdrpIP(vdrpIp);
         virtualMachine.setVdrpPort(vdrpPort);
         virtualMachine.setState(new State(state));
-        virtualMachine.setSubState(new State(subState));
+        virtualMachine.setSubState(new State(subState == null ? StateEnum.UNKNOWN : subState));
         virtualMachine.setHighDisponibility(highDisponibility == 1 ? true : false);
         virtualMachine.setUser(userHB == null ? null : userHB.toPojo());
         virtualMachine.setEnterprise(enterpriseHB == null ? null : enterpriseHB.toPojo());

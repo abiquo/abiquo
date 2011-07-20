@@ -289,14 +289,21 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
             virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
         }
 
-        // Client sends sometimes a description null or ""
-        if (StringUtils.isEmpty(subState.getDescription()))
+        if (subState != null)
         {
-            virtualMachineHB.setSubState(StateEnum.fromId(subState.getId()));
+            // Client sends sometimes a description null or ""
+            if (StringUtils.isEmpty(subState.getDescription()))
+            {
+                virtualMachineHB.setSubState(StateEnum.fromId(subState.getId()));
+            }
+            else
+            {
+                virtualMachineHB.setSubState(StateEnum.valueOf(subState.getDescription()));
+            }
         }
         else
         {
-            virtualMachineHB.setSubState(StateEnum.valueOf(subState.getDescription()));
+            virtualMachineHB.setSubState(StateEnum.UNKNOWN);
         }
 
         virtualMachineHB.setImage(virtualImage == null ? null : virtualImage.toPojoHB());

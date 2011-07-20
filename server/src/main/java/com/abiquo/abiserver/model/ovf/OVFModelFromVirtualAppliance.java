@@ -507,6 +507,13 @@ public class OVFModelFromVirtualAppliance
                 rule.setMac(ip.getMac());
                 rule.setName(ip.getName());
 
+                // Configure bootstrap for the gateway-enabled NIC
+                if (ip.getConfigureGateway())
+                {
+                    addBootstrapConfiguration(ip.getVirtualDataCenter().getIdVirtualDataCenter(),
+                        ip.getVirtualApp().getIdVirtualApp(), vmHB, rule);
+                }
+
                 service.getStaticRules().add(rule);
 
                 numberOfRules++;
@@ -762,10 +769,6 @@ public class OVFModelFromVirtualAppliance
         AnnotationSectionType annotationSection =
             createVirtualSystemRDPortAnnotationSection(virtualMachine);
 
-        // Add Bootstrap configuration, if the virtual machine requires it.
-        // This should be added only in deployment; not in VM state change calls
-        addBootstrapConfiguration(nodeVirtualImage, virtualAppliance, annotationSection);
-
         // OVFEnvelopeUtils.addSection(virtualSystem, productSection);
         OVFEnvelopeUtils.addSection(virtualSystem, hardwareSection);
         OVFEnvelopeUtils.addSection(virtualSystem, annotationSection);
@@ -795,28 +798,29 @@ public class OVFModelFromVirtualAppliance
         return annotationSection;
     }
 
-    private void addBootstrapConfiguration(final NodeVirtualImage node,
-        final VirtualAppliance virtualAppliance, final AnnotationSectionType annotationSection)
+    private static void addBootstrapConfiguration(final Integer idVirtualdatacenter,
+        final Integer idVirtualAppliance, final VirtualmachineHB virtualMachine,
+        final IpPoolType rule)
     {
-        if (node.getVirtualImage().isChefEnabled())
+        // Captured VMs may have null virtual images
+        if (virtualMachine.getImage() != null && virtualMachine.getImage().isChefEnabled())
         {
             // Build the bootstrap configuration URI
             String bootstrapURITemplate =
                 "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/bootstrapconfig";
 
             String apiLocation = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
-            Integer idVDC = virtualAppliance.getVirtualDataCenter().getId();
-            Integer idVApp = virtualAppliance.getId();
-            Integer idVM = node.getVirtualMachine().getId();
+            if (apiLocation.endsWith("/"))
+            {
+                apiLocation = apiLocation.substring(0, apiLocation.length() - 1);
+            }
 
             String bootstrapURI =
-                String.format(bootstrapURITemplate, apiLocation, idVDC, idVApp, idVM);
+                String.format(bootstrapURITemplate, apiLocation, idVirtualdatacenter,
+                    idVirtualAppliance, virtualMachine.getIdVm());
 
-            // Add the bootstrap configuration to the annotation section
-            Map<QName, String> otherAttributes = annotationSection.getOtherAttributes();
-            otherAttributes.put(AbiCloudConstants.bootstrapConfigURIQname, bootstrapURI);
-            // TODO: OneTimeToken
-            otherAttributes.put(AbiCloudConstants.bootstrapConfigAuthQname, "TODO: ONETIMETOKEN");
+            rule.setBootstrapConfigURI(bootstrapURI);
+            rule.setBootstrapConfigAuth("TODO: ONETIMETOKEN");
         }
     }
 

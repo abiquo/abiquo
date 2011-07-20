@@ -34,11 +34,14 @@ import java.util.UUID;
 
 import javax.xml.namespace.QName;
 
+import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
+import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
+import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
 import org.dmtf.schemas.ovf.envelope._1.VSSDType;
@@ -839,7 +842,6 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             }
             else if (CIMResourceTypeEnum.Ethernet_Adapter.getNumericResourceType() == resourceType)
             {
-
                 String macAddress = item.getAddress().getValue();
                 String vswitchName = item.getConnection().get(0).getValue();
                 int vlanTag = Integer.parseInt(item.getAllocationUnits().getValue());
@@ -921,7 +923,7 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
         String repositoryManagerAddress = getRepositoryManagerAddress(envelope);
         virtualConfig.setRepositoryManagerAddress(repositoryManagerAddress);
 
-        addBootstrapConfiguration(virtualConfig, virtualSystemInstance);
+        addBootstrapConfiguration(virtualConfig, envelope);
 
         return virtualConfig;
     }
@@ -1008,24 +1010,35 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
     }
 
     private void addBootstrapConfiguration(final VirtualMachineConfiguration virtualConfig,
-        final VirtualSystemType virtualSystemInstance) throws SectionException
+        final EnvelopeType envelope) throws SectionException
     {
-        String bootstrapURI =
-            getAttributeFromAnnotation(virtualSystemInstance,
-                BootstrapConfiguration.bootstrapConfigURIQname);
-        String bootstrapAuth =
-            getAttributeFromAnnotation(virtualSystemInstance,
-                BootstrapConfiguration.bootstrapConfigAuthQname);
+        AbicloudNetworkType abiquoNetwork =
+            OVFEnvelopeUtils.getSection(envelope, AbicloudNetworkType.class);
 
-        if (bootstrapURI != null)
+        for (OrgNetworkType network : abiquoNetwork.getNetworks())
         {
-            // We assume bootstrapAuth can be null if the bootstrapURI does not require
-            // authentication
-            BootstrapConfiguration bootstrapConfig = new BootstrapConfiguration();
-            bootstrapConfig.setConfigURI(bootstrapURI);
-            bootstrapConfig.setAuth(bootstrapAuth);
+            List<IpPoolType> rules = network.getConfiguration().getDhcpService().getStaticRules();
+            for (IpPoolType rule : rules)
+            {
+                // There is only one rule with the configure gateway flag in ALL rules from ALL
+                // networks
+                if (rule.isConfigureGateway())
+                {
+                    if (rule.getBootstrapConfigURI() != null)
+                    {
+                        // We assume bootstrapAuth can be null if the bootstrapURI does not require
+                        // authentication
+                        BootstrapConfiguration bootstrapConfig = new BootstrapConfiguration();
+                        bootstrapConfig.setConfigURI(rule.getBootstrapConfigURI());
+                        bootstrapConfig.setAuth(rule.getBootstrapConfigAuth());
 
-            virtualConfig.setBootstrapConfig(bootstrapConfig);
+                        virtualConfig.setBootstrapConfig(bootstrapConfig);
+                    }
+
+                    // We're done
+                    return;
+                }
+            }
         }
     }
 
