@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<abi:Infrastructure xmlns:abi="http://www.abicloud.com/model/test/infrastructure" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.abicloud.com/model/test/infrastructure Infrastructure.xsd ">
-  
-  <abi:Datacenter Name="testDatacenter" RemoteServicesBaseURI="http://virtualfactorylocation:8080/vf">
-  
-    <abi:Machine Name="tstMachine1" HypervisorType="vBox" 	IP="tst1.abiquo.hq.com"/>
-    <abi:Machine Name="tstMachine2" HypervisorType="KVM" 	IP="tst2.abiquo.hq.com"/>
-    <abi:Machine Name="tstMachine3" HypervisorType="xen-3" 	IP="tst3.abiquo.hq.com"/>
-    
-    <abi:VirtualDatacenter HypervisorType="vBox" Name="tstVDC">
-      <abi:VirtualAppliance Name="TestVA1"/>
-      <abi:VirtualAppliance Name="TestVA2"/>      
-    </abi:VirtualDatacenter>
-    
-  </abi:Datacenter>
+<abi:Infrastructure xmlns:abi="http://www.abicloud.com/model/test/infrastructure"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.abicloud.com/model/test/infrastructure Infrastructure.xsd ">
+    <abi:Datacenter Name="testDatacenter" RemoteServicesBaseURI="http://virtualfactorylocation:8080/vf">
+        <abi:Machine Name="tstMachine1" HypervisorType="vBox" IP="tst1.abiquo.hq.com" />
+        <abi:Machine Name="tstMachine2" HypervisorType="KVM" IP="tst2.abiquo.hq.com" />
+        <abi:Machine Name="tstMachine3" HypervisorType="xen-3" IP="tst3.abiquo.hq.com" />
+        <abi:VirtualDatacenter HypervisorType="vBox" Name="tstVDC">
+            <abi:VirtualAppliance Name="TestVA1" />
+            <abi:VirtualAppliance Name="TestVA2" />
+        </abi:VirtualDatacenter>
+    </abi:Datacenter>
 </abi:Infrastructure>

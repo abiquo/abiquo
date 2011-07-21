@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualApplianceConversionsHB" table="virtual_appliance_conversions">
-    <id name="id" type="int">      
-      <generator class="identity"/>
-    </id>
-    
-    <many-to-one class="VirtualappHB" fetch="select" name="virtualAppliance" lazy="false">
-      <column name="idVirtualAppliance" not-null="true"/>
-    </many-to-one>
-    
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB" fetch="select" name="virtualImageConversion" lazy="false">
-      <column name="idConversion" not-null="true"/>
-    </many-to-one>
-    
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB" fetch="select" name="nodeVirtualImage" lazy="false">
-      <column name="idNode"/>
-    </many-to-one>
-        
-    <property name="idUser" type="int" />
-    <property name="forceLimits" type="boolean" />
-  </class>  
+    <class catalog="kinton"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualApplianceConversionsHB"
+        table="virtual_appliance_conversions">
+        <id name="id" type="int">
+            <generator class="identity" />
+        </id>
+        <many-to-one class="VirtualappHB" fetch="select" name="virtualAppliance" lazy="false">
+            <column name="idVirtualAppliance" not-null="true" />
+        </many-to-one>
+        <many-to-one
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB"
+            fetch="select" name="virtualImageConversion" lazy="false">
+            <column name="idConversion" not-null="true" />
+        </many-to-one>
+        <many-to-one
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB"
+            fetch="select" name="nodeVirtualImage" lazy="false">
+            <column name="idNode" />
+        </many-to-one>
+        <property name="idUser" type="int" />
+        <property name="forceLimits" type="boolean" />
+    </class>
 </hibernate-mapping>

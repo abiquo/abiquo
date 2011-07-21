@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo</groupId>
     <artifactId>aimstub</artifactId>
     <packaging>jar</packaging>
-
-
     <!-- TODO Reference the parent project -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
@@ -35,7 +33,6 @@
             <artifactId>thrift</artifactId>
             <version>0.2.0</version>
         </dependency>
-        
         <!-- Testing -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -51,7 +48,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <!-- Project properties -->
     <name>Abiquo AIM stub</name>
     <url>http://www.abiquo.com</url>
@@ -62,7 +58,6 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
     <build>
         <finalName>aimstub</finalName>
         <plugins>
@@ -73,7 +68,6 @@
                     <source>${jdk.version}</source>
                     <target>${jdk.version}</target>
                 </configuration>
-
             </plugin>
         </plugins>
         <resources>

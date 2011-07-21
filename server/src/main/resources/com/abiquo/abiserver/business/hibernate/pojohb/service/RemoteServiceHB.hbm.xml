@@ -1,50 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
-<hibernate-mapping>    
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB" table="remote_service">
-    <id name="idRemoteService" type="java.lang.Integer">
-      <column name="idRemoteService"/>
-      <generator class="identity"/>
-    </id>
-    <property name="idDataCenter" type="java.lang.Integer">
-      <column name="idDataCenter" not-null="true"/>
-    </property>
-
-    <property name="remoteServiceType" type="RemoteServiceType"/>
-
-    <property name="uri" type="java.lang.String" not-null="true"/>
-      
-    <property name="status" type="java.lang.Integer"/>   
-  </class>
-  
-  <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_DATACENTER">
-    select rs
-    from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs
-    where rs.idDataCenter = :idDataCenter
-  </query>
-  
-  <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_TYPE">
-    select rs
-    from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs    	       
-    where rs.idDataCenter = :idDataCenter
-    and rs.remoteServiceType = :remoteServiceType
-  </query>
-  
-  <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_URL">
-		select rs
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB
-		rs
-		where rs.uri = :uri
-  </query>
-  
-  
-  <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_LOCATION_BY_TYPE">
-      select rs.uri
-      from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs             
-      where rs.idDataCenter = :idDataCenter
-      and rs.remoteServiceType = :remoteServiceType
-  </query>
-  
+<hibernate-mapping>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB"
+        table="remote_service">
+        <id name="idRemoteService" type="java.lang.Integer">
+            <column name="idRemoteService" />
+            <generator class="identity" />
+        </id>
+        <property name="idDataCenter" type="java.lang.Integer">
+            <column name="idDataCenter" not-null="true" />
+        </property>
+        <property name="remoteServiceType" type="RemoteServiceType" />
+        <property name="uri" type="java.lang.String" not-null="true" />
+        <property name="status" type="java.lang.Integer" />
+    </class>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_DATACENTER"> select rs from
+        com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where
+        rs.idDataCenter = :idDataCenter
+    </query>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_TYPE"> select rs from
+        com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where
+        rs.idDataCenter = :idDataCenter and rs.remoteServiceType = :remoteServiceType
+    </query>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_URL"> select rs from
+        com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.uri =
+        :uri
+    </query>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_LOCATION_BY_TYPE"> select rs.uri from
+        com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where
+        rs.idDataCenter = :idDataCenter and rs.remoteServiceType = :remoteServiceType
+    </query>
 </hibernate-mapping>

@@ -71,123 +71,108 @@
 
 
 <div id="uploadDiskFile">
-<h2 id="uploadDiskFileTitle">Upload a new disk file</h2>
-<form action="http://localhost/am/erepos/1/ovfs" method="POST" accept-charset="utf-8"
-	enctype="multipart/form-data">
-	
-	
-	<h2 id="progressNumber"></h2>
+	<h2 id="uploadDiskFileTitle">Upload a new disk file</h2>
+	<form action="http://localhost/am/erepos/1/ovfs" method="POST"
+		accept-charset="utf-8" enctype="multipart/form-data">
 
-	<input type="file" name="diskFile" id="diskFile" onchange="fileSelected();" />
-	<div class="row"><input type="button" onclick="uploadFile()" value="Upload" /></div>
-</form>
+
+		<h2 id="progressNumber"></h2>
+
+		<input type="file" name="diskFile" id="diskFile"
+			onchange="fileSelected();" />
+		<div class="row">
+			<input type="button" onclick="uploadFile()" value="Upload" />
+		</div>
+	</form>
 </div>
 
 
 
-<h2 id="crudBlankTitle">Add OVFPackage
+<h2 id="crudBlankTitle">
+	Add OVFPackage <br /> <br />
 
-<br/><br/>
-
-<div class="objectForm">
-<form>
-
+	<div class="objectForm">
+		<form>
 
 
-<label for="object_idEnterprise">Enterprise</label>
-<input title="Enter"id="object_idEnterprise"	type="text" name="object.idEnterprise" 	value="" size="5" />
-<br/>
 
-<label for="object_ovfUrl">ovfUrl</label>
-<input id="object_ovfUrl" 			class="" 	type="text" name="object.ovfUrl" 		value="" size="50" />
-<br/>
+			<label for="object_idEnterprise">Enterprise</label> <input
+				title="Enter" id="object_idEnterprise" type="text"
+				name="object.idEnterprise" value="" size="5" /> <br /> <label
+				for="object_ovfUrl">ovfUrl</label> <input id="object_ovfUrl"
+				class="" type="text" name="object.ovfUrl" value="" size="50" /> <br />
 
-<label for="object_name">Name</label>
-<input id="object_name" 			class="" 	type="text" name="object.name" 			value="" size="50" /> 
-<br/>
+			<label for="object_name">Name</label> <input id="object_name"
+				class="" type="text" name="object.name" value="" size="50" /> <br />
 
-<label for="object_description">Description</label>
-<input id="object_description" 		class="" 	type="text" name="object.description" 	value="" size="50" />
-<br/>
+			<label for="object_description">Description</label> <input
+				id="object_description" class="" type="text"
+				name="object.description" value="" size="50" /> <br /> <label
+				for="object_iconPath">icon path</label> <input id="object_iconPath"
+				class="" type="text" name="object.iconPath" value="" size="50" /> <br />
 
-<label for="object_iconPath">icon path</label>
-<input id="object_iconPath" 		class="" 	type="text" name="object.iconPath" 		value="" size="50" />
-<br/>
-
-<label for="object_categoryName">Category</label>
-<input id="object_categoryName" 	class="" 	type="text" name="object.categoryName" 	value="" size="50" />
-<br/>
+			<label for="object_categoryName">Category</label> <input
+				id="object_categoryName" class="" type="text"
+				name="object.categoryName" value="" size="50" /> <br />
 
 
-<!--  -->
-<label for="object_ diskFilePath">File Path</label>
-<input id="object_ diskFilePath" 	class="" 	type="text" name="object.diskFilePath" 	value="" size="50" />     
-<br/>
-
-<label for="object_ diskFileSize">File Size</label>
-<input id="object_diskFileSize" 				type="text" name="object.diskFileSize" 	value="" size="5" />
-<br/>
-
-<label for="object_cpu">requred CPU</label>
-<input id="object_cpu" 							type="text" name="object.cpu" 			value="" size="5" />
-<br/>
-
-<label for="object_ram">requred RAM</label>
-<input id="object_ram" 							type="text" name="object.ram" 			value="" size="5" />
-<label for="object_ramSizeUnit">RAM units</label>
-<select id="object_ramSizeUnit" name="object.ramSizeUnit">
-	<option name="BYTE" 	ord="0" value="BYTE">BYTE</option>
-	<option name="KILOBYTE" ord="1" value="KILOBYTE">KILOBYTE</option>
-	<option name="MEGABYTE" ord="2" value="MEGABYTE">MEGABYTE</option>
-	<option name="GIGABYTE" ord="3" value="GIGABYTE" selected="true">GIGABYTE</option>
-	<option name="TERABYTE" ord="4" value="TERABYTE">TB</option>
-</select> 
-<br/>
-
-<label for="object_hd">requred HD</label>
-<input id="object_hd" 							type="text" name="object.hd" 			value="" size="5" />
-<label for="object_hdSizeUnit">HD units</label>
-<select id="object_hdSizeUnit" name="object.hdSizeUnit">
-	<option name="BYTE" 	ord="0" value="BYTE">BYTE</option>
-	<option name="KILOBYTE" ord="1" value="KILOBYTE">KILOBYTE</option>
-	<option name="MEGABYTE" ord="2" value="MEGABYTE">MEGABYTE</option>
-	<option name="GIGABYTE" ord="3" value="GIGABYTE" selected="true">GIGABYTE</option>
-	<option name="TERABYTE" ord="4" value="TERABYTE">TB</option>
-</select> 
-<br/>
-
-
-<label for="object_diskFileFormat">disk format</label>
-<select id="object_diskFileFormat" name="object.diskFileFormat">
-	<option name="UNKNOWN" 					ord="0" value="UNKNOWN">UNKNOWN</option>
-	<option name="RAW" 						ord="1" value="RAW">RAW</option>
-	<option name="INCOMPATIBLE" 			ord="2" value="INCOMPATIBLE">INCOMPATIBLE</option>
-	<option name="VMDK_STREAM_OPTIMIZED" 	ord="3" value="VMDK_STREAM_OPTIMIZED">VMDK_STREAM_OPTIMIZED</option>
-	<option name="VMDK_FLAT" 				ord="4" value="VMDK_FLAT">VMDK_FLAT</option>
-	<option name="VMDK_SPARSE" 				ord="5" value="VMDK_SPARSE">VMDK_SPARSE</option>
-	<option name="VHD_FLAT" 				ord="6" value="VHD_FLAT">VHD_FLAT</option>
-	<option name="VHD_SPARSE" 				ord="7" value="VHD_SPARSE">VHD_SPARSE</option>
-	<option name="VDI_FLAT" 				ord="8" value="VDI_FLAT">VDI_FLAT</option>
-	<option name="VDI_SPARSE" 				ord="9" value="VDI_SPARSE">VDI_SPARSE</option>
-	<option name="QCOW2_FLAT" 				ord="10" value="QCOW2_FLAT">QCOW2_FLAT</option>
-	<option name="QCOW2_SPARSE" 			ord="11" value="QCOW2_SPARSE">QCOW2_SPARSE</option>
-</select> 
-<br/>
+			<!--  -->
+			<label for="object_ diskFilePath">File Path</label> <input
+				id="object_ diskFilePath" class="" type="text"
+				name="object.diskFilePath" value="" size="50" /> <br /> <label
+				for="object_ diskFileSize">File Size</label> <input
+				id="object_diskFileSize" type="text" name="object.diskFileSize"
+				value="" size="5" /> <br /> <label for="object_cpu">requred
+				CPU</label> <input id="object_cpu" type="text" name="object.cpu" value=""
+				size="5" /> <br /> <label for="object_ram">requred RAM</label> <input
+				id="object_ram" type="text" name="object.ram" value="" size="5" />
+			<label for="object_ramSizeUnit">RAM units</label> <select
+				id="object_ramSizeUnit" name="object.ramSizeUnit">
+				<option name="BYTE" ord="0" value="BYTE">BYTE</option>
+				<option name="KILOBYTE" ord="1" value="KILOBYTE">KILOBYTE</option>
+				<option name="MEGABYTE" ord="2" value="MEGABYTE">MEGABYTE</option>
+				<option name="GIGABYTE" ord="3" value="GIGABYTE" selected="true">GIGABYTE</option>
+				<option name="TERABYTE" ord="4" value="TERABYTE">TB</option>
+			</select> <br /> <label for="object_hd">requred HD</label> <input
+				id="object_hd" type="text" name="object.hd" value="" size="5" /> <label
+				for="object_hdSizeUnit">HD units</label> <select
+				id="object_hdSizeUnit" name="object.hdSizeUnit">
+				<option name="BYTE" ord="0" value="BYTE">BYTE</option>
+				<option name="KILOBYTE" ord="1" value="KILOBYTE">KILOBYTE</option>
+				<option name="MEGABYTE" ord="2" value="MEGABYTE">MEGABYTE</option>
+				<option name="GIGABYTE" ord="3" value="GIGABYTE" selected="true">GIGABYTE</option>
+				<option name="TERABYTE" ord="4" value="TERABYTE">TB</option>
+			</select> <br /> <label for="object_diskFileFormat">disk format</label> <select
+				id="object_diskFileFormat" name="object.diskFileFormat">
+				<option name="UNKNOWN" ord="0" value="UNKNOWN">UNKNOWN</option>
+				<option name="RAW" ord="1" value="RAW">RAW</option>
+				<option name="INCOMPATIBLE" ord="2" value="INCOMPATIBLE">INCOMPATIBLE</option>
+				<option name="VMDK_STREAM_OPTIMIZED" ord="3"
+					value="VMDK_STREAM_OPTIMIZED">VMDK_STREAM_OPTIMIZED</option>
+				<option name="VMDK_FLAT" ord="4" value="VMDK_FLAT">VMDK_FLAT</option>
+				<option name="VMDK_SPARSE" ord="5" value="VMDK_SPARSE">VMDK_SPARSE</option>
+				<option name="VHD_FLAT" ord="6" value="VHD_FLAT">VHD_FLAT</option>
+				<option name="VHD_SPARSE" ord="7" value="VHD_SPARSE">VHD_SPARSE</option>
+				<option name="VDI_FLAT" ord="8" value="VDI_FLAT">VDI_FLAT</option>
+				<option name="VDI_SPARSE" ord="9" value="VDI_SPARSE">VDI_SPARSE</option>
+				<option name="QCOW2_FLAT" ord="10" value="QCOW2_FLAT">QCOW2_FLAT</option>
+				<option name="QCOW2_SPARSE" ord="11" value="QCOW2_SPARSE">QCOW2_SPARSE</option>
+			</select> <br />
 
 
 
 
-<!-- 
+			<!-- 
     private Integer idUser;
 -->
 
 
-<p class="crudButtons">
-<input type="submit" name="_save" value="Save" /> 	
-</form>
-    
-    
-</div>
+			<p class="crudButtons">
+				<input type="submit" name="_save" value="Save" />
+		</form>
 
-</body>
+
+	</div>
+
+	</body>
 </html>

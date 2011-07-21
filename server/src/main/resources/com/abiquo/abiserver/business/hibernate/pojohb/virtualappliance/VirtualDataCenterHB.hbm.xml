@@ -1,106 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB"
-		table="virtualdatacenter" dynamic-update="true" dynamic-insert="true"
-		select-before-update="false">
-		<id name="idVirtualDataCenter" type="java.lang.Integer">
-			<column name="idVirtualDataCenter" />
-			<generator class="identity" />
-		</id>
-		<property name="name" type="string">
-			<column length="40" name="name" not-null="true" />
-		</property>
-		<property name="idDataCenter" type="java.lang.Integer">
-			<column length="10" name="idDataCenter" not-null="true" />
-		</property>
-		
-    	<property name="hypervisorType" type="HypervisorType" not-null="true"/>
-    
-		<many-to-one
-			class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
-			lazy="false" fetch="select" name="enterpriseHB">
-			<column name="idEnterprise" />
-		</many-to-one>		
-		<many-to-one
-			class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB"
-			lazy="false" fetch="select" name="network">
-			<column name="networktypeID" />
-		</many-to-one>
-		
-		
-		<!-- Limits -->
-		<component name="limits"
-			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
-			<component name="cpu"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="cpuHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="cpuSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="ram"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="ramHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="ramSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="hd"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="hdHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="hdSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="storage"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="storageHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="storageSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>						
-			<component name="vlan"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="vlanHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="vlanSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="publicIP"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="publicIPHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="publicIPSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-		</component>		
-		
-		
-	</class>
-    <query name="VIRTUAL_DATACENTER.GET_BY_NETWORK" >
-      Select vd
-      from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd
-           inner join vd.network n
-      where n.networkId = :network_id
+    <class catalog="kinton"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB"
+        table="virtualdatacenter" dynamic-update="true" dynamic-insert="true" select-before-update="false">
+        <id name="idVirtualDataCenter" type="java.lang.Integer">
+            <column name="idVirtualDataCenter" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column length="40" name="name" not-null="true" />
+        </property>
+        <property name="idDataCenter" type="java.lang.Integer">
+            <column length="10" name="idDataCenter" not-null="true" />
+        </property>
+        <property name="hypervisorType" type="HypervisorType" not-null="true" />
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
+            lazy="false" fetch="select" name="enterpriseHB">
+            <column name="idEnterprise" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB"
+            lazy="false" fetch="select" name="network">
+            <column name="networktypeID" />
+        </many-to-one>
+        <!-- Limits -->
+        <component name="limits"
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
+            <component name="cpu"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="cpuHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="cpuSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="ram"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="ramHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="ramSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="hd"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="hdHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="hdSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="storage"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="storageHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="storageSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="vlan"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="vlanHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="vlanSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="publicIP"
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="publicIPHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="publicIPSoft" type="java.lang.Long" not-null="true" />
+            </component>
+        </component>
+    </class>
+    <query name="VIRTUAL_DATACENTER.GET_BY_NETWORK"> Select vd from
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd inner
+        join vd.network n where n.networkId = :network_id
     </query>
-    <query name="VIRTUAL_DATACENTER_GET_BY_VAPP" >
-      Select vd
-      from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd,
-      	   VirtualappHB vapp
-      where vapp.virtualDataCenterHB.idVirtualDataCenter = vd.idVirtualDataCenter
-        and vapp.idVirtualApp = :vappId
+    <query name="VIRTUAL_DATACENTER_GET_BY_VAPP"> Select vd from
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd,
+        VirtualappHB vapp where vapp.virtualDataCenterHB.idVirtualDataCenter =
+        vd.idVirtualDataCenter and vapp.idVirtualApp = :vappId
     </query>
-    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE">
-    	from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd
-    	where enterpriseHB.idEnterprise = :enterpriseId
-    	order by vd.name asc
+    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE"> from
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd where
+        enterpriseHB.idEnterprise = :enterpriseId order by vd.name asc
     </query>
-    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE_AND_DATACENTER">
-    	from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd
-    	where enterpriseHB.idEnterprise = :enterpriseId and idDataCenter = :datacenterId
-    	order by vd.name asc
+    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE_AND_DATACENTER"> from
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd where
+        enterpriseHB.idEnterprise = :enterpriseId and idDataCenter = :datacenterId order by vd.name
+        asc
     </query>
 </hibernate-mapping>

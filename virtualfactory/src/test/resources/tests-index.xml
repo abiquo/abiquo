@@ -1,11 +1,10 @@
-<tests abicloud_WS_location="http://localhost:80/virtualfactory/"
-	request_timeout="6000000" sleep_time="20000">
-
-	<group name="III">
-		<group name="A">
-			<test name="001" />
-<!--			<test name="002" />-->
-<!--			<test name="003" />-->
-		</group>
-	</group>
+<tests abicloud_WS_location="http://localhost:80/virtualfactory/" request_timeout="6000000"
+    sleep_time="20000">
+    <group name="III">
+        <group name="A">
+            <test name="001" />
+            <!-- <test name="002" /> -->
+            <!-- <test name="003" /> -->
+        </group>
+    </group>
 </tests>

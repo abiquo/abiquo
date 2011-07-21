@@ -20,9 +20,6 @@
  */
 
 /* CSS file for logo definition*/
-
-	.loginLogo
-	{
-		source:Embed("/assets/application/login/logo.png");
-	}
-
+.loginLogo {
+	source: Embed("/assets/application/login/logo.png");
+}

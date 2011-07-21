@@ -2,118 +2,84 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-
-	<class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" table="datacenter">
-		<id name="idDataCenter" type="java.lang.Integer">
-			<column name="idDataCenter" />
-			<generator class="identity" />
-		</id>
-		<property name="name" type="string">
-			<column length="20" name="name" not-null="true" />
-		</property>
-		<property name="situation" type="string">
-			<column length="100" name="situation" />
-		</property>
-		
-		<set name="entLimits" lazy="false" cascade="all-delete-orphan">
-			<key>
-				<column name="idDataCenter" />
-			</key>
-			<one-to-many
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
-		</set>
-		
-		<many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB"
-			lazy="false" fetch="select" name="network">
-			<column name="network_id" />
-		</many-to-one>
-		<set inverse="true" lazy="true" name="racks" order-by="name">
-			<key>
-				<column name="idDataCenter" not-null="true" />
-			</key>
-			<one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB" />
-		</set>
-		<set inverse="true" lazy="false" name="remoteServicesHB">
-			<key>
-				<column name="idDataCenter" not-null="true" />
-			</key>
-			<one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB" />
-		</set>
-	</class>
-	
-	<query name="DATACENTER.GET_NUMBER_OF_VIRTUAL_DATACENTERS">
-		Select count(vdc)
-		from 
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB
-		as vdc
-		where vdc.idDataCenter = :idDatacenter
+    <class catalog="kinton"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" table="datacenter">
+        <id name="idDataCenter" type="java.lang.Integer">
+            <column name="idDataCenter" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column length="20" name="name" not-null="true" />
+        </property>
+        <property name="situation" type="string">
+            <column length="100" name="situation" />
+        </property>
+        <set name="entLimits" lazy="false" cascade="all-delete-orphan">
+            <key>
+                <column name="idDataCenter" />
+            </key>
+            <one-to-many
+                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
+        </set>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB"
+            lazy="false" fetch="select" name="network">
+            <column name="network_id" />
+        </many-to-one>
+        <set inverse="true" lazy="true" name="racks" order-by="name">
+            <key>
+                <column name="idDataCenter" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB" />
+        </set>
+        <set inverse="true" lazy="false" name="remoteServicesHB">
+            <key>
+                <column name="idDataCenter" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB" />
+        </set>
+    </class>
+    <query name="DATACENTER.GET_NUMBER_OF_VIRTUAL_DATACENTERS"> Select count(vdc) from
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB as vdc
+        where vdc.idDataCenter = :idDatacenter
     </query>
-	<query name="GET_ALL_DATACENTER_IDS">
-		Select dc.idDataCenter 
-        from DatacenterHB as dc           
+    <query name="GET_ALL_DATACENTER_IDS"> Select dc.idDataCenter from DatacenterHB as dc
     </query>
-	<query name="DATACENTER.GET_BY_PRIVATE_NETWORK_ID">
-		Select d
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB
-		as d,
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB
-		vd
-		inner join vd.network n
-		where vd.idDataCenter = d.idDataCenter
-		and n.networkId = :networkId
+    <query name="DATACENTER.GET_BY_PRIVATE_NETWORK_ID"> Select d from
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB as d,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd inner
+        join vd.network n where vd.idDataCenter = d.idDataCenter and n.networkId = :networkId
     </query>
-	<query name="DATACENTER.GET_BY_PUBLIC_NETWORK_ID">
-		Select d
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB
-		as d
-		where d.network.networkId = :networkId
+    <query name="DATACENTER.GET_BY_PUBLIC_NETWORK_ID"> Select d from
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB as d where
+        d.network.networkId = :networkId
     </query>
-	<query name="DATACENTER.GET_BY_NAME">
-		Select d
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB
-		as d
-		where d.name = :name
-    </query>    
-    <query name="GET_ALLOWED_DATACENTERS">
-		Select dclimit.datacenter
-		from DatacenterLimitHB as dclimit
-		where dclimit.enterprise.idEnterprise = :idEnterprise	
-	</query>
-	<!-- query name="DATACENTER.GET_RACKS_BY_DATACENTER">
-		Select racks
-		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm
-		     right join pm.rack racks
-		     inner join racks.datacenter dc,
-		     com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent
-		where dc.idDataCenter = :idDatacenter	
-		  and pm.idEnterprise = ent.idEnterprise
-		  and (
-		         racks.name like :filterLike or
-		         pm.name like :filterLike or
-		         ent.name like :filterLike
-		      )
-	</query -->
-	<query name="DATACENTER.GET_RACKS_BY_DATACENTER">
-		Select distinct(racks)
-		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm
-		     right join pm.rack racks
-		     inner join racks.datacenter dc		     
-		where dc.idDataCenter = :idDatacenter
-		  and (
-		      racks.name like :filterLike or
-		      pm.name like :filterLike or
-		      pm in (
-		             Select pms
-		             from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pms,
-		             com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent
-		             where pms.idEnterprise = ent.idEnterprise   
-		               and ent.name like :filterLike
-		             )   
-		      )
-	</query>
-    
-    
+    <query name="DATACENTER.GET_BY_NAME"> Select d from
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB as d where d.name
+        = :name
+    </query>
+    <query name="GET_ALLOWED_DATACENTERS"> Select dclimit.datacenter from DatacenterLimitHB as dclimit where
+        dclimit.enterprise.idEnterprise = :idEnterprise
+    </query>
+    <!-- query name="DATACENTER.GET_RACKS_BY_DATACENTER">
+        Select racks
+        from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm
+        right join pm.rack racks
+        inner join racks.datacenter dc,
+        com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent
+        where dc.idDataCenter = :idDatacenter
+        and pm.idEnterprise = ent.idEnterprise
+        and (
+        racks.name like :filterLike or
+        pm.name like :filterLike or
+        ent.name like :filterLike
+        )
+        </query -->
+    <query name="DATACENTER.GET_RACKS_BY_DATACENTER"> Select distinct(racks) from
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm right
+        join pm.rack racks inner join racks.datacenter dc where dc.idDataCenter = :idDatacenter and
+        ( racks.name like :filterLike or pm.name like :filterLike or pm in ( Select pms from
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pms,
+        com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent where pms.idEnterprise
+        = ent.idEnterprise and ent.name like :filterLike ) )
+    </query>
 </hibernate-mapping>

@@ -11,21 +11,20 @@
                 <include>*.lst</include>
             </includes>
         </fileSet>
-
         <fileSet>
             <directory>target/themes/base</directory>
             <outputDirectory>themes/base</outputDirectory>
             <includes>
                 <include>*.swf</include>
             </includes>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>src/assets/customcomponents/custompreloader</directory>
             <outputDirectory>themes/base</outputDirectory>
             <includes>
                 <include>CustomPreloaderLogo.png</include>
             </includes>
-        </fileSet>        
+        </fileSet>
         <fileSet>
             <directory>src/assets/virtualimage</directory>
             <outputDirectory>themes/base</outputDirectory>

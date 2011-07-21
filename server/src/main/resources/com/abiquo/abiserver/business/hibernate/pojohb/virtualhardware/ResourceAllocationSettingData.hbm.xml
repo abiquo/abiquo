@@ -2,81 +2,83 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData" table="rasd">
-    <id name="instanceID" type="java.lang.String">
-      <column length="50" name="instanceID"/>
-    </id>
-    <property name="address" type="java.lang.String">
-      <column length="256" name="address" not-null="false"/>
-    </property>
-    <property name="addressOnParent" type="java.lang.String">
-      <column length="25" name="addressOnParent" not-null="false"/>
-    </property>
-    <property name="allocationUnits" type="java.lang.String">
-      <column length="15" name="allocationUnits" not-null="false"/>
-    </property>
-    <property name="automaticAllocation" type="java.lang.Integer">
-      <column name="automaticAllocation" not-null="false"/>
-    </property>
-    <property name="automaticDeallocation" type="java.lang.Integer">
-      <column name="automaticDeallocation" not-null="false"/>
-    </property>
-    <property name="caption" type="java.lang.String">
-      <column length="15" name="caption" not-null="false"/>
-    </property>
-    <property name="changeableType" type="java.lang.Integer">
-      <column name="changeableType" not-null="false"/>
-    </property>
-    <property name="configurationName" type="java.lang.String">
-      <column length="15" name="configurationName" not-null="false"/>
-    </property>
-    <property name="connection" type="java.lang.String">
-      <column length="256" name="connectionResource" not-null="false"/>
-    </property>
-    <property name="consumerVisibility" type="java.lang.Integer">
-      <column name="consumerVisibility" not-null="false"/>
-    </property>
-    <property name="description" type="java.lang.String">
-      <column length="50" name="description" not-null="false"/>
-    </property>
-    <property name="elementName" type="java.lang.String">
-      <column length="15" name="elementName" not-null="true"/>
-    </property>
-    <property name="generation" type="java.lang.Long">
-      <column length="20" name="generation" not-null="false"/>
-    </property>
-    <property name="hostResource" type="java.lang.String">
-      <column length="256" name="hostResource" not-null="false"/>
-    </property>
-    <property name="limit" type="java.lang.Long">
-      <column name="limitResource" not-null="false"/>
-    </property>
-    <property name="mappingBehaviour" type="java.lang.Integer">
-      <column name="mappingBehaviour" not-null="false"/>
-    </property>
-    <property name="otherResourceType" type="java.lang.String">
-      <column length="50" name="otherResourceType" not-null="false"/>
-    </property>
-    <property name="parent" type="java.lang.String">
-      <column length="50" name="parent" not-null="false"/>
-    </property>
-    <property name="poolID" type="java.lang.String">
-      <column length="50" name="poolID" not-null="false"/>
-    </property>
-    <property name="reservation" type="java.lang.Long">
-      <column name="reservation" not-null="false"/>
-    </property>
-    <property name="resourceSubType" type="java.lang.String">
-      <column length="15" name="resourceSubType" not-null="false"/>
-    </property>
-    <property name="resourceType" type="java.lang.Integer">
-      <column name="resourceType" not-null="true"/>
-    </property>
-    <property name="virtualQuantity" type="java.lang.Long">
-      <column name="virtualQuantity" not-null="false"/>
-    </property>
-    <property name="weight" type="java.lang.String">
-      <column name="weight" not-null="false"/>
-    </property>
-  </class>
+    <class catalog="kinton"
+        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData"
+        table="rasd">
+        <id name="instanceID" type="java.lang.String">
+            <column length="50" name="instanceID" />
+        </id>
+        <property name="address" type="java.lang.String">
+            <column length="256" name="address" not-null="false" />
+        </property>
+        <property name="addressOnParent" type="java.lang.String">
+            <column length="25" name="addressOnParent" not-null="false" />
+        </property>
+        <property name="allocationUnits" type="java.lang.String">
+            <column length="15" name="allocationUnits" not-null="false" />
+        </property>
+        <property name="automaticAllocation" type="java.lang.Integer">
+            <column name="automaticAllocation" not-null="false" />
+        </property>
+        <property name="automaticDeallocation" type="java.lang.Integer">
+            <column name="automaticDeallocation" not-null="false" />
+        </property>
+        <property name="caption" type="java.lang.String">
+            <column length="15" name="caption" not-null="false" />
+        </property>
+        <property name="changeableType" type="java.lang.Integer">
+            <column name="changeableType" not-null="false" />
+        </property>
+        <property name="configurationName" type="java.lang.String">
+            <column length="15" name="configurationName" not-null="false" />
+        </property>
+        <property name="connection" type="java.lang.String">
+            <column length="256" name="connectionResource" not-null="false" />
+        </property>
+        <property name="consumerVisibility" type="java.lang.Integer">
+            <column name="consumerVisibility" not-null="false" />
+        </property>
+        <property name="description" type="java.lang.String">
+            <column length="50" name="description" not-null="false" />
+        </property>
+        <property name="elementName" type="java.lang.String">
+            <column length="15" name="elementName" not-null="true" />
+        </property>
+        <property name="generation" type="java.lang.Long">
+            <column length="20" name="generation" not-null="false" />
+        </property>
+        <property name="hostResource" type="java.lang.String">
+            <column length="256" name="hostResource" not-null="false" />
+        </property>
+        <property name="limit" type="java.lang.Long">
+            <column name="limitResource" not-null="false" />
+        </property>
+        <property name="mappingBehaviour" type="java.lang.Integer">
+            <column name="mappingBehaviour" not-null="false" />
+        </property>
+        <property name="otherResourceType" type="java.lang.String">
+            <column length="50" name="otherResourceType" not-null="false" />
+        </property>
+        <property name="parent" type="java.lang.String">
+            <column length="50" name="parent" not-null="false" />
+        </property>
+        <property name="poolID" type="java.lang.String">
+            <column length="50" name="poolID" not-null="false" />
+        </property>
+        <property name="reservation" type="java.lang.Long">
+            <column name="reservation" not-null="false" />
+        </property>
+        <property name="resourceSubType" type="java.lang.String">
+            <column length="15" name="resourceSubType" not-null="false" />
+        </property>
+        <property name="resourceType" type="java.lang.Integer">
+            <column name="resourceType" not-null="true" />
+        </property>
+        <property name="virtualQuantity" type="java.lang.Long">
+            <column name="virtualQuantity" not-null="false" />
+        </property>
+        <property name="weight" type="java.lang.String">
+            <column name="weight" not-null="false" />
+        </property>
+    </class>
 </hibernate-mapping>

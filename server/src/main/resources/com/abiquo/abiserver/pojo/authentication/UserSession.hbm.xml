@@ -2,29 +2,29 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.pojo.authentication.UserSession" table="session">
-    <id name="id" type="java.lang.Integer">
-      <column name="id"/>
-      <generator class="identity"/>
-    </id>
-    <property name="user" type="string">
-      <column length="20" name="`user`" not-null="true"/>
-    </property>
-    <property name="key" type="string">
-      <column length="100" name="`key`"/>
-    </property>
-    <property name="expireDate" type="timestamp">
-      <column length="0" name="`expireDate`"/>
-    </property>
-    <property name="userIdDb" type="integer">
-    	<column name="idUser"/>
-    </property>
-    <property name="authType" type="string">
-      <column length="20" name="`authType`"/>
-    </property>
-  </class>
-  <sql-query name="checkSession">
-   		<return class="com.abiquo.abiserver.pojo.authentication.UserSession"/>
-   		SELECT * FROM session WHERE user=:user
-   </sql-query>
+    <class catalog="kinton" name="com.abiquo.abiserver.pojo.authentication.UserSession" table="session">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="user" type="string">
+            <column length="20" name="`user`" not-null="true" />
+        </property>
+        <property name="key" type="string">
+            <column length="100" name="`key`" />
+        </property>
+        <property name="expireDate" type="timestamp">
+            <column length="0" name="`expireDate`" />
+        </property>
+        <property name="userIdDb" type="integer">
+            <column name="idUser" />
+        </property>
+        <property name="authType" type="string">
+            <column length="20" name="`authType`" />
+        </property>
+    </class>
+    <sql-query name="checkSession">
+        <return class="com.abiquo.abiserver.pojo.authentication.UserSession" />
+        SELECT * FROM session WHERE user=:user
+    </sql-query>
 </hibernate-mapping>

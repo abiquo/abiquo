@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
-		</layout>
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
-	</appender>
-
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${catalina.base}/logs/virtualfactory.log</file>
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
-		</layout>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      		<fileNamePattern>${catalina.base}/logs/virtualfactory-%d{yyyy-MM-dd}.log</fileNamePattern>
-			<maxHistory>5</maxHistory>
-    	</rollingPolicy>
-	</appender>
-	
-	<appender name="VBOX" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/virtualfactory.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/virtualfactory-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="VBOX" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${catalina.base}/logs/virtualfactory-vbox.log</file>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
@@ -31,18 +28,15 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
-	
-	<logger name="org.jinterop">
+    <logger name="org.jinterop">
         <level value="ERROR" />
     </logger>
-	
-	<logger name="com.abiquo">
-		<level value="DEBUG" />
-	</logger>
-	
-	<root>
-		<level value="INFO" />
-		<appender-ref ref="FILE" />
-		<appender-ref ref="STDOUT" />
-	</root>
+    <logger name="com.abiquo">
+        <level value="DEBUG" />
+    </logger>
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT" />
+    </root>
 </configuration>

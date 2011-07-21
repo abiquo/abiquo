@@ -1,124 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB"
-		table="metering">
-		<id name="idMeter" type="java.lang.Long">
-			<column name="idMeter" />
-			<generator class="identity" />
-		</id>
-		<property name="idDatacenter" type="java.lang.Integer">
-			<column length="10" name="idDatacenter" not-null="false" />
-		</property>
-		<property name="datacenter" type="string">
-			<column length="20" name="datacenter" not-null="false" />
-		</property>
-
-		<property name="idRack" type="java.lang.Integer">
-			<column length="15" name="idRack" not-null="false" />
-		</property>
-		<property name="rack" type="string">
-			<column length="20" name="rack" not-null="false" />
-		</property>
-		
-		<property name="idPhysicalMachine" type="java.lang.Integer">
-			<column length="20" name="idPhysicalMachine" not-null="false" />
-		</property>
-		<property name="physicalMachine" type="string">
-			<column length="30" name="physicalMachine" not-null="false" />
-		</property>
-		
-		<property name="idStorageSystem" type="java.lang.Integer">
-			<column length="10" name="idStorageSystem" not-null="false" />
-		</property>
-		<property name="storageSystem" type="string">
-			<column length="256" name="storageSystem" not-null="false" />
-		</property>
-		
-		<property name="idStoragePool" type="string">
-			<column length="40" name="idStoragePool" not-null="false" />
-		</property>
-		<property name="storagePool" type="string">
-			<column length="256" name="storagePool" not-null="false" />
-		</property>
-		
-		<property name="idVolume" type="string">
-			<column length="50" name="idVolume" not-null="false" />
-		</property>
-		<property name="volume" type="string">
-			<column length="256" name="volume" not-null="false" />
-		</property>			
-		
-		<property name="idNetwork" type="java.lang.Integer">
-			<column length="11" name="idNetwork" not-null="false" />
-		</property>
-		<property name="network" type="string">
-			<column length="256" name="network" not-null="false" />
-		</property>	
-		
-		<property name="idSubnet" type="java.lang.Integer">
-			<column length="11" name="idSubnet" not-null="false" />
-		</property>
-		<property name="subnet" type="string">
-			<column length="256" name="subnet" not-null="false" />
-		</property>	
-		
-		<property name="idEnterprise" type="java.lang.Integer">
-			<column length="10" name="idEnterprise" not-null="false" />
-		</property>
-		<property name="enterprise" type="string">
-			<column length="40" name="enterprise" not-null="false" />
-		</property>	
-		
-		<property name="idUser" type="java.lang.Integer">
-			<column length="10" name="idUser" not-null="false" />
-		</property>
-		<property name="user" type="string">
-			<column length="20" name="user" not-null="false" />
-		</property>
-		
-		<property name="idVDC" type="java.lang.Integer">
-			<column length="10" name="idVirtualDataCenter" not-null="false" />
-		</property>
-		<property name="virtualDataCenter" type="string">
-			<column length="40" name="virtualDataCenter" not-null="false" />
-		</property>	
-		
-		<property name="idVirtualApp" type="java.lang.Integer">
-			<column length="10" name="idVirtualApp" not-null="false" />
-		</property>
-		<property name="virtualApp" type="string">
-			<column length="30" name="virtualApp" not-null="false" />
-		</property>					
-			
-		<property name="idVirtualMachine" type="java.lang.Integer">
-			<column length="10" name="idVirtualMachine" not-null="false" />
-		</property>
-		<property name="virtualmachine" type="string">
-			<column length="256" name="virtualmachine" not-null="false" />
-		</property>	
-		
-		<property name="severity" type="string">
-			<column length="100" name="severity" not-null="true" />
-		</property>
-		<property name="timestamp" type="string">
-			<column length="100" name="timestamp" not-null="true" />
-		</property>
-		<property name="performedby" type="string">
-			<column length="256" name="performedby" not-null="true" />
-		</property>
-		<property name="actionperformed" type="string">
-			<column length="100" name="actionperformed" not-null="true" />
-		</property>
-		<property name="component" type="string">
-			<column length="256" name="component" not-null="false" />
-		</property>
-		<property name="stacktrace" type="string">
-			<column name="stacktrace" not-null="false" />
-		</property>
-			
-  </class>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB"
+        table="metering">
+        <id name="idMeter" type="java.lang.Long">
+            <column name="idMeter" />
+            <generator class="identity" />
+        </id>
+        <property name="idDatacenter" type="java.lang.Integer">
+            <column length="10" name="idDatacenter" not-null="false" />
+        </property>
+        <property name="datacenter" type="string">
+            <column length="20" name="datacenter" not-null="false" />
+        </property>
+        <property name="idRack" type="java.lang.Integer">
+            <column length="15" name="idRack" not-null="false" />
+        </property>
+        <property name="rack" type="string">
+            <column length="20" name="rack" not-null="false" />
+        </property>
+        <property name="idPhysicalMachine" type="java.lang.Integer">
+            <column length="20" name="idPhysicalMachine" not-null="false" />
+        </property>
+        <property name="physicalMachine" type="string">
+            <column length="30" name="physicalMachine" not-null="false" />
+        </property>
+        <property name="idStorageSystem" type="java.lang.Integer">
+            <column length="10" name="idStorageSystem" not-null="false" />
+        </property>
+        <property name="storageSystem" type="string">
+            <column length="256" name="storageSystem" not-null="false" />
+        </property>
+        <property name="idStoragePool" type="string">
+            <column length="40" name="idStoragePool" not-null="false" />
+        </property>
+        <property name="storagePool" type="string">
+            <column length="256" name="storagePool" not-null="false" />
+        </property>
+        <property name="idVolume" type="string">
+            <column length="50" name="idVolume" not-null="false" />
+        </property>
+        <property name="volume" type="string">
+            <column length="256" name="volume" not-null="false" />
+        </property>
+        <property name="idNetwork" type="java.lang.Integer">
+            <column length="11" name="idNetwork" not-null="false" />
+        </property>
+        <property name="network" type="string">
+            <column length="256" name="network" not-null="false" />
+        </property>
+        <property name="idSubnet" type="java.lang.Integer">
+            <column length="11" name="idSubnet" not-null="false" />
+        </property>
+        <property name="subnet" type="string">
+            <column length="256" name="subnet" not-null="false" />
+        </property>
+        <property name="idEnterprise" type="java.lang.Integer">
+            <column length="10" name="idEnterprise" not-null="false" />
+        </property>
+        <property name="enterprise" type="string">
+            <column length="40" name="enterprise" not-null="false" />
+        </property>
+        <property name="idUser" type="java.lang.Integer">
+            <column length="10" name="idUser" not-null="false" />
+        </property>
+        <property name="user" type="string">
+            <column length="20" name="user" not-null="false" />
+        </property>
+        <property name="idVDC" type="java.lang.Integer">
+            <column length="10" name="idVirtualDataCenter" not-null="false" />
+        </property>
+        <property name="virtualDataCenter" type="string">
+            <column length="40" name="virtualDataCenter" not-null="false" />
+        </property>
+        <property name="idVirtualApp" type="java.lang.Integer">
+            <column length="10" name="idVirtualApp" not-null="false" />
+        </property>
+        <property name="virtualApp" type="string">
+            <column length="30" name="virtualApp" not-null="false" />
+        </property>
+        <property name="idVirtualMachine" type="java.lang.Integer">
+            <column length="10" name="idVirtualMachine" not-null="false" />
+        </property>
+        <property name="virtualmachine" type="string">
+            <column length="256" name="virtualmachine" not-null="false" />
+        </property>
+        <property name="severity" type="string">
+            <column length="100" name="severity" not-null="true" />
+        </property>
+        <property name="timestamp" type="string">
+            <column length="100" name="timestamp" not-null="true" />
+        </property>
+        <property name="performedby" type="string">
+            <column length="256" name="performedby" not-null="true" />
+        </property>
+        <property name="actionperformed" type="string">
+            <column length="100" name="actionperformed" not-null="true" />
+        </property>
+        <property name="component" type="string">
+            <column length="256" name="component" not-null="false" />
+        </property>
+        <property name="stacktrace" type="string">
+            <column name="stacktrace" not-null="false" />
+        </property>
+    </class>
 </hibernate-mapping>
-
