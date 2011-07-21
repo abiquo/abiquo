@@ -1,0 +1,318 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <!-- Define the parent -->
+    <parent>
+        <groupId>com.abiquo.abicloud</groupId>
+        <artifactId>platform</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+
+    <!-- Setting the basic POM configuration -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.abiquo</groupId>
+    <artifactId>nodecollector</artifactId>
+    <packaging>war</packaging>
+
+    <!-- Set project properties -->
+    <name>Node Collector</name>
+
+    <!-- Set dependences -->
+    <url>http://maven.apache.org</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Abiquo Internal Dependences -->
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>aimstub</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${pom.version}</version>
+        </dependency>
+        <!-- ws-man -->
+        <dependency>
+            <groupId>com.sun.wiseman</groupId>
+            <artifactId>wiseman</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.wiseman</groupId>
+            <artifactId>wiseman-tools</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- Configuration support -->
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <!-- Spring depencendes -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- REST dependences -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.wink</groupId>
+            <artifactId>wink-server</artifactId>
+            <version>${wink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.wink</groupId>
+            <artifactId>wink-spring-support</artifactId>
+            <version>${wink.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.wink</groupId>
+            <artifactId>wink-client</artifactId>
+            <version>${wink.version}</version>
+        </dependency>
+        <!--  JAXB and JSON incoming providers dependency -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <version>4.0.4</version>
+        </dependency>
+		<!--  JAXWS dependencies por VirtualBox -->
+        <dependency>
+			<groupId>com.sun.xml.ws</groupId>
+    		<artifactId>jaxws-rt</artifactId>
+    		<version>2.1.4</version>
+		</dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+        <!-- Hibernate method validator -->
+		<dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>4.2.0.Beta2</version>
+        </dependency>
+        <!--  Plugin dependences -->
+        <dependency>
+            <groupId>org.virtualbox</groupId>
+            <artifactId>vboxjws</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.libvirt</groupId>
+            <artifactId>libvirt</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-discovery</groupId>
+            <artifactId>commons-discovery</artifactId>
+            <version>0.4</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Hyper-V dependencies -->
+        <dependency>
+            <groupId>j-interop</groupId>
+            <artifactId>j-interop</artifactId>
+            <version>2.06</version>
+        </dependency>
+        <dependency>
+            <groupId>j-interop</groupId>
+            <artifactId>j-interopdeps</artifactId>
+            <version>2.06</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hyper9</groupId>
+            <artifactId>jwbem</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.samba.jcifs</groupId>
+            <artifactId>jcifs</artifactId>
+            <version>1.2.19</version>
+        </dependency>
+        <!-- XENServer Dependencies -->
+        <dependency>
+            <groupId>org.apache.xmlrpc</groupId>
+            <artifactId>xmlrpc-common</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlrpc</groupId>
+            <artifactId>xmlrpc-client</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.util</groupId>
+            <artifactId>ws-commons-util</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.xensource</groupId>
+            <artifactId>xenserver</artifactId>
+            <version>5.6.0-1</version>
+        </dependency>
+        <!-- END XENServer Dependencies -->
+        <!-- Integration Test Dependencies -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- new vmware api -->
+        <dependency>
+            <groupId>com.vmware.vim25</groupId>
+            <artifactId>vim25</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <!-- Stonith resource dependencies -->
+        <dependency>
+        	<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-exec</artifactId>
+    		<version>1.1</version>
+        </dependency>
+        <!-- TODELETE -->
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Build properties -->
+    <build>
+        <finalName>nodecollector</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!-- Generate the JAR for the client -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>classes-client</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>client</classifier>
+                            <includes>
+                                <include>**/exception/*.class</include>
+                                <include>**/client/*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>classes</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>classes</classifier>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+</project>
