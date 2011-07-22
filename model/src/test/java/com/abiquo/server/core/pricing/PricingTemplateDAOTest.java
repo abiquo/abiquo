@@ -21,9 +21,10 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,21 +32,24 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingTemplateDAOTest extends DefaultDAOTestBase<PricingTemplateDAO, PricingTemplate>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected PricingTemplateDAO createDao(EntityManager entityManager)
+    protected PricingTemplateDAO createDao(final EntityManager entityManager)
     {
         return new PricingTemplateDAO(entityManager);
     }
@@ -68,5 +72,19 @@ public class PricingTemplateDAOTest extends DefaultDAOTestBase<PricingTemplateDA
         return (PricingTemplateGenerator) super.eg();
     }
 
-    
+    @Test
+    public void findPricingTemplates()
+    {
+        PricingTemplate pt1 = eg().createUniqueInstance();
+        PricingTemplate pt2 = eg().createUniqueInstance();
+
+        ds().persistAll(pt1.getCurrency(), pt2.getCurrency(), pt1, pt2);
+
+        PricingTemplateDAO dao = createDaoForRollbackTransaction();
+
+        Collection<PricingTemplate> pts = dao.find(null, null, false, 0, 25);
+        AssertEx.assertSize(pts, 2);
+
+    }
+
 }

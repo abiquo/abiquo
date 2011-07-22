@@ -61,6 +61,8 @@ import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.StoragePool;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.Currency;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
@@ -80,8 +82,8 @@ public class TestDataAccessManager
 {
     private static JpaEntityManagerFactoryForTesting factory;
 
-    private static List<String> associationTablesInAssociationDeletionOrder =
-        ListUtils.createList();
+    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
+        .createList();
 
     private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
         ListUtils.createList();
@@ -146,7 +148,7 @@ public class TestDataAccessManager
             RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
             Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
-            VirtualApplianceStatefulConversion.class);
+            VirtualApplianceStatefulConversion.class, PricingTemplate.class, Currency.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

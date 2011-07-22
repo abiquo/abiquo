@@ -47,7 +47,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final int minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
-        final BigDecimal memoryMB)
+        final BigDecimal memoryMB)// , final int idCurrency
     {
         super();
         this.name = name;
@@ -63,7 +63,9 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.publicIp = publicIp;
         this.vcpu = vCpu;
         this.memoryMB = memoryMB;
+        // this.idCurrency = idCurrency;
         this.lastUpdate = new Date();
+
     }
 
     private Integer id;
@@ -244,6 +246,18 @@ public class PricingTemplateDto extends SingleResourceTransportDto
     public void setLastUpdate(final Date lastUpdate)
     {
         this.lastUpdate = lastUpdate;
+    }
+
+    private int idCurrency;
+
+    public int getIdCurrency()
+    {
+        return idCurrency;
+    }
+
+    public void setIdCurrency(final int idCurrency)
+    {
+        this.idCurrency = idCurrency;
     }
 
 }

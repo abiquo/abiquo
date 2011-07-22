@@ -64,9 +64,8 @@ public class PricingTemplate extends DefaultEntityBase
     }
 
     public PricingTemplate(final String name, final BigDecimal hdGb,
-        final BigDecimal standingChargePeriod, final Enterprise enterprise,
-        final BigDecimal limitMaximumDeployedCharged, final BigDecimal vlan,
-        final boolean showMinimumCharge, final int chargingPeriod,
+        final BigDecimal standingChargePeriod, final BigDecimal limitMaximumDeployedCharged,
+        final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final int minimumCharge, final Currency currency, final BigDecimal publicIp,
         final BigDecimal vCpu, final BigDecimal memoryMB)
@@ -75,7 +74,6 @@ public class PricingTemplate extends DefaultEntityBase
         setName(name);
         setHdGB(hdGb);
         setStandingChargePeriod(standingChargePeriod);
-        setEnterprise(enterprise);
         setLimitMaximumDeployedCharged(limitMaximumDeployedCharged);
         setVlan(vlan);
         setShowChangesBefore(showChangesBefore);

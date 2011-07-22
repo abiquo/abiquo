@@ -21,14 +21,19 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
 import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 
 @Repository
+@Transactional
 public class PricingRep extends DefaultRepBase
 {
 
@@ -41,6 +46,16 @@ public class PricingRep extends DefaultRepBase
     public PricingRep()
     {
 
+    }
+
+    public PricingRep(final EntityManager entityManager)
+    {
+        assert entityManager != null;
+        assert entityManager.isOpen();
+
+        this.entityManager = entityManager;
+        pricingTemplateDao = new PricingTemplateDAO(entityManager);
+        currencyDao = new CurrencyDAO(entityManager);
     }
 
     public List<Currency> findAllCurrency()
@@ -90,6 +105,17 @@ public class PricingRep extends DefaultRepBase
             pricingTemplateDao.persist(pricingTemplate);
             pricingTemplateDao.flush();
         }
+    }
+
+    public boolean existAnyPricTempWithSameName(final String name)
+    {
+        return pricingTemplateDao.existAnyPricTempWithSameName(name);
+    }
+
+    public Collection<PricingTemplate> findPricingTemplates(final String filter,
+        final String order, final boolean desc, final Integer page, final Integer numResults)
+    {
+        return pricingTemplateDao.find(filter, order, desc, page, numResults);
     }
 
 }

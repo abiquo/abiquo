@@ -25,22 +25,17 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemplate>
 {
 
-    EnterpriseGenerator enterpriseGenerator;
-
     CurrencyGenerator currencyGenerator;
 
     public PricingTemplateGenerator(final SeedGenerator seed)
     {
         super(seed);
-        enterpriseGenerator = new EnterpriseGenerator(seed);
         currencyGenerator = new CurrencyGenerator(seed);
 
     }
@@ -61,23 +56,23 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
     @Override
     public PricingTemplate createUniqueInstance()
     {
-        // Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        return createInstance(null);
+        Currency currency = currencyGenerator.createUniqueInstance();
+        final String name = newString(nextSeed(), 0, 255);
+        return createInstance(name, currency);
     }
 
-    public PricingTemplate createInstance(final Enterprise enterprise)
+    public PricingTemplate createInstance(final String name)
     {
         Currency currency = currencyGenerator.createUniqueInstance();
 
-        return createInstance(enterprise, currency);
+        return createInstance(name, currency);
     }
 
-    public PricingTemplate createInstance(final Enterprise enterprise, final Currency currency)
+    public PricingTemplate createInstance(final String name, final Currency currency)
     {
         BigDecimal seed = newBigDecimal();
         int seedint = nextSeed();
 
-        final String name = newString(nextSeed(), 0, 255);
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
         final BigDecimal limitMaximumDeployedCharged = seed;
@@ -95,7 +90,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
             new PricingTemplate(name,
                 hdGb,
                 standingChargePeriod,
-                enterprise,
                 limitMaximumDeployedCharged,
                 vlan,
                 showMinimumCharge,
@@ -116,10 +110,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
-        // Enterprise enterprise = entity.getEnterprise();
-        // enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
-        // entitiesToPersist.add(enterprise);
 
         Currency currency = entity.getCurrency();
         currencyGenerator.addAuxiliaryEntitiesToPersist(currency, entitiesToPersist);

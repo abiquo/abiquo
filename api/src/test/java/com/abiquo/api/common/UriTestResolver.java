@@ -195,7 +195,7 @@ public class UriTestResolver
         return resolveURI(template,
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
-    
+
     public static String resolveRacksURI(final Integer datacenterId)
     {
         String template =
