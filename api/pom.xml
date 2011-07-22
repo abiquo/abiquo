@@ -31,6 +31,12 @@
             <classifier>tests</classifier>
         </dependency>
         <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>nodecollector</artifactId>
+            <version>${project.version}</version>
+            <classifier>client</classifier>
+        </dependency>
+        <dependency>
             <groupId>com.abiquo.abicloud</groupId>
             <artifactId>tracer</artifactId>
             <version>${project.version}</version>
