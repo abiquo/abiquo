@@ -40,12 +40,14 @@ import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.chef.ChefCookbook;
+import com.abiquo.server.core.cloud.chef.ChefCookbookDto;
+import com.abiquo.server.core.cloud.chef.ChefCookbooksDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -99,7 +101,7 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
+        return createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
 
     @GET
@@ -153,7 +155,7 @@ public class VirtualMachineResource extends AbstractResource
 
         service.updateVirtualMachineUse(virtualApplianceId, vmachine);
 
-        return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
+        return createTransferObject(vmachine, virtualApplianceId, restBuilder);
     }
 
     // TODO forceEnterpriseLimits = true
@@ -232,7 +234,7 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-              vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
         }
     }
 
@@ -293,5 +295,55 @@ public class VirtualMachineResource extends AbstractResource
     public String getChefRecipes() throws Exception
     {
         return "chef";
+    }
+
+    public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachineDto vmDto = createTransferObject(v, vdcId, vappId, restBuilder);
+        return vmDto;
+    }
+
+    private static VirtualMachineDto createTransferObject(final VirtualMachine v,
+        final Integer vappId, final IRESTBuilder restBuilder)
+    {
+
+        VirtualMachineDto dto = new VirtualMachineDto();
+
+        dto.setCpu(v.getCpu());
+        dto.setDescription(v.getDescription());
+        dto.setHd(v.getHdInBytes());
+        dto.setHighDisponibility(v.getHighDisponibility());
+        dto.setId(v.getId());
+        // dto.setIdState(v.getidState)
+        dto.setIdType(v.getIdType());
+
+        dto.setName(v.getName());
+        dto.setPassword(v.getPassword());
+        dto.setRam(v.getRam());
+        dto.setState(v.getState());
+        dto.setVdrpIP(v.getVdrpIP());
+        dto.setVdrpPort(v.getVdrpPort());
+        if (v.getCookbooks() != null)
+        {
+            ChefCookbooksDto cbooks = new ChefCookbooksDto();
+            dto.setCookbooks(cbooks);
+            for (ChefCookbook cookbook : v.getCookbooks())
+            {
+                ChefCookbookDto cbook = new ChefCookbookDto();
+                cbook.setCookbook(cookbook.getCookbook());
+                cbook.setCookbookVersion(cookbook.getCookbookVersion());
+                cbook.setId(cookbook.getId());
+                dto.getCookbooks().add(cbook);
+            }
+        }
+        return dto;
+    }
+
+    public static VirtualMachineDto createTransferObject(final VirtualMachine v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder)
+    {
+        return createTransferObject(v, vappId, restBuilder);
+
     }
 }

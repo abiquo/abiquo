@@ -81,8 +81,8 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (VirtualMachine v : all)
             {
-                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(),
-                    vapp.getId(), restBuilder));
+                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(), vapp
+                    .getId(), restBuilder));
             }
         }
 
@@ -109,18 +109,16 @@ public class VirtualMachinesResource extends AbstractResource
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
 
         Hypervisor hypervisor = vm.getHypervisor();
-        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
-        Rack rack = (machine == null) ? null : machine.getRack();
-        Datacenter dc = (rack == null) ? null : rack.getDatacenter();
+        Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        Rack rack = machine == null ? null : machine.getRack();
+        Datacenter dc = rack == null ? null : rack.getDatacenter();
 
-        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
-        User user = (vm.getUser() == null) ? null : vm.getUser();
+        Enterprise enterprise = vm.getEnterprise() == null ? null : vm.getEnterprise();
+        User user = vm.getUser() == null ? null : vm.getUser();
 
-        vmDto
-            .addLinks(restBuilder.buildVirtualMachineAdminLinks((dc == null) ? null : dc.getId(),
-                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
-                (enterprise == null) ? null : enterprise.getId(),
-                (user == null) ? null : user.getId()));
+        vmDto.addLinks(restBuilder.buildVirtualMachineAdminLinks(dc == null ? null : dc.getId(),
+            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
         return vmDto;
     }
@@ -140,9 +138,8 @@ public class VirtualMachinesResource extends AbstractResource
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, v);
+            VirtualMachineResource.createTransferObject(v, vdcId, vappId, restBuilder);
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId()));
-
         return vmDto;
     }
 
@@ -152,18 +149,16 @@ public class VirtualMachinesResource extends AbstractResource
         VirtualMachineDto vmDto =
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
         Hypervisor hypervisor = vm.getHypervisor();
-        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
-        Rack rack = (machine == null) ? null : machine.getRack();
+        Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        Rack rack = machine == null ? null : machine.getRack();
 
-        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
-        User user = (vm.getUser() == null) ? null : vm.getUser();
+        Enterprise enterprise = vm.getEnterprise() == null ? null : vm.getEnterprise();
+        User user = vm.getUser() == null ? null : vm.getUser();
 
-        vmDto
-            .addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
-                (rack == null) ? null : rack.getDatacenter().getId(),
-                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
-                (enterprise == null) ? null : enterprise.getId(),
-                (user == null) ? null : user.getId()));
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
+            rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
+            machine == null ? null : machine.getId(), enterprise == null ? null : enterprise
+                .getId(), user == null ? null : user.getId()));
 
         return vmDto;
     }

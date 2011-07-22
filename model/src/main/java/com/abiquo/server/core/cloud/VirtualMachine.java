@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -30,6 +32,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -39,6 +43,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.server.core.cloud.chef.ChefCookbook;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -49,19 +54,20 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP =
+        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
+            + "WHERE nvi.virtualAppliance.id = :vapp_id";
 
-    public static final String BY_DC = "SELECT vm "
-        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-        + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC =
+        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+            + " AND pm.datacenter.id = :datacenterId";
 
     public static final int MANAGED = 1;
 
@@ -446,7 +452,6 @@ public class VirtualMachine extends DefaultEntityBase
         this.user = user;
     }
 
-    
     public final static String SUB_STATE_PROPERTY = "subState";
 
     private final static boolean SUB_STATE_REQUIRED = false;
@@ -463,10 +468,11 @@ public class VirtualMachine extends DefaultEntityBase
         return this.subState;
     }
 
-    public void setSubState(State subState)
+    public void setSubState(final State subState)
     {
         this.subState = subState;
     }
+
     //
     public final static String STATE_PROPERTY = "state";
 
@@ -514,9 +520,46 @@ public class VirtualMachine extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    public static final String CHEFCOOKBOOK_TABLE = "chefcookbook";
+
+    public static final String CHEFCOOKBOOK_PROPERTY = "cookbooks";
+
+    static final String CHEFCOOKBOOK_ID_COLUMN = "chefCookbookId";
+
+    static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = CHEFCOOKBOOK_TABLE, joinColumns = {@JoinColumn(name = CHEFCOOKBOOK_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    private List<ChefCookbook> cookbooks = new ArrayList<ChefCookbook>();
+
+    public List<ChefCookbook> getCookbooks()
+    {
+        if (cookbooks == null)
+        {
+            cookbooks = new ArrayList<ChefCookbook>();
+        }
+        return cookbooks;
+    }
+
+    /* package */void addToCookbooks(final ChefCookbook cookbook)
+    {
+        assert cookbook != null;
+        assert !this.cookbooks.contains(cookbook);
+
+        this.cookbooks.add(cookbook);
+    }
+
+    /* package */void removeFromCookbooks(final ChefCookbook cookbook)
+    {
+        assert cookbook != null;
+        assert this.cookbooks.contains(cookbook);
+
+        this.cookbooks.remove(cookbook);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
