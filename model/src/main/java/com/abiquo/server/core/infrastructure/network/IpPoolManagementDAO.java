@@ -45,31 +45,6 @@ import com.abiquo.server.core.util.PagedList;
 public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagement>
 {
 
-    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE = "SELECT ip "//
-        + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
-        + "INNER JOIN dc.network net, "//
-        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan "//
-        + "INNER JOIN vlan.configuration.dhcp dhcp, "//
-        + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
-        // + "LEFT JOIN join ip.virtualMachine vm "//
-        + "LEFT JOIN ip.virtualAppliance vapp, "//
-        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "where net.id = vlan.network.id "//
-        + "and dhcp.id = ip.dhcp.id "//
-        + "and dc.id = vdc.datacenter.id "//
-        + "and vdc.enterprise.id = :enterpriseId "//
-        + "and ip.virtualDatacenter.id = vdc.id ";
-
-    private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
-        "SELECT * " //
-            + "FROM ip_pool_management ip, " //
-            + "rasd_management rasd " //
-            + "JOIN virtualmachine vm " //
-            + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
-            + "AND rasd.idVM != :idVM " //
-            + "AND ip.vlan_network_id = :idVlanNetwork " //
-            + "AND vm.state != 'NOT_DEPLOYED'"; //
-
     public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
         + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
@@ -98,6 +73,39 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_NETWORK = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+        + " AND vn.network.id = :net_id AND " + "( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+    private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
+        "SELECT * " //
+            + "FROM ip_pool_management ip, " //
+            + "rasd_management rasd " //
+            + "JOIN virtualmachine vm " //
+            + "ON vm.idVM = rasd.idVM " + "WHERE rasd.idManagement = ip.idManagement " //
+            + "AND rasd.idVM != :idVM " //
+            + "AND ip.vlan_network_id = :idVlanNetwork " //
+            + "AND vm.state != 'NOT_DEPLOYED'"; //
+
+    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE = "SELECT ip "//
+        + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
+        + "INNER JOIN dc.network net, "//
+        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan "//
+        + "INNER JOIN vlan.configuration.dhcp dhcp, "//
+        + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
+        // + "LEFT JOIN join ip.virtualMachine vm "//
+        + "LEFT JOIN ip.virtualAppliance vapp, "//
+        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+        + "where net.id = vlan.network.id "//
+        + "and dhcp.id = ip.dhcp.id "//
+        + "and dc.id = vdc.datacenter.id "//
+        + "and vdc.enterprise.id = :enterpriseId "//
+        + "and ip.virtualDatacenter.id = vdc.id ";
+
     private static Criterion equalMac(final String mac)
     {
         assert !StringUtils.isEmpty(mac);
@@ -113,269 +121,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     public IpPoolManagementDAO(final EntityManager entityManager)
     {
         super(IpPoolManagement.class, entityManager);
-    }
-
-    public boolean existsAnyWithMac(final String mac)
-    {
-        assert !StringUtils.isEmpty(mac);
-
-        return this.existsAnyByCriterions(equalMac(mac));
-    }
-
-    public List<IpPoolManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
-    {
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
-
-        Criterion onVM = Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
-
-        criteria.add(onVM);
-
-        List<IpPoolManagement> result = getResultList(criteria);
-
-        return result;
-
-    }
-
-    /**
-     * Return the {@link PagedList} entity with the Ips by VLAN.
-     * 
-     * @param vdcId virtual datacenter id
-     * @param vlanId vlan id
-     * @return list of used IpPoolManagement.
-     */
-    public List<IpPoolManagement> findByPrivateVLAN(final Integer vdcId, final Integer vlanId)
-    {
-
-        Query finalQuery = getSession().createQuery(BY_VLAN);
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", "%");
-
-        Integer totalResults = finalQuery.list().size();
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-
-        return ipList;
-
-    }
-
-    /**
-     * Find all the IpPoolManagement created by a vLAN with filter options
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vlanId identifier of the vlan.
-     * @param firstElem first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param has filter %like%
-     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
-     * @param asc ordering filter, ascending = true, descending = false.
-     * @return List of IP addresses that pass the filter.
-     */
-    public List<IpPoolManagement> findByPrivateVLANFiltered(final Integer vdcId,
-        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
-        final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_VLAN + " " + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    /**
-     * Find all the IpPoolManagement created and available by a vLAN with filter options
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vlanId identifier of the vlan.
-     * @param firstElem first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param has filter %like%
-     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
-     * @param asc ordering filter, ascending = true, descending = false.
-     * @return List of IP addresses that pass the filter.
-     */
-    public List<IpPoolManagement> findByPrivateVLANAvailableFiltered(final Integer vdcId,
-        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
-        final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery =
-            getSession().createQuery(
-                BY_VLAN + " " + defineFilterAvailable() + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    /**
-     * Return the {@link PagedList} entity with the used Ips by VLAN.
-     * 
-     * @param vdcId virtual datacenter id
-     * @param vlanId vlan id
-     * @return list of used IpPoolManagement.
-     */
-    public List<IpPoolManagement> findUsedIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
-    {
-        Query finalQuery = getSession().createQuery(BY_VLAN + " " + defineFilterUsed());
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", "%");
-
-        Integer totalResults = finalQuery.list().size();
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-
-        return ipList;
-    }
-
-    /**
-     * Return the list of IPs purchased by an enterprise in a public VLAN. Any IP in a public VLAN
-     * with VirtualDatacenter not null
-     * 
-     * @param vlan network to search into.
-     * @return the list of with IPs purchased.
-     */
-    public List<IpPoolManagement> findIpsPurchasedInPublicVlan(final VLANNetwork vlan)
-    {
-        return findByCriterions(Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan),
-            Restrictions.isNotNull(RasdManagement.VIRTUAL_DATACENTER_PROPERTY));
-    }
-
-    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
-        final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("vdc_id", vdcId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    public List<IpPoolManagement> findByEnterprise(final Integer entId, Integer firstElem,
-        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
-        final Boolean asc)
-    {
-        // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
-        finalQuery.setParameter("ent_id", entId);
-        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-
-        // Check if the page requested is bigger than the last one
-        Integer totalResults = finalQuery.list().size();
-        if (firstElem >= totalResults)
-        {
-            firstElem = totalResults - numElem;
-        }
-
-        // Get the list of elements
-        finalQuery.setFirstResult(firstElem);
-        finalQuery.setMaxResults(numElem);
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-        ipList.setPageSize(numElem);
-        ipList.setCurrentElement(firstElem);
-
-        return ipList;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<String> getAllMacs()
-    {
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
-        ProjectionList projList = Projections.projectionList();
-        projList.add(Projections.property(IpPoolManagement.MAC_PROPERTY));
-
-        criteria.setProjection(projList);
-        return criteria.list();
-    }
-
-    public List<IpPoolManagement> getNetworkPoolPurchasedByEnterprise(final Integer enterpriseId)
-    {
-        Query query = getSession().createQuery(GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE);
-        query.setParameter("enterpriseId", enterpriseId);
-
-        return query.list();
-    }
-
-    public Boolean isVlanAssignedToDifferentVM(final Integer virtualMachineId,
-        final VLANNetwork vlanNetwork)
-    {
-        List<IpPoolManagement> ippoolList;
-        Query query =
-            getSession().createSQLQuery(
-                GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
-        query.setParameter("idVlanNetwork", vlanNetwork.getId());
-        query.setParameter("idVM", virtualMachineId);
-        ippoolList = query.list();
-
-        if (ippoolList.isEmpty())
-        {
-            return false;
-        }
-        return true;
-    }
-
-    public List<IpPoolManagement> findByVirtualAppliance(final VirtualAppliance vapp)
-    {
-        Criterion onVapp = Restrictions.eq(RasdManagement.VIRTUAL_APPLIANCE_PROPERTY, vapp);
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(onVapp);
-        List<IpPoolManagement> result = getResultList(criteria);
-
-        return result;
     }
 
     /**
@@ -459,6 +204,337 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         }
 
         return queryString.toString();
+    }
+
+    public boolean existsAnyWithMac(final String mac)
+    {
+        assert !StringUtils.isEmpty(mac);
+
+        return this.existsAnyByCriterions(equalMac(mac));
+    }
+
+    public List<IpPoolManagement> findByEnterprise(final Integer entId, Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+        final Boolean asc)
+    {
+        // Get the query that counts the total results.
+        Query finalQuery = getSession().createQuery(BY_ENT + " " + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("ent_id", entId);
+        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+        if (firstElem >= totalResults)
+        {
+            firstElem = totalResults - numElem;
+        }
+
+        // Get the list of elements
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(numElem);
+        ipList.setCurrentElement(firstElem);
+
+        return ipList;
+    }
+
+    /**
+     * Return the {@link PagedList} entity with the Ips by VLAN.
+     * 
+     * @param vdcId virtual datacenter id
+     * @param vlanId vlan id
+     * @return list of used IpPoolManagement.
+     */
+    public List<IpPoolManagement> findByPrivateVLAN(final Integer vdcId, final Integer vlanId)
+    {
+
+        Query finalQuery = getSession().createQuery(BY_VLAN);
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", "%");
+
+        Integer totalResults = finalQuery.list().size();
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+
+        return ipList;
+
+    }
+
+    /**
+     * Find all the IpPoolManagement created and available by a vLAN with filter options
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan.
+     * @param firstElem first element to retrieve.
+     * @param numElem number of elements to retrieve.
+     * @param has filter %like%
+     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
+     * @param asc ordering filter, ascending = true, descending = false.
+     * @return List of IP addresses that pass the filter.
+     */
+    public List<IpPoolManagement> findByPrivateVLANAvailableFiltered(final Integer vdcId,
+        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
+        final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
+    {
+        // Get the query that counts the total results.
+        Query finalQuery =
+            getSession().createQuery(
+                BY_VLAN + " " + defineFilterAvailable() + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (firstElem >= totalResults)
+        {
+            firstElem = totalResults - numElem;
+        }
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(numElem);
+        ipList.setCurrentElement(firstElem);
+
+        return ipList;
+    }
+
+    /**
+     * Find all the IpPoolManagement created by a vLAN with filter options
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan.
+     * @param firstElem first element to retrieve.
+     * @param numElem number of elements to retrieve.
+     * @param has filter %like%
+     * @param orderby ordering filter. {@see IpPoolManagement.OrderByEnum}
+     * @param asc ordering filter, ascending = true, descending = false.
+     * @return List of IP addresses that pass the filter.
+     */
+    public List<IpPoolManagement> findByPrivateVLANFiltered(final Integer vdcId,
+        final Integer vlanId, Integer firstElem, final Integer numElem, final String has,
+        final IpPoolManagement.OrderByEnum orderby, final Boolean asc)
+    {
+        // Get the query that counts the total results.
+        Query finalQuery = getSession().createQuery(BY_VLAN + " " + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (firstElem >= totalResults)
+        {
+            firstElem = totalResults - numElem;
+        }
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(numElem);
+        ipList.setCurrentElement(firstElem);
+
+        return ipList;
+    }
+
+    public List<IpPoolManagement> findByVdc(final Integer vdcId, Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
+        final Boolean asc)
+    {
+        // Get the query that counts the total results.
+        Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (firstElem >= totalResults)
+        {
+            firstElem = totalResults - numElem;
+        }
+        finalQuery.setFirstResult(firstElem);
+        finalQuery.setMaxResults(numElem);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(numElem);
+        ipList.setCurrentElement(firstElem);
+
+        return ipList;
+    }
+
+    public List<IpPoolManagement> findByVirtualAppliance(final VirtualAppliance vapp)
+    {
+        Criterion onVapp = Restrictions.eq(RasdManagement.VIRTUAL_APPLIANCE_PROPERTY, vapp);
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(onVapp);
+        List<IpPoolManagement> result = getResultList(criteria);
+
+        return result;
+    }
+
+    public List<IpPoolManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+
+        Criterion onVM = Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
+
+        criteria.add(onVM);
+
+        List<IpPoolManagement> result = getResultList(criteria);
+
+        return result;
+
+    }
+
+    /**
+     * Return all the IPs from a VLAN.
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
+    {
+        return findIpsByNetwork(network, vlanId, null);
+    }
+
+    /**
+     * Return all the IPs from a VLAN filtered by a string
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @param has to filter the search
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
+        final String has)
+    {
+        return findIpsByNetwork(network, vlanId, has, 0, null);
+    }
+
+    /**
+     * Return all the IPs from a VLAN filtered by a string and saying how many elements do you want
+     * and the first element to retrieve
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @param has to filter the search
+     * @param firstElem firstelement to retrieve.
+     * @param numeElem to retrieve.
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId,
+        final String has, Integer firstElem, final Integer numElem)
+    {
+        Query finalQuery = getSession().createQuery(BY_NETWORK);
+        finalQuery.setParameter("net_id", network.getId());
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", has == null || has.isEmpty() ? "%" : "%" + has + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (numElem != null)
+        {
+            finalQuery.setMaxResults(numElem);
+        }
+
+        if (firstElem >= totalResults)
+        {
+            firstElem = totalResults - 1;
+            finalQuery.setMaxResults(1);
+        }
+        finalQuery.setFirstResult(firstElem);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(numElem);
+        ipList.setCurrentElement(firstElem);
+
+        return ipList;
+    }
+
+    /**
+     * Return the list of IPs purchased by an enterprise in a public VLAN. Any IP in a public VLAN
+     * with VirtualDatacenter not null
+     * 
+     * @param vlan network to search into.
+     * @return the list of with IPs purchased.
+     */
+    public List<IpPoolManagement> findIpsPurchasedInPublicVlan(final VLANNetwork vlan)
+    {
+        return findByCriterions(Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan),
+            Restrictions.isNotNull(RasdManagement.VIRTUAL_DATACENTER_PROPERTY));
+    }
+
+    /**
+     * Return the {@link PagedList} entity with the used Ips by VLAN.
+     * 
+     * @param vdcId virtual datacenter id
+     * @param vlanId vlan id
+     * @return list of used IpPoolManagement.
+     */
+    public List<IpPoolManagement> findUsedIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
+    {
+        Query finalQuery = getSession().createQuery(BY_VLAN + " " + defineFilterUsed());
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", "%");
+
+        Integer totalResults = finalQuery.list().size();
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+
+        return ipList;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<String> getAllMacs()
+    {
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+        ProjectionList projList = Projections.projectionList();
+        projList.add(Projections.property(IpPoolManagement.MAC_PROPERTY));
+
+        criteria.setProjection(projList);
+        return criteria.list();
+    }
+
+    public List<IpPoolManagement> getNetworkPoolPurchasedByEnterprise(final Integer enterpriseId)
+    {
+        Query query = getSession().createQuery(GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE);
+        query.setParameter("enterpriseId", enterpriseId);
+
+        return query.list();
+    }
+
+    public Boolean isVlanAssignedToDifferentVM(final Integer virtualMachineId,
+        final VLANNetwork vlanNetwork)
+    {
+        List<IpPoolManagement> ippoolList;
+        Query query =
+            getSession().createSQLQuery(
+                GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
+        query.setParameter("idVlanNetwork", vlanNetwork.getId());
+        query.setParameter("idVM", virtualMachineId);
+        ippoolList = query.list();
+
+        if (ippoolList.isEmpty())
+        {
+            return false;
+        }
+        return true;
     }
 
 }

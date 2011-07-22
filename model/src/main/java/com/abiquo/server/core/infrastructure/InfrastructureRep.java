@@ -718,4 +718,17 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return ipPoolDao.findIpsPurchasedInPublicVlan(vlan);
     }
+
+    /**
+     * Return all the IPs from a VLAN.
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
+    {
+        return ipPoolDao.findIpsByNetwork(network, vlanId);
+    }
+
 }

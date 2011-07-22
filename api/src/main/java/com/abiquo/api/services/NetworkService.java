@@ -43,9 +43,7 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
-import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.server.core.util.network.NetworkResolver;
@@ -88,16 +86,27 @@ public class NetworkService extends DefaultApiService
         return repo.findAllVlans();
     }
 
+    /**
+     * Creates a new private address.
+     * 
+     * @param virtualDatacenterId identifier of the virtual datacenter
+     * @param newVlan {@link VLANNetwork} object with the new parameters to create.
+     * @return the created {@link VLANNetwork} object.
+     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VLANNetwork createPrivateNetwork(final Integer virtualDatacenterId,
-        final VLANNetworkDto networkdto)
+        final VLANNetwork newVlan)
     {
+
         VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
         if (virtualDatacenter == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+        newVlan.setNetwork(virtualDatacenter.getNetwork());
+        validate(newVlan);
+        validate(newVlan.getConfiguration());
 
         userService.checkCurrentEnterpriseForPostMethods(virtualDatacenter.getEnterprise());
 
@@ -105,49 +114,21 @@ public class NetworkService extends DefaultApiService
         checkNumberOfCurrentVLANs(virtualDatacenter);
 
         // check if we have a vlan with the same name in the VirtualDatacenter
-        if (repo.existAnyVlanWithName(virtualDatacenter.getNetwork(), networkdto.getName()))
+        if (repo.existAnyVlanWithName(virtualDatacenter.getNetwork(), newVlan.getName()))
         {
-            addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME);
+            addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME_VDC);
             flushErrors();
         }
 
-        // Create the NetworkConfiguration object
-        NetworkConfiguration config =
-            new NetworkConfiguration(networkdto.getAddress(),
-                networkdto.getMask(),
-                IPNetworkRang.transformIntegerMaskToIPMask(networkdto.getMask()).toString(),
-                networkdto.getGateway(),
-                FENCE_MODE);
-
-        config.setPrimaryDNS(networkdto.getPrimaryDNS());
-        config.setSecondaryDNS(networkdto.getSecondaryDNS());
-        config.setSufixDNS(networkdto.getSufixDNS());
-        if (!config.isValid())
-        {
-            addValidationErrors(config.getValidationErrors());
-            flushErrors();
-        }
         // once we have validated we have IPs in all IP parameters (isValid() method), we should
         // ensure they are
         // actually PRIVATE IPs. Also check if the gateway is in the range, and
-        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(networkdto.getAddress()),
-            networkdto.getMask());
-        repo.insertNetworkConfig(config);
+        checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
+            .getAddress()), newVlan.getConfiguration().getMask());
 
-        // Create the VLANObject inside the VirtualDatacenter network
-        VLANNetwork vlan =
-            new VLANNetwork(networkdto.getName(),
-                virtualDatacenter.getNetwork(),
-                networkdto.getDefaultNetwork(),
-                config);
-        if (!vlan.isValid())
-        {
-            addValidationErrors(vlan.getValidationErrors());
-            flushErrors();
-        }
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
         // put the previous default one as non-default.
-        if (networkdto.getDefaultNetwork())
+        if (newVlan.getDefaultNetwork())
         {
             VLANNetwork vlanDefault = repo.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
             if (vlanDefault != null)
@@ -156,22 +137,31 @@ public class NetworkService extends DefaultApiService
                 repo.updateVlan(vlanDefault);
             }
         }
-        repo.insertVlan(vlan);
+        repo.insertNetworkConfig(newVlan.getConfiguration());
+        repo.insertVlan(newVlan);
 
         // Calculate all the IPs of the VLAN and generate the DHCP entity that stores these IPs
-        Collection<IPAddress> addressRange = calculateIPRange(networkdto);
-        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, vlan, addressRange);
+        Collection<IPAddress> range =
+            IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(newVlan.getConfiguration()
+                .getAddress()), newVlan.getConfiguration().getMask());
+
+        if (!IPAddress.isIntoRange(range, newVlan.getConfiguration().getGateway()))
+        {
+            addValidationErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
+            flushErrors();
+        }
+        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range);
 
         // Trace the creation.
         String messageTrace =
-            "A new VLAN with in a private range with name '" + vlan.getName()
+            "A new VLAN with in a private range with name '" + newVlan.getName()
                 + "' has been created in " + virtualDatacenter.getName();
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_CREATED,
                 messageTrace);
         }
-        return vlan;
+        return newVlan;
     }
 
     public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
@@ -290,10 +280,11 @@ public class NetworkService extends DefaultApiService
         // 2 - Change all the IpPoolManagement entities with the new network name
         if (!newNetwork.getName().equalsIgnoreCase(oldNetwork.getName()))
         {
-            VLANNetwork duplicatedVLAN = repo.findVlanByNameInVDC(vdc, newNetwork.getName());
+            VLANNetwork duplicatedVLAN =
+                repo.findVlanByNameInNetwork(vdc.getNetwork(), newNetwork.getName());
             if (duplicatedVLAN != null)
             {
-                addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME);
+                addConflictErrors(APIError.VLANS_DUPLICATED_VLAN_NAME_VDC);
                 flushErrors();
             }
 
@@ -439,28 +430,6 @@ public class NetworkService extends DefaultApiService
             throw new BadRequestException(APIError.VLANS_PRIVATE_ADDRESS_WRONG);
         }
 
-    }
-
-    /**
-     * Calculate the whole range of IPs and ensure the gateway is inside this range.
-     * 
-     * @param vlan transfer object to create/delete/modify vlans.
-     * @return the collection of ip ranges.
-     */
-    private Collection<IPAddress> calculateIPRange(final VLANNetworkDto vlan)
-    {
-        Collection<IPAddress> range =
-            IPNetworkRang.calculateWholeRange(IPAddress.newIPAddress(vlan.getAddress()),
-                vlan.getMask());
-
-        //
-        if (!IPAddress.isIntoRange(range, vlan.getGateway()))
-        {
-            addValidationErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
-            flushErrors();
-        }
-
-        return range;
     }
 
     /**

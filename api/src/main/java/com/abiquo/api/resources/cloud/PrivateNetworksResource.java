@@ -57,8 +57,8 @@ public class PrivateNetworksResource extends AbstractResource
 
     @GET
     public VLANNetworksDto getPrivateNetworks(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer virtualDatacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer virtualDatacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<VLANNetwork> all = service.getPrivateNetworks(virtualDatacenterId);
 
@@ -79,11 +79,13 @@ public class PrivateNetworksResource extends AbstractResource
 
     @POST
     public VLANNetworkDto createNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(0) Integer virtualDatacenterId,
-        VLANNetworkDto network, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(0) final Integer virtualDatacenterId,
+        final VLANNetworkDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        VLANNetwork vlan = service.createPrivateNetwork(virtualDatacenterId, network);
-        return PrivateNetworkResource.createTransferObject(vlan, virtualDatacenterId, restBuilder);
+        VLANNetwork network = PrivateNetworkResource.createPersistenceObject(dto);
+        network = service.createPrivateNetwork(virtualDatacenterId, network);
+        return PrivateNetworkResource.createTransferObject(network, virtualDatacenterId,
+            restBuilder);
     }
 
 }

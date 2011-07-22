@@ -105,7 +105,7 @@ public enum APIError
 
     // VLANS
     VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
-        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME(
+        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME_VDC(
         "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
         "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
@@ -119,7 +119,8 @@ public enum APIError
         "VLAN-11", "Default VLAN can not be deleted."), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-12", "Can not delete a VLAN with IPs used by Virtual Machines"), VLANS_TAG_MANDATORY_FOR_PUBLIC_VLANS(
         "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
-        "VLAN-14", "Can not delete a VLAN with IPs purchased by Enterprises"),
+        "VLAN-14", "Can not delete a VLAN with IPs purchased by Enterprises"), VLANS_DUPLICATED_VLAN_NAME_DC(
+        "VLAN-1", "Can not create two VLANs with the same name in a Datacenter"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),

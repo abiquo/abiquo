@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
@@ -113,10 +114,9 @@ public class VirtualDatacenterService extends DefaultApiService
         // && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
         // .getAvailableVirtualDatacenters()));
         boolean findByUser =
-            user != null
-                && (!securityService.canManageOtherEnterprises()
-                    && !securityService.canManageOtherUsers() && !StringUtils.isEmpty(user
-                    .getAvailableVirtualDatacenters()));
+            user != null && !securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers()
+                && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
 
         if (enterprise == null && user != null)
         {
@@ -147,7 +147,7 @@ public class VirtualDatacenterService extends DefaultApiService
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualDatacenter createVirtualDatacenter(final VirtualDatacenterDto dto,
-        final Datacenter datacenter, final Enterprise enterprise)
+        final Datacenter datacenter, final Enterprise enterprise) throws Exception
     {
         if (!isValidEnterpriseDatacenter(enterprise, datacenter))
         {
@@ -160,7 +160,8 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // set as default vlan (as it is the first one) and create it.
         dto.getVlan().setDefaultNetwork(Boolean.TRUE);
-        networkService.createPrivateNetwork(vdc.getId(), dto.getVlan());
+        networkService.createPrivateNetwork(vdc.getId(),
+            PrivateNetworkResource.createPersistenceObject(dto.getVlan()));
 
         assignVirtualDatacenterToUser(vdc);
 

@@ -187,7 +187,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         }
         setup(ipsObjects.toArray());
 
-        VLANNetworkDto dto = createTransferObject(vlan, vdc.getId());
+        VLANNetworkDto dto = createTransferObject(vlan);
         // modify the name and the primary DNS.
         dto.setName("newname");
         dto.setPrimaryDNS("45.45.45.0");
@@ -228,7 +228,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void updateVLANparamsInvalids() throws Exception
     {
-        VLANNetworkDto dto = createTransferObject(vlan, vdc.getId());
+        VLANNetworkDto dto = createTransferObject(vlan);
         Resource resource = client.resource(resolvePrivateNetworkURI(0, vlan.getId()));
         ClientResponse response =
             resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
@@ -348,8 +348,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
      * @return the {@link VLANNetworkDto} transfer object.
      * @throws Exception pim-pam-pum
      */
-    public static VLANNetworkDto createTransferObject(final VLANNetwork network,
-        final Integer virtualDatacenterId) throws Exception
+    public static VLANNetworkDto createTransferObject(final VLANNetwork network) throws Exception
     {
         VLANNetworkDto dto =
             ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);

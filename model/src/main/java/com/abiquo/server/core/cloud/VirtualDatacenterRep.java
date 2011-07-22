@@ -474,9 +474,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param name name of the VLAN.
      * @return the VLAN.
      */
-    public VLANNetwork findVlanByNameInVDC(final VirtualDatacenter vdc, final String name)
+    public VLANNetwork findVlanByNameInNetwork(final Network network, final String name)
     {
-        return vlanDAO.findVlanByNameInVDC(vdc, name);
+        return vlanDAO.findVlanByNameInNetwork(network, name);
     }
 
 }

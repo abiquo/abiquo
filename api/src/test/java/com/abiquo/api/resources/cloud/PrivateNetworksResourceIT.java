@@ -299,7 +299,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
         // Check we can not create the dto again caused by the network name.
         response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 409, APIError.VLANS_DUPLICATED_VLAN_NAME);
+        assertErrors(response, 409, APIError.VLANS_DUPLICATED_VLAN_NAME_VDC);
 
         // Ensure we can create it with the same name into another vdc.
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(rs.getDatacenter());
