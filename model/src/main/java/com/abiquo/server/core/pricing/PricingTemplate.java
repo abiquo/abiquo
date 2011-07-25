@@ -43,7 +43,6 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -68,7 +67,7 @@ public class PricingTemplate extends DefaultEntityBase
         final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final int minimumCharge, final Currency currency, final BigDecimal publicIp,
-        final BigDecimal vCpu, final BigDecimal memoryMB)
+        final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate)
     {
 
         setName(name);
@@ -85,6 +84,7 @@ public class PricingTemplate extends DefaultEntityBase
         setPublicIp(publicIp);
         setVcpu(vCpu);
         setMemoryMB(memoryMB);
+        setDefaultTemplate(defaultTemplate);
         setLastUpdate(new Date());
     }
 
@@ -163,28 +163,6 @@ public class PricingTemplate extends DefaultEntityBase
         this.standingChargePeriod = standingChargePeriod;
     }
 
-    public final static String ENTERPRISE_PROPERTY = "enterprise";
-
-    private final static boolean ENTERPRISE_REQUIRED = false;
-
-    private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
-
-    @JoinColumn(name = ENTERPRISE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
-    private Enterprise enterprise;
-
-    @Required(value = ENTERPRISE_REQUIRED)
-    public Enterprise getEnterprise()
-    {
-        return this.enterprise;
-    }
-
-    public void setEnterprise(final Enterprise enterprise)
-    {
-        this.enterprise = enterprise;
-    }
-
     public final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_PROPERTY =
         "limitMaximumDeployedCharged";
 
@@ -231,17 +209,17 @@ public class PricingTemplate extends DefaultEntityBase
     private boolean showMinimumCharge;
 
     @Required(value = SHOW_MINIMUM_CHARGE_REQUIRED)
-    public boolean getShowMinimumCharge()
+    public final static String CHARGING_PERIOD_PROPERTY = "chargingPeriod";
+
+    public boolean isShowMinimumCharge()
     {
-        return this.showMinimumCharge;
+        return showMinimumCharge;
     }
 
-    private void setShowMinimumCharge(final boolean showMinimumCharge)
+    public void setShowMinimumCharge(final boolean showMinimumCharge)
     {
         this.showMinimumCharge = showMinimumCharge;
     }
-
-    public final static String CHARGING_PERIOD_PROPERTY = "chargingPeriod";
 
     private final static boolean CHARGING_PERIOD_REQUIRED = true;
 
@@ -292,17 +270,17 @@ public class PricingTemplate extends DefaultEntityBase
     private boolean showChangesBefore;
 
     @Required(value = SHOW_CHANGES_BEFORE_REQUIRED)
-    public boolean getShowChangesBefore()
+    public final static String MINIMUM_CHARGE_PROPERTY = "minimumCharge";
+
+    public boolean isShowChangesBefore()
     {
-        return this.showChangesBefore;
+        return showChangesBefore;
     }
 
-    private void setShowChangesBefore(final boolean showChangesBefore)
+    public void setShowChangesBefore(final boolean showChangesBefore)
     {
         this.showChangesBefore = showChangesBefore;
     }
-
-    public final static String MINIMUM_CHARGE_PROPERTY = "minimumCharge";
 
     private final static boolean MINIMUM_CHARGE_REQUIRED = true;
 
@@ -397,6 +375,25 @@ public class PricingTemplate extends DefaultEntityBase
     public void setMemoryMB(final BigDecimal memoryMB)
     {
         this.memoryMB = memoryMB;
+    }
+
+    public final static String DEFAULT_TEMPLATE_PROPERTY = "defaultTemplate";
+
+    private final static boolean DEFAULT_TEMPLATE_REQUIRED = true;
+
+    private final static String DEFAULT_TEMPLATE_COLUMN = "defaultTemplate";
+
+    @Column(name = DEFAULT_TEMPLATE_COLUMN, nullable = !DEFAULT_TEMPLATE_REQUIRED)
+    private boolean defaultTemplate;
+
+    public boolean isDefaultTemplate()
+    {
+        return defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final boolean defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
     }
 
     private final static String LAST_UPDATE_COLUMN = "last_update";

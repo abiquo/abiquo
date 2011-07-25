@@ -100,7 +100,8 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 currency,
                 publicIp,
                 vCpu,
-                memoryMb);
+                memoryMb,
+                false);
 
         return pricingTemplate;
     }

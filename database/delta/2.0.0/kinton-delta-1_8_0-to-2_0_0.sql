@@ -39,14 +39,13 @@ CREATE TABLE `kinton`.`costCode` (
 -- Definition of table `kinton`.`pricing`
 CREATE TABLE `kinton`.`pricing_template` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `idEnterprise` int(10) UNSIGNED,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `name` varchar(256) NOT NULL ,
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `limitMaximumDeployedCharged` DECIMAL(20) NOT NULL default 0,
+  `limitMaximumDeployedCharged` DECIMAL(20),
   `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
   `vcpu` DECIMAL(20) NOT NULL default 0,
@@ -54,12 +53,11 @@ CREATE TABLE `kinton`.`pricing_template` (
   `hdGB` DECIMAL(20) NOT NULL default 0,
   `vlan` DECIMAL(20) NOT NULL default 0,
   `publicIp` DECIMAL(20) NOT NULL default 0,
+   `defaultTemplate` boolean NOT NULL default 0,
    `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`) ,
-  KEY `Pricing_FK1_Enterprise` (`idEnterprise`),
   KEY `Pricing_FK2_Currency` (`idCurrency`),
-  CONSTRAINT `Pricing_FK1_Enterprise` FOREIGN KEY (`idEnterprise` ) REFERENCES `kinton`.`enterprise` (`idEnterprise` ) ON DELETE NO ACTION,
   CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
