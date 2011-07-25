@@ -68,13 +68,13 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
 
@@ -90,12 +90,11 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    public void pause(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void pause(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
+        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
+        SchedulerException, NotEnoughResourcesException
     {
-
 
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
@@ -105,8 +104,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).post(null);
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
+                MediaType.APPLICATION_XML).post(null);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -135,8 +134,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).put(newRequirements);
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
+                MediaType.APPLICATION_XML).put(newRequirements);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -264,7 +263,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 params);
     }
 
-    private VirtualMachineDto createTransferObject(VirtualMachine virtualMachine)
+    private VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
