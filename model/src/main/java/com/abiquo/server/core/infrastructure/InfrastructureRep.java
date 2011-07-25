@@ -139,6 +139,8 @@ public class InfrastructureRep extends DefaultRepBase
         this.networkDao = new NetworkDAO(entityManager);
         this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
         this.storageRep = new StorageRep(entityManager);
+        this.vlanDao = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
     public Datacenter findById(final Integer id)

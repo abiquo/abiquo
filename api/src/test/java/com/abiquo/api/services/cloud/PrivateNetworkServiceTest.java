@@ -99,26 +99,6 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
     }
 
     /**
-     * Perform an update test from the service.
-     */
-    @Test(groups = {BASIC_UNIT_TESTS})
-    public void updateNetworkOKTest()
-    {
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-
-        NetworkService service = new NetworkService(em);
-        vlan.setName("newname");
-        vlan.getConfiguration().setPrimaryDNS("45.45.45.0");
-        vlan = service.updatePrivateNetwork(vdc.getId(), vlan.getId(), vlan);
-
-        commitActiveTransaction(em);
-
-        // Assert the values has changed.
-        assertEquals(vlan.getName(), "newname");
-        assertEquals(vlan.getConfiguration().getPrimaryDNS(), "45.45.45.0");
-    }
-
-    /**
      * Throws a not found exception when it does not found the virtual datacenter
      */
     @Test(expectedExceptions = {NotFoundException.class})
@@ -259,12 +239,11 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
 
         // Update the vlan object.
         vlan = service.getPrivateNetwork(vdc.getId(), vlan.getId());
+        commitActiveTransaction(em);
 
         // Post assertions
         assertTrue(vlan2.getDefaultNetwork());
         assertFalse(vlan.getDefaultNetwork());
-
-        commitActiveTransaction(em);
 
     }
 
@@ -355,7 +334,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
      * Not all the fields of the VLAN can be changed. That was tested in previous test. This method
      * test all the fields in the VLANNetwork can be changed are actually changed.
      */
-    @Test
+    @Test(groups = {BASIC_UNIT_TESTS})
     public void updateNetworkUdatesAllFields()
     {
         VLANNetwork copy = performCopy(vlan);
