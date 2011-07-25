@@ -686,7 +686,7 @@ public class InfrastructureRep extends DefaultRepBase
     }
 
     /**
-     * Return all the VLANs by Datacenter.
+     * Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}
@@ -694,6 +694,17 @@ public class InfrastructureRep extends DefaultRepBase
     public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter)
     {
         return vlanDao.findPublicVLANNetworksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return all the public VLANs by Datacenter.
+     * 
+     * @param datacenter {@link Datacenter} where we search for.
+     * @return list of found {@link VLANNetwork}
+     */
+    public List<VLANNetwork> findAllPrivateVlansByDatacenter(final Datacenter datacenter)
+    {
+        return vlanDao.findPrivateVLANNetworksByDatacenter(datacenter);
     }
 
     /**

@@ -58,6 +58,12 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.enterprise.id = :enterpriseId";
 
+    private final String FIND_BY_DATACENTER =
+        " Select vlan "
+            + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "
+            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "
+            + "INNER JOIN vdc.network net WHERE vdc.datacenter.id = :datacenterId and vlan.network.id = net.id";
+
     private final String GET_VLAN_DATACENTER =
         "SELECT dc " //
             + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
@@ -85,6 +91,14 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
+
+        return query.list();
+    }
+
+    public List<VLANNetwork> findPrivateVLANNetworksByDatacenter(final Datacenter datacenter)
+    {
+        Query query = getSession().createQuery(FIND_BY_DATACENTER);
+        query.setParameter("datacenterId", datacenter.getId());
 
         return query.list();
     }

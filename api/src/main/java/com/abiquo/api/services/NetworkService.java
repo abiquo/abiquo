@@ -164,6 +164,12 @@ public class NetworkService extends DefaultApiService
         return newVlan;
     }
 
+    /**
+     * Return the private networks defined in a Virtual Datacenter.
+     * 
+     * @param virtualDatacenterId identifier of the virtual datacenter.
+     * @return a Collection of {@link VLANNetwork} defined inside the Virtual Datacenter.
+     */
     public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
     {
         VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
@@ -498,7 +504,7 @@ public class NetworkService extends DefaultApiService
         }
 
         // check the gateway belongs to the networks.
-        // networkConfiguration.setDhcp(dhcp);
+        vlan.getConfiguration().setDhcp(dhcp);
 
         return dhcp;
     }
