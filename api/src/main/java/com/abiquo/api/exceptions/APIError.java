@@ -322,7 +322,8 @@ public enum APIError
     // PRICING TEMPLATE
     CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
         "PRICINGTEMPLATE-1", "Missing enterprise parameter"), PRICING_TEMPLATE_DUPLICATED_NAME(
-        "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template");
+        "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
+        "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist");
 
     /**
      * Internal error code

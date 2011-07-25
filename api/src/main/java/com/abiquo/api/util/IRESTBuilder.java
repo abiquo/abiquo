@@ -158,7 +158,4 @@ public interface IRESTBuilder
     public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
         final PricingTemplateDto pricingTemplate);
 
-    public List<RESTLink> buildPricingTemplateLinks(Integer enterpriseId, Integer currencyId,
-        PricingTemplateDto pricingTemplate);
-
 }

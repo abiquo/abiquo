@@ -838,10 +838,4 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
-    public List<RESTLink> buildPricingTemplateLinks(final Integer enterpriseId,
-        final Integer currencyId, final PricingTemplateDto pricingTemplate)
-    {
-        return null;
-    }
 }

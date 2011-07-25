@@ -118,4 +118,9 @@ public class PricingRep extends DefaultRepBase
         return pricingTemplateDao.find(filter, order, desc, page, numResults);
     }
 
+    public PricingTemplate findPricingTemplateById(final Integer id)
+    {
+        return pricingTemplateDao.findById(id);
+    }
+
 }
