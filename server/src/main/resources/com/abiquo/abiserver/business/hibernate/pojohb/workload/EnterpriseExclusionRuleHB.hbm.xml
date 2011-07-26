@@ -2,18 +2,15 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton" lazy="false" table="workload_enterprise_exclusion_rule"
-        name="com.abiquo.abiserver.business.hibernate.pojohb.workload.EnterpriseExclusionRuleHB">
+    <class catalog="kinton" lazy="false" table="workload_enterprise_exclusion_rule" name="com.abiquo.abiserver.business.hibernate.pojohb.workload.EnterpriseExclusionRuleHB">
         <id name="id" type="java.lang.Integer">
             <column name="id" />
             <generator class="identity" />
         </id>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
-            fetch="select" lazy="false" name="enterprise1" not-null="true">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterprise1" not-null="true">
             <column name="idEnterprise1" />
         </many-to-one>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
-            fetch="select" lazy="false" name="enterprise2" not-null="true">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterprise2" not-null="true">
             <column name="idEnterprise2" />
         </many-to-one>
     </class>

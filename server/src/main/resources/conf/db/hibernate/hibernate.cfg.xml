@@ -17,27 +17,20 @@
         <property name="hibernate.validator.autoregister_listeners">false</property>
         <property name="hibernate.archive.autodetection">hbm</property>
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/enumeration-mappings.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientResourceHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientresourceExceptionHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientResourceHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientresourceExceptionHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthGroupHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerResourceHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerresourceExceptionHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerResourceHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerresourceExceptionHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/CategoryHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatacenterHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatacenterHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/EnterpriseHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/HypervisorHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/HypervisorHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/IconHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/LogHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/NodeHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatastoreHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/PhysicalmachineHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/PhysicalmachineHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/RackHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/UcsRackHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/RepositoryHB.hbm.xml" />
@@ -45,36 +38,24 @@
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/RoleHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/UserHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/pojo/authentication/UserSession.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualappHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualDataCenterHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/ResourceAllocationSettingData.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/ResourceManagement.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/DatacenterLimitHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualimageHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualmachineHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualappHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualDataCenterHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/ResourceAllocationSettingData.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/ResourceManagement.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualhardware/DatacenterLimitHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualimageHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualmachineHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/DHCPServiceHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkConfigurationHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkConfigurationHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/VlanNetworkHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/service/RemoteServiceHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/metering/MeterHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualImageConversionsHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualApplianceConversionsHB.hbm.xml" />
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkAssignmentHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualImageConversionsHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualappliance/VirtualApplianceConversionsHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkAssignmentHB.hbm.xml" />
         <!-- Workload Engine -->
-        <mapping
-            resource="com/abiquo/abiserver/business/hibernate/pojohb/workload/EnterpriseExclusionRuleHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/workload/EnterpriseExclusionRuleHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/workload/MachineLoadRuleHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/workload/FitPolicyRuleHB.hbm.xml" />
     </session-factory>
