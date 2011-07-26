@@ -58,7 +58,6 @@
             import net.undf.abicloud.events.VirtualApplianceEvent;
             import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.view.general.AbiCloudAlert;
-            import net.undf.abicloud.view.networking.virtualdatacenter.NetworkManagement;
             import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceForm;
             import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceList;
             import net.undf.abicloud.vo.infrastructure.State;

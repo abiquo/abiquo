@@ -32,6 +32,7 @@ package net.undf.abicloud.events
     import net.undf.abicloud.vo.networking.VlanNetwork;
     import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
+    import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
     public class NetworkingEvent extends Event
@@ -120,6 +121,8 @@ package net.undf.abicloud.events
         public var newOrder:int;
         
         public var ipPoolManagementId:int;
+        
+        public var virtualAppliance:VirtualAppliance;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

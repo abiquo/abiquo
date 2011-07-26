@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
         	import mx.managers.DragManager;
@@ -61,6 +62,8 @@
             //The VirtualDatacenter where the VirtualMachine is
             [Bindable]
             protected var _virtualDatacenter:VirtualDataCenter;
+            
+            private var _virtualAppliance:VirtualAppliance;
 
             //Flag indicating if changes can be made to the VirtualMachine network configuration
             [Bindable]
@@ -105,10 +108,12 @@
              * Initializes this component to manage the Network of a Virtual Machine
              */
             public function init(node:NodeVirtualImage, isEditionAllowed:Boolean,
-                                 virtualDatacenter:VirtualDataCenter):void
+                                 virtualDatacenter:VirtualDataCenter,
+                                 virtualAppliance:VirtualAppliance):void
             {
                 _virtualMachine = node.virtualMachine;
                 _virtualDatacenter = virtualDatacenter;
+                _virtualAppliance = virtualAppliance;
                 _isEditionAllowed = isEditionAllowed;
 
                 if (_virtualMachine)
@@ -123,6 +128,8 @@
                 if (_virtualMachine)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
+                    event.virtualDatacenter = _virtualDatacenter;
+                    event.virtualAppliance = _virtualAppliance;
                     event.virtualMachine = _virtualMachine;
                     event.callback = setVirtualMachineNICs;
                     dispatchEvent(event);
@@ -146,7 +153,7 @@
                                       true);
                 PopUpManager.centerPopUp(availableNICSelector);
 
-                availableNICSelector.init(_virtualDatacenter, _virtualMachine);
+                availableNICSelector.init(_virtualDatacenter, _virtualAppliance, _virtualMachine);
             }
 
             private function closeAvailableNICSelector(event:Event = null):void
@@ -185,6 +192,8 @@
                 if (closeEvent.detail == Alert.YES)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE);
+                    event.virtualDatacenter = _virtualDatacenter;
+                    event.virtualAppliance = _virtualAppliance;
                     event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
                     event.virtualMachine = _virtualMachine;
                     dispatchEvent(event);
@@ -201,6 +210,8 @@
             protected function getVirtualMachineGateway():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_VIRTUAL_MACHINE_GATEWAY);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.callback = setVirtualMachineGateway;
                 dispatchEvent(event);
@@ -216,6 +227,8 @@
             protected function getAvailableGateways():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_GATEWAYS_FOR_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.callback = setAvailableGateways;
                 dispatchEvent(event);
@@ -244,6 +257,8 @@
             protected function assignGatewayToVirtualMachine():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.gateway = virtualMachineGatewayInput.selectedIndex > -1 ? virtualMachineGatewayInput.selectedItem as IPAddress : null;
                 dispatchEvent(event);
@@ -252,6 +267,8 @@
             protected function unassignGatewayFromVirtualMachine():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.gateway = null;
                 dispatchEvent(event);
@@ -282,6 +299,9 @@
             
             protected function reorderNicIntoVM(newIndex:int ,ipPoolManagement:int ):void{
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE);
+            	event.virtualDatacenter = _virtualDatacenter;
+            	event.virtualAppliance = _virtualAppliance;
+            	event.virtualMachine = _virtualMachine;
                 event.newOrder = newIndex;
                 event.ipPoolManagementId = ipPoolManagement;
                 dispatchEvent(event);
