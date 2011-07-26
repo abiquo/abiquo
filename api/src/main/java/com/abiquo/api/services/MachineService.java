@@ -79,9 +79,6 @@ public class MachineService extends DefaultApiService
     @Autowired
     protected VirtualDatacenterRep virtualDatacenterRep;
 
-    @Autowired
-    protected InfrastructureService infrastructureService;
-
     public MachineService()
     {
 
@@ -95,7 +92,6 @@ public class MachineService extends DefaultApiService
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
-        infrastructureService = new InfrastructureService(em);
     }
 
     public List<Machine> getMachinesByRack(final Integer rackId)
@@ -183,7 +179,7 @@ public class MachineService extends DefaultApiService
 
         // Monitoring machine
         RemoteService vsmRS =
-            infrastructureService.getRemoteService(datacenter.getId(),
+            remoteServiceService.getRemoteService(datacenter.getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor =
