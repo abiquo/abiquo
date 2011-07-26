@@ -94,6 +94,23 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void getMachinesListFiltered() throws Exception
+    {
+        String filter = "?filter=notMatches";
+        Resource resource = client.resource(machinesURI + filter);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        assertEquals(200, response.getStatusCode());
+
+        MachinesDto entity = response.getEntity(MachinesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 0);
+    }
+
+    @Test
     public void createMachinesWithDatastores()
     {
         Resource resource = client.resource(machinesURI);

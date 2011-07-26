@@ -35,10 +35,8 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
-import com.abiquo.api.exceptions.PreconditionFailedException;
-import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -72,11 +70,10 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    protected
-    InfrastructureService infrastructureService;
+    protected OVFGeneratorService ovfService;
 
     @Autowired
-    protected OVFGeneratorService ovfService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     UserService userService;
@@ -91,7 +88,7 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.infrastructureService = new InfrastructureService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -140,6 +137,11 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         return vm;
+    }
+
+    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -224,9 +226,9 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
-            || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
-            || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
+        if (oldState == State.POWERED_OFF && newState != State.RUNNING || oldState == State.PAUSED
+            && newState != State.REBOOTED || oldState == State.RUNNING
+            && newState == State.REBOOTED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
             flushErrors();
@@ -242,15 +244,15 @@ public class VirtualMachineService extends DefaultApiService
      * @throws Exception
      */
     public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final State state) throws Exception
+        final Integer vdcId, final State state)
     {
         // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         // Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
 
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
-        checkPauseAllowed(vm,state);
-        
+        checkPauseAllowed(vm, state);
+
         State old = vm.getState();
 
         validMachineStateChange(old, state);
@@ -258,7 +260,7 @@ public class VirtualMachineService extends DefaultApiService
         blockVirtualMachine(vm);
         try
         {
-            
+
             Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
 
             VirtualAppliance vapp = contanerVirtualAppliance(vm);
@@ -267,7 +269,8 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                infrastructureService.getRemoteService(datacenterId, RemoteServiceType.VIRTUAL_FACTORY);
+                remoteServiceService.getRemoteService(datacenterId,
+                    RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
 
@@ -287,7 +290,7 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
@@ -342,13 +345,14 @@ public class VirtualMachineService extends DefaultApiService
 
         resource.put(docEnvelopeRunning);
     }
-    
-    public void checkPauseAllowed(VirtualMachine vm, State state)
+
+    public void checkPauseAllowed(final VirtualMachine vm, final State state)
     {
-        if((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3 && state == State.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();
         }
     }
+
 }

@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:security="http://www.springframework.org/schema/security"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
     <security:http>
         <!-- / -->
         <security:intercept-url pattern="/"
@@ -227,6 +227,8 @@
             method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*"
             method="PUT" access="ROLE_PHYS_DC_MANAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*"
+            method="DELETE" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/hypervisors"
             method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS " />
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits"
@@ -240,6 +242,8 @@
             method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url
             pattern="/admin/datacenters/*/action/discover_multiple"
+            method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/hypervisor"
             method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- RACKS -->
         <security:intercept-url pattern="/admin/datacenters/*/racks"
@@ -256,6 +260,8 @@
             method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*"
             method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*"
+            method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- MACHINES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines"
             method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />

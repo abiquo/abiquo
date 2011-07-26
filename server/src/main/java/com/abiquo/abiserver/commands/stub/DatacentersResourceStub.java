@@ -21,33 +21,20 @@
 
 package com.abiquo.abiserver.commands.stub;
 
-import java.util.List;
+import java.util.ArrayList;
 
-import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 
-public interface MachinesResourceStub
+public interface DatacentersResourceStub
 {
-    /**
-     * Returns the list of machines from a managed rack (Must be a managed rack, otherwise it throws
-     * an exception!)
-     * 
-     * @param ucsRack which the machines are attached.
-     * @return BasicResult
-     */
-    public DataResult<List<PhysicalMachine>> getMachines(UcsRack ucsRack);
+    public DataResult<DataCenter> createDatacenter(DataCenter datacenter);
 
-    /**
-     * Refresh the list of machines from a managed rack (Must be a managed rack, otherwise it throws
-     * an exception!)
-     * 
-     * @param ucsRack which the machines.
-     * @return BasicResult
-     */
-    public DataResult<List<PhysicalMachine>> refreshMachines(UcsRack ucsRack);
+    public DataResult<ArrayList<DataCenter>> getDatacenters();
 
-    public DataResult<List<PhysicalMachine>> getPhysicalMachinesByRack(Integer datacenterId,
-        Integer rackId, String filters);
+    public DataResult<DataCenter> modifyDatacenter(DataCenter datacenter);
 
+    public DataResult<DataCenter> deleteDatacenter(DataCenter datacenter);
+
+    public DataResult<DataCenter> getDatacenter(Integer datacenterId);
 }

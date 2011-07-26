@@ -140,7 +140,9 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
         Integer Start = firstElem;
         if (totalResults < firstElem)
+        {
             Start = totalResults - numElem;
+        }
         // Get the list of elements
         finalQuery.setFirstResult(Start);
         finalQuery.setMaxResults(numElem);
@@ -165,7 +167,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//and pm.idState != 7" // not HA_DISABLED
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//
+            // and pm.idState != 7" // not HA_DISABLED
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     private static final String SUM_STORAGE_RESOURCES =
@@ -186,8 +189,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_VLAN_RESOURCES =
-        "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el " +
-        "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId " +
-        "and vdc.idEnterprise = el.idEnterprise";
+        "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el "
+            + "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId "
+            + "and vdc.idEnterprise = el.idEnterprise";
 
 }

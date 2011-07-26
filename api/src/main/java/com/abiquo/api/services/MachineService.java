@@ -71,7 +71,7 @@ public class MachineService extends DefaultApiService
     private VsmServiceStub vsm;
 
     @Autowired
-    private InfrastructureService infrastructureService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     protected VirtualMachineService virtualMachineService;
@@ -89,15 +89,20 @@ public class MachineService extends DefaultApiService
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VsmServiceStub();
-        infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
+        remoteServiceService = new RemoteServiceService(em);
     }
 
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
+        return getMachinesByRack(rackId, null);
+    }
+
+    public List<Machine> getMachinesByRack(final Integer rackId, final String filter)
+    {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);
+        List<Machine> machines = repo.findRackMachines(rack, filter);
 
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created
@@ -133,7 +138,8 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
-    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public Machine getMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
 
@@ -282,7 +288,7 @@ public class MachineService extends DefaultApiService
     {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
-            infrastructureService.getRemoteService(machine.getDatacenter().getId(),
+            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();

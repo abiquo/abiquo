@@ -330,6 +330,7 @@ package net.undf.abicloud.utils.customtree
             
             	//we open the taag and retrieve the list of physical machine
 	            var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_PHYSICALMACHINE_BY_RACK);
+	            event.dataCenter = Rack(branch.item).dataCenter;
 	            event.branch = branch;
 	            event.rackId = branch.item.id;
 	            if(searchFilter.length > 0){

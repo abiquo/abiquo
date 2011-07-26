@@ -61,7 +61,9 @@ public enum APIError
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
-        "The current enterprise can't use this datacenter"),
+        "The current enterprise can't use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
+        "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(

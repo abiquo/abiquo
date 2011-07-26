@@ -26,10 +26,19 @@ import static com.abiquo.api.common.UriTestResolver.resolveDatacentersURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacentersDto;
@@ -38,6 +47,29 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
 public class DatacentersResourceIT extends AbstractJpaGeneratorIT
 {
+    Enterprise e1;
+
+    String SYSADMIN = "SYSADMIN";
+
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        e1 = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        r.setEnterprise(e1);
+        User u = userGenerator.createInstance(e1, r, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e1);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
 
     @Test
     public void getDatacentersList() throws Exception
@@ -62,6 +94,37 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         assertNotEmpty(entity.getCollection());
     }
 
+    @Test
+    public void getDatacentersListbyEnt() throws Exception
+    {
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Datacenter d1 = datacenterGenerator.createUniqueInstance();
+        Datacenter d2 = datacenterGenerator.createUniqueInstance();
+        Datacenter d3 = datacenterGenerator.createUniqueInstance();
+        DatacenterLimits dl1 = datacenterLimitsGenerator.createInstance(e1, d1);
+        DatacenterLimits dl2 = datacenterLimitsGenerator.createInstance(e1, d2);
+        DatacenterLimits dl3 = datacenterLimitsGenerator.createInstance(e2, d3);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e2);
+        entitiesToSetup.add(d1);
+        entitiesToSetup.add(d2);
+        entitiesToSetup.add(d3);
+        entitiesToSetup.add(dl1);
+        entitiesToSetup.add(dl2);
+        entitiesToSetup.add(dl3);
+        setup(entitiesToSetup.toArray());
+
+        ClientResponse response =
+            get(resolveDatacentersURI() + "?idEnterprise=" + e1.getId(), SYSADMIN, SYSADMIN);
+        assertEquals(200, response.getStatusCode());
+
+        DatacentersDto entity = response.getEntity(DatacentersDto.class);
+        assertNotNull(entity);
+        assertNotEmpty(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 2);
+    }
+
     /**
      * Test the creation of the datacenter with remote services in the same call.
      * 
@@ -71,12 +134,13 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
     public void createDatacenterWithRemotServicesTest() throws Exception
     {
         // Create the two remote services for the datacenters
+        // Remote services conection mustn't be checked
         RemoteServiceDto rsAm = new RemoteServiceDto();
-        rsAm.setType(RemoteServiceType.NODE_COLLECTOR);
-        rsAm.setUri("http://example.com/nodecollector");
+        rsAm.setType(RemoteServiceType.DHCP_SERVICE);
+        rsAm.setUri("http://example.com/dhcp");
         RemoteServiceDto rsSSM = new RemoteServiceDto();
-        rsSSM.setType(RemoteServiceType.STORAGE_SYSTEM_MONITOR);
-        rsSSM.setUri("http://example.com/ssm");
+        rsSSM.setType(RemoteServiceType.BPM_SERVICE);
+        rsSSM.setUri("http://example.com/bpm");
         RemoteServicesDto rsList = new RemoteServicesDto();
         rsList.add(rsAm);
         rsList.add(rsSSM);
