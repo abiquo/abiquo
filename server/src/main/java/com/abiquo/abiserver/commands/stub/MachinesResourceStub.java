@@ -47,4 +47,7 @@ public interface MachinesResourceStub
      */
     public DataResult<List<PhysicalMachine>> refreshMachines(UcsRack ucsRack);
 
+    public DataResult<List<PhysicalMachine>> getPhysicalMachinesByRack(Integer datacenterId,
+        Integer rackId, String filters);
+
 }

@@ -22,6 +22,7 @@
 package com.abiquo.api.services;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -39,8 +40,11 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -73,6 +77,12 @@ public class DatacenterService extends DefaultApiService
     @Autowired
     VirtualDatacenterService virtualDatacenterService;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    EnterpriseRep enterpriseRep;
+
     public DatacenterService()
     {
 
@@ -84,7 +94,19 @@ public class DatacenterService extends DefaultApiService
         infrastructureService = new InfrastructureService(em);
         remoteServiceService = new RemoteServiceService(em);
         virtualDatacenterService = new VirtualDatacenterService(em);
+        userService = new UserService(em);
         tracer = new TracerLogger();
+    }
+
+    public Collection<Datacenter> getDatacenters(final Enterprise enterprise)
+    {
+        Collection<DatacenterLimits> dcLimits = repo.findDatacenterLimits(enterprise);
+        Set<Datacenter> dcs = new HashSet<Datacenter>();
+        for (DatacenterLimits dcl : dcLimits)
+        {
+            dcs.add(dcl.getDatacenter());
+        }
+        return dcs;
     }
 
     public Collection<Datacenter> getDatacenters()
@@ -92,7 +114,7 @@ public class DatacenterService extends DefaultApiService
         return repo.findAll();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public Datacenter addDatacenter(final Datacenter datacenter) throws Exception
     {
         if (repo.existsAnyDatacenterWithName(datacenter.getName()))
@@ -113,6 +135,11 @@ public class DatacenterService extends DefaultApiService
         datacenter.setNetwork(network);
         repo.insert(datacenter);
 
+        // Assign datacenter to the own enterprise
+        DatacenterLimits dcLimits =
+            new DatacenterLimits(userService.getCurrentUser().getEnterprise(), datacenter);
+        enterpriseRep.insertLimit(dcLimits);
+
         // Add the default tiers
         for (int i = 1; i <= 4; i++)
         {
@@ -128,6 +155,7 @@ public class DatacenterService extends DefaultApiService
         return datacenter;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public RemoteServicesDto addRemoteServices(final List<RemoteService> remoteServices,
         final Integer idDatacenter)
     {
@@ -268,6 +296,11 @@ public class DatacenterService extends DefaultApiService
             flushErrors();
         }
 
+    }
+
+    public boolean isAssignedTo(final Integer datacenterId, final RemoteServiceType type)
+    {
+        return infrastructureService.isAssignedTo(datacenterId, type);
     }
 
     // overrided on premium

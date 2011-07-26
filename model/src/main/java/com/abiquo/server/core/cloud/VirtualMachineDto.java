@@ -23,10 +23,13 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.util.StringUtils;
+
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualMachine")
-public class VirtualMachineDto extends SingleResourceTransportDto
+public class VirtualMachineDto extends SingleResourceTransportDto implements
+    Comparable<VirtualMachineDto>
 {
     private Integer id;
 
@@ -179,9 +182,30 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    @Override
+    public int compareTo(final VirtualMachineDto vm2)
+    {
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return this.getName().compareTo(vm2.getName());
+        }
+        else if (!StringUtils.hasText(this.getName()) && !StringUtils.hasText(vm2.getName()))
+        {
+            return 0;
+        }
+        else if (!StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
 }

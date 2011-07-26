@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 
 @Repository("jpaVirtualMachineDAO")
 public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
@@ -44,26 +46,26 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         super(VirtualMachine.class);
     }
 
-    public VirtualMachineDAO(EntityManager entityManager)
+    public VirtualMachineDAO(final EntityManager entityManager)
     {
         super(VirtualMachine.class, entityManager);
     }
 
-    private static Criterion sameHypervisor(Hypervisor hypervisor)
+    private static Criterion sameHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
 
         return Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, hypervisor);
     }
 
-    private static Criterion sameEnterprise(Enterprise enterprise)
+    private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
 
         return Restrictions.eq(VirtualMachine.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private static Criterion sameUser(User user)
+    private static Criterion sameUser(final User user)
     {
         return Restrictions.eq(VirtualMachine.USER_PROPERTY, user);
     }
@@ -78,7 +80,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.MANAGED);
     }
 
-    public List<VirtualMachine> findVirtualMachines(Hypervisor hypervisor)
+    public List<VirtualMachine> findVirtualMachines(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         assert isManaged2(hypervisor);
@@ -89,7 +91,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public List<VirtualMachine> findManagedVirtualMachines(Hypervisor hypervisor)
+    public List<VirtualMachine> findManagedVirtualMachines(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
         assert isManaged2(hypervisor);
@@ -100,7 +102,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public List<VirtualMachine> findVirtualMachinesByEnterprise(Enterprise enterprise)
+    public List<VirtualMachine> findVirtualMachinesByEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert isManaged2(enterprise);
@@ -111,7 +113,8 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public List<VirtualMachine> findVirtualMachinesByUser(Enterprise enterprise, User user)
+    public List<VirtualMachine> findVirtualMachinesByUser(final Enterprise enterprise,
+        final User user)
     {
         Criteria criteria = createCriteria(sameUser(user)).add(sameEnterprise(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
@@ -119,17 +122,17 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public VirtualMachine findByName(String name)
+    public VirtualMachine findByName(final String name)
     {
         return findUniqueByProperty(VirtualMachine.NAME_PROPERTY, name);
     }
 
-    public VirtualMachine findByUUID(String uuid)
+    public VirtualMachine findByUUID(final String uuid)
     {
         return findUniqueByProperty(VirtualMachine.UUID_PROPERTY, uuid);
     }
 
-    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(Integer vappId)
+    public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
     {
         List<VirtualMachine> vmList = null;
         TypedQuery<VirtualMachine> query =
@@ -140,7 +143,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
-    public void deleteNotManagedVirtualMachines(Hypervisor hypervisor)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
         List<VirtualMachine> notManaged = getResultList(criteria);
@@ -152,7 +155,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         flush();
     }
 
-    public List<VirtualMachine> findVirtualMachinesByDatacenter(Integer datacenterId)
+    public List<VirtualMachine> findVirtualMachinesByDatacenter(final Integer datacenterId)
     {
         List<VirtualMachine> vmList = null;
         TypedQuery<VirtualMachine> query =
@@ -163,12 +166,26 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
-    public void updateVirtualMachineState(Integer vmachineId, State state)
+    public void updateVirtualMachineState(final Integer vmachineId, final State state)
     {
         VirtualMachine vmachine = findById(vmachineId);
 
         vmachine.setState(state);
 
         flush();
+    }
+
+    private static Criterion equalName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
+    }
+
+    public boolean existsAnyWithName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return this.existsAnyByCriterions(equalName(name));
     }
 }

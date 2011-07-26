@@ -93,8 +93,13 @@ public class MachineService extends DefaultApiService
 
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
+        return getMachinesByRack(rackId, null);
+    }
+
+    public List<Machine> getMachinesByRack(final Integer rackId, final String filter)
+    {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);
+        List<Machine> machines = repo.findRackMachines(rack, filter);
 
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created

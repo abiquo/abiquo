@@ -139,6 +139,11 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public VirtualMachine updateVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId, final VirtualMachineDto dto)
@@ -223,9 +228,9 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
-            || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
-            || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
+        if (oldState == State.POWERED_OFF && newState != State.RUNNING || oldState == State.PAUSED
+            && newState != State.REBOOTED || oldState == State.RUNNING
+            && newState == State.REBOOTED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
             flushErrors();
@@ -342,7 +347,7 @@ public class VirtualMachineService extends DefaultApiService
 
     public void checkPauseAllowed(final VirtualMachine vm, final State state)
     {
-        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3 && state == State.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();

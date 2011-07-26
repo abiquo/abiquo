@@ -30,6 +30,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class PhysicalMachine extends InfrastructureElement implements IPojo<PhysicalmachineHB>
@@ -115,7 +116,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return dataCenter;
     }
 
-    public void setDataCenter(DataCenter dataCenter)
+    public void setDataCenter(final DataCenter dataCenter)
     {
         this.dataCenter = dataCenter;
     }
@@ -125,7 +126,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -135,7 +136,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ram;
     }
 
-    public void setRam(int ram)
+    public void setRam(final int ram)
     {
         this.ram = ram;
     }
@@ -145,7 +146,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return cpu;
     }
 
-    public void setCpu(int cpu)
+    public void setCpu(final int cpu)
     {
         this.cpu = cpu;
     }
@@ -155,7 +156,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return hd;
     }
 
-    public void setHd(long hd)
+    public void setHd(final long hd)
     {
         this.hd = hd;
     }
@@ -165,7 +166,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return realRam;
     }
 
-    public void setRealRam(int realRam)
+    public void setRealRam(final int realRam)
     {
         this.realRam = realRam;
     }
@@ -175,7 +176,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return realCpu;
     }
 
-    public void setRealCpu(int realCpu)
+    public void setRealCpu(final int realCpu)
     {
         this.realCpu = realCpu;
     }
@@ -183,7 +184,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     /**
      * @param realStorage the realStorage to set
      */
-    public void setRealStorage(long realStorage)
+    public void setRealStorage(final long realStorage)
     {
         this.realStorage = realStorage;
     }
@@ -202,7 +203,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ramUsed;
     }
 
-    public void setRamUsed(int ram)
+    public void setRamUsed(final int ram)
     {
         ramUsed = ram;
     }
@@ -212,7 +213,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return cpuUsed;
     }
 
-    public void setCpuUsed(int cpu)
+    public void setCpuUsed(final int cpu)
     {
         cpuUsed = cpu;
     }
@@ -222,7 +223,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return hdUsed;
     }
 
-    public void setHdUsed(long hd)
+    public void setHdUsed(final long hd)
     {
         hdUsed = hd;
     }
@@ -240,7 +241,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return idState;
     }
 
-    public void setIdState(int idState)
+    public void setIdState(final int idState)
     {
         this.idState = idState;
     }
@@ -248,7 +249,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     /**
      * @param cpuRatio the cpuRatio to set
      */
-    public void setCpuRatio(int cpuRatio)
+    public void setCpuRatio(final int cpuRatio)
     {
         this.cpuRatio = cpuRatio;
     }
@@ -256,7 +257,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     /**
      * @param vswitchName the vswitchName to set
      */
-    public void setVswitchName(String vswitchName)
+    public void setVswitchName(final String vswitchName)
     {
         this.vswitchName = vswitchName;
     }
@@ -280,7 +281,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     /**
      * @param initiatorIQN, the new initiatorIQN to set
      */
-    public void setInitiatorIQN(String initiatorIQN)
+    public void setInitiatorIQN(final String initiatorIQN)
     {
         this.initiatorIQN = initiatorIQN;
     }
@@ -288,7 +289,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     /**
      * @param datastores the datastores to set
      */
-    public void setDatastores(Set<Datastore> datastores)
+    public void setDatastores(final Set<Datastore> datastores)
     {
         this.datastores = datastores;
     }
@@ -301,7 +302,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return datastores;
     }
 
-    public void setIdEnterprise(Integer idEnterprise)
+    public void setIdEnterprise(final Integer idEnterprise)
     {
         this.idEnterprise = idEnterprise;
     }
@@ -316,7 +317,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ipmiIp;
     }
 
-    public void setIpmiIp(String ipmiIp)
+    public void setIpmiIp(final String ipmiIp)
     {
         this.ipmiIp = ipmiIp;
     }
@@ -326,7 +327,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ipmiPort;
     }
 
-    public void setIpmiPort(Integer ipmiPort)
+    public void setIpmiPort(final Integer ipmiPort)
     {
         this.ipmiPort = ipmiPort;
     }
@@ -336,7 +337,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ipmiUser;
     }
 
-    public void setIpmiUser(String ipmiUser)
+    public void setIpmiUser(final String ipmiUser)
     {
         this.ipmiUser = ipmiUser;
     }
@@ -346,7 +347,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return ipmiPassword;
     }
 
-    public void setIpmiPassword(String ipmiPassword)
+    public void setIpmiPassword(final String ipmiPassword)
     {
         this.ipmiPassword = ipmiPassword;
     }
@@ -356,11 +357,12 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return hypervisor;
     }
 
-    public void setHypervisor(HyperVisor hypervisor)
+    public void setHypervisor(final HyperVisor hypervisor)
     {
         this.hypervisor = hypervisor;
     }
 
+    @Override
     public PhysicalmachineHB toPojoHB()
     {
         PhysicalmachineHB physicalMachineHB = new PhysicalmachineHB();
@@ -415,7 +417,7 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachineHB.setDatastoresHB(datastoresHB);
         if (idEnterprise != null)
         {
-            physicalMachineHB.setIdEnterprise((idEnterprise.intValue() != 0) ? idEnterprise : null);
+            physicalMachineHB.setIdEnterprise(idEnterprise.intValue() != 0 ? idEnterprise : null);
         }
 
         if (hypervisor != null)
@@ -431,12 +433,13 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         return rack;
     }
 
-    public void setRack(Rack rack)
+    public void setRack(final Rack rack)
     {
         this.rack = rack;
     }
 
-    public static PhysicalMachine create(MachineDto dto, DataCenter datacenter, Rack rack)
+    public static PhysicalMachine create(final MachineDto dto, final DataCenter datacenter,
+        final Rack rack)
     {
         PhysicalMachine physicalMachine = new PhysicalMachine();
 
@@ -466,6 +469,69 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         // physicalMachine.setInitiatorIQN(dto.get);
 
         return physicalMachine;
+    }
+
+    public static PhysicalMachine create(final MachineDto dto, final Rack rack)
+    {
+        PhysicalMachine physicalMachine = new PhysicalMachine();
+
+        // physicalMachine.setDataCenter(datacenter);
+        physicalMachine.setCpuRatio(dto.getVirtualCpusPerCore());
+        physicalMachine.setCpu(dto.getVirtualCpuCores());
+        physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
+        physicalMachine.setDescription(dto.getDescription());
+        physicalMachine.setHd(dto.getVirtualHardDiskInMb());
+        physicalMachine.setRealCpu(dto.getRealCpuCores());
+        physicalMachine.setRealRam(dto.getRealRamInMb());
+        physicalMachine.setRealStorage(dto.getRealHardDiskInMb());
+        physicalMachine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
+        physicalMachine.setId(dto.getId());
+        physicalMachine.setName(dto.getName());
+        physicalMachine.setAssignedTo(rack);
+        physicalMachine.setRam(dto.getVirtualRamInMb());
+        physicalMachine.setRamUsed(dto.getVirtualRamUsedInMb());
+        physicalMachine.setIdState(dto.getState().ordinal());
+        physicalMachine.setVswitchName(dto.getVirtualSwitch());
+        physicalMachine.setIpmiIp(dto.getIpmiIp());
+        physicalMachine.setIpmiPort(dto.getIpmiPort());
+        physicalMachine.setIpmiUser(dto.getIpmiUser());
+        physicalMachine.setIpmiPassword(dto.getIpmiPassword());
+
+        // FIXME: where is initiatorIQN?
+        // physicalMachine.setInitiatorIQN(dto.get);
+
+        return physicalMachine;
+    }
+
+    public void completeInfo(final MachineDto dto)
+    {
+        HyperVisor h = new HyperVisor();
+        h.setIp(dto.getIp());
+        h.setIpService(dto.getIpService());
+        h.setType(new HyperVisorType(dto.getType()));
+        h.setUser(dto.getUser());
+        h.setPassword(dto.getPassword());
+        this.setHypervisor(h);
+
+        if (dto.getDatastores() != null && !dto.getDatastores().getCollection().isEmpty())
+        {
+            this.setDatastores(new HashSet<Datastore>());
+
+            for (DatastoreDto dataDto : dto.getDatastores().getCollection())
+            {
+                Datastore datastore = new Datastore();
+                datastore.setDatastoreUUID(dataDto.getDatastoreUUID());
+                datastore.setDirectory(dataDto.getDirectory());
+                datastore.setEnabled(dataDto.isEnabled());
+                datastore.setId(dataDto.getId());
+                datastore.setName(dataDto.getName());
+                datastore.setSize(dataDto.getSize());
+                datastore.setUsedSize(dataDto.getUsedSize());
+                datastore.setUUID(dataDto.getRootPath());
+
+                this.getDatastores().add(datastore);
+            }
+        }
     }
 
 }

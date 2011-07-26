@@ -218,10 +218,15 @@ public class InfrastructureRep extends DefaultRepBase
 
     public List<Machine> findRackMachines(final Rack rack)
     {
+        return findRackMachines(rack, null);
+    }
+
+    public List<Machine> findRackMachines(final Rack rack, final String filter)
+    {
         assert rack != null;
         assert this.rackDao.isManaged(rack);
 
-        return this.machineDao.findRackMachines(rack);
+        return this.machineDao.findRackMachines(rack, filter);
     }
 
     public Set<HypervisorType> findHypervisors(final Datacenter datacenter)
@@ -255,6 +260,11 @@ public class InfrastructureRep extends DefaultRepBase
         final Datacenter datacenter)
     {
         return datacenterLimitDao.findByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    public Collection<DatacenterLimits> findDatacenterLimits(final Enterprise enterprise)
+    {
+        return datacenterLimitDao.findByEnterprise(enterprise);
     }
 
     public boolean existsAnyRackWithName(final Datacenter datacenter, final String name)

@@ -351,6 +351,7 @@ public class InfrastructureService extends DefaultApiService
         return old;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void removeRack(final Rack rack)
     {
 
@@ -527,8 +528,8 @@ public class InfrastructureService extends DefaultApiService
                 flushErrors();
             }
         }
-        if ((remoteService.getType() == RemoteServiceType.DHCP_SERVICE)
-            || (remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR))
+        if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
+            || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
         {
             if (repo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {

@@ -90,7 +90,7 @@ public class RemoteServiceService extends DefaultApiService
         return infrastrucutreRepo.findRemoteServicesByDatacenter(datacenter);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
         Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
@@ -161,7 +161,8 @@ public class RemoteServiceService extends DefaultApiService
 
                 repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
 
-                if (infrastrucutreRepo.existRepositoryInOtherDatacenter(datacenter, repositoryLocation))
+                if (infrastrucutreRepo.existRepositoryInOtherDatacenter(datacenter,
+                    repositoryLocation))
                 {
                     remoteService.setStatus(STATUS_ERROR);
 
@@ -170,7 +171,8 @@ public class RemoteServiceService extends DefaultApiService
                     return configurationErrors;
                 }
 
-                if (!infrastrucutreRepo.existRepositoryInSameDatacenter(datacenter, repositoryLocation))
+                if (!infrastrucutreRepo.existRepositoryInSameDatacenter(datacenter,
+                    repositoryLocation))
                 {
                     infrastrucutreRepo.createRepository(datacenter, repositoryLocation);
                 }
@@ -329,8 +331,8 @@ public class RemoteServiceService extends DefaultApiService
                 flushErrors();
             }
         }
-        if ((remoteService.getType() == RemoteServiceType.DHCP_SERVICE)
-            || (remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR))
+        if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
+            || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
         {
             if (infrastrucutreRepo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {

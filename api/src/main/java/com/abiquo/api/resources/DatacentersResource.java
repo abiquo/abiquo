@@ -32,15 +32,19 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacentersDto;
@@ -62,12 +66,26 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private RemoteServiceService remoteServiceService;
 
+    @Autowired
+    private EnterpriseService entService;
+
     @GET
-    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder) throws Exception
+    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
+        @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
-        Collection<Datacenter> all = service.getDatacenters();
+        Collection<Datacenter> list = null;
+        if (StringUtils.hasText(idEnterprise))
+        {
+            Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));
+            list = service.getDatacenters(enterprise);
+        }
+        else
+        {
+            list = service.getDatacenters();
+        }
+
         DatacentersDto datacenters = new DatacentersDto();
-        for (Datacenter d : all)
+        for (Datacenter d : list)
         {
             DatacenterDto dcdto = createTransferObject(d, restBuilder);
             dcdto.setRemoteServices(new RemoteServicesDto());
