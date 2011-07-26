@@ -2,8 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB"
-        table="dhcp_service" lazy="false">
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB" table="dhcp_service" lazy="false">
         <id name="dhcpServiceId" type="java.lang.Integer">
             <column name="dhcp_service_id" />
             <generator class="identity" />
@@ -15,8 +14,7 @@
             <key>
                 <column name="dhcp_service_id" not-null="true" />
             </key>
-            <one-to-many
-                class="com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB" />
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB" />
         </bag>
     </class>
     <!--
@@ -48,17 +46,10 @@
     <!-- cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1,
         3) as integer) -->
     <!-- </query> -->
-    <query name="DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT"> Select host from
-        com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB conf inner
-        join conf.dhcpService dhcp,
-        com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB host where
-        dhcp.dhcpServiceId = :dhcpId and dhcp.dhcpServiceId = host.dhcpServiceId and host.ip !=
-        :gateway and host.virtualMachine is null order by cast(substring(host.ip, 1, locate('.',
-        host.ip) - 1) as integer), cast(substring(host.ip, locate('.', host.ip) + 1, locate('.',
-        host.ip, locate('.', host.ip) + 1) - locate('.', host.ip) - 1) as integer),
-        cast(substring(host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1, locate('.',
-        host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1) - locate('.', host.ip,
-        locate('.', host.ip) + 1) - 1) as integer), cast(substring(host.ip, locate('.', host.ip,
-        locate('.', host.ip, locate('.', host.ip) + 1) + 1) + 1, 3) as integer)
-    </query>
+    <query name="DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT"> Select host from com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB conf inner join conf.dhcpService dhcp,
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB host where dhcp.dhcpServiceId = :dhcpId and dhcp.dhcpServiceId = host.dhcpServiceId and host.ip != :gateway and
+        host.virtualMachine is null order by cast(substring(host.ip, 1, locate('.', host.ip) - 1) as integer), cast(substring(host.ip, locate('.', host.ip) + 1, locate('.', host.ip, locate('.',
+        host.ip) + 1) - locate('.', host.ip) - 1) as integer), cast(substring(host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1, locate('.', host.ip, locate('.', host.ip, locate('.',
+        host.ip) + 1) + 1) - locate('.', host.ip, locate('.', host.ip) + 1) - 1) as integer), cast(substring(host.ip, locate('.', host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1) + 1, 3)
+        as integer)</query>
 </hibernate-mapping>

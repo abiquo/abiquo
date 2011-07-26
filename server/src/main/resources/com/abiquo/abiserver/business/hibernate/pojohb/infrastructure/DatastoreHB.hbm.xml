@@ -2,8 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB"
-        table="datastore">
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB" table="datastore">
         <id name="idDatastore" type="java.lang.Integer">
             <column name="idDatastore" />
             <generator class="identity" />
@@ -33,8 +32,7 @@
             <key>
                 <column name="idDatastore" not-null="true" />
             </key>
-            <many-to-many column="idPhysicalMachine"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
+            <many-to-many column="idPhysicalMachine" class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
         </set>
     </class>
 </hibernate-mapping>

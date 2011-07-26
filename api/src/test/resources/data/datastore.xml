@@ -1,31 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1"
-        version_c="1" />
-    <datacenter idDataCenter="2" name="datacenter_2" situation="situation_datacenter_2"
-        version_c="1" />
-    <datacenter idDataCenter="3" name="datacenter_3" situation="situation_datacenter_3"
-        version_c="1" />
-    <rack idRack="1" idDataCenter="1" name="rack_1" shortDescription="description_rack_1"
-        largeDescription="large_description_rack_1" version_c="1" />
-    <rack idRack="2" idDataCenter="2" name="rack_2" shortDescription="description_rack_2"
-        largeDescription="large_description_rack_2" version_c="1" />
-    <rack idRack="3" idDataCenter="2" name="rack_3" shortDescription="description_rack_3"
-        largeDescription="large_description_rack_3" version_c="1" />
-    <rack idRack="4" idDataCenter="2" name="rack_4" shortDescription="description_rack_4"
-        largeDescription="large_description_rack_4" version_c="1" />
-    <physicalmachine idPhysicalMachine="1" idRack="1" idDataCenter="1" name="machine_1"
-        description="description_1" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
-        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1"
-        version_c="1" />
-    <physicalmachine idPhysicalMachine="2" idRack="2" idDataCenter="2" name="machine_2"
-        description="description_2" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
-        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1"
-        version_c="1" />
-    <datastore id="1" name="ds1" rootPath="uuid1" directory="dir1" version_c="1" enabled="true"
-        shared="false" size="100" usedSize="0" />
-    <datastore id="2" name="ds2" rootPath="uuid2" directory="dir2" version_c="1" enabled="false"
-        shared="false" size="100" usedSize="0" />
+    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1" version_c="1" />
+    <datacenter idDataCenter="2" name="datacenter_2" situation="situation_datacenter_2" version_c="1" />
+    <datacenter idDataCenter="3" name="datacenter_3" situation="situation_datacenter_3" version_c="1" />
+    <rack idRack="1" idDataCenter="1" name="rack_1" shortDescription="description_rack_1" largeDescription="large_description_rack_1" version_c="1" />
+    <rack idRack="2" idDataCenter="2" name="rack_2" shortDescription="description_rack_2" largeDescription="large_description_rack_2" version_c="1" />
+    <rack idRack="3" idDataCenter="2" name="rack_3" shortDescription="description_rack_3" largeDescription="large_description_rack_3" version_c="1" />
+    <rack idRack="4" idDataCenter="2" name="rack_4" shortDescription="description_rack_4" largeDescription="large_description_rack_4" version_c="1" />
+    <physicalmachine idPhysicalMachine="1" idRack="1" idDataCenter="1" name="machine_1" description="description_1" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
+        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
+    <physicalmachine idPhysicalMachine="2" idRack="2" idDataCenter="2" name="machine_2" description="description_2" realRam="24" realCpu="24" realStorage="24" ram="2" cpu="2" hd="2"
+        cpuRatio="1" ramUsed="0" cpuUsed="0" hdUSed="0" idState="1" vswitchName="127.0.0.1" version_c="1" />
+    <datastore id="1" name="ds1" rootPath="uuid1" directory="dir1" version_c="1" enabled="true" shared="false" size="100" usedSize="0" />
+    <datastore id="2" name="ds2" rootPath="uuid2" directory="dir2" version_c="1" enabled="false" shared="false" size="100" usedSize="0" />
     <machine_datastores idMachine="1" idDatastore="1" />
     <machine_datastores idMachine="2" idDatastore="2" />
 </dataset>

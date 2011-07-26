@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:p="http://www.springframework.org/schema/p" xmlns:http="http://cxf.apache.org/transports/http/configuration"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:http="http://cxf.apache.org/transports/http/configuration"
     xmlns:sec="http://cxf.apache.org/configuration/security" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
            http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
@@ -9,20 +8,16 @@
     <import resource="classpath:META-INF/cxf/cxf.xml" />
     <import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml" />
     <import resource="classpath:heartbeat-internal-context.xml" />
-    <bean id="registrationClient" class="com.abiquo.heartbeat.client.services.impl.RegistrationClientImpl"
-        p:reminderTimeout="259200000" />
-    <bean id="heartbeatClient" class="com.abiquo.heartbeat.client.services.impl.HeartbeatClientImpl"
-        p:reminderTimeout="259200000" />
+    <bean id="registrationClient" class="com.abiquo.heartbeat.client.services.impl.RegistrationClientImpl" p:reminderTimeout="259200000" />
+    <bean id="heartbeatClient" class="com.abiquo.heartbeat.client.services.impl.HeartbeatClientImpl" p:reminderTimeout="259200000" />
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
         <property name="jndiName" value="java:comp/env/jdbc/heartbeatDB" />
     </bean>
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
         <property name="dataSource" ref="dataSource" />
     </bean>
-    <jaxrs:client id="heartbeatServiceStub" address="${heartbeatAddress}/heartbeat-server/"
-        serviceClass="com.abiquo.heartbeat.shared.services.HeartbeatService" />
-    <jaxrs:client id="registerServiceStub" address="${heartbeatAddress}/heartbeat-server/"
-        serviceClass="com.abiquo.heartbeat.shared.services.RegisterService" />
+    <jaxrs:client id="heartbeatServiceStub" address="${heartbeatAddress}/heartbeat-server/" serviceClass="com.abiquo.heartbeat.shared.services.HeartbeatService" />
+    <jaxrs:client id="registerServiceStub" address="${heartbeatAddress}/heartbeat-server/" serviceClass="com.abiquo.heartbeat.shared.services.RegisterService" />
     <!-- <http:conduit name="*.http-conduit"> -->
     <!-- <http:tlsClientParameters> -->
     <!-- <sec:trustManagers> -->

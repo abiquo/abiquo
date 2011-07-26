@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
-<hibernate-mapping package="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage"
-    catalog="kinton">
+<hibernate-mapping package="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage" catalog="kinton">
     <class name="VirtualimageHB" table="virtualimage">
         <!-- ID -->
         <id name="idImage" type="java.lang.Integer">
