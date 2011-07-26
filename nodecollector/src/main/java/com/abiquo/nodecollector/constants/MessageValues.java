@@ -301,7 +301,55 @@ public final class MessageValues
     public static final String UCS_LS_ERROR =
         "Cannot change the state if the blade is not associated with any Logic Server";
 
+    /**
+     * Invalid blade DN.
+     */
     public static final String UCS_BLADE_DN_ERROR = "Invalid blade dn";
+
+    /**
+     * The Logic Server is already associated to a LS.
+     */
+    public static final String UCS_LS_ASSOC_ERROR =
+        "Cannot associate the Logic Server because it is already associated";
+
+    /**
+     * The Logic Server is already unassociated.
+     */
+    public static final String UCS_LS_UNASSOC_ERROR =
+        "Cannot disassociate the Logic Server because it is already unassociated";
+
+    /**
+     * The Logic Server is wan not associated to a LS due to an unknown error.
+     */
+    public static final String UCS_LS_ASSOC_GEN_ERROR =
+        "Cannot associate the Logic Server due to an unknown error";
+
+    /**
+     * The Logic Server was not unassociated due unknown error.
+     */
+    public static final String UCS_LS_UNASSOC_GEN_ERROR =
+        "Cannot disassociate the Logic Server due to an unknown error";
+
+    /**
+     * The Logic Server does not exists.
+     */
+
+    public static final String UCS_LS_NO_EXISTS_ERROR = "The Logic Server does not exists";
+
+    /**
+     * The Organization does not exists.
+     */
+    public static final String UCS_ORGANIZATION_NO_EXISTS_ERROR =
+        "The Organization does not exists";
+
+    /** The Logic Server already exists. */
+    public static final String UCS_LS_EXISTS_ERROR = "The Logic Server already exists";
+
+    /**
+     * The UCS could not be reached.
+     */
+    public static final String UCS_COMM_ERROR =
+        "There was a problem with UCS. Review your network configuration and check that UCS Manager is working";
 
     /**
      * Private constructor due it is an utility class.

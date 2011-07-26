@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.infrastructure;
 
-import static org.testng.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Random;
 
@@ -35,14 +33,14 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
 
     private DatacenterGenerator datacenterGenerator;
 
-    public UcsRackGenerator(SeedGenerator seed)
+    public UcsRackGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(UcsRack obj1, UcsRack obj2)
+    public void assertAllPropertiesEqual(final UcsRack obj1, final UcsRack obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, UcsRack.PORT_PROPERTY,
             UcsRack.IP_PROPERTY, UcsRack.PASSWORD_PROPERTY, UcsRack.USER_PROPERTY);
@@ -51,11 +49,11 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     @Override
     public UcsRack createUniqueInstance()
     {
-        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();   
+        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();
         return createInstance(datacenter);
     }
-    
-    public UcsRack createInstance(Datacenter datacenter)
+
+    public UcsRack createInstance(final Datacenter datacenter)
     {
         int seed = nextSeed();
         final String shortDescription =
@@ -70,7 +68,7 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
             newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
                 Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
         Integer vlan_per_vdc_expected = 8;
-        
+
         UcsRack ucsRack =
             new UcsRack("rack" + new Random().nextInt(),
                 datacenter,
@@ -90,10 +88,11 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(UcsRack entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final UcsRack entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
+
         Datacenter datacenter = entity.getDatacenter();
 
         this.datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);

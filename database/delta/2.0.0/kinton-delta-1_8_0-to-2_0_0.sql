@@ -11,7 +11,7 @@
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
-
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
