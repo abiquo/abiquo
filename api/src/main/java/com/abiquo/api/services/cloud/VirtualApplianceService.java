@@ -40,8 +40,8 @@ import org.w3c.dom.Document;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
-import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
@@ -84,7 +84,7 @@ public class VirtualApplianceService extends DefaultApiService
     OVFGeneratorService ovfService;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    RemoteServiceService remoteServiceService;
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
@@ -103,9 +103,10 @@ public class VirtualApplianceService extends DefaultApiService
     public VirtualApplianceService(final EntityManager em)
     {
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
-    	this.repo = new VirtualDatacenterRep(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.infrastructureService = new InfrastructureService(em);
+        this.repo = new VirtualDatacenterRep(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.userService = new UserService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
     }
 
     /**
@@ -169,11 +170,11 @@ public class VirtualApplianceService extends DefaultApiService
                 Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
                 RemoteService vsm =
-                    infrastructureService.getRemoteService(datacenter.getId(),
+                    remoteServiceService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
                 RemoteService vf =
-                    infrastructureService.getRemoteService(datacenter.getId(),
+                    remoteServiceService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
                 long timeout = Long.valueOf(ConfigService.getServerTimeout());

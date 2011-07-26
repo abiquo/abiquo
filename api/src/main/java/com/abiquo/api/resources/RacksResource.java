@@ -32,6 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -59,11 +60,12 @@ public class RacksResource extends AbstractResource
     @GET
     public RacksDto getRacks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         // Receive the Racks and convert them as RacksDto in the 'createTransferObject' loop.
-        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId);
+        List<Rack> all = infrastructureService.getRacksByDatacenter(datacenterId, filter);
         RacksDto racks = new RacksDto();
         if (all != null && !all.isEmpty())
         {

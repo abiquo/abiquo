@@ -43,14 +43,18 @@ public interface RacksResourceStub
      *         object.
      */
     public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter);
-    
-    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId, IPAddress ipFrom, IPAddress ipTo,
-        final HypervisorType hypervisorType, final String user, final String password,
-        final Integer port, final String vSwitchName);
-    
-    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
-    
-    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
+
+    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter, String filter);
+
+    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId,
+        IPAddress ipFrom, IPAddress ipTo, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer port, final String vSwitchName);
+
+    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId);
+
+    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId);
 
     /**
      * Returns all {@link UcsRack} in {@link DataCenter}.
@@ -60,6 +64,18 @@ public interface RacksResourceStub
      *         appropiate object.
      */
     public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter);
+
+    public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter, String filter);
+
+    public DataResult<List<Rack>> getRacksByDatacenter(DataCenter datacenter);
+
+    public DataResult<List<Rack>> getRacksByDatacenter(DataCenter datacenter, String filter);
+
+    public DataResult<Rack> createRack(Rack rack);
+
+    public DataResult<Rack> modifyRack(final Rack rack);
+
+    public BasicResult deleteRack(Rack rack);
 
     public DataResult<UcsRack> editUcsRack(UcsRack ucsRack);
 }

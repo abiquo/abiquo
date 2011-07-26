@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObject;
 import static com.abiquo.api.resources.RemoteServiceResource.createTransferObject;
 
 import java.util.List;
@@ -54,8 +55,8 @@ public class RemoteServicesResource extends AbstractResource
 
     @GET
     public RemoteServicesDto getRemoteServices(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<RemoteService> all = service.getRemoteServicesByDatacenter(datacenterId);
         RemoteServicesDto remoteServices = new RemoteServicesDto();
@@ -73,10 +74,12 @@ public class RemoteServicesResource extends AbstractResource
 
     @POST
     public RemoteServiceDto postRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RemoteServiceDto remoteService, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
-        RemoteServiceDto persistentService = service.addRemoteService(remoteService, datacenterId);
+        RemoteService rs = createPersistenceObject(remoteService);
+        RemoteServiceDto persistentService = service.addRemoteService(rs, datacenterId);
 
         return RemoteServiceResource.addLinks(restBuilder, persistentService, datacenterId);
     }

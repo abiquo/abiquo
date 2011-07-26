@@ -135,6 +135,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
+    }
+
     public VLANNetwork findVlanById(final Integer id)
     {
         assert id != null;

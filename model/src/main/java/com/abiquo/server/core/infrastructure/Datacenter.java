@@ -62,7 +62,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected Datacenter()
+    public Datacenter()
     {
         // Just for JPA support
     }
@@ -78,6 +78,11 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     // ******************************* Properties *******************************
@@ -104,7 +109,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.location;
     }
 
-    public void setLocation(String location)
+    public void setLocation(final String location)
     {
         this.location = location;
     }
@@ -132,7 +137,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -157,13 +162,13 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.network;
     }
 
-    public void setNetwork(Network network)
+    public void setNetwork(final Network network)
     {
         this.network = network;
     }
 
     // *************************** Mandatory constructors ***********************
-    public Datacenter(String name, String location)
+    public Datacenter(final String name, final String location)
     {
         super();
         setName(name);
@@ -171,16 +176,17 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     }
 
     // *************************** Business methods ***********************
-    public Rack createRack(String name, Integer vlanIdMin, Integer vlanIdMax,
-        Integer vlanPerVdcExpected, Integer nrsq)
+    public Rack createRack(final String name, final Integer vlanIdMin, final Integer vlanIdMax,
+        final Integer vlanPerVdcExpected, final Integer nrsq)
     {
         return new Rack(name, this, vlanIdMin, vlanIdMax, vlanPerVdcExpected, nrsq);
     }
 
-    public Machine createMachine(String name, String description, int ramInMb, int realRamInMb,
-        int currentRamInUseInMb, long hardDiskInMb, long realHardDiskInMb,
-        long currentHardDiskInUse, int realCpuThreads, int realCpuCores, int virtualCpusPerThread,
-        int currentCpusInUse, State state, String virtualSwitch)
+    public Machine createMachine(final String name, final String description, final int ramInMb,
+        final int realRamInMb, final int currentRamInUseInMb, final long hardDiskInMb,
+        final long realHardDiskInMb, final long currentHardDiskInUse, final int realCpuThreads,
+        final int realCpuCores, final int virtualCpusPerThread, final int currentCpusInUse,
+        final State state, final String virtualSwitch)
     {
         return new Machine(this,
             name,
@@ -199,7 +205,8 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
             virtualSwitch);
     }
 
-    public RemoteService createRemoteService(RemoteServiceType type, String uri, int status)
+    public RemoteService createRemoteService(final RemoteServiceType type, final String uri,
+        final int status)
     {
         return new RemoteService(this, type, uri, status);
     }

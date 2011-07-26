@@ -32,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -41,6 +42,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Machine.State;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -73,7 +75,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     private static Criterion sameId(final Integer id)
     {
-        return Restrictions.eq(Machine.ID_PROPERTY, id);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
     private static Criterion sameName(final String name)
@@ -86,6 +88,15 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
     private Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(Machine.ENTERPRISE_PROPERTY, enterprise);
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(Machine.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
     }
 
     public List<Machine> findMachines(final Datacenter datacenter)
@@ -116,10 +127,19 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findRackMachines(final Rack rack)
     {
+        return findRackMachines(rack, null);
+    }
+
+    public List<Machine> findRackMachines(final Rack rack, final String filter)
+    {
         assert rack != null;
         assert isManaged2(rack);
 
         Criteria criteria = createCriteria(sameRack(rack));
+        if (filter != null && !filter.isEmpty())
+        {
+            criteria.add(filterBy(filter));
+        }
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
         List<Machine> result = getResultList(criteria);
         return result;
