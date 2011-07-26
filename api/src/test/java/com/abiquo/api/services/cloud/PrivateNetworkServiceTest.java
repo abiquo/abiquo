@@ -231,7 +231,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         NetworkService service = new NetworkService(em);
         VLANNetwork copy = performCopy(vlan2);
         copy.setDefaultNetwork(Boolean.TRUE);
-        service.updatePrivateNetwork(vdc.getId(), vlan2.getId(), copy);
+        vlan2 = service.updatePrivateNetwork(vdc.getId(), vlan2.getId(), copy);
         commitActiveTransaction(em);
 
         em = getEntityManagerWithAnActiveTransaction();

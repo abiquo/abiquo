@@ -152,4 +152,6 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
+    public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
 }
