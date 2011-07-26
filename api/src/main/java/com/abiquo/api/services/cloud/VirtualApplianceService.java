@@ -105,8 +105,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-        this.vdcService = new VirtualDatacenterService(em);
         this.remoteServiceService = new RemoteServiceService(em);
+        this.userService = new UserService(em);
     }
 
     /**
