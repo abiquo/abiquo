@@ -78,7 +78,7 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         d.setName("datacenter_test");
         d.setLocation("situation_datacenter_test");
 
-        ClientResponse response = post(resolveDatacentersURI(), d);
+        ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -151,7 +151,7 @@ public class DatacentersResourceIT extends AbstractJpaGeneratorIT
         d.setRemoteServices(rsList);
 
         // Assert creation
-        ClientResponse response = post(resolveDatacentersURI(), d);
+        ClientResponse response = post(resolveDatacentersURI(), d, SYSADMIN, SYSADMIN);
         // System.out.println(response.getStatusCode() + ' ' + response.getMessage());
         assertEquals(response.getStatusCode(), 201);
 
