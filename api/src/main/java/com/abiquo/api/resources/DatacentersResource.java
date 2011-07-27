@@ -119,9 +119,8 @@ public class DatacentersResource extends AbstractResource
         if (datacenterDto.getRemoteServices() != null)
         {
             RemoteServicesDto rsd =
-                service
-                    .addRemoteServices(createPersistenceObjects(datacenterDto.getRemoteServices()),
-                        datacenter.getId());
+                service.addRemoteServices(
+                    createPersistenceObjects(datacenterDto.getRemoteServices()), datacenter);
             dto.setRemoteServices(rsd);
         }
         return dto;
