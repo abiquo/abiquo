@@ -62,7 +62,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected Datacenter()
+    public Datacenter()
     {
         // Just for JPA support
     }
