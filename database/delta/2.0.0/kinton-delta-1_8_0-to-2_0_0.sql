@@ -11,7 +11,7 @@
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
-
+alter table repository modify URL varchar(255);
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
