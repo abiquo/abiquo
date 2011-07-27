@@ -2,23 +2,23 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB" table="category">
-    <id name="idCategory" type="java.lang.Integer">
-      <column name="idCategory"/>
-      <generator class="identity"/>
-    </id>
-    <property name="name" type="string">
-      <column length="30" name="name" not-null="true"/>
-    </property>
-    <property name="isErasable" type="int">
-      <column name="isErasable" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-    <property name="isDefault" type="int">
-      <column name="isDefault" not-null="true">
-        <comment>0-No 1-Yes</comment>
-      </column>
-    </property>
-  </class>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB" table="category">
+        <id name="idCategory" type="java.lang.Integer">
+            <column name="idCategory" />
+            <generator class="identity" />
+        </id>
+        <property name="name" type="string">
+            <column length="30" name="name" not-null="true" />
+        </property>
+        <property name="isErasable" type="int">
+            <column name="isErasable" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="isDefault" type="int">
+            <column name="isDefault" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+    </class>
 </hibernate-mapping>

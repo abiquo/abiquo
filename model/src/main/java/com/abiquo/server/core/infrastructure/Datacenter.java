@@ -62,7 +62,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    public Datacenter()
+    protected Datacenter()
     {
         // Just for JPA support
     }
@@ -78,11 +78,6 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     public Integer getId()
     {
         return this.id;
-    }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
     }
 
     // ******************************* Properties *******************************

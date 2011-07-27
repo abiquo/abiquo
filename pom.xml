@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <!--                                      -->
-    <!--           POM RELATIONSHIPS          -->
-    <!--                                      -->
-
-    <!--      Maven coordinates        -->
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo.abicloud</groupId>
     <artifactId>platform</artifactId>
     <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
     <!-- Shared Properties -->
     <properties>
         <!-- Build properties -->
@@ -21,7 +18,6 @@
         <tomcat.port>80</tomcat.port>
         <tomcat.user>abiquo</tomcat.user>
         <tomcat.password>abiquo</tomcat.password>
-
         <!-- Dependences versions -->
         <spring.version>3.0.5.RELEASE</spring.version>
         <cxf.version>2.2.12</cxf.version>
@@ -35,7 +31,6 @@
         <catalina.version>6.0.29</catalina.version>
         <testng.version>5.12.1</testng.version>
     </properties>
-
     <!-- Aggregations. Common modules -->
     <modules>
         <module>vsm</module>
@@ -49,10 +44,9 @@
         <module>nodecollector</module>
         <module>commons-amqp</module>
     </modules>
-
-    <!--                                      -->
-    <!--        PROJECT INFORMATION           -->
-    <!--                                      -->
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
     <name>Abiquo Community Edition</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -62,9 +56,8 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
-    <!--           BUILD SETTINGS             -->
-    <!--                                      -->  
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <!-- Running plugins from the PLATFORM POM -->
         <plugins>
@@ -107,6 +100,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+            </plugin>
         </plugins>
         <!-- Plugin inheritance configuration -->
         <pluginManagement>
@@ -144,14 +141,14 @@
                     <version>2.9</version>
                     <configuration>
                         <suiteXmlFiles>
-	                        <suiteXmlFile>src/test/resources/testng/test-${test.suite}.xml</suiteXmlFile>
-	                    </suiteXmlFiles>
-	                    <properties>
-	                       <property>
-	                           <name>listener</name>
-	                           <value>com.abiquo.testng.TestOutputListener</value>
-	                       </property>
-	                    </properties>
+                            <suiteXmlFile>src/test/resources/testng/test-${test.suite}.xml</suiteXmlFile>
+                        </suiteXmlFiles>
+                        <properties>
+                            <property>
+                                <name>listener</name>
+                                <value>com.abiquo.testng.TestOutputListener</value>
+                            </property>
+                        </properties>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -177,41 +174,39 @@
                             <suiteXmlFile>src/test/resources/testng/it-${it.suite}.xml</suiteXmlFile>
                         </suiteXmlFiles>
                         <properties>
-                           <property>
-                               <name>listener</name>
-                               <value>com.abiquo.testng.TestOutputListener</value>
-                           </property>
+                            <property>
+                                <name>listener</name>
+                                <value>com.abiquo.testng.TestOutputListener</value>
+                            </property>
                         </properties>
                     </configuration>
                 </plugin>
                 <plugin>
-	                <groupId>org.codehaus.cargo</groupId>
-	                <artifactId>cargo-maven2-plugin</artifactId>
-	                <version>1.0</version>
-	                <configuration>
-	                    <wait>true</wait>
-	                    <container>
-	                        <containerId>tomcat6x</containerId>
-	                        <type>remote</type>
-	                    </container>
-	                    <configuration>
-	                        <type>runtime</type>
-	                        <properties>
-	                            <cargo.tomcat.manager.url>http://${tomcat.home}:${tomcat.port}/manager</cargo.tomcat.manager.url>
-	                            <cargo.remote.username>${tomcat.user}</cargo.remote.username>
-	                            <cargo.remote.password>${tomcat.password}</cargo.remote.password>
-	                        </properties>
-	                    </configuration>
-	                </configuration>
-	            </plugin>
+                    <groupId>org.codehaus.cargo</groupId>
+                    <artifactId>cargo-maven2-plugin</artifactId>
+                    <version>1.0</version>
+                    <configuration>
+                        <wait>true</wait>
+                        <container>
+                            <containerId>tomcat6x</containerId>
+                            <type>remote</type>
+                        </container>
+                        <configuration>
+                            <type>runtime</type>
+                            <properties>
+                                <cargo.tomcat.manager.url>http://${tomcat.home}:${tomcat.port}/manager</cargo.tomcat.manager.url>
+                                <cargo.remote.username>${tomcat.user}</cargo.remote.username>
+                                <cargo.remote.password>${tomcat.password}</cargo.remote.password>
+                            </properties>
+                        </configuration>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-    <!--                                      -->
-    <!--   ENVIRONMENT SETTINGS               -->
-    <!--                                      -->
-
+    <!-- -->
+    <!-- ENVIRONMENT SETTINGS -->
+    <!-- -->
     <!-- Community URLs -->
     <issueManagement>
         <system>JIRA</system>
@@ -233,7 +228,6 @@
             </notifier>
         </notifiers>
     </ciManagement>
-
     <!-- Repositories -->
     <repositories>
         <repository>
@@ -242,7 +236,6 @@
             <url>http://repo.community.abiquo.com/repo</url>
         </repository>
     </repositories>
-
     <!-- Plugin Repositories -->
     <pluginRepositories>
         <pluginRepository>
@@ -251,7 +244,6 @@
             <url>http://repo.community.abiquo.com/repo</url>
         </pluginRepository>
     </pluginRepositories>
-
     <!-- Distribution Management -->
     <distributionManagement>
         <repository>
@@ -263,7 +255,6 @@
             <url>http://repo.community.abiquo.com/libs-snapshots-local</url>
         </snapshotRepository>
     </distributionManagement>
-
     <!-- And profiles -->
     <profiles>
         <!-- Profiles defined by OS -->
@@ -336,5 +327,4 @@
             </modules>
         </profile>
     </profiles>
-
 </project>

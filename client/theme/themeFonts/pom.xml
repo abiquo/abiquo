@@ -1,46 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-     Copyright 2008 Marvin Herman Froeder
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
+    Copyright 2008 Marvin Herman Froeder
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- 
-    <!--                                      -->
-    <!--     POM RELATIONSHIPS                -->
-    <!--                                      -->
-
-    <!--       Maven coordinates              -->
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <artifactId>client-theme-fonts</artifactId>
     <packaging>swf</packaging>
-
-    <!--       Inheritances                   -->
+    <!-- Inheritances -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>client</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
-   <!--       Project properties             -->
+    <!-- Project properties -->
     <properties>
         <flexmojos.version>3.6.1</flexmojos.version>
         <flex.sdk.version>3.4.0</flex.sdk.version>
         <flex.sdk.revision>9271</flex.sdk.revision>
     </properties>
-
-    <!--       Dependences                    -->
+    <!-- Dependences -->
     <dependencies>
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
@@ -67,12 +62,10 @@
             <version>3.1</version>
             <type>swc</type>
         </dependency>
-
     </dependencies>
-   
-    <!--                                      -->
-    <!--       PROJECT INFORMATION            -->
-    <!--                                      -->
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
     <name>Client Flex Fonts</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -82,11 +75,9 @@
             <url>http://www.gnu.org/license/lgpl.html</url>
         </license>
     </licenses>
-  
-  
-    <!--                                      -->
-    <!--       BUILD SETTINGS                 -->
-    <!--                                      -->
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>src/test/flex</testSourceDirectory>
@@ -124,10 +115,8 @@
                     <output>${project.build.directory}/${project.name}-${project.version}.swf</output>
                     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
                     <targetPlayer>10.0.0</targetPlayer>
-
                     <skipTests>true</skipTests>
                 </configuration>
-
                 <dependencies>
                     <dependency>
                         <groupId>com.adobe.flex</groupId>
@@ -143,43 +132,41 @@
                 </dependencies>
                 <executions>
                     <!--
-                    <execution>
+                        <execution>
                         <goals>
-                            <goal>wrapper</goal>
+                        <goal>wrapper</goal>
                         </goals>
-                    </execution>
+                        </execution>
                     -->
-
-                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos issue-->
+                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos
+                        issue -->
                     <!-- application CSS file -->
-					<!-- base theme -->
-                  <!-- base CSS file -->
-                  <execution> 
-                    <id>compile-css-to-swf-base</id> 
-                    <phase>compile</phase> 
-                    <goals> 
-                      <goal>compile-swf</goal> 
-                    </goals> 
-                    <configuration> 
-                      <sourceFile>arialComplete.css</sourceFile>
-                      <output>target/themes/fonts/arialComplete.swf</output> 
-                    </configuration> 
-                  </execution>
-                            <!-- logo CSS file -->
-                  <execution> 
-                    <id>compile-css-to-swf-logo</id> 
-                    <phase>compile</phase> 
-                    <goals> 
-                      <goal>compile-swf</goal> 
-                    </goals> 
-                    <configuration> 
-                      <sourceFile>japanese.css</sourceFile>
-                      <output>target/themes/fonts/japanese.swf</output> 
-                    </configuration> 
-                  </execution>                     
-
+                    <!-- base theme -->
+                    <!-- base CSS file -->
+                    <execution>
+                        <id>compile-css-to-swf-base</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>arialComplete.css</sourceFile>
+                            <output>target/themes/fonts/arialComplete.swf</output>
+                        </configuration>
+                    </execution>
+                    <!-- logo CSS file -->
+                    <execution>
+                        <id>compile-css-to-swf-logo</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>japanese.css</sourceFile>
+                            <output>target/themes/fonts/japanese.swf</output>
+                        </configuration>
+                    </execution>
                 </executions>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -189,10 +176,8 @@
                     <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                
                 <configuration>
                     <descriptors>
                         <descriptor>maven-assembly-descriptor.xml</descriptor>
@@ -208,8 +193,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
-
             <plugin>
                 <inherited>false</inherited>
                 <groupId>com.mycila.maven-license-plugin</groupId>
@@ -220,7 +203,7 @@
                     <failIfMissing>true</failIfMissing>
                     <includes>
                         <include>**/*.as</include>
-                        <!--<include>**/*.mxml</include>-->
+                        <!--<include>**/*.mxml</include> -->
                         <include>**/*.css</include>
                     </includes>
                 </configuration>
