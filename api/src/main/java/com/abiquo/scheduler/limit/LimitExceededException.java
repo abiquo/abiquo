@@ -46,9 +46,11 @@ public class LimitExceededException extends AllocatorException
 
     private String entityId;
 
-    public LimitExceededException(Map<LimitResource, LimitStatus> resourcesStatus,
-        DefaultEntityWithLimits entity, VirtualMachineRequirements requirements,
-        DefaultEntityCurrentUsed actual, String entityId)
+    private final static Long BYTES_TO_MB = 1024l * 1024l;
+
+    public LimitExceededException(final Map<LimitResource, LimitStatus> resourcesStatus,
+        final DefaultEntityWithLimits entity, final VirtualMachineRequirements requirements,
+        final DefaultEntityCurrentUsed actual, final String entityId)
     {
         super("Limit exceeded");
         this.entity = entity;
@@ -88,34 +90,39 @@ public class LimitExceededException extends AllocatorException
     {
         return String.format(
             //
-            "%s ; \n" + //
-                "USED\t       CPU=%d \t RAM=%d \t HD=%d \t Storage=%d \t VLAN=%d \t IP=%d \t ; \n" + //
-                "REQUIRED\t   CPU=%d \t RAM=%d \t HD=%d \t Storage=%d \t VLAN=%d \t IP=%d \t ; \n" + //
-                "SOFT LIMIT\t CPU=%d \t RAM=%d \t HD=%d \t Storage=%d \t VLAN=%d \t IP=%d \t ; \n" + //
-                "HARD LIMIT\t CPU=%d \t RAM=%d \t HD=%d \t Storage=%d \t VLAN=%d \t IP=%d \t ; \n" + //
+            "%s ; \n"
+                + //
+                "USED\t       CPU=%d \t RAM=%d MB \t HD=%d MB \t Storage=%d MB \t VLAN=%d \t IP=%d \t ; \n"
+                + //
+                "REQUIRED\t   CPU=%d \t RAM=%d MB \t HD=%d MB \t Storage=%d MB \t VLAN=%d \t IP=%d \t ; \n"
+                + //
+                "SOFT LIMIT\t CPU=%d \t RAM=%d MB \t HD=%d MB \t Storage=%d MB \t VLAN=%d \t IP=%d \t ; \n"
+                + //
+                "HARD LIMIT\t CPU=%d \t RAM=%d MB \t HD=%d MB \t Storage=%d MB \t VLAN=%d \t IP=%d \t ; \n"
+                + //
                 "STATUS\t     CPU=%s \t RAM=%s \t HD=%s \t Storage=%s \t VLAN=%s \t IP=%s \t ; \n", //
             entityId, //
             actual.getCpu(),
             actual.getRamInMb(),
-            actual.getHdInMb(),
-            actual.getStorage(),
+            (actual.getHdInMb() / BYTES_TO_MB),
+            (actual.getStorage() / BYTES_TO_MB),
             actual.getVlanCount(),
             actual.getPublicIp(), //
             requir.getCpu(),
             requir.getRam(),
-            requir.getHd(),
-            requir.getStorage(),
+            (requir.getHd() / BYTES_TO_MB),
+            (requir.getStorage() / BYTES_TO_MB),
             requir.getPublicVLAN(),
             requir.getPublicIP(), //
             entity.getCpuCountSoftLimit(),
             entity.getRamSoftLimitInMb(),
-            entity.getHdSoftLimitInMb(),
-            entity.getStorageSoft(),
+            (entity.getHdSoftLimitInMb() / BYTES_TO_MB),
+            (entity.getStorageSoft() / BYTES_TO_MB),
             entity.getVlanSoft(),
             entity.getPublicIpsSoft(), //
             entity.getCpuCountHardLimit(), entity.getRamHardLimitInMb(),
-            entity.getHdHardLimitInMb(),
-            entity.getStorageHard(),
+            (entity.getHdHardLimitInMb() / BYTES_TO_MB),
+            (entity.getStorageHard() / BYTES_TO_MB),
             entity.getVlanHard(),
             entity.getPublicIpsHard(), //
             status.get(LimitResource.CPU),

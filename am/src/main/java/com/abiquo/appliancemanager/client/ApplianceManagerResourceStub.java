@@ -48,6 +48,13 @@ public class ApplianceManagerResourceStub
 
     private final String serviceUri;
 
+    /**
+     * Timeout only of ''slow nfs filesystem access'' (getting the repository usage or refresh the
+     * available packages)
+     */
+    private final static Integer CLIENT_TIMEOUT_MS = Integer.parseInt(System.getProperty(
+        "abiquo.appliancemanager.timeout", "5000")); // default 5seconds
+
     public ApplianceManagerResourceStub(final String serviceUri)
     {
         super();
@@ -55,7 +62,7 @@ public class ApplianceManagerResourceStub
         this.client = new RestClient();
 
         ClientConfig confTimeout = new ClientConfig();
-        confTimeout.readTimeout(5000); // 5seconds
+        confTimeout.readTimeout(CLIENT_TIMEOUT_MS);
         this.clientTimeout = new RestClient(confTimeout);
     }
 
@@ -112,6 +119,9 @@ public class ApplianceManagerResourceStub
         return repository(idEnterprise, false);
     }
 
+    /**
+     * Timeout
+     */
     Resource repository(final String idEnterprise, final boolean checkCanWrite)
     {
         String url =
@@ -125,7 +135,7 @@ public class ApplianceManagerResourceStub
             url = UriHelper.appendQueryParamsToPath(url, queryParams, false);
         }
 
-        Resource resource = client.resource(url);
+        Resource resource = clientTimeout.resource(url);
 
         return resource;
     }

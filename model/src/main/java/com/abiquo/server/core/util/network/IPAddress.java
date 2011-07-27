@@ -257,19 +257,19 @@ public class IPAddress
      */
     public Boolean isBiggerThan(IPAddress ip)
     {
-        if (Integer.valueOf(getFirstOctet()) != (Integer.valueOf(ip.getFirstOctet())))
+        if (!Integer.valueOf(getFirstOctet()).equals(Integer.valueOf(ip.getFirstOctet())))
         {
             return Integer.valueOf(getFirstOctet()) > (Integer.valueOf(ip.getFirstOctet()));
         }
-        else if (Integer.valueOf(getSecondOctet()) != (Integer.valueOf(ip.getSecondOctet())))
+        else if (!Integer.valueOf(getSecondOctet()).equals(Integer.valueOf(ip.getSecondOctet())))
         {
             return Integer.valueOf(getSecondOctet()) > (Integer.valueOf(ip.getSecondOctet()));
         }
-        else if (Integer.valueOf(getThirdOctet()) != (Integer.valueOf(ip.getThirdOctet())))
+        else if (!Integer.valueOf(getThirdOctet()).equals(Integer.valueOf(ip.getThirdOctet())))
         {
             return Integer.valueOf(getThirdOctet()) > (Integer.valueOf(ip.getThirdOctet()));
         }
-        else if (Integer.valueOf(getFourthOctet()) != (Integer.valueOf(ip.getFourthOctet())))
+        else if (!Integer.valueOf(getFourthOctet()).equals(Integer.valueOf(ip.getFourthOctet())))
         {
             return Integer.valueOf(getFourthOctet()) > (Integer.valueOf(ip.getFourthOctet()));
         }

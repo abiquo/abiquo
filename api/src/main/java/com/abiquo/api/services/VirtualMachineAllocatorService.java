@@ -80,10 +80,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (NotEnoughResourcesException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (LimitExceededException limite)
         {
@@ -91,24 +89,18 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (ResourceAllocationException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (AllocatorException e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));
         }
         catch (Exception e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addUnexpectedErrors(error);
+            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));
         }
         finally
         {
@@ -136,10 +128,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (NotEnoughResourcesException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (LimitExceededException limite)
         {
@@ -147,24 +137,18 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (ResourceAllocationException e)
         {
-            APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
+                virtualMachineId, e));
         }
         catch (AllocatorException e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addConflictErrors(error);
+            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));
         }
         catch (Exception e)
         {
-            APIError error = APIError.ALLOCATOR_ERROR;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(virtualMachineId),
-                e.getMessage()));
-            addUnexpectedErrors(error);
+            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
+                virtualMachineId, e));            
         }
         finally
         {
@@ -173,6 +157,17 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         return vmachine;
     }
+
+    private CommonError createErrorWithExceptionDetails(APIError apiError,
+        Integer virtualMachineId, Exception e)
+    {
+        final String msg =
+            String.format("%s (%s)\n%s", apiError.getMessage(),
+                virtualMachineInfo(virtualMachineId), e.getMessage());
+
+        return new CommonError(apiError.getCode(), msg);
+    }
+
 
     public void updateVirtualMachineUse(final Integer idVirtualApp, final VirtualMachine vMachine)
     {

@@ -44,6 +44,7 @@ import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Machine;
 
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -76,6 +77,14 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm = vmGenerator.createInstance(ent);
         VirtualMachine vm2 = vmGenerator.createInstance(ent);
 
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        Machine machine2 = vm2.getHypervisor().getMachine();
+        machine2.setDatacenter(vdc.getDatacenter());
+        machine2.setRack(null);
+
         VirtualAppliance vapp2 = vappGenerator.createInstance(vdc);
 
         // Asociate it to the created virtual appliance
@@ -98,6 +107,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(nvi);
 
@@ -109,6 +120,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(machine2);
+        entitiesToSetup.add(vm2.getHypervisor());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(nvi2);
 

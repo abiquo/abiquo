@@ -24,6 +24,7 @@ package net.undf.abicloud.controller.virtualimage
     import mx.collections.ArrayCollection;
     
     import net.undf.abicloud.controller.ResultHandler;
+    import net.undf.abicloud.events.virtualimage.VirtualImageEvent;
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
@@ -220,15 +221,14 @@ package net.undf.abicloud.controller.virtualimage
         {
             if (result.success)
             {
-                var ovfPackageStatusList:ArrayCollection = DataResult(result).data as ArrayCollection;
-                if (ovfPackageStatusList.length > 0)
-                {
-                    //The upload progress are not saved in model, but returned to who asked for them
-                    callback(ovfPackageStatusList.getItemAt(0) as OVFPackageInstanceStatus);
-                }
+                var ovfPackageInstanceStatus:OVFPackageInstanceStatus = DataResult(result).data as OVFPackageInstanceStatus;
+                //The upload progress are not saved in model, but returned to who asked for them
+                callback(ovfPackageInstanceStatus);                
             }
             else
             {
+            	//Dispatch an event that an error occured
+            	AbiCloudModel.getInstance().virtualImageManager.dispatchEvent(new VirtualImageEvent(VirtualImageEvent.VIRTUAL_IMAGE_UPLOAD_ERROR));
                 //There was a problem
                 super.handleResult(result);
             }

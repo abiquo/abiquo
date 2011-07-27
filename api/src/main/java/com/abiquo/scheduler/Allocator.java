@@ -39,8 +39,10 @@ import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
+import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
@@ -80,9 +82,10 @@ public class Allocator implements IAllocator
     VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
-    NetworkAssignmentDAO networkAssignmentDao;
+    VirtualApplianceRep virtualAppRep;
 
-    // ///////
+    @Autowired
+    NetworkAssignmentDAO networkAssignmentDao;
 
     @Autowired
     VirtualimageAllocationService allocationService;
@@ -98,6 +101,10 @@ public class Allocator implements IAllocator
     /** All the entities to check its limits. Premium adds */
     @Autowired
     EnterpriseLimitChecker checkEnterpirse;
+
+    /** Only used on the HA reallocate. */
+    @Autowired
+    ResourceUpgradeUse upgradeUse;
 
     @Autowired
     UserService userService;
@@ -165,8 +172,6 @@ public class Allocator implements IAllocator
         VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-
-        VirtualImage vi = vmachine.getVirtualImage();
 
         final VirtualImage vimage = getVirtualImageWithVirtualMachineResourceRequirements(vmachine);
 
@@ -249,9 +254,17 @@ public class Allocator implements IAllocator
         return vmachine;
     }
 
+    @Override
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, State state)
+        throws AllocatorException, ResourceAllocationException
+    {
+        log.error("Community doesn't implement HA");
+        return null;
+    }
+
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)
-    private VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
+    protected VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
         final VirtualMachine vmachine)
     {
         VirtualImage vimage = new VirtualImage(null); // doesn't care about enterprise

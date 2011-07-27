@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -51,9 +51,11 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
@@ -82,13 +84,16 @@ public class VirtualApplianceService extends DefaultApiService
     OVFGeneratorService ovfService;
 
     @Autowired
-    RemoteServiceService remoteService;
+    InfrastructureService infrastructureService;
 
     @Autowired
     VirtualMachineAllocatorService allocatorService;
 
     @Autowired
     UserService userService;
+    
+    @Autowired
+    VirtualApplianceRep virtualApplianceRepo;
 
     public VirtualApplianceService()
     {
@@ -98,8 +103,10 @@ public class VirtualApplianceService extends DefaultApiService
     public VirtualApplianceService(final EntityManager em)
     {
         this.repo = new VirtualDatacenterRep(em);
+        this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-        this.remoteService = new RemoteServiceService(em);
+    	this.vdcService = new VirtualDatacenterService(em);
+    	this.infrastructureService = new InfrastructureService(em);
     }
 
     /**
@@ -112,6 +119,11 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
+    }
+
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    {
+        return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
 
     /**
@@ -158,11 +170,11 @@ public class VirtualApplianceService extends DefaultApiService
                 Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
                 RemoteService vsm =
-                    remoteService.getRemoteService(datacenter.getId(),
+                    infrastructureService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
                 RemoteService vf =
-                    remoteService.getRemoteService(datacenter.getId(),
+                    infrastructureService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_FACTORY);
 
                 long timeout = Long.valueOf(ConfigService.getServerTimeout());

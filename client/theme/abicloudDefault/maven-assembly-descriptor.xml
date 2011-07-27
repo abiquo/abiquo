@@ -5,27 +5,25 @@
     </formats>
     <fileSets>
         <fileSet>
-          <directory>target/themes/abicloudDefault</directory>
-          <outputDirectory>themes/abicloudDefault</outputDirectory>
-          <includes>
-            <include>*.swf</include>
-          </includes>
-          </fileSet>
+            <directory>target/themes/abicloudDefault</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
+            <includes>
+                <include>*.swf</include>
+            </includes>
+        </fileSet>
         <fileSet>
-          <directory>src</directory>
-          <outputDirectory>themes/abicloudDefault</outputDirectory>
-          <includes>
-            <include>theme.lst</include>
-          </includes>
-          </fileSet>
-	<fileSet>
-		<directory>src/assets/application/login</directory>
-		<outputDirectory>themes/abicloudDefault</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
-        </fileSets>
-
+            <directory>src</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
+            <includes>
+                <include>theme.lst</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/assets/application/login</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
+            <includes>
+                <include>logo.png</include>
+            </includes>
+        </fileSet>
+    </fileSets>
 </assembly>

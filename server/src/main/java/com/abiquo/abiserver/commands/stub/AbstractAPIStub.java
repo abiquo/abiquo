@@ -50,6 +50,7 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -93,6 +94,20 @@ public class AbstractAPIStub
         return resource(uri, user, password).get();
     }
 
+    /**
+     * Adds the content-type and accept headers with appropiate {@link MediaType}.
+     * 
+     * @param uri remote location.
+     * @param user login.
+     * @param password password.
+     * @return ClientResponse
+     */
+    protected ClientResponse get(final String uri, final MediaType mediaType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+    }
+
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
@@ -108,7 +123,7 @@ public class AbstractAPIStub
     protected ClientResponse put(final String uri, final Object dto, final String user,
         final String password, final String mediaType)
     {
-        return resource(uri, user, password).accept(mediaType).contentType(mediaType).put(dto);
+        return resource(uri, user, password, mediaType).contentType(mediaType).put(dto);
     }
 
     protected ClientResponse delete(final String uri, final String user, final String password)
@@ -119,7 +134,7 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String user, final String password,
         final String mediaType)
     {
-        return resource(uri, user, password).accept(mediaType).delete();
+        return resource(uri, user, password, mediaType).delete();
     }
 
     protected ClientResponse get(final String uri)
@@ -131,7 +146,7 @@ public class AbstractAPIStub
     protected ClientResponse get(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).get();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
     protected ClientResponse post(final String uri, final Object dto)
@@ -161,12 +176,18 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
+    
+    // protected ClientResponse put(final String uri, final Object dto, String mediaType)
+    // {
+    // UserHB user = getCurrentUser();
+    // return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).put(dto);
+    // }
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
-            .contentType(mediaType).put(dto);
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
+            .put(dto);
     }
 
     protected ClientResponse delete(final String uri)
@@ -183,8 +204,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
-            .contentType(mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
+            mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -195,7 +216,7 @@ public class AbstractAPIStub
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
         String[] tokens;
-        if (this.currentSession != null && currentSession.getAuthType() != null)
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
         {
             tokens =
                 new String[] {user, valueOf(tokenExpiration), signature,
@@ -208,6 +229,69 @@ public class AbstractAPIStub
         }
         String cookieValue = StringUtils.join(tokens, ":");
 
+        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
+
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
+
+    private Resource resource(final String uri, final String user, final String password,
+        final String mediaType)
+    {
+        Resource resource = client.resource(uri).accept(mediaType);
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+
+        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
+
+        String[] tokens;
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
+
+        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
+
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
+
+    /**
+     * Instantiate the {@link Resource} and not add the {@link MediaType.APPLICATION_XML} to the
+     * request.
+     * 
+     * @param uri remote location.
+     * @param user login.
+     * @param password password.
+     * @param mediaType content negotiation.
+     * @return Resource
+     */
+    private Resource resource(final String uri, final String user, final String password,
+        final MediaType mediaType)
+    {
+        Resource resource = client.resource(uri).contentType(mediaType);
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+
+        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
+
+        String[] tokens;
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature,
+                currentSession.getAuthType()};
+        }
+        else
+        {
+            tokens =
+                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
+        }
+        String cookieValue = StringUtils.join(tokens, ":");
         cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
         return resource.cookie(new Cookie("auth", cookieValue));
@@ -331,8 +415,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
-            Collections.singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
+            .singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -364,8 +448,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
-            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
+            .singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -465,6 +549,39 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
+    
+    protected String createMachineLink(final Integer datacenterId, final Integer rackId, final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
+            params);
+    }
+    
+    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId, final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn",
+            params);
+    }
+    
+    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId, final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+            params);
+    }
 
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
@@ -499,7 +616,7 @@ public class AbstractAPIStub
     }
 
     protected Resource resource(final String uri, final String user, final String password,
-        ClientHandler... handlers)
+        final ClientHandler... handlers)
     {
         if (handlers == null || handlers.length == 0)
         {
@@ -514,7 +631,7 @@ public class AbstractAPIStub
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
         String[] tokens;
-        if (this.currentSession != null && currentSession.getAuthType() != null)
+        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
         {
             tokens =
                 new String[] {user, valueOf(tokenExpiration), signature,
@@ -533,8 +650,42 @@ public class AbstractAPIStub
     }
 
     protected ClientResponse get(final String uri, final String user, final String password,
-        ClientHandler... handlers)
+        final ClientHandler... handlers)
     {
         return resource(uri, user, password, handlers).get();
+    }
+
+    protected String createRacksLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks", params);
+    }
+
+    protected String createMachinesLink(final Rack rack)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", valueOf(rack.getDataCenter().getId()));
+        params.put("rack", rack.getId().toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
+    }
+    
+    protected String createMachinesLink(final Integer datacenterId, final Integer rackId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
+    }
+
+    protected String createRackLink(final Integer datacenterId, final Integer rackId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
 }

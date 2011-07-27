@@ -26,6 +26,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -41,6 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = Rack.TABLE_NAME, uniqueConstraints = {})
+@Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Table(appliesTo = Rack.TABLE_NAME, indexes = {})
 public class Rack extends DefaultEntityBase
 {
@@ -66,7 +69,7 @@ public class Rack extends DefaultEntityBase
     {
         return this.id;
     }
-    
+
     public void setId(Integer id)
     {
         this.id = id;
@@ -105,7 +108,7 @@ public class Rack extends DefaultEntityBase
 
     private final static boolean SHORT_DESCRIPTION_REQUIRED = false;
 
-    final static int SHORT_DESCRIPTION_LENGTH_MIN = 1;
+    final static int SHORT_DESCRIPTION_LENGTH_MIN = 0;
 
     final static int SHORT_DESCRIPTION_LENGTH_MAX = 30;
 
@@ -133,7 +136,7 @@ public class Rack extends DefaultEntityBase
 
     private final static boolean LONG_DESCRIPTION_REQUIRED = false;
 
-    final static int LONG_DESCRIPTION_LENGTH_MIN = 1;
+    final static int LONG_DESCRIPTION_LENGTH_MIN = 0;
 
     final static int LONG_DESCRIPTION_LENGTH_MAX = 100;
 
@@ -316,6 +319,26 @@ public class Rack extends DefaultEntityBase
     public void setVlansIdAvoided(String vlansIdAvoided)
     {
         this.vlansIdAvoided = vlansIdAvoided;
+    }
+    
+    public final static String HAENABLED_PROPERTY = "haEnabled";
+
+    private final static String HAENABLED_COLUMN = "haEnabled";
+
+    private final static boolean HAENABLED_REQUIRED = true;
+
+    @Column(name = HAENABLED_COLUMN, nullable = false)
+    private boolean haEnabled = false;
+
+    @Required(value = HAENABLED_REQUIRED)
+    public boolean isHaEnabled()
+    {
+        return this.haEnabled;
+    }
+
+    public void setHaEnabled(boolean haEnabled)
+    {
+        this.haEnabled = haEnabled;
     }
 
     // ********************************** Others

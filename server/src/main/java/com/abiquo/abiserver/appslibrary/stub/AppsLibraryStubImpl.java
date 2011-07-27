@@ -47,6 +47,7 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
+import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public class AppsLibraryStubImpl implements AppsLibraryStub
 {
@@ -64,6 +65,8 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
     final String password;
 
     final String authType;
+
+    public static final String OVF_PACKAGE_PATH = "appslib/ovfpackages";
 
     public AppsLibraryStubImpl(final UserSession session)
     {
@@ -280,4 +283,37 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
         return Response.status(response.getStatusCode()).entity(cause).build();
     }
 
+    @Override
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
+        final String nameOVFPackageList)
+    {
+        final Integer idOvfPackageList =
+            getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+
+        Resource resource = createResourceOVFPackages(idEnterprise, idOvfPackageList);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        final Integer httpStatus = response.getStatusCode();
+
+        if (httpStatus != 200)
+        {
+            throw new WebApplicationException(response(response));
+        }
+
+        return response.getEntity(OVFPackagesDto.class);
+    }
+    
+    public Resource createResourceOVFPackages(final Integer idEnterprise,
+        final Integer idOvfpackageList)
+    {
+        final String path =
+            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH
+                + '/' + String.valueOf(idOvfpackageList);
+
+        Resource reso = client.resource(baseUri + "/" + path);
+
+        setAuthCookie(reso);
+
+        return reso;
+    }
 }

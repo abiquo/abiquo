@@ -21,19 +21,19 @@
 
 package com.abiquo.virtualfactory.machine.test;
 
+import static org.testng.Assert.fail;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -45,10 +45,10 @@ import com.abiquo.virtualfactory.model.VirtualDiskType;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
 
-public abstract class AbsMachineTest extends TestCase
+public abstract class AbsMachineTest
 {
 
-    private final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
+    protected final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
 
     protected IHypervisor hypervisor;
 
@@ -116,6 +116,11 @@ public abstract class AbsMachineTest extends TestCase
     protected String iscsiTestLocation;
 
     protected String iscsiUUID;
+    
+    /**
+     * Sets test ready for deploy without copying disk (HA)
+     */
+    protected boolean isHA = false;
 
     public abstract IHypervisor instantiateHypervisor();
 
@@ -138,14 +143,16 @@ public abstract class AbsMachineTest extends TestCase
         disks.add(virtualDisk);
 
         List<VirtualNIC> vnicList = new ArrayList<VirtualNIC>();
-        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
-        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
+        // FIXME: Uncomment This!
+//        vnicList.add(new VirtualNIC(vswitchName, macAddress, vlanTag, networkName, 0));
+//        vnicList.add(new VirtualNIC(vswitchName2, macAddress2, vlanTag2, networkName2, 1));
 
         VirtualMachineConfiguration conf =
             new VirtualMachineConfiguration(id,
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -155,8 +162,7 @@ public abstract class AbsMachineTest extends TestCase
         return conf;
     }
 
-    @Override
-    @Before
+    @BeforeMethod
     public void setUp()
     {
         try
@@ -183,8 +189,7 @@ public abstract class AbsMachineTest extends TestCase
         log.debug("Created test machine");
     }
 
-    @Override
-    @After
+    @AfterMethod
     public void tearDown()
     {
         log.debug("deleting VM on state " + vMachine.getStateInHypervisor());
@@ -368,7 +373,7 @@ public abstract class AbsMachineTest extends TestCase
          */
     }
 
-    private void logAndFail(String msg, Exception e)
+    private void logAndFail(final String msg, final Exception e)
     {
         log.error(msg, e);
         fail(msg);

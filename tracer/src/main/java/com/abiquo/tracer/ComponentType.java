@@ -56,7 +56,7 @@ public enum ComponentType implements Serializable
     LICENSE_MANAGER(32768 | PLATFORM.getValue(), "License Manager"),
 
     // Stateful converter
-    STATEFUL_CONVERTER(65536 | VIRTUAL_APPLIANCE.getValue(), "Stateful converter"),
+    PERSISTENT_CONVERTER(65536 | VIRTUAL_APPLIANCE.getValue(), "Persistent converter"),
 
     // Abiquo's API
     API(131072, "API"),
@@ -70,7 +70,8 @@ public enum ComponentType implements Serializable
     // Roles
     ROLE_LDAP(1048576, "Role LDAP"),
 
-    ;
+    // HA
+    HIGH_AVAILABILITY(2621444, "High availability engine");
 
     private final int component;
 

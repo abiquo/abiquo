@@ -23,962 +23,1254 @@
 	Main CSS file. Describes basic and common application component styles
 	All commented selectors are in the base.css. They can be uncommented here if they must be re-defined 
 */
+.ApplicationPostLoginBackground {
+	background-color: #a4a4a4;
+}
 
-	.ApplicationPostLoginBackground 
-	{
- 			background-color:		#a4a4a4;
- 	}
-	
-	.headerLogo
-	{
-		source:Embed("/assets/application/main/header/logo.png");
-	}
+.headerLogo {
+	source: Embed("/assets/application/main/header/logo.png");
+}
 
-	.loginLogo
-	{
-		source:Embed("/assets/application/login/logo.png");
-	}
-	
-	CursorManager
-	{
-		busy-cursor: Embed("/assets/flexcomponents/cursormanager/BusyCursor.swf");
-	}
-	
-	
-	ToolTip
-	{
-		background-image:		Embed("/assets/flexcomponents/tooltip/background.png", scaleGridTop="7", scaleGridBottom="16", scaleGridLeft="7", scaleGridRight="10");
-		background-size: "100%";
-		padding-top:2;
-		padding-left:5;
-		padding-right:6;
-		padding-bottom:0;
-		border-style:none;
-		font-size: 10;
-		color: #FFF;
-	}
-	
-	.errorTip
-	{
-		background-image: none;
-		padding-top:2;
-		padding-left:5;
-		padding-right:6;
-		padding-bottom:0;
-		font-size: 10;
-		color: #FFF;	
-	}
-	
-	Tile
-	{
-		background-color:				#ffffff;
-		selection-color:				#000000;
-		roll-over-color:				#f1f1f1;
-		padding-bottom:					1;
-		padding-left:					1;
-		padding-right:					1;
-		padding-top:					1;
-		horizontal-gap:					1;
-		vertical-gap:					1;
-		border-style:					none;
-	}
-	
-	
-	TabBar
-	{
-		tab-style-name:	"TabBarTabStyle";
-		first-tab-style-name: "TabBarTabStyle";
-		last-tab-style-name: "TabBarTabStyle";
-		selected-tab-text-style-name:	"TabBarSelectedTabText";
-	}
-		.TabBarTabStyle
-		{
-			color:	#505050;
-			backgroundColor: #fea305;
-		}
-		.TabBarSelectedTabText
-		{
-			color:	#ffffff;	
-		}
-		
-	
-	DataGrid 
-	{
-	   alternatingItemColors: #ffffff, #f4f4f4;
-	   headerColors: #fefefe, #dbdbdc;
-	   horizontalGridLines: false;
-	   letterSpacing: 0;
-	   verticalGridLines: true;
-	   verticalGridLineColor: #cacaca;
-	   rollOverColor: #e5e5e5;
-	   borderThickness: 1;
-	   borderColor: #cccccc;
-	   selectionColor: #cccccc;
-	   textIndent: 0;
-	   dropShadowEnabled: false;
-	   headerStyleName: "mydataGridHeaderStyle";
-	}
-		
-		.mydataGridHeaderStyle 
-		{
-		   color: #505050;
-		   letterSpacing: 0;
-		}
-		
-		
-	ScrollBar
-	{
-		up-arrow-up-skin: 		Embed("/assets/flexcomponents/scrollbar/uparrow_up.png");
-		up-arrow-over-skin:		Embed("/assets/flexcomponents/scrollbar/uparrow_up.png");
-		up-arrow-down-skin:		Embed("/assets/flexcomponents/scrollbar/uparrow_down.png");
-		
-		down-arrow-up-skin:		Embed("/assets/flexcomponents/scrollbar/downarrow_up.png");
-		down-arrow-over-skin:	Embed("/assets/flexcomponents/scrollbar/downarrow_up.png");
-		down-arrow-down-skin:	Embed("/assets/flexcomponents/scrollbar/downarrow_down.png");
-		
-		thumb-icon:				Embed("/assets/flexcomponents/scrollbar/thumb_icon.png");
-		thumb-up-skin:			Embed("/assets/flexcomponents/scrollbar/thumb_up.png", scaleGridTop="3", scaleGridBottom="7", scaleGridLeft="2", scaleGridRight="11");
-		thumb-over-skin:		Embed("/assets/flexcomponents/scrollbar/thumb_over.png", scaleGridTop="3", scaleGridBottom="7", scaleGridLeft="2", scaleGridRight="11");
-		thumb-down-skin:		Embed("/assets/flexcomponents/scrollbar/thumb_down.png", scaleGridTop="3", scaleGridBottom="7", scaleGridLeft="2", scaleGridRight="11");
-		
-		track-skin: 			Embed("/assets/flexcomponents/scrollbar/track.png", scaleGridTop="17", scaleGridBottom="28", scaleGridLeft="3", scaleGridRight="12");
-	}
-	
-	TextArea
-	{
-		background-image:		Embed("/assets/flexcomponents/textarea/background.png", scaleGridTop="10", scaleGridBottom="11", scaleGridLeft="11", scaleGridRight="15");
-		background-size:		"100%";
-		border-style:			none;
-		background-color:		none;
-		color:					#505050;
-		font-weight:			normal;
-		font-size:				11px;
-		focus-thickness:		0;
-		padding-top:			2;
-		padding-left:			5;
-	}
-	
-	
-	NumericStepper
-	{
-		border-thickness: 			0;
-		focus-thickness:			0;
-		up-arrow-up-skin: 			Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
-		up-arrow-over-skin:			Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
-		up-arrow-down-skin:			Embed("/assets/flexcomponents/numericstepper/uparrow_down.png");
-		up-arrow-disabled-skin:		Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
-		down-arrow-up-skin:			Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
-		down-arrow-over-skin:		Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
-		down-arrow-down-skin:		Embed("/assets/flexcomponents/numericstepper/downarrow_down.png");
-		down-arrow-disabled-skin:	Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
-		background-image:			Embed("/assets/flexcomponents/numericstepper/background.png", scaleGridTop="2", scaleGridBottom="15", scaleGridLeft="7", scaleGridRight="10");
-		background-size: 			"100%";
-		border-style: 			none;
-		disabled-color:			#999999;
-		background-disabled-color:	none;
-	}
-	
-	.AlternativeCheckBox
-	{
-		up-icon:				Embed("/assets/flexcomponents/checkbox/alternative_up_icon.png");
-		over-icon: 				Embed("/assets/flexcomponents/checkbox/alternative_up_icon.png");
-		down-icon: 				Embed("/assets/flexcomponents/checkbox/alternative_down_icon.png");
-		selected-up-icon: 		Embed("/assets/flexcomponents/checkbox/alternative_selected_up_icon.png");
-		selected-over-icon: 	Embed("/assets/flexcomponents/checkbox/alternative_selected_up_icon.png");
-		selected-down-icon: 	Embed("/assets/flexcomponents/checkbox/alternative_selected_down_icon.png");
-		color:					#505050;
-		roll-over-color:		#505050;
-		text-roll-over-color:	#505050;
-		text-selected-color:	#505050;
-	}
-	
-	
-	Accordion
-	{
-		border-color:			#cfcfcf;
-		background-color:		#f3f3f3;
-		header-height:			22;	
-	}
-	
-	
-	AccordionHeader
-	{
-		color:					#505050;
-		text-roll-over-color:	#505050;
-		text-selected-color:	#000000;
-		up-skin:				Embed("/assets/flexcomponents/accordionheader/up_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");
-		over-skin:				Embed("/assets/flexcomponents/accordionheader/over_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");	
-		down-skin:				Embed("/assets/flexcomponents/accordionheader/down_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");
-		selected-up-skin:		Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");
-		selected-over-skin:		Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");
-		selected-down-skin:		Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="17", scaleGridRight="19");
-	
-		padding-left:			15;
-		padding-top:			1;
-		
-		font-weight:			bold;
-		font-size:				11;
-	}
-	
-	
-	HSlider
-	{
-		thumb-skin: 			Embed("/assets/flexcomponents/hslider/thumb_skin.png");
-		thumb-down-skin: 		Embed(source="/assets/flexcomponents/hslider/thumb_down_skin.png");
-		thumb-disabled-skin:	Embed(source="/assets/flexcomponents/hslider/thumb_disabled_skin.png");
-		track-skin: 			Embed(source="/assets/flexcomponents/hslider/track_skin.png", scaleGridTop="2", scaleGridBottom="3", scaleGridLeft="4", scaleGridRight="50");
-		data-tip-offset:		0;
-	}
-	
-		
-	RadioButton
-	{
-		up-icon: 				Embed("/assets/flexcomponents/radiobutton/up_icon.png");
-		over-icon: 				Embed("/assets/flexcomponents/radiobutton/over_icon.png");
-		down-icon: 				Embed("/assets/flexcomponents/radiobutton/down_icon.png");
-		selected-up-icon: 		Embed("/assets/flexcomponents/radiobutton/selected_up_icon.png");
-		selected-over-icon:	 	Embed("/assets/flexcomponents/radiobutton/selected_up_icon.png");
-		selected-down-icon: 	Embed("/assets/flexcomponents/radiobutton/selected_down_icon.png");
-		disabled-icon: 			Embed("/assets/flexcomponents/radiobutton/disabled_icon.png");
-		color:					#505050;
-		text-roll-over-color: 	#666666;
-		text-selected-color:	#666666;
-	}
-	
-	
- 	Button
-	{
-		up-skin:				Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		over-skin:				Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		down-skin:				Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		disabled-skin:			Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		color:				#ffffff;
-		roll-over-color:			#ffffff;
-		text-roll-over-color:		#ffffff;
-		text-selected-color:		#e5e5e5;
-		padding-left:			5;
-		padding-right:			5;
-		padding-top:			3;
-	}
-	
-	
-	.AlternativeButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/alternativebutton/up_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		over-skin:				Embed("/assets/customcomponents/buttons/alternativebutton/over_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		down-skin:				Embed("/assets/customcomponents/buttons/alternativebutton/down_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/alternativebutton/disabled_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		font-weight:			normal;
-		font-size:				11;
-		color:					#505050;
-		roll-over-color:		#505050;
-		text-roll-over-color:	#505050;
-		text-selected-color:	#000000;
-		padding-left:			5;
-		padding-right:			5;
-		padding-top:			3;
-		
-	}
-	
-	List 
-	{
-		roll-over-color:				#cacaca;
-		borderColor: 					#cccccc;
-		selectionColor: 				#cccccc;
-		cornerRadius: 					0;
-		background-image:				Embed("/assets/flexcomponents/list/background_image.png", scaleGridTop="1", scaleGridBottom="8", scaleGridLeft="1", scaleGridRight="8");
-		background-size:				"100%";
-		padding-bottom:					0;
-		padding-left:					5;
-		padding-right:					0;
-		padding-top:					0;
-	}
-	
-	.ListFull 
-	{
-		roll-over-color:					#cacaca;
-		borderColor: 					#cccccc;
-		selectionColor: 					#cccccc;
-		cornerRadius: 					0;
-		background-image:					Embed("/assets/flexcomponents/list/background_image2.png", scaleGridTop="1", scaleGridBottom="8", scaleGridLeft="1", scaleGridRight="8");
-		background-size:					"100%";
-		padding-bottom:					0;
-		padding-left:					5;
-		padding-right:					0;
-		padding-top:					0;
-	}
-	
-	.CustomTreeNodeBranch
-	{
-		padding-left:			2;
-		padding-right:			8;
-		vertical-align:			middle;
-	}
-	
-	.CustomTreeNodeLeaf
-	{
-		padding-left:			6;
-		padding-right:			8;
-		vertical-align:			middle;
-	}
-	
-	.CustomHorizontalTabBar
-	{
-		selected-tab-text-style-name:	"HorizontalTabBarSelectedTab";
-		
-		first-tab-style-name:		"HorizontalTabBarFirstTab";
-		tab-style-name:			"HorizontalTabBarTab";
-		last-tab-style-name:		"HorizontalTabBarLastTab";
-		
-	}
-	
-	.CustomHorizontalTabBarOneTab
-	{
-		selected-tab-text-style-name:	"HorizontalTabBarSelectedTab";
-		
-		tab-style-name:			"HorizontalTabBarTabOneTab";
-		
-	}
-		.HorizontalTabBarSelectedTab
-		{
-			color: 			#000000;
-			text-roll-over-color:	#000000;
-		}
-		
-		.HorizontalTabBarFirstTab
-		{
-			color:			#505050;
-			text-roll-over-color:	#505050;
-			
-			skin:				Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-			over-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_over.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-			down-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-			selected-up-skin:		Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-			selected-over-skin: 	Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-			selected-down-skin:	Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="6", scaleGridRight="10");
-		}
+.loginLogo {
+	source: Embed("/assets/application/login/logo.png");
+}
 
+CursorManager {
+	busy-cursor: Embed("/assets/flexcomponents/cursormanager/BusyCursor.swf");
+}
 
-		.HorizontalTabBarTab
-		{
-			color:			#505050;
-			text-roll-over-color:	#505050;
-			
-			skin:				Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			over-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			down-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-up-skin:		Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-over-skin: 	Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-down-skin:	Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-		}
-		
-		.HorizontalTabBarTabOneTab
-		{
-			color:	#505050;
-			text-roll-over-color:	#505050;
-			
-			skin:				Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			over-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			down-skin:			Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-up-skin:		Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-over-skin:	Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-			selected-down-skin: 	Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png", scaleGridTop="5", scaleGridBottom="10", scaleGridLeft="5", scaleGridRight="10");
-		}
-		
-		.HorizontalTabBarLastTab
-		{
-			color:			#505050;
-			text-roll-over-color:	#505050;
-			
-			skin:				Embed("/assets/customcomponents/customhorizontaltabbar/LastTab.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-			over-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_over.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-			down-skin: 			Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-			selected-up-skin:		Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-			selected-over-skin: 	Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-			selected-down-skin:	Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png", scaleGridTop="6", scaleGridBottom="10", scaleGridLeft="4", scaleGridRight="15");
-		}
+ToolTip {
+	background-image: Embed("/assets/flexcomponents/tooltip/background.png", scaleGridTop =   
+		   "7", scaleGridBottom =       "16", scaleGridLeft =       "7",
+		scaleGridRight =   
+		   "10");
+	background-size: "100%";
+	padding-top: 2;
+	padding-left: 5;
+	padding-right: 6;
+	padding-bottom: 0;
+	border-style: none;
+	font-size: 10;
+	color: #FFF;
+}
 
+.errorTip {
+	background-image: none;
+	padding-top: 2;
+	padding-left: 5;
+	padding-right: 6;
+	padding-bottom: 0;
+	font-size: 10;
+	color: #FFF;
+}
 
+Tile {
+	background-color: #ffffff;
+	selection-color: #000000;
+	roll-over-color: #f1f1f1;
+	padding-bottom: 1;
+	padding-left: 1;
+	padding-right: 1;
+	padding-top: 1;
+	horizontal-gap: 1;
+	vertical-gap: 1;
+	border-style: none;
+}
 
-	.CustomVerticalTabBar
-	{
-		selected-tab-text-style-name:	"VerticalTabBarSelectedTab";
-		
-		first-tab-style-name:		"VerticalTabBarFirstTab";
-		tab-style-name:			"VerticalTabBarTab";
-		last-tab-style-name:		"VerticalTabBarLastTab";
-		
-	}
-		.VerticalTabBarSelectedTab
-		{
-			color: 			#000000;
-			text-roll-over-color:	#000000;
-		}
-		
-		.VerticalTabBarFirstTab
-		{
-			color:			#505050;
-			text-roll-over-color:	#505050;
-			
-			skin:				Embed("/assets/customcomponents/customverticaltabbar/FirstTab.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-			over-skin: 			Embed("/assets/customcomponents/customverticaltabbar/FirstTab_over.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-			down-skin: 			Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-			selected-up-skin:		Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-			selected-over-skin: 	Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-			selected-down-skin:	Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="7", scaleGridRight="47");
-		}
+TabBar {
+	tab-style-name: "TabBarTabStyle";
+	first-tab-style-name: "TabBarTabStyle";
+	last-tab-style-name: "TabBarTabStyle";
+	selected-tab-text-style-name: "TabBarSelectedTabText";
+}
 
-		.VerticalTabBarTab
-		{
-			color:				#505050;
-			text-roll-over-color:		#505050;
-			
-			skin:					Embed("/assets/customcomponents/customverticaltabbar/Tab.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-			over-skin: 				Embed("/assets/customcomponents/customverticaltabbar/Tab_over.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-			down-skin: 				Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-			selected-up-skin:			Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-			selected-over-skin: 		Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-			selected-down-skin:		Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png", scaleGridTop="4", scaleGridBottom="14", scaleGridLeft="4", scaleGridRight="50");
-		}
-		
-		.VerticalTabBarLastTab
-		{
-			color:				#505050;
-			text-roll-over-color:		#505050;
-			
-			skin:					Embed("/assets/customcomponents/customverticaltabbar/LastTab.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-			over-skin: 				Embed("/assets/customcomponents/customverticaltabbar/LastTab_over.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-			down-skin: 				Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-			selected-up-skin:			Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-			selected-over-skin: 		Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-			selected-down-skin:		Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png", scaleGridTop="4", scaleGridBottom="13", scaleGridLeft="7", scaleGridRight="47");
-		}
-		
-	
-	.AlternativeTabBar
-	{			
-		selected-tab-text-style-name:		"AlternativeTabBarSelectedTab";
-		first-tab-style-name:			"AlternativeTabBarTab";
-		tab-style-name:				"AlternativeTabBarTab";
-		last-tab-style-name:			"AlternativeTabBarTab";
-		
-	}
-			.AlternativeTabBarSelectedTab
-			{
-				border-style:		none;
-				border-thickness:		0;
-				
-				padding-left:		15;
-				padding-right:		15;
-				color:			#000000;
-				text-roll-over-color:	#000000;
-			}
-			
-			.AlternativeTabBarTab
-			{
-				border-style:		none;
-				border-thickness:		0;
-				
-				padding-left:		15;
-				padding-right:		15;
-				color:			#000000;
-				text-roll-over-color:	#000000;
-				
-				skin:				Embed("/assets/customcomponents/alternativetabbar/Tab_up.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				over-skin: 			Embed("/assets/customcomponents/alternativetabbar/Tab_over.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				down-skin: 			Embed("/assets/customcomponents/alternativetabbar/Tab_over.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-up-skin:		Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-over-skin:	Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-down-skin:	Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-			}
-	
-	.AbiCloudBlindContainer
-	{
-		background-image:			Embed("/assets/customcomponents/abicloudblind/background_image.png", scaleGridTop="15", scaleGridBottom="20", scaleGridLeft="15", scaleGridRight="20");
-		background-size:			"100%";
-		
-		horizontal-center:			0;
-		
-		padding-left:				15;
-		padding-right:				15;
-		padding-top:				10;
-		padding-bottom:				10;
-		
-		horizontal-align:			center;
-		vertical-align:				top;
-	}
+.TabBarTabStyle {
+	color: #505050;
+	backgroundColor: #fea305;
+}
 
+.TabBarSelectedTabText {
+	color: #ffffff;
+}
 
-	.GeneralToggledContainer
-	{
-		
-		
-	}
-	
-		.GeneralToggleContainerVS
-		{
-			background-image:		Embed("/assets/customcomponents/generaltoggledcontainer/viewstack/background.png", scaleGridTop="39", scaleGridBottom="40", scaleGridLeft="22", scaleGridRight="28");
-			background-size:		"100%";		
-		}
-		
-		.GeneralToggleContainerTabBar
-		{			
-			selected-tab-text-style-name:	"GeneralToggleButtonBarSelectedTab";
-			first-tab-style-name:			"GeneralToggleButtonBarFirstTab";
-			tab-style-name:					"GeneralToggleButtonBarTab";
-			last-tab-style-name:			"GeneralToggleButtonBarLastTab";
-			
-		}
-			.GeneralToggleButtonBarSelectedTab
-			{
-				border-style:			none;
-				border-thickness:		0;
-				
-				padding-top:			3;
-				padding-left:			15;
-				padding-right:			15;	
-				color:					#000000;
-				text-roll-over-color:	#000000;
-			}
-			
-			.GeneralToggleButtonBarFirstTab
-			{
-				border-style:			none;
-				border-thickness:		0;
-				
-				padding-top:			3;
-				padding-left:			15;
-				padding-right:			15;	
-				color:					#000000;
-				text-roll-over-color:	#000000;
-				
-				skin:				Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				over-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				down-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-up-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-				selected-down-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png", scaleGridTop="7", scaleGridBottom="10", scaleGridLeft="7", scaleGridRight="9");
-			}
-	
-			.GeneralToggleButtonBarTab
-			{
-				border-style:			none;
-				border-thickness:		0;
-				
-				padding-top:			3;
-				padding-left:			15;
-				padding-right:			15;	
-				color:					#000000;
-				text-roll-over-color:	#000000;
-				
-				skin:				Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-				over-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-				down-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-				selected-up-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-				selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-				selected-down-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="7");
-			}
-			
-			.GeneralToggleButtonBarLastTab
-			{
-				border-style:			none;
-				border-thickness:		0;
-				
-				padding-top:			3;
-				padding-left:			15;
-				padding-right:			15;	
-				color:					#000000;
-				text-roll-over-color:	#000000;
-				
-				skin:				Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-				over-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-				down-skin: 			Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-				selected-up-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-				selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-				selected-down-skin:	Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png", scaleGridTop="7", scaleGridBottom="8", scaleGridLeft="2", scaleGridRight="4");
-			}
-		
-		
-		
-		
-		
-	.FullScreenButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/fullscreenbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/fullscreenbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/fullscreenbutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_up_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_down_skin.png");
-	}
-	
-	
-	.LeftRightButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/leftrightbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/leftrightbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/leftrightbutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/leftrightbutton/selected_up_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/leftrightbutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/leftrightbutton/selected_down_skin.png");
-		
-	}
-	
-	
-	.UpDownButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/updownbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/updownbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/updownbutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/updownbutton/selected_up_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/updownbutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/updownbutton/selected_down_skin.png");
-		
-	}
-	
-	
-	.DeleteButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/deletebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/deletebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/deletebutton/down_skin.png");
-	}
-	
-	.DownloadButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/downloadbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/downloadbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/downloadbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/downloadbutton/disabled_skin.png");
-	}
-	
-	.WorldButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/worldbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/worldbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/worldbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/worldbutton/up_skin.png");
-	}
-	
-	
-	.RefreshButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/refreshbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/refreshbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/refreshbutton/down_skin.png");
-	}
-	
-	
-	.ListViewButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/listviewbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/listviewbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png");
-		selected-up-skin:   	Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png");
-		selected-over-skin: 	Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png");
-		selected-down-skin: 	Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png");
-	}
-	
-	.IconViewButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/iconviewbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/iconviewbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png");
-		selected-up-skin:   	Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png");
-		selected-over-skin: 	Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png");
-		selected-down-skin: 	Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png");
-	}
-	
-	
-	.GeneralPanelHeaderSkin
-	{
-		background-image:		Embed("/assets/application/skins/generalpanel_header_skin.png", scaleGridTop="9", scaleGridBottom="13", scaleGridLeft="9", scaleGridRight="12");
-		background-size:		"100%";
-		padding-top:			1;
-		font-weight:			bold;
-	}
-	
-	.GeneralSubPanelHeaderSkin
-	{
-		padding-top:			1;
-		font-weight:			bold;
-	}
-	
-	.GeneralDataPanelTopSkin
-	{
-		background-image:		Embed("/assets/application/skins/generaldatapanel_top_skin.png", scaleGridTop="1", scaleGridBottom="8", scaleGridLeft="1", scaleGridRight="8");
-		background-size:		"100%";
-	}
-	
-	
-	.GeneralDataPanelTopFullSkin
-	{
-		background-image:		Embed("/assets/application/skins/generaldatapanel_top_full_skin.png", scaleGridTop="1", scaleGridBottom="8", scaleGridLeft="1", scaleGridRight="8");
-		background-size:		"100%";
-	}
-	
-	
-	.GeneralPanelBottomSkin
-	{
-		background-image:		Embed("/assets/application/skins/generalpanel_bottom_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="8", scaleGridRight="22");
-		background-size:		"100%";	
-		vertical-align: 		middle;
-	}
-	
-	.GeneralSubPanelBottomSkin
-	{
-		background-image:		Embed("/assets/application/skins/general_subpanel_bottom_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="8", scaleGridRight="22");
-		background-size:		"100%";	
-		vertical-align: 		middle;
-		horizontal-gap:		"5";
-		padding-left:		"6";
-		padding-right:		"6";
-	}
-	
-	
-	.GeneralDataPanelBottomSkin
-	{
-		background-image:		Embed("/assets/application/skins/generaldatapanel_bottom_skin.png", scaleGridTop="3", scaleGridBottom="19", scaleGridLeft="8", scaleGridRight="22");
-		background-size:		"100%";
-		/*padding-top:			5px;*/
-	}
-	
-	
-	.GeneralPanelTextStyle
-	{
-		font-size:				9;
-		color:				#FFFFFF;
-		left:					5;
-		vertical-center:		0;
-	}
-	
-	.GeneralSubPanelTextStyle
-	{
-		font-size:				9;
-		color:				#505050;
-		left:					0;
-		vertical-center:		0;
-	}
-	
-	
-	.VerticalStateBlackBarSkin
-	{
-		background-image:		Embed("/assets/application/skins/verticalstateblackbar_skin.png", scaleGridTop="1", scaleGridBottom="2", scaleGridLeft="1", scaleGridRight="26");
-		background-size:		"100%";
-	}
-	
-	.VerticalIndicatorBlackBarSkin
-	{
-		background-image:		Embed("/assets/application/skins/verticalindicatorblackbar_skin.png");
-		background-size:		"100%";
-	}
-	
-	.VerticalGreyBarSkin
-	{
-		background-image:		Embed("/assets/application/skins/gray_skin.png", scaleGridTop="3", scaleGridBottom="12", scaleGridLeft="3", scaleGridRight="30");
-		background-size:		"100%";
-	}
-	
-	
-	.ListAccessButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/listaccessbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/listaccessbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/listaccessbutton/down_skin.png");
-	}
-	
-	
-	.AddButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/addbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/addbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/addbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/addbutton/disabled_skin.png");
-	}
-	
-	
-	.AddButtonPlus
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/addbuttonplus/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/addbuttonplus/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/addbuttonplus/down_skin.png");
-		pop-up-over-skin:		Embed("/assets/customcomponents/buttons/addbuttonplus/pop_up_over_skin.png");
-		pop-up-down-skin:		Embed("/assets/customcomponents/buttons/addbuttonplus/pop_up_down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/addbuttonplus/disabled_skin.png");
-		disabled-color:			#999999;
-		drop-down-style-name:   "PopUpMenuButtonDropDownStyle";
-		color: 					#505050;
-	}
-	
-	.RemoveButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/removebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/removebutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/removebutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/removebutton/disabled_skin.png");
-	}
-	
-	.ConfigurationButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/configurationbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/configurationbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/configurationbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/configurationbutton/disabled_skin.png");
-	}
-	
-	.ConfigurationButtonPlus
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/configurationbuttonplus/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/configurationbuttonplus/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/configurationbuttonplus/down_skin.png");
-		pop-up-over-skin:		Embed("/assets/customcomponents/buttons/configurationbuttonplus/pop_up_over_skin.png");
-		pop-up-down-skin:		Embed("/assets/customcomponents/buttons/configurationbuttonplus/pop_up_down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/configurationbuttonplus/disabled_skin.png");
-		disabled-color:			#999999;
-		drop-down-style-name:   "PopUpMenuButtonDropDownStyle";
-		color: 					#505050;
-	}
-	
-	.RefreshButtonBig
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/refreshbuttonbig/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/refreshbuttonbig/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/refreshbuttonbig/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/refreshbuttonbig/disabled_skin.png");
-	}
-	
-	.GoBackButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/gobackbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/gobackbutton/up_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/gobackbutton/down_skin.png");
-	}
+DataGrid {
+	alternatingItemColors: #ffffff, #f4f4f4;
+	headerColors: #fefefe, #dbdbdc;
+	horizontalGridLines: false;
+	letterSpacing: 0;
+	verticalGridLines: true;
+	verticalGridLineColor: #cacaca;
+	rollOverColor: #e5e5e5;
+	borderThickness: 1;
+	borderColor: #cccccc;
+	selectionColor: #cccccc;
+	textIndent: 0;
+	dropShadowEnabled: false;
+	headerStyleName: "mydataGridHeaderStyle";
+}
 
-	
-	.MoreActionsButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
-		over-skin:				Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
-		down-skin:				Embed("/assets/customcomponents/buttons/moreactionsbutton/down_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
-		pop-up-over-skin:		Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_over_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
-		pop-up-down-skin:		Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_down_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/moreactionsbutton/disabled_skin.png", scaleGridTop="5", scaleGridBottom="7", scaleGridLeft="5", scaleGridRight="25");
+.mydataGridHeaderStyle {
+	color: #505050;
+	letterSpacing: 0;
+}
+
+ScrollBar {
+	up-arrow-up-skin: Embed("/assets/flexcomponents/scrollbar/uparrow_up.png");
+	up-arrow-over-skin: Embed("/assets/flexcomponents/scrollbar/uparrow_up.png");
+	up-arrow-down-skin: Embed("/assets/flexcomponents/scrollbar/uparrow_down.png");
+	down-arrow-up-skin: Embed("/assets/flexcomponents/scrollbar/downarrow_up.png");
+	down-arrow-over-skin: Embed("/assets/flexcomponents/scrollbar/downarrow_up.png");
+	down-arrow-down-skin: Embed("/assets/flexcomponents/scrollbar/downarrow_down.png");
+	thumb-icon: Embed("/assets/flexcomponents/scrollbar/thumb_icon.png");
+	thumb-up-skin: Embed("/assets/flexcomponents/scrollbar/thumb_up.png", scaleGridTop =   
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	thumb-over-skin: Embed("/assets/flexcomponents/scrollbar/thumb_over.png", scaleGridTop = 
+		 
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	thumb-down-skin: Embed("/assets/flexcomponents/scrollbar/thumb_down.png", scaleGridTop = 
+		 
+		   "3", scaleGridBottom =       "7", scaleGridLeft =       "2",
+		scaleGridRight =  
+		    "11");
+	track-skin: Embed("/assets/flexcomponents/scrollbar/track.png", scaleGridTop =    
+		  "17", scaleGridBottom =       "28", scaleGridLeft =       "3",
+		scaleGridRight =       "12");
+}
+
+TextArea {
+	background-image: Embed("/assets/flexcomponents/textarea/background.png", scaleGridTop =
+		  
+		   "10", scaleGridBottom =       "11", scaleGridLeft =       "11",
+		scaleGridRight =   
+		   "15");
+	background-size: "100%";
+	border-style: none;
+	background-color: none;
+	color: #505050;
+	font-weight: normal;
+	font-size: 11px;
+	focus-thickness: 0;
+	padding-top: 2;
+	padding-left: 5;
+}
+
+NumericStepper {
+	border-thickness: 0;
+	focus-thickness: 0;
+	up-arrow-up-skin: Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
+	up-arrow-over-skin: Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
+	up-arrow-down-skin: Embed("/assets/flexcomponents/numericstepper/uparrow_down.png");
+	up-arrow-disabled-skin: Embed("/assets/flexcomponents/numericstepper/uparrow_up.png");
+	down-arrow-up-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
+	down-arrow-over-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
+	down-arrow-down-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_down.png");
+	down-arrow-disabled-skin: Embed("/assets/flexcomponents/numericstepper/downarrow_up.png");
+	background-image: Embed("/assets/flexcomponents/numericstepper/background.png",
+		scaleGridTop =       "2", scaleGridBottom =       "15", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "10");
+	background-size: "100%";
+	border-style: none;
+	disabled-color: #999999;
+	background-disabled-color: none;
+}
+
+.AlternativeCheckBox {
+	up-icon: Embed("/assets/flexcomponents/checkbox/alternative_up_icon.png");
+	over-icon: Embed("/assets/flexcomponents/checkbox/alternative_up_icon.png");
+	down-icon: Embed("/assets/flexcomponents/checkbox/alternative_down_icon.png");
+	selected-up-icon: Embed("/assets/flexcomponents/checkbox/alternative_selected_up_icon.png"
+		);
+	selected-over-icon: Embed("/assets/flexcomponents/checkbox/alternative_selected_up_icon.png"
+		);
+	selected-down-icon: Embed("/assets/flexcomponents/checkbox/alternative_selected_down_icon.png"
+		);
+	color: #505050;
+	roll-over-color: #505050;
+	text-roll-over-color: #505050;
+	text-selected-color: #505050;
+}
+
+Accordion {
+	border-color: #cfcfcf;
+	background-color: #f3f3f3;
+	header-height: 22;
+}
+
+AccordionHeader {
+	color: #505050;
+	text-roll-over-color: #505050;
+	text-selected-color: #000000;
+	up-skin: Embed("/assets/flexcomponents/accordionheader/up_skin.png", scaleGridTop
+		=       "3", scaleGridBottom =       "19", scaleGridLeft =       "17",
+		scaleGridRight =   
+		   "19");
+	over-skin: Embed("/assets/flexcomponents/accordionheader/over_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
+	down-skin: Embed("/assets/flexcomponents/accordionheader/down_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
+	selected-up-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
+	selected-over-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
+	selected-down-skin: Embed("/assets/flexcomponents/accordionheader/selected_up_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "17", scaleGridRight =       "19");
+	padding-left: 15;
+	padding-top: 1;
+	font-weight: bold;
+	font-size: 11;
+}
+
+HSlider {
+	thumb-skin: Embed("/assets/flexcomponents/hslider/thumb_skin.png");
+	thumb-down-skin: Embed(source =      
+		"/assets/flexcomponents/hslider/thumb_down_skin.png");
+	thumb-disabled-skin: Embed(source =    
+		  "/assets/flexcomponents/hslider/thumb_disabled_skin.png");
+	track-skin: Embed(source =       "/assets/flexcomponents/hslider/track_skin.png",
+		scaleGridTop =       "2", scaleGridBottom =       "3", scaleGridLeft =
+		    
+		 "4", scaleGridRight =       "50");
+	data-tip-offset: 0;
+}
+
+RadioButton {
+	up-icon: Embed("/assets/flexcomponents/radiobutton/up_icon.png");
+	over-icon: Embed("/assets/flexcomponents/radiobutton/over_icon.png");
+	down-icon: Embed("/assets/flexcomponents/radiobutton/down_icon.png");
+	selected-up-icon: Embed("/assets/flexcomponents/radiobutton/selected_up_icon.png");
+	selected-over-icon: Embed("/assets/flexcomponents/radiobutton/selected_up_icon.png");
+	selected-down-icon: Embed("/assets/flexcomponents/radiobutton/selected_down_icon.png");
+	disabled-icon: Embed("/assets/flexcomponents/radiobutton/disabled_icon.png");
+	color: #505050;
+	text-roll-over-color: #666666;
+	text-selected-color: #666666;
+}
+
+Button {
+	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop =     
+		 "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =    
+		  "12");
+	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop = 
+		 
+		   "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =   
+		   "12");
+	color: #ffffff;
+	roll-over-color: #ffffff;
+	text-roll-over-color: #ffffff;
+	text-selected-color: #e5e5e5;
+	padding-left: 5;
+	padding-right: 5;
+	padding-top: 3;
+}
+
+.AlternativeButton {
+	up-skin: Embed("/assets/customcomponents/buttons/alternativebutton/up_skin.png",
+		scaleGridTop =       "5", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "12");
+	over-skin: Embed("/assets/customcomponents/buttons/alternativebutton/over_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
+	down-skin: Embed("/assets/customcomponents/buttons/alternativebutton/down_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
+	disabled-skin: Embed("/assets/customcomponents/buttons/alternativebutton/disabled_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "12");
+	font-weight: normal;
+	font-size: 11;
+	color: #505050;
+	roll-over-color: #505050;
+	text-roll-over-color: #505050;
+	text-selected-color: #000000;
+	padding-left: 5;
+	padding-right: 5;
+	padding-top: 3;
+}
+
+List {
+	roll-over-color: #cacaca;
+	borderColor: #cccccc;
+	selectionColor: #cccccc;
+	cornerRadius: 0;
+	background-image: Embed("/assets/flexcomponents/list/background_image.png", scaleGridTop =
 		
-		font-weight:			normal;
-		font-size:				11;
-		color:					#505050;
-		roll-over-color:		#505050;
-		text-roll-over-color:	#505050;
-		text-selected-color:	#000000;
-		padding-left:			5;
-		padding-right:			5;
-		padding-top:			3;	
-	}
-	
-	
-	.StandardPowerButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/standardpowerbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/standardpowerbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/standardpowerbutton/disabled_skin.png");
 		
-		selected-over-skin:     Embed("/assets/customcomponents/buttons/standardpowerbutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png");
-		selected-disabled-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/selected_over_skin.png");
-	}
-	
-	.StandardPauseButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/standardpausebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/standardpausebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/standardpausebutton/disabled_skin.png");
 		
-		selected-over-skin:     Embed("/assets/customcomponents/buttons/standardpausebutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png");
-	}
+		   "1", scaleGridBottom =       "8", scaleGridLeft =       "1",
+		scaleGridRight =  
+		    "8");
+	background-size: "100%";
+	padding-bottom: 0;
+	padding-left: 5;
+	padding-right: 0;
+	padding-top: 0;
+}
+
+.ListFull {
+	roll-over-color: #cacaca;
+	borderColor: #cccccc;
+	selectionColor: #cccccc;
+	cornerRadius: 0;
+	background-image: Embed("/assets/flexcomponents/list/background_image2.png", scaleGridTop
+		=       "1", scaleGridBottom =       "8", scaleGridLeft =       "1",
+		scaleGridRight =   
+		   "8");
+	background-size: "100%";
+	padding-bottom: 0;
+	padding-left: 5;
+	padding-right: 0;
+	padding-top: 0;
+}
+
+.CustomTreeNodeBranch {
+	padding-left: 2;
+	padding-right: 8;
+	vertical-align: middle;
+}
+
+.CustomTreeNodeLeaf {
+	padding-left: 6;
+	padding-right: 8;
+	vertical-align: middle;
+}
+
+.CustomHorizontalTabBar {
+	selected-tab-text-style-name: "HorizontalTabBarSelectedTab";
+	first-tab-style-name: "HorizontalTabBarFirstTab";
+	tab-style-name: "HorizontalTabBarTab";
+	last-tab-style-name: "HorizontalTabBarLastTab";
+}
+
+.CustomHorizontalTabBarOneTab {
+	selected-tab-text-style-name: "HorizontalTabBarSelectedTab";
+	tab-style-name: "HorizontalTabBarTabOneTab";
+}
+
+.HorizontalTabBarSelectedTab {
+	color: #000000;
+	text-roll-over-color: #000000;
+}
+
+.HorizontalTabBarFirstTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab.png",
+		scaleGridTop =       "6", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "6", scaleGridRight =       "10");
+	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_over.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
+	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
+	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
+	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
+	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "6", scaleGridRight =       "10");
+}
+
+.HorizontalTabBarTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
+	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
+	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
+	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "5", scaleGridRight =       "10");
+}
+
+.HorizontalTabBarTabOneTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab_over.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "10");
+}
+
+.HorizontalTabBarLastTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab.png",
+		scaleGridTop =       "6", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "15");
+	over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_over.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
+	down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
+	selected-up-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
+	selected-over-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
+	selected-down-skin: Embed("/assets/customcomponents/customhorizontaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "6", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "4", scaleGridRight =       "15");
+}
+
+.CustomVerticalTabBar {
+	selected-tab-text-style-name: "VerticalTabBarSelectedTab";
+	first-tab-style-name: "VerticalTabBarFirstTab";
+	tab-style-name: "VerticalTabBarTab";
+	last-tab-style-name: "VerticalTabBarLastTab";
+}
+
+.VerticalTabBarSelectedTab {
+	color: #000000;
+	text-roll-over-color: #000000;
+}
+
+.VerticalTabBarFirstTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
+	over-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_over.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
+	down-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/FirstTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "14",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+}
+
+.VerticalTabBarTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customverticaltabbar/Tab.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+	over-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_over.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+	down-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/Tab_selected.png",
+		scaleGridTop =       "4", scaleGridBottom =       "14", scaleGridLeft
+		= 
+		     "4", scaleGridRight =       "50");
+}
+
+.VerticalTabBarLastTab {
+	color: #505050;
+	text-roll-over-color: #505050;
+	skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab.png",
+		scaleGridTop =       "4", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
+	over-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_over.png",
+		scaleGridTop =       "4", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "47");
+	down-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-up-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-over-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+	selected-down-skin: Embed("/assets/customcomponents/customverticaltabbar/LastTab_selected.png"
+		, scaleGridTop =       "4", scaleGridBottom =       "13",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "47");
+}
+
+.AlternativeTabBar {
+	selected-tab-text-style-name: "AlternativeTabBarSelectedTab";
+	first-tab-style-name: "AlternativeTabBarTab";
+	tab-style-name: "AlternativeTabBarTab";
+	last-tab-style-name: "AlternativeTabBarTab";
+}
+
+.AlternativeTabBarSelectedTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+}
+
+.AlternativeTabBarTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+	skin: Embed("/assets/customcomponents/alternativetabbar/Tab_up.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+	over-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_over.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+	down-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_over.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+	selected-up-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+	selected-over-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+	selected-down-skin: Embed("/assets/customcomponents/alternativetabbar/Tab_selected.png",
+		scaleGridTop =       "7", scaleGridBottom =       "10", scaleGridLeft
+		= 
+		     "7", scaleGridRight =       "9");
+}
+
+.AbiCloudBlindContainer {
+	background-image: Embed("/assets/customcomponents/abicloudblind/background_image.png",
+		scaleGridTop =       "15", scaleGridBottom =       "20", scaleGridLeft
+		= 
+		  
+		  "15", scaleGridRight =       "20");
+	background-size: "100%";
+	horizontal-center: 0;
+	padding-left: 15;
+	padding-right: 15;
+	padding-top: 10;
+	padding-bottom: 10;
+	horizontal-align: center;
+	vertical-align: top;
+}
+
+.GeneralToggledContainer {
 	
-	.StandardRebootButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/standardrebootbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/standardrebootbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/standardrebootbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/standardrebootbutton/disabled_skin.png");
-	}
-	
-	.StandardHaltButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/standardhaltbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/standardhaltbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/standardhaltbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/standardhaltbutton/disabled_skin.png");
-		
-		selected-over-skin:     Embed("/assets/customcomponents/buttons/standardhaltbutton/selected_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/standardhaltbutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/standardhaltbutton/selected_skin.png");
-	}
-	
-	.StandardDeployButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/standarddeploybutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/standarddeploybutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/standarddeploybutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/standarddeploybutton/up_skin.png");
-		
-		selected-over-skin:     Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_over_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_skin.png");
-	}
-	
-	.MailButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/mailbutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/mailbutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/mailbutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/mailbutton/disabled_skin.png");
-	}
-	
-	.BundleButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/bundlebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/bundlebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/bundlebutton/down_skin.png");
-		disabled-skin:			Embed("/assets/customcomponents/buttons/bundlebutton/disabled_skin.png");
-	}
-	
-	.MinimizeButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/minimizebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/minimizebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/minimizebutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png");
-	}
-	
-	.NormalizeButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/normalizebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/normalizebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/normalizebutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png");	
-	}
-	
-	.MaximizeButton
-	{
-		up-skin:				Embed("/assets/customcomponents/buttons/maximizebutton/up_skin.png");
-		over-skin:				Embed("/assets/customcomponents/buttons/maximizebutton/over_skin.png");
-		down-skin:				Embed("/assets/customcomponents/buttons/maximizebutton/down_skin.png");
-		selected-up-skin:		Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png");
-		selected-over-skin:		Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png");
-		selected-down-skin:		Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png");
-	}
-	
-	.paginatorTextOnColor{
-		color:      #FFFFFF;
-	}
+}
+
+.GeneralToggleContainerVS {
+	background-image: Embed("/assets/customcomponents/generaltoggledcontainer/viewstack/background.png"
+		, scaleGridTop =       "39", scaleGridBottom =       "40",
+		scaleGridLeft = 
+		  
+		  "22", scaleGridRight =       "28");
+	background-size: "100%";
+}
+
+.GeneralToggleContainerTabBar {
+	selected-tab-text-style-name: "GeneralToggleButtonBarSelectedTab";
+	first-tab-style-name: "GeneralToggleButtonBarFirstTab";
+	tab-style-name: "GeneralToggleButtonBarTab";
+	last-tab-style-name: "GeneralToggleButtonBarLastTab";
+}
+
+.GeneralToggleButtonBarSelectedTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-top: 3;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+}
+
+.GeneralToggleButtonBarFirstTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-top: 3;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_over.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/FirstTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "10",
+		scaleGridLeft = 
+		  
+		  "7", scaleGridRight =       "9");
+}
+
+.GeneralToggleButtonBarTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-top: 3;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab.png",
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "7");
+	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
+	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_over.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
+	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
+	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
+	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/Tab_selected.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "7");
+}
+
+.GeneralToggleButtonBarLastTab {
+	border-style: none;
+	border-thickness: 0;
+	padding-top: 3;
+	padding-left: 15;
+	padding-right: 15;
+	color: #000000;
+	text-roll-over-color: #000000;
+	skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+	over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+	down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_over.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+	selected-up-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+	selected-over-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+	selected-down-skin: Embed("/assets/customcomponents/generaltoggledcontainer/tabbar/LastTab_selected.png"
+		, scaleGridTop =       "7", scaleGridBottom =       "8", scaleGridLeft
+		= 
+		     "2", scaleGridRight =       "4");
+}
+
+.FullScreenButton {
+	up-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_up_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/fullscreenbutton/selected_down_skin.png"
+		);
+}
+
+.LeftRightButton {
+	up-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/selected_up_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/leftrightbutton/selected_down_skin.png"
+		);
+}
+
+.UpDownButton {
+	up-skin: Embed("/assets/customcomponents/buttons/updownbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/updownbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/updownbutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/updownbutton/selected_up_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/updownbutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/updownbutton/selected_down_skin.png"
+		);
+}
+
+.DeleteButton {
+	up-skin: Embed("/assets/customcomponents/buttons/deletebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/deletebutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/deletebutton/down_skin.png");
+}
+
+.DownloadButton {
+	up-skin: Embed("/assets/customcomponents/buttons/downloadbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/downloadbutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/downloadbutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/downloadbutton/disabled_skin.png"
+		);
+}
+
+.WorldButton {
+	up-skin: Embed("/assets/customcomponents/buttons/worldbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/worldbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/worldbutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/worldbutton/up_skin.png");
+}
+
+.RefreshButton {
+	up-skin: Embed("/assets/customcomponents/buttons/refreshbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/refreshbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/refreshbutton/down_skin.png");
+}
+
+.ListViewButton {
+	up-skin: Embed("/assets/customcomponents/buttons/listviewbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/listviewbutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/listviewbutton/selected_skin.png"
+		);
+}
+
+.IconViewButton {
+	up-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/iconviewbutton/selected_skin.png"
+		);
+}
+
+.GeneralPanelHeaderSkin {
+	background-image: Embed("/assets/application/skins/generalpanel_header_skin.png",
+		scaleGridTop =       "9", scaleGridBottom =       "13", scaleGridLeft
+		= 
+		     "9", scaleGridRight =       "12");
+	background-size: "100%";
+	padding-top: 1;
+	font-weight: bold;
+}
+
+.GeneralSubPanelHeaderSkin {
+	padding-top: 1;
+	font-weight: bold;
+}
+
+.GeneralDataPanelTopSkin {
+	background-image: Embed("/assets/application/skins/generaldatapanel_top_skin.png",
+		scaleGridTop =       "1", scaleGridBottom =       "8", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "8");
+	background-size: "100%";
+}
+
+.GeneralDataPanelTopFullSkin {
+	background-image: Embed("/assets/application/skins/generaldatapanel_top_full_skin.png",
+		scaleGridTop =       "1", scaleGridBottom =       "8", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "8");
+	background-size: "100%";
+}
+
+.GeneralPanelBottomSkin {
+	background-image: Embed("/assets/application/skins/generalpanel_bottom_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
+	background-size: "100%";
+	vertical-align: middle;
+}
+
+.GeneralSubPanelBottomSkin {
+	background-image: Embed("/assets/application/skins/general_subpanel_bottom_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
+	background-size: "100%";
+	vertical-align: middle;
+	horizontal-gap: "5";
+	padding-left: "6";
+	padding-right: "6";
+}
+
+.GeneralDataPanelBottomSkin {
+	background-image: Embed("/assets/application/skins/generaldatapanel_bottom_skin.png",
+		scaleGridTop =       "3", scaleGridBottom =       "19", scaleGridLeft
+		= 
+		     "8", scaleGridRight =       "22");
+	background-size: "100%";
+	/*padding-top:			5px;*/
+}
+
+.GeneralPanelTextStyle {
+	font-size: 9;
+	color: #FFFFFF;
+	left: 5;
+	vertical-center: 0;
+}
+
+.GeneralSubPanelTextStyle {
+	font-size: 9;
+	color: #505050;
+	left: 0;
+	vertical-center: 0;
+}
+
+.VerticalStateBlackBarSkin {
+	background-image: Embed("/assets/application/skins/verticalstateblackbar_skin.png",
+		scaleGridTop =       "1", scaleGridBottom =       "2", scaleGridLeft =
+		    
+		 "1", scaleGridRight =       "26");
+	background-size: "100%";
+}
+
+.VerticalIndicatorBlackBarSkin {
+	background-image: Embed("/assets/application/skins/verticalindicatorblackbar_skin.png");
+	background-size: "100%";
+}
+
+.VerticalGreyBarSkin {
+	background-image: Embed("/assets/application/skins/gray_skin.png", scaleGridTop =      
+		"3", scaleGridBottom =       "12", scaleGridLeft =       "3",
+		scaleGridRight = 
+		  
+		  "30");
+	background-size: "100%";
+}
+
+.ListAccessButton {
+	up-skin: Embed("/assets/customcomponents/buttons/listaccessbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/listaccessbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/listaccessbutton/down_skin.png");
+}
+
+.AddButton {
+	up-skin: Embed("/assets/customcomponents/buttons/addbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/addbutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/addbutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/addbutton/disabled_skin.png");
+}
+
+.AddButtonPlus {
+	up-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/down_skin.png");
+	pop-up-over-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/pop_up_over_skin.png"
+		);
+	pop-up-down-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/pop_up_down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/addbuttonplus/disabled_skin.png"
+		);
+	disabled-color: #999999;
+	drop-down-style-name: "PopUpMenuButtonDropDownStyle";
+	color: #505050;
+}
+
+.RemoveButton {
+	up-skin: Embed("/assets/customcomponents/buttons/removebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/removebutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/removebutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/removebutton/disabled_skin.png");
+}
+
+.ConfigurationButton {
+	up-skin: Embed("/assets/customcomponents/buttons/configurationbutton/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/configurationbutton/up_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/configurationbutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/configurationbutton/disabled_skin.png"
+		);
+}
+
+.ConfigurationButtonPlus {
+	up-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/up_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/down_skin.png"
+		);
+	pop-up-over-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/pop_up_over_skin.png"
+		);
+	pop-up-down-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/pop_up_down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/configurationbuttonplus/disabled_skin.png"
+		);
+	disabled-color: #999999;
+	drop-down-style-name: "PopUpMenuButtonDropDownStyle";
+	color: #505050;
+}
+
+.RefreshButtonBig {
+	up-skin: Embed("/assets/customcomponents/buttons/refreshbuttonbig/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/refreshbuttonbig/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/refreshbuttonbig/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/refreshbuttonbig/disabled_skin.png"
+		);
+}
+
+.GoBackButton {
+	up-skin: Embed("/assets/customcomponents/buttons/gobackbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/gobackbutton/up_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/gobackbutton/down_skin.png");
+}
+
+.MoreActionsButton {
+	up-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png",
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "25");
+	over-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/up_skin.png",
+		scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft =
+		    
+		 "5", scaleGridRight =       "25");
+	down-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/down_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
+	pop-up-over-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_over_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
+	pop-up-down-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/pop_up_down_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
+	disabled-skin: Embed("/assets/customcomponents/buttons/moreactionsbutton/disabled_skin.png"
+		, scaleGridTop =       "5", scaleGridBottom =       "7", scaleGridLeft
+		= 
+		     "5", scaleGridRight =       "25");
+	font-weight: normal;
+	font-size: 11;
+	color: #505050;
+	roll-over-color: #505050;
+	text-roll-over-color: #505050;
+	text-selected-color: #000000;
+	padding-left: 5;
+	padding-right: 5;
+	padding-top: 3;
+}
+
+.StandardPowerButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/disabled_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/down_skin.png"
+		);
+	selected-disabled-skin: Embed("/assets/customcomponents/buttons/standardpowerbutton/selected_over_skin.png"
+		);
+}
+
+.StandardDisabledByHAButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standardhadisable/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/standardhadisable/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standardhadisable/disabled_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/standardhadisable/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/standardhadisable/down_skin.png"
+		);
+	selected-disabled-skin: Embed("/assets/customcomponents/buttons/standardhadisable/selected_over_skin.png"
+		);
+}
+
+.StandardPauseButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/disabled_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/standardpausebutton/down_skin.png"
+		);
+}
+
+.StandardRebootButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standardrebootbutton/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/standardrebootbutton/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standardrebootbutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standardrebootbutton/disabled_skin.png"
+		);
+}
+
+.StandardHaltButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/disabled_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/down_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/standardhaltbutton/selected_skin.png"
+		);
+}
+
+.StandardDeployButton {
+	up-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/up_skin.png"
+		);
+	over-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/down_skin.png"
+		);
+	disabled-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/up_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_over_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_down_skin.png"
+		);
+	selected-up-skin: Embed("/assets/customcomponents/buttons/standarddeploybutton/selected_skin.png"
+		);
+}
+
+.MailButton {
+	up-skin: Embed("/assets/customcomponents/buttons/mailbutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/mailbutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/mailbutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/mailbutton/disabled_skin.png");
+}
+
+.BundleButton {
+	up-skin: Embed("/assets/customcomponents/buttons/bundlebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/bundlebutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/bundlebutton/down_skin.png");
+	disabled-skin: Embed("/assets/customcomponents/buttons/bundlebutton/disabled_skin.png");
+}
+
+.MinimizeButton {
+	up-skin: Embed("/assets/customcomponents/buttons/minimizebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/minimizebutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/minimizebutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/minimizebutton/selected_skin.png"
+		);
+}
+
+.NormalizeButton {
+	up-skin: Embed("/assets/customcomponents/buttons/normalizebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/normalizebutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/normalizebutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/normalizebutton/selected_skin.png"
+		);
+}
+
+.MaximizeButton {
+	up-skin: Embed("/assets/customcomponents/buttons/maximizebutton/up_skin.png");
+	over-skin: Embed("/assets/customcomponents/buttons/maximizebutton/over_skin.png");
+	down-skin: Embed("/assets/customcomponents/buttons/maximizebutton/down_skin.png");
+	selected-up-skin: Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png"
+		);
+	selected-over-skin: Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png"
+		);
+	selected-down-skin: Embed("/assets/customcomponents/buttons/maximizebutton/selected_skin.png"
+		);
+}
+
+.paginatorTextOnColor {
+	color: #FFFFFF;
+}

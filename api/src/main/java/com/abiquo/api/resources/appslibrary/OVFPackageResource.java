@@ -32,8 +32,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.OVFPackageService;
 import com.abiquo.api.services.stub.ApplianceManagerStub;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
@@ -71,8 +71,8 @@ public class OVFPackageResource extends AbstractResource
 
     /** Used to know where the AM is located on the current datacenter. */
     //@Autowired
-    @Resource(name = "remoteServiceService")
-    RemoteServiceService remoteServices;
+    @Resource(name = "infrastructureService")
+    InfrastructureService remoteServices;
 
     /** Used to consume the remote service Appliance Manager. */
     @Autowired

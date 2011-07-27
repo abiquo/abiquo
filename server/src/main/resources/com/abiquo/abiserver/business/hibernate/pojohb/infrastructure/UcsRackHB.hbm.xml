@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.UcsRackHB" table="ucs_rack">
+        <id name="idRack" type="java.lang.Integer">
+            <column name="idRack" />
+            <generator class="identity" />
+        </id>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" lazy="false" fetch="select" name="datacenter">
+            <column name="idDataCenter" not-null="true" />
+        </many-to-one>
+        <property name="name" type="string">
+            <column length="20" name="name" not-null="true" />
+        </property>
+        <property name="shortDescription" type="string">
+            <column length="30" name="shortDescription" />
+        </property>
+        <property name="largeDescription" type="string">
+            <column length="100" name="largeDescription" />
+        </property>
+        <set inverse="true" lazy="true" name="physicalmachines" order-by="name">
+            <key>
+                <column name="idRack" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
+        </set>
+        <property name="vlan_id_min" type="java.lang.Integer">
+            <column name="vlan_id_min" />
+        </property>
+        <property name="vlan_id_max" type="java.lang.Integer">
+            <column name="vlan_id_max" />
+        </property>
+        <property name="vlans_id_avoided" type="string">
+            <column length="255" name="vlans_id_avoided" />
+        </property>
+        <property name="vlan_per_vdc_expected" type="java.lang.Integer">
+            <column name="vlan_per_vdc_expected" />
+        </property>
+        <property name="NRSQ" type="java.lang.Integer">
+            <column name="nrsq" />
+        </property>
+        <property name="port" type="java.lang.Integer">
+            <column name="port" />
+        </property>
+        <property name="ip" type="java.lang.String">
+            <column name="ip" />
+        </property>
+        <property name="user" type="java.lang.String">
+            <column name="user" />
+        </property>
+        <property name="password" type="java.lang.String">
+            <column name="password" />
+        </property>
+    </class>
+</hibernate-mapping>

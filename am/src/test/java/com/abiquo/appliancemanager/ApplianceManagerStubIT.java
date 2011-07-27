@@ -43,11 +43,11 @@ import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
 public class ApplianceManagerStubIT
 {
@@ -56,8 +56,8 @@ public class ApplianceManagerStubIT
 
     public static final int RS_FILE_SERVER_PORT = 8282;
 
-    protected final static String ovfId = String.format(
-        "http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
+    protected final static String ovfId =
+        String.format("http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
 
     protected final static String ovfIdInvalid =
         "http://localhost:8080/testovf/description-INVALID.ovf";
@@ -70,8 +70,7 @@ public class ApplianceManagerStubIT
 
     protected ApplianceManagerStubTestUtils testUtils;
 
-    protected final static String REPO_PATH = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryPath();
+    protected static String REPO_PATH;
 
     
 //    @Test
@@ -95,10 +94,11 @@ public class ApplianceManagerStubIT
      * @throws IOException
      */
     // @BeforeTest
-    @BeforeMethod
+    @BeforeClass // XXX BeforeMethod
     public void initializeRepositoryFileSystem() throws IOException
     {
 
+        REPO_PATH ="/tmp/testrepo/";
         File vmrepo = new File(REPO_PATH);
         if (vmrepo.exists())
         {
@@ -107,6 +107,8 @@ public class ApplianceManagerStubIT
 
         vmrepo.mkdirs();
         new File(REPO_PATH + ".abiquo_repository").createNewFile();
+//        REPO_PATH = AMConfigurationManager.getInstance()
+//        .getAMConfiguration().getRepositoryPath();
     }
 
     @Test
@@ -274,7 +276,7 @@ public class ApplianceManagerStubIT
         testUtils.createBundleDiskFile(ovfId, snapshot);
 
         stub.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(baseUrl,
-                                                              // idEnterprise, snapshot, ovfDto);
+        // idEnterprise, snapshot, ovfDto);
     }
 
     public void testDelete()
@@ -375,7 +377,7 @@ public class ApplianceManagerStubIT
 
     protected static String getLocation()
     {
-        return "http://localhost:9090/am"; // TODO jetty port configured on pom.xml
+        return "http://localhost:9009/am"; // TODO jetty port configured on pom.xml
         // return String.format("http://localhost:%s/am", AM_SERVICE_MAPPING_PORT);
     }
 

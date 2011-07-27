@@ -24,6 +24,7 @@
 	var vncUser = "";
 	var vncPass = "";
 	var vncName = "";
+    var vncVmPass = "";
 	var width = 800;
 	var height = 600;
 	
@@ -52,6 +53,9 @@
 					
 			else if(parameterName == "vncName")
 				vncName = parameterValue;
+            
+            else if(parameterName == "vncVmPass")
+                vncVmPass = parameterValue;
 					
 			else if(parameterName == "width")
 				width = parameterValue;
@@ -71,7 +75,7 @@
 </head>
 
 <body style="text-align: center;">
-	
+
 	<script type="application/javascript">
 		var appletCode = "<applet code=\"com.abiquo.xenserverapplet.XenServerConsole.class\" archive=\"xsapplet.jar, console-5.6.0-1.jar, xenserver-5.6.0-1.jar, ws-commons-util-1.0.2.jar, xmlrpc-common-3.1.jar, xmlrpc-client-3.1.jar\"";
 		appletCode 	   += " width=\"" + width +"\" height=\"" + height + "\" align=\"middle\">";
@@ -79,10 +83,11 @@
 		appletCode	   += "<param name=\"USER\" value=\"" + vncUser + "\">";
 		appletCode	   += "<param name=\"PASS\" value=\"" + vncPass + "\">";
 		appletCode	   += "<param name=\"NAME\" value=\"" + vncName + "\">";
+        appletCode     += "<param name=\"VMPASS\" value=\"" + vncVmPass + "\">";
 		appletCode	   += "</applet>";
 
 	    document.write(appletCode);
 	</script>
-	
+
 </body>
 </html>

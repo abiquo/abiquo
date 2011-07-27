@@ -19,7 +19,10 @@ Learn more about Flex at http://flex.org
 <script src="javascriptsupport/remoteaccess.js" language="javascript"></script>
 <script src="javascriptsupport/virtualimage.js" language="javascript"></script>
 <style>
-body { margin: 0px; overflow:hidden }
+body {
+	margin: 0px;
+	overflow: hidden
+}
 </style>
 <script language="JavaScript" type="text/javascript">
 <!--
@@ -36,8 +39,8 @@ var requiredRevision = ${version_revision};
 </script>
 </head>
 
-<body scroll="no" onload="onBodyLoad()">
-<script language="JavaScript" type="text/javascript">
+<body scroll="no" onload="onBodyLoad()" bgcolor="black">
+	<script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
 var hasProductInstall = DetectFlashVer(6, 0, 65);
@@ -98,7 +101,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 // -->
 </script>
 
-<script type="text/javascript">
+	<script type="text/javascript">
       			
 	var flexApplication;
 
@@ -139,8 +142,8 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	
 </script>
 
-<noscript>
-  	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+	<noscript>
+		<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="${application}" width="${width}" height="${height}"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
 			<param name="movie" value="${swf}.swf" />
@@ -149,48 +152,44 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			<param name="allowScriptAccess" value="sameDomain" />
 			<param name="allowFullScreen" value="true" />
 			<embed src="${swf}.swf" quality="high" bgcolor="${bgcolor}"
-				width="${width}" height="${height}" name="${application}" align="middle"
-				play="true"
-				loop="false"
-				quality="high"
-				allowScriptAccess="sameDomain"
-				type="application/x-shockwave-flash"
+				width="${width}" height="${height}" name="${application}"
+				align="middle" play="true" loop="false" quality="high"
+				allowScriptAccess="sameDomain" type="application/x-shockwave-flash"
 				pluginspage="http://www.adobe.com/go/getflashplayer"
-				allowFullScreen="true"
-				>
+				allowFullScreen="true">
 			</embed>
-	</object>
-</noscript>
+		</object>
+	</noscript>
 
-<!-- Place to load support form for Virtual Images -->
-<div id="viFormDiv" style="text-align: center; z-index: 1; width: 300px; height: 150px; position: absolute; top: 50%; left: 50%; margin-left: -150px; margin-top: -80px; 
-						   display: none; background-color: #FFFFFF;
-						   BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid;">
-	<form id="viForm" name="viForm"
-		  style="width: 100%; "
-		  enctype="multipart/form-data" method="post"
-		  target="viFormIframe">
-		<input id="viDiskInfo" name="diskInfo" type="hidden">
-		<br />
- 		<input id="viDiskFile" name="diskFile" type="file" onchange="onChangeDiskFile();">
- 		<iframe id="viFormIframe" name="viFormIframe" style="display: none; position:absolute;" src="" onload="return onVirtualImageFormSubmitComplete();"></iframe>
- 		<iframe id="viDownloadIframe" name="viDownloadIframe" style="display: none; position:absolute;" src=""></iframe>
- 	</form>
- 	
-	
-</div>
+	<!-- Place to load support form for Virtual Images -->
+	<div id="viFormDiv"
+		style="text-align: center; z-index: 1; width: 300px; height: 150px; position: absolute; top: 50%; left: 50%; margin-left: -150px; margin-top: -80px; display: none; background-color: #FFFFFF; BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid;">
+		<form id="viForm" name="viForm" style="width: 100%;"
+			enctype="multipart/form-data" method="post" target="viFormIframe">
+			<input id="viDiskInfo" name="diskInfo" type="hidden"> <br />
+			<input id="viDiskFile" name="diskFile" type="file"
+				onchange="onChangeDiskFile();">
+			<iframe id="viFormIframe" name="viFormIframe"
+				style="display: none; position: absolute;" src=""
+				onload="return onVirtualImageFormSubmitComplete();"></iframe>
+			<iframe id="viDownloadIframe" name="viDownloadIframe"
+				style="display: none; position: absolute;" src=""></iframe>
+		</form>
 
-<!-- Place to load Java applets for Remoting Access -->
-<div id="raDiv" style="display: none; text-align:left; z-index: 1; top: 20; bottom: 10; left: 20; right: 20; position: absolute;">
 
-	<button id="closeButton" type="button" onclick="unloadRemoteAccessJavaClient()"
-	   		style="top: 0; right: -2; z-index: 2; position: absolute;">X</button>
-	<iframe  id="raIframe"  frameborder="0" marginwidth="10"  marginheight="10"
-			 width="100%" height="100%"
-	         scrolling="no"  src=""
-	         style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid; 
-	         		z-index: 1; position: absolute; background-color: #FFFFFF;"></iframe> 
-</div>
+	</div>
+
+	<!-- Place to load Java applets for Remoting Access -->
+	<div id="raDiv"
+		style="display: none; text-align: left; z-index: 1; top: 20; bottom: 10; left: 20; right: 20; position: absolute;">
+
+		<button id="closeButton" type="button"
+			onclick="unloadRemoteAccessJavaClient()"
+			style="top: 0; right: -2; z-index: 2; position: absolute;">X</button>
+		<iframe id="raIframe" frameborder="0" marginwidth="10"
+			marginheight="10" width="100%" height="100%" scrolling="no" src=""
+			style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: black 1px solid; z-index: 1; position: absolute; background-color: #FFFFFF;"></iframe>
+	</div>
 
 </body>
 </html>

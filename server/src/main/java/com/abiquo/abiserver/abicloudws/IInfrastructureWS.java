@@ -22,12 +22,14 @@
 package com.abiquo.abiserver.abicloudws;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -46,6 +48,17 @@ public interface IInfrastructureWS
      */
     public BasicResult setVirtualMachineState(VirtualMachine virtualMachine, String actionState)
         throws Exception;
+
+    /**
+     * Update the VM configuration without changing the VM state.
+     * 
+     * @param virtualMachine The VM to update
+     * @param additionalRasds The additionsl resources to consider
+     * @return
+     * @throws Exception
+     */
+    public BasicResult updateVirtualMachineConfiguration(final VirtualMachine virtualMachine,
+        final List<ResourceAllocationSettingData> additionalRasds) throws Exception;
 
     /**
      * Edits the virtualMachine with a new configuration

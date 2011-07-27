@@ -207,11 +207,12 @@ public class RasdManagement extends DefaultEntityBase
 
     public long getAttachmentOrder()
     {
-        return getRasd().getGeneration();
+        Long generation = getRasd().getGeneration();
+        return generation == null ? 0L : generation;
     }
 
     public void setAttachmentOrder(final long order)
     {
-        getRasd().setGeneration(order);
+        getRasd().setGeneration(order < 0 ? 0L : order);
     }
 }

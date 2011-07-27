@@ -87,32 +87,35 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("datacenterId",
-                datacenterId).setParameter("enterpriseId", enterpriseId).setParameter(
-                "not_deployed", VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId)
+                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
+                .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
         BigDecimal storage =
-            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigDecimal) getSession().createSQLQuery(SUM_STORAGE_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger publicIps =
-            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_IP_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         BigInteger vlan =
-            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES).setParameter(
-                "datacenterId", datacenterId).setParameter("enterpriseId", enterpriseId)
-                .uniqueResult();
+            (BigInteger) getSession().createSQLQuery(COUNT_VLAN_RESOURCES)
+                .setParameter("datacenterId", datacenterId)
+                .setParameter("enterpriseId", enterpriseId).uniqueResult();
 
         DefaultEntityCurrentUsed used = new DefaultEntityCurrentUsed(cpu.intValue(), ram, hd);
 
-        used.setStorage(storage == null ? 0 : storage.longValue());
+        // Storage usage is stored in MB
+        used.setStorage(storage == null ? 0 : storage.longValue() * 1024 * 1024);
         used.setPublicIp(publicIps == null ? 0 : publicIps.longValue());
         used.setVlanCount(vlan == null ? 0 : vlan.longValue());
         return used;
@@ -136,7 +139,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
         Integer totalResults = finalQuery.list().size();
 
         Integer Start = firstElem;
-        if(totalResults < firstElem) Start = totalResults-numElem;
+        if (totalResults < firstElem)
+            Start = totalResults - numElem;
         // Get the list of elements
         finalQuery.setFirstResult(Start);
         finalQuery.setMaxResults(numElem);
@@ -161,7 +165,7 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//and pm.idState != 7" // not HA_DISABLED
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     private static final String SUM_STORAGE_RESOURCES =
@@ -182,8 +186,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_VLAN_RESOURCES =
-        "select count(*) from vlan_network vn, datacenter dc, virtualdatacenter vdc "
-            + " where vn.network_id= dc.network_id and vdc.networktypeID = vn.network_id "
-            + " and dc.idDataCenter = :datacenterId  and vdc.idEnterprise = :enterpriseId";
+        "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el " +
+        "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId " +
+        "and vdc.idEnterprise = el.idEnterprise";
 
 }

@@ -38,6 +38,10 @@ package net.undf.abicloud.vo.infrastructure
         public var dataCenter:DataCenter;
         
         public var vlanNetworkParameters:VlanNetworkParameters;
+        
+        public var haEnabled:Boolean;
+
+        public static const TYPE:String = "Standard Rack";
 
         /* ------------- Constructor ------------- */
         public function Rack()
@@ -47,6 +51,7 @@ package net.undf.abicloud.vo.infrastructure
             largeDescription = '';
             dataCenter = new DataCenter();
             vlanNetworkParameters = new VlanNetworkParameters();
+            haEnabled = false;
         }
 
         override public function set assignedTo(iE:InfrastructureElement):void

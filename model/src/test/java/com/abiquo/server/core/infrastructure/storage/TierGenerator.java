@@ -32,74 +32,71 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class TierGenerator extends DefaultEntityGenerator<Tier>
 {
+    private DatacenterGenerator datacenterGenerator;
 
-    
-      DatacenterGenerator datacenterGenerator;
-    
-
-    public TierGenerator(SeedGenerator seed)
+    public TierGenerator(final SeedGenerator seed)
     {
         super(seed);
-        
-          datacenterGenerator = new DatacenterGenerator(seed);
-        
+        datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Tier obj1, Tier obj2)
+    public void assertAllPropertiesEqual(final Tier obj1, final Tier obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, Tier.NAME_PROPERTY,Tier.ENABLED_PROPERTY,Tier.DESCRIPTION_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, Tier.NAME_PROPERTY, Tier.ENABLED_PROPERTY,
+            Tier.DESCRIPTION_PROPERTY);
+
+        datacenterGenerator.assertAllPropertiesEqual(obj1.getDatacenter(), obj2.getDatacenter());
     }
 
     @Override
     public Tier createUniqueInstance()
     {
-
-        Tier tier = new Tier();
-        
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        return createInstance(datacenter);
+    }
+
+    public Tier createInstance(final Datacenter datacenter)
+    {
+        String name = newString(nextSeed(), Tier.NAME_LENGTH_MIN, Tier.NAME_LENGTH_MAX);
+        return createInstance(datacenter, name);
+    }
+
+    public Tier createInstance(final Datacenter datacenter, final String name)
+    {
+        Tier tier = new Tier();
+
         tier.setDatacenter(datacenter);
-        tier.setName("LoPutoTier");
-        tier.setDescription("LoPutoTier Description");
-        tier.setEnabled(true);
+        tier.setName(name);
+        tier.setDescription(newString(nextSeed(), Tier.DESCRIPTION_LENGTH_MIN,
+            Tier.DESCRIPTION_LENGTH_MAX));
+        tier.setEnabled(Boolean.TRUE);
+
         return tier;
     }
-    
-    public Tier createInstance(Datacenter datacenter, String tierName)
+
+    public List<Tier> createTiersForDatacenter(final Datacenter datacenter)
     {
-    	Tier tier = new Tier();
-    	
-    	tier.setDatacenter(datacenter);
-    	tier.setName(tierName);
-    	tier.setDescription("Tier description for tier " + tierName);
-    	tier.setEnabled(Boolean.TRUE);
-    	
-    	return tier;
-    }
-    
-    public List<Tier> createTiersForDatacenter(Datacenter datacenter)
-    {
-    	List<Tier> listOfTiers = new ArrayList<Tier>();
-    	
-        for (Integer i = 1; i <= 4; i ++)
+        List<Tier> listOfTiers = new ArrayList<Tier>();
+
+        for (Integer i = 1; i <= 4; i++)
         {
-        	Tier currentTier = createInstance(datacenter, "Tier " + i.toString());
-        	listOfTiers.add(currentTier);
+            Tier currentTier = createInstance(datacenter, "Tier " + i.toString());
+            listOfTiers.add(currentTier);
         }
-        
-    	return listOfTiers;
+
+        return listOfTiers;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Tier entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Tier entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
-          Datacenter datacenter = entity.getDatacenter();
-          datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
-          entitiesToPersist.add(datacenter);
-        
+
+        Datacenter datacenter = entity.getDatacenter();
+        datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
+        entitiesToPersist.add(datacenter);
     }
 
 }

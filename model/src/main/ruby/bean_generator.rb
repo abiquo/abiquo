@@ -161,8 +161,11 @@ if confirm?(@bean_path)
   {
       public static final String TABLE_NAME = "#{@table}";
 
+      // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
+      // code
       protected #{@class}()
       {
+          // Just for JPA support
       }
 
       #{id_template}

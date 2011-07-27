@@ -24,17 +24,14 @@ package com.abiquo.abiserver.scheduler;
 import java.io.StringReader;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import org.apache.wink.common.internal.providers.entity.csv.CsvReader;
-
-import junit.framework.TestCase;
 
 /**
  * Test the scheduler behavior for a given IScheduler implementation and a TestDataSet (with a
  * VirtualImage and PhysicalMachine test set).
  */
-public class SchedulerRestrictionsTest extends TestCase
+public class SchedulerRestrictionsTest
 {
     // /** The logger object */
     // private final static Logger log = LoggerFactory.getLogger(SchedulerRestrictionsTest.class);
@@ -246,7 +243,7 @@ public class SchedulerRestrictionsTest extends TestCase
     // tst.tearDown();
     // }
 
-    public static void main(String[] args)
+    public static void main(final String[] args)
     {
         CsvReader reader = new CsvReader(new StringReader("a,2,3,4-10"));
         Collection<Integer> vlans_avoided_collection = new HashSet();

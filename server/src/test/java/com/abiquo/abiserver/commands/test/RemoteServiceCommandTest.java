@@ -21,11 +21,10 @@
 
 package com.abiquo.abiserver.commands.test;
 
-import junit.framework.TestCase;
+import static org.testng.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.abiserver.commands.impl.RemoteServicesCommandImpl;
 import com.abiquo.abiserver.exception.PersistenceException;
@@ -34,36 +33,26 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 /**
  * The Class InfrastructureCommandTest
  */
-public class RemoteServiceCommandTest extends TestCase
+public class RemoteServiceCommandTest
 {
-    
+
     /** The infra command. */
     private RemoteServicesCommandImpl rsCommand;
 
-     /** The user session. */
+    /** The user session. */
     private UserSession userSession;
 
     /**
      * Sets the up.
      * 
-     * @throws java.lang.Exception      * @throws Exception the exception
+     * @throws java.lang.Exception * @throws Exception the exception
      */
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception
-    {       
+    {
         rsCommand = new RemoteServicesCommandImpl();
         userSession = new UserSession();
         userSession.setUser("admin");
-    }
-
-    /**
-     * Tear down.
-     * 
-     * @throws java.lang.Exception      * @throws Exception the exception
-     */
-    @After
-    public void tearDown() throws Exception
-    {
     }
 
     /**
@@ -75,26 +64,26 @@ public class RemoteServiceCommandTest extends TestCase
     public void testAddRemoteService() throws PersistenceException
     {
         assertTrue(true);
-//        RemoteServiceType rst = new RemoteServiceType();
-//        rst.setIdRemoteServiceType(1);
-//        rst.setName("VirtualFactory");
-//
-//        RemoteService rs = new RemoteService();
-//        //rs.setUri("http://localhost:8080/test_vf");
-//        rs.setUuid("---");
-//        rs.setName("test_vf");
-//        rs.setProtocol("http://");
-//        rs.setDomainName("localhost");
-//        rs.setPort(8080);
-//        rs.setServiceMapping("test_vf");
-//        rs.setIdRemoteServiceType(rst);
-//        rs.setIdDataCenter(1);
-//        rs.setStatus(0);
-//        RemoteService rsNew = rsCommand.addRemoteService(userSession, rs);
-//        assertNotNull(rsNew);
-//        assertTrue(rsNew.getStatus() == 0);
-//        assertEquals("http://localhost:8080/test_vf", rsNew.getUri());
-        
+        // RemoteServiceType rst = new RemoteServiceType();
+        // rst.setIdRemoteServiceType(1);
+        // rst.setName("VirtualFactory");
+        //
+        // RemoteService rs = new RemoteService();
+        // //rs.setUri("http://localhost:8080/test_vf");
+        // rs.setUuid("---");
+        // rs.setName("test_vf");
+        // rs.setProtocol("http://");
+        // rs.setDomainName("localhost");
+        // rs.setPort(8080);
+        // rs.setServiceMapping("test_vf");
+        // rs.setIdRemoteServiceType(rst);
+        // rs.setIdDataCenter(1);
+        // rs.setStatus(0);
+        // RemoteService rsNew = rsCommand.addRemoteService(userSession, rs);
+        // assertNotNull(rsNew);
+        // assertTrue(rsNew.getStatus() == 0);
+        // assertEquals("http://localhost:8080/test_vf", rsNew.getUri());
+
     }
 
 }

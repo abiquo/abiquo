@@ -31,6 +31,9 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -77,8 +80,8 @@ public class TestDataAccessManager
 {
     private static JpaEntityManagerFactoryForTesting factory;
 
-    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
-        .createList();
+    private static List<String> associationTablesInAssociationDeletionOrder =
+        ListUtils.createList();
 
     private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
         ListUtils.createList();
@@ -141,7 +144,9 @@ public class TestDataAccessManager
             EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
             Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
             RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
-            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class);
+            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
+            NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
+            VirtualApplianceStatefulConversion.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

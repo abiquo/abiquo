@@ -23,6 +23,7 @@ package com.abiquo.virtualfactory.utils.hyperv;
 import static org.jinterop.dcom.impls.JIObjectFactory.narrowObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jinterop.dcom.common.JIException;
 import org.jinterop.dcom.core.IJIComObject;
@@ -35,6 +36,8 @@ import org.jinterop.dcom.impls.automation.IJIDispatch;
 import org.jinterop.dcom.impls.automation.IJIEnumVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hyper9.jwbem.SWbemServices;
 
 /**
  * Hyper-v utils
@@ -53,7 +56,8 @@ public class HyperVUtils
      * @param dispatch the dispatch object to get the job state from
      * @throws JIException if an error occurs
      */
-    public static void monitorJob(String jobPath, IJIDispatch dispatch) throws JIException
+    public static void monitorJob(final String jobPath, final IJIDispatch dispatch)
+        throws JIException
     {
         int jobState = 0;
         IJIDispatch jobDispatch = null;
@@ -98,7 +102,7 @@ public class HyperVUtils
         }
     }
 
-    public static JIVariant[][] enumToJIVariantArray(JIVariant[] set) throws JIException
+    public static JIVariant[][] enumToJIVariantArray(final JIVariant[] set) throws JIException
     {
         IJIDispatch dispatchTemp =
             (IJIDispatch) narrowObject(set[0].getObjectAsComObject()
@@ -143,7 +147,8 @@ public class HyperVUtils
      * @return an array of the string
      * @throws JIException
      */
-    public static String[] getArrayString(IJIDispatch dispatch, String property) throws JIException
+    public static String[] getArrayString(final IJIDispatch dispatch, final String property)
+        throws JIException
     {
         JIVariant[] tmp =
             (JIVariant[]) dispatch.get(property).getObjectAsArray().getArrayInstance();
@@ -164,8 +169,8 @@ public class HyperVUtils
      * @return the device number
      * @throws JIException
      */
-    public static int getDeviceNumberFromMountedLUN(IJIDispatch objectDispatcher, String iqn,
-        String lunId) throws JIException
+    public static int getDeviceNumberFromMountedLUN(final IJIDispatch objectDispatcher,
+        final String iqn, final String lunId) throws JIException
     {
         Integer lun = Integer.parseInt(lunId);
 
@@ -239,8 +244,8 @@ public class HyperVUtils
      * @return the session ID
      * @throws JIException
      */
-    public static String getSessionIDFromMountedLun(IJIDispatch objectDispatcher, String iqn)
-        throws JIException
+    public static String getSessionIDFromMountedLun(final IJIDispatch objectDispatcher,
+        final String iqn) throws JIException
     {
         String query = "Select * From MSiSCSIInitiator_SessionClass Where TargetName='" + iqn + "'";
 
@@ -269,8 +274,8 @@ public class HyperVUtils
      * @return the resource associated with the mounted lun disk
      * @throws JIException
      */
-    public static IJIDispatch getPhysicalDiskResourceByDiskDrivePath(String diskDrivePath,
-        JIVariant[][] physicalDiskList) throws JIException
+    public static IJIDispatch getPhysicalDiskResourceByDiskDrivePath(final String diskDrivePath,
+        final JIVariant[][] physicalDiskList) throws JIException
     {
         IJIDispatch targetphysicalDiskResource = null;
 
@@ -283,15 +288,18 @@ public class HyperVUtils
 
             JIArray hostsArray = hostResult.getObjectAsArray();
 
-            JIVariant[] hostsVariantArray = (JIVariant[]) hostsArray.getArrayInstance();
-
-            // Getting just the first host
-            String host = hostsVariantArray[0].getObjectAsString2();
-
-            if (diskDrivePath.equals(host))
+            if (hostsArray != null)
             {
-                targetphysicalDiskResource = physicalDiskResource;
-                return targetphysicalDiskResource;
+                JIVariant[] hostsVariantArray = (JIVariant[]) hostsArray.getArrayInstance();
+
+                // Getting just the first host
+                String host = hostsVariantArray[0].getObjectAsString2();
+
+                if (diskDrivePath.equalsIgnoreCase(host))
+                {
+                    targetphysicalDiskResource = physicalDiskResource;
+                    return targetphysicalDiskResource;
+                }
             }
         }
 
@@ -307,8 +315,8 @@ public class HyperVUtils
      * @return the dispatch of the instance
      * @throws JIException
      */
-    public static IJIDispatch createNewInstance(IJIDispatch objectDispatcher, String instance)
-        throws JIException
+    public static IJIDispatch createNewInstance(final IJIDispatch objectDispatcher,
+        final String instance) throws JIException
     {
         IJIDispatch instanceClass =
             (IJIDispatch) JIObjectFactory.narrowObject(objectDispatcher.callMethodA("Get",
@@ -319,5 +327,55 @@ public class HyperVUtils
 
         return (IJIDispatch) JIObjectFactory.narrowObject(tmp[0].getObjectAsComObject()
             .queryInterface(IJIDispatch.IID));
+
+    }
+    
+    /**
+     * Parses an array of COM Objects and transforms them to a list of {@link IJIDispatch} objects.
+     * 
+     * @param set The array to transform.
+     * @return The list of <code>IJIDispatch</code> objects.
+     * @throws JIException If transformation cannot be done.
+     */
+    public static List<IJIDispatch> enumToIJIDispatchList(final JIVariant[] set) throws JIException
+    {
+        List<IJIDispatch> results = new ArrayList<IJIDispatch>();
+        JIVariant[][] tmpSet = enumToJIVariantArray(set);
+
+        for (JIVariant[] element : tmpSet)
+        {
+            for (JIVariant element2 : element)
+            {
+                IJIDispatch dispatch =
+                    (IJIDispatch) JIObjectFactory.narrowObject(element2.getObjectAsComObject()
+                        .queryInterface(IJIDispatch.IID));
+
+                results.add(dispatch);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Runs a query using the specified service.
+     * 
+     * @param query The query to run.
+     * @param service Service to use to run the query.
+     * @return The query results.
+     * @throws JIException If query can not be executed.
+     */
+    public static List<IJIDispatch> execQuery(final String query, final SWbemServices service)
+        throws JIException
+    {
+        IJIDispatch dispatcher = service.getObjectDispatcher();
+
+        Object[] inParams =
+            new Object[] {new JIString(query), JIVariant.OPTIONAL_PARAM(),
+            JIVariant.OPTIONAL_PARAM(), JIVariant.OPTIONAL_PARAM()};
+
+        JIVariant[] results = dispatcher.callMethodA("ExecQuery", inParams);
+
+        return HyperVUtils.enumToIJIDispatchList(results);
     }
 }

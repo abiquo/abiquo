@@ -55,7 +55,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
  * This class checks if the Path Params and Query Params annotated with constraints in the 
- * chosen resource to execute pass the constraints.
+ * chosen resource to execute pass these constraints.
  * That avoids a lot of {if ... else ... } clauses in the Resource layer.
  * 
  * @author jdevesa@abiquo.com
@@ -170,7 +170,7 @@ public class InputParamConstraintHandler implements RequestHandler
         MethodConstraintViolation<Object> constraintViolation, String value, String paramName)
     {
         String code = "CONSTR-" + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName().toUpperCase();
-        String message = "Parameter " + paramName + " " + constraintViolation.getMessage() + " but value " + value + " was found";
+        String message = "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '" + value + "' was found";
         return new CommonError(code, message);
     }
 

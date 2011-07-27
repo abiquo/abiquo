@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="AM basic integration tests" verbose="1">
+    <listeners>
+        <listener class-name="com.abiquo.testng.TestServerListener" />
+    </listeners>
+    <test name="Basic integration tests">
+        <packages>
+            <package name="com.abiquo.appliancemanager.*" />
+        </packages>
+    </test>
+</suite>

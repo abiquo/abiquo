@@ -63,6 +63,7 @@ public class VMWareMachineTest extends AbsMachineTest
                 name,
                 disks,
                 rdPort,
+                null,
                 ramAllocationUnits,
                 cpuNumber,
                 vnicList);
@@ -107,7 +108,7 @@ public class VMWareMachineTest extends AbsMachineTest
         return new VmwareHypervisor();
     }
 
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         VMWareMachineTest test = new VMWareMachineTest();
         test.setUp();

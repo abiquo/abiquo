@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-	
-	<bean id="vsmStub" class="com.abiquo.api.services.stub.MockVSMStub" factory-method="mock" />
-	
-	<bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
-		<property name="replacements">
-			<map>
-				<entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
-			</map>
-		</property>
-	</bean>
-	
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+    <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
+        <property name="replacements">
+            <map>
+                <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
+                <entry key="vsmServiceStub" value="vsmServiceStubMock" />
+                <entry key="infrastructureService" value="infrastructureTestService" />
+            </map>
+        </property>
+    </bean>
 </beans>

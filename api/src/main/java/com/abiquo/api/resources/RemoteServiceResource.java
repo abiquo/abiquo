@@ -33,11 +33,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
-import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -49,15 +50,14 @@ import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 @Controller
 public class RemoteServiceResource extends AbstractResource
 {
-    // @Autowired
-    @Resource(name = "remoteServiceService")
-    private RemoteServiceService service;
+    @Autowired
+    private InfrastructureService service;
 
     public static final String REMOTE_SERVICE = "remoteservice";
 
     public static final String REMOTE_SERVICE_PARAM = "{" + REMOTE_SERVICE + "}";
 
-    public static final String CHECK_RESOURCE = "action/" + RemoteServiceService.CHECK_RESOURCE;
+    public static final String CHECK_RESOURCE = "action/" + InfrastructureService.CHECK_RESOURCE;
 
     /*
      * REST methods
@@ -86,7 +86,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         RemoteServiceDto rs = getRemoteService(datacenterId, serviceType, restBuilder);
 
-        ErrorsDto errors = service.checkStatus(rs.getType(), rs.getUri());
+        ErrorsDto errors = service.checkRemoteServiceStatus(rs.getType(), rs.getUri());
 
         rs.setStatus(errors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR);
         return rs;

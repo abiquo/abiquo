@@ -21,11 +21,11 @@
 
 package com.abiquo.mailman;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  * 
@@ -49,10 +49,9 @@ public class RendererManagerTest
 
         String body = RendererManager.generateBody(properties, "test", "en", "default");
 
-        assertTrue("Rendered text", (body.indexOf("testlastname") > 0)
-            && (body.indexOf("testname") > 0) && (body.indexOf("Hello World!") > 0)
-            && (body.indexOf("en") > 0) && (body.indexOf("testusername") > 0)
-            && (body.indexOf("testpassword") > 0));
+        assertTrue((body.indexOf("testlastname") > 0) && (body.indexOf("testname") > 0)
+            && (body.indexOf("Hello World!") > 0) && (body.indexOf("en") > 0)
+            && (body.indexOf("testusername") > 0) && (body.indexOf("testpassword") > 0));
     }
 
     // /**

@@ -50,7 +50,9 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {@NamedQuery(name = "VOLUMES_BY_VDC", query = VolumeManagement.BY_VDC)})
+@NamedQueries( {
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
+@NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "8";
@@ -61,10 +63,22 @@ public class VolumeManagement extends RasdManagement
 
     // Queries
 
+    public static final String VOLUMES_BY_VDC = "VOLUMES_BY_VDC";
+
+    public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
+
     public static final String BY_VDC =
         "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
             + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.virtualDatacenter.id = :vdcId "
             + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+
+    public static final String BY_POOL =
+        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
+            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.storagePool.idStorage = :poolId "
+            + "AND (" + "vol.rasd.elementName like :filterLike "
+            + "OR vol.rasd.id like :filterLike " + "OR vm.name like :filterLike "
             + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
             + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
@@ -93,12 +107,8 @@ public class VolumeManagement extends RasdManagement
         // Volume properties
         setStoragePool(pool);
         setIdScsi(idScsi);
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
+        setState(VolumeState.DETACHED);
         setSizeInMB(sizeInMB);
-
-        // TODO: Remove these fields?
-        setUsedSizeInMB(0);
-        setAvailableSizeInMB(sizeInMB);
     }
 
     public final static String STORAGE_POOL_PROPERTY = "storagePool";
@@ -144,6 +154,11 @@ public class VolumeManagement extends RasdManagement
     public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
+    }
+
+    public boolean isStateful()
+    {
+        return virtualImage != null;
     }
 
     public final static String ID_SCSI_PROPERTY = "idScsi";
@@ -236,7 +251,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getSizeInMB()
     {
-        return getRasd().getLimit();
+        Long size = getRasd().getLimit();
+        return size == null ? 0L : size;
     }
 
     public void setSizeInMB(final long sizeInMB)
@@ -246,7 +262,8 @@ public class VolumeManagement extends RasdManagement
 
     public long getAvailableSizeInMB()
     {
-        return getRasd().getReservation();
+        Long reservation = getRasd().getReservation();
+        return reservation == null ? 0L : reservation;
     }
 
     public void setAvailableSizeInMB(final long availableSizeInMB)
@@ -258,46 +275,24 @@ public class VolumeManagement extends RasdManagement
 
     public void associate()
     {
-        if (state != VolumeState.NOT_MOUNTED_NOT_RESERVED)
+        if (state != VolumeState.DETACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_NOT_RESERVED.name());
+                + VolumeState.DETACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.ATTACHED);
     }
 
     public void disassociate()
     {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
+        if (state != VolumeState.ATTACHED)
         {
             throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
+                + VolumeState.ATTACHED.name());
         }
 
-        setState(VolumeState.NOT_MOUNTED_NOT_RESERVED);
-    }
-
-    public void mount()
-    {
-        if (state != VolumeState.NOT_MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.NOT_MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.MOUNTED_RESERVED);
-    }
-
-    public void unmount()
-    {
-        if (state != VolumeState.MOUNTED_RESERVED)
-        {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.MOUNTED_RESERVED.name());
-        }
-
-        setState(VolumeState.NOT_MOUNTED_RESERVED);
+        setState(VolumeState.DETACHED);
     }
 
     // ********************************** Others ********************************
@@ -310,11 +305,10 @@ public class VolumeManagement extends RasdManagement
     public static enum OrderByEnum
     {
         NAME("elementname", "vol.rasd.elementName"), ID("idman", "vol.id"), VIRTUALDATACENTER(
-            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname",
-            "vol.virtualMachine.name"), VIRTUALAPPLIANCE("vaname", "vapp.name"), TIER("tier",
-            "vol.storagePool.tier.name"), TOTALSIZE("size", "vol.rasd.limit"), AVAILABLESIZE(
-            "available", "vol.rasd.reservation"), USEDSIZE("used", "vol.usedSizeInMB"), STATE(
-            "state", "vol.state");
+            "vdcname", "vol.virtualDatacenter.name"), VIRTUALMACHINE("vmname", "vm.name"), VIRTUALAPPLIANCE(
+            "vaname", "vapp.name"), TIER("tier", "vol.storagePool.tier.name"), TOTALSIZE("size",
+            "vol.rasd.limit"), AVAILABLESIZE("available", "vol.rasd.reservation"), USEDSIZE("used",
+            "vol.usedSizeInMB"), STATE("state", "vol.state");
 
         private String columnSQL;
 

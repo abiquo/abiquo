@@ -57,17 +57,18 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     public StorageDevice getDeviceById(final Integer datacenterId, final Integer deviceId)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
-                Restrictions.eq("id", deviceId));
+            createCriteria(Restrictions.eq("id", deviceId), Restrictions.eq("datacenter.id",
+                datacenterId));
         Object obj = criteria.uniqueResult();
         return (StorageDevice) obj;
     }
 
-    public StorageDevice findDeviceById(final Integer datacenterId, final String managementIp)
+    public StorageDevice findDeviceByManagementIP(final Integer datacenterId,
+        final String managementIp)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
-                Restrictions.eq("managementIp", managementIp));
+            createCriteria(Restrictions.eq("managementIp", managementIp), Restrictions.eq(
+                "datacenter.id", datacenterId));
         Object obj = criteria.uniqueResult();
         return (StorageDevice) obj;
     }

@@ -99,18 +99,6 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
         this.rootPath = rootPath;
     }
 
-    private boolean shared;
-
-    public boolean isShared()
-    {
-        return shared;
-    }
-
-    public void setShared(boolean shared)
-    {
-        this.shared = shared;
-    }
-
     private long size;
 
     public long getSize()
@@ -145,6 +133,20 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
+    }     
+    
+    private String datastoreUUID;
+    
+    public void setDatastoreUUID(String datastoreUUID)
+    {
+        this.datastoreUUID = datastoreUUID;
     }
+
+    public String getDatastoreUUID()
+    {
+        return datastoreUUID;
+    }
+
+    
 
 }

@@ -98,27 +98,27 @@ public class LibvirtMachine extends AbsVirtualMachine
     private int cpuNumbers;
 
     /** The machine name. */
-    private final String machineName;
+    private String machineName;
 
     /** The machine UUID. */
-    private final UUID machineId;
+    private UUID machineId;
 
     /** The remote desktop port */
-    private final int rdpPort;
+    private int rdpPort;
 
     /** Source virtual image on the remote repository. */
     private String imagePath;
 
-    private final List<String> storagePoolList;
+    private List<String> storagePoolList;
 
     /**
      * Sets containing the devices name used
      */
-    private final CopyOnWriteArraySet<String> hdSet;
+    private CopyOnWriteArraySet<String> hdSet;
 
     private String domainXml;
 
-    private final String kvmemulation;
+    private String kvmemulation;
 
     private String targetDatstore;
 
@@ -131,7 +131,12 @@ public class LibvirtMachine extends AbsVirtualMachine
     public LibvirtMachine(final VirtualMachineConfiguration config) throws VirtualMachineException
     {
         super(config);
+        initConfig(config);
+    }
 
+    private void initConfig(final VirtualMachineConfiguration config)
+        throws VirtualMachineException
+    {
         if (config.isSetHypervisor() && config.getHyper() instanceof AbsLibvirtHypervisor)
         {
             libvirtHyper = (AbsLibvirtHypervisor) config.getHyper();
@@ -265,7 +270,7 @@ public class LibvirtMachine extends AbsVirtualMachine
                 // Clone the source image
                 logger.info("Cloning the virtual machine: {}", getMachineName().toString());
 
-                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+                if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
                 {
                     cloneVirtualDisk();
                 }
@@ -596,7 +601,7 @@ public class LibvirtMachine extends AbsVirtualMachine
             dom.undefine();
 
             // [ABICLOUDPREMIUM-1459] Should not be executed in stateful images
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD && !config.getVirtualDiskBase().isHa())
             {
                 removeImage();
             }
@@ -621,50 +626,54 @@ public class LibvirtMachine extends AbsVirtualMachine
     public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
         throws VirtualMachineException
     {
-        Connect conn = null;
-        Domain dom = null;
+        config = newConfiguration;
+        initConfig(newConfiguration);
 
-        try
-        {
-            conn = connect(conn);
-            dom = conn.domainLookupByName(getMachineName());
+        updateDomain(newConfiguration);
 
-            // Setting the new Ram value
-            if (newConfiguration.isRam_set())
-            {
-                logger.info("Libvirt: Reconfiguring The Virtual Machine For Memory Update "
-                    + getMachineName());
-                // the memory is set in kilobytes
-                dom.setMaxMemory((newConfiguration.getMemoryRAM() / 1024));
-                dom.setMemory((newConfiguration.getMemoryRAM() / 1024));
-                memoryRam = newConfiguration.getMemoryRAM();
-            }
-
-            // Setting the number cpu value
-            if (newConfiguration.isCpu_number_set())
-            {
-                logger.info("Libvirt: Reconfiguring The Virtual Machine For CPU Update "
-                    + getMachineName());
-                dom.setVcpus(newConfiguration.getCpuNumber());
-                cpuNumbers = newConfiguration.getCpuNumber();
-            }
-
-            // Setting the disk cpu value
-            logger.info("Libvirt: Reconfiguring The Virtual Machine For disk Update "
-                + getMachineName());
-
-            reconfigDisks(newConfiguration, config);
-
-        }
-        catch (Exception e)
-        {
-            logger.error("Libvirt reconfigure error:" + e);
-            throw new VirtualMachineException(e);
-        }
-        finally
-        {
-            disconnectAndThrowError(conn, dom);
-        }
+        // Connect conn = null;
+        // Domain dom = null;
+        //
+        // try
+        // {
+        // conn = connect(conn);
+        // dom = conn.domainLookupByName(getMachineName());
+        //
+        // // Setting the new Ram value
+        // if (newConfiguration.isRam_set())
+        // {
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For Memory Update "
+        // + getMachineName());
+        // // the memory is set in kilobytes
+        // dom.setMaxMemory((newConfiguration.getMemoryRAM() / 1024));
+        // dom.setMemory((newConfiguration.getMemoryRAM() / 1024));
+        // memoryRam = newConfiguration.getMemoryRAM();
+        // }
+        //
+        // // Setting the number cpu value
+        // if (newConfiguration.isCpu_number_set())
+        // {
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For CPU Update "
+        // + getMachineName());
+        // dom.setVcpus(newConfiguration.getCpuNumber());
+        // cpuNumbers = newConfiguration.getCpuNumber();
+        // }
+        //
+        // // Setting the disk cpu value
+        // logger.info("Libvirt: Reconfiguring The Virtual Machine For disk Update "
+        // + getMachineName());
+        //
+        // reconfigDisks(newConfiguration, config);
+        // }
+        // catch (Exception e)
+        // {
+        // logger.error("Libvirt reconfigure error:" + e);
+        // throw new VirtualMachineException(e);
+        // }
+        // finally
+        // {
+        // disconnectAndThrowError(conn, dom);
+        // }
     }
 
     /**
@@ -677,21 +686,19 @@ public class LibvirtMachine extends AbsVirtualMachine
     private void reconfigDisks(final VirtualMachineConfiguration newConfiguration,
         final VirtualMachineConfiguration config) throws VirtualMachineException
     {
+        // throw new VirtualMachineException("Cannot reconfigure the extended disks in "
+        // + "KVM and XEN guests wihout undeploying.");
+
         List<VirtualDisk> newExtendedDiskList = newConfiguration.getExtendedVirtualDiskList();
         List<VirtualDisk> oldExtendedDiskList = config.getExtendedVirtualDiskList();
 
         // If there are no more extended disks, I remove the existent ones
-        if (newExtendedDiskList.size() == 0
+        if (newExtendedDiskList.isEmpty()
             && newExtendedDiskList.size() < oldExtendedDiskList.size())
         {
-            // It deteches all the storage pools
-            detachExtendedDisksFromConfig(newConfiguration);
+            // It detaches all the storage pools
+            // detachExtendedDisksFromConfig(newConfiguration);
 
-            // Updates the domain definition
-            updateDomain(newConfiguration);
-        }
-        else if (newExtendedDiskList.size() > 0)
-        {
             // Updates the domain definition
             // As the attach configuration does not work properly we are just adding the storage
             // pools and modifying the xml definition
@@ -876,7 +883,6 @@ public class LibvirtMachine extends AbsVirtualMachine
     private String defineXMLdomain(final VirtualMachineConfiguration configuration)
         throws VirtualMachineException
     {
-
         // Base XML
         String src_xml =
             "<domain type='kvm'>" + "<name>debian</name>"
@@ -891,7 +897,14 @@ public class LibvirtMachine extends AbsVirtualMachine
         // Only add the VNC port if it is enabled
         if (AddressingUtils.isValidPort(String.valueOf(rdpPort)))
         {
-            src_xml += "<graphics type='vnc' port='???' listen='???'/>";
+            if (configuration.getRdPassword() != null && !configuration.getRdPassword().equals(""))
+            {
+                src_xml += "<graphics type='vnc' port='???' listen='???' passwd='???'/>";
+            }
+            else
+            {
+                src_xml += "<graphics type='vnc' port='???' listen='???'/>";
+            }
         }
 
         src_xml +=
@@ -919,15 +932,15 @@ public class LibvirtMachine extends AbsVirtualMachine
 
             // Analyzing if the base virtual disk is an stateless or statefull disk
 
-            if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
+            if (configuration.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
             {
-                String targetDatastore = getDatastore(config.getVirtualDiskBase());
+                String targetDatastore = getDatastore(configuration.getVirtualDiskBase());
                 attachDisktoDoc(doc, "hda", targetDatastore + getMachineName().toString(), "ide",
-                    config.getVirtualDiskBase().getFormat());
+                    configuration.getVirtualDiskBase().getFormat());
             }
-            else if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
+            else if (configuration.getVirtualDiskBase().getDiskType() == VirtualDiskType.ISCSI)
             {
-                attachIscsiDisk(config.getVirtualDiskBase(), doc, "hda", "virtio");
+                attachIscsiDisk(configuration.getVirtualDiskBase(), doc, "hda", "ide");
             }
 
             // replaceAttribute(doc, "source", "file", destinationRepository// + File.separatorChar
@@ -944,6 +957,12 @@ public class LibvirtMachine extends AbsVirtualMachine
             {
                 replaceAttribute(doc, "graphics", "listen", "0.0.0.0");
                 replaceAttribute(doc, "graphics", "port", Integer.toString(rdpPort));
+                
+		if (configuration.getRdPassword() != null
+                    && !configuration.getRdPassword().equals(""))
+                {
+                    replaceAttribute(doc, "graphics", "passwd", configuration.getRdPassword());
+                }
             }
 
             if (libvirtHyper.getHypervisorType().toLowerCase().equals("kvm"))
@@ -1146,12 +1165,12 @@ public class LibvirtMachine extends AbsVirtualMachine
      * Private helper to attach the extended disks to the xml domain definition
      * 
      * @param doc the xml domain definition
-     * @param config the config file containing the extended disks to attach
+     * @param config the configuration file containing the extended disks to attach
      */
-    private void attachExtendedDisk(final Document doc, final VirtualMachineConfiguration config)
-        throws Exception
+    private void attachExtendedDisk(final Document doc,
+        final VirtualMachineConfiguration configuration) throws Exception
     {
-        for (VirtualDisk vdisk : config.getExtendedVirtualDiskList())
+        for (VirtualDisk vdisk : configuration.getExtendedVirtualDiskList())
         {
             // TODO Attaching other STANDARD extended disks
             if (vdisk.getDiskType().compareTo(VirtualDiskType.ISCSI) == 0)

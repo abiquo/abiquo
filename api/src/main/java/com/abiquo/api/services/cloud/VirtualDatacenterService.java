@@ -39,6 +39,8 @@ import com.abiquo.api.services.PrivateNetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -212,7 +214,14 @@ public class VirtualDatacenterService extends DefaultApiService
         }
         if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            addConflictErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+            String vlanXvdc = ConfigService.getSystemProperty(ConfigService.VLAN_PER_VDC);
+            String errorMsg =
+                APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getMessage().replace("{0}",
+                    vlanXvdc);
+            CommonError error =
+                new CommonError(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getCode(),
+                    errorMsg);
+            addConflictErrors(error);
             flushErrors();
         }
 
@@ -292,7 +301,15 @@ public class VirtualDatacenterService extends DefaultApiService
         }
         else if (!isValidVlanHardLimitPerVdc(vdc.getVlanHard()))
         {
-            addValidationErrors(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC);
+
+            String vlanXvdc = ConfigService.getSystemProperty(ConfigService.VLAN_PER_VDC);
+            String errorMsg =
+                APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getMessage().replace("{0}",
+                    vlanXvdc);
+            CommonError error =
+                new CommonError(APIError.LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC.getCode(),
+                    errorMsg);
+            addValidationErrors(error);
         }
 
         if (vdc.getHypervisorType() != null
@@ -317,4 +334,10 @@ public class VirtualDatacenterService extends DefaultApiService
     {
         return datacenterRepo.findHypervisors(datacenter).contains(type);
     }
+
+    public Collection<NodeVirtualImage> getNodeVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return repo.findNodeVirtualImageByEnterprise(enterprise);
+    }
+
 }

@@ -36,6 +36,7 @@ import com.vmware.vim25.DVPortgroupConfigSpec;
 import com.vmware.vim25.DistributedVirtualPortgroupPortgroupType;
 import com.vmware.vim25.DistributedVirtualSwitchPortConnection;
 import com.vmware.vim25.DynamicProperty;
+import com.vmware.vim25.HostNotConnected;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.ObjectSpec;
@@ -48,6 +49,7 @@ import com.vmware.vim25.VirtualDeviceConfigSpec;
 import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
 import com.vmware.vim25.VirtualEthernetCardDistributedVirtualPortBackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
+import com.vmware.vim25.VirtualMachineConnectionState;
 import com.vmware.vim25.VirtualVmxnet3;
 import com.vmware.vim25.VmwareDistributedVirtualSwitchVlanIdSpec;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
@@ -263,14 +265,28 @@ public class DistrubutedPortGroupActions
             InventoryNavigator navigator = new InventoryNavigator(fold);
             // Get the VirtualMachine
             VirtualMachine vm;
+            VirtualMachineConnectionState state;
+
             do
             {
                 // TODO: This is dangerous!!! Think in something else.
                 // retrieve the virtual machine while the vcenter refreshes the state.
                 vm = (VirtualMachine) navigator.searchManagedEntity("VirtualMachine", nameVM);
-
             }
             while (vm == null);
+
+            state = vm.getRuntime().connectionState;
+
+            if (!state.name().equalsIgnoreCase("connected"))
+            {
+                String message =
+                    "The virtual machine "
+                        + nameVM
+                        + " it has an inconsistent state in this point of the deployment. Current state: "
+                        + state.name()
+                        + ". Only 'connected' state available. It may happens due the incompatibility between Abiquo's HA and vCenter. Aborting";
+                throw new VirtualMachineException(message);
+            }
 
             // Get the information we need to create the binding to a DVS.
             DistributedVirtualPortgroup dvPortGroup =
@@ -321,6 +337,19 @@ public class DistrubutedPortGroupActions
                 throw new VirtualMachineException(message);
             }
 
+        }
+        catch (HostNotConnected e)
+        {
+            String message =
+                "Could not associate virtual machine with name '"
+                    + nameVM
+                    + "' to port group '"
+                    + portGroupName
+                    + "' because the host that stores the virtual machine '"
+                    + nameVM
+                    + "' is not connected. It may happens due the incompatibility between Abiquo's HA and vCenter.";
+            LOGGER.error(message);
+            throw new VirtualMachineException(message);
         }
         catch (RemoteException e)
         {

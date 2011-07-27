@@ -30,13 +30,19 @@ import javax.persistence.PersistenceException;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.util.FilterOptions;
 import com.abiquo.server.core.util.PagedList;
+import com.abiquo.server.core.cloud.VirtualMachine;
 
 @Repository("jpaVolumeManagementDAO")
 /* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
@@ -93,6 +99,42 @@ import com.abiquo.server.core.util.PagedList;
             + "and vi.idEnterprise = :idEnterprise " + "and (rasd.elementName like :filterLike "
             + "or tier.name like :filterLike )";
 
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
+    {
+        Criteria criteria = createCriteria(samePool(sp));
+        return getResultList(criteria);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        Criteria criteria = createCriteria(sameVirtualDatacenter(vdc));
+        return getResultList(criteria);
+    }
+
+    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer volumeId)
+    {
+        Criteria criteria = createCriteria(sameId(volumeId), sameVirtualDatacenter(vdc));
+        return (VolumeManagement) criteria.uniqueResult();
+    }
+
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    {
+        // Filters on the VolumeManagement entity
+        Criteria crit = createCriteria();
+        crit.createAlias(VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+
+        crit.add(sameVirtualDatacenter(vdc));
+        crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
+        crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
+
+        crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
+            StorageTechnologyType.GENERIC_ISCSI));
+
+        return getResultList(crit);
+    }
+
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
     {
@@ -104,12 +146,48 @@ import com.abiquo.server.core.util.PagedList;
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
 
-    public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
+    @SuppressWarnings("unchecked")
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp, final FilterOptions filters)
+        throws Exception
     {
-        Criteria criteria = createCriteria(Restrictions.eq("storagePool", sp));
-        return getResultList(criteria);
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.getMessage());
+        }
+
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
+
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_POOL);
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setString("poolId", sp.getId());
+        queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
     }
 
+    @SuppressWarnings("unchecked")
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
         final FilterOptions filters) throws Exception
     {
@@ -127,7 +205,7 @@ import com.abiquo.server.core.util.PagedList;
 
         String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
 
-        Query query = getSession().getNamedQuery("VOLUMES_BY_VDC");
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_VDC);
 
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
@@ -150,18 +228,9 @@ import com.abiquo.server.core.util.PagedList;
         return volumesList;
     }
 
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    public VolumeManagement getVolumeByRasd(final Rasd rasd)
     {
-        Criteria criteria = createCriteria(Restrictions.eq("virtualDatacenter", vdc));
-        return getResultList(criteria);
-    }
-
-    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer volumeId)
-    {
-        Criteria criteria =
-            createCriteria(Restrictions.eq("virtualDatacenter", vdc)).add(
-                Restrictions.eq("id", volumeId));
+        Criteria criteria = createCriteria(Restrictions.eq("rasd", rasd));
         return (VolumeManagement) criteria.uniqueResult();
     }
 
@@ -186,8 +255,8 @@ import com.abiquo.server.core.util.PagedList;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
-            + filters.getFilter() + "%");
+        query.setParameter("filterLike",
+            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 
@@ -202,6 +271,13 @@ import com.abiquo.server.core.util.PagedList;
 
         return volumes;
 
+    }
+
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("virtualImage.id", idImage));
+        Object obj = criteria.uniqueResult();
+        return (VolumeManagement) obj;
     }
 
     @SuppressWarnings("unchecked")
@@ -226,8 +302,12 @@ import com.abiquo.server.core.util.PagedList;
     private String defineOrderBy(final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder();
+
         queryString.append(" order by ");
-        queryString.append(orderBy);
+        if (orderBy.equalsIgnoreCase("vol.id"))
+            queryString.append("vol.rasd.id");
+        else
+            queryString.append(orderBy);
         queryString.append(" ");
 
         if (asc)
@@ -240,5 +320,36 @@ import com.abiquo.server.core.util.PagedList;
         }
 
         return queryString.toString();
+    }
+
+    private static Criterion sameVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        return Restrictions.eq(VolumeManagement.VIRTUAL_DATACENTER_PROPERTY, vdc);
+    }
+
+    private static Criterion samePool(final StoragePool pool)
+    {
+        return Restrictions.eq(VolumeManagement.STORAGE_POOL_PROPERTY, pool);
+    }
+
+    private static Criterion sameRasd(final Rasd rasd)
+    {
+        return Restrictions.eq(VolumeManagement.RASD_PROPERTY, rasd);
+    }
+
+    private static Criterion sameId(final Integer id)
+    {
+        return Restrictions.eq(VolumeManagement.ID_PROPERTY, id);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+    {
+        Criteria criteria = createCriteria(sameVirtualMachine(vm));
+        return getResultList(criteria);
+    }
+
+    private static Criterion sameVirtualMachine(final VirtualMachine vm)
+    {
+        return Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_PROPERTY, vm);
     }
 }

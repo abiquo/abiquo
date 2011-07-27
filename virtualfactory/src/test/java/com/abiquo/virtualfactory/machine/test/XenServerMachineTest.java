@@ -25,9 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.virtualfactory.hypervisor.impl.XenServerHypervisor;
 import com.abiquo.virtualfactory.machine.impl.XenServerMachine;
@@ -42,7 +41,7 @@ import com.abiquo.virtualfactory.network.VirtualNIC;
  * 
  * @author ibarrera
  */
-public class XenServerMachineTest extends TestCase
+public class XenServerMachineTest
 {
     private static final String HYPERVISOR_HOST = "10.60.1.77";
 
@@ -67,7 +66,7 @@ public class XenServerMachineTest extends TestCase
 
     protected XenServerMachine machine;
 
-    @Override
+    @BeforeMethod
     protected void setUp() throws Exception
     {
         hypervisor = getHypervisor();
@@ -92,6 +91,7 @@ public class XenServerMachineTest extends TestCase
             MACHINE_NAME, // Name
             disks, // Virtual disks
             9999, // RD Port
+            null, // RD Password
             512 * 1024 * 1024, // RAM (in bytes)
             1, // CPUs
             vlans); // VLANS
@@ -107,7 +107,7 @@ public class XenServerMachineTest extends TestCase
         return new XenServerHypervisor();
     }
 
-    protected void configureExternalStorage(VirtualMachineConfiguration config)
+    protected void configureExternalStorage(final VirtualMachineConfiguration config)
     {
         // Do nothing
     }

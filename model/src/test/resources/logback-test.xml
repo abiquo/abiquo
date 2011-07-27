@@ -1,22 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
+            <Pattern>[%level] %msg%n</Pattern>
         </layout>
     </appender>
-
-    <logger name="org.hibernate">
-        <level value="WARN" />
-    </logger>
-
-    <logger name="com.abiquo">
-        <level value="DEBUG" />
-    </logger>
-
-    <root>
+    <logger name="com.abiquo.testng">
         <level value="INFO" />
         <appender-ref ref="STDOUT" />
+    </logger>
+    <root>
+        <level value="OFF" />
     </root>
 </configuration>

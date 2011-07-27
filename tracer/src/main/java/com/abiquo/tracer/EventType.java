@@ -70,7 +70,7 @@ public enum EventType implements Serializable
         "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
         311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
         "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"),
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL", "Retrieve Rack"),
 
     // Storage system-related events
     SSM_CREATE(400, "SSM_CREATE", "Storage System Manager created"), SSM_MODIFY(401, "SSM_MODIFY",
@@ -79,8 +79,8 @@ public enum EventType implements Serializable
         404, "POOL_MODIFY", "Storage Pool modified"), POOL_DELETE(405, "POOL_DELETE",
         "Storage Pool deleted"), VOLUME_CREATE(406, "VOLUME_CREATE", "Volume created"), VOLUME_MODIFY(
         407, "VOLUME_MODIFY", "Volume modified"), VOLUME_DELETE(408, "VOLUME_DELETE",
-        "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ASSIGN", "Volume assigned"), VOLUME_UNASSIGN(
-        410, "VOLUME_UNASSIGN", "Volume unassigned"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
+        "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
+        410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
         413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
 
@@ -92,17 +92,17 @@ public enum EventType implements Serializable
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
 
     // Stateful related events
-    STATEFUL_PROCESS_START(600, "STATEFUL_PROCESS_START",
-        "A Stateful conversion process has started"), STATEFUL_RAW_FINISHED(601,
-        "STATEFUL_RAW_FINISHED",
-        "A Stateful RAW conversion has finished and it is ready to be dumped to a volume"), STATEFUL_VOLUME_CREATED(
-        602, "STATEFUL_VOLUME_CREATED", "A Stateful volume has been created"), STATEFUL_DUMP_ENQUEUED(
-        603, "STATEFUL_DUMP_ENQUEUED", "A Stateful volume dump has been enqueued"), STATEFUL_DUMP_FINISHED(
-        604, "STATEFUL_DUMP_FINISHED", "A Stateful dump to a volume has finished"), STATEFUL_PROCESS_FINISHED(
-        605, "STATEFUL_PROCESS_FINISHED", "A Stateful conversion process has finished"), STATEFUL_PROCESS_FAILED(
-        606, "STATEFUL_PROCESS_FAILED", "A Stateful process has failed"), STATEFUL_INITIATOR_ADDED(
-        607, "STATEFUL_INITIATOR_ADDED", "Stateful inititator has added"),
-
+        // Stateful related events
+        PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START", "A Persistent conversion process has started"), 
+        PERSISTENT_RAW_FINISHED(601, "PERSISTENT_RAW_FINISHED", "A Persistent RAW conversion has finished and it is ready to be dumped to a volume"), 
+        PERSISTENT_VOLUME_CREATED(602, "PERSISTENT_VOLUME_CREATED", "A Persistent volume has been created"), 
+        PERSISTENT_DUMP_ENQUEUED(603, "PERSISTENT_DUMP_ENQUEUED", "A Persistent volume dump has been enqueued"), 
+        PERSISTENT_DUMP_FINISHED(604, "PERSISTENT_DUMP_FINISHED", "A Persistent dump to a volume has finished"), 
+        PERSISTENT_PROCESS_FINISHED(605, "PERSISTENT_PROCESS_FINISHED", "A Persistent conversion process has finished"), 
+        PERSISTENT_PROCESS_FAILED(606, "PERSISTENT_PROCESS_FAILED", "A Persistent process has failed"), 
+        PERSISTENT_INITIATOR_ADDED(607, "PERSISTENT_INITIATOR_ADDED", "Persistent initiator has added"),
+        
+        
     // License related events
     LICENSE_ADDED(700, "LICENSE_ADDED", "A new license has been added to the system"), LICENSE_REMOVED(
         701, "LICENSE_REMOVED", "A license has been removed"), LICENSE_CORRUPT(702,
@@ -147,6 +147,14 @@ public enum EventType implements Serializable
         "ROLE_LDAP_MODIFIED", "Role ldap updated"), ROLE_LDAP_DELETED(1302, "ROLE_LDAP_DELETED",
         "Role ldap deleted"),
 
+    // HA Engine Events
+    MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
+        1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
+        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"), 
+        
+    //ALLOCATION RULES
+    ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"),
+    ALLOCATION_RULES_REMOVED(1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
     ;
 
     private final int event;
@@ -204,3 +212,5 @@ public enum EventType implements Serializable
         }
     }
 }
+
+

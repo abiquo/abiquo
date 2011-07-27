@@ -68,8 +68,9 @@ public class Datastore extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "datastore";
 
-    protected Datastore()
+    public Datastore()
     {
+        // never call this!
     }
 
     private final static String ID_COLUMN = "idDatastore";
@@ -141,26 +142,6 @@ public class Datastore extends DefaultEntityBase
         this.directory = directory;
     }
 
-    public final static String SHARED_PROPERTY = "shared";
-
-    private final static String SHARED_COLUMN = "shared";
-
-    private final static boolean SHARED_REQUIRED = true;
-
-    @Column(name = SHARED_COLUMN, nullable = false)
-    private boolean shared;
-
-    @Required(value = SHARED_REQUIRED)
-    public boolean isShared()
-    {
-        return this.shared;
-    }
-
-    public void setShared(final boolean shared)
-    {
-        this.shared = shared;
-    }
-
     public final static String ROOT_PATH_PROPERTY = "rootPath";
 
     private final static boolean ROOT_PATH_REQUIRED = true;
@@ -184,7 +165,7 @@ public class Datastore extends DefaultEntityBase
         return this.rootPath;
     }
 
-    private void setRootPath(final String rootPath)
+    public void setRootPath(String rootPath)
     {
         this.rootPath = rootPath;
     }
@@ -257,6 +238,34 @@ public class Datastore extends DefaultEntityBase
     public void setEnabled(final boolean enabled)
     {
         this.enabled = enabled;
+    }
+
+    public final static String DATASTORE_UUID_PROPERTY = "datastoreUUID";
+
+    private final static boolean DATASTORE_UUID_REQUIRED = false;
+
+    private final static int DATASTORE_UUID_LENGTH_MIN = 0;
+
+    private final static int DATASTORE_UUID_LENGTH_MAX = 255;
+
+    private final static boolean DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DATASTORE_UUID_COLUMN = "datastoreUuid";
+
+    @Column(name = DATASTORE_UUID_COLUMN, nullable = !DATASTORE_UUID_REQUIRED, length = DATASTORE_UUID_LENGTH_MAX)
+    private String datastoreUUID;
+
+    @Required(value = DATASTORE_UUID_REQUIRED)
+    @Length(min = DATASTORE_UUID_LENGTH_MIN, max = DATASTORE_UUID_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DATASTORE_UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDatastoreUUID()
+    {
+        return this.datastoreUUID;
+    }
+
+    public void setDatastoreUUID(String datastoreUUID)
+    {
+        this.datastoreUUID = datastoreUUID;
     }
 
     // code in Datastore
