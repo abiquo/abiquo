@@ -192,7 +192,7 @@ public enum APIError
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
         "Wrong remote service"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
-        "The remote service's url already exist and can't be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
+        "The remote service's url already exists and can't be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
         "RS-4", "The remote service's url is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
         "This datacenter already has a storage pool asigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
