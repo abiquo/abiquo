@@ -399,7 +399,12 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="reorderNICintoVM"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.newOrder, event.ipPoolManagementId]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id,
+            event.newOrder, 
+            event.ipPoolManagementId]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
