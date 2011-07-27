@@ -743,7 +743,7 @@ CREATE TABLE  `kinton`.`repository` (
   `idRepository` int(3) unsigned NOT NULL auto_increment,
   `idDataCenter` INT UNSIGNED NOT NULL ,
   `name` varchar(30),
-  `URL` varchar(50) NOT NULL,
+  `URL` varchar(255) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRepository`),
   CONSTRAINT `fk_idDataCenter` FOREIGN KEY ( `idDataCenter` ) REFERENCES `datacenter` ( `idDataCenter` ) ON DELETE CASCADE
