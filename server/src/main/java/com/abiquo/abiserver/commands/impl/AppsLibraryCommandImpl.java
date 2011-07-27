@@ -75,8 +75,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
+        .getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -139,8 +139,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
-                        .toString());
+                    String.format("Can not obtain the datacenter with id [%s]",
+                        idDatacenter.toString());
             }
 
             factory.rollbackConnection();
@@ -161,8 +161,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
         catch (AppsLibraryCommandException e)
         {
-            logger.warn("{}",e);
-            
+            logger.warn("{}", e);
+
             repository.setRepositoryCapacityMb(0l);
             repository.setRepositoryEnterpriseUsedMb(0l);
             repository.setRepositoryRemainingMb(0l);
@@ -286,7 +286,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 throw new AppsLibraryCommandException(cause);
             }
 
-            
             if (category.getIsDefault() > 0)
             {
                 factory.rollbackConnection();

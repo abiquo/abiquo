@@ -65,8 +65,9 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualDatacenter,
         final Integer vlanId)
     {
-        return findUniqueByCriterions(Restrictions.eq(VLANNetwork.NETWORK_PROPERTY,
-            virtualDatacenter.getNetwork()), Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
+        return findUniqueByCriterions(
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
     }
 
     private static Criterion sameNetwork(final VirtualDatacenter virtualDatacenter)
@@ -87,8 +88,8 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     public VLANNetwork findByDefault(final VirtualDatacenter virtualDatacenter)
     {
-        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()), Restrictions.eq(
-            VLANNetwork.DEFAULT_PROPERTY, true));
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
     }
 
     private Criterion nameEqual(final String name)

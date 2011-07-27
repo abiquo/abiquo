@@ -56,15 +56,13 @@ public class PrivateNetworkResource extends AbstractResource
     @GET
     public VLANNetworkDto getPrivateNetwork(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(0) Integer virtualDatacenterId,
-        @PathParam(PRIVATE_NETWORK) @NotNull @Min(0) Integer vlanId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(PRIVATE_NETWORK) @NotNull @Min(0) Integer vlanId,
+        @Context IRESTBuilder restBuilder) throws Exception
     {
         VLANNetwork network = service.getNetwork(virtualDatacenterId, vlanId);
 
         return createTransferObject(network, virtualDatacenterId, restBuilder);
     }
-    
-       
 
     private static VLANNetworkDto addLinks(IRESTBuilder restBuilder, VLANNetworkDto network,
         Integer virtualDatacenterId)
@@ -85,7 +83,7 @@ public class PrivateNetworkResource extends AbstractResource
         dto.setPrimaryDNS(network.getConfiguration().getPrimaryDNS());
         dto.setSecondaryDNS(network.getConfiguration().getSecondaryDNS());
         dto.setSufixDNS(network.getConfiguration().getSufixDNS());
-        
+
         dto = addLinks(restBuilder, dto, virtualDatacenterId);
 
         return dto;

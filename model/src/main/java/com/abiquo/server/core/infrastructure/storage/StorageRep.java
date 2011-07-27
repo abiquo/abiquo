@@ -126,7 +126,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.findById(volumeId);
     }
-    
+
     public VolumeManagement findVolumeByRasd(final Rasd rasd)
     {
         return volumeDAO.getVolumeByRasd(rasd);
@@ -173,7 +173,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
     }
-    
+
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
         return volumeDAO.getVolumeFromImage(idImage);
@@ -283,7 +283,7 @@ public class StorageRep extends DefaultRepBase
     {
         volumeDAO.flush();
     }
-    
+
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm);

@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.pricing;
+package com.abiquo.server.core.pricing;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class CurrencyTest extends DefaultEntityTestBase<Currency>
-  {
+public class CurrencyTest extends DefaultEntityTestBase<Currency>
+{
 
-      @Override
-      protected InstanceTester<Currency> createEntityInstanceGenerator()
-      {
-          return new CurrencyGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<Currency> createEntityInstanceGenerator()
+    {
+        return new CurrencyGenerator(getSeed());
+    }
+}

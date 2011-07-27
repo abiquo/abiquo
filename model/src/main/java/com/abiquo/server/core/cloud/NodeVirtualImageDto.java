@@ -19,48 +19,49 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class NodeVirtualImageDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private int modified;
-
-public int getModified()
+@XmlRootElement(name = "")
+public class NodeVirtualImageDto extends SingleResourceTransportDto
 {
-    return modified;
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private int modified;
+
+    public int getModified()
+    {
+        return modified;
+    }
+
+    public void setModified(int modified)
+    {
+        this.modified = modified;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
 }
-
-public void setModified(int modified)
-{
-    this.modified = modified;
-}
-
-private String name;
-
-public String getName()
-{
-    return name;
-}
-
-public void setName(String name)
-{
-    this.name = name;
-}
-
-  }

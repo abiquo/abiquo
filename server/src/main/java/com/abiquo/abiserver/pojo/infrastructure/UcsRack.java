@@ -37,6 +37,7 @@ public class UcsRack extends Rack
     private String user;
 
     private final String type = "UCS Rack";
+
     /* ------------- Constructor ------------- */
     public UcsRack()
     {

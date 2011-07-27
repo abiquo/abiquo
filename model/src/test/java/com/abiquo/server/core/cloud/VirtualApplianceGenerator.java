@@ -83,7 +83,7 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
 
         return virtualAppliance;
     }
-    
+
     public VirtualAppliance createInstance(VirtualDatacenter virtualDatacenter, String vappName)
     {
         State state = newEnum(State.class, nextSeed());

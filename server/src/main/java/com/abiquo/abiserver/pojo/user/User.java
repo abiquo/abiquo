@@ -245,7 +245,7 @@ public class User implements IPojo<UserHB>
         user.setLocale(dto.getLocale());
         user.setPass(dto.getPassword());
         user.setActive(dto.isActive());
-	user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
+        user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
             .valueOf(dto.getAuthType()));
         if (!StringUtils.isEmpty(dto.getAvailableVirtualDatacenters()))
         {

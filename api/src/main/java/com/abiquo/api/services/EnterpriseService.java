@@ -253,8 +253,8 @@ public class EnterpriseService extends DefaultApiService
             for (Machine m : reservedMachines)
             {
                 releaseMachine(m.getId(), id);
-	    }
-	}
+            }
+        }
 
         if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
         {

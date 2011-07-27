@@ -50,7 +50,8 @@ public class LimitExceededException extends AllocatorException
             String
                 .format(
                     "It's not possible to reserve a new %s, your hard limit it's defined to %d, your soft limit is %d and you have %d %s allocated. ",
-                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual, resource.getEntityName()));
+                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual,
+                    resource.getEntityName()));
 
         this.entity = entity;
         this.required = required;

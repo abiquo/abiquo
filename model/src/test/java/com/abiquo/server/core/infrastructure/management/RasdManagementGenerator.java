@@ -61,14 +61,14 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
 
         if (obj1.getVirtualDatacenter() != null || obj2.getVirtualDatacenter() != null)
         {
-            vdcGenerator.assertAllPropertiesEqual(obj1.getVirtualDatacenter(), obj2
-                .getVirtualDatacenter());
+            vdcGenerator.assertAllPropertiesEqual(obj1.getVirtualDatacenter(),
+                obj2.getVirtualDatacenter());
         }
 
         if (obj1.getVirtualAppliance() != null || obj2.getVirtualAppliance() != null)
         {
-            vappGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-                .getVirtualAppliance());
+            vappGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
+                obj2.getVirtualAppliance());
         }
 
         if (obj1.getVirtualMachine() != null || obj2.getVirtualMachine() != null)

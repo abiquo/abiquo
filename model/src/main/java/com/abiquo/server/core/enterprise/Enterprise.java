@@ -191,7 +191,7 @@ public class Enterprise extends DefaultEntityWithLimits
         setRepositoryHard(limit.hard);
     }
 
-    public final static String PRICING_PROPERTY = "pricing";
+    public final static String PRICING_PROPERTY = "pricingTemplate";
 
     private final static boolean PRICING_REQUIRED = false;
 

@@ -79,8 +79,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(rack);
 
         assertLinkExist(rack, validRackUri, "edit");
-        assertLinkExist(rack, resolveMachinesURI(validRack.getDatacenter().getId(), validRack
-            .getId()), "machines");
+        assertLinkExist(rack,
+            resolveMachinesURI(validRack.getDatacenter().getId(), validRack.getId()), "machines");
         assertLinkExist(rack, resolveDatacenterURI(validRack.getDatacenter().getId()), "datacenter");
     }
 
@@ -115,8 +115,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         rack.setShortDescription("dummy_description");
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
         assertEquals(200, response.getStatusCode());
 
         RackDto modified = response.getEntity(RackDto.class);
@@ -135,8 +135,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         rack.setName("rack_test");
 
         response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
         assertEquals(response.getStatusCode(), 409);
 
     }
@@ -153,8 +153,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(invalidRack);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
 
         assertEquals(404, response.getStatusCode());
     }
@@ -172,8 +172,8 @@ public class RackResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(rackInvalidDatacenter);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                rack);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(rack);
 
         assertEquals(404, response.getStatusCode());
 

@@ -60,7 +60,6 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
     {
         Enterprise e1 = enterpriseGenerator.createUniqueInstance();
         Enterprise e2 = enterpriseGenerator.createUniqueInstance();
-       
 
         Role r1 = roleGenerator.createInstanceSysAdmin();
         Role r2 = roleGenerator.createInstanceEnterprisAdmin();

@@ -32,7 +32,8 @@ import com.abiquo.abiserver.pojo.virtualhardware.ResourceManagement;
  * 
  * @author jdevesa@abiquo.com
  */
-public class IpPoolManagement extends ResourceManagement implements Serializable, IPojo<ResourceManagementHB> 
+public class IpPoolManagement extends ResourceManagement implements Serializable,
+    IPojo<ResourceManagementHB>
 {
 
     /**
@@ -44,47 +45,47 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
      * Identifier of its dhcp service definition.
      */
     private Integer dhcpServiceId;
-    
+
     /**
-     * MAC address of the resource 
+     * MAC address of the resource
      */
     protected String mac;
-    
+
     /**
-     * Name of the DHCP rule 
+     * Name of the DHCP rule
      */
     protected String name;
-    
+
     /**
      * IP address asigned.
      */
     protected String ip;
-    
+
     /**
-     * The name of the vlan network where the Resource belongs. 
+     * The name of the vlan network where the Resource belongs.
      */
     private String vlanNetworkName;
-    
+
     /**
      * Name of the enterprise.
      */
     private String enterpriseName;
-    
+
     /**
      * Identifier of the enterprise.
      */
     private Integer enterpriseId;
-    
+
     /**
-     * Should we configure the gateway? 
+     * Should we configure the gateway?
      */
     private Boolean configureGateway;
-    
+
     /**
      * The IP is in quarantine?
      */
     private Boolean quarantine;
-    
+
     /**
      * @return the dhcpServiceId
      */
@@ -149,7 +150,6 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
         this.ip = ip;
     }
 
-
     /**
      * @return the configureGateway
      */
@@ -181,7 +181,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     {
         return vlanNetworkName;
     }
-    
+
     /**
      * @return the enterpriseName
      */
@@ -213,7 +213,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     {
         this.enterpriseId = enterpriseId;
     }
-    
+
     /**
      * @param quarantine the quarantine to set
      */
@@ -229,12 +229,12 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     {
         return quarantine;
     }
-    
+
     @Override
     public IpPoolManagementHB toPojoHB()
     {
         IpPoolManagementHB ipPoolHB = new IpPoolManagementHB();
-        
+
         ipPoolHB.setConfigureGateway(getConfigureGateway());
         ipPoolHB.setDhcpServiceId(getDhcpServiceId());
         ipPoolHB.setIdManagement(getIdManagement());
@@ -244,7 +244,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
         ipPoolHB.setName(getMac());
         ipPoolHB.setVlanNetworkName(getVlanNetworkName());
         ipPoolHB.setQuarantine(getQuarantine());
-        
+
         return ipPoolHB;
     }
 

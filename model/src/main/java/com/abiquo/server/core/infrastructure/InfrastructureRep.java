@@ -273,7 +273,7 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return this.ucsRackDao.existAnyOtherWithIP(ip);
     }
-    
+
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
@@ -593,7 +593,7 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
-    
+
     public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
     {
         return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
@@ -645,7 +645,6 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return machineDao.findRackEnabledForHAMachines(rack);
     }
-
 
     /**
      * Return all {@links UcsRack} associated to a

@@ -40,25 +40,25 @@ public class BasicResult
     public final static int NOT_AUTHORIZED = 6;
 
     public final static int VIRTUAL_IMAGE_IN_USE = 7;
-    
+
     /** When NonBlocking service try to start a virtual application. */
     public final static int SOFT_LIMT_EXCEEDED = 8;
-    
+
     /** When NonBlocking service try to start a virtual application. */
     public final static int HARD_LIMT_EXCEEDED = 9;
-    
+
     /** When NonBlocking service try to start a virtual application. */
     public final static int CLOUD_LIMT_EXCEEDED = 10;
-    
+
     /** When we try to delete a virtual image not managed by abicloud. */
-    public final static int NOT_MANAGED_VIRTUAL_IMAGE=11;
-    
+    public final static int NOT_MANAGED_VIRTUAL_IMAGE = 11;
+
     /** When we try to release a public ip from an enterprise used by a node. */
-    public final static int PUBLIC_IP_USED=12;
-    
+    public final static int PUBLIC_IP_USED = 12;
+
     /** When a user tries to deploy a virtual appliance with zero nodes */
-    public final static int ZERO_NODES=13;
-       
+    public final static int ZERO_NODES = 13;
+
     private Boolean success;
 
     private String message;

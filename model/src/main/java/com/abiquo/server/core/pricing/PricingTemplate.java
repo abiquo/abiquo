@@ -124,7 +124,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(final String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -141,7 +141,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.hdGB;
     }
 
-    private void setHdGB(final BigDecimal hdGb)
+    public void setHdGB(final BigDecimal hdGb)
     {
         this.hdGB = hdGb;
     }
@@ -158,7 +158,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.standingChargePeriod;
     }
 
-    private void setStandingChargePeriod(final BigDecimal standingChargePeriod)
+    public void setStandingChargePeriod(final BigDecimal standingChargePeriod)
     {
         this.standingChargePeriod = standingChargePeriod;
     }
@@ -177,7 +177,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.limitMaximumDeployedCharged;
     }
 
-    private void setLimitMaximumDeployedCharged(final BigDecimal limitMaximumDeployedCharged)
+    public void setLimitMaximumDeployedCharged(final BigDecimal limitMaximumDeployedCharged)
     {
         this.limitMaximumDeployedCharged = limitMaximumDeployedCharged;
     }
@@ -194,7 +194,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.vlan;
     }
 
-    private void setVlan(final BigDecimal vlan)
+    public void setVlan(final BigDecimal vlan)
     {
         this.vlan = vlan;
     }
@@ -238,7 +238,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.chargingPeriod;
     }
 
-    private void setChargingPeriod(final int chargingPeriod)
+    public void setChargingPeriod(final int chargingPeriod)
     {
         this.chargingPeriod = chargingPeriod;
     }
@@ -255,7 +255,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.minimumChargePeriod;
     }
 
-    private void setMinimumChargePeriod(final BigDecimal minimumChargePeriod)
+    public void setMinimumChargePeriod(final BigDecimal minimumChargePeriod)
     {
         this.minimumChargePeriod = minimumChargePeriod;
     }
@@ -299,7 +299,7 @@ public class PricingTemplate extends DefaultEntityBase
         return this.minimumCharge;
     }
 
-    private void setMinimumCharge(final int minimumCharge)
+    public void setMinimumCharge(final int minimumCharge)
     {
         this.minimumCharge = minimumCharge;
     }

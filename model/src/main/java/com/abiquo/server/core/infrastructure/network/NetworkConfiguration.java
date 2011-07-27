@@ -137,8 +137,9 @@ public class NetworkConfiguration extends DefaultEntityBase
     private final static boolean MASK_REQUIRED = true;
 
     private final static String MASK_COLUMN = "mask";
-    
+
     private final static long MASK_MIN_VALUE = 0L;
+
     private final static long MASK_MAX_VALUE = 31L;
 
     @Column(name = MASK_COLUMN, nullable = !MASK_REQUIRED)
@@ -325,7 +326,8 @@ public class NetworkConfiguration extends DefaultEntityBase
     }
 
     // *************************** Mandatory constructors ***********************
-    public NetworkConfiguration(String address, Integer mask, String netmask, String gateway, String fenceMode)
+    public NetworkConfiguration(String address, Integer mask, String netmask, String gateway,
+        String fenceMode)
     {
         setAddress(address);
         setMask(mask);

@@ -81,12 +81,11 @@ public class Machine extends DefaultEntityBase
     {
         return this.id;
     }
-    
+
     public void setId(Integer id)
     {
         this.id = id;
     }
-    
 
     // ******************************* Properties
     // *******************************
@@ -766,12 +765,12 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-    
+
     // Transient attributes needed to Management Racks functionality
-    
+
     @Transient
     private List<String> listOfMacs;
-    
+
     public void setListOfMacs(List<String> listOfMacs)
     {
         this.listOfMacs = listOfMacs;
@@ -785,10 +784,10 @@ public class Machine extends DefaultEntityBase
         }
         return listOfMacs;
     }
-    
+
     @Transient
     private Boolean belongsToManagedRack = Boolean.FALSE;
-    
+
     public void setBelongsToManagedRack(Boolean belongsToManagedRack)
     {
         this.belongsToManagedRack = belongsToManagedRack;
@@ -798,7 +797,5 @@ public class Machine extends DefaultEntityBase
     {
         return belongsToManagedRack;
     }
-
-    
 
 }

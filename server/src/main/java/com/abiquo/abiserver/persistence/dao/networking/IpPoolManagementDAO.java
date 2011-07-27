@@ -44,8 +44,8 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
     boolean isVlanAssignedToDifferentVM(Integer vlan_network_id, Integer idVM);
 
     // TODO TBD
-    List<IpPoolManagementHB> findByVirtualMachine(Integer idVm); 
-    
+    List<IpPoolManagementHB> findByVirtualMachine(Integer idVm);
+
     /**
      * Returns if the MAC address is already created.
      * 

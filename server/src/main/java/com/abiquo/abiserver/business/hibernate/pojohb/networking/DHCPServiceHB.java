@@ -42,7 +42,7 @@ public class DHCPServiceHB extends DHCPServiceType
      * Identifier of the RemoteService.
      */
     private Integer dhcpRemoteServiceId;
-    
+
     /**
      * Value that establish the relation between this class and its network configuration.
      */

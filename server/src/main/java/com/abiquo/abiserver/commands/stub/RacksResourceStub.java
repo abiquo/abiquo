@@ -43,14 +43,16 @@ public interface RacksResourceStub
      *         object.
      */
     public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter);
-    
-    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId, IPAddress ipFrom, IPAddress ipTo,
-        final HypervisorType hypervisorType, final String user, final String password,
-        final Integer port, final String vSwitchName);
-    
-    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
-    
-    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId, final Integer machineId);
+
+    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId,
+        IPAddress ipFrom, IPAddress ipTo, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer port, final String vSwitchName);
+
+    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId);
+
+    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId);
 
     /**
      * Returns all {@link UcsRack} in {@link DataCenter}.

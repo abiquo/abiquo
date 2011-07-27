@@ -147,7 +147,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
-        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
+        int actualAndRequiredVLANs =
+            (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
@@ -229,7 +230,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case NO_DETAIL:
                 if (tracer != null)
                 {
-                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                        traceMessage);
                 }
                 break;
             default:
@@ -242,8 +244,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
-                    || entity instanceof VirtualDatacenter) && tracer != null)
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED) || entity instanceof VirtualDatacenter)
+                    && tracer != null)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }

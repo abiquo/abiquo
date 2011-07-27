@@ -119,7 +119,7 @@ public class VirtualAppliance extends DefaultEntityBase
 
     private final static String NODECONNECTIONS_COLUMN = "nodeconnections";
 
-    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition="TEXT")
+    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition = "TEXT")
     private String nodeconnections;
 
     @Required(value = NODECONNECTIONS_REQUIRED)

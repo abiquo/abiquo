@@ -35,13 +35,13 @@ public class RESTHandlerFactory extends HandlersFactory
     public List< ? extends RequestHandler> getRequestHandlers()
     {
         List<RequestHandler> listOfHandlers = new ArrayList<RequestHandler>();
-        
-        // Check the input constraints 
+
+        // Check the input constraints
         listOfHandlers.add(new InputParamConstraintHandler());
-        
+
         // Injects the IRESTLinkBuilder object to all the methods.
         listOfHandlers.add(new RESTHandler());
-        
+
         return listOfHandlers;
     }
 

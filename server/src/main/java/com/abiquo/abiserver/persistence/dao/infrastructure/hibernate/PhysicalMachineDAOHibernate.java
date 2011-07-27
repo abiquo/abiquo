@@ -71,8 +71,9 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
         "PHYSICALMACHINE.GET_LIST_BY_RACK";
 
     private static final String FIRST_PASS_QUERY = "PHYSICALMACHINE.FIRST_PASS_QUERY";
-    
-    private static final String PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE= "PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE";
+
+    private static final String PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE =
+        "PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE";
 
     @Override
     public List<PhysicalmachineHB> getByRackAndVirtualDatacenter(Integer idRack,
@@ -105,18 +106,21 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
 
         return numberOfDeployedMachines;
     }
-    
+
     @Override
-    public Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(PhysicalmachineHB pmHB, Integer idEnterprise)
+    public Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(PhysicalmachineHB pmHB,
+        Integer idEnterprise)
     {
         Long numberOfDeployedMachines;
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE);
+        Query pmQuery =
+            session
+                .getNamedQuery(PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE);
         pmQuery.setInteger("idphysicalmachine", pmHB.getIdPhysicalMachine());
         pmQuery.setInteger("identerprise", idEnterprise);
         List<Long> longList = (List<Long>) pmQuery.list();
-        numberOfDeployedMachines =  longList.get(0);
+        numberOfDeployedMachines = longList.get(0);
         return numberOfDeployedMachines;
     }
 
@@ -217,14 +221,15 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
-        String namedQuery = filters == null || filters.isEmpty() ? PHYSICALMACHINE_GET_LIST_BY_RACK :
-        	"PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE";
-        
+        String namedQuery =
+            filters == null || filters.isEmpty() ? PHYSICALMACHINE_GET_LIST_BY_RACK
+                : "PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE";
+
         Query pmQuery = session.getNamedQuery(namedQuery);
         pmQuery.setInteger("idRack", rackId);
         if (filters != null && !filters.isEmpty())
         {
-        	pmQuery.setString("filterLike", "%" + filters + "%");
+            pmQuery.setString("filterLike", "%" + filters + "%");
         }
 
         return pmQuery.list();

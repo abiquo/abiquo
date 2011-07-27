@@ -159,7 +159,11 @@ public enum EventType implements Serializable
         1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
 
     // PRICING TEMPLATE
-    PRICING_TEMPLATE_CREATED(1600, "PRICING_TEMPLATE_CREATED", "Pricing Template created"), ;
+    PRICING_TEMPLATE_CREATED(1600, "PRICING_TEMPLATE_CREATED", "Pricing Template created"), PRICING_TEMPLATE_MODIFIED(
+        1601, "PRICING_TEMPLATE_MODIFIED", "Pricing Template updated"), PRICING_TEMPLATE_DELETED(
+        1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"),
+
+    ;
 
     private final int event;
 

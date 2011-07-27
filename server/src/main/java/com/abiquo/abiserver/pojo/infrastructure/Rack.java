@@ -37,10 +37,11 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
     private DataCenter dataCenter;
 
     private VlanNetworkParameters vlanNetworkParameters;
-    
+
     private Boolean haEnabled;
 
     private final String type = "Standard Rack";
+
     /* ------------- Constructor ------------- */
     public Rack()
     {
@@ -110,7 +111,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         rackPojo.setHaEnabled(getHaEnabled());
         return rackPojo;
     }
-    
+
     public void setHaEnabled(Boolean haEnabled)
     {
         this.haEnabled = haEnabled;
@@ -141,5 +142,4 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>
         return rack;
     }
 
-    
 }

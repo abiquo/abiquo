@@ -49,13 +49,13 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 public class IpAddressService extends DefaultApiService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(IpAddressService.class);
-    
+
     @Autowired
     VirtualDatacenterRep repo;
 
     public List<IpPoolManagement> getListIpPoolManagementByVLAN(final Integer vlanId,
         final Integer page, final Integer numElem)
-    {        
+    {
         return repo.findIpsByVLAN(vlanId, page, numElem);
     }
 
@@ -66,7 +66,8 @@ public class IpAddressService extends DefaultApiService
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
         if (orderByEnum == null)
         {
-            LOGGER.info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
+            LOGGER
+                .info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
             addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
             flushErrors();
         }

@@ -61,16 +61,18 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
         Integer mask = 24;
         String netmask = "255.255.255.0";
 
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
+        NetworkConfiguration config =
+            new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createUniqueInstance());
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
 
         return config;
     }
-    
+
     /**
      * Create a new configuration from an already created RemoteService.
+     * 
      * @param dhcpService dhcp remote service already created.
      * @return the generated {@link NetworkConfiguration} object
      */
@@ -89,11 +91,12 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
 
         Integer mask = 24;
 
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, "255.255.255.0" , gateway, fenceMode);
+        NetworkConfiguration config =
+            new NetworkConfiguration(address, mask, "255.255.255.0", gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createInstance(dhcpService));
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
-        
+
         return config;
     }
 
@@ -105,28 +108,29 @@ public class NetworkConfigurationGenerator extends DefaultEntityGenerator<Networ
         dhcpGenerator.addAuxiliaryEntitiesToPersist(entity.getDhcp(), entitiesToPersist);
         entitiesToPersist.add(entity.getDhcp());
     }
-    
+
     public NetworkConfiguration createInstance(RemoteService dhcpService, String netmask)
     {
         int seed = nextSeed();
-        
+
         String address = "192.168.1.0";
         String gateway = "192.168.1.1";
         String primaryDNS = "8.8.8.8";
         String secondaryDNS = "9.9.9.9";
-        
+
         String fenceMode =
             newString(seed, NetworkConfiguration.FENCE_MODE_LENGTH_MIN,
                 NetworkConfiguration.FENCE_MODE_LENGTH_MAX);
-        
+
         Integer mask = IPNetworkRang.transformIPMaskToIntegerMask(IPAddress.newIPAddress(netmask));
 
-        NetworkConfiguration config = new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
+        NetworkConfiguration config =
+            new NetworkConfiguration(address, mask, netmask, gateway, fenceMode);
         config.setDhcp(dhcpGenerator.createInstance(dhcpService));
         config.setPrimaryDNS(primaryDNS);
         config.setSecondaryDNS(secondaryDNS);
-        
-        return config;        
-        
+
+        return config;
+
     }
 }

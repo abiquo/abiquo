@@ -119,8 +119,7 @@ public class RackResource extends AbstractResource
         service.removeRack(datacenterId, rackId);
     }
 
-
-    // Create the transfer object. ModelTransformer do the dirty work. You should only 
+    // Create the transfer object. ModelTransformer do the dirty work. You should only
     // create custom links depending on the entity.
     public static RackDto createTransferObject(Rack rack, IRESTBuilder restBuilder)
         throws Exception

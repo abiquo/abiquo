@@ -319,8 +319,8 @@ public class InfrastructureWS implements IInfrastructureWS
             envelope =
                 OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(
                     virtualMachine, null, null);
-//                    OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
-//                        virtualMachine), null);
+            // OVFModelFactory.createOVFModelFromVirtualAppliance().getActualState(
+            // virtualMachine), null);
 
             // envelope =
             // OVFModelFactory.createOVFModelFromVirtualAppliance().constructEnvelopeType(

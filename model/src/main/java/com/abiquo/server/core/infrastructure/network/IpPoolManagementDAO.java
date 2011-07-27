@@ -70,24 +70,24 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "AND ip.vlan_network_id = :idVlanNetwork " //
             + "AND vm.state != 'NOT_DEPLOYED'"; //
 
-    public static final String BY_ENT =
-        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn, " + " Enterprise ent "
-            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
+        + " Enterprise ent " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+        + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id " + " AND "
+        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
 
-    public static final String BY_VDC =
-        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
-            + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
+        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
+        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
 
     private static Criterion equalMac(String mac)
     {
@@ -152,7 +152,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             getEntityManager().createNamedQuery("IP_POOL_MANAGEMENT.BY_VLAN",
                 IpPoolManagement.class);
         query.setParameter("vlan_id", vlanId);
-        if(firstElement >= totalResults) firstElement = totalResults-numElem;
+        if (firstElement >= totalResults)
+            firstElement = totalResults - numElem;
         if (numElem != -1)
         {
 
@@ -168,8 +169,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         }
 
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(result);
-    
-        
+
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
         ipList.setCurrentElement(firstElement);
@@ -189,11 +189,11 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
 
-        if(firstElem >= totalResults) firstElem = totalResults-numElem;
+        if (firstElem >= totalResults)
+            firstElem = totalResults - numElem;
         finalQuery.setFirstResult(firstElem);
         finalQuery.setMaxResults(numElem);
 
-      
         PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
         ipList.setTotalResults(totalResults);
         ipList.setPageSize(numElem);
@@ -213,7 +213,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
-        if(firstElem >= totalResults) firstElem = totalResults-numElem;
+        if (firstElem >= totalResults)
+            firstElem = totalResults - numElem;
 
         // Get the list of elements
         finalQuery.setFirstResult(firstElem);

@@ -162,7 +162,8 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
         // If unable to find a username and password, just abort as TokenBasedRememberMeServices is
         // unable to construct a valid token in this case.
         if (!StringUtils.hasLength(username)
-            || (!StringUtils.hasLength(password) && AuthType.ABIQUO.name().equalsIgnoreCase(authType)) || !StringUtils.hasLength(authType))
+            || (!StringUtils.hasLength(password) && AuthType.ABIQUO.name().equalsIgnoreCase(
+                authType)) || !StringUtils.hasLength(authType))
         {
             return;
         }

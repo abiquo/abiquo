@@ -47,7 +47,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     private String secondaryDNS;
 
     private String sufixDNS;
-    
+
     private Boolean defaultNetwork;
 
     public Integer getId()
@@ -79,7 +79,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     {
         this.tag = tag;
     }
-    
+
     public String getGateway()
     {
         return gateway;

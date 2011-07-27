@@ -140,8 +140,8 @@ public class InfrastructureCommandImplTest
         Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
         for (RemoteServiceHB remoteServiceHB : remoteServices)
         {
-            assertEquals("The remote service uri couln't be changed", newUri, remoteServiceHB
-                .getUri());
+            assertEquals("The remote service uri couln't be changed", newUri,
+                remoteServiceHB.getUri());
         }
     }
 }

@@ -39,8 +39,9 @@ public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
@@ -68,5 +69,4 @@ public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
         return (CostCodeGenerator) super.eg();
     }
 
-    
 }

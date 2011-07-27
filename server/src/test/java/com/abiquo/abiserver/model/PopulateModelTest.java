@@ -999,8 +999,8 @@ public class PopulateModelTest
         disjunction.add(Restrictions.eq("resourceType", resourceType));
 
         ArrayList<ResourceAllocationSettingData> rasds =
-            (ArrayList<ResourceAllocationSettingData>) session.createCriteria(
-                ResourceAllocationSettingData.class).add(disjunction).list();
+            (ArrayList<ResourceAllocationSettingData>) session
+                .createCriteria(ResourceAllocationSettingData.class).add(disjunction).list();
 
         if (rasds == null)
         {

@@ -70,7 +70,7 @@ public class OVFPackageResource extends AbstractResource
     public static final String INSTALL_TARGET_QUERY_PARAM = "idDatacenter";
 
     /** Used to know where the AM is located on the current datacenter. */
-    //@Autowired
+    // @Autowired
     @Resource(name = "infrastructureService")
     InfrastructureService remoteServices;
 

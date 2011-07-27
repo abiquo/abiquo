@@ -906,8 +906,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-                    
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
+
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
+                        userSession);
                 }
                 else
                 {
@@ -1066,8 +1067,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 

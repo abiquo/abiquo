@@ -67,8 +67,6 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
 
     private static final String IP_POOL_GET_BY_VIRTUAL_MACHIE = "IP_POOL.GET_BY_VIRTUAL_MACHIE";
 
-
-    
     @Override
     public List<IpPoolManagementHB> findByVirtualMachine(Integer idVm)
     {
@@ -389,7 +387,8 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
         else
         {
             // order by IP by default
-            queryString .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) asc");
+            queryString
+                .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) asc");
 
         }
 

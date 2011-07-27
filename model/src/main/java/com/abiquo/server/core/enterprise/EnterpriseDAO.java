@@ -45,6 +45,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaEnterpriseDAO")
@@ -151,17 +152,30 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return existsAnyOtherByCriterions(enterprise, nameEqual(name));
     }
 
+    private Criterion samePricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+
+    }
+
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and pm.idState != 7" // not HA_DISABLED
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and
+                                                                                               // pm.idState
+                                                                                               // !=
+                                                                                               // 7"
+                                                                                               // //
+                                                                                               // not
+                                                                                               // HA_DISABLED
             + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
-                enterpriseId).setParameter("not_deployed",
-                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("enterpriseId", enterpriseId)
+                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
+                .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
@@ -278,4 +292,10 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         //
         // return repoUsed;
     }
+
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return existsAnyByCriterions(samePricingTemplate(pricingTemplate));
+    }
+
 }

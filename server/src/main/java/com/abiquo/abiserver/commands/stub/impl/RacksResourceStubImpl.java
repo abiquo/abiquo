@@ -76,7 +76,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         // TODO Auto-generated method stub
         return null;
     }
- 
+
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getUcsRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
      */

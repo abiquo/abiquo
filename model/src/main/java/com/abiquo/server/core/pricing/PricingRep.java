@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Repository
 @Transactional
@@ -43,6 +44,9 @@ public class PricingRep extends DefaultRepBase
     @Autowired
     private PricingTemplateDAO pricingTemplateDao;
 
+    @Autowired
+    private EnterpriseRep enterpriseRep;
+
     public PricingRep()
     {
 
@@ -54,6 +58,7 @@ public class PricingRep extends DefaultRepBase
         assert entityManager.isOpen();
 
         this.entityManager = entityManager;
+        enterpriseRep = new EnterpriseRep(entityManager);
         pricingTemplateDao = new PricingTemplateDAO(entityManager);
         currencyDao = new CurrencyDAO(entityManager);
     }
@@ -123,4 +128,29 @@ public class PricingRep extends DefaultRepBase
         return pricingTemplateDao.findById(id);
     }
 
+    public void updatePricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        pricingTemplateDao.flush();
+    }
+
+    public List<PricingTemplate> findAllPricingTemplateByName(final String name)
+    {
+        return pricingTemplateDao.findAllPricingTemplateByName(name);
+    }
+
+    public boolean existAnyOtherPricingTempWithName(final PricingTemplate pricingTemplate,
+        final String name)
+    {
+        return pricingTemplateDao.existAnyOtherPricingTempWithName(pricingTemplate, name);
+    }
+
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return enterpriseRep.existAnyEnterpriseWithPricingTemplate(pricingTemplate);
+    }
+
+    public void deletePricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        pricingTemplateDao.remove(pricingTemplate);
+    }
 }

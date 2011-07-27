@@ -78,8 +78,8 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         dto.setStatus(1);
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                dto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(dto);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -102,8 +102,8 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
 
         Resource resource =
-            client.resource(uri).contentType(MediaType.APPLICATION_XML).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(uri).contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML);
 
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setType(RemoteServiceType.APPLIANCE_MANAGER);
@@ -123,8 +123,8 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveRemoteServicesURI(rs.getDatacenter().getId());
 
         Resource resource =
-            client.resource(uri).contentType(MediaType.APPLICATION_XML).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(uri).contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML);
 
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setType(RemoteServiceType.NODE_COLLECTOR);

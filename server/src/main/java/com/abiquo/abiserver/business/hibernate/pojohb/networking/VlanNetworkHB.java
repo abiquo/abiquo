@@ -58,7 +58,7 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
      * The enterprise to which the Vlan is reserved for
      */
     private EnterpriseHB enterpriseHB;
-    
+
     /**
      * @return the vlanNetworkId
      */
@@ -122,23 +122,23 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
     {
         this.enterpriseHB = enterpriseHB;
     }
-   
+
     @Override
     public VlanNetwork toPojo()
     {
         VlanNetwork vnet = new VlanNetwork();
-        
+
         vnet.setNetworkId(getNetworkId());
         vnet.setNetworkName(getNetworkName());
         vnet.setVlanNetworkId(getVlanNetworkId());
         vnet.setVlanTag(getVlanTag());
         vnet.setDefaultNetwork(getDefaultNetwork());
-        
+
         if (getConfiguration() != null)
         {
             vnet.setConfiguration(((NetworkConfigurationHB) getConfiguration()).toPojo());
         }
-        
+
         return vnet;
     }
 

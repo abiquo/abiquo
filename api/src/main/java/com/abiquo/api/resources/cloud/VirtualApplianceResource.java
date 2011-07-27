@@ -83,14 +83,14 @@ public class VirtualApplianceResource
 
         return createTransferObject(vapp, restBuilder);
     }
-    
+
     @PUT
     public VirtualApplianceDto updateVirtualAppliance(
-		@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
         VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
     {
-    	VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
+        VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
 
         return createTransferObject(vapp, restBuilder);
     }
@@ -128,7 +128,7 @@ public class VirtualApplianceResource
     {
         VirtualApplianceDto dto =
             ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
-        
+
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());

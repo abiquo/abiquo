@@ -36,7 +36,6 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
     private DatacenterGenerator datacenterGenerator;
 
     private RackGenerator rackGenerator;
-    
 
     public MachineGenerator(SeedGenerator seed)
     {
@@ -97,14 +96,14 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
 
         final String name = newString(seed, Machine.NAME_LENGTH_MIN, Machine.NAME_LENGTH_MAX);
         Machine machine = createMachine(datacenter, name);
-                
+
         return machine;
     }
 
     public Machine createMachine(Datacenter datacenter, Rack rack)
     {
         Machine machine = createMachine(datacenter);
-        machine.setRack(rack);       
+        machine.setRack(rack);
 
         return machine;
     }
@@ -134,7 +133,7 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
                 virtualRamUsedInMb, virtualHardDiskInMb, realHardDiskInMb, virtualHardDiskUsed,
                 realCpuThreads, realCpuCores, currentCpusInUse, virtualCpusPerThread, state,
                 virtualSwitch);
-        
+
         return machine;
     }
 

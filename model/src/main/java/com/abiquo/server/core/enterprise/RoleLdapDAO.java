@@ -47,7 +47,6 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
  * @author ssedano
  */
 
-
 @Repository("jpaLdapRoleDAO")
 public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
 {
@@ -104,6 +103,7 @@ public class RoleLdapDAO extends DefaultDAOBase<Integer, RoleLdap>
         }
         return criteria;
     }
+
     // Criterions
 
     private Criterion sameRole(final Role role)

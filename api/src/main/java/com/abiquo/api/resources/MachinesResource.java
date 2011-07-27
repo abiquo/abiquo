@@ -57,7 +57,9 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 public class MachinesResource extends AbstractResource
 {
     public static final String MACHINES_PATH = "machines";
+
     public static final String SINGLE_MACHINE_MIME_TYPE = "application/machinedto+xml";
+
     public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
 
     @Autowired
@@ -67,7 +69,8 @@ public class MachinesResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
-    public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) @Min(1) Integer datacenterId,
+    public MachinesDto getMachines(
+        @PathParam(DatacenterResource.DATACENTER) @Min(1) Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(1) Integer rackId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
@@ -80,11 +83,12 @@ public class MachinesResource extends AbstractResource
 
         return transformMachinesDto(restBuilder, all);
     }
-    
+
     @POST
     @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
     @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
-    public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
+    public MachineDto postMachines(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachineDto machine,
         @Context IRESTBuilder restBuilder) throws Exception
     {
@@ -94,22 +98,23 @@ public class MachinesResource extends AbstractResource
 
         return transfer;
     }
-    
+
     @POST
     @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
     @Produces(MULTIPLE_MACHINES_MIME_TYPE)
-    public MachinesDto postMultipleMachines(@PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
+    public MachinesDto postMultipleMachines(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachinesDto machines,
         @Context IRESTBuilder restBuilder) throws Exception
     {
         List<Machine> machinesToCreate = MachineResource.createPersistenceObjects(machines);
-        List<Machine> machinesCreated = infrastructureService.addMachines(machinesToCreate, datacenterId, rackId);
+        List<Machine> machinesCreated =
+            infrastructureService.addMachines(machinesToCreate, datacenterId, rackId);
         MachinesDto transfer = MachineResource.createTransferObjects(machinesCreated, restBuilder);
 
         return transfer;
     }
-    
-   
+
     public static MachinesDto transformMachinesDto(IRESTBuilder restBuilder,
         Collection<Machine> machines) throws Exception
     {

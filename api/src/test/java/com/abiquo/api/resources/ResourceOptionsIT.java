@@ -29,7 +29,6 @@ import org.apache.wink.client.Resource;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
 public class ResourceOptionsIT extends AbstractJpaGeneratorIT
 {
     @Test

@@ -148,7 +148,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (Exception e)
         {
             addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));            
+                virtualMachineId, e));
         }
         finally
         {
@@ -167,7 +167,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         return new CommonError(apiError.getCode(), msg);
     }
-
 
     public void updateVirtualMachineUse(final Integer idVirtualApp, final VirtualMachine vMachine)
     {

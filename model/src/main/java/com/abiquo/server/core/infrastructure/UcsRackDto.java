@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class UcsRackDto extends RackDto
 {
     private static final long serialVersionUID = 1L;
-    
+
     private Integer port;
 
     public Integer getPort()

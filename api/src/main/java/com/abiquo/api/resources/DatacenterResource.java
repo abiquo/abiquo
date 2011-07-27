@@ -121,7 +121,7 @@ public class DatacenterResource extends AbstractResource
         }
         enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
         enterprisesDto.addLinks(buildEnterprisesLinks(uriInfo.getAbsolutePath().toString(),
-            (PagedList) enterprises, network,numElem));
+            (PagedList) enterprises, network, numElem));
         return enterprisesDto;
 
     }
@@ -184,13 +184,15 @@ public class DatacenterResource extends AbstractResource
             previous = (previous < 0) ? 0 : previous;
 
             links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + previous + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + previous + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
         Integer next = list.getCurrentElement() + list.getPageSize();
         if (next < list.getTotalResults())
         {
             links.add(new RESTLink("next", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + next + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + next + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
 
         Integer last = list.getTotalResults() - list.getPageSize();
@@ -199,7 +201,8 @@ public class DatacenterResource extends AbstractResource
             last = 0;
         }
         links.add(new RESTLink("last", Path + "?" + NETWORK + "=" + network.toString() + '&'
-            + AbstractResource.START_WITH + "=" + last + '&' +AbstractResource.LIMIT +"=" + numElem));
+            + AbstractResource.START_WITH + "=" + last + '&' + AbstractResource.LIMIT + "="
+            + numElem));
         return links;
     }
 }

@@ -45,9 +45,9 @@ import com.abiquo.model.transport.error.ErrorsDto;
 @Provider
 public class APIExceptionMapper implements ExceptionMapper<APIException>
 {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(APIExceptionMapper.class);
-    
+
     @Override
     public Response toResponse(APIException exception)
     {
@@ -71,14 +71,15 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         errorDto.setMessage(error.getMessage());
         return errorDto;
     }
-    
+
     private Status defineStatus(APIException exception, ErrorsDto dto)
     {
         if (exception instanceof ForbiddenException)
         {
             if (logger.isTraceEnabled())
             {
-                logger.trace("API Response " + Status.FORBIDDEN.name() + "\n" + dto.toString(), exception);
+                logger.trace("API Response " + Status.FORBIDDEN.name() + "\n" + dto.toString(),
+                    exception);
             }
             return Status.FORBIDDEN;
         }
@@ -86,7 +87,8 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         {
             if (logger.isTraceEnabled())
             {
-                logger.trace("API Response " + Status.BAD_REQUEST.name() + "\n" + dto.toString(), exception);
+                logger.trace("API Response " + Status.BAD_REQUEST.name() + "\n" + dto.toString(),
+                    exception);
             }
             return Status.BAD_REQUEST;
         }
@@ -94,7 +96,8 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         {
             if (logger.isTraceEnabled())
             {
-                logger.trace("API Response " + Status.CONFLICT.name() + "\n" + dto.toString(), exception);
+                logger.trace("API Response " + Status.CONFLICT.name() + "\n" + dto.toString(),
+                    exception);
             }
             return Status.CONFLICT;
         }
@@ -102,18 +105,23 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         {
             if (logger.isTraceEnabled())
             {
-                logger.trace("API Response " + Status.NOT_FOUND.name() + "\n" + dto.toString(), exception);
+                logger.trace("API Response " + Status.NOT_FOUND.name() + "\n" + dto.toString(),
+                    exception);
             }
             return Status.NOT_FOUND;
         }
         if (exception instanceof ServiceUnavailableException)
         {
-            logger.error("Unexpected exception that throws a 503 error code in API:\n" + dto.toString(), exception);
+            logger.error(
+                "Unexpected exception that throws a 503 error code in API:\n" + dto.toString(),
+                exception);
             return Status.SERVICE_UNAVAILABLE;
         }
         if (exception instanceof InternalServerErrorException)
         {
-            logger.error("Unexpected exception that throws a 500 error code in API:\n" + dto.toString(), exception);
+            logger.error(
+                "Unexpected exception that throws a 500 error code in API:\n" + dto.toString(),
+                exception);
             return Status.INTERNAL_SERVER_ERROR;
         }
         else

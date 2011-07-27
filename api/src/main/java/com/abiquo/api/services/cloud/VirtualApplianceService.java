@@ -91,7 +91,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
@@ -105,8 +105,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.infrastructureService = new InfrastructureService(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     /**

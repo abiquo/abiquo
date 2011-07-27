@@ -232,7 +232,7 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-              vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
         }
     }
 

@@ -41,7 +41,7 @@ public class RemoteServicesDto extends WrapperDto<RemoteServiceDto>
     @XmlElement(name = "remoteService")
     public List<RemoteServiceDto> getCollection()
     {
-        if(collection == null)
+        if (collection == null)
         {
             collection = new ArrayList<RemoteServiceDto>();
         }

@@ -64,15 +64,15 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     protected String networkName;
 
     /**
-     * The tag that defines the network. 
+     * The tag that defines the network.
      */
     protected Integer vlanTag;
-    
+
     /**
      * The configuration of the VLAN
      */
     private NetworkConfiguration configuration;
-    
+
     /**
      * @return the vlanNetworkId
      */
@@ -169,23 +169,22 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         this.configuration = configuration;
     }
 
-   
     @Override
     public VlanNetworkHB toPojoHB()
     {
         VlanNetworkHB vnetHB = new VlanNetworkHB();
-        
+
         vnetHB.setNetworkId(getNetworkId());
         vnetHB.setVlanNetworkId(getVlanNetworkId());
         vnetHB.setDefaultNetwork(getDefaultNetwork());
         vnetHB.setNetworkName(getNetworkName());
         vnetHB.setVlanTag(getVlanTag());
-                
+
         if (getConfiguration() != null)
         {
             vnetHB.setConfiguration(getConfiguration().toPojoHB());
-        }        
-       
+        }
+
         return vnetHB;
     }
 

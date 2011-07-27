@@ -76,12 +76,12 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
      * Identifier of its vlan network
      */
     private Integer vlanNetworkId;
-    
+
     /**
      * If the IP is in quarantine.
      */
     private Boolean quarantine;
-    
+
     /**
      * @return the ip
      */
@@ -202,7 +202,6 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         return vlanNetworkId;
     }
 
-   
     /**
      * @param quarantine the quarantine to set
      */
@@ -218,7 +217,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     {
         return quarantine;
     }
-    
+
     @Override
     public IpPoolManagement toPojo()
     {
@@ -233,7 +232,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         ipPool.setName(getName());
         ipPool.setVlanNetworkName(vlanNetworkName);
         ipPool.setQuarantine(getQuarantine());
-        
+
         if (getVirtualApp() != null)
         {
             ipPool.setVirtualApplianceId(getVirtualApp().getIdVirtualApp());
@@ -263,14 +262,13 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         {
             if (!mac2.contains(":"))
             {
-                StringBuilder formattedMA =
-                    new StringBuilder(mac2.substring(0, 2) + ":");
+                StringBuilder formattedMA = new StringBuilder(mac2.substring(0, 2) + ":");
                 formattedMA.append(mac2.substring(2, 4) + ":");
                 formattedMA.append(mac2.substring(4, 6) + ":");
                 formattedMA.append(mac2.substring(6, 8) + ":");
                 formattedMA.append(mac2.substring(8, 10) + ":");
                 formattedMA.append(mac2.substring(10, 12));
-            
+
                 return formattedMA.toString();
             }
             else

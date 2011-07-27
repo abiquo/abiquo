@@ -55,6 +55,11 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
         return Restrictions.eq(PricingTemplate.NAME_PROPERTY, name);
     }
 
+    public boolean existAnyOtherPricingTempWithName(final PricingTemplate pt, final String name)
+    {
+        return existsAnyOtherByCriterions(pt, sameName(name));
+    }
+
     private Criterion filterBy(final String filter)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
@@ -119,5 +124,13 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
         }
 
         return criteria;
+    }
+
+    public List<PricingTemplate> findAllPricingTemplateByName(final String name)
+    {
+        Criteria criteria = createCriteria(sameName(name));
+        criteria.addOrder(Order.asc(PricingTemplate.NAME_PROPERTY));
+
+        return criteria.list();
     }
 }

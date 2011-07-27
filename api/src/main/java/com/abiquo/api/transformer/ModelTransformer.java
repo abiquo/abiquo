@@ -61,7 +61,8 @@ public class ModelTransformer
         Class superClass = sourceClass.getSuperclass();
         while (!superClass.getSimpleName().equalsIgnoreCase("SingleResourceTransportDto"))
         {
-            transportFields = (Field[]) ArrayUtils.addAll(transportFields, superClass.getDeclaredFields());
+            transportFields =
+                (Field[]) ArrayUtils.addAll(transportFields, superClass.getDeclaredFields());
             superClass = superClass.getSuperclass();
         }
 
@@ -80,7 +81,8 @@ public class ModelTransformer
 
                     if (setterExist(name, targetClass, field.getType()))
                     {
-                        setter(name, targetClass, field.getType()).invoke(target, new Object[] {value});
+                        setter(name, targetClass, field.getType()).invoke(target,
+                            new Object[] {value});
                     }
                 }
             }
@@ -109,7 +111,7 @@ public class ModelTransformer
     {
         String name = "set" + StringUtils.capitalize(fieldName);
         Method method = clazz.getMethod(name, new Class[] {type});
-        
+
         if (method != null)
         {
             method.setAccessible(true);

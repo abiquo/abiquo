@@ -74,7 +74,7 @@ public class VirtualDatacenterResource extends AbstractResource
 
     @Autowired
     UserService userService;
-    
+
     @Context
     UriInfo uriInfo;
 
@@ -108,10 +108,10 @@ public class VirtualDatacenterResource extends AbstractResource
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
-        @QueryParam(START_WITH) @Min(0) final Integer startwith, @QueryParam(BY) final String orderBy,
-        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) @Min(0)final Integer limit,
-        @QueryParam(ASC) final Boolean desc_or_asc, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(START_WITH) @Min(0) final Integer startwith,
+        @QueryParam(BY) final String orderBy, @QueryParam(FILTER) final String filter,
+        @QueryParam(LIMIT) @Min(0) final Integer limit, @QueryParam(ASC) final Boolean desc_or_asc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         // Set query Params by default if they are not informed
         Integer firstElem = (startwith == null) ? 0 : startwith;
@@ -123,10 +123,9 @@ public class VirtualDatacenterResource extends AbstractResource
         List<IpPoolManagement> all =
             ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
         /*
-        if (all == null || all.isEmpty())
-        {
-            throw new ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS);
-        }*/
+         * if (all == null || all.isEmpty()) { throw new
+         * ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS); }
+         */
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 

@@ -115,7 +115,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
         ds().persistAll(datacenter, enterprise);
 
         DatacenterDAO dao = createDaoWithNoTransaction();
-     
+
         DefaultEntityCurrentUsed expectedUsed = new DefaultEntityCurrentUsed(0, 0, 0);
         DefaultEntityCurrentUsed currentUsed =
             dao.getCurrentResourcesAllocated(datacenter.getId(), enterprise.getId());

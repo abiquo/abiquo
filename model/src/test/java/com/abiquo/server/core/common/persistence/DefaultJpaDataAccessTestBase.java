@@ -24,12 +24,13 @@ package com.abiquo.server.core.common.persistence;
 import com.softwarementors.bzngine.engines.jpa.test.JpaDataAccessTestBase;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 
-public class DefaultJpaDataAccessTestBase extends JpaDataAccessTestBase {
+public class DefaultJpaDataAccessTestBase extends JpaDataAccessTestBase
+{
 
-	@Override
-	protected EntityManagerFactoryForTesting getFactory() {
-		return TestDataAccessManager.getFactory();
-	}
-
+    @Override
+    protected EntityManagerFactoryForTesting getFactory()
+    {
+        return TestDataAccessManager.getFactory();
+    }
 
 }

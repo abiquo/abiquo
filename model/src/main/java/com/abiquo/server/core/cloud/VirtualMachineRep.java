@@ -92,7 +92,7 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return dao.findByUUID(uuid);
     }
-    
+
     public VirtualMachine findByName(String name)
     {
         return dao.findByName(name);

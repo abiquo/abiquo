@@ -223,8 +223,9 @@ public class VirtualMachineResourceIT extends TestPopulate
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");
         assertNotNull(vmDto);
@@ -233,8 +234,9 @@ public class VirtualMachineResourceIT extends TestPopulate
         response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
             "edit");
         assertNotNull(vmDto);
@@ -406,8 +408,8 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), new Random()
-                .nextInt()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
+                new Random().nextInt()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -448,8 +450,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -490,8 +492,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -525,8 +527,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
 
         Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_XML);
 
         if (action.allocate)
         {
@@ -555,13 +557,13 @@ public class VirtualMachineResourceIT extends TestPopulate
 
                 if (action.targetMachineName.contains("no_resource"))
                 {
-                    Assert.assertTrue(noResources, String.format(
-                        "expected no_resource for vmId [%d]", virtualMachineId));
+                    Assert.assertTrue(noResources,
+                        String.format("expected no_resource for vmId [%d]", virtualMachineId));
                 }
                 else if (action.targetMachineName.contains("limit"))
                 {
-                    Assert.assertTrue(limit, String.format("expected limit for vmId [%d]",
-                        virtualMachineId));
+                    Assert.assertTrue(limit,
+                        String.format("expected limit for vmId [%d]", virtualMachineId));
                 }
                 else
                 {

@@ -73,12 +73,12 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
 
             // Create the Datastore
             newDatastore =
-                (DatastoreHB) HibernateDAOFactory.getSessionFactory().getCurrentSession().merge(
-                    newDatastore);
+                (DatastoreHB) HibernateDAOFactory.getSessionFactory().getCurrentSession()
+                    .merge(newDatastore);
 
             // Persist the relation between the datastore and the physicalmachine.
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
-            
+
             PhysicalmachineHB pmHB = pmDAO.findById(physicalMachineId);
             pmHB.getDatastoresHB().add(newDatastore);
 
@@ -119,7 +119,8 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
                 throw new DatastoreCommandException("Datastore to edit doesn't exist in Database");
             }
 
-            // The changes in the datastore deploy directory are not allowed if there is any virtual machine deployed
+            // The changes in the datastore deploy directory are not allowed if there is any virtual
+            // machine deployed
             if (vmDAO.findByDatastore(datastoreId).size() > 0)
             {
                 if (!datastore.getDirectory().equals(dataHB.getDirectory())
@@ -140,8 +141,10 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
             if (!datastore.getDirectory().equals(dataHB.getDirectory()))
             {
                 // ESXi and XenServer manage the directory on their own way. So, we can not edit it
-                if (pmHB.getHypervisor().getType().getValue().equalsIgnoreCase(HypervisorType.VMX_04.getValue())
-                    || pmHB.getHypervisor().getType().getValue().equalsIgnoreCase(HypervisorType.XENSERVER.getValue()))
+                if (pmHB.getHypervisor().getType().getValue()
+                    .equalsIgnoreCase(HypervisorType.VMX_04.getValue())
+                    || pmHB.getHypervisor().getType().getValue()
+                        .equalsIgnoreCase(HypervisorType.XENSERVER.getValue()))
                 {
                     throw new DatastoreCommandException("Can not edit the directory for this Hypervisor");
                 }

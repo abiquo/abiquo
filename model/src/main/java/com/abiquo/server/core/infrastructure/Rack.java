@@ -320,7 +320,7 @@ public class Rack extends DefaultEntityBase
     {
         this.vlansIdAvoided = vlansIdAvoided;
     }
-    
+
     public final static String HAENABLED_PROPERTY = "haEnabled";
 
     private final static String HAENABLED_COLUMN = "haEnabled";
