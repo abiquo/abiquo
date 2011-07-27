@@ -166,7 +166,10 @@ public class DatacenterService extends DefaultApiService
             for (RemoteService rs : remoteServices)
             {
                 RemoteServiceDto rsDto = remoteServiceService.addRemoteService(rs, idDatacenter);
-                responseRemoteService.add(rsDto);
+                if (rsDto != null)
+                {
+                    responseRemoteService.add(rsDto);
+                }
             }
         }
 
