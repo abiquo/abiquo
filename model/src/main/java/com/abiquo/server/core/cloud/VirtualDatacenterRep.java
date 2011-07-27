@@ -39,6 +39,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.DhcpDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -310,7 +311,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
     {
-        return ipManagementDAO.findByPrivateVLAN(vdcId, vlanId);
+        return ipManagementDAO.findIpsByPrivateVLAN(vdcId, vlanId);
     }
 
     /**
@@ -323,7 +324,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Integer vlanId, final Integer firstElem, final Integer numElem, final String has,
         final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
     {
-        return ipManagementDAO.findByPrivateVLANFiltered(vdcId, vlanId, firstElem, numElem, has,
+        return ipManagementDAO.findIpsByPrivateVLANFiltered(vdcId, vlanId, firstElem, numElem, has,
             orderBy, asc);
     }
 
@@ -337,7 +338,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Integer vlanId, final Integer firstElem, final Integer numElem, final String has,
         final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
     {
-        return ipManagementDAO.findByPrivateVLANAvailableFiltered(vdcId, vlanId, firstElem,
+        return ipManagementDAO.findIpsByPrivateVLANAvailableFiltered(vdcId, vlanId, firstElem,
             numElem, has, orderBy, asc);
     }
 
@@ -363,7 +364,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
         final Boolean asc)
     {
-        return ipManagementDAO.findByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
+        return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -376,7 +377,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
         final Boolean asc)
     {
-        return ipManagementDAO.findByEnterprise(entId, firstElem, numElem, has, orderBy, asc);
+        return ipManagementDAO.findIpsByEnterprise(entId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -387,12 +388,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsByVirtualAppliance(final VirtualAppliance vapp)
     {
-        return ipManagementDAO.findByVirtualAppliance(vapp);
+        return ipManagementDAO.findIpsByVirtualAppliance(vapp);
     }
 
     public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine vm)
     {
-        return ipManagementDAO.findByVirtualMachine(vm);
+        return ipManagementDAO.findIpsByVirtualMachine(vm);
     }
 
     /**
@@ -477,6 +478,22 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public VLANNetwork findVlanByNameInNetwork(final Network network, final String name)
     {
         return vlanDAO.findVlanByNameInNetwork(network, name);
+    }
+
+    public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
+        final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+    {
+        return ipManagementDAO.findPublicIpsByDatacenter(datacenterId, startwith, limit, filter,
+            orderByEnum, descOrAsc);
+    }
+
+    public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,
+        final Integer vlanId, final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+    {
+        return ipManagementDAO.findPublicIpsByVlan(datacenterId, vlanId, startwith, limit, filter,
+            orderByEnum, descOrAsc);
     }
 
 }

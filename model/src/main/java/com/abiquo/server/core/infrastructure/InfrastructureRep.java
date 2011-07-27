@@ -729,7 +729,7 @@ public class InfrastructureRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsPurchasedInPublicVlan(final VLANNetwork vlan)
     {
-        return ipPoolDao.findIpsPurchasedInPublicVlan(vlan);
+        return ipPoolDao.findPublicIpsPurchasedByVlan(vlan);
     }
 
     /**

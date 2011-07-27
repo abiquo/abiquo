@@ -836,4 +836,11 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

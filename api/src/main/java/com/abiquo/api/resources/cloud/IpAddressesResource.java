@@ -39,9 +39,6 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ConflictException;
-import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
@@ -57,56 +54,60 @@ import com.abiquo.server.core.util.PagedList;
 @Parent(PrivateNetworkResource.class)
 @Path(IpAddressesResource.IP_ADDRESSES)
 @Controller
-public class IpAddressesResource extends AbstractResource {
-	
-	public static final String IP_ADDRESSES = "ips";
-	
-	public static final String ONLYAVAILABLE = "onlyAvailable";
-	
+public class IpAddressesResource extends AbstractResource
+{
 
-	@Autowired
-	private IpAddressService service;
+    public static final String IP_ADDRESSES = "ips";
 
-	@Context
-	UriInfo uriInfo;
+    public static final String ONLYAVAILABLE = "onlyAvailable";
 
-	@GET
-	public IpsPoolManagementDto getIPAddresses(
-			@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-			@PathParam(PrivateNetworkResource.PRIVATE_NETWORK) Integer vlanId,
-			@QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
-			@QueryParam(BY) @DefaultValue("ip") final String orderBy,
-			@QueryParam(FILTER) @DefaultValue("") final String filter,
-			@QueryParam(LIMIT) @Min(0) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
-			@QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
-			@QueryParam(ONLYAVAILABLE) @DefaultValue("false") final Boolean available,
-			@Context final IRESTBuilder restBuilder) throws Exception {
-		
-		List<IpPoolManagement> all = service.getListIpPoolManagementByVLAN(
-				vdcId, vlanId, startwith, orderBy, filter, limit, descOrAsc, available);
+    @Autowired
+    private IpAddressService service;
 
-		IpsPoolManagementDto ips = new IpsPoolManagementDto();
+    @Context
+    UriInfo uriInfo;
 
-		for (IpPoolManagement ip : all) {
-			ips.add(createTransferObject(ip, restBuilder));
-		}
+    @GET
+    public IpsPoolManagementDto getIPAddresses(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) final Integer vlanId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("ip") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(0) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @QueryParam(ONLYAVAILABLE) @DefaultValue("false") final Boolean available,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
 
-		ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
-				.toString(), (PagedList) all));
-		ips.setTotalSize(((PagedList) all).getTotalResults());
+        List<IpPoolManagement> all =
+            service.getListIpPoolManagementByVLAN(vdcId, vlanId, startwith, orderBy, filter, limit,
+                descOrAsc, available);
 
-		return ips;
-	}
+        IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
-	public static IpPoolManagementDto createTransferObject(IpPoolManagement ip,
-			IRESTBuilder restBuilder) throws Exception {
-		IpPoolManagementDto dto = ModelTransformer.transportFromPersistence(
-				IpPoolManagementDto.class, ip);
+        for (IpPoolManagement ip : all)
+        {
+            ips.add(createTransferObject(ip, restBuilder));
+        }
 
-		// Create the links to the resources where the IP object is assigned to
-		dto.addLinks(restBuilder.buildIpRasdLinks(ip));
-		dto.addLinks(restBuilder.buildRasdLinks(ip));
+        ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+            (PagedList) all));
+        ips.setTotalSize(((PagedList) all).getTotalResults());
 
-		return dto;
-	}
+        return ips;
+    }
+
+    public static IpPoolManagementDto createTransferObject(final IpPoolManagement ip,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        IpPoolManagementDto dto =
+            ModelTransformer.transportFromPersistence(IpPoolManagementDto.class, ip);
+
+        // Create the links to the resources where the IP object is assigned to
+        dto.addLinks(restBuilder.buildIpRasdLinks(ip));
+        dto.addLinks(restBuilder.buildRasdLinks(ip));
+
+        return dto;
+    }
 }

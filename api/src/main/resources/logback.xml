@@ -19,7 +19,7 @@
         </rollingPolicy>
     </appender>
     <logger name="com.abiquo">
-        <level value="DEBUG" />
+        <level value="TRACE" />
     </logger>
     <logger name="org.hibernate">
         <level value="WARN" />
@@ -34,7 +34,7 @@
         <level value="WARN" />
     </logger>
     <root>
-        <level value="INFO" />
+        <level value="TRACE" />
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </root>

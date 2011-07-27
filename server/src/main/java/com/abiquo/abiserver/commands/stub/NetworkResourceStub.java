@@ -24,8 +24,6 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
-import java.io.UnsupportedEncodingException;
-
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -46,12 +44,20 @@ public interface NetworkResourceStub
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
-	public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId, Integer vlanId,
-			Integer offset, Integer numberOfNodes, String filterLike,
-			String orderBy, Boolean asc, Boolean onlyAvailable);
-	
+    public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId, Integer vlanId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
+        Boolean onlyAvailable);
+
     public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
+        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolByVlan(Integer datacenterId, Integer vlanId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
     /**

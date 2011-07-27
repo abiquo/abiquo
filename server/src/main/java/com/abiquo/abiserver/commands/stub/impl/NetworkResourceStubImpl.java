@@ -58,35 +58,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 {
 
     @Override
-    public BasicResult getPrivateNetworks(final Integer vdcId)
-    {
-        DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
-
-        String uri = createPrivateNetworksLink(vdcId);
-        ClientResponse response = get(uri);
-
-        if (response.getStatusCode() == 200)
-        {
-            VLANNetworksDto networksDto = response.getEntity(VLANNetworksDto.class);
-            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
-
-            for (VLANNetworkDto dto : networksDto.getCollection())
-            {
-                nets.add(createFlexObject(dto));
-            }
-
-            result.setData(nets);
-            result.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, result, "getPrivateNetworks");
-        }
-
-        return result;
-    }
-
-    @Override
     public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
         final VLANNetworkDto dto)
     {
@@ -107,157 +78,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return result;
     }
-
-    @Override
-    public BasicResult getListNetworkPoolByEnterprise(final Integer enterpriseId,
-        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc) throws NetworkCommandException
-    {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
-
-        StringBuilder buildRequest = new StringBuilder(createEnterpriseIPsLink(enterpriseId));
-        buildRequest.append("?startwith=" + offset);
-        buildRequest.append("&limit=" + numElem);
-        buildRequest.append("&by=" + transformOrderBy(orderBy));
-        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
-        String filter = filterLike;
-        try
-        {
-            filter = URLEncoder.encode(filterLike, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-
-        }
-        if (!filter.isEmpty())
-        {
-            buildRequest.append("&has=" + filter);
-        }
-        String request = buildRequest.toString();
-
-        ClientResponse response = get(request);
-
-        if (response.getStatusCode() == 200)
-        {
-            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
-            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
-
-            for (IpPoolManagementDto ip : ips.getCollection())
-            {
-                IpPoolManagement flexIp = createFlexObject(ip);
-                flexIp.setEnterpriseId(enterpriseId);
-                flexIps.add(flexIp);
-            }
-            listResponse.setList(flexIps);
-            listResponse.setTotalNumEntities(ips.getTotalSize());
-
-            dataResult.setData(listResponse);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, dataResult, "getListNetworkPoolByEnterprise");
-        }
-
-        return dataResult;
-    }
-
-    @Override
-    public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
-        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc) throws NetworkCommandException
-    {
-        DataResult<ListResponse<IpPoolManagement>> dataResult =
-            new DataResult<ListResponse<IpPoolManagement>>();
-        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
-
-        StringBuilder buildRequest =
-            new StringBuilder(createVirtualDatacenterPrivateIPsLink(vdcId));
-        buildRequest.append("?startwith=" + offset);
-        buildRequest.append("&limit=" + numElem);
-        buildRequest.append("&by=" + transformOrderBy(orderBy));
-        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
-        if (!filterLike.isEmpty())
-        {
-            buildRequest.append("&has=" + filterLike);
-        }
-
-        ClientResponse response = get(buildRequest.toString());
-
-        if (response.getStatusCode() == 200)
-        {
-            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
-            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
-
-            for (IpPoolManagementDto ip : ips.getCollection())
-            {
-                IpPoolManagement flexIp = createFlexObject(ip);
-                flexIps.add(flexIp);
-            }
-            listResponse.setList(flexIps);
-            listResponse.setTotalNumEntities(ips.getTotalSize());
-
-            dataResult.setData(listResponse);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, dataResult, "getListNetworkPoolByVirtualDatacenter");
-        }
-
-        return dataResult;
-    }
-    
-
-	@Override
-	public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId,
-			Integer vlanId, Integer offset, Integer numberOfNodes,
-			String filterLike, String orderBy, Boolean asc,
-			Boolean onlyAvailable) {
-		
-		DataResult<ListResponse<IpPoolManagement>> dataResult =
-	            new DataResult<ListResponse<IpPoolManagement>>();
-	        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
-
-	        StringBuilder buildRequest =
-	            new StringBuilder(createPrivateNetworkIPsLink(vdcId, vlanId));
-	        buildRequest.append("?startwith=" + offset);
-	        buildRequest.append("&limit=" + numberOfNodes);
-	        buildRequest.append("&by=" + transformOrderBy(orderBy));
-	        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
-	        buildRequest.append("&onlyAvailable=" + ((onlyAvailable) ? "true" : "false"));
-	        if (!filterLike.isEmpty())
-	        {
-	            buildRequest.append("&has=" + filterLike);
-	        }
-
-	        ClientResponse response = get(buildRequest.toString());
-
-	        if (response.getStatusCode() == 200)
-	        {
-	            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
-	            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
-
-	            for (IpPoolManagementDto ip : ips.getCollection())
-	            {
-	                IpPoolManagement flexIp = createFlexObject(ip);
-	                flexIps.add(flexIp);
-	            }
-	            listResponse.setList(flexIps);
-	            listResponse.setTotalNumEntities(ips.getTotalSize());
-
-	            dataResult.setData(listResponse);
-	            dataResult.setSuccess(Boolean.TRUE);
-	        }
-	        else
-	        {
-	            populateErrors(response, dataResult, "getListNetworkPoolByPrivateVLAN");
-	        }
-
-	        return dataResult;
-	}
 
     @Override
     public BasicResult getEnterprisesWithNetworksByDatacenter(final UserSession userSession,
@@ -324,26 +144,275 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return dataResult;
     }
 
-    private String transformOrderBy(final String orderBy)
+    @Override
+    public BasicResult getListNetworkPoolByEnterprise(final Integer enterpriseId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
     {
-        if (orderBy == null)
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest = new StringBuilder(createEnterpriseIPsLink(enterpriseId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        String filter = filterLike;
+        try
         {
-            return "ip";
+            filter = URLEncoder.encode(filterLike, "UTF-8");
         }
-        else if (orderBy.equalsIgnoreCase("vlannetworkname"))
+        catch (UnsupportedEncodingException e)
         {
-            return "vlan";
+
         }
-        else if (orderBy.equalsIgnoreCase("virtualappliancename"))
+        if (!filter.isEmpty())
         {
-            return "virtualappliance";
+            buildRequest.append("&has=" + filter);
         }
-        else if (orderBy.equalsIgnoreCase("virtualmachinename"))
+        String request = buildRequest.toString();
+
+        ClientResponse response = get(request);
+
+        if (response.getStatusCode() == 200)
         {
-            return "virtualmachine";
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIp.setEnterpriseId(enterpriseId);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
         }
         else
-            return orderBy;
+        {
+            populateErrors(response, dataResult, "getListNetworkPoolByEnterprise");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getListNetworkPoolByPrivateVLAN(final Integer vdcId, final Integer vlanId,
+        final Integer offset, final Integer numberOfNodes, final String filterLike,
+        final String orderBy, final Boolean asc, final Boolean onlyAvailable)
+    {
+
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest = new StringBuilder(createPrivateNetworkIPsLink(vdcId, vlanId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numberOfNodes);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("&onlyAvailable=" + (onlyAvailable ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPoolByPrivateVLAN");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacenterPrivateIPsLink(vdcId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPoolByVirtualDatacenter");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
+        final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
+        final String filterLike, final String orderBy, final Boolean asc)
+        throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest = new StringBuilder(createDatacenterPublicIPsLink(datacenterId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numberOfNodes);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPublicPoolByDatacenter");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getListNetworkPublicPoolByVlan(final Integer datacenterId,
+        final Integer vlanId, final Integer offset, final Integer numberOfNodes,
+        final String filterLike, final String orderBy, final Boolean asc)
+        throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createPrivateNetworkIPsLink(datacenterId, vlanId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numberOfNodes);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPublicPoolByVlan");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getPrivateNetworks(final Integer vdcId)
+    {
+        DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
+
+        String uri = createPrivateNetworksLink(vdcId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            VLANNetworksDto networksDto = response.getEntity(VLANNetworksDto.class);
+            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
+
+            for (VLANNetworkDto dto : networksDto.getCollection())
+            {
+                nets.add(createFlexObject(dto));
+            }
+
+            result.setData(nets);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getPrivateNetworks");
+        }
+
+        return result;
     }
 
     private IpPoolManagement createFlexObject(final IpPoolManagementDto ip)
@@ -360,6 +429,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         for (RESTLink currentLink : ip.getLinks())
         {
             if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+            }
+            if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
             {
                 flexIp.setVlanNetworkName(currentLink.getTitle());
             }
@@ -408,4 +481,29 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return newNet;
     }
+
+    private String transformOrderBy(final String orderBy)
+    {
+        if (orderBy == null)
+        {
+            return "ip";
+        }
+        else if (orderBy.equalsIgnoreCase("vlannetworkname"))
+        {
+            return "vlan";
+        }
+        else if (orderBy.equalsIgnoreCase("virtualappliancename"))
+        {
+            return "virtualappliance";
+        }
+        else if (orderBy.equalsIgnoreCase("virtualmachinename"))
+        {
+            return "virtualmachine";
+        }
+        else
+        {
+            return orderBy;
+        }
+    }
+
 }
