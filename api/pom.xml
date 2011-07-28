@@ -202,7 +202,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.8.5</version>
-            <scope>test</scope>
+            <!-- <scope>test</scope> -->
         </dependency>
         <!-- END: TEST DEPENDENCIES -->
         <!-- OTHER DEPENDENCIES -->
