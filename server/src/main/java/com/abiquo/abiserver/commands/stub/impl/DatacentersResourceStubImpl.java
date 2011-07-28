@@ -49,7 +49,7 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         DataResult<ArrayList<DataCenter>> result = new DataResult<ArrayList<DataCenter>>();
         ArrayList<DataCenter> dcs = new ArrayList<DataCenter>();
 
-        ClientResponse response = get(createDatacenterLink());
+        ClientResponse response = get(createDatacenterLink(), FLAT_MEDIA_TYPE);
 
         if (response.getStatusCode() == 200)
         {
