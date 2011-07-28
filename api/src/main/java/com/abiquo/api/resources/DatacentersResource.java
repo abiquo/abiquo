@@ -32,6 +32,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
@@ -70,6 +71,32 @@ public class DatacentersResource extends AbstractResource
     private EnterpriseService entService;
 
     @GET
+    public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
+        @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
+    {
+        Collection<Datacenter> list = null;
+        if (StringUtils.hasText(idEnterprise))
+        {
+            Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));
+            list = service.getDatacenters(enterprise);
+        }
+        else
+        {
+            list = service.getDatacenters();
+        }
+
+        DatacentersDto datacenters = new DatacentersDto();
+        for (Datacenter d : list)
+        {
+            DatacenterDto dcdto = createTransferObject(d, restBuilder);
+            datacenters.add(dcdto);
+        }
+
+        return datacenters;
+    }
+
+    @GET
+    @Produces(FLAT_MEDIA_TYPE)
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
