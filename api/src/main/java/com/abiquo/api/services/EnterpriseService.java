@@ -59,6 +59,8 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,6 +71,9 @@ public class EnterpriseService extends DefaultApiService
 
     @Autowired
     VirtualDatacenterRep vdcRepo;
+
+    @Autowired
+    PricingRep pricingRep;
 
     @Autowired
     MachineService machineService;
@@ -123,8 +128,8 @@ public class EnterpriseService extends DefaultApiService
         return userService.getCurrentUser().getEnterprise();
     }
 
-    public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
-        final Integer numResults)
+    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
+        final String filterName, final Integer offset, final Integer numResults)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
@@ -136,6 +141,13 @@ public class EnterpriseService extends DefaultApiService
         if (!StringUtils.isEmpty(filterName))
         {
             return repo.findByNameAnywhere(filterName);
+        }
+
+        PricingTemplate pt = null;
+        if (idPricingTempl != 0)
+        {
+            pt = findPricingTemplate(idPricingTempl);
+            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults);
         }
 
         return repo.findAll(offset, numResults);
@@ -558,5 +570,16 @@ public class EnterpriseService extends DefaultApiService
     {
         // community dummy impl (no limit check)
 
+    }
+
+    private PricingTemplate findPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
     }
 }

@@ -57,9 +57,11 @@ public class EnterprisesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public EnterprisesDto getEnterprises(@QueryParam("filter") String filterName,
-        @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public EnterprisesDto getEnterprises(@QueryParam("idPricingTemplate") final String idPricTempl,
+        @QueryParam("included") final boolean included,
+        @QueryParam("filter") final String filterName, @QueryParam("page") Integer page,
+        @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         if (page == null)
         {
@@ -71,7 +73,14 @@ public class EnterprisesResource extends AbstractResource
             numResults = DEFAULT_PAGE_LENGTH;
         }
 
-        Collection<Enterprise> all = service.getEnterprises(filterName, page, numResults);
+        int idPricingTempl = 0;
+        if (idPricTempl != null)
+        {
+            idPricingTempl = Integer.valueOf(idPricTempl);
+        }
+
+        Collection<Enterprise> all =
+            service.getEnterprises(idPricingTempl, included, filterName, page, numResults);
         EnterprisesDto enterprises = new EnterprisesDto();
 
         if (all != null && !all.isEmpty())
@@ -94,8 +103,8 @@ public class EnterprisesResource extends AbstractResource
     }
 
     @POST
-    public EnterpriseDto postEnterprise(EnterpriseDto enterprise, @Context IRESTBuilder restBuilder)
-        throws Exception
+    public EnterpriseDto postEnterprise(final EnterpriseDto enterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Enterprise e = service.addEnterprise(enterprise);
 

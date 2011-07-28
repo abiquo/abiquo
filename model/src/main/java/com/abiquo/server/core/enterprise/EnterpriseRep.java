@@ -135,6 +135,14 @@ public class EnterpriseRep extends DefaultRepBase
         return this.enterpriseDAO.findAll(offset, numResults);
     }
 
+    public List<Enterprise> findByPricingTemplate(final PricingTemplate pricingTempl,
+        final boolean included, final String filterName, final Integer offset,
+        final Integer numResults)
+    {
+        return this.enterpriseDAO.findByPricingTemplate(pricingTempl, included, filterName, offset,
+            numResults);
+    }
+
     public List<Enterprise> findByNameAnywhere(final String name)
     {
         assert name != null;

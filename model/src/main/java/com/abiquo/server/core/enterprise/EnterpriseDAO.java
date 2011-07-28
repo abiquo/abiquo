@@ -30,6 +30,7 @@ import javax.persistence.PersistenceException;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -108,6 +109,30 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return result;
     }
 
+    public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
+        final String filterName, final Integer offset, final Integer numResults)
+    {
+        Criteria criteria = createCriteria(pt, included, filterName);
+
+        Long total = count(criteria);
+
+        criteria = createCriteria(pt, included, filterName);
+
+        criteria.setFirstResult(offset * numResults);
+        criteria.setMaxResults(numResults);
+
+        List<Enterprise> result = getResultList(criteria);
+
+        PagedList<Enterprise> page = new PagedList<Enterprise>();
+        page.addAll(result);
+        page.setCurrentElement(offset);
+        page.setPageSize(numResults);
+        page.setTotalResults(total.intValue());
+
+        return page;
+
+    }
+
     private static Criterion nameLikeAnywhere(final String name)
     {
         assert name != null;
@@ -152,10 +177,33 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return existsAnyOtherByCriterions(enterprise, nameEqual(name));
     }
 
+    private Criterion differentPricingTemplateOrNull(final PricingTemplate pricingTemplate)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.ne(Enterprise.PRICING_PROPERTY, pricingTemplate));
+        filterDisjunction.add(Restrictions.isNull(Enterprise.PRICING_PROPERTY));
+        return filterDisjunction;
+        // return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+
+    }
+
     private Criterion samePricingTemplate(final PricingTemplate pricingTemplate)
     {
-        return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate));
 
+        return filterDisjunction;
+        // return Restrictions.eq(Enterprise.PRICING_PROPERTY, pricingTemplate);
+
+    }
+
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(Role.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
     }
 
     private static final String SUM_VM_RESOURCES =
@@ -298,4 +346,27 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return existsAnyByCriterions(samePricingTemplate(pricingTemplate));
     }
 
+    private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
+        final String filter)
+    {
+        Criteria criteria = createCriteria();
+
+        if (included)
+        {
+
+            criteria.add(samePricingTemplate(pricingTemplate));
+
+        }
+        else
+        {
+            criteria.add(differentPricingTemplateOrNull(pricingTemplate));
+        }
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        return criteria;
+    }
 }
