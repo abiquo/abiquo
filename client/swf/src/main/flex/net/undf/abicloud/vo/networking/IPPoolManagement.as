@@ -41,6 +41,8 @@ package net.undf.abicloud.vo.networking
         public var ip:String;
 
         public var vlanNetworkName:String;
+        
+        public var vlanNetworkId:int;
 
         public var enterpriseId:int;
 
