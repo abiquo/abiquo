@@ -219,8 +219,9 @@ public enum APIError
         "Bad credentials attempting to retrieve the list of physical machines from rack "), NC_BAD_CREDENTIALS_TO_MACHINE(
         "NC-3", "Bad credentials attempting to retrieve the machine "), NC_CONNECTION_EXCEPTION(
         "NC-4", "There is a machine running in the given IP. But any hypervisor responds"), NC_NOT_FOUND_EXCEPTION(
-        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
-        "Unexpected exception building the request to Discovery Manager"), NC_UNAVAILABLE_EXCEPTION(
+        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION(
+        "NC-6",
+        "Hypervisor information could not be discovered or retrieved. This error may be caused by misconfiguration of the platform or an error in the data provided. Please see the Event Log for more detail"), NC_UNAVAILABLE_EXCEPTION(
         "NC-7", "The discovery manager currently is not available"),
 
     // STORAGE POOL
