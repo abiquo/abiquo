@@ -87,6 +87,6 @@
                 </props>
             </list>
         </property>
-        <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
     </bean>
+    <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>
