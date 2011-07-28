@@ -41,6 +41,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaIpPoolManagementDAO")
 public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagement>
@@ -409,6 +410,24 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
         return result;
 
+    }
+
+    /**
+     * Return a single {@link IpPoolManagement}
+     * 
+     * @param vlan {@link VLANNetwork} oject which the Ip should belong to.
+     * @param ipId identifier of the Ip.
+     * @return the found object.
+     */
+    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
+    {
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+        Criterion vlanEqual = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
+        Criterion ipEqual = Restrictions.eq(PersistentEntity.ID_PROPERTY, ipId);
+
+        criteria.add(vlanEqual).add(ipEqual);
+
+        return (IpPoolManagement) criteria.uniqueResult();
     }
 
     /**

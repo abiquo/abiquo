@@ -121,7 +121,9 @@ public enum APIError
         "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-14", "Can not delete a VLAN with IPs purchased by Enterprises"), VLANS_DUPLICATED_VLAN_NAME_DC(
         "VLAN-15", "Can not create two VLANs with the same name in a Datacenter"), VLANS_TAG_INVALID(
-        "VLAN-16", "VLAN tag out of limits"),
+        "VLAN-16", "VLAN tag out of limits"), VLANS_NON_EXISTENT_PUBLIC_IP("VLAN-17",
+        "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
+        "Only 'quarantine' attribute can be modified when edit an IP"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),

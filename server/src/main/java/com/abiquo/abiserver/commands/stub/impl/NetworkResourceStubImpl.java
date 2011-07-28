@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
@@ -50,12 +51,74 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
+import com.abiquo.server.core.infrastructure.network.VlanTagAvailabilityDto;
 
 /**
  * @author jdevesa
  */
 public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkResourceStub
 {
+
+    @Override
+    public DataResult<Boolean> checkVLANTagAvailability(final Integer datacenterId,
+        final Integer proposedVLANTag, final Integer currentVlanId)
+    {
+        DataResult<Boolean> result = new DataResult<Boolean>();
+        String uri = createDatacenterPublicTagCheck(datacenterId);
+        UserHB user = getCurrentUser();
+        ClientResponse response =
+            resource(uri, user.getUser(), user.getPassword()).queryParam("tag", proposedVLANTag)
+                .get();
+
+        if (response.getStatusCode() == 200)
+        {
+            VlanTagAvailabilityDto availDto = response.getEntity(VlanTagAvailabilityDto.class);
+            switch (availDto.getAvailable())
+            {
+                case AVAILABLE:
+                {
+                    result.setData(Boolean.TRUE);
+                    break;
+                }
+                case INVALID:
+                {
+                    result.setData(Boolean.FALSE);
+                    result.setMessage(availDto.getMessage());
+                    break;
+                }
+                case USED:
+                {
+                    // If its used, check if it is used by the currentVlanId network
+                    if (currentVlanId != null)
+                    {
+                        DataResult<VlanNetwork> dr =
+                            (DataResult<VlanNetwork>) getPublicNetwork(datacenterId, currentVlanId);
+                        if (dr.getData().getVlanTag().equals(proposedVLANTag))
+                        {
+                            result.setData(Boolean.TRUE);
+                        }
+                        else
+                        {
+                            result.setData(Boolean.FALSE);
+                            result.setMessage(availDto.getMessage());
+                        }
+                    }
+                    else
+                    {
+                        result.setData(Boolean.FALSE);
+                        result.setMessage(availDto.getMessage());
+                    }
+                }
+            }
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "checkVLANTagAvailability");
+        }
+
+        return result;
+    }
 
     @Override
     public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
@@ -77,6 +140,38 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         return result;
+    }
+
+    @Override
+    public BasicResult editPublicIp(final Integer datacenterId, final Integer vlanId,
+        final Integer idManagement, final IpPoolManagement ipPoolManagement)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createPublicNetworkIPLink(datacenterId, vlanId, idManagement);
+        ClientResponse response = put(uri, createDtoObject(ipPoolManagement));
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editPublicIp");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult getEnterpriseFromReservedVlanId(final Integer datacenterId,
+        final Integer vlanId)
+    {
+        // TODO: per a interroute aplicar aixo.
+        DataResult<Enterprise> dr = new DataResult<Enterprise>();
+        dr.setSuccess(Boolean.TRUE);
+        dr.setData(null);
+
+        return dr;
     }
 
     @Override
@@ -350,7 +445,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
 
         StringBuilder buildRequest =
-            new StringBuilder(createPrivateNetworkIPsLink(datacenterId, vlanId));
+            new StringBuilder(createPublicNetworkIPsLink(datacenterId, vlanId));
         buildRequest.append("?startwith=" + offset);
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
@@ -415,6 +510,43 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return result;
     }
 
+    @Override
+    public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId)
+    {
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+
+        String uri = createPublicNetworkLink(datacenterId, vlanId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
+            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
+            result.setData(createFlexObject(networkDto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getPublicNetwork");
+        }
+
+        return result;
+
+    }
+
+    private IpPoolManagementDto createDtoObject(final IpPoolManagement ip)
+    {
+        IpPoolManagementDto dto = new IpPoolManagementDto();
+        dto.setId(ip.getIdManagement());
+        dto.setIp(ip.getIp());
+        dto.setMac(ip.getMac());
+        dto.setName(ip.getName());
+        dto.setNetworkName(ip.getVlanNetworkName());
+        dto.setConfigurationGateway(ip.getConfigureGateway());
+        dto.setQuarantine(ip.getQuarantine());
+        return dto;
+    }
+
     private IpPoolManagement createFlexObject(final IpPoolManagementDto ip)
     {
         IpPoolManagement flexIp = new IpPoolManagement();
@@ -431,10 +563,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
             {
                 flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
             }
             if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
             {
                 flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
             }
             else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
             {

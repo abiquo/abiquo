@@ -82,7 +82,7 @@ public class IpPoolManagement extends RasdManagement
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected IpPoolManagement()
+    public IpPoolManagement()
     {
         // Just for JPA support
     }
@@ -189,10 +189,15 @@ public class IpPoolManagement extends RasdManagement
         return this.mac;
     }
 
-    private void setMac(final String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
-        getRasd().setAddress(mac);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setAddress(mac);
+        }
     }
 
     public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
@@ -258,7 +263,7 @@ public class IpPoolManagement extends RasdManagement
         return this.ip;
     }
 
-    private void setIp(final String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -311,7 +316,12 @@ public class IpPoolManagement extends RasdManagement
     public void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
-        getRasd().setParent(networkName);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setParent(networkName);
+        }
     }
 
     // ********************************** Helper methods ********************************

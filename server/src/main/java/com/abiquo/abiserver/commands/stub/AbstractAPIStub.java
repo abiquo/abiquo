@@ -643,7 +643,52 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("dc", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/ips", params);
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/publicips", params);
+    }
+
+    protected String createDatacenterPublicTagCheck(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/checkavailability", params);
+    }
+
+    protected String createPublicNetworksLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network", params);
+    }
+
+    protected String createPublicNetworkLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}", params);
+    }
+
+    protected String createPublicNetworkIPsLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips", params);
+    }
+
+    protected String createPublicNetworkIPLink(final Integer datacenterId, final Integer networkId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips/{ip}", params);
     }
 
     protected Resource resource(final String uri, final String user, final String password,

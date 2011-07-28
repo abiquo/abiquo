@@ -26,7 +26,9 @@ package com.abiquo.abiserver.commands.stub;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -34,13 +36,25 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
  */
 public interface NetworkResourceStub
 {
-    public BasicResult getPrivateNetworks(final Integer vdcId);
+    public DataResult<Boolean> checkVLANTagAvailability(Integer datacenterId,
+        Integer proposedVLANTag, Integer currentVlanId);
 
-    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
+    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
+        VLANNetworkDto dto);
+
+    public BasicResult editPublicIp(Integer datacenterId, Integer vlanId, Integer idManagement,
+        IpPoolManagement ipPoolManagement);
+
+    public BasicResult getEnterpriseFromReservedVlanId(Integer datacenterId, Integer vlanId);
+
+    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
+        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
-    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
+    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
@@ -48,8 +62,8 @@ public interface NetworkResourceStub
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
         Boolean onlyAvailable);
 
-    public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
+    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
@@ -60,26 +74,8 @@ public interface NetworkResourceStub
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
-    /**
-     * Creates a new Private vlan network
-     * 
-     * @param userSession user who performs the action
-     * @param vdcId identifier of the virtualdatacenter
-     * @param vlanDto object to create.
-     * @return BasicResult
-     */
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
-        VLANNetworkDto dto);
+    public BasicResult getPrivateNetworks(final Integer vdcId);
 
-    /**
-     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
-     * 
-     * @param userSession user who performs the action.
-     * @param vdcId virtual datacenter identifier.
-     * @return the DHCP info into a parsed String.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
-        throws NetworkCommandException;
+    public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
 
 }

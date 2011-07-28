@@ -496,4 +496,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
             orderByEnum, descOrAsc);
     }
 
+    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
+    {
+        return ipManagementDAO.findIp(vlan, ipId);
+    }
+
 }

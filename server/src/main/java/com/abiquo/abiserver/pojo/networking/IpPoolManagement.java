@@ -32,7 +32,8 @@ import com.abiquo.abiserver.pojo.virtualhardware.ResourceManagement;
  * 
  * @author jdevesa@abiquo.com
  */
-public class IpPoolManagement extends ResourceManagement implements Serializable, IPojo<ResourceManagementHB> 
+public class IpPoolManagement extends ResourceManagement implements Serializable,
+    IPojo<ResourceManagementHB>
 {
 
     /**
@@ -44,47 +45,52 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
      * Identifier of its dhcp service definition.
      */
     private Integer dhcpServiceId;
-    
+
     /**
-     * MAC address of the resource 
+     * MAC address of the resource
      */
     protected String mac;
-    
+
     /**
-     * Name of the DHCP rule 
+     * Name of the DHCP rule
      */
     protected String name;
-    
+
     /**
      * IP address asigned.
      */
     protected String ip;
-    
+
     /**
-     * The name of the vlan network where the Resource belongs. 
+     * The name of the vlan network where the Resource belongs.
      */
     private String vlanNetworkName;
-    
+
+    /**
+     * The id of the vlan network where the resource belongs to.
+     */
+    private Integer vlanNetworkId;
+
     /**
      * Name of the enterprise.
      */
     private String enterpriseName;
-    
+
     /**
      * Identifier of the enterprise.
      */
     private Integer enterpriseId;
-    
+
     /**
-     * Should we configure the gateway? 
+     * Should we configure the gateway?
      */
     private Boolean configureGateway;
-    
+
     /**
      * The IP is in quarantine?
      */
     private Boolean quarantine;
-    
+
     /**
      * @return the dhcpServiceId
      */
@@ -96,7 +102,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param dhcpServiceId the dhcpServiceId to set
      */
-    public void setDhcpServiceId(Integer dhcpServiceId)
+    public void setDhcpServiceId(final Integer dhcpServiceId)
     {
         this.dhcpServiceId = dhcpServiceId;
     }
@@ -112,7 +118,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param mac the mac to set
      */
-    public void setMac(String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
     }
@@ -128,7 +134,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param name the name to set
      */
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -144,11 +150,10 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param ip the ip to set
      */
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
-
 
     /**
      * @return the configureGateway
@@ -161,7 +166,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param configureGateway the configureGateway to set
      */
-    public void setConfigureGateway(Boolean configureGateway)
+    public void setConfigureGateway(final Boolean configureGateway)
     {
         this.configureGateway = configureGateway;
     }
@@ -169,7 +174,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param vlanNetworkName the vlanNetworkName to set
      */
-    public void setVlanNetworkName(String vlanNetworkName)
+    public void setVlanNetworkName(final String vlanNetworkName)
     {
         this.vlanNetworkName = vlanNetworkName;
     }
@@ -181,7 +186,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     {
         return vlanNetworkName;
     }
-    
+
     /**
      * @return the enterpriseName
      */
@@ -193,7 +198,7 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param enterpriseName the enterpriseName to set
      */
-    public void setEnterpriseName(String enterpriseName)
+    public void setEnterpriseName(final String enterpriseName)
     {
         this.enterpriseName = enterpriseName;
     }
@@ -209,15 +214,15 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     /**
      * @param enterpriseId the enterpriseId to set
      */
-    public void setEnterpriseId(Integer enterpriseId)
+    public void setEnterpriseId(final Integer enterpriseId)
     {
         this.enterpriseId = enterpriseId;
     }
-    
+
     /**
      * @param quarantine the quarantine to set
      */
-    public void setQuarantine(Boolean quarantine)
+    public void setQuarantine(final Boolean quarantine)
     {
         this.quarantine = quarantine;
     }
@@ -229,12 +234,12 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     {
         return quarantine;
     }
-    
+
     @Override
     public IpPoolManagementHB toPojoHB()
     {
         IpPoolManagementHB ipPoolHB = new IpPoolManagementHB();
-        
+
         ipPoolHB.setConfigureGateway(getConfigureGateway());
         ipPoolHB.setDhcpServiceId(getDhcpServiceId());
         ipPoolHB.setIdManagement(getIdManagement());
@@ -244,8 +249,18 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
         ipPoolHB.setName(getMac());
         ipPoolHB.setVlanNetworkName(getVlanNetworkName());
         ipPoolHB.setQuarantine(getQuarantine());
-        
+
         return ipPoolHB;
+    }
+
+    public Integer getVlanNetworkId()
+    {
+        return vlanNetworkId;
+    }
+
+    public void setVlanNetworkId(Integer vlanNetworkId)
+    {
+        this.vlanNetworkId = vlanNetworkId;
     }
 
 }
