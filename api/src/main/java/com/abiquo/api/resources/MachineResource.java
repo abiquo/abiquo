@@ -255,6 +255,7 @@ public class MachineResource extends AbstractResource
             dto.setType(machine.getHypervisor().getType());
             dto.setUser(machine.getHypervisor().getUser());
             dto.setPassword(machine.getHypervisor().getPassword());
+            dto.setPort(machine.getHypervisor().getPort());
         }
 
         if (machine.getDatastores() != null)
