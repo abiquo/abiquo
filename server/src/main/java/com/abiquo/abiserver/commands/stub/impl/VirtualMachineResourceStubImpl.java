@@ -68,8 +68,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
@@ -90,12 +90,11 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    public void pause(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void pause(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
+        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
+        SchedulerException, NotEnoughResourcesException
     {
-
 
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
@@ -264,14 +263,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 params);
     }
 
-    private VirtualMachineDto createTransferObject(VirtualMachine virtualMachine)
+    private VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd((int) virtualMachine.getHd());
+        dto.setHd(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());
