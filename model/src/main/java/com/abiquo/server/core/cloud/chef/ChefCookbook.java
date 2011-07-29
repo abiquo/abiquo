@@ -55,8 +55,8 @@ public class ChefCookbook extends DefaultEntityBase
     {
         super();
         setVirtualmachine(virtualmachine);
-        setCookbook(cookbook);
-        setCookbook(version);
+        setName(cookbook);
+        setVersion(version);
     }
 
     private final static String ID_COLUMN = "chefCookbookId";
@@ -117,12 +117,12 @@ public class ChefCookbook extends DefaultEntityBase
         return this.cookbookVersion;
     }
 
-    public void setCookbookVersion(final String cookbookVersion)
+    public void setVersion(final String version)
     {
-        this.cookbookVersion = cookbookVersion;
+        this.cookbookVersion = version;
     }
 
-    public final static String COOKBOOK_PROPERTY = "cookbook";
+    public final static String COOKBOOK_PROPERTY = "name";
 
     private final static boolean COOKBOOK_REQUIRED = true;
 
@@ -135,19 +135,19 @@ public class ChefCookbook extends DefaultEntityBase
     private final static String COOKBOOK_COLUMN = "Cookbook";
 
     @Column(name = COOKBOOK_COLUMN, nullable = !COOKBOOK_REQUIRED, length = COOKBOOK_LENGTH_MAX)
-    private String cookbook;
+    private String name;
 
     @Required(value = COOKBOOK_REQUIRED)
     @Length(min = COOKBOOK_LENGTH_MIN, max = COOKBOOK_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = COOKBOOK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getCookbook()
+    public String getName()
     {
-        return this.cookbook;
+        return this.name;
     }
 
-    private void setCookbook(final String cookbook)
+    private void setName(final String name)
     {
-        this.cookbook = cookbook;
+        this.name = name;
     }
 
 }

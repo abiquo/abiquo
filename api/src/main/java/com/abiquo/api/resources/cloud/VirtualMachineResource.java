@@ -331,8 +331,8 @@ public class VirtualMachineResource extends AbstractResource
             for (ChefCookbook cookbook : v.getCookbooks())
             {
                 ChefCookbookDto cbook = new ChefCookbookDto();
-                cbook.setCookbook(cookbook.getCookbook());
-                cbook.setCookbookVersion(cookbook.getCookbookVersion());
+                cbook.setName(cookbook.getName());
+                cbook.setVersion(cookbook.getCookbookVersion());
                 cbook.setId(cookbook.getId());
                 dto.getCookbooks().add(cbook);
             }

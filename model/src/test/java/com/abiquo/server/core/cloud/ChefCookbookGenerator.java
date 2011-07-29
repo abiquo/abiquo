@@ -72,7 +72,7 @@ public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
         String version = newString(nextSeed(), 0, 5);
         String cookbook = newString(nextSeed(), 0, 255);
         ChefCookbook chefCookbook = new ChefCookbook(null, cookbook, version);
-        chefCookbook.setCookbookVersion(version);
+        chefCookbook.setVersion(version);
 
         return chefCookbook;
     }

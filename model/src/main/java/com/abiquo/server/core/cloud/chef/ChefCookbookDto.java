@@ -42,28 +42,28 @@ public class ChefCookbookDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private String cookbook;
+    private String name;
 
-    public String getCookbook()
+    public String getName()
     {
-        return cookbook;
+        return name;
     }
 
-    public void setCookbook(final String cookbook)
+    public void setName(final String name)
     {
-        this.cookbook = cookbook;
+        this.name = name;
     }
 
-    private String cookbookVersion;
+    private String version;
 
-    public String getCookbookVersion()
+    public String getVersion()
     {
-        return cookbookVersion;
+        return version;
     }
 
-    public void setCookbookVersion(final String cookbookVersion)
+    public void setVersion(final String version)
     {
-        this.cookbookVersion = cookbookVersion;
+        this.version = version;
     }
 
 }
