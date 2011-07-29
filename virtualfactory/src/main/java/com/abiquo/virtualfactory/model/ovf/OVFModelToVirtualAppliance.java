@@ -260,10 +260,6 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             {
                 newList.add(vd);
             }
-            else
-            {
-                System.err.println("viejo maricon !");
-            }
         }
         
         conf.getExtendedVirtualDiskList().clear();
