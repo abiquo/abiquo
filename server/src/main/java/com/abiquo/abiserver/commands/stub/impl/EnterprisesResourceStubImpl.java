@@ -21,7 +21,9 @@
 package com.abiquo.abiserver.commands.stub.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.wink.client.ClientResponse;
@@ -383,5 +385,54 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         EnterpriseDto responseDto = response.getEntity(EnterpriseDto.class);
         Enterprise enterprise = Enterprise.create(responseDto);
         return enterprise;
+    }
+
+    @Override
+    public DataResult<EnterpriseListResult> getEnterprisesWithPricingTemplate(
+        final ListRequest enterpriseListOptions, final Integer idPricingTemplate,
+        final boolean included)
+    {
+        DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
+
+        String uri =
+            createEnterprisesLink(enterpriseListOptions.getFilterLike(),
+                enterpriseListOptions.getOffset(), enterpriseListOptions.getNumberOfNodes());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (idPricingTemplate != null)
+        {
+            queryParams.put("idPricingTemplate", new String[] {String.valueOf(idPricingTemplate)});
+        }
+        queryParams.put("included", new String[] {String.valueOf(included)});
+
+        uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+
+            EnterprisesDto responseDto = response.getEntity(EnterprisesDto.class);
+
+            EnterpriseListResult listResult = new EnterpriseListResult();
+            Collection<Enterprise> list = new LinkedHashSet<Enterprise>();
+            for (EnterpriseDto dto : responseDto.getCollection())
+            {
+                list.add(Enterprise.create(dto));
+            }
+            listResult.setEnterprisesList(list);
+
+            Integer total =
+                responseDto.getTotalSize() != null ? responseDto.getTotalSize() : list.size();
+            listResult.setTotalEnterprises(total);
+
+            result.setData(listResult);
+        }
+        else
+        {
+            populateErrors(response, result, "getEnterprises");
+        }
+
+        return result;
     }
 }

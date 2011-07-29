@@ -692,4 +692,39 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
+
+    protected String createCurrencyLink(final int currencyId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currencyId}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
+    }
+
+    protected String createPricingTemplateLink(final int templateId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}",
+            Collections.singletonMap("role", valueOf(templateId)));
+    }
+
+    protected String createPricingTemplatesLink()
+    {
+        return createPricingTemplatesLink(null, null);
+    }
+
+    protected String createPricingTemplatesLink(Integer offset, final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/pricingTemplates", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
 }

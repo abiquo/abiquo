@@ -43,4 +43,7 @@ public interface EnterprisesResourceStub
 
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(
         final Enterprise enterprise);
+
+    public DataResult<EnterpriseListResult> getEnterprisesWithPricingTemplate(
+        ListRequest listOptions, Integer idPricingTemplate, boolean included);
 }
