@@ -91,14 +91,14 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.cpu = cpu;
     }
 
-    private int hd;
+    private long hd;
 
-    public int getHd()
+    public long getHd()
     {
         return hd;
     }
 
-    public void setHd(final int hd)
+    public void setHd(final long hd)
     {
         this.hd = hd;
     }
