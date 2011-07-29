@@ -352,6 +352,17 @@ public final class MessageValues
         "There was a problem with UCS. Review your network configuration and check that UCS Manager is working";
 
     /**
+     * The Logic Server is not a template.
+     */
+    public static final String UCS_LS_NO_TEMPLATE_ERROR = "The Logic Server is not a template";
+
+    /**
+     * No instance.
+     */
+    public static final String UCS_LS_TEMPLATE_INSTANTIATION_ERROR =
+        "Cannot instantiate the Logic Server due to an unknown error";
+
+    /**
      * Private constructor due it is an utility class.
      */
     private MessageValues()
