@@ -52,6 +52,9 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service("remoteServiceService")
 @Transactional(readOnly = true)
@@ -128,6 +131,10 @@ public class RemoteServiceService extends DefaultApiService
         {
             responseDto.setConfigurationErrors(configurationErrors);
         }
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_CREATE,
+            responseDto.getType().getName() + " created in " + responseDto.getUri()
+                + " for datacenter " + datacenter.getName());
 
         return responseDto;
     }
