@@ -305,7 +305,7 @@ public class DatacenterService extends DefaultApiService
         Datacenter datacenter = repo.findById(id);
         if (datacenter == null)
         {
-            addNotFoundErrors(APIError.DATASTORE_NON_EXISTENT);
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
             flushErrors();
         }
 
