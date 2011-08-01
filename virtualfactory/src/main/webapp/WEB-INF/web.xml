@@ -1,52 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="WebApp_ID" version="2.5">
-	
-	<display-name>Abiquo Virtual Factory</display-name>
-
-	<!-- Spring framework context file -->
-	<!-- Default configuration, it could be omitted -->
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:spring/applicationcontext.xml</param-value>
-	</context-param>
-
-	<listener>
-		<listener-class>com.abiquo.virtualfactory.web.listener.LicenseContextListener</listener-class>
-	</listener>
-	
-	<!-- Spring framework context loader listener -->
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
-	<!-- Logging Bridge Listener -->
-	<listener>
-		<listener-class>com.abiquo.virtualfactory.web.listener.JInteropLoggingListener</listener-class>
-	</listener>
-	
-	<!-- Remote Service Check Servlet-->
-	<servlet>
-		<servlet-name>CheckServlet</servlet-name>
-		<servlet-class>com.abiquo.virtualfactory.web.servlet.CheckServlet</servlet-class>
-	</servlet>
-
-	<!--  Wiseman servlet and its mapping -->
-	<servlet>
-		<servlet-name>WSManServlet</servlet-name>
-		<servlet-class>com.sun.ws.management.server.reflective.WSManReflectiveServlet</servlet-class>
-	</servlet>
-	
-	<servlet-mapping>
-		<servlet-name>CheckServlet</servlet-name>
-		<url-pattern>/check</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>WSManServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
-
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+    <display-name>Abiquo Virtual Factory</display-name>
+    <!-- Spring framework context file -->
+    <!-- Default configuration, it could be omitted -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring/applicationcontext.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>com.abiquo.virtualfactory.web.listener.LicenseContextListener</listener-class>
+    </listener>
+    <!-- Spring framework context loader listener -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!-- Logging Bridge Listener -->
+    <listener>
+        <listener-class>com.abiquo.virtualfactory.web.listener.JInteropLoggingListener</listener-class>
+    </listener>
+    <!-- Remote Service Check Servlet -->
+    <servlet>
+        <servlet-name>CheckServlet</servlet-name>
+        <servlet-class>com.abiquo.virtualfactory.web.servlet.CheckServlet</servlet-class>
+    </servlet>
+    <!-- Wiseman servlet and its mapping -->
+    <servlet>
+        <servlet-name>WSManServlet</servlet-name>
+        <servlet-class>com.sun.ws.management.server.reflective.WSManReflectiveServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CheckServlet</servlet-name>
+        <url-pattern>/check</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>WSManServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
 </web-app>

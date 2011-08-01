@@ -55,7 +55,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
  * This class checks if the Path Params and Query Params annotated with constraints in the 
- * chosen resource to execute pass the constraints.
+ * chosen resource to execute pass these constraints.
  * That avoids a lot of {if ... else ... } clauses in the Resource layer.
  * 
  * @author jdevesa@abiquo.com

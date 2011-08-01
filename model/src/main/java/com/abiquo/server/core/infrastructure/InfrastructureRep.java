@@ -346,6 +346,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.machineDao.findById(id);
     }
 
+    public Machine findMachineByIds(Integer datacenterId, Integer rackId, Integer machineId)
+    {
+        return this.machineDao.findByIds(datacenterId, rackId, machineId);
+    }
+
     public void insertMachine(final Machine machine)
     {
         assert machine != null;
@@ -641,6 +646,7 @@ public class InfrastructureRep extends DefaultRepBase
         return machineDao.findRackEnabledForHAMachines(rack);
     }
 
+
     /**
      * Return all {@links UcsRack} associated to a
      * 
@@ -667,4 +673,5 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
     }
+
 }

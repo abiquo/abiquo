@@ -131,7 +131,7 @@ public class UcsRack extends Rack
                 dto.getNrsq(),
                 dto.getVlanPerVdcExpected());
         rack.setVlanNetworkParameters(vlanNetworkParameters);
-
+        rack.setHaEnabled(dto.isHaEnabled());
         return rack;
     }
 }

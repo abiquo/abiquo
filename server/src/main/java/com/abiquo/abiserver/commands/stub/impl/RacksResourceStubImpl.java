@@ -85,4 +85,15 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         // PREMIUM
         return null;
     }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
+     */
+    @Override
+    public DataResult<UcsRack> editUcsRack(UcsRack ucsRack)
+    {
+        // PREMIUM
+
+        return null;
+    }
 }

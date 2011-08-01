@@ -40,18 +40,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.api.util.RESTLinkBuildersImpl;
+import com.abiquo.api.util.AbiquoLinkBuildersFactory;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.WrapperDto;
 import com.google.common.collect.Iterables;
 
 public class RESTHandler extends CheckLocationHeaderHandler
 {
-    protected static Class REST_BUILDER_INTERFACE = IRESTBuilder.class;
+    protected Class REST_BUILDER_INTERFACE = IRESTBuilder.class;
 
     public void handleRequest(MessageContext context)
     {
-        LinkBuilders builder = new RESTLinkBuildersImpl(context);
+        LinkBuilders builder = new AbiquoLinkBuildersFactory(context);
         context.getAttributes().remove(LinkBuilders.class.getName());
         context.setAttribute(LinkBuilders.class, builder);
 

@@ -1,0 +1,20 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="API basic integration tests" verbose="1">
+    <!--
+        <listeners>
+        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
+        <listener class-name="com.abiquo.testng.TestServerListener" />
+        </listeners>
+    -->
+    <test name="Basic integration tests">
+        <groups>
+            <run>
+                <include name="it-basic" />
+            </run>
+        </groups>
+        <packages>
+            <package name="com.abiquo.api.*" />
+            <package name="com.abiquo.scheduler.*" />
+        </packages>
+    </test>
+</suite>

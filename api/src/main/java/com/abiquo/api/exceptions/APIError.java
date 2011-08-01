@@ -47,7 +47,7 @@ public enum APIError
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(
-        "GEN-2", "Invalid document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
+        "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
         "Invalid credentials"),
@@ -71,7 +71,8 @@ public enum APIError
         "ENTERPRISE-6", "Cannot delete the current user enterprise"), ENTERPRISE_EMPTY_NAME(
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
-        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
+        "ENTERPRISE-9", "Missing link to the enterprise"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -118,8 +119,8 @@ public enum APIError
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
-        "RACK-3", "There is already a rack with that name in this datacenter"),
-        NON_EXISTENT_RACK("RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
+        "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
+        "RACK-4", "This rack does not exist"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
@@ -165,7 +166,7 @@ public enum APIError
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
         "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"),
+        "ROLE-7", "Cannot create a global role with the same name of an existing global role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -308,7 +309,16 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume")
+        "Cannot resize a generic Iscsi volume"),
+
+    // RULES
+    NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
+        "RULE-2", "The requested load balance rule does not exist"), NON_EXISTENT_MLR("RULE-3",
+        "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
+        "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
+        "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
+        "RULE-6", "The load balance type indicated is null or invalid")
+
     ;
 
     /**

@@ -21,19 +21,19 @@
 
 package com.abiquo.virtualfactory.machine.test;
 
+import static org.testng.Assert.fail;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -45,7 +45,7 @@ import com.abiquo.virtualfactory.model.VirtualDiskType;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.network.VirtualNIC;
 
-public abstract class AbsMachineTest extends TestCase
+public abstract class AbsMachineTest
 {
 
     protected final static Logger log = LoggerFactory.getLogger(AbsMachineTest.class);
@@ -162,8 +162,7 @@ public abstract class AbsMachineTest extends TestCase
         return conf;
     }
 
-    @Override
-    @Before
+    @BeforeMethod
     public void setUp()
     {
         try
@@ -190,8 +189,7 @@ public abstract class AbsMachineTest extends TestCase
         log.debug("Created test machine");
     }
 
-    @Override
-    @After
+    @AfterMethod
     public void tearDown()
     {
         log.debug("deleting VM on state " + vMachine.getStateInHypervisor());
