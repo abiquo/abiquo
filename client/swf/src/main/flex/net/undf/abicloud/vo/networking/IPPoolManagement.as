@@ -51,6 +51,8 @@ package net.undf.abicloud.vo.networking
         public var configureGateway:Boolean;
 
         public var quarantine:Boolean;
+        
+        public var available:Boolean;
 
         public function IPPoolManagement()
         {
