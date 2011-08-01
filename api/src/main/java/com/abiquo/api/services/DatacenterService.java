@@ -250,6 +250,11 @@ public class DatacenterService extends DefaultApiService
     public void removeDatacenter(final Integer id)
     {
         Datacenter datacenter = repo.findById(id);
+        if (datacenter == null)
+        {
+            addNotFoundErrors(APIError.DATASTORE_NON_EXISTENT);
+            flushErrors();
+        }
 
         // only delete the datacenter if it doesn't have any virtual datacenter and any storage
         // device associated
