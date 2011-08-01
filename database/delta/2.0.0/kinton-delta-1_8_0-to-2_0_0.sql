@@ -25,6 +25,8 @@ UPDATE kinton.metering SET actionperformed="VAPP_INSTANCE" WHERE actionperformed
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 alter table repository modify URL varchar(255);
+-- [UCS]
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --

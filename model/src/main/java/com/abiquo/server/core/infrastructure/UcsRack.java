@@ -84,7 +84,7 @@ public class UcsRack extends Rack
         return this.port;
     }
 
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -113,7 +113,7 @@ public class UcsRack extends Rack
         return this.ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -141,7 +141,7 @@ public class UcsRack extends Rack
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -169,7 +169,7 @@ public class UcsRack extends Rack
         return this.user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }

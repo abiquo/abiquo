@@ -210,6 +210,9 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_OFF,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
+                params));
         }
 
         return links;
@@ -791,6 +794,7 @@ public class RESTBuilder implements IRESTBuilder
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         final EnterpriseExclusionRule enterpriseExclusion)
     {
+        // TODO Auto-generated method stub
         return null;
     }
 

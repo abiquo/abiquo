@@ -13,7 +13,12 @@
     <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
     <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
     <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
-    <!-- -->
+    <xs:element name="LogicServer" type="nc:LogicServerDto" />
+    <xs:element name="LogicServers" type="nc:LogicServersDto" />
+    <xs:element name="Organization" type="nc:OrganizationDto" />
+    <xs:element name="Organizations" type="nc:OrganizationsDto" />
+    
+    <!--                                      -->
     <!-- Definition of the main complex types -->
     <!-- defined as Data Transfer Objects -->
     <!-- -->
@@ -86,9 +91,58 @@
             <xs:enumeration value="UCS" />
         </xs:restriction>
     </xs:simpleType>
-    <!-- -->
-    <!-- Complex helper types -->
-    <!-- -->
+    <xs:complexType name="LogicServerDto">
+		<xs:annotation>
+			<xs:documentation>
+				The object contains the current needed values of the Logic Server
+				capabilities to retrieve
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" nillable="false" />
+			<xs:element name="associated" type="xs:string" nillable="false" />
+			<xs:element name="associatedTo" type="xs:string" nillable="true" />
+			<xs:element name="description" type="xs:string" nillable="true" />
+		</xs:sequence>
+    </xs:complexType>
+	<xs:complexType name="LogicServersDto">
+        <xs:annotation>
+            <xs:documentation>
+                Wrapper class to get a list of Logic Servers.
+            </xs:documentation>
+        </xs:annotation>
+            <xs:sequence>
+                <xs:element name="logicServer" type="nc:LogicServerDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="OrganizationDto">
+        <xs:annotation>
+            <xs:documentation>
+                The object contains the current needed values of the Organization
+                capabilities to retrieve
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="dn" type="xs:string" nillable="false" />
+            <xs:element name="name" type="xs:string" nillable="false" />
+            <xs:element name="level" type="xs:string" nillable="true" />
+            <xs:element name="status" type="xs:string" nillable="true" />
+            <xs:element name="descriptioni" type="xs:string" nillable="true" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="OrganizationsDto">
+        <xs:annotation>
+            <xs:documentation>
+                Wrapper class to get a list of Organizations.
+            </xs:documentation>
+        </xs:annotation>
+            <xs:sequence>
+                <xs:element name="organizations" type="nc:OrganizationDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+    </xs:complexType>
+    <!--                                      -->
+    <!--  Complex helper types                -->
+    <!--                                      -->
     <xs:complexType name="ComputerSystemType" abstract="true">
         <xs:annotation>
             <xs:documentation> Class computer system POJO contains all the shared capabilities for

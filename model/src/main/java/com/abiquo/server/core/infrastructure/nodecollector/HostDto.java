@@ -26,7 +26,6 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -34,15 +33,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * 
- *                 The object contains the current needed values of the physical machine capabilities to retrieve
- *             
- * 
- * <p>Java class for HostDto complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * The object contains the current needed values of the physical machine capabilities to retrieve
+ * <p>
+ * Java class for HostDto complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="HostDto">
@@ -54,155 +50,154 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="status" type="{http://abiquo.com/server/core/infrastructure/nodecollector}HostStatusEnumType"/>
  *         &lt;element name="statusInfo" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="initiatorIQN" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "HostDto", propOrder = {
-    "hypervisor",
-    "version",
-    "status",
-    "statusInfo",
-    "initiatorIQN"
-})
-public class HostDto
-    extends ComputerSystemType
+@XmlType(name = "HostDto", propOrder = {"hypervisor", "version", "status", "statusInfo",
+"initiatorIQN", "description"})
+public class HostDto extends ComputerSystemType
 {
 
     @XmlElement(required = true)
     protected String hypervisor;
+
     @XmlElement(required = true)
     protected String version;
+
     @XmlElement(required = true)
     protected HostStatusEnumType status;
+
     @XmlElement(required = true, nillable = true)
     protected String statusInfo;
+
     @XmlElement(required = true, nillable = true)
     protected String initiatorIQN;
+
+    @XmlElement(required = true)
+    protected String description;
 
     /**
      * Gets the value of the hypervisor property.
      * 
-     * @return
-     *     possible object is
-     *     {@link HypervisorEnumTypeDto }
-     *     
+     * @return possible object is {@link HypervisorEnumTypeDto }
      */
-    public String getHypervisor() {
+    public String getHypervisor()
+    {
         return hypervisor;
     }
 
     /**
      * Sets the value of the hypervisor property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link HypervisorEnumTypeDto }
-     *     
+     * @param value allowed object is {@link HypervisorEnumTypeDto }
      */
-    public void setHypervisor(String value) {
+    public void setHypervisor(final String value)
+    {
         this.hypervisor = value;
     }
 
     /**
      * Gets the value of the version property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getVersion() {
+    public String getVersion()
+    {
         return version;
     }
 
     /**
      * Sets the value of the version property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setVersion(String value) {
+    public void setVersion(final String value)
+    {
         this.version = value;
     }
 
     /**
      * Gets the value of the status property.
      * 
-     * @return
-     *     possible object is
-     *     {@link HostStatusEnumType }
-     *     
+     * @return possible object is {@link HostStatusEnumType }
      */
-    public HostStatusEnumType getStatus() {
+    public HostStatusEnumType getStatus()
+    {
         return status;
     }
 
     /**
      * Sets the value of the status property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link HostStatusEnumType }
-     *     
+     * @param value allowed object is {@link HostStatusEnumType }
      */
-    public void setStatus(HostStatusEnumType value) {
+    public void setStatus(final HostStatusEnumType value)
+    {
         this.status = value;
     }
 
     /**
      * Gets the value of the statusInfo property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getStatusInfo() {
+    public String getStatusInfo()
+    {
         return statusInfo;
     }
 
     /**
      * Sets the value of the statusInfo property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setStatusInfo(String value) {
+    public void setStatusInfo(final String value)
+    {
         this.statusInfo = value;
     }
 
     /**
      * Gets the value of the initiatorIQN property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getInitiatorIQN() {
+    public String getInitiatorIQN()
+    {
         return initiatorIQN;
     }
 
     /**
      * Sets the value of the initiatorIQN property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setInitiatorIQN(String value) {
+    public void setInitiatorIQN(final String value)
+    {
         this.initiatorIQN = value;
     }
 
+    /**
+     * Gets the value of the hypervisor property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getDescription()
+    {
+        return description;
+    }
+
+    /**
+     * Sets the value of the hypervisor property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setDescription(final String description)
+    {
+        this.description = description;
+    }
 }

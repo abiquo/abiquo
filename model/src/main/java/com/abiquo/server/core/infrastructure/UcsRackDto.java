@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class UcsRackDto extends RackDto
 {
     private static final long serialVersionUID = 1L;
-    
+
     private Integer port;
 
     public Integer getPort()
@@ -35,7 +35,7 @@ public class UcsRackDto extends RackDto
         return port;
     }
 
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -47,7 +47,7 @@ public class UcsRackDto extends RackDto
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -59,7 +59,7 @@ public class UcsRackDto extends RackDto
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -71,9 +71,8 @@ public class UcsRackDto extends RackDto
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
-
 }
