@@ -34,6 +34,7 @@ import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -136,5 +137,13 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         }
 
         return DataCenter.create(dto);
+    }
+
+    @Override
+    public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(final Integer dcId,
+        final Integer rackId, final Integer pmId)
+    {
+        // PREMIUM
+        return null;
     }
 }

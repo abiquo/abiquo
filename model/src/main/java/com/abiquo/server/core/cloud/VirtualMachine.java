@@ -25,26 +25,16 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.ForeignKey;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
-import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
-import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
@@ -90,12 +80,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String HYPERVISOR_ID_COLUMN = "idHypervisor";
 
-    @JoinColumn(name = HYPERVISOR_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_hypervisor")
+    // @JoinColumn(name = HYPERVISOR_ID_COLUMN)
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @ForeignKey(name = "FK_" + TABLE_NAME + "_hypervisor")
     private Hypervisor hypervisor;
 
-    @Required(value = HYPERVISOR_REQUIRED)
+    // @Required(value = HYPERVISOR_REQUIRED)
     public Hypervisor getHypervisor()
     {
         return this.hypervisor;
@@ -114,13 +104,13 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
+    // @ManyToOne(fetch = FetchType.LAZY)
     // , cascade = CascadeType.ALL)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualimage")
+    // @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualimage")
     private VirtualImage virtualImage;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
+    // @Required(value = VIRTUAL_IMAGE_REQUIRED)
     public VirtualImage getVirtualImage()
     {
         return this.virtualImage;
@@ -138,12 +128,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String DATASTORE_ID_COLUMN = "idDatastore";
 
-    @JoinColumn(name = DATASTORE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_datastore")
+    // @JoinColumn(name = DATASTORE_ID_COLUMN)
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @ForeignKey(name = "FK_" + TABLE_NAME + "_datastore")
     private Datastore datastore;
 
-    @Required(value = DATASTORE_REQUIRED)
+    // @Required(value = DATASTORE_REQUIRED)
     public Datastore getDatastore()
     {
         return this.datastore;
@@ -168,12 +158,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String NAME_COLUMN = "Name";
 
-    @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
+    // @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
     private String name;
 
-    @Required(value = NAME_REQUIRED)
-    @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @Required(value = NAME_REQUIRED)
+    // @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
+    // @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getName()
     {
         return this.name;
@@ -196,12 +186,14 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String DESCRIPTION_COLUMN = "Description";
 
-    @Column(name = DESCRIPTION_COLUMN, nullable = !DESCRIPTION_REQUIRED, length = DESCRIPTION_LENGTH_MAX)
+    // @Column(name = DESCRIPTION_COLUMN, nullable = !DESCRIPTION_REQUIRED, length =
+    // DESCRIPTION_LENGTH_MAX)
     private String description;
 
-    @Required(value = DESCRIPTION_REQUIRED)
-    @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
-    // @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @Required(value = DESCRIPTION_REQUIRED)
+    // @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
+    // // @LeadingOrTrailingWhitespace(allowed =
+    // DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getDescription()
     {
         return this.description;
@@ -220,8 +212,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int RAM_MAX = Integer.MAX_VALUE;
 
-    @Column(name = RAM_COLUMN, nullable = true)
-    @Range(min = RAM_MIN, max = RAM_MAX)
+    // @Column(name = RAM_COLUMN, nullable = true)
+    // @Range(min = RAM_MIN, max = RAM_MAX)
     private int ram;
 
     public int getRam()
@@ -242,8 +234,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int CPU_MAX = Integer.MAX_VALUE;
 
-    @Column(name = CPU_COLUMN, nullable = true)
-    @Range(min = CPU_MIN, max = CPU_MAX)
+    // @Column(name = CPU_COLUMN, nullable = true)
+    // @Range(min = CPU_MIN, max = CPU_MAX)
     private int cpu;
 
     public int getCpu()
@@ -264,8 +256,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static long HD_MAX = Long.MAX_VALUE;
 
-    @Column(name = HD_COLUMN, nullable = true)
-    @Range(min = HD_MIN, max = HD_MAX)
+    // @Column(name = HD_COLUMN, nullable = true)
+    // @Range(min = HD_MIN, max = HD_MAX)
     private long hdInBytes;
 
     public long getHdInBytes()
@@ -286,8 +278,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int VDRP_PORT_MAX = Integer.MAX_VALUE;
 
-    @Column(name = VDRP_PORT_COLUMN, nullable = true)
-    @Range(min = VDRP_PORT_MIN, max = VDRP_PORT_MAX)
+    // @Column(name = VDRP_PORT_COLUMN, nullable = true)
+    // @Range(min = VDRP_PORT_MIN, max = VDRP_PORT_MAX)
     private int vdrpPort;
 
     public int getVdrpPort()
@@ -312,12 +304,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String VDRP_IP_COLUMN = "VdrpIP";
 
-    @Column(name = VDRP_IP_COLUMN, nullable = !VDRP_IP_REQUIRED, length = VDRP_IP_LENGTH_MAX)
+    // @Column(name = VDRP_IP_COLUMN, nullable = !VDRP_IP_REQUIRED, length = VDRP_IP_LENGTH_MAX)
     private String vdrpIP;
 
-    @Required(value = VDRP_IP_REQUIRED)
-    @Length(min = VDRP_IP_LENGTH_MIN, max = VDRP_IP_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = VDRP_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @Required(value = VDRP_IP_REQUIRED)
+    // @Length(min = VDRP_IP_LENGTH_MIN, max = VDRP_IP_LENGTH_MAX)
+    // @LeadingOrTrailingWhitespace(allowed = VDRP_IP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getVdrpIP()
     {
         return this.vdrpIP;
@@ -338,7 +330,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int UUID_LENGTH_MAX = 255;
 
-    @Column(name = UUID_COLUMN, nullable = !UUID_REQUIRED, length = UUID_LENGTH_MAX)
+    // @Column(name = UUID_COLUMN, nullable = !UUID_REQUIRED, length = UUID_LENGTH_MAX)
     private String uuid;
 
     public void setUuid(final String uuid)
@@ -346,8 +338,8 @@ public class VirtualMachine extends DefaultEntityBase
         this.uuid = uuid;
     }
 
-    @Required(value = UUID_REQUIRED)
-    @Length(min = UUID_LENGTH_MIN, max = UUID_LENGTH_MAX)
+    // @Required(value = UUID_REQUIRED)
+    // @Length(min = UUID_LENGTH_MIN, max = UUID_LENGTH_MAX)
     public String getUuid()
     {
         return uuid;
@@ -361,8 +353,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int HIGH_DISPONIBILITY_MAX = Integer.MAX_VALUE;
 
-    @Column(name = HIGH_DISPONIBILITY_COLUMN, nullable = true)
-    @Range(min = HIGH_DISPONIBILITY_MIN, max = HIGH_DISPONIBILITY_MAX)
+    // @Column(name = HIGH_DISPONIBILITY_COLUMN, nullable = true)
+    // @Range(min = HIGH_DISPONIBILITY_MIN, max = HIGH_DISPONIBILITY_MAX)
     private int highDisponibility;
 
     public int getHighDisponibility()
@@ -383,8 +375,8 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int ID_TYPE_MAX = Integer.MAX_VALUE;
 
-    @Column(name = ID_TYPE_COLUMN, nullable = false)
-    @Range(min = ID_TYPE_MIN, max = ID_TYPE_MAX)
+    // @Column(name = ID_TYPE_COLUMN, nullable = false)
+    // @Range(min = ID_TYPE_MIN, max = ID_TYPE_MAX)
     private Integer idType;
 
     public Integer getIdType()
@@ -408,12 +400,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
 
-    @JoinColumn(name = ENTERPRISE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
+    // @JoinColumn(name = ENTERPRISE_ID_COLUMN)
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
     private Enterprise enterprise;
 
-    @Required(value = ENTERPRISE_REQUIRED)
+    // @Required(value = ENTERPRISE_REQUIRED)
     public Enterprise getEnterprise()
     {
         return this.enterprise;
@@ -430,12 +422,12 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String USER_ID_COLUMN = "idUser";
 
-    @JoinColumn(name = USER_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_user")
+    // @JoinColumn(name = USER_ID_COLUMN)
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @ForeignKey(name = "FK_" + TABLE_NAME + "_user")
     private User user;
 
-    @Required(value = USER_REQUIRED)
+    // @Required(value = USER_REQUIRED)
     public User getUser()
     {
         return this.user;
@@ -455,11 +447,11 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static State STATE_DEFAULT = State.NOT_DEPLOYED;
 
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
+    // @Enumerated(value = javax.persistence.EnumType.STRING)
+    // @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
     private State state = STATE_DEFAULT;
 
-    @Required(value = STATE_REQUIRED)
+    // @Required(value = STATE_REQUIRED)
     public State getState()
     {
         return this.state;
@@ -482,18 +474,18 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String PASSWORD_COLUMN = "password";
 
-    @Column(name = PASSWORD_COLUMN, nullable = !PASSWORD_REQUIRED, length = PASSWORD_LENGTH_MAX)
+    // @Column(name = PASSWORD_COLUMN, nullable = !PASSWORD_REQUIRED, length = PASSWORD_LENGTH_MAX)
     private String password;
 
-    @Required(value = PASSWORD_REQUIRED)
-    @Length(min = PASSWORD_LENGTH_MIN, max = PASSWORD_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    // @Required(value = PASSWORD_REQUIRED)
+    // @Length(min = PASSWORD_LENGTH_MIN, max = PASSWORD_LENGTH_MAX)
+    // @LeadingOrTrailingWhitespace(allowed = PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getPassword()
     {
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }

@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.DataResult;
 
 public interface MachinesResourceStub
@@ -49,5 +50,8 @@ public interface MachinesResourceStub
 
     public DataResult<List<PhysicalMachine>> getPhysicalMachinesByRack(Integer datacenterId,
         Integer rackId, String filters);
+
+    public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(Integer dcId, Integer rackId,
+        Integer pmId);
 
 }
