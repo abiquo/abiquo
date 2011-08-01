@@ -90,6 +90,7 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.State;
+import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -361,9 +362,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         physicalmachineHB, enterpriseId);
             }
 
-            if ((numberOfVM.equals(new Long(0)))
-                && ((physicalmachineHB.getIdEnterprise() == null) || (physicalmachineHB
-                    .getIdEnterprise() == 0)))
+            if (numberOfVM.equals(new Long(0))
+                && (physicalmachineHB.getIdEnterprise() == null || physicalmachineHB
+                    .getIdEnterprise() == 0))
             {
                 infrastructures.add(physicalmachineHB.toPojo());
             }
@@ -906,8 +907,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-                    
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
+
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
+                        userSession);
                 }
                 else
                 {
@@ -1066,8 +1068,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 
@@ -1426,6 +1428,18 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             PhysicalMachine physicalMachineAux = physicalMachineHb.toPojo();
 
+            if (pm.getAssignedTo() instanceof UcsRack)
+            {
+                dataResult.setSuccess(false);
+                dataResult.setMessage("The Machine is managed and its name cannot change");
+                // Log the event
+                traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_MODIFY,
+                    userSession, physicalMachineCreation.getPhysicalMachine().getDataCenter(),
+                    null, "The Machine is managed and its name cannot change", null,
+                    (Rack) physicalMachineCreation.getPhysicalMachine().getAssignedTo(),
+                    physicalMachineHb.toPojo(), null, null);
+                return dataResult;
+            }
             final String ipService = pm.getHypervisor().getIpService();
 
             // Updating the other attributes
