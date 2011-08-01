@@ -23,11 +23,7 @@ package com.abiquo.server.core.infrastructure.network;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
-import com.softwarementors.validation.constraints.Required;
 
 @XmlRootElement(name = "ipPoolManagement")
 public class IpPoolManagementDto extends SingleResourceTransportDto
@@ -39,7 +35,7 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -51,7 +47,7 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -63,7 +59,7 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return mac;
     }
 
-    public void setMac(String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
     }
@@ -75,7 +71,7 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return configurationGateway;
     }
 
-    public void setConfigurationGateway(boolean configurationGateway)
+    public void setConfigurationGateway(final boolean configurationGateway)
     {
         this.configurationGateway = configurationGateway;
     }
@@ -87,7 +83,7 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return quarantine;
     }
 
-    public void setQuarantine(boolean quarantine)
+    public void setQuarantine(final boolean quarantine)
     {
         this.quarantine = quarantine;
     }
@@ -99,11 +95,11 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
-    
+
     private String networkName;
 
     public String getNetworkName()
@@ -114,6 +110,18 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
     public void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
+    }
+
+    private boolean available;
+
+    public boolean getAvailable()
+    {
+        return available;
+    }
+
+    public void setAvailable(final boolean available)
+    {
+        this.available = available;
     }
 
 }

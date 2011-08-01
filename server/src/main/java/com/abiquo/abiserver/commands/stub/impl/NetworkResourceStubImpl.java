@@ -143,6 +143,36 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
+        final Integer vlanTag, final NetworkConfiguration configuration, final Enterprise enterprise)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createPublicNetworksLink(datacenterId);
+
+        VLANNetworkDto dto = new VLANNetworkDto();
+        dto.setAddress(configuration.getNetworkAddress());
+        dto.setDefaultNetwork(Boolean.FALSE);
+        dto.setGateway(configuration.getGateway());
+        dto.setMask(configuration.getMask());
+        dto.setName(networkName);
+        dto.setPrimaryDNS(configuration.getPrimaryDNS());
+        dto.setSecondaryDNS(configuration.getSecondaryDNS());
+        dto.setSufixDNS(configuration.getSufixDNS());
+        dto.setTag(vlanTag);
+
+        ClientResponse response = post(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "createPublicVlan");
+        }
+        return result;
+    }
+
+    @Override
     public BasicResult editPublicIp(final Integer datacenterId, final Integer vlanId,
         final Integer idManagement, final IpPoolManagement ipPoolManagement)
     {
@@ -159,6 +189,38 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             populateErrors(response, result, "editPublicIp");
         }
 
+        return result;
+    }
+
+    @Override
+    public BasicResult editPublicVlan(final Integer datacenterId, final Integer vlanNetworkId,
+        final String vlanName, final Integer vlanTag, final NetworkConfiguration configuration,
+        final Boolean defaultNetwork, final Enterprise enterprise)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createPublicNetworkLink(datacenterId, vlanNetworkId);
+
+        VLANNetworkDto dto = new VLANNetworkDto();
+        dto.setAddress(configuration.getNetworkAddress());
+        dto.setDefaultNetwork(defaultNetwork);
+        dto.setGateway(configuration.getGateway());
+        dto.setId(vlanNetworkId);
+        dto.setMask(configuration.getMask());
+        dto.setName(vlanName);
+        dto.setPrimaryDNS(configuration.getPrimaryDNS());
+        dto.setSecondaryDNS(configuration.getSecondaryDNS());
+        dto.setSufixDNS(configuration.getSufixDNS());
+        dto.setTag(vlanTag);
+
+        ClientResponse response = put(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editPublicVlan");
+        }
         return result;
     }
 
@@ -437,7 +499,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPublicPoolByVlan(final Integer datacenterId,
         final Integer vlanId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc)
+        final String filterLike, final String orderBy, final Boolean asc, final Boolean all)
         throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
@@ -450,6 +512,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("all=" + (all ? "true" : "false"));
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -544,6 +607,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setNetworkName(ip.getVlanNetworkName());
         dto.setConfigurationGateway(ip.getConfigureGateway());
         dto.setQuarantine(ip.getQuarantine());
+        dto.setAvailable(ip.getAvailable());
         return dto;
     }
 
@@ -557,6 +621,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setQuarantine(ip.getQuarantine());
         flexIp.setConfigureGateway(ip.getConfigurationGateway());
         flexIp.setName(ip.getName());
+        flexIp.setAvailable(ip.getAvailable());
 
         for (RESTLink currentLink : ip.getLinks())
         {

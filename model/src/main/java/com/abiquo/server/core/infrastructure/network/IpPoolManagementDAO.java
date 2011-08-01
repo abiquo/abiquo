@@ -160,6 +160,24 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return this.existsAnyByCriterions(equalMac(mac));
     }
 
+    /**
+     * Return a single {@link IpPoolManagement}
+     * 
+     * @param vlan {@link VLANNetwork} oject which the Ip should belong to.
+     * @param ipId identifier of the Ip.
+     * @return the found object.
+     */
+    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
+    {
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+        Criterion vlanEqual = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
+        Criterion ipEqual = Restrictions.eq(PersistentEntity.ID_PROPERTY, ipId);
+
+        criteria.add(vlanEqual).add(ipEqual);
+
+        return (IpPoolManagement) criteria.uniqueResult();
+    }
+
     public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, Integer firstElem,
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
         final Boolean asc)
@@ -413,24 +431,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     /**
-     * Return a single {@link IpPoolManagement}
-     * 
-     * @param vlan {@link VLANNetwork} oject which the Ip should belong to.
-     * @param ipId identifier of the Ip.
-     * @return the found object.
-     */
-    public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
-    {
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
-        Criterion vlanEqual = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
-        Criterion ipEqual = Restrictions.eq(PersistentEntity.ID_PROPERTY, ipId);
-
-        criteria.add(vlanEqual).add(ipEqual);
-
-        return (IpPoolManagement) criteria.uniqueResult();
-    }
-
-    /**
      * Return all the public IPS defined into a Datacenter.
      * 
      * @param datacenterId identifier of the datacenter.
@@ -476,10 +476,12 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,
         final Integer vlanId, Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        final OrderByEnum orderByEnum, final Boolean descOrAsc, final Boolean all)
     {
         Query finalQuery =
-            getSession().createQuery(BY_PUBLIC_VLAN + " " + defineOrderBy(orderByEnum, descOrAsc));
+            getSession().createQuery(
+                BY_PUBLIC_VLAN + " " + defineAllFilter(all) + " "
+                    + defineOrderBy(orderByEnum, descOrAsc));
         finalQuery.setParameter("datacenter_id", datacenterId);
         finalQuery.setParameter("vlan_id", vlanId);
         finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
@@ -578,6 +580,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             return false;
         }
         return true;
+    }
+
+    /**
+     * If the 'all' is set, return all the IPs by a public vlan.
+     * 
+     * @param all boolean to set if we should return all the IPs.
+     * @return a String filter.
+     */
+    private String defineAllFilter(final Boolean all)
+    {
+        if (!all)
+        {
+            return " AND ip.available = 1";
+        }
+
+        return "";
     }
 
     /**

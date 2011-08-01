@@ -11,7 +11,7 @@
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
-
+ALTER TABLE `kinton`.`ip_pool_management` ADD COLUMN `available` boolean NOT NULL default 1; 
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --

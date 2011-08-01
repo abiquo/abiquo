@@ -92,6 +92,11 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
     private Boolean quarantine;
 
     /**
+     * The IP is available?.
+     */
+    private Boolean available;
+
+    /**
      * @return the dhcpServiceId
      */
     public Integer getDhcpServiceId()
@@ -258,9 +263,19 @@ public class IpPoolManagement extends ResourceManagement implements Serializable
         return vlanNetworkId;
     }
 
-    public void setVlanNetworkId(Integer vlanNetworkId)
+    public void setVlanNetworkId(final Integer vlanNetworkId)
     {
         this.vlanNetworkId = vlanNetworkId;
+    }
+
+    public Boolean getAvailable()
+    {
+        return available;
+    }
+
+    public void setAvailable(final Boolean available)
+    {
+        this.available = available;
     }
 
 }

@@ -27,8 +27,9 @@ package com.abiquo.abiserver.commands.stub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
+import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
-import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -36,14 +37,21 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
  */
 public interface NetworkResourceStub
 {
-    public DataResult<Boolean> checkVLANTagAvailability(Integer datacenterId,
-        Integer proposedVLANTag, Integer currentVlanId);
+    public BasicResult checkVLANTagAvailability(Integer datacenterId, Integer proposedVLANTag,
+        Integer currentVlanId);
 
     public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
         VLANNetworkDto dto);
 
+    public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
+        NetworkConfiguration configuration, Enterprise enterprise);
+
     public BasicResult editPublicIp(Integer datacenterId, Integer vlanId, Integer idManagement,
         IpPoolManagement ipPoolManagement);
+
+    public BasicResult editPublicVlan(Integer datacenterId, Integer vlanNetworkId, String vlanName,
+        Integer vlanTag, NetworkConfiguration configuration, Boolean defaultNetwork,
+        Enterprise enterprise);
 
     public BasicResult getEnterpriseFromReservedVlanId(Integer datacenterId, Integer vlanId);
 
@@ -71,8 +79,8 @@ public interface NetworkResourceStub
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByVlan(Integer datacenterId, Integer vlanId,
-        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
+        Boolean all) throws NetworkCommandException;
 
     public BasicResult getPrivateNetworks(final Integer vdcId);
 

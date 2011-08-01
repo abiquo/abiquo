@@ -114,6 +114,7 @@ public class IpPoolManagement extends RasdManagement
         setIp(ip);
         setVlanNetwork(vlan);
         setNetworkName(networkName);
+        setAvailable(Boolean.TRUE);
     }
 
     public final static String NAME_PROPERTY = "name";
@@ -238,6 +239,26 @@ public class IpPoolManagement extends RasdManagement
     public void setQuarantine(final boolean quarantine)
     {
         this.quarantine = quarantine;
+    }
+
+    public final static String AVAILABLE_PROPERTY = "available";
+
+    private final static String AVAILABLE_COLUMN = "available";
+
+    private final static boolean AVAILABLE_REQUIRED = false;
+
+    @Column(name = AVAILABLE_COLUMN, nullable = false)
+    private boolean available;
+
+    @Required(value = AVAILABLE_REQUIRED)
+    public boolean getAvailable()
+    {
+        return this.available;
+    }
+
+    public void setAvailable(final boolean available)
+    {
+        this.available = available;
     }
 
     public final static String IP_PROPERTY = "ip";
