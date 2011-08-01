@@ -418,45 +418,6 @@ public class InfrastructureService extends DefaultApiService
     {
 
         return remoteServiceService.addRemoteService(rs, datacenterId);
-        // Datacenter datacenter = repo.findById(datacenterId);
-        // if (datacenter == null)
-        // {
-        // addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
-        // flushErrors();
-        // }
-        //
-        // checkUniqueness(datacenter, dto);
-        //
-        // RemoteService remoteService =
-        // datacenter.createRemoteService(dto.getType(), dto.getUri(), 0);
-        //
-        // if (!remoteService.isValid())
-        // {
-        // addValidationErrors(remoteService.getValidationErrors());
-        // flushErrors();
-        // }
-        //
-        // ErrorsDto configurationErrors = checkRemoteServiceStatus(remoteService.getType(),
-        // remoteService.getUri());
-        //
-        // int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
-        // remoteService.setStatus(status);
-        //
-        // if (dto.getType() == RemoteServiceType.APPLIANCE_MANAGER)
-        // {
-        // configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
-        // }
-        //
-        // repo.insertRemoteService(remoteService);
-        //
-        // RemoteServiceDto responseDto = createTransferObject(remoteService);
-        // if (!configurationErrors.isEmpty())
-        // {
-        // responseDto.setConfigurationErrors(configurationErrors);
-        // }
-        //
-        // return responseDto;
-
     }
 
     public RemoteService getRemoteService(final Integer id)
@@ -517,6 +478,10 @@ public class InfrastructureService extends DefaultApiService
         {
             responseDto.setConfigurationErrors(configurationErrors);
         }
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
+            dto.getType().getName() + " updated");
+
         return responseDto;
     }
 
@@ -528,6 +493,9 @@ public class InfrastructureService extends DefaultApiService
         checkRemoteServiceStatusBeforeRemoving(remoteService);
 
         repo.deleteRemoteService(remoteService);
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_DELETE,
+            remoteService.getType().getName() + " deleted");
     }
 
     protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)

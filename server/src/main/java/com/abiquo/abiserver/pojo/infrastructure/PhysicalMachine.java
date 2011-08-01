@@ -508,7 +508,10 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         HyperVisor h = new HyperVisor();
         h.setIp(dto.getIp());
         h.setIpService(dto.getIpService());
-        h.setType(new HyperVisorType(dto.getType()));
+        if (dto.getType() != null)
+        {
+            h.setType(new HyperVisorType(dto.getType()));
+        }
         h.setUser(dto.getUser());
         h.setPassword(dto.getPassword());
         if (dto.getPort() != null)
