@@ -121,6 +121,8 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
             DataCenter dc = DataCenter.create(responseDto);
             dc.setRemoteServices(new ArrayList<RemoteService>());
+            result.setSuccess(true);
+
             if (responseDto.getRemoteServices() != null
                 && !responseDto.getRemoteServices().isEmpty())
             {
@@ -128,9 +130,18 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
                 {
                     dc.getRemoteServices().add(RemoteService.create(rsdto, dc.getId()));
                 }
+
+                if (responseDto.getRemoteServices().getConfigErrors() != null
+                    && !responseDto.getRemoteServices().getConfigErrors().isEmpty())
+                {
+                    result.setSuccess(false);
+                    result
+                        .setMessage("Datacenter '"
+                            + dc.getName()
+                            + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.");
+                }
             }
 
-            result.setSuccess(true);
             result.setData(dc);
         }
         else

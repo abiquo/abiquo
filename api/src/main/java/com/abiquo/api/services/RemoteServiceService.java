@@ -45,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -94,6 +95,58 @@ public class RemoteServiceService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public SingleResourceTransportDto addRemoteService(final RemoteService rs,
+        final Datacenter datacenter)
+    {
+        if (datacenter == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+            flushErrors();
+        }
+
+        RemoteServiceDto responseDto = new RemoteServiceDto();
+
+        ErrorsDto errorsDto = checkUniqueness(datacenter, rs);
+
+        if (errorsDto.getCollection() == null || errorsDto.getCollection().size() > 0)
+        {
+            return errorsDto;
+        }
+        else
+        {
+            RemoteService remoteService =
+                datacenter.createRemoteService(rs.getType(), rs.getUri(), 0);
+
+            if (!remoteService.isValid())
+            {
+                addValidationErrors(remoteService.getValidationErrors());
+                flushErrors();
+            }
+
+            ErrorsDto configurationErrors =
+                checkStatus(remoteService.getType(), remoteService.getUri());
+
+            int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
+            remoteService.setStatus(status);
+
+            if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
+            {
+                configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
+            }
+
+            infrastrucutreRepo.insertRemoteService(remoteService);
+
+            responseDto = createTransferObject(remoteService);
+            if (!configurationErrors.isEmpty())
+            {
+                responseDto.setConfigurationErrors(configurationErrors);
+            }
+        }
+
+        return responseDto;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
         Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
@@ -103,7 +156,9 @@ public class RemoteServiceService extends DefaultApiService
             flushErrors();
         }
 
-        checkUniqueness(datacenter, rs);
+        RemoteServiceDto responseDto = new RemoteServiceDto();
+
+        checkUniqueness(datacenter, rs, true);
 
         RemoteService remoteService = datacenter.createRemoteService(rs.getType(), rs.getUri(), 0);
 
@@ -126,7 +181,7 @@ public class RemoteServiceService extends DefaultApiService
 
         infrastrucutreRepo.insertRemoteService(remoteService);
 
-        RemoteServiceDto responseDto = createTransferObject(remoteService);
+        responseDto = createTransferObject(remoteService);
         if (!configurationErrors.isEmpty())
         {
             responseDto.setConfigurationErrors(configurationErrors);
@@ -413,29 +468,56 @@ public class RemoteServiceService extends DefaultApiService
         return configurationErrors;
     }
 
-    private void checkUniqueness(final Datacenter datacenter, final RemoteService remoteService)
+    private ErrorsDto checkUniqueness(final Datacenter datacenter, final RemoteService remoteService)
     {
+        return checkUniqueness(datacenter, remoteService, false);
+    }
+
+    private ErrorsDto checkUniqueness(final Datacenter datacenter,
+        final RemoteService remoteService, final boolean flushErrors)
+    {
+        ErrorsDto configurationErrors = new ErrorsDto();
+
         if (remoteService.getType().checkUniqueness())
         {
             try
             {
                 if (infrastrucutreRepo.existAnyRemoteServiceWithUri(remoteService.getUri()))
                 {
-                    addConflictErrors(APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS);
-                    flushErrors();
+                    APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
+                    configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
+                        .getName() + " : " + error.getMessage()));
+                    if (flushErrors)
+                    {
+                        addConflictErrors(error);
+                        flushErrors();
+                    }
                 }
             }
             catch (URISyntaxException e)
             {
-                addValidationErrors(APIError.REMOTE_SERVICE_MALFORMED_URL);
-                flushErrors();
+                APIError error = APIError.REMOTE_SERVICE_MALFORMED_URL;
+                configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
+                    .getName() + " : " + error.getMessage()));
+                if (flushErrors)
+                {
+                    addValidationErrors(error);
+                    flushErrors();
+                }
             }
         }
         else if (infrastrucutreRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
             remoteService.getType()))
         {
-            addConflictErrors(APIError.REMOTE_SERVICE_TYPE_EXISTS);
-            flushErrors();
+            APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
+            configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
+                + " : " + error.getMessage()));
+            if (flushErrors)
+            {
+                addConflictErrors(error);
+                flushErrors();
+            }
         }
+        return configurationErrors;
     }
 }

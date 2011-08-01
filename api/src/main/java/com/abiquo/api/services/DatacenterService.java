@@ -41,6 +41,8 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -157,7 +159,7 @@ public class DatacenterService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public RemoteServicesDto addRemoteServices(final List<RemoteService> remoteServices,
-        final Integer idDatacenter)
+        final Datacenter datacenter)
     {
         // Add the Remote Services in database in case are informed in the request
         RemoteServicesDto responseRemoteService = new RemoteServicesDto();
@@ -165,9 +167,52 @@ public class DatacenterService extends DefaultApiService
         {
             for (RemoteService rs : remoteServices)
             {
-                RemoteServiceDto rsDto = remoteServiceService.addRemoteService(rs, idDatacenter);
-                responseRemoteService.add(rsDto);
+
+                SingleResourceTransportDto srtDto =
+                    remoteServiceService.addRemoteService(rs, datacenter);
+
+                if (srtDto instanceof RemoteServiceDto)
+                {
+                    RemoteServiceDto rsDto = (RemoteServiceDto) srtDto;
+                    if (rsDto != null)
+                    {
+                        responseRemoteService.add(rsDto);
+                    }
+                }
+                else if (srtDto instanceof ErrorsDto)
+                {
+                    if (responseRemoteService.getConfigErrors() == null)
+                    {
+                        responseRemoteService.setConfigErrors(new ErrorsDto());
+                    }
+                    responseRemoteService.getConfigErrors().addAll((ErrorsDto) srtDto);
+                }
+
             }
+        }
+
+        if (responseRemoteService.getConfigErrors() != null
+            && !responseRemoteService.getConfigErrors().isEmpty())
+        {
+            // Log the event
+            tracer
+                .log(
+                    SeverityType.MAJOR,
+                    ComponentType.DATACENTER,
+                    EventType.DC_CREATE,
+                    "Datacenter '"
+                        + datacenter.getName()
+                        + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.");
+        }
+        else
+        {
+            // Log the event
+            tracer.log(
+                SeverityType.INFO,
+                ComponentType.DATACENTER,
+                EventType.DC_CREATE,
+                "Datacenter '" + datacenter.getName() + "' has been created in "
+                    + datacenter.getLocation());
         }
 
         return responseRemoteService;
