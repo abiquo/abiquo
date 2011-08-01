@@ -136,7 +136,8 @@ public enum APIError
         "The requested state transaction is not valid"), MACHINE_NOT_ACCESIBLE("MACHINE-6",
         "The requested machine could not be contacted"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MANAGED_MACHINE_CANNOT_CHANGE_NAME(
+        "MACHINE-8", "The Machine is in a managed Rack and the name can not be changed."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
