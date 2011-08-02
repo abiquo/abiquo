@@ -102,6 +102,28 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
         + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_VDC_PURCHASED =
+        " SELECT ip FROM "
+            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id AND "
+            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
+    public static final String BY_VDC_TO_PURCHASE =
+        " SELECT ip FROM "
+            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
+            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
         + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
@@ -510,6 +532,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return ipList;
     }
 
+    public List<IpPoolManagement> findpublicIpsPurchasedByVirtualDatacenter(final Integer vdcId,
+        final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     /**
      * Return the list of IPs purchased by an enterprise in a public VLAN. Any IP in a public VLAN
      * with VirtualDatacenter not null
@@ -521,6 +551,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     {
         return findByCriterions(Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan),
             Restrictions.isNotNull(RasdManagement.VIRTUAL_DATACENTER_PROPERTY));
+    }
+
+    public List<IpPoolManagement> findpublicIpsToPurchaseByVirtualDatacenter(final Integer vdcId,
+        final Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**

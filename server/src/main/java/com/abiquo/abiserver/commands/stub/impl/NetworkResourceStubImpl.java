@@ -146,7 +146,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
         final Integer vlanTag, final NetworkConfiguration configuration, final Enterprise enterprise)
     {
-        BasicResult result = new BasicResult();
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
 
         VLANNetworkDto dto = new VLANNetworkDto();
@@ -161,7 +161,26 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setTag(vlanTag);
 
         ClientResponse response = post(uri, dto);
-        if (response.getStatusCode() == 200)
+        if (response.getStatusCode() == 201)
+        {
+            result.setData(createFlexObject(response.getEntity(VLANNetworkDto.class)));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "createPublicVlan");
+        }
+        return result;
+    }
+
+    @Override
+    public BasicResult deletePublicVlan(final Integer datacenterId, final Integer vlanId)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createPublicNetworkLink(datacenterId, vlanId);
+        ClientResponse response = delete(uri);
+        if (response.getStatusCode() == 204)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -189,6 +208,31 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             populateErrors(response, result, "editPublicIp");
         }
 
+        return result;
+    }
+
+    @Override
+    public BasicResult editPublicIps(final Integer datacenterId, final Integer vlanNetworkId,
+        final ArrayList<IpPoolManagement> listOfPublicIPs)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createPublicNetworkIPsLink(datacenterId, vlanNetworkId);
+
+        IpsPoolManagementDto ipsDto = new IpsPoolManagementDto();
+        for (IpPoolManagement ipPool : listOfPublicIPs)
+        {
+            ipsDto.add(this.createDtoObject(ipPool));
+        }
+
+        ClientResponse response = put(uri, ipsDto);
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editPublicIps");
+        }
         return result;
     }
 
@@ -512,7 +556,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
-        buildRequest.append("all=" + (all ? "true" : "false"));
+        buildRequest.append("&all=" + (all ? "true" : "false"));
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);

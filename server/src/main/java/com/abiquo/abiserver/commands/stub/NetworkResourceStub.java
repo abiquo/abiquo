@@ -24,6 +24,8 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.ArrayList;
+
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
@@ -46,8 +48,13 @@ public interface NetworkResourceStub
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
         NetworkConfiguration configuration, Enterprise enterprise);
 
+    public BasicResult deletePublicVlan(Integer datacenterId, Integer vlanId);
+
     public BasicResult editPublicIp(Integer datacenterId, Integer vlanId, Integer idManagement,
         IpPoolManagement ipPoolManagement);
+
+    public BasicResult editPublicIps(Integer datacenterId, Integer vlanNetworkId,
+        ArrayList<IpPoolManagement> listOfPublicIPs);
 
     public BasicResult editPublicVlan(Integer datacenterId, Integer vlanNetworkId, String vlanName,
         Integer vlanTag, NetworkConfiguration configuration, Boolean defaultNetwork,

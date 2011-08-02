@@ -156,4 +156,6 @@ public interface IRESTBuilder
     public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
 
     public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip);
+
+    public List<RESTLink> buildPublicIpRasdLinks(IpPoolManagement ip);
 }

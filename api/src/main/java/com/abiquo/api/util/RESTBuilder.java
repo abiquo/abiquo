@@ -843,4 +843,11 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildPublicIpRasdLinks(final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
