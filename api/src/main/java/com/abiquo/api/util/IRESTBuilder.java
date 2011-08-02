@@ -50,6 +50,8 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.CurrencyDto;
 import com.abiquo.server.core.pricing.PricingTemplateDto;
@@ -157,5 +159,10 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
         final PricingTemplateDto pricingTemplate);
+
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId);
+
+    public List<RESTLink> buildCostCodeCurrencyLinks(CostCode costCode, Currency currency,
+        CostCodeCurrencyDto dto);
 
 }

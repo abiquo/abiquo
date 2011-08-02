@@ -38,8 +38,6 @@ public class PricingTemplateDto extends SingleResourceTransportDto
 
     public PricingTemplateDto()
     {
-        super();
-        // TODO Auto-generated constructor stub
     }
 
     public PricingTemplateDto(final String name, final BigDecimal hdGb,
@@ -49,7 +47,6 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         final int minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
         final BigDecimal memoryMB, final boolean defaultTemplate)
     {
-        super();
         this.name = name;
         this.hdGB = hdGb;
         this.standingChargePeriod = standingChargePeriod;
@@ -248,14 +245,14 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.lastUpdate = lastUpdate;
     }
 
-    private int idCurrency;
+    private Integer idCurrency;
 
-    public int getIdCurrency()
+    public Integer getIdCurrency()
     {
         return idCurrency;
     }
 
-    public void setIdCurrency(final int idCurrency)
+    public void setIdCurrency(final Integer idCurrency)
     {
         this.idCurrency = idCurrency;
     }

@@ -163,6 +163,11 @@ public enum EventType implements Serializable
         1601, "PRICING_TEMPLATE_MODIFIED", "Pricing Template updated"), PRICING_TEMPLATE_DELETED(
         1602, "PRICING_TEMPLATE_DELETED", "Pricing Template deleted"),
 
+    // COSTCODE_CURRENCY
+    COSTCODE_CURRENCY_CREATED(1700, "COSTCODE_CURRENCY_CREATED", "Cost Code -Currency created"), COSTCODE_CURRENCY_MODIFIED(
+        1701, "COSTCODE_CURRENCY_MODIFIED", "ost Code -Currencyupdated"), COSTCODE_CURRENCY_DELETED(
+        1702, "COSTCODE_CURRENCY_DELETED", "ost Code -Currency deleted"),
+
     ;
 
     private final int event;

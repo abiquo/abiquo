@@ -327,7 +327,16 @@ public enum APIError
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"),
 
     // CURRENCY
-    NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist");
+    NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"),
+
+    // COST CODE
+    NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
+        "COSTCODE-1", "Missing  Cost Code parameter"),
+
+    // COST CODE- CURRENCY
+    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
+        "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist");
 
     /**
      * Internal error code

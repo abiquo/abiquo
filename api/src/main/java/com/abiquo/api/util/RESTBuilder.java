@@ -86,6 +86,8 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.CurrencyDto;
 import com.abiquo.server.core.pricing.PricingTemplateDto;
@@ -835,6 +837,21 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
         final PricingTemplateDto pricingTemplate)
     {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeCurrencyLinks(final CostCode costCode,
+        final Currency currency, final CostCodeCurrencyDto dto)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 

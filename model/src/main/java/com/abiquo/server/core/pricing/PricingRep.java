@@ -45,6 +45,12 @@ public class PricingRep extends DefaultRepBase
     private PricingTemplateDAO pricingTemplateDao;
 
     @Autowired
+    private CostCodeDAO costCodeDao;
+
+    @Autowired
+    private CostCodeCurrencyDAO costCodeCurrencyDao;
+
+    @Autowired
     private EnterpriseRep enterpriseRep;
 
     public PricingRep()
@@ -61,6 +67,8 @@ public class PricingRep extends DefaultRepBase
         enterpriseRep = new EnterpriseRep(entityManager);
         pricingTemplateDao = new PricingTemplateDAO(entityManager);
         currencyDao = new CurrencyDAO(entityManager);
+        costCodeDao = new CostCodeDAO(entityManager);
+        costCodeCurrencyDao = new CostCodeCurrencyDAO(entityManager);
     }
 
     public List<Currency> findAllCurrency()
@@ -153,4 +161,45 @@ public class PricingRep extends DefaultRepBase
     {
         pricingTemplateDao.remove(pricingTemplate);
     }
+
+    public CostCode findCostCodeById(final Integer costCodeId)
+    {
+        return costCodeDao.findById(costCodeId);
+    }
+
+    public CostCodeCurrency findCurrencyCostCode(final CostCode costCode, final Currency currency)
+    {
+        return costCodeCurrencyDao.findCurrencyCostCode(costCode, currency);
+    }
+
+    public void insertCostCodeCurrency(final CostCodeCurrency costCodeCurrency)
+    {
+        costCodeCurrencyDao.persist(costCodeCurrency);
+    }
+
+    public void insertCostCode(final CostCode costCode)
+    {
+        if (costCode != null)
+        {
+            costCodeDao.persist(costCode);
+            costCodeDao.flush();
+        }
+    }
+
+    public CostCodeCurrency findCostCodeCurrencyById(final Integer id)
+    {
+        return costCodeCurrencyDao.findById(id);
+    }
+
+    public void updateCostCodeCurrency(final CostCodeCurrency costCodeCurrency)
+    {
+        costCodeCurrencyDao.flush();
+    }
+
+    public boolean existAnyOtherWithCurrency(final CostCodeCurrency costCodeCurrency,
+        final Currency currency, final CostCode costCode)
+    {
+        return costCodeCurrencyDao.existAnyOtherWithCurrency(costCodeCurrency, currency, costCode);
+    }
+
 }

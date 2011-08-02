@@ -73,8 +73,11 @@ public enum ComponentType implements Serializable
     // HA
     HIGH_AVAILABILITY(2097152, "High availability engine"),
 
-    // PRICING_ EMPLATE
-    PRICING_TEMPLATE(4194304, "Pricing Template");
+    // PRICING_ TEMPLATE
+    PRICING_TEMPLATE(4194304, "Pricing Template"),
+
+    // COSTCODE_CURRENCY
+    COSTCODE_CURRENCY(8388608, "Cost Code - Currency");
 
     private final int component;
 

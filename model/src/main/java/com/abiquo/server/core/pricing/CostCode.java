@@ -21,10 +21,16 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
@@ -47,7 +53,7 @@ public class CostCode extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public CostCode(final String variable, final String description)
+    public CostCode(final String name, final String description)
     {
         this.setName(name);
         this.setDescription(description);
@@ -122,4 +128,6 @@ public class CostCode extends DefaultEntityBase
         this.description = description;
     }
 
+    @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "costCode")
+    private List<CostCodeCurrency> costCodeByCurrency = new ArrayList<CostCodeCurrency>();
 }
