@@ -81,6 +81,7 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.server.core.infrastructure.UcsRackDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
@@ -178,6 +179,33 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachinesResource.class, MachinesResource.MACHINES_PATH,
             params));
 
+        if (rack instanceof UcsRackDto)
+        {
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_CLONE,
+                RackResource.RACK_ACTION_LOGICSERVERS_CLONE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_DELETE,
+                RackResource.RACK_ACTION_LOGICSERVERS_DELETE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_DISSOCIATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS, RackResource.RACK_ACTION_LOGICSERVERS_REL,
+                params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES,
+                RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_ORGANIZATIONS, RackResource.RACK_ACTION_ORGANIZATIONS_REL,
+                params));
+        }
         return links;
     }
 

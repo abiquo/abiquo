@@ -57,6 +57,40 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_PARAM = "{" + RACK + "}";
 
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE = "logicServers/associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE = "logicServers/dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS = "logicServers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE = "logicServers/delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE = "logicServers/clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS = "organizations";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lsTemplates";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
+        "logicServers/assocTemplate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL = "ls-dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_REL = "logicServers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE_REL = "ls-delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE_REL = "ls-clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS_REL = "organizations";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES_REL = "ls-templates";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
+        "ls-associateTemplate";
+
     // Define its service. It should only have ONE service!
     @Autowired
     private InfrastructureService service;
@@ -66,9 +100,9 @@ public class RackResource extends AbstractResource
     // previous to this call is the responsible of manage it.
     @GET
     public RackDto getRack(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) Integer datacenterId,
-        @PathParam(RACK) @NotNull @Min(1) Integer rackId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RACK) @NotNull @Min(1) final Integer rackId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         // Receive the Rack and convert it as RackDto in the 'createTransferObject' method. That's
         // enough!
@@ -82,9 +116,9 @@ public class RackResource extends AbstractResource
     // have any constraint. Constraints inside the entity are checked later.
     @PUT
     public RackDto modifyRack(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) Integer datacenterId,
-        @PathParam(RACK) @NotNull @Min(1) Integer rackId, RackDto rackDto,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RACK) @NotNull @Min(1) final Integer rackId, final RackDto rackDto,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         // Check the parameter id of the rack has the same id than the rackId.
         if (!rackDto.getId().equals(rackId))
@@ -112,17 +146,16 @@ public class RackResource extends AbstractResource
     // nor lesser than 1. You don't have to do anything with it. Only declare it. A custom handler
     // previous to this call is the responsible of manage it.
     public void deleteRack(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) Integer datacenterId,
-        @PathParam(RACK) @NotNull @Min(1) Integer rackId)
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RACK) @NotNull @Min(1) final Integer rackId)
     {
         // Pass the whole hierarchy ids at the service. That's all.
         service.removeRack(datacenterId, rackId);
     }
 
-
-    // Create the transfer object. ModelTransformer do the dirty work. You should only 
+    // Create the transfer object. ModelTransformer do the dirty work. You should only
     // create custom links depending on the entity.
-    public static RackDto createTransferObject(Rack rack, IRESTBuilder restBuilder)
+    public static RackDto createTransferObject(final Rack rack, final IRESTBuilder restBuilder)
         throws Exception
     {
         RackDto dto = ModelTransformer.transportFromPersistence(RackDto.class, rack);
@@ -132,7 +165,7 @@ public class RackResource extends AbstractResource
     }
 
     // Create the persistence object.
-    public static Rack createPersistenceObject(RackDto rack) throws Exception
+    public static Rack createPersistenceObject(final RackDto rack) throws Exception
     {
         return ModelTransformer.persistenceFromTransport(Rack.class, rack);
     }
