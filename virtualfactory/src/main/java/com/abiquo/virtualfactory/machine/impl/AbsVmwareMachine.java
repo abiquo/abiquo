@@ -195,7 +195,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
                     }
                 }
-                
+
                 // Configure the port group in the common way. If a DVS is used, the internal loop,
                 // will not do anything because the list of vnics is empty.
                 configureNetwork();
@@ -345,7 +345,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
      * @return true if the virtual switch exists, false if contrary
      * @throws Exception
      */
-    private boolean existsVswitch(ManagedObjectReference hostmor, String vSwitchName)
+    private boolean existsVswitch(final ManagedObjectReference hostmor, final String vSwitchName)
         throws Exception
     {
         ExtendedAppUtil apputil = utils.getAppUtil();
@@ -494,9 +494,18 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // Force to power off the machine before deleting
             powerOffMachine();
 
+            if (vmConfig.getVirtualDiskBase().isHa())
+            {
+                executeTaskOnVM(VMTasks.UNREGISTER);
+            }
+            else
+            {
+                executeTaskOnVM(VMTasks.DELETE);
+            }
+
             // if we have connection with the vCenter, unregister the 'orphaned' machine.
             // Do nothing
-            if (vCenterBridge != null)
+            if (vCenterBridge != null && !vmConfig.getVirtualDiskBase().isHa())
             {
                 try
                 {
@@ -507,15 +516,6 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
                     logger.warn("Could not unregister Virtual Machine '" + config.getMachineName()
                         + "' and it will be 'orphaned'");
                 }
-            }
-
-            if (vmConfig.getVirtualDiskBase().isHa())
-            {
-                executeTaskOnVM(VMTasks.UNREGISTER);
-            }
-            else
-            {
-                executeTaskOnVM(VMTasks.DELETE);
             }
 
             try
@@ -785,7 +785,9 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     public void pauseMachine() throws VirtualMachineException
     {
         if (!checkState(State.PAUSE))
+        {
             executeTaskOnVM(VMTasks.PAUSE);
+        }
     }
 
     @Override
@@ -800,28 +802,36 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         }
 
         if (!checkState(State.POWER_OFF))
+        {
             executeTaskOnVM(VMTasks.POWER_OFF);
+        }
     }
 
     @Override
     public void powerOnMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.POWER_ON);
+        }
     }
 
     @Override
     public void resetMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.RESET);
+        }
     }
 
     @Override
     public void resumeMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.RESUME);
+        }
     }
 
     @Override
