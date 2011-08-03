@@ -23,7 +23,6 @@ package com.abiquo.scheduler.workload;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,13 +44,13 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
+import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -124,20 +123,20 @@ public class VirtualimageAllocationService
     private final static Logger log = LoggerFactory.getLogger(VirtualimageAllocationService.class);
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    private InfrastructureRep datacenterRepo;
 
     @Autowired
-    VirtualApplianceDAO virtualApplianceDao;
+    private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
-    NetworkAssignmentDAO networkAssignmentDao;
+    private NetworkAssignmentDAO networkAssignmentDao;
 
     /** Replacement to use premium implementation (@see persistencebeans-premium.xml). */
-    SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
+    private SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
 
     @Resource(name = "physicalmachineRuleFinder")
     // premium impl by replacements
-    public void setRuleFinder(SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
+    public void setRuleFinder(final SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder)
     {
         this.ruleFinder = ruleFinder;
     }
@@ -153,7 +152,7 @@ public class VirtualimageAllocationService
      *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance) throws ResourceAllocationException
+        final Integer idVirtualAppliance)
     {
         final List<Integer> rackCandidates = getCandidateRacks(idVirtualAppliance);
 
@@ -202,10 +201,37 @@ public class VirtualimageAllocationService
     }
 
     /**
+     * Finds the targets that best fits a given resource. If there is no target that can accept the
+     * resource, then null will be returned.
+     * 
+     * @param datastoreUuid, the selected machine should have this datastore enabled.
+     * @param originalHypervisorId, the selected machine IS NOT this provided hypervisor.
+     * @param rackId, the rack is already defined.
+     * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
+     *             target.
+     */
+    public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
+        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
+        Integer rackId) throws ResourceAllocationException
+    {
+
+        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
+        final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
+
+        final Collection<Machine> firstPassCandidates =
+
+            datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
+                datastoreUuid, originalHypervisorId);
+
+        return findSecondPassCandidates(firstPassCandidates, vimage, idVirtualAppliance, fitPolicy);
+
+    }
+
+    /**
      * Return a sorted list of racks (sorted by rack goodness based on network params). If some
      * network assigment on the datacenter then the rack is already defined.
      */
-    protected List<Integer> getCandidateRacks(Integer idVirtualApp)
+    protected List<Integer> getCandidateRacks(final Integer idVirtualApp)
     {
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
@@ -238,8 +264,8 @@ public class VirtualimageAllocationService
         }
     }
 
-    protected Collection<Machine> findFirstPassCandidates(VirtualImage vimage,
-        Integer idVirtualApp, Rack rack) throws NotEnoughResourcesException
+    protected Collection<Machine> findFirstPassCandidates(final VirtualImage vimage,
+        final Integer idVirtualApp, final Rack rack) throws NotEnoughResourcesException
     {
         Collection<Machine> candidateMachines;
 
@@ -335,7 +361,7 @@ public class VirtualimageAllocationService
      *             target.
      */
     protected final Machine findSecondPassCandidates(final Collection<Machine> firstPassCandidates,
-        VirtualImage vimage, Integer virtualApplianceId, final FitPolicy fitPolicy)
+        final VirtualImage vimage, final Integer virtualApplianceId, final FitPolicy fitPolicy)
         throws NotEnoughResourcesException
     {
         IAllocationFit physicalMachineFit;
@@ -420,7 +446,7 @@ public class VirtualimageAllocationService
         return bestTarget;
     }
 
-    private String candidateNames(Collection<Machine> firstPassCandidates)
+    private String candidateNames(final Collection<Machine> firstPassCandidates)
     {
         StringBuilder sb = new StringBuilder();
         for (Machine candidate : firstPassCandidates)
@@ -444,8 +470,8 @@ public class VirtualimageAllocationService
      * When editing a virtual machine this method checks if the increases resources (setted at
      * vimage) are allowed by the workload rules.
      */
-    public boolean checkVirtualMachineResourceIncrease(Machine machine, VirtualImage vimage,
-        Integer virtualApplianceId)
+    public boolean checkVirtualMachineResourceIncrease(final Machine machine,
+        final VirtualImage vimage, final Integer virtualApplianceId)
     {
         // get all the rules of the candiate machines
         Map<Machine, List<MachineLoadRule>> machineRulesMap =

@@ -36,12 +36,14 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
 
     private long repositoryHard;
 
+    private boolean isReservationRestricted;
+
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -51,7 +53,7 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -61,7 +63,7 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return repositorySoft;
     }
 
-    public void setRepositorySoft(long repositorySoft)
+    public void setRepositorySoft(final long repositorySoft)
     {
         this.repositorySoft = repositorySoft;
     }
@@ -71,14 +73,24 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return repositoryHard;
     }
 
-    public void setRepositoryHard(long repositoryHard)
+    public void setRepositoryHard(final long repositoryHard)
     {
         this.repositoryHard = repositoryHard;
     }
 
-    public void setRepositoryLimits(long soft, long hard)
+    public void setRepositoryLimits(final long soft, final long hard)
     {
         this.repositorySoft = soft;
         this.repositoryHard = hard;
+    }
+
+    public boolean getIsReservationRestricted()
+    {
+        return isReservationRestricted;
+    }
+
+    public void setIsReservationRestricted(boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
     }
 }

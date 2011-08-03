@@ -32,39 +32,43 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaCabinetDAO")
-public class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice> {
+/* package */class StorageDeviceDAO extends DefaultDAOBase<Integer, StorageDevice>
+{
 
-	public StorageDeviceDAO() {
-		super(StorageDevice.class);
-	}
+    public StorageDeviceDAO()
+    {
+        super(StorageDevice.class);
+    }
 
-	public StorageDeviceDAO(EntityManager entityManager) {
-		super(StorageDevice.class, entityManager);
-	}
+    public StorageDeviceDAO(final EntityManager entityManager)
+    {
+        super(StorageDevice.class, entityManager);
+    }
 
-	@SuppressWarnings("unchecked")
-	public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId) {
-		
-		Criteria criteria = createCriteria(Restrictions.eq("datacenter.id",
-				datacenterId));
-		return criteria.list();
-	
-	}
+    @SuppressWarnings("unchecked")
+    public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId)
+    {
+
+        Criteria criteria = createCriteria(Restrictions.eq("datacenter.id", datacenterId));
+        return criteria.list();
+
+    }
 
     public StorageDevice getDeviceById(final Integer datacenterId, final Integer deviceId)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
-                Restrictions.eq("id", deviceId));
+            createCriteria(Restrictions.eq("id", deviceId), Restrictions.eq("datacenter.id",
+                datacenterId));
         Object obj = criteria.uniqueResult();
         return (StorageDevice) obj;
     }
 
-    public StorageDevice findDeviceById(Integer datacenterId, String managementIp)
+    public StorageDevice findDeviceByManagementIP(final Integer datacenterId,
+        final String managementIp)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("datacenter.id", datacenterId)).add(
-                Restrictions.eq("managementIp", managementIp));
+            createCriteria(Restrictions.eq("managementIp", managementIp), Restrictions.eq(
+                "datacenter.id", datacenterId));
         Object obj = criteria.uniqueResult();
         return (StorageDevice) obj;
     }

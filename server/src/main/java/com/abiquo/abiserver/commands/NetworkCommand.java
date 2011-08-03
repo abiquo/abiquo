@@ -105,33 +105,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * For any DataCenter, lists all the enterprises that are using its networks.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param datacenterId identifier of the DataCenter.
-     * @param offset first element to return.
-     * @param numElem number of elements to return.
-     * @param filterLike filter the search by....
-     * @return list of {@link EnterpriseHB} object that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String filterLike)
-        throws NetworkCommandException;
-
-    /**
-     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
-     * 
-     * @param userSession user who performs the action.
-     * @param vdcId virtual datacenter identifier.
-     * @return the DHCP info into a parsed String.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public String getInfoDHCPServer(UserSession userSession, Integer vdcId)
-        throws NetworkCommandException;
-
-    /**
      * Return the list of gateways you can choose by a virtual machine.
      * 
      * @param userSession user who performs the action.
@@ -160,44 +133,6 @@ public interface NetworkCommand
         throws NetworkCommandException;
 
     /**
-     * Return the list of network resources of a given Enterprise.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param enterpriseId identifier of the enterprise.
-     * @param offset first element to return.
-     * @param numElem number of elements to return.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @param orderBy the order preferences of the query.
-     * @param asc tell him if we want to order ascendant or descendant
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolByEnterprise(UserSession userSession,
-        Integer enterpriseId, Integer offset, Integer numElem, String filterLike, String orderBy,
-        Boolean asc) throws NetworkCommandException;
-
-    /**
-     * Return the list of network resources of a given Virtual DataCenter.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vdcId virtualDataCenterId identifier of the Virtual DataCenter.
-     * @param offset first element to return.
-     * @param numElem number of elements to return
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @param orderBy the order preferences of the query.
-     * @param asc tell him if we want to order ascendant or descendant
-     * @return a list of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public List<IpPoolManagementHB> getListNetworkPoolByVDC(UserSession userSession, Integer vdcId,
-        Integer offset, Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
-
-    /**
      * Return the list of network resources of a given VLAN.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -217,21 +152,6 @@ public interface NetworkCommand
         Boolean asc) throws NetworkCommandException;
 
     /**
-     * For any DataCenter, calculate how many enterprises are that using its networks. Used by
-     * paging purposes.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param datacenterId identifier of the Datacenter
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar...
-     * @return the Number of enterprises that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, String filterLike) throws NetworkCommandException;
-
-    /**
      * Return the number of available network resources of a given VLAN. Used by paging purposes.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -244,34 +164,6 @@ public interface NetworkCommand
      */
     public Integer getNumberNetworkPoolAvailableByVLAN(UserSession userSession, Integer vlanId,
         String filterLike) throws NetworkCommandException;
-
-    /**
-     * Return the number of network resources of a given Enterprise. Used by paging purposes.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param enterprise identifier of the enterprise.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @return a number of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolByEnterprise(UserSession userSession, Integer enterprise,
-        String filterLike) throws NetworkCommandException;
-
-    /**
-     * Return the number of network resources of a given Virtual DataCenter.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vdcId virtualDataCenterId identifier of the Virtual DataCenter.
-     * @param filterLike filters the search by similar values. Use it if you want to retrieve a
-     *            similar IPAddress, MAC address, VLAN name.
-     * @return a number of {@link IpPoolManagement} that matches the search.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
-    public Integer getNumberNetworkPoolByVDC(UserSession userSession, Integer vdcId, String filter)
-        throws NetworkCommandException;
 
     /**
      * Return the number of network resources of a given VLAN.
@@ -392,6 +284,6 @@ public interface NetworkCommand
      * 
      * @throws NetworkCommandException if the Hard Limit is exceeded.
      */
-    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter)
-        throws NetworkCommandException;
+    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter,
+        UserSession userSession) throws NetworkCommandException;
 }

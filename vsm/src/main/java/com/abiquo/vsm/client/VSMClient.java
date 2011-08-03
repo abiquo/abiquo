@@ -21,8 +21,10 @@
 
 package com.abiquo.vsm.client;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -131,7 +133,8 @@ public class VSMClient
         throws VSMClientException
     {
         Resource resource =
-            client.resource(basePath + "/physicalmachines?address=" + physicalMachineAddress);
+            client.resource(basePath + "/physicalmachines?address="
+                + encodeUTF8(physicalMachineAddress));
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         checkResponseErrors(response);
         return response.getEntity(PhysicalMachinesDto.class).getCollection().get(0);
@@ -219,13 +222,17 @@ public class VSMClient
      * @param virtualMachineName The name of the virtual machine.
      * @return The subscription for the virtual machine.
      * @throws VSMClientException If there is no subscription for the given virtual machine.
+     * @throws UnsupportedEncodingException
      */
     public VirtualMachineDto getSubscription(String virtualMachineName) throws VSMClientException
     {
+
         Resource resource =
-            client.resource(basePath + "/subscriptions?virtualmachine=" + virtualMachineName);
+            client.resource(basePath + "/subscriptions?virtualmachine="
+                + encodeUTF8(virtualMachineName));
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
         checkResponseErrors(response);
+
         return response.getEntity(VirtualMachinesDto.class).getCollection().get(0);
     }
 
@@ -239,10 +246,10 @@ public class VSMClient
     {
         try
         {
-            VirtualMachineDto dto = getSubscription(virtualMachineName);
+            getSubscription(virtualMachineName);
             return true;
         }
-        catch (VSMClientException e)
+        catch (Exception e)
         {
             return false;
         }
@@ -250,7 +257,7 @@ public class VSMClient
 
     /**
      * Returns true if the PhysicalMachine is already monitored.
-     *
+     * 
      * @param physicalMachineAddress The address of the physical machine
      * @return True if the machine is already monitored. Otherwise false;
      */
@@ -289,8 +296,8 @@ public class VSMClient
 
         Resource resource = client.resource(basePath + "/subscriptions");
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML_TYPE).contentType(
-                MediaType.APPLICATION_XML_TYPE).post(vm);
+            resource.accept(MediaType.APPLICATION_XML_TYPE)
+                .contentType(MediaType.APPLICATION_XML_TYPE).post(vm);
 
         checkResponseErrors(response);
         return response.getEntity(VirtualMachineDto.class);
@@ -335,17 +342,15 @@ public class VSMClient
         if (response.getStatusCode() / 200 != 1)
         {
             Status status = Status.fromStatusCode(response.getStatusCode());
+            ErrorDto error = response.getEntity(ErrorDto.class);
 
-            if (status.compareTo(Status.NOT_FOUND) == 0)
+            if (error != null)
             {
-                throw new VSMClientException(status,
-                    "The Virtual System monitor is not properly configured");
+                throw new VSMClientException(status, error.getMessage());
             }
 
-            ErrorDto error = response.getEntity(ErrorDto.class);
-            String errorMessage = error == null ? response.getMessage() : error.getMessage();
-
-            throw new VSMClientException(status, errorMessage);
+            throw new VSMClientException(status,
+                "The Virtual System monitor is not properly configured");
         }
     }
 
@@ -365,6 +370,19 @@ public class VSMClient
         catch (MalformedURLException e)
         {
             return false;
+        }
+    }
+
+    private String encodeUTF8(final String value) throws VSMClientException
+    {
+        try
+        {
+            return URLEncoder.encode(value, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new VSMClientException(Status.INTERNAL_SERVER_ERROR, "Can not encode '" + value
+                + "'. UTF-8 is an unsupported encoding.");
         }
     }
 }

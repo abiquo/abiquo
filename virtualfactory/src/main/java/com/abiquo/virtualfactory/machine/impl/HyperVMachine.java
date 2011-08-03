@@ -47,7 +47,8 @@ public class HyperVMachine extends AbsHyperVMachine
      * @param configuration the virtual machine configuration
      * @throws VirtualMachineException
      */
-    public HyperVMachine(VirtualMachineConfiguration configuration) throws VirtualMachineException
+    public HyperVMachine(final VirtualMachineConfiguration configuration)
+        throws VirtualMachineException
     {
         super(configuration);
     }
@@ -63,21 +64,12 @@ public class HyperVMachine extends AbsHyperVMachine
         logger.debug("Configuring Virtual disks resources");
 
         // Getting the IDE controller
-
-        IJIDispatch ideControllerDispatch = getIdeControllerByAddress(0);
-
-        // Getting the dispatcher of the ide resource added Path
-        IJIDispatch idePathDispatcher =
-            (IJIDispatch) JIObjectFactory.narrowObject(ideControllerDispatch.get("Path_")
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
-
-        String ideControllerPath = idePathDispatcher.get("Path").getObjectAsString2();
+        String ideControllerPath = getIDEControllerPathByAddress(0);
 
         if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
         {
             configureVHDDisk(ideControllerPath, 0);
         }
-
     }
 
     /**
@@ -103,11 +95,11 @@ public class HyperVMachine extends AbsHyperVMachine
             {
                 virtualSysteManagementServiceExt.destroyVirtualSystem(vmDispatch);
 
-                //if (config.getVirtualDiskBase().getDiskType() == VirtualDiskType.STANDARD)
-                //{
-                    // Just deleted the base disk when the virtual disk is stateless
+                // Just deleted the base disk when the virtual disk is stateless
+                if (!config.getVirtualDiskBase().isHa())
+                {
                     deleteBaseDisk();
-                //}
+                }
             }
             else
             {
@@ -139,12 +131,24 @@ public class HyperVMachine extends AbsHyperVMachine
     }
 
     @Override
-    public void configureExtendedDiskResources(VirtualMachineConfiguration vmConfig)
+    public void configureExtendedDiskResources(final VirtualMachineConfiguration vmConfig)
         throws Exception
     {
         logger
             .info("This is a premium functionality. Not extended disk resources will be attached");
 
+    }
+
+    protected String getIDEControllerPathByAddress(final int address) throws Exception
+    {
+        IJIDispatch ideControllerDispatch = getIdeControllerByAddress(address);
+
+        // Getting the dispatcher of the ide resource added Path
+        IJIDispatch idePathDispatcher =
+            (IJIDispatch) JIObjectFactory.narrowObject(ideControllerDispatch.get("Path_")
+                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+
+        return idePathDispatcher.get("Path").getObjectAsString2();
     }
 
 }

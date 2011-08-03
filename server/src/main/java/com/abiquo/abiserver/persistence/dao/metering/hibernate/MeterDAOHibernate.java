@@ -34,11 +34,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.user.Role;
+import com.abiquo.abiserver.security.SecurityService;
 
 /**
  * * Class that implements the extra DAO functions for the
@@ -53,8 +54,9 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<MeterHB> findAllByFilter(HashMap<String, String> filter,
-        List<String> performedbyList, Integer numrows, Integer role) throws PersistenceException
+    public List<MeterHB> findAllByFilter(final HashMap<String, String> filter,
+        final List<String> performedbyList, final Integer numrows, final RoleHB role)
+        throws PersistenceException
     {
         Integer numberOfParameters = 0;
         List<MeterHB> listOfMeters = new ArrayList<MeterHB>();
@@ -127,7 +129,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
         if (filter.containsKey("enterprise"))
         {
-            stringQuery.append(" and enterprise like '%" + filter.get("enterprise") + "%'");
+            stringQuery.append(" and enterprise like '%" + replaceApostrophe(filter.get("enterprise")) + "%'");
         }
         if (filter.containsKey("user"))
         {
@@ -156,32 +158,36 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
         if (filter.containsKey("actionperformed"))
         {
-            stringQuery.append(" and actionperformed like '" + filter.get("actionperformed")
-                + "%'");
+            stringQuery
+                .append(" and actionperformed like '" + filter.get("actionperformed") + "%'");
         }
         if (filter.containsKey("component"))
         {
             stringQuery.append(" and component like '%" + filter.get("component") + "%'");
-        }
+        }   
 
-        if (role != Role.SYS_ADMIN)
+        // if (role != Role.SYS_ADMIN)
+        if (!SecurityService.isCloudAdmin(role.toPojo()))
         {
-            // performedby filter
-            stringQuery.append(" and performedby in (");
-            boolean firstentry = true;
-            for (String currentString : performedbyList)
+            if (performedbyList != null && !performedbyList.isEmpty())
             {
-                if (firstentry == false)
+                // performedby filter
+                stringQuery.append(" and performedby in (");
+                boolean firstentry = true;
+                for (String currentString : performedbyList)
                 {
-                    stringQuery.append(",");
+                    if (firstentry == false)
+                    {
+                        stringQuery.append(",");
+                    }
+                    stringQuery.append("'" + currentString + "'");
+                    if (firstentry == true)
+                    {
+                        firstentry = false;
+                    }
                 }
-                stringQuery.append("'" + currentString + "'");
-                if (firstentry == true)
-                {
-                    firstentry = false;
-                }
+                stringQuery.append(")");
             }
-            stringQuery.append(")");
         }
         // delete last ','
         stringQuery.append(" order by timestamp desc");
@@ -194,5 +200,10 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         listOfMeters = meterQuery.list();
 
         return listOfMeters;
+    }
+    
+    private final String replaceApostrophe(final String name)
+    {
+        return name.replaceAll("'", "''");
     }
 }

@@ -27,6 +27,8 @@ import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveHypervisorTypesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRacksURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRemoteServicesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveEnterprisesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveEnterprisesByDatacenterURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -37,14 +39,23 @@ import javax.ws.rs.core.MediaType;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 {
@@ -74,7 +85,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     public void existHypervisorsLink()
     {
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()), DatacenterResource.HYPERVISORS_PATH);
+        assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()),
+            DatacenterResource.HYPERVISORS_PATH);
     }
 
     @Test
@@ -82,7 +94,8 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     {
 
         DatacenterDto dc = createDatacenter();
-        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()), RemoteServicesResource.REMOTE_SERVICES_PATH);
+        assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()),
+            RemoteServicesResource.REMOTE_SERVICES_PATH);
     }
 
     @Test
@@ -133,6 +146,68 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         assertEquals(404, response.getStatusCode());
         assertErrors(response, 404, APIError.NON_EXISTENT_DATACENTER.getCode());
     }
+    
+    @Test
+    public void getEnterprisesByDatacenters() throws ClientWebException, IOException
+    {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        DatacenterLimits dcl = datacenterLimitsGenerator.createInstance(enterprise, datacenter);
+        
+        setup(enterprise,datacenter,dcl);
+        Integer datacenterId = datacenter.getId();
+
+        String uri = resolveEnterprisesByDatacenterURI(datacenterId);
+
+        ClientResponse response = get(uri);
+        assertEquals(response.getStatusCode(), 200);
+
+        EnterprisesDto enterprises = response.getEntity(EnterprisesDto.class);
+        assertNotNull(enterprises);
+        assertEquals(enterprises.getCollection().isEmpty(), false);
+     
+        assertEquals(enterprises.getCollection().get(0).getName(),enterprise.getName());
+        assertEquals(enterprises.getCollection().get(0).getId(),enterprise.getId());
+    }
+    
+    @Test
+    public void getEnterprisesWithNetworkByDatacenters() throws ClientWebException, IOException
+    {
+        
+        RemoteService rs;
+        VLANNetwork vlan;
+        VirtualDatacenter vdc;
+        rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
+        vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        setup(vdc.getDatacenter(),rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        setup(vlan);        
+        
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        DatacenterLimits dcl = datacenterLimitsGenerator.createInstance(enterprise, vdc.getDatacenter());
+        DatacenterLimits dcl2 = datacenterLimitsGenerator.createInstance(vdc.getEnterprise(),vdc.getDatacenter());
+        setup(enterprise, dcl,dcl2);
+        Integer datacenterId = vdc.getDatacenter().getId();
+
+        String uri0 = resolveEnterprisesByDatacenterURI(datacenterId);
+        String uri1 = uri0 + "?network=true";
+        String uri2 = uri0 + "?network=true&startwith=2&limit=1";
+        ClientResponse response0 = get(uri0);
+        ClientResponse response1 = get(uri1);
+        ClientResponse response2 = get(uri2);
+        assertEquals(response0.getStatusCode(), 200);
+        assertEquals(response1.getStatusCode(), 200);
+        assertEquals(response2.getStatusCode(), 200);
+
+        EnterprisesDto enterprises0 = response0.getEntity(EnterprisesDto.class);
+        EnterprisesDto enterprises1 = response1.getEntity(EnterprisesDto.class);
+        EnterprisesDto enterprises2 = response2.getEntity(EnterprisesDto.class);
+        assertNotNull(enterprises0);
+        assertEquals(enterprises0.getCollection().size(), 2);
+        assertEquals(enterprises1.getCollection().size(), 1);
+        assertEquals(enterprises2.getCollection().size(), 1);
+        assertEquals(enterprises1.getCollection().get(0).getName(),vdc.getEnterprise().getName());
+    }
 
     /* delete is disabled at this moment */
     @Test(enabled = false)
@@ -152,7 +227,7 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         setup(datacenter);
 
         String href = resolveDatacenterURI(datacenter.getId());
-        
+
         return get(href).getEntity(DatacenterDto.class);
     }
 }

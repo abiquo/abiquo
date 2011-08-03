@@ -36,7 +36,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
 
     private VirtualImageGenerator vImageGenerator;
 
-    public NodeVirtualImageGenerator(SeedGenerator seed)
+    public NodeVirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
         vApplianceGenerator = new VirtualApplianceGenerator(seed);
@@ -45,7 +45,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     }
 
     @Override
-    public void assertAllPropertiesEqual(NodeVirtualImage obj1, NodeVirtualImage obj2)
+    public void assertAllPropertiesEqual(final NodeVirtualImage obj1, final NodeVirtualImage obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, NodeVirtualImage.MODIFIED_PROPERTY,
             NodeVirtualImage.NAME_PROPERTY);
@@ -67,29 +67,36 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         return new NodeVirtualImage("" + new Random().nextInt(), vAppliance, vImage, vMachine);
     }
 
-    public NodeVirtualImage createInstance(VirtualAppliance virtualAppliance, VirtualImage vimage)
+    public NodeVirtualImage createInstance(final VirtualMachine vMachine)
+    {
+        VirtualAppliance vAppliance = vApplianceGenerator.createUniqueInstance();
+        return createInstance(vAppliance, vMachine);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
+        final VirtualImage vimage)
     {
         VirtualMachine vMachine = vMachineGenerator.createInstance(vimage);
 
         return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vimage, vMachine);
     }
 
-    public NodeVirtualImage createInstance(VirtualAppliance virtualAppliance,
-        VirtualMachine vMachine)
+    public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
+        final VirtualMachine vMachine)
     {
         return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vMachine
             .getVirtualImage(), vMachine);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(NodeVirtualImage entity,
-        List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final NodeVirtualImage entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
         VirtualAppliance vAppliance = entity.getVirtualAppliance();
         VirtualMachine vMachine = entity.getVirtualMachine();
-        VirtualImage vImage = entity.getVirtualImage();
+        // VirtualImage vImage = entity.getVirtualImage();
 
         vApplianceGenerator.addAuxiliaryEntitiesToPersist(vAppliance, entitiesToPersist);
         entitiesToPersist.add(vAppliance);
@@ -97,8 +104,9 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         vMachineGenerator.addAuxiliaryEntitiesToPersist(vMachine, entitiesToPersist);
         entitiesToPersist.add(vMachine);
 
-        vImageGenerator.addAuxiliaryEntitiesToPersist(vImage, entitiesToPersist);
-        entitiesToPersist.add(vImage);
+        // The virtualMachine generator already saves the VirtualImage
+        // vImageGenerator.addAuxiliaryEntitiesToPersist(vImage, entitiesToPersist);
+        // entitiesToPersist.add(vImage);
     }
 
 }

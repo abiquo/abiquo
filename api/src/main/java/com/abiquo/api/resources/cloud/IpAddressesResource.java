@@ -26,6 +26,7 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ConflictException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
@@ -50,7 +52,6 @@ import com.abiquo.server.core.util.PagedList;
 
 /**
  * @author jdevesa
- *
  */
 @Parent(PrivateNetworkResource.class)
 @Path(IpAddressesResource.IP_ADDRESSES)
@@ -61,22 +62,20 @@ public class IpAddressesResource extends AbstractResource
 
     @Autowired
     private IpAddressService service;
-    
+
     @Context
     UriInfo uriInfo;
 
     @GET
     public IpsPoolManagementDto getIPAddresses(
         @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) Integer vlanId,
-        @QueryParam(PAGE) Integer page,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @QueryParam(START_WITH) @Min(0) Integer startwith,
+        @QueryParam(LIMIT) @Min(0) Integer limit, @Context IRESTBuilder restBuilder)
+        throws Exception
     {
-        List<IpPoolManagement> all = service.getListIpPoolManagementByVLAN(vlanId, (page == null)? 0 : page, DEFAULT_PAGE_LENGTH);
-
-        if (all == null || all.isEmpty())
-        {
-            throw new ConflictException(APIError.NETWORK_WITHOUT_IPS);
-        }
+        List<IpPoolManagement> all =
+            service.getListIpPoolManagementByVLAN(vlanId, (startwith == null) ? 0 : startwith,
+                (limit == null) ? DEFAULT_PAGE_LENGTH : limit);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
@@ -85,15 +84,22 @@ public class IpAddressesResource extends AbstractResource
             ips.add(createTransferObject(ip, restBuilder));
         }
 
-        ips.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(), (PagedList) all));
-        
+        ips.addLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+            (PagedList) all));
+        ips.setTotalSize(((PagedList) all).getTotalResults());
+
         return ips;
     }
-    
-    public static IpPoolManagementDto createTransferObject(IpPoolManagement ip, IRESTBuilder restBuilder) throws Exception
+
+    public static IpPoolManagementDto createTransferObject(IpPoolManagement ip,
+        IRESTBuilder restBuilder) throws Exception
     {
         IpPoolManagementDto dto =
             ModelTransformer.transportFromPersistence(IpPoolManagementDto.class, ip);
+
+        // Create the links to the resources where the IP object is assigned to
+        dto.addLinks(restBuilder.buildIpRasdLinks(ip));
+        dto.addLinks(restBuilder.buildRasdLinks(ip));
 
         return dto;
     }

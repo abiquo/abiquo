@@ -21,6 +21,8 @@
 
 package com.abiquo.api.exceptions.mapper;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -43,15 +45,62 @@ public class ServerExceptionMapper<T extends Throwable> implements ExceptionMapp
     {
         ErrorsDto errors = new ErrorsDto();
         ErrorDto error = new ErrorDto();
-        error.setCode(getErrorCode(exception));
-        error.setMessage(getErrorMessage(exception));
-
         ResponseBuilder builder = new ResponseBuilderImpl();
-        builder.entity(errors);
-        builder.status(getResponseStatus(exception));
-
-        exception.printStackTrace();
-
+        if (exception instanceof WebApplicationException)
+        {
+            WebApplicationException webException = (WebApplicationException) exception;
+            switch (webException.getResponse().getStatus())
+            {
+                case 400:
+                    error.setCode(APIError.STATUS_BAD_REQUEST.getCode());
+                    error.setMessage(APIError.STATUS_BAD_REQUEST.getMessage());
+                    builder.status(Status.BAD_REQUEST);
+                    break;
+                case 401:
+                    error.setCode(APIError.STATUS_UNAUTHORIZED.getCode());
+                    error.setMessage(APIError.STATUS_UNAUTHORIZED.getMessage());
+                    builder.status(Status.UNAUTHORIZED);
+                    break;
+                case 403:
+                    error.setCode(APIError.STATUS_FORBIDDEN.getCode());
+                    error.setMessage(APIError.STATUS_FORBIDDEN.getMessage());
+                    builder.status(Status.FORBIDDEN);
+                    break;
+                case 404:
+                    error.setCode(APIError.STATUS_NOT_FOUND.getCode());
+                    error.setMessage(APIError.STATUS_NOT_FOUND.getMessage());
+                    builder.status(Status.NOT_FOUND);
+                    break;
+//                case 405:
+//                    error.setCode(APIError.STATUS_METHOD_NOT_ALLOWED.getCode());
+//                    error.setMessage(APIError.STATUS_METHOD_NOT_ALLOWED.getMessage());
+//                    builder.status(Status.);
+//                    break;
+                case 415:
+                    error.setCode(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE.getCode());
+                    error.setMessage(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE.getMessage());
+                    builder.status(Status.UNSUPPORTED_MEDIA_TYPE);
+                    break;
+                default:
+                    error.setCode(APIError.STATUS_INTERNAL_SERVER_ERROR.getCode());
+                    error.setMessage(APIError.STATUS_INTERNAL_SERVER_ERROR.getMessage());
+                    builder.status(Status.INTERNAL_SERVER_ERROR);
+                    break;
+                    
+            }
+        }
+        else
+        {
+            error.setCode(APIError.STATUS_INTERNAL_SERVER_ERROR.getCode());
+            error.setMessage(APIError.STATUS_INTERNAL_SERVER_ERROR.getMessage());
+            builder.status(Status.INTERNAL_SERVER_ERROR);
+            
+            exception.printStackTrace();            
+        }
+        
+        errors.getCollection().add(error);       
+        builder.entity(errors).type(MediaType.APPLICATION_XML_TYPE);
+        
         return builder.build();
     }
 
@@ -60,13 +109,4 @@ public class ServerExceptionMapper<T extends Throwable> implements ExceptionMapp
         return Status.INTERNAL_SERVER_ERROR;
     }
 
-    protected String getErrorCode(T exception)
-    {
-        return "ISE-500";
-    }
-
-    protected String getErrorMessage(T exception)
-    {
-        return exception.getMessage();
-    }
 }

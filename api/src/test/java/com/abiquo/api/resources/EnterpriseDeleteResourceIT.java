@@ -25,8 +25,10 @@ import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,6 +36,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
@@ -44,10 +47,20 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance(Role.Type.SYS_ADMIN);
-
+        Role r = roleGenerator.createUniqueInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
-        setup(e, r, u);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(e);
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        setup(entitiesToSetup.toArray());
+
     }
 
     @Test
@@ -64,7 +77,6 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         response = get(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 404);
 
-        tearDown("user", "role", "enterprise");
     }
 
     @Test
@@ -76,11 +88,8 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveEnterpriseURI(vdc.getEnterprise().getId());
 
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), 400);
+        assertErrors(response, 409, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
 
-        assertErrors(response, APIError.ENTERPRISE_DELETE_ERROR_WITH_VDCS.getCode());
-
-        tearDown("virtualdatacenter", "user", "role", "enterprise", "datacenter", "network");
     }
 
     @Test
@@ -94,20 +103,30 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 204);
 
-        tearDown("virtualimage", "user", "role", "enterprise");
     }
 
     @Test
     public void shouldDeleteEnterpriseWhenContainsUsers()
     {
         User user = userGenerator.createUniqueInstance();
-        setup(user.getEnterprise(), user.getRole(), user);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(user.getEnterprise());
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
 
         String uri = resolveEnterpriseURI(user.getEnterprise().getId());
 
         ClientResponse response = delete(uri, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), 204);
 
-        tearDown("user", "role", "enterprise");
     }
 }

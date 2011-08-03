@@ -89,7 +89,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * @param dispatch The dispatch object
      * @param service The service connection
      */
-    public MsvmVirtualSystemManagementServiceExtended(IJIDispatch dispatch, SWbemServices service)
+    public MsvmVirtualSystemManagementServiceExtended(final IJIDispatch dispatch,
+        final SWbemServices service)
     {
         super(dispatch, service);
         this.dispatch = dispatch;
@@ -124,7 +125,7 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * @param vmDispatch TODO
      * @return the error code of
      */
-    public int destroyVirtualSystem(IJIDispatch vmDispatch) throws Exception
+    public int destroyVirtualSystem(final IJIDispatch vmDispatch) throws Exception
     {
         JIVariant tmp = vmDispatch.get("Path_");
         IJIDispatch dispatchTemp =
@@ -162,7 +163,7 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * 
      * @param vmDispatch A reference to the virtual computer system instance to be destroyed.
      */
-    public void destroyVirtualSystem2(IJIDispatch vmDispatch) throws Exception
+    public void destroyVirtualSystem2(final IJIDispatch vmDispatch) throws Exception
     {
         if (this.destroyVirtualSystem == null)
         {
@@ -205,7 +206,7 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * @param globalSettingDataText the Global setting data text of the virtual system to create
      * @throws JIException
      */
-    public void defineVirtualSystem(String globalSettingDataText) throws JIException
+    public void defineVirtualSystem(final String globalSettingDataText) throws JIException
     {
         if (this.defineVirtualSystem == null)
         {
@@ -250,8 +251,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * @return the resource allocation setting data path of the added resource
      * @throws JIException
      */
-    public String addVirtualSystemResources(IJIDispatch vmDispatch,
-        IJIDispatch newResourceAllocationDispatch) throws JIException
+    public String addVirtualSystemResources(final IJIDispatch vmDispatch,
+        final IJIDispatch newResourceAllocationDispatch) throws JIException
     {
         // Getting the dispatcher of the VM Path
         IJIDispatch vmPathDispatcher =
@@ -324,8 +325,9 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      * @deprecated
      * @throws JIException
      */
-    public String addVirtualSystemResources2(IJIDispatch vmDispatch,
-        IJIDispatch newResourceAllocationDispatch) throws JIException
+    @Deprecated
+    public String addVirtualSystemResources2(final IJIDispatch vmDispatch,
+        final IJIDispatch newResourceAllocationDispatch) throws JIException
     {
         if (this.addVirtualSystemResources == null)
         {
@@ -393,8 +395,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      *            added.
      * @throws JIException
      */
-    public void addVirtualSystemResourcesVoid(IJIDispatch vmDispatch,
-        IJIDispatch newResourceAllocationDispatch) throws JIException
+    public void addVirtualSystemResourcesVoid(final IJIDispatch vmDispatch,
+        final IJIDispatch newResourceAllocationDispatch) throws JIException
     {
         // Getting the dispatcher of the VM Path
         IJIDispatch vmPathDispatcher =
@@ -448,8 +450,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      *            removed.
      * @throws JIException
      */
-    public void removeVirtualSystemResources(IJIDispatch vmDispatch,
-        IJIDispatch resourceAllocationDispatch) throws JIException
+    public void removeVirtualSystemResources(final IJIDispatch vmDispatch,
+        final IJIDispatch resourceAllocationDispatch) throws JIException
     {
         // Getting the dispatcher of the VM Path
         IJIDispatch vmPathDispatcher =
@@ -460,14 +462,16 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
         String vmPath = vmPathDispatcher.get("Path").getObjectAsString2();
 
         // Getting the dispatcher of the resource path
+        IJIDispatch resourcePathDispatcher =
+            (IJIDispatch) JIObjectFactory.narrowObject(resourceAllocationDispatch.get("Path_")
+                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
-        String resourceText =
-            resourceAllocationDispatch.callMethodA("GetText_", new Object[] {new Integer(1)})[0]
-                .getObjectAsString2();
+        // Getting the virtual machine path
+        String resourcePath = resourcePathDispatcher.get("Path").getObjectAsString2();
 
         JIVariant[] tmp =
             dispatch.callMethodA("RemoveVirtualSystemResources", new Object[] {
-            new JIString(vmPath), new JIArray(new JIString[] {new JIString(resourceText)}),
+            new JIString(vmPath), new JIArray(new JIString[] {new JIString(resourcePath)}),
             JIVariant.EMPTY_BYREF(), JIVariant.EMPTY_BYREF()});
 
         int result = tmp[0].getObjectAsInt();
@@ -476,14 +480,14 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
 
         if (result == 0)
         {
-            logger.debug(name + " added to " + vmPath);
+            logger.debug(name + " removed from " + vmPath);
         }
         else
         {
             if (result == 4096)
             {
                 logger.debug("Removing resources...");
-                String jobPath = tmp[1].getObjectAsVariant().getObjectAsString2();
+                String jobPath = tmp[2].getObjectAsVariant().getObjectAsString2();
                 HyperVUtils.monitorJob(jobPath, service.getObjectDispatcher());
             }
             else
@@ -493,7 +497,6 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
                     + vmDispatch.get("ElementName").getObjectAsString2());
             }
         }
-
     }
 
     /**
@@ -505,8 +508,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      *            to be modified.
      * @throws JIException
      */
-    public void modifyVirtualSystemResources(IJIDispatch vmDispatch,
-        IJIDispatch modifiedResourceAllocationSettingData) throws JIException
+    public void modifyVirtualSystemResources(final IJIDispatch vmDispatch,
+        final IJIDispatch modifiedResourceAllocationSettingData) throws JIException
     {
         // Getting the dispatcher of the VM Path
         IJIDispatch vmPathDispatcher =
@@ -560,8 +563,8 @@ public class MsvmVirtualSystemManagementServiceExtended extends MsvmVirtualSyste
      *            system.
      * @throws JIException
      */
-    public void modifyVirtualSystem(IJIDispatch vmDispatch, IJIDispatch systemSettingData)
-        throws JIException
+    public void modifyVirtualSystem(final IJIDispatch vmDispatch,
+        final IJIDispatch systemSettingData) throws JIException
     {
         // Getting the dispatcher of the VM Path
         IJIDispatch vmPathDispatcher =

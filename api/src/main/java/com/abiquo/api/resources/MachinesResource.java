@@ -26,11 +26,17 @@ import static com.abiquo.api.resources.MachineResource.createTransferObject;
 import java.util.Collection;
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +45,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
-import com.abiquo.api.services.RackService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -51,19 +57,21 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 public class MachinesResource extends AbstractResource
 {
     public static final String MACHINES_PATH = "machines";
+    public static final String SINGLE_MACHINE_MIME_TYPE = "application/machinedto+xml";
+    public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
 
     @Autowired
-    private MachineService machineService;
+    protected MachineService machineService;
 
     @Autowired
-    private RackService rackService;
+    protected InfrastructureService infrastructureService;
 
     @GET
-    public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, @Context IRESTBuilder restBuilder)
+    public MachinesDto getMachines(@PathParam(DatacenterResource.DATACENTER) @Min(1) Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(1) Integer rackId, @Context IRESTBuilder restBuilder)
         throws Exception
     {
-        if (!rackService.isAssignedTo(datacenterId, rackId))
+        if (!infrastructureService.isAssignedTo(datacenterId, rackId))
         {
             throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
         }
@@ -72,23 +80,36 @@ public class MachinesResource extends AbstractResource
 
         return transformMachinesDto(restBuilder, all);
     }
-
+    
     @POST
-    public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(RackResource.RACK) Integer rackId, MachineDto machine,
+    @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
+    @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
+    public MachineDto postMachines(@PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachineDto machine,
         @Context IRESTBuilder restBuilder) throws Exception
     {
-        if (!rackService.isAssignedTo(datacenterId, rackId))
-        {
-            throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
-        }
-
-        Machine m = machineService.addMachine(machine, rackId);
+        Machine mToCreate = MachineResource.createPersistenceObject(machine);
+        Machine m = infrastructureService.addMachine(mToCreate, datacenterId, rackId);
         MachineDto transfer = createTransferObject(m, restBuilder);
 
         return transfer;
     }
+    
+    @POST
+    @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
+    @Produces(MULTIPLE_MACHINES_MIME_TYPE)
+    public MachinesDto postMultipleMachines(@PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachinesDto machines,
+        @Context IRESTBuilder restBuilder) throws Exception
+    {
+        List<Machine> machinesToCreate = MachineResource.createPersistenceObjects(machines);
+        List<Machine> machinesCreated = infrastructureService.addMachines(machinesToCreate, datacenterId, rackId);
+        MachinesDto transfer = MachineResource.createTransferObjects(machinesCreated, restBuilder);
 
+        return transfer;
+    }
+    
+   
     public static MachinesDto transformMachinesDto(IRESTBuilder restBuilder,
         Collection<Machine> machines) throws Exception
     {

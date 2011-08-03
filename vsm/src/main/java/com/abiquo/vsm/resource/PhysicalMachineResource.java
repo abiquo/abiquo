@@ -20,6 +20,8 @@
  */
 package com.abiquo.vsm.resource;
 
+import static com.abiquo.vsm.resource.ResourceUtils.decodeParameter;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,8 +66,8 @@ public class PhysicalMachineResource extends AbstractResource
     public static final String VIRTUALMACHINE_PARAM = "vm";
 
     /** The virtual machine path. */
-    public static final String VIRTUALMACHINE_PATH =
-        PHYSICALMACHINE_PATH + "/virtualmachine/{" + VIRTUALMACHINE_PARAM + "}";
+    public static final String VIRTUALMACHINE_PATH = PHYSICALMACHINE_PATH + "/virtualmachine/{"
+        + VIRTUALMACHINE_PARAM + "}";
 
     /** The query parameter used to specify the physical machine address. */
     private static final String ADDRESS_QUERY_PARAM = "address";
@@ -107,6 +109,8 @@ public class PhysicalMachineResource extends AbstractResource
         }
         else
         {
+            physicalMachineAddress = decodeParameter(physicalMachineAddress);
+
             PhysicalMachine pm = dao.findPhysicalMachineByAddress(physicalMachineAddress);
             if (pm == null)
             {
@@ -146,14 +150,15 @@ public class PhysicalMachineResource extends AbstractResource
         PhysicalMachine pm;
         if (credentials.length != 0)
         {
-        	pm = vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType(),
-                credentials[0], credentials[1]);
+            pm =
+                vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType(),
+                    credentials[0], credentials[1]);
         }
         else
         {
-        	pm = vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType());
+            pm = vsmService.monitor(physicalMachine.getAddress(), physicalMachine.getType());
         }
-        
+
         return toDto(pm);
     }
 
@@ -167,6 +172,8 @@ public class PhysicalMachineResource extends AbstractResource
     public void shutdown(@PathParam(PHYSICALMACHINE_PARAM) String physicalMachineId)
     {
         checkSystem();
+
+        physicalMachineId = decodeParameter(physicalMachineId);
 
         PhysicalMachine pm = dao.getPhysicalMachine(Integer.valueOf(physicalMachineId));
         if (pm == null)
@@ -190,6 +197,9 @@ public class PhysicalMachineResource extends AbstractResource
         @PathParam(VIRTUALMACHINE_PARAM) String virtualMachineName)
     {
         checkSystem();
+
+        physicalMachineId = decodeParameter(physicalMachineId);
+        virtualMachineName = decodeParameter(virtualMachineName);
 
         PhysicalMachine pm = dao.getPhysicalMachine(Integer.valueOf(physicalMachineId));
         if (pm == null)

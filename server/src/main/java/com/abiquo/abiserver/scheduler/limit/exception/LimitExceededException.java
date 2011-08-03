@@ -45,10 +45,13 @@ public class LimitExceededException extends AllocatorException
     public LimitExceededException(Object entity, long required, long actual, LimitHB limit,
         LimitResource resource)
     {
-        super(String.format(
-            "Limit exceeded %s : actual allocated %d, required %d and limits set to [%d , %d]",
-            resource.name(), actual, required, limit.getSoft(), limit.getHard()));
-        
+
+        super(
+            String
+                .format(
+                    "It's not possible to reserve a new %s, your hard limit it's defined to %d, your soft limit is %d and you have %d %s allocated. ",
+                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual, resource.getEntityName()));
+
         this.entity = entity;
         this.required = required;
         this.actual = actual;

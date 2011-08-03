@@ -26,6 +26,7 @@
     xmlns="net.undf.abicloud.view.general.*"
     initialize="onInitialize()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_bundleVirtualMachine.value}"
     titleText="@Resource(bundle='VirtualImage', key='POPUP_TITLE_SELECT_VIRTUAL_MACHINE')">
 
     <mx:Script>

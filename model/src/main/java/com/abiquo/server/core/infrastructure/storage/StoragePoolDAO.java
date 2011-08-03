@@ -33,42 +33,43 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaStoragePoolDAO")
 @SuppressWarnings("unchecked")
-public class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
+/* package */class StoragePoolDAO extends DefaultDAOBase<String, StoragePool>
 {
     public StoragePoolDAO()
     {
         super(StoragePool.class);
     }
 
-    public StoragePoolDAO(EntityManager entityManager)
+    public StoragePoolDAO(final EntityManager entityManager)
     {
         super(StoragePool.class, entityManager);
     }
 
-   
-    public List<StoragePool> getPoolsByStorageDevice(Integer deviceId)
+    public List<StoragePool> getPoolsByStorageDevice(final Integer deviceId)
     {
         Criteria criteria = createCriteria(Restrictions.eq("device.id", deviceId));
         return criteria.list();
     }
 
-    public StoragePool findPoolById(Integer deviceId, String poolId)
+    public StoragePool findPoolById(final Integer deviceId, final String poolId)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("device.id", deviceId)).add(Restrictions.eq("idStorage", poolId));
-        Object obj = criteria.uniqueResult();
-        return (StoragePool) obj;
-    }
-    
-    public StoragePool findPoolByName(Integer deviceId, String name)
-    {
-        Criteria criteria =
-            createCriteria(Restrictions.eq("device.id", deviceId)).add(Restrictions.eq("name", name));
+            createCriteria(Restrictions.eq("device.id", deviceId)).add(
+                Restrictions.eq("idStorage", poolId));
         Object obj = criteria.uniqueResult();
         return (StoragePool) obj;
     }
 
-    public List<StoragePool> findPoolsByTier(Tier tier)
+    public StoragePool findPoolByName(final Integer deviceId, final String name)
+    {
+        Criteria criteria =
+            createCriteria(Restrictions.eq("device.id", deviceId)).add(
+                Restrictions.eq("name", name));
+        Object obj = criteria.uniqueResult();
+        return (StoragePool) obj;
+    }
+
+    public List<StoragePool> findPoolsByTier(final Tier tier)
     {
         Criteria criteria = createCriteria(Restrictions.eq("tier", tier));
         return criteria.list();

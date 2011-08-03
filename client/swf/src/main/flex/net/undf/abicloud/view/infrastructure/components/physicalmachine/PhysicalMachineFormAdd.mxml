@@ -25,6 +25,7 @@
 <general:AbiCloudPopUp xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
     titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_PHYSICALMACHINEADD')"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_infra_createPhysicalMachine.value}"
     xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*">
 
     <mx:Metadata>
@@ -220,7 +221,7 @@
             required="true">
             <mx:TextInput id="nameInput"
                 width="100%" height="20"
-                maxChars="29"
+                maxChars="128"
                 change="validateForm()"/>
         </mx:FormItem>
 

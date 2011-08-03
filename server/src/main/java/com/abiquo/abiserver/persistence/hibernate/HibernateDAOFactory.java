@@ -93,9 +93,11 @@ import com.abiquo.abiserver.persistence.dao.networking.hibernate.VlanNetworkDAOH
 import com.abiquo.abiserver.persistence.dao.user.EnterpriseDAO;
 import com.abiquo.abiserver.persistence.dao.user.RoleDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
+import com.abiquo.abiserver.persistence.dao.user.UserSessionDAO;
 import com.abiquo.abiserver.persistence.dao.user.hibernate.EnterpriseDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.user.hibernate.RoleDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.user.hibernate.UserDAOHibernate;
+import com.abiquo.abiserver.persistence.dao.user.hibernate.UserSessionDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.NodeVirtualImageDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceConversionsDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -126,6 +128,7 @@ import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 import com.abiquo.abiserver.persistence.dao.workload.hibernate.EnterpriseExclusionRuleDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.workload.hibernate.FitPolicyRuleDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.workload.hibernate.MachineLoadRuleDAOHibernate;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 
 /**
  * @author jdevesa
@@ -565,5 +568,11 @@ public class HibernateDAOFactory implements DAOFactory
     {
         return (NetworkAssigmntDAO) instantiateDAO(NetworkAssigmntDAOHibernate.class,
             NetworkAssignmentHB.class);
+    }
+
+    @Override
+    public UserSessionDAO getUserSessionDAO()
+    {
+        return (UserSessionDAO) instantiateDAO(UserSessionDAOHibernate.class, UserSession.class);
     }
 }

@@ -19,17 +19,43 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.management;
+package com.abiquo.server.core.infrastructure.management;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import org.testng.annotations.Test;
 
-  public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
-  {
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-      @Override
-      protected InstanceTester<RasdManagement> createEntityInstanceGenerator()
-      {
-          return new RasdManagementGenerator(getSeed());
-      }
-  }
+public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
+{
+
+    @Override
+    protected InstanceTester<RasdManagement> createEntityInstanceGenerator()
+    {
+        return new RasdManagementGenerator(getSeed());
+    }
+
+    @Test
+    public void testGenerationValues()
+    {
+        RasdManagement rasdm = createUniqueEntity();
+
+        rasdm.setAttachmentOrder(-1L);
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
+
+        rasdm.setAttachmentOrder(0L);
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
+
+        rasdm.setAttachmentOrder(1L);
+        assertEquals(rasdm.getAttachmentOrder(), 1L);
+    }
+
+    @Test
+    public void testNullPropertyAccess()
+    {
+        RasdManagement rasdm = createUniqueEntity();
+
+        assertNull(rasdm.getRasd().getGeneration());
+        assertEquals(rasdm.getAttachmentOrder(), 0L);
+    }
+}

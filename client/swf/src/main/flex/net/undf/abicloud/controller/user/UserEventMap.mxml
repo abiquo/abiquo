@@ -110,6 +110,39 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- UserEvent.CHECK_ROLE_PRIVILEGE ________________________________________________________________________ -->
+    <EventHandlers type="{UserEvent.CHECK_ROLE_PRIVILEGE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.userService}"
+            method="checkRolePrivilege"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.role.id, event.privilege]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{UserResultHandler}"
+                    method="handleCheckRolePrivilege"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>   
 
 
 
@@ -181,6 +214,39 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- UserEvent.GET_ROLES ________________________________________________________________________ -->
+    <EventHandlers type="{UserEvent.GET_ROLES}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.userService}"
+            method="getRoles"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.roleListOptions, event.enterprise]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{UserResultHandler}"
+                    method="handleGetRoles"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers> 
 
 
     <!-- UserEvent.CLOSE_SESSION_USERS ________________________________________________________________________ -->

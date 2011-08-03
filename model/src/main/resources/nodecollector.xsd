@@ -13,10 +13,10 @@
     <!--  responses                           -->
     <!--                                      -->
     <xs:element name="Host" type="nc:HostDto" />
+    <xs:element name="Hosts" type="nc:HostsDto" />
     <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
     <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
     <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
-    <xs:element name="ErrorResponse" type="nc:ErrorResponseDto" />
 
     <!--                                      -->
     <!-- Definition of the main complex types -->
@@ -41,6 +41,17 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <xs:complexType name="HostsDto">
+    	<xs:annotation>
+    		<xs:documentation>
+    			Wrapper class to get a list of Hosts.
+    		</xs:documentation>
+    	</xs:annotation>
+    		<xs:sequence>
+    		    <xs:element name="host" type="nc:HostDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+    		</xs:sequence>
+    </xs:complexType>
+    
     <xs:complexType name="VirtualSystemDto">
         <xs:complexContent>
             <xs:extension base="nc:ComputerSystemType" >
@@ -74,14 +85,17 @@
             <xs:enumeration value="xenserver" />
         </xs:restriction>
     </xs:simpleType>
-
-
-    <xs:complexType name="ErrorResponseDto">
-        <xs:sequence>
-            <xs:element name="httpStatus" type="xs:int" />
-            <xs:element name="messageResponse" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
+    
+    <xs:simpleType name="RackEnumTypeDto">
+    	<xs:annotation>
+    		<xs:documentation>
+    			Parametrizes the type of Rack
+    		</xs:documentation>
+    	</xs:annotation>
+    	<xs:restriction base="xs:string">
+    		<xs:enumeration value="UCS" />
+    	</xs:restriction>
+    </xs:simpleType>
 
 
     <!--                                      -->
@@ -248,6 +262,8 @@
         <xs:restriction base="xs:string">
             <xs:enumeration value="managed" />
             <xs:enumeration value="not_managed" />
+            <xs:enumeration value="provisioned" />
+            <xs:enumeration value="stopped" />
         </xs:restriction>
     </xs:simpleType>
 

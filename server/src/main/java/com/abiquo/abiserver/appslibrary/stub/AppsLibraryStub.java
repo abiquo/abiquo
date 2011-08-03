@@ -23,6 +23,7 @@ package com.abiquo.abiserver.appslibrary.stub;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public interface AppsLibraryStub
 {
@@ -39,4 +40,13 @@ public interface AppsLibraryStub
 
     void deleteOVFPackageList(final Integer idEnterprise, final String nameOvfpackageList);
 
+    /**
+     * Recupera la
+     * 
+     * @param idEnterprise
+     * @param nameOVFPackageList
+     * @return
+     */
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
+        final String nameOVFPackageList);
 }

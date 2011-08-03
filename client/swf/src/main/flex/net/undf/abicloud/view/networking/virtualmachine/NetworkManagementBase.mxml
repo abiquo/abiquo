@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
         	import mx.managers.DragManager;
         	import mx.controls.Image;
@@ -301,7 +302,9 @@
             }
             
           
-            
+            private function returnMac(object:Object, column:DataGridColumn):String{
+            	return AbicloudUtils.formatMac(object.mac);
+            }
            
         ]]>
     </mx:Script>
@@ -339,6 +342,7 @@
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
                         dataField="ip"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
+                    	labelFunction="returnMac"
                         dataField="mac"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_VLAN')"
                         dataField="vlanNetworkName"/>

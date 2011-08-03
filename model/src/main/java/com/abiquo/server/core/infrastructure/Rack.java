@@ -26,6 +26,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -41,6 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = Rack.TABLE_NAME, uniqueConstraints = {})
+@Inheritance(strategy = InheritanceType.JOINED)
 @org.hibernate.annotations.Table(appliesTo = Rack.TABLE_NAME, indexes = {})
 public class Rack extends DefaultEntityBase
 {
@@ -50,7 +53,7 @@ public class Rack extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER*
     // call from business code
-    protected Rack()
+    public Rack()
     {
         // Just for JPA support
     }
@@ -65,6 +68,11 @@ public class Rack extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
     }
 
     // ******************************* Properties
@@ -100,7 +108,7 @@ public class Rack extends DefaultEntityBase
 
     private final static boolean SHORT_DESCRIPTION_REQUIRED = false;
 
-    final static int SHORT_DESCRIPTION_LENGTH_MIN = 1;
+    final static int SHORT_DESCRIPTION_LENGTH_MIN = 0;
 
     final static int SHORT_DESCRIPTION_LENGTH_MAX = 30;
 
@@ -128,7 +136,7 @@ public class Rack extends DefaultEntityBase
 
     private final static boolean LONG_DESCRIPTION_REQUIRED = false;
 
-    final static int LONG_DESCRIPTION_LENGTH_MIN = 1;
+    final static int LONG_DESCRIPTION_LENGTH_MIN = 0;
 
     final static int LONG_DESCRIPTION_LENGTH_MAX = 100;
 
@@ -169,7 +177,7 @@ public class Rack extends DefaultEntityBase
         return this.datacenter;
     }
 
-    private void setDatacenter(Datacenter value)
+    public void setDatacenter(Datacenter value)
     {
         this.datacenter = value;
     }
@@ -199,14 +207,14 @@ public class Rack extends DefaultEntityBase
 
     @Column(name = VLAN_ID_MIN_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MIN_MIN, max = VLAN_ID_MIN_MAX)
-    private int vlanIdMin;
+    private Integer vlanIdMin;
 
-    public int getVlanIdMin()
+    public Integer getVlanIdMin()
     {
         return this.vlanIdMin;
     }
 
-    public void setVlanIdMin(int vlanIdMin)
+    public void setVlanIdMin(Integer vlanIdMin)
     {
         this.vlanIdMin = vlanIdMin;
     }
@@ -223,14 +231,14 @@ public class Rack extends DefaultEntityBase
 
     @Column(name = VLAN_PER_VDC_EXPECTED_COLUMN, nullable = true)
     @Range(min = VLAN_PER_VDC_EXPECTED_MIN, max = VLAN_PER_VDC_EXPECTED_MAX)
-    private int vlanPerVdcExpected;
+    private Integer vlanPerVdcExpected;
 
-    public int getVlanPerVdcExpected()
+    public Integer getVlanPerVdcExpected()
     {
         return this.vlanPerVdcExpected;
     }
 
-    public void setVlanPerVdcExpected(int vlanPerVdcExpected)
+    public void setVlanPerVdcExpected(Integer vlanPerVdcExpected)
     {
         this.vlanPerVdcExpected = vlanPerVdcExpected;
     }
@@ -247,14 +255,14 @@ public class Rack extends DefaultEntityBase
 
     @Column(name = NRSQ_COLUMN, nullable = true)
     @Range(min = NRSQ_MIN, max = NRSQ_MAX)
-    private int nrsq;
+    private Integer nrsq;
 
-    public int getNrsq()
+    public Integer getNrsq()
     {
         return this.nrsq;
     }
 
-    public void setNrsq(int nrsq)
+    public void setNrsq(Integer nrsq)
     {
         this.nrsq = nrsq;
     }
@@ -271,14 +279,14 @@ public class Rack extends DefaultEntityBase
 
     @Column(name = VLAN_ID_MAX_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MAX_MIN, max = VLAN_ID_MAX_MAX)
-    private int vlanIdMax;
+    private Integer vlanIdMax;
 
-    public int getVlanIdMax()
+    public Integer getVlanIdMax()
     {
         return this.vlanIdMax;
     }
 
-    public void setVlanIdMax(int vlanIdMax)
+    public void setVlanIdMax(Integer vlanIdMax)
     {
         this.vlanIdMax = vlanIdMax;
     }
@@ -311,6 +319,26 @@ public class Rack extends DefaultEntityBase
     public void setVlansIdAvoided(String vlansIdAvoided)
     {
         this.vlansIdAvoided = vlansIdAvoided;
+    }
+    
+    public final static String HAENABLED_PROPERTY = "haEnabled";
+
+    private final static String HAENABLED_COLUMN = "haEnabled";
+
+    private final static boolean HAENABLED_REQUIRED = true;
+
+    @Column(name = HAENABLED_COLUMN, nullable = false)
+    private boolean haEnabled = false;
+
+    @Required(value = HAENABLED_REQUIRED)
+    public boolean isHaEnabled()
+    {
+        return this.haEnabled;
+    }
+
+    public void setHaEnabled(boolean haEnabled)
+    {
+        this.haEnabled = haEnabled;
     }
 
     // ********************************** Others

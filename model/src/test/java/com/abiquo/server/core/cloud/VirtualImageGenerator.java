@@ -23,10 +23,10 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.enumerator.DiskFormatType;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -41,7 +41,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     RepositoryGenerator repositoryGenerator;
 
-    public VirtualImageGenerator(SeedGenerator seed)
+    public VirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
         enterpriseGenerator = new EnterpriseGenerator(seed);
@@ -50,7 +50,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     }
 
     @Override
-    public void assertAllPropertiesEqual(VirtualImage obj1, VirtualImage obj2)
+    public void assertAllPropertiesEqual(final VirtualImage obj1, final VirtualImage obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualImage.DISKFORMAT_TYPE_PROPERTY,
             VirtualImage.NAME_PROPERTY, VirtualImage.STATEFUL_PROPERTY,
@@ -80,7 +80,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     }
 
-    public VirtualImage createInstance(Enterprise enterprise)
+    public VirtualImage createInstance(final Enterprise enterprise)
     {
         // XXX Category category = categoryGenerator.createUniqueInstance();
 
@@ -92,8 +92,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         // return new VirtualImage(enterprise);
     }
 
-    public VirtualImage createInstance(Enterprise enterprise, Repository repository,
-        int cpuRequired, int ramRequired, long hdRequired, String name)
+    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
+        final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
 
         VirtualImage vimage = new VirtualImage(enterprise);
@@ -119,7 +119,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         return vimage;
     }
 
-    public VirtualImage createImageWithConversions(Enterprise enterprise)
+    public VirtualImage createImageWithConversions(final Enterprise enterprise)
     {
         VirtualImage image = createInstance(enterprise);
         VirtualImageConversion conversion =
@@ -130,7 +130,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VirtualImage entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final VirtualImage entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

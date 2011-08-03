@@ -33,6 +33,7 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
@@ -73,7 +74,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
     VirtualApplianceDAO virtualApplianceDAO;
 
     @Autowired
-    RasdManagementDAO rasdDAO;
+    RasdManagementDAO rasdManagementDAO;
+
+    @Autowired
+    RasdDAO rasdDAO;
 
     @Autowired
     NetworkAssignmentDAO naDao;
@@ -89,7 +93,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     }
 
-    public VirtualDatacenterRep(EntityManager em)
+    public VirtualDatacenterRep(final EntityManager em)
     {
         this.entityManager = em;
         this.virtualDatacenterDAO = new VirtualDatacenterDAO(em);
@@ -98,14 +102,15 @@ public class VirtualDatacenterRep extends DefaultRepBase
         this.dhcpDAO = new DhcpDAO(em);
         this.ipManagementDAO = new IpPoolManagementDAO(em);
         this.virtualApplianceDAO = new VirtualApplianceDAO(em);
-        this.rasdDAO = new RasdManagementDAO(em);
+        this.rasdManagementDAO = new RasdManagementDAO(em);
+        this.rasdDAO = new RasdDAO(em);
         this.networkConfigDAO = new NetworkConfigurationDAO(em);
         this.dhcpDAO = new DhcpDAO(em);
         this.vmDao = new VirtualMachineDAO(em);
         this.nodeviDao = new NodeVirtualImageDAO(em);
     }
 
-    public VirtualDatacenter findById(Integer id)
+    public VirtualDatacenter findById(final Integer id)
     {
         assert id != null;
 
@@ -117,27 +122,33 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.virtualDatacenterDAO.findAll();
     }
 
-    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter, User user)
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter, final User user)
     {
         return this.virtualDatacenterDAO
             .findByEnterpriseAndDatacenter(enterprise, datacenter, user);
     }
 
-    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter)
+    public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         return this.virtualDatacenterDAO.findByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
-    public VLANNetwork findVlanById(Integer id)
+    public VLANNetwork findVlanById(final Integer id)
     {
         assert id != null;
 
         return vlanDAO.findById(id);
     }
 
-    public VLANNetwork findVlanByName(String name)
+    public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualdatacenter,
+        final Integer vlanId)
+    {
+        return vlanDAO.findVlanByVirtualDatacenterId(virtualdatacenter, vlanId);
+    }
+
+    public VLANNetwork findVlanByName(final String name)
     {
         return vlanDAO.findUniqueByProperty(VLANNetwork.NAME_PROPERTY, name);
     }
@@ -147,64 +158,76 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return this.vlanDAO.findAll();
     }
 
-    public Collection<VLANNetwork> findVlansByVirtualDatacener(VirtualDatacenter virtualDatacenter)
+    public Collection<VLANNetwork> findVlansByVirtualDatacener(
+        final VirtualDatacenter virtualDatacenter)
     {
         assert virtualDatacenter != null;
 
         return this.vlanDAO.findVLANNetworks(virtualDatacenter);
     }
 
-    public void insertNetwork(Network network)
+    public VLANNetwork findVlanByDefault(final VirtualDatacenter virtualDatacenter)
+    {
+        return vlanDAO.findByDefault(virtualDatacenter);
+    }
+
+    public void insertNetwork(final Network network)
     {
         networkDAO.persist(network);
     }
 
-    public boolean existAnyVlanWithName(Network network, String name)
+    public boolean existAnyVlanWithName(final Network network, final String name)
     {
         return vlanDAO.existsAnyWithName(network, name);
     }
 
-    public void insertDhcp(Dhcp dhcp)
+    public void insertDhcp(final Dhcp dhcp)
     {
         dhcpDAO.persist(dhcp);
     }
 
-    public void insertIpManagement(IpPoolManagement ipManagement)
+    public void insertIpManagement(final IpPoolManagement ipManagement)
     {
+        rasdDAO.persist(ipManagement.getRasd());
         ipManagementDAO.persist(ipManagement);
     }
 
-    public boolean existAnyIpWithMac(String mac)
+    public boolean existAnyIpWithMac(final String mac)
     {
         return ipManagementDAO.existsAnyWithMac(mac);
     }
 
-    public void insertNetworkConfig(NetworkConfiguration configuration)
+    public void insertNetworkConfig(final NetworkConfiguration configuration)
     {
         networkConfigDAO.persist(configuration);
     }
 
-    public void insertVlan(VLANNetwork vlan)
+    public void insertVlan(final VLANNetwork vlan)
     {
         vlanDAO.persist(vlan);
     }
 
-    public void inserVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void updateVlan(final VLANNetwork vlan)
+    {
+        vlanDAO.flush();
+    }
+
+    public void inserVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         virtualApplianceDAO.persist(virtualAppliance);
     }
 
-    public void insert(VirtualDatacenter vdc)
+    public void insert(final VirtualDatacenter vdc)
     {
         virtualDatacenterDAO.persist(vdc);
     }
 
-    public void update(VirtualDatacenter vdc)
+    public void update(final VirtualDatacenter vdc)
     {
         virtualDatacenterDAO.flush();
     }
 
-    public void delete(VirtualDatacenter vdc)
+    public void delete(final VirtualDatacenter vdc)
     {
         Collection<VLANNetwork> vlans = findVlansByVirtualDatacener(vdc);
 
@@ -222,45 +245,47 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.getAllMacs();
     }
 
-    public Collection<VirtualDatacenter> findByEnterprise(Enterprise enterprise)
+    public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
     {
         return virtualDatacenterDAO.findByEnterprise(enterprise);
     }
 
     public Collection<VirtualAppliance> findVirtualAppliancesByVirtualDatacenter(
-        VirtualDatacenter virtualDatacenter)
+        final VirtualDatacenter virtualDatacenter)
     {
         return virtualApplianceDAO.findByVirtualDatacenter(virtualDatacenter);
     }
 
-    public boolean containsVirtualAppliances(VirtualDatacenter virtualDatacenter)
+    public boolean containsVirtualAppliances(final VirtualDatacenter virtualDatacenter)
     {
         return !findVirtualAppliancesByVirtualDatacenter(virtualDatacenter).isEmpty();
     }
 
     public Collection<RasdManagement> findResourcesByVirtualDatacenterAndResourceType(
-        VirtualDatacenter virtualDatacenter, String idResource)
+        final VirtualDatacenter virtualDatacenter, final String idResource)
     {
-        return rasdDAO.findByVirtualDatacenterAndResourceType(virtualDatacenter, idResource);
+        return rasdManagementDAO.findByVirtualDatacenterAndResourceType(virtualDatacenter,
+            idResource);
     }
 
-    public boolean containsResources(VirtualDatacenter virtualDatacenter, String idResource)
+    public boolean containsResources(final VirtualDatacenter virtualDatacenter,
+        final String idResource)
     {
         return !findResourcesByVirtualDatacenterAndResourceType(virtualDatacenter, idResource)
             .isEmpty();
     }
 
-    public VirtualDatacenter findByName(String name)
+    public VirtualDatacenter findByName(final String name)
     {
         return virtualDatacenterDAO.findUniqueByProperty(VirtualDatacenter.NAME_PROPERTY, name);
     }
 
-    public void insertNetworkAssignment(NetworkAssignment na)
+    public void insertNetworkAssignment(final NetworkAssignment na)
     {
         naDao.persist(na);
     }
 
-    public void insertVirtualMachine(VirtualMachine vm)
+    public void insertVirtualMachine(final VirtualMachine vm)
     {
         vmDao.persist(vm);
     }
@@ -283,10 +308,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param vdcId identifier of the virtual datacenter
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+        final Boolean asc)
     {
-        return ipManagementDAO.findByVdc(vdcId, page, numElem);
+        return ipManagementDAO.findByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -295,10 +321,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param entId enterprise identifier
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, final Integer page,
-        final Integer numElem)
+    public List<IpPoolManagement> findIpsByEnterprise(final Integer entId, final Integer firstElem,
+        final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
+        final Boolean asc)
     {
-        return ipManagementDAO.findByEnterprise(entId, page, numElem);
+        return ipManagementDAO.findByEnterprise(entId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
@@ -307,21 +334,21 @@ public class VirtualDatacenterRep extends DefaultRepBase
      * @param vappId enterprise identifier
      * @return list of IpPoolManagement.
      */
-    public List<IpPoolManagement> findIpsByVirtualAppliance(VirtualAppliance vapp)
+    public List<IpPoolManagement> findIpsByVirtualAppliance(final VirtualAppliance vapp)
     {
         return ipManagementDAO.findByVirtualAppliance(vapp);
     }
 
-    public List<IpPoolManagement> findIpsByVirtualMachine(VirtualMachine vm)
+    public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine vm)
     {
-        return ipManagementDAO.findByVirtualMachine(vm.getId());
+        return ipManagementDAO.findByVirtualMachine(vm);
     }
 
     /**
      * Creates teh nodevirtualimage to associate the virtual machine to a virtual appliance
      */
-    public NodeVirtualImage associateToVirtualAppliance(String name, VirtualMachine vmachine,
-        VirtualAppliance vapp)
+    public NodeVirtualImage associateToVirtualAppliance(final String name,
+        final VirtualMachine vmachine, final VirtualAppliance vapp)
     {
         assert (vmachine.getVirtualImage() != null);
 
@@ -333,54 +360,60 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return nvi;
     }
 
-    public NodeVirtualImage findNodeVirtualImageByVirtualMachine(VirtualMachine vmachine)
+    public NodeVirtualImage findNodeVirtualImageByVirtualMachine(final VirtualMachine vmachine)
     {
         return nodeviDao.findByVirtualMachine(vmachine);
     }
 
-    public VirtualAppliance findVirtualApplianceByVirtualMachine(VirtualMachine vmachine)
+    public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine vmachine)
     {
         return nodeviDao.findVirtualAppliance(vmachine);
     }
 
-    public VirtualMachine findVirtualMachineByName(String name)
+    public Collection<NodeVirtualImage> findNodeVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return nodeviDao.findByEnterprise(enterprise);
+    }
+
+    public VirtualMachine findVirtualMachineByName(final String name)
     {
         return vmDao.findByName(name);
     }
 
-    public VirtualMachine findVirtualMachineById(Integer virtualMachineId)
+    public VirtualMachine findVirtualMachineById(final Integer virtualMachineId)
     {
         return vmDao.findById(virtualMachineId);
     }
 
-    public void deleteVirtualMachine(VirtualMachine vmachine)
+    public void deleteVirtualMachine(final VirtualMachine vmachine)
     {
         vmDao.remove(vmachine);
     }
 
-    public void deleteNodeVirtualImage(NodeVirtualImage nvi)
+    public void deleteNodeVirtualImage(final NodeVirtualImage nvi)
     {
         // TODO deassociate
         nodeviDao.remove(nvi);
     }
 
-    public VirtualAppliance findVirtualApplianceByName(String name)
+    public VirtualAppliance findVirtualApplianceByName(final String name)
     {
         return virtualApplianceDAO.findByName(name);
     }
 
-    public VirtualAppliance findVirtualApplianceById(Integer vappId)
+    public VirtualAppliance findVirtualApplianceById(final Integer vappId)
     {
         return virtualApplianceDAO.findById(vappId);
     }
 
-    public void updateVirtualAppliance(VirtualAppliance vapp)
+    public void updateVirtualAppliance(final VirtualAppliance vapp)
     {
         virtualApplianceDAO.flush();
     }
 
-    public void insertVirtualAppliance(VirtualAppliance vapp)
+    public void insertVirtualAppliance(final VirtualAppliance vapp)
     {
         virtualApplianceDAO.persist(vapp);
     }
+
 }

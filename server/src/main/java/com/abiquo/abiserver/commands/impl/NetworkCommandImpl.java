@@ -85,7 +85,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     // Define the inner class to sort the ipPoolManagement
     class IpPoolManagementComparator implements Comparator<IpPoolManagementHB>
     {
-        public int compare(IpPoolManagementHB ip1, IpPoolManagementHB ip2)
+        @Override
+        public int compare(final IpPoolManagementHB ip1, final IpPoolManagementHB ip2)
         {
             return Integer.valueOf(ip1.getRasd().getConfigurationName())
                 - Integer.valueOf(ip2.getRasd().getConfigurationName());
@@ -101,8 +102,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(UserHB user, Integer networkId, Integer vmId)
-        throws NetworkCommandException
+    public void assignDefaultNICResource(final UserHB user, final Integer networkId,
+        final Integer vmId) throws NetworkCommandException
     {
         try
         {
@@ -155,8 +156,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(UserSession userSession, Integer networkId, Integer vmId)
-        throws NetworkCommandException
+    public void assignDefaultNICResource(final UserSession userSession, final Integer networkId,
+        final Integer vmId) throws NetworkCommandException
     {
         try
         {
@@ -178,8 +179,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
 
     }
 
-    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter)
-        throws NetworkCommandException
+    @Override
+    public void checkPrivateVlan(final VirtualDataCenterHB vdc, final Integer datacenterId,
+        final EnterpriseHB enter, final UserSession userSession) throws NetworkCommandException
     {
         NetworkHB netHB = vdc.getNetwork();
 
@@ -197,8 +199,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public VlanNetworkHB createPrivateVlanNetwork(UserSession userSession, String networkName,
-        Integer idNetwork, NetworkConfigurationHB configuration, Boolean defaultNetwork)
+    public VlanNetworkHB createPrivateVlanNetwork(final UserSession userSession,
+        final String networkName, final Integer idNetwork,
+        final NetworkConfigurationHB configuration, final Boolean defaultNetwork)
         throws NetworkCommandException
     {
 
@@ -212,7 +215,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             DatacenterHB dc = factory.getDataCenterDAO().findById(vdc.getIdDataCenter());
 
             // Before anything, check if we have reached the maxim number of VLAN for the network.
-            checkPrivateVlan(vdc, vdc.getIdDataCenter(), currentUser.getEnterpriseHB());
+            checkPrivateVlan(vdc, vdc.getIdDataCenter(), currentUser.getEnterpriseHB(), userSession);
 
             // Retrieve the list of the IPAddress that will compose the IP pool.
             List<IPAddress> listIPs =
@@ -273,7 +276,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void deleteVlanNetwork(UserSession userSession, Integer vlanNetworkId)
+    public void deleteVlanNetwork(final UserSession userSession, final Integer vlanNetworkId)
         throws NetworkCommandException
     {
         VlanNetworkHB vlanHB = new VlanNetworkHB();
@@ -350,8 +353,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public VlanNetworkHB editPrivateVlanNetwork(UserSession userSession, String networkName,
-        Integer vlanNetworkId, NetworkConfigurationHB newConfiguration, Boolean defaultNetwork)
+    public VlanNetworkHB editPrivateVlanNetwork(final UserSession userSession,
+        final String networkName, final Integer vlanNetworkId,
+        final NetworkConfigurationHB newConfiguration, final Boolean defaultNetwork)
         throws NetworkCommandException
     {
 
@@ -486,95 +490,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<EnterpriseHB> getEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, Integer offset, Integer numElem, String ipLike)
-        throws NetworkCommandException
-    {
-        List<EnterpriseHB> enterpriseList = new ArrayList<EnterpriseHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            enterpriseList =
-                netManDAO.getEnterprisesWithNetworksByDatacenter(datacenterId, offset, numElem,
-                    ipLike);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return enterpriseList;
-    }
-
-    @Override
-    public String getInfoDHCPServer(UserSession userSession, Integer vdcId)
-        throws NetworkCommandException
-    {
-
-        StringBuilder formattedData = new StringBuilder();
-
-        try
-        {
-            factory.beginConnection();
-
-            IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
-            VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-
-            List<IpPoolManagementHB> ipPools =
-                ipPoolDAO.getNetworkPoolByVDC(vdcId, 0, null, "", null, null);
-            VirtualDataCenterHB vdc = vdcDAO.findById(vdcId);
-
-            formattedData.append("## AbiCloud DHCP configuration for network "
-                + vdc.getNetwork().getUuid() + "\n");
-            formattedData
-                .append("## Please copy and paste the following lines into your DHCP server\n");
-
-            for (IpPoolManagementHB ipPool : ipPools)
-            {
-
-                formattedData.append("host " + ipPool.getName() + " {\n");
-
-                // VirtualBox mac format
-                if (!ipPool.getMac().contains(":"))
-                {
-                    String unformattedMA = ipPool.getMac();
-                    StringBuilder formattedMA =
-                        new StringBuilder(unformattedMA.substring(0, 2) + ":");
-                    formattedMA.append(unformattedMA.substring(2, 4) + ":");
-                    formattedMA.append(unformattedMA.substring(4, 6) + ":");
-                    formattedMA.append(unformattedMA.substring(6, 8) + ":");
-                    formattedMA.append(unformattedMA.substring(8, 10) + ":");
-                    formattedMA.append(unformattedMA.substring(10, 12));
-                    formattedData.append("\thardware ethernet " + formattedMA + ";\n");
-
-                }
-                else
-                {
-                    formattedData.append("\thardware ethernet " + ipPool.getMac() + ";\n");
-                }
-                formattedData.append("\tfixed-address " + ipPool.getIp() + ";\n");
-                formattedData.append("}\n\n");
-
-            }
-
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return formattedData.toString();
-    }
-
-    @Override
-    public List<IPAddress> getListGatewaysByVirtualMachine(UserSession userSession, Integer vmId)
-        throws NetworkCommandException
+    public List<IPAddress> getListGatewaysByVirtualMachine(final UserSession userSession,
+        final Integer vmId) throws NetworkCommandException
     {
         try
         {
@@ -612,9 +529,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<IpPoolManagementHB> getListNetworkPoolAvailableByVLAN(UserSession userSession,
-        Integer vlanId, Integer offset, Integer numElem, String ipLike)
-        throws NetworkCommandException
+    public List<IpPoolManagementHB> getListNetworkPoolAvailableByVLAN(
+        final UserSession userSession, final Integer vlanId, final Integer offset,
+        final Integer numElem, final String ipLike) throws NetworkCommandException
     {
         List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
 
@@ -635,58 +552,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<IpPoolManagementHB> getListNetworkPoolByEnterprise(UserSession userSession,
-        Integer enterpriseId, Integer offset, Integer numElem, String ipLike, String orderBy,
-        Boolean asc) throws NetworkCommandException
-    {
-        List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            ipList =
-                netManDAO.getNetworkPoolByEnterprise(enterpriseId, offset, numElem, ipLike,
-                    orderBy, asc);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return ipList;
-    }
-
-    @Override
-    public List<IpPoolManagementHB> getListNetworkPoolByVDC(UserSession userSession, Integer vdcId,
-        Integer offset, Integer numElem, String stringLike, String orderBy, Boolean asc)
-        throws NetworkCommandException
-    {
-        List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
-
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            ipList =
-                netManDAO.getNetworkPoolByVDC(vdcId, offset, numElem, stringLike, orderBy, asc);
-            factory.endConnection();
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-
-        return ipList;
-    }
-
-    @Override
-    public List<IpPoolManagementHB> getListNetworkPoolByVLAN(UserSession userSession,
-        Integer vlanId, Integer offset, Integer numElem, String ipLike, String orderBy, Boolean asc)
-        throws NetworkCommandException
+    public List<IpPoolManagementHB> getListNetworkPoolByVLAN(final UserSession userSession,
+        final Integer vlanId, final Integer offset, final Integer numElem, final String ipLike,
+        final String orderBy, final Boolean asc) throws NetworkCommandException
     {
         List<IpPoolManagementHB> ipList = new ArrayList<IpPoolManagementHB>();
 
@@ -707,29 +575,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public Integer getNumberEnterprisesWithNetworksByDatacenter(UserSession userSession,
-        Integer datacenterId, String filterLike) throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs =
-                netManDAO.getNumberEnterprisesWithNetworkPoolByDatacenter(datacenterId, filterLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolAvailableByVLAN(UserSession userSession, Integer vlanId,
-        String ipLike) throws NetworkCommandException
+    public Integer getNumberNetworkPoolAvailableByVLAN(final UserSession userSession,
+        final Integer vlanId, final String ipLike) throws NetworkCommandException
     {
         try
         {
@@ -748,48 +595,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public Integer getNumberNetworkPoolByEnterprise(UserSession userSession, Integer enterpriseId,
-        String ipLike) throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs = netManDAO.getNumberNetworkPoolByEnterprise(enterpriseId, ipLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByVDC(UserSession userSession, Integer vdcId, String ipLike)
-        throws NetworkCommandException
-    {
-        try
-        {
-            factory.beginConnection();
-            IpPoolManagementDAO netManDAO = factory.getIpPoolManagementDAO();
-            Integer numberOfIPs = netManDAO.getNumberNetworkPoolByVDC(vdcId, ipLike);
-            factory.endConnection();
-
-            return numberOfIPs;
-        }
-        catch (PersistenceException e)
-        {
-            factory.rollbackConnection();
-            throw new NetworkCommandException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByVLAN(UserSession userSession, Integer vlanId, String ipLike)
-        throws NetworkCommandException
+    public Integer getNumberNetworkPoolByVLAN(final UserSession userSession, final Integer vlanId,
+        final String ipLike) throws NetworkCommandException
     {
         try
         {
@@ -808,8 +615,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(UserSession userSession,
-        Integer virtualMachineId) throws NetworkCommandException
+    public List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(final UserSession userSession,
+        final Integer virtualMachineId) throws NetworkCommandException
     {
         try
         {
@@ -833,8 +640,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public IPAddress getUsedGatewayByVirtualMachine(UserSession userSession, Integer vmId)
-        throws NetworkCommandException
+    public IPAddress getUsedGatewayByVirtualMachine(final UserSession userSession,
+        final Integer vmId) throws NetworkCommandException
     {
         try
         {
@@ -871,8 +678,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void releaseNICFromVirtualMachine(UserSession userSession, Integer ipPoolManagementId)
-        throws NetworkCommandException
+    public void releaseNICFromVirtualMachine(final UserSession userSession,
+        final Integer ipPoolManagementId) throws NetworkCommandException
     {
         IpPoolManagementHB ipPoolHB = new IpPoolManagementHB();
         VlanNetworkHB vlanHB = new VlanNetworkHB();
@@ -978,8 +785,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void requestGatewayForVirtualMachine(UserSession userSession, Integer vmId,
-        IPAddress gateway) throws NetworkCommandException
+    public void requestGatewayForVirtualMachine(final UserSession userSession, final Integer vmId,
+        final IPAddress gateway) throws NetworkCommandException
     {
         try
         {
@@ -1024,8 +831,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void requestNICforVirtualMachine(UserSession userSession, Integer vmId,
-        Integer ipPoolManagement) throws NetworkCommandException
+    public void requestNICforVirtualMachine(final UserSession userSession, final Integer vmId,
+        final Integer ipPoolManagement) throws NetworkCommandException
     {
         IpPoolManagementHB ipPoolHB = new IpPoolManagementHB();
         VlanNetworkHB vlan = new VlanNetworkHB();
@@ -1064,7 +871,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<String> resolveNetworkMaskFromClassType(String classType)
+    public List<String> resolveNetworkMaskFromClassType(final String classType)
         throws NetworkCommandException
     {
         NetworkResolver netResolver = new NetworkResolver();
@@ -1073,16 +880,16 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public List<List<String>> resolveNetworksFromClassTypeAndMask(String classType, IPAddress mask)
-        throws NetworkCommandException
+    public List<List<String>> resolveNetworksFromClassTypeAndMask(final String classType,
+        final IPAddress mask) throws NetworkCommandException
     {
         NetworkResolver netResolver = new NetworkResolver();
         return netResolver.resolvePossibleNetworks(classType, mask);
     }
 
     @Override
-    public void reorderNICintoVM(UserSession userSession, Integer newOrder,
-        Integer ipPoolManagementId) throws NetworkCommandException
+    public void reorderNICintoVM(final UserSession userSession, final Integer newOrder,
+        final Integer ipPoolManagementId) throws NetworkCommandException
     {
         try
         {
@@ -1166,8 +973,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * VirtualDataCenterHB virtualDataCenter, NodeVirtualImageHB node, IPAddress privateIP) in order
      * to set the RASD related to a new MAC address
      */
-    protected ResourceAllocationSettingData assignPrivateMACResourceRASD(String MACaddress,
-        String networkName)
+    protected ResourceAllocationSettingData assignPrivateMACResourceRASD(final String MACaddress,
+        final String networkName)
     {
         ResourceAllocationSettingData rasd = new ResourceAllocationSettingData();
 
@@ -1195,8 +1002,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @param listIPs network range of values.
      * @param networkId identifier of the network.
      */
-    protected void checkVlanEntryValues(NetworkConfigurationHB configuration, String networkName,
-        List<IPAddress> listIPs) throws NetworkCommandException
+    protected void checkVlanEntryValues(final NetworkConfigurationHB configuration,
+        final String networkName, final List<IPAddress> listIPs) throws NetworkCommandException
     {
 
         if (networkName.isEmpty())
@@ -1273,10 +1080,10 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @throws PersistenceException any problem accessing to database.
      * @throws NetworkCommandException logic problems.
      */
-    protected VlanNetworkHB createVlanNetwork(String networkName, Integer idNetwork,
-        NetworkConfigurationHB configuration, Boolean defaultNetwork, Integer vlanTag,
-        List<IPAddress> listOfIpsToCreate, VirtualDataCenterHB vdc) throws PersistenceException,
-        NetworkCommandException
+    protected VlanNetworkHB createVlanNetwork(final String networkName, final Integer idNetwork,
+        NetworkConfigurationHB configuration, final Boolean defaultNetwork, final Integer vlanTag,
+        final List<IPAddress> listOfIpsToCreate, final VirtualDataCenterHB vdc)
+        throws PersistenceException, NetworkCommandException
     {
         final String FENCE_MODE = "bridge";
 
@@ -1337,9 +1144,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         return vlan;
     }
 
-    protected DHCPServiceHB defineTheDHCP(DatacenterHB datacenter,
-        List<IPAddress> listOfIpsToCreate, VirtualDataCenterHB vdc, VlanNetworkHB vlan)
-        throws NetworkCommandException, PersistenceException
+    protected DHCPServiceHB defineTheDHCP(final DatacenterHB datacenter,
+        final List<IPAddress> listOfIpsToCreate, final VirtualDataCenterHB vdc,
+        final VlanNetworkHB vlan) throws NetworkCommandException, PersistenceException
     {
         IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
         DHCPServiceDAO dhcpServiceDAO = factory.getDHCPServiceDAO();
@@ -1372,8 +1179,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 while (ipPoolDAO.existingMACAddress(nextRandomMacAddress));
 
                 nextIpPool.setMac(nextRandomMacAddress);
-                
-                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when reload
+
+                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when
+                // reload
                 // leases with the ':' char in the lease name)
                 nextIpPool.setName(nextIpPool.getMac().replace(":", "") + "_host");
             }
@@ -1404,7 +1212,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @param vmId identifier of the virtual machine.
      * @return
      */
-    protected List<IpPoolManagementHB> getListOfNICs(Integer vmId)
+    protected List<IpPoolManagementHB> getListOfNICs(final Integer vmId)
     {
         IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
         List<IpPoolManagementHB> list = ipPoolDAO.getPrivateNICsByVirtualMachine(vmId);
@@ -1419,8 +1227,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @param gateway gateway can not be the the next available by default.
      * @return an {@link IpPoolManagementHB} instance
      */
-    protected IpPoolManagementHB getNextAvailableIP(Integer dhcpServiceId, String gateway)
-        throws NetworkCommandException
+    protected IpPoolManagementHB getNextAvailableIP(final Integer dhcpServiceId,
+        final String gateway) throws NetworkCommandException
     {
         DHCPServiceDAO dhcpServiceDAO = factory.getDHCPServiceDAO();
         IpPoolManagementHB nextIp = dhcpServiceDAO.getNextAvailableIp(dhcpServiceId, gateway);
@@ -1441,8 +1249,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @param ipPoolManagement contains all the needed information for the NIC
      * @throws PersistenceException
      */
-    protected IpPoolManagementHB requestNICforVirtualMachine(Integer vmId, Integer ipPoolManagement)
-        throws PersistenceException
+    protected IpPoolManagementHB requestNICforVirtualMachine(final Integer vmId,
+        final Integer ipPoolManagement) throws PersistenceException
     {
         // NOTE: needs and embedded transaction!
         IpPoolManagementHB ipPoolHB = new IpPoolManagementHB();

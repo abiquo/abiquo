@@ -52,6 +52,9 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     /** The enterprise name */
     private String name;
 
+    /** kind of reservation */
+    private Boolean isReservationRestricted;
+
     private ResourceAllocationLimitHB limits;
 
     private Collection<PhysicalmachineHB> reservedMachines;
@@ -88,6 +91,16 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public Boolean getIsReservationRestricted()
+    {
+        return isReservationRestricted;
+    }
+
+    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    {
+        this.isReservationRestricted = isReservationRestricted;
     }
 
     /**
@@ -129,6 +142,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     /**
      * This method create a generic enterprise pojo object.
      */
+    @Override
     public Enterprise toPojo()
     {
         Enterprise enterprise = new Enterprise();
@@ -136,6 +150,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         enterprise.setId(getIdEnterprise());
         enterprise.setName(getName());
         enterprise.setLimits(limits.toPojo());
+        enterprise.setIsReservationRestricted(isReservationRestricted);
 
         Set<DatacenterLimit> dcLimitsPojo = new HashSet<DatacenterLimit>();
 

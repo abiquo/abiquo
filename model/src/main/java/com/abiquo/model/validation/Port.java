@@ -23,6 +23,7 @@ package com.abiquo.model.validation;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -36,7 +37,7 @@ import javax.validation.Payload;
 
 @Documented
 @Constraint(validatedBy = Port.Validator.class)
-@Target( {METHOD, FIELD})
+@Target( {METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Port
 {
@@ -64,6 +65,11 @@ public @interface Port
             if (!port.required() && value == null)
             {
                 return true;
+            }
+            
+            if (port.required() && value == null)
+            {
+                return false;
             }
 
             Boolean valid = value >= 0 && value <= 65535;

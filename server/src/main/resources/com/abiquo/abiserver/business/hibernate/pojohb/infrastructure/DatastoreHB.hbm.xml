@@ -16,10 +16,7 @@
 			<column length="255" name="directory" />
 		</property>
 		<property name="rootPath" type="string">
-			<column length="36" name="rootPath" not-null="true" />
-		</property>
-		<property name="shared" type="boolean">
-			<column name="shared" />
+			<column length="42" name="rootPath" not-null="true" />
 		</property>
 		<property name="enabled" type="boolean">
 			<column name="enabled" />
@@ -29,6 +26,9 @@
 		</property>
 		<property name="usedSize" type="java.lang.Long">
 			<column name="usedSize" not-null="true" />
+		</property>
+		<property name="datastoreUUID" type="string">
+			<column length="255" name="datastoreUuid" />
 		</property>
 		<set name="pmList" table="datastore_assignment" lazy="false" cascade="all">
 			<key>

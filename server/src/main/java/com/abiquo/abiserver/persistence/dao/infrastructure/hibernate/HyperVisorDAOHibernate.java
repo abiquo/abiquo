@@ -33,7 +33,7 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * * Class that implements the extra DAO functions for the

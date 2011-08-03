@@ -33,7 +33,7 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * Implements the functionality of the {@link DatastoreCommand} interface.
@@ -152,8 +152,8 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
             dataHB.setEnabled(datastore.getEnabled());
             dataHB.setName(datastore.getName());
             dataHB.setSize(datastore.getSize());
-            dataHB.setShared(datastore.getShared());
             dataHB.setUsedSize(datastore.getUsedSize());
+            dataHB.setDatastoreUUID(datastore.getDatastoreUUID());
             dataHB = dataDAO.makePersistent(dataHB);
 
             factory.endConnection();

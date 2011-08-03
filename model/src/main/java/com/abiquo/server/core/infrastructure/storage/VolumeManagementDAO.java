@@ -30,21 +30,29 @@ import javax.persistence.PersistenceException;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.model.enumerator.VolumeState;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.util.FilterOptions;
+import com.abiquo.server.core.util.PagedList;
+import com.abiquo.server.core.cloud.VirtualMachine;
 
-@SuppressWarnings("unchecked")
 @Repository("jpaVolumeManagementDAO")
-public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
+/* package */class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagement>
 {
     public VolumeManagementDAO()
     {
         super(VolumeManagement.class);
     }
 
-    public VolumeManagementDAO(EntityManager entityManager)
+    public VolumeManagementDAO(final EntityManager entityManager)
     {
         super(VolumeManagement.class, entityManager);
     }
@@ -57,40 +65,75 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
      * enterprise of the stateful image.
      **/
     private final String SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE =
-        "select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "//
-            + "virtualmachine.name as vmname, rasd.limitResource as limitresource, "//
-            + "rasd.reservation as reservation, volman.usedSize as used, "//
-            + "rasd.elementName as elementname "//
-            + "from volume_management volman, virtualdatacenter vdc, rasd, "//
-            + "rasd_management rasdm "//
-            + "left join virtualmachine on rasdm.idVM = virtualmachine.idVM "//
-            + "left join virtualapp on rasdm.idVirtualApp = virtualapp.idVirtualApp "//
-            + "where "//
-            + "volman.idManagement = rasdm.idManagement "//
-            + "and rasdm.idResource = rasd.instanceID "//
-            + "and rasdm.idVirtualDataCenter = vdc.idVirtualDataCenter "//
-            + "and vdc.idEnterprise = :idEnterprise "//
-            + "and ( "//
-            + "rasd.elementName like :filterLike "//
-            + "or virtualmachine.name like :filterLike "//
-            + "or virtualapp.name like :filterLike "//
-            + "or vdc.name like :filterLike "//
-            + ") "//
-            + "union "//
-            + "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "//
-            + "rasd.limitResource as limitresource, rasd.reservation as reservation, volman.usedSize as used, "//
-            + "rasd.elementName as elementname "//
-            + "from volume_management volman, virtualimage vi, rasd, rasd_management "//
-            + "rasdm "//
-            + "where "//
-            + "volman.idImage = vi.idImage "//
-            + "and volman.idManagement = rasdm.idManagement "//
-            + "and rasdm.idResource = rasd.instanceID "//
-            + "and rasdm.idVirtualDataCenter is null "//
-            + "and rasdm.idVirtualApp is null "//
-            + "and rasdm.idVM is null "//
-            + "and vi.idEnterprise = :idEnterprise "//
-            + "and rasd.elementName like :filterLike";//
+        "select volman.idManagement as idman, vdc.name as vdcname, virtualapp.name as vaname, "
+            + "virtualmachine.name as vmname, rasd.limitResource as size, "
+            + "rasd.reservation as available, volman.usedSize as used, "
+            + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
+            + "from (volume_management volman, virtualdatacenter vdc, rasd, rasd_management rasdm) "
+            + "left join virtualmachine on rasdm.idVM = virtualmachine.idVM "
+            + "left join virtualapp on rasdm.idVirtualApp = virtualapp.idVirtualApp "
+            + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
+            + "left join tier on storage_pool.idTier = tier.id "
+            + "where "
+            + "volman.idManagement = rasdm.idManagement "
+            + "and rasdm.idResource = rasd.instanceID "
+            + "and rasdm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+            + "and vdc.idEnterprise = :idEnterprise "
+            + "and ( "
+            + "rasd.elementName like :filterLike "
+            + "or virtualmachine.name like :filterLike "
+            + "or virtualapp.name like :filterLike "
+            + "or vdc.name like :filterLike "
+            + "or tier.name like :filterLike "
+            + ") "
+            + "union "
+            + "select volman.idManagement as idman, '' as vdcname, '' as vaname, '' as vmname, "
+            + "rasd.limitResource as size, rasd.reservation as available, volman.usedSize as used, "
+            + "rasd.elementName as elementname, volman.state as state, tier.name as tier "
+            + "from (volume_management volman, virtualimage vi, rasd, rasd_management rasdm) "
+            + "left join storage_pool on volman.idStorage = storage_pool.idStorage "
+            + "left join tier on storage_pool.idTier = tier.id " + "where "
+            + "volman.idImage = vi.idImage " + "and volman.idManagement = rasdm.idManagement "
+            + "and rasdm.idResource = rasd.instanceID " + "and rasdm.idVirtualDataCenter is null "
+            + "and rasdm.idVirtualApp is null " + "and rasdm.idVM is null "
+            + "and vi.idEnterprise = :idEnterprise " + "and (rasd.elementName like :filterLike "
+            + "or tier.name like :filterLike )";
+
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp)
+    {
+        Criteria criteria = createCriteria(samePool(sp));
+        return getResultList(criteria);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        Criteria criteria = createCriteria(sameVirtualDatacenter(vdc));
+        return getResultList(criteria);
+    }
+
+    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer volumeId)
+    {
+        Criteria criteria = createCriteria(sameId(volumeId), sameVirtualDatacenter(vdc));
+        return (VolumeManagement) criteria.uniqueResult();
+    }
+
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
+    {
+        // Filters on the VolumeManagement entity
+        Criteria crit = createCriteria();
+        crit.createAlias(VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+
+        crit.add(sameVirtualDatacenter(vdc));
+        crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
+        crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
+
+        crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,
+            StorageTechnologyType.GENERIC_ISCSI));
+
+        return getResultList(crit);
+    }
 
     public List<VolumeManagement> getVolumesFromEnterprise(final Integer idEnterprise)
         throws PersistenceException
@@ -102,16 +145,144 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
 
         return getSQLQueryResults(getSession(), query, VolumeManagement.class, 0);
     }
-        
-    public List<VolumeManagement> getVolumesByPool(StoragePool sp)
+
+    @SuppressWarnings("unchecked")
+    public List<VolumeManagement> getVolumesByPool(final StoragePool sp, final FilterOptions filters)
+        throws Exception
     {
-        Criteria criteria = createCriteria(Restrictions.eq("storagePool",
-            sp));
-        return criteria.list();
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.getMessage());
+        }
+
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
+
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_POOL);
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setString("poolId", sp.getId());
+        queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
     }
 
-    private <T> List<T> getSQLQueryResults(Session session, Query query, Class<T> objectClass,
-        int idFieldPosition)
+    @SuppressWarnings("unchecked")
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
+        final FilterOptions filters) throws Exception
+    {
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.getMessage());
+        }
+
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
+
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_BY_VDC);
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setInteger("vdcId", vdc.getId());
+        queryWithOrder.setString("filterLike", (filters.getFilter().isEmpty()) ? "%" : "%"
+            + filters.getFilter() + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
+    }
+
+    public VolumeManagement getVolumeByRasd(final Rasd rasd)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("rasd", rasd));
+        return (VolumeManagement) criteria.uniqueResult();
+    }
+
+    public List<VolumeManagement> getVolumesByEnterprise(final Integer id,
+        final FilterOptions filters)
+    {
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            // If order is invalid, return null;
+            return null;
+        }
+
+        Query query =
+            getSession().createSQLQuery(
+                SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
+                    + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
+        query.setParameter("idEnterprise", id);
+        query.setParameter("filterLike",
+            (filters.getFilter().isEmpty()) ? "%" : "%" + filters.getFilter() + "%");
+
+        Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
+
+        query.setFirstResult(filters.getStartwith());
+        query.setMaxResults(filters.getLimit());
+        PagedList<VolumeManagement> volumes =
+            new PagedList<VolumeManagement>(getSQLQueryResults(getSession(), query,
+                VolumeManagement.class, 0));
+        volumes.setTotalResults(size);
+        volumes.setPageSize((filters.getLimit() > size) ? size : filters.getLimit());
+        volumes.setCurrentElement(filters.getStartwith());
+
+        return volumes;
+
+    }
+
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("virtualImage.id", idImage));
+        Object obj = criteria.uniqueResult();
+        return (VolumeManagement) obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> getSQLQueryResults(final Session session, final Query query,
+        final Class<T> objectClass, final int idFieldPosition)
     {
         List<T> result = new ArrayList<T>();
         List<Object[]> sqlResult = query.list();
@@ -128,4 +299,57 @@ public class VolumeManagementDAO extends DefaultDAOBase<Integer, VolumeManagemen
         return result;
     }
 
+    private String defineOrderBy(final String orderBy, final Boolean asc)
+    {
+        StringBuilder queryString = new StringBuilder();
+
+        queryString.append(" order by ");
+        if (orderBy.equalsIgnoreCase("vol.id"))
+            queryString.append("vol.rasd.id");
+        else
+            queryString.append(orderBy);
+        queryString.append(" ");
+
+        if (asc)
+        {
+            queryString.append("asc");
+        }
+        else
+        {
+            queryString.append("desc");
+        }
+
+        return queryString.toString();
+    }
+
+    private static Criterion sameVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        return Restrictions.eq(VolumeManagement.VIRTUAL_DATACENTER_PROPERTY, vdc);
+    }
+
+    private static Criterion samePool(final StoragePool pool)
+    {
+        return Restrictions.eq(VolumeManagement.STORAGE_POOL_PROPERTY, pool);
+    }
+
+    private static Criterion sameRasd(final Rasd rasd)
+    {
+        return Restrictions.eq(VolumeManagement.RASD_PROPERTY, rasd);
+    }
+
+    private static Criterion sameId(final Integer id)
+    {
+        return Restrictions.eq(VolumeManagement.ID_PROPERTY, id);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+    {
+        Criteria criteria = createCriteria(sameVirtualMachine(vm));
+        return getResultList(criteria);
+    }
+
+    private static Criterion sameVirtualMachine(final VirtualMachine vm)
+    {
+        return Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_PROPERTY, vm);
+    }
 }

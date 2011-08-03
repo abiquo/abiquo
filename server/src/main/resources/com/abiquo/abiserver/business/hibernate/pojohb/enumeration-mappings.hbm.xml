@@ -3,12 +3,12 @@
 	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
 	<typedef name="HypervisorType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.server.core.enumerator.HypervisorType</param>
+    	<param name="enumClass">com.abiquo.model.enumerator.HypervisorType</param>
        	<param name="identifierMethod">name</param>
    	</typedef>
    	
    	<typedef name="DiskFormatType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-    	<param name="enumClass">com.abiquo.server.core.enumerator.DiskFormatType</param>
+    	<param name="enumClass">com.abiquo.model.enumerator.DiskFormatType</param>
        	<param name="identifierMethod">name</param>
    	</typedef>
    	
@@ -36,7 +36,7 @@
 		<param name="enumClass">com.abiquo.abiserver.business.hibernate.pojohb.workload.engine.core.FitPolicy</param>
 	</typedef>
 	
-	<typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType">
-		<param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param>
-	</typedef>
+<!-- 	<typedef name="RoleType" class="com.abiquo.abiserver.business.hibernate.pojohb.userType.GenericEnumUserType"> -->
+<!-- 		<param name="enumClass">com.abiquo.server.core.enterprise.Role$Type</param> -->
+<!-- 	</typedef> -->
 </hibernate-mapping>

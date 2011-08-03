@@ -44,13 +44,16 @@
 		[Event(name="editRack", type="flash.events.Event")]
 		[Event(name="editPhysicalMachine", type="flash.events.Event")]
 		
-		[Event(name="infrastructureElementSelected", type="flash.events.Event")]
+		[Event(name="infrastructureElementSelected", type="net.undf.abicloud.events.InfrastructureEvent")]
 		
 		[Event(name="refreshDatacenterResources", type="flash.events.Event")]
 	</mx:Metadata>
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.infrastructure.UcsRack;
         	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
@@ -73,6 +76,12 @@
             //Associated to the filter text
 			[Bindable]
 			public var searchFilter:String;
+			
+			[Bindable]
+			private var _isUcs:Boolean;
+			
+			[Bindable]
+			private var _ucsMachineEditable:Boolean;
 
             public function get racks():ArrayCollection
             {
@@ -97,6 +106,17 @@
             public function set selectedInfrastructureElement(value:InfrastructureElement):void
             {
                 this._selectedInfrastructureElement = value;
+                this._ucsMachineEditable = false;
+                if(this._selectedInfrastructureElement){
+                	this._isUcs = this._selectedInfrastructureElement.assignedTo is UcsRack;
+                }
+                
+                if(this._selectedInfrastructureElement is PhysicalMachine 
+            	&& (PhysicalMachine(this._selectedInfrastructureElement).idState == PhysicalMachine.STATE_MANAGED
+            	 || PhysicalMachine(this._selectedInfrastructureElement).idState == PhysicalMachine.STATE_NOT_MANAGED) ){
+            		this._ucsMachineEditable = true;
+            	}	
+
                 dispatchEvent(new Event("selectedInfrastructureElementChange"));
             }
 
@@ -106,6 +126,8 @@
 
             private function onCreationComplete():void
             {
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_ALLOW_MODIFY_SERVERS,"visible",infrastructureTools);
+                
                 //Initializing variables that required only to initalize once
                 _infrastructureDataDescriptor = new InfrastructureDataDescriptor();
                 
@@ -161,7 +183,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Infrastructure",
-                                                                                    "ALERT_DELETE_RACK_HEADER"),
+                                                                                    "ALERT_DELETE_RACK_HEADER")+" '"+this._selectedInfrastructureElement.name+"'",
                                             ResourceManager.getInstance().getString("Infrastructure",
                                                                                     "ALERT_DELETE_RACK_TEXT"),
                                             Alert.YES | Alert.NO,
@@ -171,7 +193,7 @@
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("Infrastructure",
-                                                                                    "ALERT_DELETE_PHYSICALMACHINE_HEADER"),
+                                                                                    "ALERT_DELETE_PHYSICALMACHINE_HEADER")+" '"+this._selectedInfrastructureElement.name+"'",
                                             ResourceManager.getInstance().getString("Infrastructure",
                                                                                     "ALERT_DELETE_PHYSICALMACHINE_TEXT"),
                                             Alert.YES | Alert.NO,
@@ -235,7 +257,13 @@
                 }
 
                 //Announcing that a InfrastructureElement has been selected
-                dispatchEvent(new Event("infrastructureElementSelected"));
+                var eventElement:InfrastructureEvent = new InfrastructureEvent("infrastructureElementSelected");
+                if(event){
+	                eventElement.automaticUpdate = true;
+                }else{
+                	eventElement.automaticUpdate = false;
+                }
+                dispatchEvent(eventElement);
             }
 
             private function onClickRefreshDatacenterResourcesButton():void
@@ -279,32 +307,35 @@
 
     <!-- Tool Bar -->
     <general:GeneralSubPanelToolBox bottom="0">
-        <mx:PopUpMenuButton id="addButton"
-            width="40" height="22"
-            styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
-            label="" labelField="@label"
-            toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-            itemClick="onClickAddInfrastructureElement(event)"
-            closeDuration="0"/>
+        <mx:HBox id="infrastructureTools" 
+            width="100%" verticalAlign="middle">    		
+            <mx:PopUpMenuButton id="addButton"
+                width="40" height="22"
+                styleName="AddButtonPlus" dataProvider="{addButtonDataProvider}"
+                label="" labelField="@label"
+                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+                itemClick="onClickAddInfrastructureElement(event)"
+                closeDuration="0"/>
 
-        <mx:Button id="deleteButton"
-            enabled="{this._selectedInfrastructureElement != null}"
-            styleName="RemoveButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-            click="askInfrastructureElementDeletion()"/>
+            <mx:Button id="deleteButton"
+                enabled="{this._selectedInfrastructureElement != null &amp;&amp; !this._isUcs}"
+                styleName="RemoveButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+                click="askInfrastructureElementDeletion()"/>
 
-        <mx:Spacer width="100%"/>
+            <mx:Spacer width="100%"/>
 
-        <mx:Button id="refreshDatacenterResourcesButton"
-            styleName="RefreshButtonBig"
-            toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REFRESH_DATACENTER_RESOURCES')"
-            click="onClickRefreshDatacenterResourcesButton()"/>
+            <mx:Button id="refreshDatacenterResourcesButton"
+                styleName="RefreshButtonBig"
+                toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REFRESH_DATACENTER_RESOURCES')"
+                click="onClickRefreshDatacenterResourcesButton()"/>
 
-        <mx:Button id="editButton"
-            enabled="{this._selectedInfrastructureElement != null}"
-            styleName="ConfigurationButton"
-            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-            click="onClickEditInfrastructureElement()"/>
+            <mx:Button id="editButton"
+                enabled="{this._selectedInfrastructureElement != null &amp;&amp; (!this._isUcs || this._ucsMachineEditable )}" 
+		styleName="ConfigurationButton"
+                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+                click="onClickEditInfrastructureElement()"/>
+        </mx:HBox>
     </general:GeneralSubPanelToolBox>
 
 </mx:Canvas>

@@ -36,39 +36,41 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.enumerator.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagementDAO;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 {
-
-    // TODO at repo
     @Autowired
-    VolumeManagementDAO volumenManDAO;
+    private StorageRep storageRep;
 
     @Autowired
-    VLANNetworkDAO vlanNetDAO;
+    private VLANNetworkDAO vlanNetDAO;
 
     @Autowired
-    IpPoolManagementDAO ipPoolDao;
+    private IpPoolManagementDAO ipPoolDao;
 
     public EnterpriseDAO()
     {
         super(Enterprise.class);
     }
 
-    public EnterpriseDAO(EntityManager entityManager)
+    public EnterpriseDAO(final EntityManager entityManager)
     {
         super(Enterprise.class, entityManager);
+
+        this.storageRep = new StorageRep(entityManager);
+        this.vlanNetDAO = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
     @Override
@@ -77,7 +79,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return createCriteria().list();
     }
 
-    public List<Enterprise> findAll(Integer offset, Integer numResults)
+    public List<Enterprise> findAll(final Integer offset, final Integer numResults)
     {
         Criteria criteria = createCriteria();
         Long total = count();
@@ -88,14 +90,14 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         List<Enterprise> result = getResultList(criteria);
 
         com.abiquo.server.core.util.PagedList<Enterprise> page = new PagedList<Enterprise>(result);
-        page.setCurrentPage(offset);
+        page.setCurrentElement(offset);
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 
         return page;
     }
 
-    public List<Enterprise> findByNameAnywhere(String name)
+    public List<Enterprise> findByNameAnywhere(final String name)
     {
         assert name != null;
 
@@ -105,7 +107,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         return result;
     }
 
-    private static Criterion nameLikeAnywhere(String name)
+    private static Criterion nameLikeAnywhere(final String name)
     {
         assert name != null;
 
@@ -117,7 +119,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     @Override
-    public void persist(Enterprise enterprise)
+    public void persist(final Enterprise enterprise)
     {
         assert enterprise != null;
         assert !isManaged(enterprise);
@@ -126,21 +128,21 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         super.persist(enterprise);
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return existsAnyByCriterions(nameEqual(name));
     }
 
-    private Criterion nameEqual(String name)
+    private Criterion nameEqual(final String name)
     {
         assert name != null;
 
         return Restrictions.eq(Enterprise.NAME_PROPERTY, name);
     }
 
-    public boolean existsAnyOtherWithName(Enterprise enterprise, String name)
+    public boolean existsAnyOtherWithName(final Enterprise enterprise, final String name)
     {
         assert enterprise != null;
         assert isManaged(enterprise);
@@ -151,22 +153,21 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and pm.idState != 7" // not HA_DISABLED
             + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
-    public DefaultEntityCurrentUsed getEnterpriseResourceUsage(int enterpriseId)
+    public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
-                .setParameter("enterpriseId", enterpriseId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_DEPLOYED.toString())
-                .uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
+                enterpriseId).setParameter("not_deployed",
+                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();
         Long hd = vmResources[2] == null ? 0 : ((BigDecimal) vmResources[2]).longValue();
 
-        Long storage = getStorageUsage(enterpriseId);
+        Long storage = getStorageUsage(enterpriseId) * 1024 * 1024; // Storage usage is stored in MB
         Long publiIp = getPublicIPUsage(enterpriseId);
         Long vlanCount = getVLANUsage(enterpriseId);
 
@@ -191,18 +192,15 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
      */
     private Long getStorageUsage(final Integer idEnterprise)
     {
-        // TODO 
-        // final List<VolumeManagement> volumes =
-        // volumenManDAO.getVolumesFromEnterprise(idEnterprise);
-        //
-        // long usedStorage = 0L;
-        // for (final VolumeManagement vol : volumes)
-        // {
-        // // TODO sum
-        // usedStorage += vol.getRasdRaw().getLimit();
-        // }
+        final List<VolumeManagement> volumes = storageRep.getVolumesByEnterprise(idEnterprise);
 
-        return 0l;
+        long usedStorage = 0L;
+        for (final VolumeManagement vol : volumes)
+        {
+            usedStorage += vol.getSizeInMB();
+        }
+
+        return usedStorage;
     }
 
     /**

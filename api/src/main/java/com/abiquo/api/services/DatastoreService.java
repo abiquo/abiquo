@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -41,7 +41,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 public class DatastoreService extends DefaultApiService
 {
     @Autowired
-    DatacenterRep repo;
+    InfrastructureRep repo;
 
     public DatastoreService()
     {
@@ -50,14 +50,14 @@ public class DatastoreService extends DefaultApiService
 
     public DatastoreService(EntityManager em)
     {
-        repo = new DatacenterRep(em);
+        repo = new InfrastructureRep(em);
     }
 
     public List<Datastore> getMachineDatastores(Integer machineId)
     {
         if (machineId == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
@@ -70,7 +70,7 @@ public class DatastoreService extends DefaultApiService
     {
         if (id == 0)
         {
-            errors.add(APIError.INVALID_ID);
+            addValidationErrors(APIError.INVALID_ID);
             flushErrors();
         }
 
@@ -89,7 +89,7 @@ public class DatastoreService extends DefaultApiService
 
             if (datastore == null)
             {
-                errors.add(APIError.DATASTORE_NON_EXISTENT);
+                addValidationErrors(APIError.DATASTORE_NON_EXISTENT);
                 flushErrors();
             }
 
@@ -102,7 +102,6 @@ public class DatastoreService extends DefaultApiService
 
             datastore =
                 new Datastore(machine, dto.getName(), dto.getRootPath(), dto.getDirectory());
-            datastore.setShared(dto.isShared());
             datastore.setEnabled(dto.isEnabled());
 
             checkValidDatastore(datastore);
@@ -119,7 +118,7 @@ public class DatastoreService extends DefaultApiService
 
         if (old == null)
         {
-            errors.add(APIError.DATASTORE_NON_EXISTENT);
+            addConflictErrors(APIError.DATASTORE_NON_EXISTENT);
             flushErrors();
         }
 
@@ -128,7 +127,7 @@ public class DatastoreService extends DefaultApiService
         old.setName(dto.getName());
         old.setDirectory(dto.getDirectory());
         old.setEnabled(dto.isEnabled());
-        old.setShared(dto.isShared());
+        old.setDatastoreUUID(dto.getDatastoreUUID());
 
         checkValidDatastore(old);
 
@@ -161,7 +160,7 @@ public class DatastoreService extends DefaultApiService
     {
         if (!datastore.isValid())
         {
-            validationErrors.addAll(datastore.getValidationErrors());
+            addValidationErrors(datastore.getValidationErrors());
         }
 
         flushErrors();
@@ -171,11 +170,11 @@ public class DatastoreService extends DefaultApiService
     {
         if (repo.existAnyDatastoreWithName(dto.getName()))
         {
-            errors.add(APIError.DATASTORE_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATASTORE_DUPLICATED_NAME);
         }
         if (repo.existAnyDatastoreWithDirectory(dto.getDirectory()))
         {
-            errors.add(APIError.DATASTORE_DUPLICATED_DIRECTORY);
+            addConflictErrors(APIError.DATASTORE_DUPLICATED_DIRECTORY);
         }
         flushErrors();
     }
@@ -184,11 +183,11 @@ public class DatastoreService extends DefaultApiService
     {
         if (repo.existAnyOtherDatastoreWithName(datastore, dto.getName()))
         {
-            errors.add(APIError.DATASTORE_DUPLICATED_NAME);
+            addConflictErrors(APIError.DATASTORE_DUPLICATED_NAME);
         }
         if (repo.existAnyOtherDatastoreWithDirectory(datastore, dto.getDirectory()))
         {
-            errors.add(APIError.DATASTORE_DUPLICATED_DIRECTORY);
+            addConflictErrors(APIError.DATASTORE_DUPLICATED_DIRECTORY);
         }
         flushErrors();
     }
@@ -198,7 +197,7 @@ public class DatastoreService extends DefaultApiService
         Machine machine = repo.findMachineById(machineId);
         if (machine == null)
         {
-            errors.add(APIError.NON_EXISTENT_MACHINE);
+            addConflictErrors(APIError.NON_EXISTENT_MACHINE);
             flushErrors();
         }
         return machine;

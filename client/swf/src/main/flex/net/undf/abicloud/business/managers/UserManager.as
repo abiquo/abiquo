@@ -30,6 +30,7 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.model.AbiCloudModel;
     import net.undf.abicloud.vo.result.ListRequest;
     import net.undf.abicloud.vo.user.Enterprise;
+    import net.undf.abicloud.vo.user.Privilege;
     import net.undf.abicloud.vo.user.User;
 
     /**
@@ -45,6 +46,8 @@ package net.undf.abicloud.business.managers
         public static const ROLES_UPDATED:String = "rolesUpdated_UserManager";
 
         public static const ENTERPRISES_UPDATED:String = "enterprisesUpdated_UserManager";
+        
+        public static const PRIVILEGES_UPDATED:String = "privilegesUpdated_UserManager";
 
         /* ------------- Constructor ------------- */
         public function UserManager()
@@ -56,6 +59,8 @@ package net.undf.abicloud.business.managers
             this._totalUsers = 0;
 
             this._roles = new ArrayCollection();
+            
+            this._privileges = new ArrayCollection();
         }
 
 
@@ -223,6 +228,97 @@ package net.undf.abicloud.business.managers
             this._roles = array;
             dispatchEvent(new Event(ROLES_UPDATED, true));
         }
+        
+        private var _totalRoles:int;
+
+        [Bindable(event="totalRolesUpdated_UserManager")]
+        public function get totalRoles():int
+        {
+            return this._totalRoles;
+        }
+
+        public function set totalRoles(total:int):void
+        {
+            this._totalRoles = total;
+        }
+        
+        ///////////////////////////////////
+        //RELATED TO PRIVILEGES
+
+
+        /**
+         * ArrayCollection containing all user privileges
+         **/
+        private var _privileges:ArrayCollection;
+
+        [Bindable(event="privilegesUpdated_UserManager")]
+        public function get privileges():ArrayCollection
+        {
+            return this._privileges;
+        }
+
+        public function set privileges(array:ArrayCollection):void
+        {
+            this._privileges = array;
+            dispatchEvent(new Event(PRIVILEGES_UPDATED, true));
+        }
+        
+        public function userHasPrivilege(privilege:String):Boolean{
+        	for(var i:int = 0 ; i < this._privileges.length ; i++){
+        		if(Privilege(this._privileges.getItemAt(i)).name == privilege){
+        			return true;
+        		}
+        	}
+        	return false;
+        }
+        
+         /**
+         * ArrayCollection containing role privileges
+         **/
+        private var _rolePrivileges:ArrayCollection;
+
+        [Bindable(event="rolePrivilegesUpdated_UserManager")]
+        public function get rolePrivileges():ArrayCollection
+        {
+            return this._rolePrivileges;
+        }
+
+        public function set rolePrivileges(array:ArrayCollection):void
+        {
+            this._rolePrivileges = array;
+            dispatchEvent(new Event(PRIVILEGES_UPDATED, true));
+        }
+        
+        /**
+         * Function which check if a user has a privilege
+         **/
+        public function roleHasPrivilege(privilege:String):Boolean{
+        	for(var i:int = 0 ; i < this._rolePrivileges.length ; i++){
+        		if(Privilege(this._rolePrivileges.getItemAt(i)).name == privilege){
+        			return true;
+        		}
+        	}
+        	return false;
+        }        
+        
+        
+        /**
+         * Function which return a privilege from role or user privileges 
+         **/
+        public function getPrivilege(privilege:String,type:String):Privilege{
+        	var list:ArrayCollection;
+        	if(type == "role"){
+        		list = this._rolePrivileges;
+        	}else{
+        		list = this._privileges;
+        	}
+        	for(var i:int = 0 ; i < list.length ; i++){
+        		if(Privilege(list.getItemAt(i)).name == privilege){
+        			return Privilege(list.getItemAt(i));
+        		}
+        	}
+        	return null;
+        }
 
         ///////////////////////////////////
         //RELATED TO ENTERPRISES
@@ -304,6 +400,13 @@ package net.undf.abicloud.business.managers
             //Updating the old enterprise without modifying its memory address
             oldEnterprise.id = newEnterprise.id;
             oldEnterprise.name = newEnterprise.name;
+            if(newEnterprise.limits){
+	            oldEnterprise.limits = newEnterprise.limits;
+	            //Update the connected user enterprise
+	            if(AbiCloudModel.getInstance().loginManager.user.enterprise.id == newEnterprise.id){
+	            	AbiCloudModel.getInstance().loginManager.user.enterprise = oldEnterprise;
+	            }            
+            }
 
             var userEvent:UserEvent = new UserEvent(UserEvent.ENTERPRISE_EDITED);
             userEvent.enterprise = oldEnterprise;

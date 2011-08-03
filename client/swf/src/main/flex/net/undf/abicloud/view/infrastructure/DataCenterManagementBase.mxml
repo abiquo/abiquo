@@ -51,6 +51,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
             import com.google.maps.LatLng;
             import com.google.maps.Map;
@@ -97,6 +99,10 @@
             private var _mapLoadControl:Timer;
 
             private var _openedMarker:Marker;
+            
+            private var _defaultLatitude:Number;
+            
+            private var _defaultLongitude:Number;
 
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
@@ -109,8 +115,7 @@
                 if (dataCentersMap.isLoaded() && _dataCentersArray.length > 0)
                 {
                     //Setting the Google Maps to its original position
-                    dataCentersMap.panTo(new LatLng(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value,
-                                                    AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value));
+                    dataCentersMap.panTo(new LatLng(this._defaultLatitude,this._defaultLongitude));
 
                     //Closing the opened Marker
                     if (this._dataCenterMapMarkClicked != null)
@@ -141,6 +146,10 @@
 
             private function onInitialize():void
             {
+                //Initialize default latitude and longitude
+                this._defaultLongitude = Number(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value);
+	            this._defaultLatitude = Number(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value);
+	                
                 //Creating Google Maps
                 dataCentersMap = new Map();
                 dataCentersMap.percentWidth = 100;
@@ -164,6 +173,10 @@
              **/
             protected function onCreationComplete():void
             {
+                //Check privilege
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',addButton,manageDCTools);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.PHYS_DC_MANAGE,'removeChild',deleteButton,manageDCTools);
+                
                 //Creating Pop Ups				
                 this._datacenterFormAdd = new DatacenterFormAdd();
                 this._datacenterFormAdd.addEventListener("DatacenterFormAddClose",
@@ -259,7 +272,7 @@
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
                                         ResourceManager.getInstance().getString("Infrastructure",
-                                                                                "ALERT_DELETE_DATACENTER_HEADER"),
+                                                                                "ALERT_DELETE_DATACENTER_HEADER")+" '"+DataCenter(dataCenterList.selectedItem).name+"'",
                                         ResourceManager.getInstance().getString("Infrastructure",
                                                                                 "ALERT_DELETE_DATACENTER_TEXT"),
                                         Alert.YES | Alert.NO, deleteDataCenter);
@@ -371,8 +384,7 @@
                 mapOptions.zoom = Number(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultZoom.value);
                 mapOptions.mapType = MapType.NORMAL_MAP_TYPE;
 				
-                mapOptions.center = new LatLng(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value,
-                                               AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value);
+                mapOptions.center = new LatLng(this._defaultLatitude,this._defaultLongitude);
 
                 dataCentersMap.setInitOptions(mapOptions);
             }
@@ -584,10 +596,10 @@
                 dataCenterList.selectedIndex = -1;
                 onClickDataCenterList();
                 if(dataCentersMap.isLoaded()){
-	                //Setting the Google Maps to its original position
-	                dataCentersMap.panTo(new LatLng(AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLongitude.value,
-	                                                AbiCloudModel.getInstance().configurationManager.config.client_infra_googleMapsDefaultLatitude.value));
-	            }
+	                //Setting the Google Maps to its original position	                
+	                dataCentersMap.panTo(new LatLng(this._defaultLatitude,this._defaultLongitude));
+	             
+	             }
                 	
             }
                 
@@ -644,25 +656,29 @@
             itemRenderer="net.undf.abicloud.view.infrastructure.components.datacenter.DataCenterListRenderer"
             click="onClickDataCenterList()"/>
 
-        <general:GeneralPanelToolBox>
-            <mx:Button id="addButton"
-                styleName="AddButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
-                click="addDataCenter()"/>
-
-            <mx:Button id="deleteButton"
-                enabled="{dataCenterList.selectedIndex > -1}"
-                styleName="RemoveButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
-                click="askDataCenterDeletion()"/>
-
-            <mx:Spacer width="100%"/>
-
-            <mx:Button id="editButton"
-                enabled="{dataCenterList.selectedIndex > -1}"
-                styleName="ConfigurationButton"
-                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
-                click="editDataCenter(dataCenterList.selectedItem as DataCenter)"/>
+        <general:GeneralPanelToolBox >
+	        <mx:HBox width="100%" 
+	        	id="manageDCTools"
+	        	verticalAlign="middle">
+	            <mx:Button id="addButton"
+	                styleName="AddButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
+	                click="addDataCenter()"/>
+	
+	            <mx:Button id="deleteButton"
+	                enabled="{dataCenterList.selectedIndex > -1}"
+	                styleName="RemoveButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
+	                click="askDataCenterDeletion()"/>
+	
+	            <mx:Spacer width="100%"/>
+	
+	            <mx:Button id="editButton"
+	                enabled="{dataCenterList.selectedIndex > -1}"
+	                styleName="ConfigurationButton"
+	                toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
+	                click="editDataCenter(dataCenterList.selectedItem as DataCenter)"/>
+             </mx:HBox>
         </general:GeneralPanelToolBox>
     </general:GeneralPanel>
 

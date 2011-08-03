@@ -342,7 +342,7 @@
             {
                 //Showing the text included in the file
                 AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("Common",
-                                                                                       "ALERT_TITLE_LABEL"),
+                                                                                       "ALERT_SUCCESS_TITLE_LABEL"),
                                                ResourceManager.getInstance().getString("Common",
                                                                                        "LABEL_WELCOME"),
                                                URLLoader(event.currentTarget).data.toString(),

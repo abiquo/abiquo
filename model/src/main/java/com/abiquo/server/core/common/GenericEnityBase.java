@@ -22,6 +22,7 @@
 package com.abiquo.server.core.common;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -29,6 +30,7 @@ import javax.persistence.MappedSuperclass;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 
+import com.abiquo.model.transport.error.CommonError;
 import com.softwarementors.bzngine.entities.PersistentVersionedEntityBase;
 import com.softwarementors.validation.ValidationManager;
 
@@ -46,9 +48,32 @@ public abstract class GenericEnityBase<T extends Serializable> extends
         return Validation.buildDefaultValidatorFactory().getValidator().validate(this).isEmpty();
     }
 
-    public Set<ConstraintViolation< ? extends Object>> getValidationErrors()
+    public Set<CommonError> getValidationErrors()
     {
-        return new LinkedHashSet<ConstraintViolation< ? extends Object>>(ValidationManager
-            .getValidator().validate(this));
+        Set<ConstraintViolation< ? extends Object>> violations =
+            new LinkedHashSet<ConstraintViolation< ? extends Object>>(ValidationManager
+                .getValidator().validate(this));
+
+        Set<CommonError> errors = new HashSet<CommonError>();
+
+        for (ConstraintViolation< ? extends Object> constrain : violations)
+        {
+            errors.add(buildCommonError(constrain));
+        }
+
+        return errors;
+    }
+
+    private CommonError buildCommonError(final ConstraintViolation< ? extends Object> constraint)
+    {
+        String code =
+            String.format("CONSTR-%s", constraint.getConstraintDescriptor().getAnnotation()
+                .annotationType().getSimpleName().toUpperCase());
+
+        String message =
+            String.format("The property '%s' %s.", constraint.getPropertyPath().toString(),
+                constraint.getMessage());
+
+        return new CommonError(code, message);
     }
 }

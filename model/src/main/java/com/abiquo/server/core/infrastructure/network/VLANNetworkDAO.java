@@ -62,6 +62,14 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return result;
     }
 
+    public VLANNetwork findVlanByVirtualDatacenterId(VirtualDatacenter virtualDatacenter,
+        Integer vlanId)
+    {
+        return findUniqueByCriterions(
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
+    }
+
     private static Criterion sameNetwork(VirtualDatacenter virtualDatacenter)
     {
         return sameNetwork(virtualDatacenter.getNetwork());
@@ -79,6 +87,12 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return existsAnyByCriterions(sameNetwork(network), nameEqual(name));
     }
 
+    public VLANNetwork findByDefault(VirtualDatacenter virtualDatacenter)
+    {
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
+    }
+
     private Criterion nameEqual(String name)
     {
         assert name != null;
@@ -89,7 +103,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     private final String FIND_BY_ENTERPRISE = " SELECT vlan "//
         + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
         + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "WHERE vlan.id = vdc.network.id "//
+        + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.enterprise.id = :enterpriseId";
 
     public List<VLANNetwork> findByEnterprise(int enterpriseId)
@@ -129,7 +143,7 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     private final String GET_VLAN_DATACENTER =
         "SELECT dc " //
-            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " // 
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
             + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
             + "WHERE net.id = vlan.network.id AND vlan.id = :id";
 
@@ -140,4 +154,5 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
         return query.uniqueResult() != null;
     }
+
 }

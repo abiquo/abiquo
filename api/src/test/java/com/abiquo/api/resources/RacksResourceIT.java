@@ -41,12 +41,6 @@ import com.abiquo.server.core.infrastructure.RacksDto;
 
 public class RacksResourceIT extends AbstractJpaGeneratorIT
 {
-    @AfterMethod
-    public void tearDown()
-    {
-        tearDown("rack", "datacenter");
-    }
-
     private String validRacksUri;
 
     @BeforeMethod
@@ -97,7 +91,7 @@ public class RacksResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
 
         response = createRack("rack_test", "rack_description", "large_rack_description");
-        assertEquals(response.getStatusCode(), 400);
+        assertEquals(response.getStatusCode(), 409);
 
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
         assertEquals(errors.getCollection().get(0).getCode(), APIError.RACK_DUPLICATED_NAME

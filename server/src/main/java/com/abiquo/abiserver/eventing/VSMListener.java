@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
@@ -65,9 +66,8 @@ public class VSMListener implements VSMCallback
 
     private static final long serialVersionUID = 1L;
 
-    protected final static String IDVIRTUALAPP_SQL_BY_VM =
-        "SELECT n.idVirtualApp " + "FROM node n, nodevirtualimage ni "
-            + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
+    protected final static String IDVIRTUALAPP_SQL_BY_VM = "SELECT n.idVirtualApp "
+        + "FROM node n, nodevirtualimage ni " + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
 
     private final static String VM_BY_UUID =
         "Select vm "
@@ -81,7 +81,7 @@ public class VSMListener implements VSMCallback
     public void onEvent(VirtualSystemEvent event)
     {
         try
-        {
+        {            
             updateEventOnDb(event);
         }
         catch (EventingException e)
@@ -116,14 +116,23 @@ public class VSMListener implements VSMCallback
                 for (Object object : results)
                 {
                     VirtualmachineHB vmHB = (VirtualmachineHB) object;
-                    logger.trace("The VM ID is: {}, The VM state is : {}", vmHB.getIdVm(), vmHB
-                        .getState());
+                    logger.trace("The VM ID is: {}, The VM state is : {}", vmHB.getIdVm(),
+                        vmHB.getState());
                 }
             }
 
             Query query = session.createQuery(VM_BY_UUID);
             query.setString("uuid", event.getVirtualSystemId());
             VirtualmachineHB virtualMachine = (VirtualmachineHB) query.uniqueResult();
+            
+            
+            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 - DISABLED_FOR_HA states
+            if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
+            {
+                logger.trace("Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process", virtualMachine.getIdVm(), virtualMachine.getState());
+                return;
+            }
+            
 
             // Checking if the VM is not null since the VM that we are receiving
             // the event was already deleted
@@ -137,8 +146,6 @@ public class VSMListener implements VSMCallback
                 switch (eventType)
                 {
                     case MOVED:
-                        // VM must be deleted from system and Vapp Updated
-                        onVMDestroyedEvent(session, virtualMachine.getIdVm());
                         // Physicalmachine destination must be updated
                         // VApp is also updated
                         onVMMovedEvent(session, virtualMachine, event.getVirtualSystemAddress(),

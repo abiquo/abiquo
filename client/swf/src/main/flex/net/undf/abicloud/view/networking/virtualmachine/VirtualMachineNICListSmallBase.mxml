@@ -33,6 +33,7 @@
     xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.collections.ArrayCollection;
 
             import net.undf.abicloud.events.NetworkingEvent;
@@ -83,6 +84,10 @@
             {
                 requestVirtualMachineNICs();
             }
+            
+            private function returnMac(object:Object, column:DataGridColumn):String{
+            	return AbicloudUtils.formatMac(object.mac);
+            }
         ]]>
     </mx:Script>
 
@@ -95,6 +100,7 @@
             <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
                 dataField="ip"/>
             <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
+            	labelFunction="returnMac"
                 dataField="mac"/>
             <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_VLAN')"
                 dataField="vlanNetworkName"/>

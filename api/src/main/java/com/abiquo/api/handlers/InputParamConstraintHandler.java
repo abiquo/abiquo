@@ -30,8 +30,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.validation.Validation;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.apache.wink.common.internal.registry.Injectable;
 import org.apache.wink.server.handlers.HandlersChain;
 import org.apache.wink.server.handlers.MessageContext;
@@ -45,12 +49,13 @@ import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.method.MethodConstraintViolation;
 import org.hibernate.validator.method.MethodValidator;
 
-import com.abiquo.api.exceptions.ExtendedAPIException;
-import com.abiquo.api.exceptions.InvalidParameterConstraint;
+import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
  * This class checks if the Path Params and Query Params annotated with constraints in the 
- * chosen resource to execute pass the constraints.
+ * chosen resource to execute pass these constraints.
  * That avoids a lot of {if ... else ... } clauses in the Resource layer.
  * 
  * @author jdevesa@abiquo.com
@@ -84,7 +89,7 @@ public class InputParamConstraintHandler implements RequestHandler
         // Define the variables needed to iterate the parameters and check the errors.
         Set<MethodConstraintViolation<Object>> constraintViolations;
         Object rsInstance = rs.getInstance(context);
-        Set<InvalidParameterConstraint> paramErrors = new LinkedHashSet<InvalidParameterConstraint>();
+        Set<CommonError> paramErrors = new LinkedHashSet<CommonError>();
         
         // Iterate the paramters and convert constraint violations into InvalidParameterConstraint error code.
         for (int index = 0; index < fp.size(); index++)
@@ -121,18 +126,29 @@ public class InputParamConstraintHandler implements RequestHandler
             // Build the error object
             for (MethodConstraintViolation<Object> constraintViolation : constraintViolations)
             {
-                paramErrors.add(transformConstraintViolationToInputParamError(constraintViolation, String.valueOf(value), paramName));
+                paramErrors.add(transformConstraintViolationToCommonError(constraintViolation, String.valueOf(value), paramName));
             }
         }
 
         if (paramErrors.size() > 0)
         {
+            ErrorsDto errors = new ErrorsDto();
+            for (CommonError commonError : paramErrors)
+            {
+                ErrorDto error = new ErrorDto();
+                error.setCode(commonError.getCode());
+                error.setMessage(commonError.getMessage());
+                
+                errors.getCollection().add(error);
+            }
+            
             // If there are param errors set the exception in the 'searchResult' object
             // and return back.
-            ExtendedAPIException exception =
-                new ExtendedAPIException(Status.BAD_REQUEST, paramErrors);
-
-            searchResult.setError(exception);
+            ResponseBuilder builder = new ResponseBuilderImpl();
+            builder.entity(errors);
+            builder.type(MediaType.APPLICATION_XML);
+            builder.status(Status.BAD_REQUEST);
+            searchResult.setError(new WebApplicationException(builder.build()));
             return;
         }
         else
@@ -150,15 +166,12 @@ public class InputParamConstraintHandler implements RequestHandler
      * @param paramName
      * @return
      */
-    private InvalidParameterConstraint transformConstraintViolationToInputParamError(
+    private CommonError transformConstraintViolationToCommonError(
         MethodConstraintViolation<Object> constraintViolation, String value, String paramName)
     {
-        InvalidParameterConstraint inv = new InvalidParameterConstraint();
-        
-        inv.setAnnotation(constraintViolation.getConstraintDescriptor().getAnnotation());
-        inv.setMessageError("Parameter " + paramName + " " + constraintViolation.getMessage() + " but value " + value + " was found");
-        
-        return inv;
+        String code = "CONSTR-" + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName().toUpperCase();
+        String message = "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '" + value + "' was found";
+        return new CommonError(code, message);
     }
 
 }

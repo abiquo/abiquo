@@ -25,56 +25,234 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.core.Response.Status;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ExtendedAPIException;
-import com.abiquo.scheduler.limit.LimitExceededException;
-import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.exceptions.ConflictException;
+import com.abiquo.api.exceptions.ForbiddenException;
+import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
+import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.server.core.common.GenericEnityBase;
 
 public abstract class DefaultApiService
 {
-    protected Collection<LimitExceededException> limitExceptions =
-        new LinkedHashSet<LimitExceededException>();
+    private Collection<CommonError> conflictErrors;
+    private Collection<CommonError> validationErrors;
+    private Collection<CommonError> notfoundErrors;
+    private Collection<CommonError> forbiddenErrors;
+    private Collection<CommonError> unexpectedErrors;
+    private Collection<CommonError> serviceUnavailableErrors;
 
-    protected Collection<APIError> errors = new LinkedHashSet<APIError>();
 
-    protected Collection<ConstraintViolation< ? >> validationErrors =
-        new LinkedHashSet<ConstraintViolation< ? >>();
+    @Autowired
+    protected TracerLogger tracer;
 
     protected void flushErrors()
     {
-        if (!errors.isEmpty() || !validationErrors.isEmpty() || !limitExceptions.isEmpty())
+        Set<CommonError> errors = new LinkedHashSet<CommonError>();
+        if (!getUnexpectedErrors().isEmpty())
         {
-            Collection<APIError> dup = new LinkedHashSet<APIError>(errors);
-            Collection<ConstraintViolation< ? >> dupValidation =
-                new LinkedHashSet<ConstraintViolation< ? >>(validationErrors);
-
-            Collection<LimitExceededException> dupLimit =
-                new LinkedHashSet<LimitExceededException>(limitExceptions);
-
-            errors.clear();
+            errors.addAll(unexpectedErrors);
+            unexpectedErrors.clear();
+            throw new InternalServerErrorException(errors);
+        }
+        if (!getForbiddenErrors().isEmpty())
+        {
+            errors.addAll(forbiddenErrors);
+            forbiddenErrors.clear();
+            throw new ForbiddenException(errors);
+        }
+        if (!getNotfoundErrors().isEmpty())
+        {
+            errors.addAll(notfoundErrors);
+            notfoundErrors.clear();
+            throw new NotFoundException(errors);
+        }
+        if (!getValidationErrors().isEmpty())
+        {
+            errors.addAll(validationErrors);
             validationErrors.clear();
-            limitExceptions.clear();
-
-            throw new ExtendedAPIException(Status.BAD_REQUEST, dup, dupValidation, dupLimit);
+            throw new BadRequestException(errors);
+        }
+        if (!getConflictErrors().isEmpty())
+        {
+            errors.addAll(conflictErrors);
+            conflictErrors.clear();
+            throw new ConflictException(errors);
+        }
+        if (!getServiceUnavailableErrors().isEmpty())
+        {
+            errors.addAll(serviceUnavailableErrors);
+            serviceUnavailableErrors.clear();
+            throw new ServiceUnavailableException(errors);
         }
     }
 
-    protected void addValidationErrors(Set<ConstraintViolation< ? >> errors)
+    protected <T extends GenericEnityBase< ? >> void validate(final T entity)
     {
-        validationErrors.addAll(errors);
+        if (!entity.isValid())
+        {
+            addValidationErrors(entity.getValidationErrors());
+            flushErrors();
+        }
+    }
+    
+    // ValidationErrors
+    private Collection<CommonError> getValidationErrors()
+    {
+        if (validationErrors == null)
+        {
+            validationErrors = new LinkedHashSet<CommonError>();
+        }
+        return validationErrors;
+    }
+    
+    protected void addValidationErrors(Set<CommonError> errors)
+    {
+        getValidationErrors().addAll(errors);
+    }
+    
+    protected void addValidationErrors(CommonError error)
+    {
+        getValidationErrors().add(error);
+    }
+    
+    protected void addValidationErrors(APIError apiError)
+    {
+        getValidationErrors().add(addAPIError(apiError));
+    }
+    
+    // NotFoundErrors
+    private Collection<CommonError> getNotfoundErrors()
+    {
+        if (notfoundErrors == null)
+        {
+            notfoundErrors = new LinkedHashSet<CommonError>();
+        }
+        return notfoundErrors;
+    }
+    
+    protected void addNotFoundErrors(Set<CommonError> errors)
+    {
+        getNotfoundErrors().addAll(errors);
+    }
+    
+    protected void addNotFoundErrors(CommonError error)
+    {
+        getNotfoundErrors().add(error);
+    }
+    
+    protected void addNotFoundErrors(APIError apiError)
+    {
+        getNotfoundErrors().add(addAPIError(apiError));
     }
 
-    protected void addValidationErrors(DefaultEntityBase entity)
+    // ConflictErrors
+    private Collection<CommonError> getConflictErrors()
     {
-        addValidationErrors(entity.getValidationErrors());
+        if (conflictErrors == null)
+        {
+            conflictErrors = new LinkedHashSet<CommonError>();
+        }
+        return conflictErrors;
     }
 
-    protected void raiseValidationErrors(DefaultEntityBase entity)
+    protected void addConflictErrors(Set<CommonError> errors)
     {
-        addValidationErrors(entity);
-        flushErrors();
+        getConflictErrors().addAll(errors);
+    }
+    
+    protected void addConflictErrors(CommonError error)
+    {
+        getConflictErrors().add(error);
+    }
+    
+    protected void addConflictErrors(APIError apiError)
+    {
+        getConflictErrors().add(addAPIError(apiError));
+    }
+   
+    // Security Errors
+    private Collection<CommonError> getForbiddenErrors()
+    {
+        if (forbiddenErrors == null)
+        {
+            forbiddenErrors = new LinkedHashSet<CommonError>();
+        }
+        return forbiddenErrors;
+    }
+    
+    protected void addForbiddenErrors(Set<CommonError> errors)
+    {
+        getForbiddenErrors().addAll(errors);
+    }
+    
+    protected void addForbiddenErrors(CommonError error)
+    {
+        getForbiddenErrors().add(error);
+    }
+    
+    protected void addForbiddenErrors(APIError apiError)
+    {
+        getForbiddenErrors().add(addAPIError(apiError));
+    }
+    
+    // Unexpected Errors
+    private Collection<CommonError> getUnexpectedErrors()
+    {
+        if (unexpectedErrors == null)
+        {
+            unexpectedErrors = new LinkedHashSet<CommonError>();
+        }
+        return unexpectedErrors;
+    }
+    
+    protected void addUnexpectedErrors(Set<CommonError> errors)
+    {
+        getUnexpectedErrors().addAll(errors);
+    }
+    
+    protected void addUnexpectedErrors(CommonError error)
+    {
+        getUnexpectedErrors().add(error);
+    }
+    
+    protected void addUnexpectedErrors(APIError apiError)
+    {
+        getUnexpectedErrors().add(addAPIError(apiError));
+    }
+    
+    // Service Unavailabe Errors
+    private Collection<CommonError> getServiceUnavailableErrors()
+    {
+        if (serviceUnavailableErrors == null)
+        {
+            serviceUnavailableErrors = new LinkedHashSet<CommonError>();
+        }
+        return serviceUnavailableErrors;
+    }
+    
+    protected void addServiceUnavailableErrors(Set<CommonError> errors)
+    {
+        getServiceUnavailableErrors().addAll(errors);
+    }
+    
+    protected void addServiceUnavailableErrors(CommonError error)
+    {
+        getServiceUnavailableErrors().add(error);
+    }
+    
+    protected void addServiceUnavailableErrors(APIError apiError)
+    {
+        getServiceUnavailableErrors().add(addAPIError(apiError));
+    }
+    
+    private CommonError addAPIError(APIError apiError)
+    {
+        return new CommonError(apiError.getCode(), apiError.getMessage());
     }
 }

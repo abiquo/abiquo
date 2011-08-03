@@ -40,6 +40,7 @@ import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkConfigurationType;
 import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType;
+import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
@@ -48,20 +49,22 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.NetworkSectionType.Network;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.CIMResourceAllocationSettingDataType;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.Caption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
-import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.ChangeableTypeEnum;
+import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -76,6 +79,7 @@ import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -83,9 +87,9 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.enumerator.HypervisorType;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -95,13 +99,14 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 @Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFGeneratorService
 {
     @Autowired
     VirtualDatacenterRep vdcRepo;
 
     @Autowired
-    DatacenterRep datacenterRepo;
+    InfrastructureRep datacenterRepo;
 
     @Autowired
     VirtualMachineRep vmRepo;
@@ -117,6 +122,8 @@ public class OVFGeneratorService
     public final static QName ADMIN_USER_PASSWORD_QNAME = new QName("adminPassword");
 
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
+
+    public final static QName HA_DISK = new QName("ha");
 
     // /////////// InfrastructureWS
 
@@ -155,7 +162,7 @@ public class OVFGeneratorService
      * @throws Exception, if the virtualMachine can not be represented as an OVF document.
      */
     public EnvelopeType constructEnvelopeType(final VirtualMachine virtualMachine,
-        String machineState) throws Exception
+        final String machineState) throws Exception
     {
         EnvelopeType envelope;
 
@@ -174,13 +181,15 @@ public class OVFGeneratorService
 
             DiskSectionType diskSectionEnvelope = createEnvelopeDisk(virtualImage);
 
+            Datastore targetDatastore = virtualMachine.getDatastore();
             ReferencesType diskReferences =
-                createDiskFileReferences(virtualImage, virtualMachine.getDatastore().getDirectory());
+                createDiskFileReferences(virtualImage, targetDatastore.getRootPath()
+                    + targetDatastore.getDirectory());
 
             // Creating the Annotation Type (machine state)
             AnnotationSectionType annotationSection =
-                createAnnotationMachineStateAndRDPPort(machineState, String.valueOf(virtualMachine
-                    .getVdrpPort()));
+                createAnnotationMachineStateAndRDPPort(machineState,
+                    String.valueOf(virtualMachine.getVdrpPort()));
 
             // creating Virtual hardware section (containing hypervisor information)
             VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
@@ -400,7 +409,7 @@ public class OVFGeneratorService
         VSSDType vssd;
 
         // from the hypervisor
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
         String hypervisorAddress =
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
         String vsystemType = hypervisor.getType().getValue();
@@ -445,7 +454,7 @@ public class OVFGeneratorService
     }
 
     private static AnnotationSectionType createAnnotationMachineStateAndRDPPort(
-        final String machineState, String rdpPort)
+        final String machineState, final String rdpPort)
     {
 
         // Creating the Annotation Type
@@ -473,11 +482,11 @@ public class OVFGeneratorService
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance)
         throws Exception
     {
-        return createVirtualApplication(virtualAppliance, false);
+        return createVirtualApplication(virtualAppliance, false, false);
     }
 
     public EnvelopeType createVirtualApplication(final VirtualAppliance virtualAppliance,
-        final boolean bundling) throws Exception
+        final boolean bundling, final boolean ha) throws Exception
     {
         // Create an OVF envelope
         EnvelopeType envelope = new EnvelopeType();
@@ -507,7 +516,7 @@ public class OVFGeneratorService
         // Getting the all the virtual Machines
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
-            NodeVirtualImage nodeVirtualImage = (NodeVirtualImage) node;
+            NodeVirtualImage nodeVirtualImage = node;
 
             State vmState = nodeVirtualImage.getVirtualMachine().getState();
 
@@ -517,11 +526,14 @@ public class OVFGeneratorService
             OVFEnvelopeUtils.addVirtualSystem(virtualSystemCollection, virtualSystem);
 
             // Setting the virtual Disk package level element to the envelope
-            OVFDiskUtils.addDisk(envelope, createDiskFromVirtualImage(nodeVirtualImage.getId()
-                .toString(), nodeVirtualImage.getVirtualImage()));
+            final String id =
+                nodeVirtualImage.getId() == null ? "10" : nodeVirtualImage.getId().toString();
 
-            OVFReferenceUtils.addFileOrIgnore(references, createFileFromVirtualImage(
-                nodeVirtualImage, bundling));
+            OVFDiskUtils.addDisk(envelope,
+                createDiskFromVirtualImage(id, nodeVirtualImage.getVirtualImage()));
+
+            OVFReferenceUtils.addFileOrIgnore(references,
+                createFileFromVirtualImage(nodeVirtualImage, bundling, ha));
         }
 
         // Adding the virtual System collection to the envelope
@@ -577,7 +589,7 @@ public class OVFGeneratorService
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
             for (IpPoolManagement ip : ips)
             {
-                if (ip.getIdVm() != null)
+                if (ip.getVirtualMachine() != null)
                 {
                     IpPoolType rule = new IpPoolType();
                     rule.setConfigureGateway(ip.getConfigureGateway());
@@ -619,7 +631,7 @@ public class OVFGeneratorService
     }
 
     private FileType createFileFromVirtualImage(final NodeVirtualImage nodeVirtualImage,
-        final boolean bundling) throws RequiredAttributeException
+        final boolean bundling, final boolean ha) throws RequiredAttributeException
     {
         String imagePath = null;
 
@@ -653,9 +665,16 @@ public class OVFGeneratorService
 
         FileType virtualDiskImageFile =
             OVFReferenceUtils.createFileType(fileId, absolutePath, fileSize, null, null);
-        insertTargetDataStore(virtualDiskImageFile, nodeVirtualImage.getVirtualMachine()
-            .getDatastore().getName()
-            + nodeVirtualImage.getVirtualMachine().getDatastore().getDirectory());
+
+        Datastore targetDatastore = nodeVirtualImage.getVirtualMachine().getDatastore();
+
+        insertTargetDataStore(virtualDiskImageFile,
+            targetDatastore.getRootPath() + targetDatastore.getDirectory());
+
+        if (ha)
+        {
+            setHA(virtualDiskImageFile);
+        }
 
         String path = null;
         if (!virtualImage.isManaged())
@@ -703,7 +722,16 @@ public class OVFGeneratorService
         virtualDiskImageFile.getOtherAttributes().put(DATASTORE_QNAME, dataStore);
     }
 
-    private static VirtualDiskDescType createDiskFromVirtualImage(String diskId,
+    /**
+     * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
+     * indicate do not execute any operation to copy/remove the disk from the target datastore.
+     */
+    private static void setHA(final FileType virtualDiskImageFile)
+    {
+        virtualDiskImageFile.getOtherAttributes().put(HA_DISK, Boolean.TRUE.toString());
+    }
+
+    private static VirtualDiskDescType createDiskFromVirtualImage(final String diskId,
         final VirtualImage virtualImage)
     {
         Long capacity = virtualImage.getHdRequiredInBytes();
@@ -785,7 +813,7 @@ public class OVFGeneratorService
         final VirtualMachine virtualMachine, final VirtualImage virtualImage,
         final String networkName, final NodeVirtualImage node) throws RequiredAttributeException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
         String hypervisorAddres = "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
         String vsystemType = hypervisor.getType().getValue();
         String instanceID = virtualMachine.getUuid();
@@ -813,18 +841,19 @@ public class OVFGeneratorService
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("RAM", "2",
                 CIMResourceTypeEnum.Memory);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam, new Long(virtualMachine
-            .getRam()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimRam,
+            new Long(virtualMachine.getRam()));
 
         // Setting CPU
         CIMResourceAllocationSettingDataType cimCpu =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("CPU", "1",
                 CIMResourceTypeEnum.Processor);
 
-        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu, new Long(virtualMachine
-            .getCpu()));
+        CIMResourceAllocationSettingDataUtils.setAllocationToRASD(cimCpu,
+            new Long(virtualMachine.getCpu()));
 
-        String virtualImageId = String.valueOf(node.getId());
+        String virtualImageId = node.getId() == null ? "10" : node.getId().toString();
+
         String diskId = "disk_" + virtualImageId;
         CIMResourceAllocationSettingDataType cimDisk =
             CIMResourceAllocationSettingDataUtils.createResourceAllocationSettingData("Harddisk"
@@ -860,8 +889,8 @@ public class OVFGeneratorService
     private String getPhysicalMachineIqn(final NodeVirtualImage nvi)
     {
         // Get Virtual Datacenter
-        Hypervisor hypervisor = (Hypervisor) nvi.getVirtualMachine().getHypervisor();
-        Machine pm = (Machine) hypervisor.getMachine();
+        Hypervisor hypervisor = nvi.getVirtualMachine().getHypervisor();
+        Machine pm = hypervisor.getMachine();
 
         return pm.getInitiatorIQN();
     }
@@ -894,14 +923,14 @@ public class OVFGeneratorService
         throws RequiredAttributeException
     {
         Collection<RasdManagement> management =
-            vmRepo.findRasdManagementByVirtualMachine(virtualMachine.getId());
+            vmRepo.findRasdManagementByVirtualMachine(virtualMachine);
 
         Collection<Rasd> rasd = new LinkedHashSet<Rasd>();
         if (management != null && !management.isEmpty())
         {
             for (RasdManagement r : management)
             {
-                rasd.add(r.getRasdRaw());
+                rasd.add(r.getRasd());
             }
         }
 
@@ -935,7 +964,7 @@ public class OVFGeneratorService
                 String virtualSystemState = null;
                 for (NodeVirtualImage node : virtualAppliance.getNodes())
                 {
-                    NodeVirtualImage nodeVi = (NodeVirtualImage) node;
+                    NodeVirtualImage nodeVi = node;
                     VirtualMachine vm = nodeVi.getVirtualMachine();
                     String uuid = vm.getUuid();
                     if (uuid.equals(subVirtualSystem.getId()))
@@ -1019,16 +1048,20 @@ public class OVFGeneratorService
 
     }
 
-    private String getRepositoryManagerAddress(final NodeVirtualImage nvi)
+    private String getRepositoryManagerAddress(NodeVirtualImage nvi)
     {
+        VirtualMachine vmachine = vmRepo.findVirtualMachineById(nvi.getVirtualMachine().getId());
+
         // Get Virtual Datacenter
-        Hypervisor hypervisor = (Hypervisor) nvi.getVirtualMachine().getHypervisor();
+        Hypervisor hypervisor = vmachine.getHypervisor();
         Machine pm = hypervisor.getMachine();
-        Rack rack = pm.getRack();
-        Integer idDatacenter = rack.getDatacenter().getId();
+
+        Integer datacenterId = pm.getDatacenter().getId();
+
+        Datacenter dc = datacenterRepo.findById(datacenterId);
 
         List<RemoteService> am =
-            datacenterRepo.findRemoteServiceWithTypeInDatacenter(rack.getDatacenter(),
+            datacenterRepo.findRemoteServiceWithTypeInDatacenter(dc,
                 RemoteServiceType.APPLIANCE_MANAGER);
 
         if (am == null || am.isEmpty())
@@ -1040,7 +1073,7 @@ public class OVFGeneratorService
         return am.iterator().next().getUri();
     }
 
-    public static RASDType toCIM_RASDType(Rasd rasdIn)
+    public static RASDType toCIM_RASDType(final Rasd rasdIn)
     {
         RASDType rasdOut = new RASDType();
 
@@ -1082,5 +1115,4 @@ public class OVFGeneratorService
 
         return rasdOut;
     }
-
 }

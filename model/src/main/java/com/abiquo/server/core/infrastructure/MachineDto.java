@@ -26,14 +26,15 @@ import java.io.Serializable;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.HypervisorDto;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Machine.State;
 
 @XmlRootElement(name = "machine")
 public class MachineDto extends SingleResourceTransportDto implements Serializable
 {
+    private static final long serialVersionUID = -4971248626582072165L;
+
     private Integer id;
 
     private String name, description;
@@ -47,23 +48,28 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     private State state;
 
     private String virtualSwitch;
-    
+
     private Integer port;
 
     private String ip;
-    
+
     private String ipService;
 
     private HypervisorType type;
 
     private String user;
-    
+
     private String password;
-    
+
     private DatastoresDto datastores;
-    
-    private HypervisorDto hypervisor;
-    
+
+    private String ipmiIp;
+
+    private Integer ipmiPort;
+
+    private String ipmiUser;
+
+    private String ipmiPassword;
 
     /**
      * @return the port
@@ -346,13 +352,43 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         return datastores;
     }
 
-    public void setHypervisor(HypervisorDto hypervisor)
+    public String getIpmiIp()
     {
-        this.hypervisor = hypervisor;
+        return ipmiIp;
     }
 
-    public HypervisorDto getHypervisor()
+    public void setIpmiIp(String ipmiIp)
     {
-        return hypervisor;
+        this.ipmiIp = ipmiIp;
+    }
+
+    public Integer getIpmiPort()
+    {
+        return ipmiPort;
+    }
+
+    public void setIpmiPort(Integer ipmiPort)
+    {
+        this.ipmiPort = ipmiPort;
+    }
+
+    public String getIpmiUser()
+    {
+        return ipmiUser;
+    }
+
+    public void setIpmiUser(String ipmiUser)
+    {
+        this.ipmiUser = ipmiUser;
+    }
+
+    public String getIpmiPassword()
+    {
+        return ipmiPassword;
+    }
+
+    public void setIpmiPassword(String ipmiPassword)
+    {
+        this.ipmiPassword = ipmiPassword;
     }
 }

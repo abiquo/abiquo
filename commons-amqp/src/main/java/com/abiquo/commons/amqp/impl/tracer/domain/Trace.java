@@ -33,6 +33,9 @@ import com.abiquo.commons.amqp.util.JSONUtils;
  */
 public class Trace implements Queuable
 {
+    /** The trace message. */
+    private String message;
+
     /** The name of the user who performs the action. */
     private String username;
 
@@ -59,6 +62,16 @@ public class Trace implements Queuable
 
     /** The hierarchy data. */
     private Map<String, String> hierarchyData;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage(final String message)
+    {
+        this.message = message;
+    }
 
     public String getUsername()
     {
@@ -155,12 +168,19 @@ public class Trace implements Queuable
     {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("Severity: ").append(getSeverity());
+        builder.append(getMessage());
+        builder.append(" [Severity: ").append(getSeverity());
         builder.append(" Component: ").append(getComponent());
         builder.append(" Event: ").append(getEvent());
-        builder.append(" Hierarchy: ").append(getHierarchy());
+
+        if (getHierarchy() != null)
+        {
+            builder.append(" Hierarchy: ").append(getHierarchy());
+        }
+
         builder.append(" Performed by ").append(getUsername());
         builder.append(" from enterprise ").append(getEnterpriseName());
+        builder.append("]");
 
         return builder.toString();
     }

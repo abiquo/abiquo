@@ -220,18 +220,6 @@ public class VirtualDatacenterResourcesDto extends SingleResourceTransportDto
         this.vmCreated = vmCreated;
     }
 
-    private int volAssociated;
-
-    public int getVolAssociated()
-    {
-        return volAssociated;
-    }
-
-    public void setVolAssociated(int volAssociated)
-    {
-        this.volAssociated = volAssociated;
-    }
-
     private int vmActive;
 
     public int getVmActive()

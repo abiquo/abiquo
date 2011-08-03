@@ -10,6 +10,7 @@
 		<!-- infrastructure -->
  		<class>com.abiquo.server.core.infrastructure.Datacenter</class>
 		<class>com.abiquo.server.core.infrastructure.Rack</class>
+		<class>com.abiquo.server.core.infrastructure.UcsRack</class>
 		<class>com.abiquo.server.core.infrastructure.Machine</class>
 		<class>com.abiquo.server.core.infrastructure.RemoteService</class>
 		<class>com.abiquo.server.core.infrastructure.Datastore</class>
@@ -39,6 +40,8 @@
 		<!-- enterprise -->
     	<class>com.abiquo.server.core.enterprise.Enterprise</class>
 		<class>com.abiquo.server.core.enterprise.Role</class>
+		<class>com.abiquo.server.core.enterprise.RoleLdap</class>
+		<class>com.abiquo.server.core.enterprise.Privilege</class>
 		<class>com.abiquo.server.core.enterprise.User</class>
 		<class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
 		<class>com.abiquo.server.core.enterprise.Session</class>
@@ -59,6 +62,7 @@
 		<class>com.abiquo.server.core.infrastructure.storage.StorageDevice</class>
     	<class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
 		<class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
+		<class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
 		<!-- end: storage -->
 
 		<!-- workload -->

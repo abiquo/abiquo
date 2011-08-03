@@ -28,16 +28,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
-import com.abiquo.server.core.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.infrastructure.DatacenterRep;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -55,7 +55,7 @@ import com.softwarementors.commons.test.SeedGenerator;
 public class PopulateInfrastructure extends PopulateConstants
 {
     @Autowired
-    private DatacenterRep dcRep;
+    private InfrastructureRep dcRep;
 
     @Autowired
     private DatacenterLimitsDAO dcLimitsDao;
@@ -288,7 +288,7 @@ public class PopulateInfrastructure extends PopulateConstants
 
             machine.setRealHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
             machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
-            machine.setVirtualHardDiskUsedInBytes(0);
+            machine.setVirtualHardDiskUsedInBytes(0L);
 
             dcRep.updateMachine(machine);
         }

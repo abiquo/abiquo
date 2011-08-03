@@ -23,12 +23,16 @@
 -->
 
 <AbiCloudPopUp 
+	creationComplete="onCreationComplete()"
     xmlns="net.undf.abicloud.view.general.*"
-    xmlns:mx="http://www.adobe.com/2006/mxml">
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vdc_createVapp.value}">
 
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import net.undf.abicloud.vo.infrastructure.State;
             import mx.resources.ResourceManager;
             import mx.resources.ResourceBundle;
@@ -62,6 +66,10 @@
             
             //created virtualAppliance to oepn it after creation depending on user choice
             public var createdVirtualAppliance:VirtualAppliance;
+            
+            private function onCreationComplete():void{
+            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",automaticOpenCheck,automaticCheckItem);
+            }
 
             /**
              * Initializes Form items to create a VirtualAppliance, or
@@ -127,7 +135,10 @@
                 }
 
                 //check or not the automatic open virtualapp after creation depending on previous user choice
-                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenVirtualApp");
+                if(SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_CUSTOMISE_SETTINGS)){
+	                automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenVirtualApp");
+                	
+                }
 
                 this._listenerRegistered = false;
                 nameInput.setFocus();
@@ -291,6 +302,7 @@
         </mx:FormItem>
         
         <mx:FormItem
+        	id="automaticCheckItem"
         	visible="{automaticOpenCheckIsEnable}"
         	includeInLayout="{automaticOpenCheckIsEnable}">
 	    	<mx:CheckBox id="automaticOpenCheck" 

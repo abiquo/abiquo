@@ -29,7 +29,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
 
 import com.abiquo.abiserver.appslibrary.AppsLibraryRecovery;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
@@ -57,12 +56,14 @@ import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.enumerator.DiskFormatType;
-import com.abiquo.server.core.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.infrastructure.Repository;
 
-@Controller
 public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryCommand
 {
 
@@ -74,8 +75,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
-        .getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace =
+        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -138,8 +139,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]",
-                        idDatacenter.toString());
+                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
+                        .toString());
             }
 
             factory.rollbackConnection();
@@ -147,12 +148,25 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause, e);
         }
 
-        final EnterpriseRepositoryDto enterpriseRepo =
-            getEnterpriseRepository(idDatacenter, String.valueOf(idEnterprise));
+        try
+        {
+            final EnterpriseRepositoryDto enterpriseRepo =
+                getEnterpriseRepository(idDatacenter, String.valueOf(idEnterprise));
 
-        repository.setRepositoryCapacityMb(enterpriseRepo.getRepositoryCapacityMb());
-        repository.setRepositoryEnterpriseUsedMb(enterpriseRepo.getRepositoryEnterpriseUsedMb());
-        repository.setRepositoryRemainingMb(enterpriseRepo.getRepositoryRemainingMb());
+            repository.setRepositoryCapacityMb(enterpriseRepo.getRepositoryCapacityMb());
+            repository
+                .setRepositoryEnterpriseUsedMb(enterpriseRepo.getRepositoryEnterpriseUsedMb());
+            repository.setRepositoryRemainingMb(enterpriseRepo.getRepositoryRemainingMb());
+
+        }
+        catch (AppsLibraryCommandException e)
+        {
+            logger.warn("{}",e);
+            
+            repository.setRepositoryCapacityMb(0l);
+            repository.setRepositoryEnterpriseUsedMb(0l);
+            repository.setRepositoryRemainingMb(0l);
+        }
 
         return repository;
     }
@@ -195,7 +209,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         {
             final String cause =
                 String.format("Can not obtain the repository usage info "
-                    + "of the Datacenter [%s] for the Enterprise [%s]", idDatacenter, idEnterprise);
+                    + "of the Datacenter [%s] for the Enterprise [%s]. "
+                    + "NFS could be bussy (check it later).", idDatacenter, idEnterprise);
 
             final String detail = e.getMessage();
 
@@ -262,13 +277,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             // Getting the category that will be deleted
             final CategoryHB category = factory.getCategoryDAO().findById(idCategory);
 
-            if (category.getIsDefault() > 0)
-            {
-                factory.rollbackConnection();
-                throw new AppsLibraryCommandException("'" + category.getName()
-                    + "' is the default Category. Can not delete it");
-            }
-
             if (category == null)
             {
                 factory.rollbackConnection();
@@ -276,6 +284,14 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 final String cause =
                     String.format("There aren't any category with id [%s]", idCategory.toString());
                 throw new AppsLibraryCommandException(cause);
+            }
+
+            
+            if (category.getIsDefault() > 0)
+            {
+                factory.rollbackConnection();
+                throw new AppsLibraryCommandException("'" + category.getName()
+                    + "' is the default Category. Can not delete it");
             }
 
             factory.getCategoryDAO().makeTransient(category);
@@ -600,7 +616,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      * </pre>
      */
     private Boolean isVirtualImageConvertedOrCompatible(final VirtualimageHB vi,
-        HypervisorType hypervisorType)
+        final HypervisorType hypervisorType)
     {
 
         final DAOFactory factory = HibernateDAOFactory.instance();
@@ -693,7 +709,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             oldVimage.setVolumePath(vimage.getVolumePath());
             oldVimage.setIdEnterprise(vimage.getIdEnterprise());
             oldVimage.setShared(vimage.getShared());
-
+            oldVimage.setCostCode(vimage.getCostCode());
             // oldVimage.setDeleted(deleted);
             // XXX oldVimage.setMaster(master);
 
@@ -1065,6 +1081,26 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
             throw new AppsLibraryCommandException(cause, e);
         }
+        catch (final Exception e)
+        {
+            String cause =
+                String.format("Can not create the OVFPackageList [%s]", ovfpackageListURL);
+
+            try
+            {
+                final String reason = e.getMessage();
+                if (reason != null)
+                {
+                    cause = cause + "\nCaused by: " + reason;
+                }
+            }
+            catch (final Exception e2)
+            {
+
+            }
+
+            throw new AppsLibraryCommandException(cause, e);
+        }
 
         return packageList;
     }
@@ -1126,12 +1162,16 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
         final String idEnterpriseSt = String.valueOf(idEnterprise);
 
+        ApplianceManagerResourceStubImpl amStub =
+            new ApplianceManagerResourceStubImpl(amServiceUri);
+
+        boolean checkCanWrite = true;
+        amStub.getRepository(idEnterpriseSt, checkCanWrite);
+
         for (final String ovfId : idsOvfpackage)
         {
             try
             {
-                ApplianceManagerResourceStubImpl amStub =
-                    new ApplianceManagerResourceStubImpl(amServiceUri);
 
                 amStub.createOVFPackageInstance(idEnterpriseSt, ovfId);
 
@@ -1258,4 +1298,95 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         return ovfIds;
     }
 
+    /**
+     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#getOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
+     *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
+     */
+    @Override
+    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
+        final String nameOVFPackageList, Integer idOVFPackageName, Integer idEnterprise,
+        Integer idRepository) throws AppsLibraryCommandException
+    {
+        final String ovfIds =
+            getOVFPackageInstanceUrl(userSession, idEnterprise, nameOVFPackageList,
+                idOVFPackageName);
+
+        return refreshOVFPackageInstanceStatus(userSession, ovfIds, idEnterprise, idRepository);
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#refreshOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
+     *      java.lang.String, java.lang.Integer, java.lang.Integer)
+     */
+    @Override
+    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
+        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
+        throws AppsLibraryCommandException
+    {
+
+        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
+        final String idEnterpriseSt = String.valueOf(idEnterprise);
+
+        OVFPackageInstanceStatusDto status;
+        try
+        {
+            ApplianceManagerResourceStubImpl amStub =
+                new ApplianceManagerResourceStubImpl(amServiceUri);
+
+            status = amStub.getCurrentOVFPackageInstanceStatus(idEnterpriseSt, idsOvfInstance);
+        }
+        catch (final Exception e)
+        {
+            final String errorCause =
+                String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
+
+            status = new OVFPackageInstanceStatusDto();
+            status.setOvfId(idsOvfInstance);
+            status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
+            status.setErrorCause(errorCause);
+        }
+        return status;
+
+    }
+
+    /**
+     * Retorna la URL del {@link OVFPackageInstance}.
+     * 
+     * @param userSession Current logged.
+     * @param userSession Data from the current user.
+     * @param idsOvfInstance Name of the item to refresh.
+     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
+     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
+     * @return URL.
+     * @throws AppsLibraryCommandException String
+     */
+    private String getOVFPackageInstanceUrl(final UserSession userSession,
+        final Integer idEnterprise, final String nameOVFPackageList,
+        final Integer nameOVFPackageInstance) throws AppsLibraryCommandException
+    {
+        OVFPackagesDto packageList;
+
+        try
+        {
+            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
+
+            packageList = appsLibClient.getOVFPackages(idEnterprise, nameOVFPackageList);
+        }
+        catch (final WebApplicationException e)
+        {
+            final String cause =
+                String.format("Can not obtain the OVFPackageList [%s].\n%s", nameOVFPackageList);
+            throw new AppsLibraryCommandException(cause, e);
+        }
+        for (int i = 0; i < packageList.getTotalSize(); i++)
+        {
+            final OVFPackageDto ovfPackage = packageList.getCollection().get(i++);
+            if (nameOVFPackageInstance.equals(ovfPackage.getId()))
+            {
+                return ovfPackage.getUrl();
+            }
+        }
+
+        return null;
+    }
 }

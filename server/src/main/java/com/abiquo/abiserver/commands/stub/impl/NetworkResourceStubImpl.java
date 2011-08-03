@@ -24,6 +24,8 @@
  */
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,21 @@ import org.apache.wink.client.ClientResponse;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
+import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPNetworkRang;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.ListResponse;
+import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 
@@ -45,7 +58,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 {
 
     @Override
-    public BasicResult getPrivateNetworks(Integer vdcId)
+    public BasicResult getPrivateNetworks(final Integer vdcId)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
@@ -67,32 +80,283 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, result, "getRemoteStoragePoolsByDevice");
+            populateErrors(response, result, "getPrivateNetworks");
         }
 
         return result;
     }
 
-    private VlanNetwork createFlexObject(VLANNetworkDto dto)
+    @Override
+    public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
+        final VLANNetworkDto dto)
+    {
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+        String uri = createPrivateNetworksLink(vdcId);
+        ClientResponse response = post(uri, dto);
+
+        if (response.getStatusCode() == 201)
+        {
+            VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
+            result.setData(createFlexObject(networkDto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "createPrivateVLANNetwork");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult getListNetworkPoolByEnterprise(final Integer enterpriseId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest = new StringBuilder(createEnterpriseIPsLink(enterpriseId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
+        String filter = filterLike;
+        try
+        {
+            filter = URLEncoder.encode(filterLike, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+
+        }
+        if (!filter.isEmpty())
+        {
+            buildRequest.append("&has=" + filter);
+        }
+        String request = buildRequest.toString();
+
+        ClientResponse response = get(request);
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIp.setEnterpriseId(enterpriseId);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPoolByEnterprise");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
+        final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
+        final Boolean asc) throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacenterPrivateIPsLink(vdcId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + ((asc) ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPoolByVirtualDatacenter");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getEnterprisesWithNetworksByDatacenter(final UserSession userSession,
+        final Integer datacenterId, final Integer offset, final Integer numElem, final String ipLike)
+        throws NetworkCommandException
+    {
+        DataResult<ListResponse<Enterprise>> dataResult =
+            new DataResult<ListResponse<Enterprise>>();
+
+        List<Enterprise> listEnt = new ArrayList<Enterprise>();
+
+        StringBuilder buildRequest = new StringBuilder(createDatacenterLink(datacenterId));
+        buildRequest.append("/action/enterprises");
+        buildRequest.append("?network=true");
+        buildRequest.append("&startwith=" + offset);
+        buildRequest.append("&limit=" + numElem);
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            EnterprisesDto enterprises = response.getEntity(EnterprisesDto.class);
+            for (EnterpriseDto entdto : enterprises.getCollection())
+            {
+
+                Enterprise e = Enterprise.create(entdto);
+                listEnt.add(e);
+            }
+            ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
+            listResponse.setList(listEnt);
+            listResponse.setTotalNumEntities(listEnt.size());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getEnterprisesWithNetworksByDatacenter");
+        }
+        return dataResult;
+
+    }
+
+    @Override
+    public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
+        throws NetworkCommandException
+    {
+        DataResult<String> dataResult = new DataResult<String>();
+        StringBuilder buildRequest = new StringBuilder(createVirtualDatacentersLink());
+        buildRequest.append("/" + vdcId.toString());
+        buildRequest.append("/action/dhcpinfo");
+
+        ClientResponse response = get(buildRequest.toString());
+        if (response.getStatusCode() == 200)
+        {
+            String dhcpinfo = response.getEntity(String.class);
+            dataResult.setData(dhcpinfo);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getInfoDHCPServer");
+        }
+        return dataResult;
+    }
+
+    private String transformOrderBy(final String orderBy)
+    {
+        if (orderBy == null)
+        {
+            return "ip";
+        }
+        else if (orderBy.equalsIgnoreCase("vlannetworkname"))
+        {
+            return "vlan";
+        }
+        else if (orderBy.equalsIgnoreCase("virtualappliancename"))
+        {
+            return "virtualappliance";
+        }
+        else if (orderBy.equalsIgnoreCase("virtualmachinename"))
+        {
+            return "virtualmachine";
+        }
+        else
+            return orderBy;
+    }
+
+    private IpPoolManagement createFlexObject(final IpPoolManagementDto ip)
+    {
+        IpPoolManagement flexIp = new IpPoolManagement();
+
+        flexIp.setIdManagement(ip.getId());
+        flexIp.setIp(ip.getIp());
+        flexIp.setMac(ip.getMac());
+        flexIp.setQuarantine(ip.getQuarantine());
+        flexIp.setConfigureGateway(ip.getConfigurationGateway());
+        flexIp.setName(ip.getName());
+
+        for (RESTLink currentLink : ip.getLinks())
+        {
+            if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+            }
+            else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
+            {
+                flexIp.setVirtualDatacenterName(currentLink.getTitle());
+                flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+            else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
+            {
+                flexIp.setVirtualApplianceName(currentLink.getTitle());
+                flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+            else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
+            {
+                flexIp.setVirtualMachineName(currentLink.getTitle());
+                flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+        }
+
+        return flexIp;
+    }
+
+    private VlanNetwork createFlexObject(final VLANNetworkDto dto)
     {
         NetworkConfiguration netconf = new NetworkConfiguration();
-        netconf.setFenceMode(dto.getNetworkConfiguration().getFenceMode());
-        netconf.setGateway(dto.getNetworkConfiguration().getGateway());
-        netconf.setMask(dto.getNetworkConfiguration().getMask());
-        netconf.setNetmask(dto.getNetworkConfiguration().getNetMask());
-        netconf.setNetworkAddress(dto.getNetworkConfiguration().getAddress());
-        netconf.setPrimaryDNS(dto.getNetworkConfiguration().getPrimaryDNS());
-        netconf.setSecondaryDNS(dto.getNetworkConfiguration().getSecondaryDNS());
-        netconf.setSufixDNS(dto.getNetworkConfiguration().getSufixDNS());
-        
+        netconf.setGateway(dto.getGateway());
+        netconf.setMask(dto.getMask());
+        netconf.setNetworkAddress(dto.getAddress());
+        netconf.setPrimaryDNS(dto.getPrimaryDNS());
+        netconf.setSecondaryDNS(dto.getSecondaryDNS());
+        netconf.setSufixDNS(dto.getSufixDNS());
+        netconf.setFenceMode("bridge");
+        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
+
         VlanNetwork newNet = new VlanNetwork();
         newNet.setConfiguration(netconf);
         newNet.setDefaultNetwork(dto.getDefaultNetwork());
         newNet.setNetworkName(dto.getName());
         newNet.setVlanNetworkId(dto.getId());
         newNet.setVlanTag(dto.getTag());
-        
-        
+        newNet.setNetworkId(dto.getId());
+
         return newNet;
     }
 
