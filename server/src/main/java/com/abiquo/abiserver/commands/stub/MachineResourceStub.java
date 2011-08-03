@@ -46,4 +46,10 @@ public interface MachineResourceStub
      */
     public BasicResult powerOn(PhysicalMachine machine);
 
+    /**
+     * Light the LED.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public BasicResult bladeLocatorLED(final PhysicalMachine machine);
 }

@@ -27,10 +27,13 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RacksResourceStub;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
+import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
 
 public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResourceStub
@@ -39,7 +42,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
      */
     @Override
-    public DataResult<UcsRack> createUcsRack(UcsRack ucsRack)
+    public DataResult<UcsRack> createUcsRack(final UcsRack ucsRack)
     {
         // PREMIUM
 
@@ -49,38 +52,42 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getAllNotManagedRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
      */
-    public DataResult<List<Rack>> getAllNotManagedRacks(DataCenter datacenter)
+    @Override
+    public DataResult<List<Rack>> getAllNotManagedRacks(final DataCenter datacenter)
     {
         // PREMIUM
         return null;
     }
 
     @Override
-    public BasicResult associateBlades(Integer datacenterId, Integer rackId, IPAddress ipFrom,
-        IPAddress ipTo, HypervisorType hypervisorType, String user, String password, Integer port,
-        String vSwitchName)
+    public BasicResult associateBlades(final Integer datacenterId, final Integer rackId,
+        final IPAddress ipFrom, final IPAddress ipTo, final HypervisorType hypervisorType,
+        final String user, final String password, final Integer port, final String vSwitchName)
     {
         return null;
     }
 
     @Override
-    public BasicResult powerOnMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public BasicResult powerOnMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public BasicResult powerOffMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public BasicResult powerOffMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         // TODO Auto-generated method stub
         return null;
     }
- 
+
     /**
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getUcsRacks(com.abiquo.abiserver.pojo.infrastructure.DataCenter)
      */
-    public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter)
+    @Override
+    public DataResult<List<UcsRack>> getUcsRacks(final DataCenter datacenter)
     {
         // PREMIUM
         return null;
@@ -90,10 +97,98 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#createUcsRack(com.abiquo.server.core.infrastructure.UcsRack)
      */
     @Override
-    public DataResult<UcsRack> editUcsRack(UcsRack ucsRack)
+    public DataResult<UcsRack> editUcsRack(final UcsRack ucsRack)
     {
         // PREMIUM
 
         return null;
     }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getOrganizations(com.abiquo.abiserver.pojo.infrastructure.UcsRack)
+     */
+    @Override
+    public DataResult<List<Organization>> getOrganizations(final UcsRack ucsRack)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getLogicServers(com.abiquo.abiserver.pojo.infrastructure.UcsRack)
+     */
+    @Override
+    public DataResult<List<LogicServer>> getLogicServers(final UcsRack ucsRack)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#getLogicServerTemplates(com.abiquo.abiserver.pojo.infrastructure.UcsRack)
+     */
+    @Override
+    public DataResult<List<LogicServer>> getLogicServerTemplates(final UcsRack ucsRack)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#cloneLogicServer(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public BasicResult cloneLogicServer(final UcsRack ucsRack, final String lsName,
+        final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#associateLogicServer(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine,
+     *      String)
+     */
+    @Override
+    public BasicResult associateLogicServer(final PhysicalMachine machine, final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#dissociateLogicServer(PhysicalMachine,
+     *      String)
+     */
+    @Override
+    public BasicResult dissociateLogicServer(final PhysicalMachine machine, final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#deleteLogicServer(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String)
+     */
+    @Override
+    public BasicResult deleteLogicServer(final UcsRack ucsRack, final String lsName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#assignLogicServerTemplate(com.abiquo.abiserver.pojo.infrastructure.UcsRack,
+     *      java.lang.String)
+     */
+    @Override
+    public BasicResult assignLogicServerTemplate(final PhysicalMachine machine,
+        final String lsName, final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }
