@@ -146,4 +146,5 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         // PREMIUM
         return null;
     }
+
 }

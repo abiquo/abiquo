@@ -196,6 +196,7 @@ public class MachineResource extends AbstractResource
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
         vmService.deleteNotManagedVirtualMachines(hypervisor);
+        infraService.updateUsedResourcesByMachine(machineId);
     }
 
     // protected methods

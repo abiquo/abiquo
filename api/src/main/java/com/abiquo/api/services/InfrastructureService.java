@@ -27,6 +27,7 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -53,6 +54,7 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
@@ -704,6 +706,39 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+    }
+
+    public Collection<VirtualMachine> getVirtualMachinesByMachine(final Integer machineId)
+    {
+        Machine machine = machineService.getMachine(machineId);
+        return virtualMachineService.findByHypervisor(machine.getHypervisor());
+    }
+
+    public void updateUsedResourcesByMachine(final Integer machineId)
+    {
+        Machine machine = machineService.getMachine(machineId);
+        Collection<VirtualMachine> vms = getVirtualMachinesByMachine(machineId);
+
+        Integer ramUsed = 0;
+        Integer cpuUsed = 0;
+        long hdUsed = 0;
+
+        for (VirtualMachine vm : vms)
+        {
+            if (vm.getState() != null
+                && !vm.getState().equals(com.abiquo.server.core.cloud.State.NOT_DEPLOYED))
+            {
+                ramUsed += vm.getRam();
+                cpuUsed += vm.getCpu();
+                hdUsed += vm.getHdInBytes();
+            }
+        }
+
+        machine.setVirtualRamUsedInMb(ramUsed);
+        machine.setVirtualCpusUsed(cpuUsed);
+        machine.setVirtualHardDiskUsedInBytes(hdUsed);
+
+        repo.updateMachine(machine);
     }
 
     public boolean hasVlanConfig(final Rack rack)
