@@ -48,6 +48,10 @@ import com.vmware.vim25.HostVirtualSwitch;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.ResourceAllocationInfo;
 import com.vmware.vim25.VirtualDeviceConfigSpec;
+import com.vmware.vim25.VirtualDeviceConfigSpecFileOperation;
+import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
+import com.vmware.vim25.VirtualDisk;
+import com.vmware.vim25.VirtualDiskFlatVer2BackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.mo.Folder;
@@ -404,6 +408,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     protected void cloneVirtualDisk() throws VirtualMachineException
     {
         disks.moveVirtualDiskToDataStore();
+
+        configureSparse();
+    }
+
+    protected void configureSparse() throws VirtualMachineException
+    {
+        // bu! empty community impl
     }
 
     /**
