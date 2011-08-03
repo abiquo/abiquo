@@ -71,7 +71,8 @@ public class DatacentersResource extends AbstractResource
     private EnterpriseService entService;
 
     @GET
-    public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
+    @Produces(LINK_MEDIA_TYPE)
+    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
         Collection<Datacenter> list = null;
@@ -97,7 +98,7 @@ public class DatacentersResource extends AbstractResource
 
     @GET
     @Produces(FLAT_MEDIA_TYPE)
-    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
+    public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
         Collection<Datacenter> list = null;
