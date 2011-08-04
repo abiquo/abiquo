@@ -1,38 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-
-	<!--                                      -->
-	<!--    POM RELATIONSHIPS                 -->
-	<!--                                      -->
-
-	<!--    Maven Coordinates                 -->
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>database</artifactId>
-
-	<!--    Inheritance                       -->
-	<parent>
-		<groupId>com.abiquo.abicloud</groupId>
-		<artifactId>platform</artifactId>
-		<version>2.0-SNAPSHOT</version>
-	</parent>
-
-	<!--                                      -->
-	<!--    PROJECT INFORMATION               -->
-	<!--                                      -->
-	<name>Database</name>
-	<url>http://www.abiquo.com</url>
-	<inceptionYear>2009</inceptionYear>
-	<licenses>
-		<license>
-			<name>LGPL</name>
-			<url>http://www.gnu.org/licenses/lgpl.html</url>
-		</license>
-	</licenses>
-
-    <!--                                      -->
-    <!--    BUILD SETTINGS                    -->
-    <!--                                      -->
-    
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven Coordinates -->
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>database</artifactId>
+    <!-- Inheritance -->
+    <parent>
+        <groupId>com.abiquo.abicloud</groupId>
+        <artifactId>platform</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
+    <name>Database</name>
+    <url>http://www.abiquo.com</url>
+    <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>LGPL</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <plugins>
             <plugin>
@@ -78,10 +72,9 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>  
+        </plugins>
         <filters>
             <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
         </filters>
     </build>
-
 </project>

@@ -3,16 +3,15 @@
     <listeners>
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
     </listeners>
-    
-	<test name="Basic unit tests">
-		<groups>
+    <test name="Basic unit tests">
+        <groups>
             <run>
                 <include name="test-basic" />
             </run>
-		</groups>
-		<packages>
-			<package name="com.abiquo.api.*" />
-			<package name="com.abiquo.scheduler.*" />
-		</packages>
-	</test>
+        </groups>
+        <packages>
+            <package name="com.abiquo.api.*" />
+            <package name="com.abiquo.scheduler.*" />
+        </packages>
+    </test>
 </suite>

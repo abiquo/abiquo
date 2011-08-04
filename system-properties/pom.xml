@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    
-    <!--                                      -->
-    <!--       POM RELATIONSHIPS              -->
-    <!--                                      -->    
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
     <modelVersion>4.0.0</modelVersion>
     <artifactId>system-properties</artifactId>
     <packaging>jar</packaging>
-
-    <!--       Inheritances                   -->
+    <!-- Inheritances -->
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
-    <!--                                      -->
-    <!--       POM RELATIONSHIPS              -->
-    <!--                                      -->    
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
     <name>System Properties</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -27,13 +24,11 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-    
     <properties>
-    	<tomcat.lib>/opt/tomcat/lib</tomcat.lib>
+        <tomcat.lib>/opt/tomcat/lib</tomcat.lib>
     </properties>
-    
     <dependencies>
-    	<dependency>
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>catalina</artifactId>
             <version>6.0.24</version>
@@ -70,24 +65,22 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-	<build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-jar-plugin</artifactId>
-        		<version>2.3.1</version>
-        		<configuration>
-        			<finalName>abiquo-tomcat</finalName>
-        			<outputDirectory>${tomcat.lib}</outputDirectory>        			
-        		</configuration>
-        	</plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <finalName>abiquo-tomcat</finalName>
+                    <outputDirectory>${tomcat.lib}</outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
-        
         <filters>
             <filter>src/main/filters/${env}-${env.family}.properties</filter>
         </filters>
@@ -98,5 +91,4 @@
             </resource>
         </resources>
     </build>
-
 </project>
