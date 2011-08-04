@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
@@ -50,6 +51,8 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
@@ -66,10 +69,15 @@ public class DatacenterResource extends AbstractResource
 
     public static final String ENTERPRISES_PATH = "action/enterprises";
 
+    public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
+
     public static final String NETWORK = "network";
 
     @Autowired
     DatacenterService service;
+
+    @Autowired
+    InfrastructureService infraService;
 
     @Autowired
     IpAddressService ipService;
@@ -105,10 +113,12 @@ public class DatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {
-        Integer firstElem = (startwith == null) ? 0 : startwith;
-        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        Integer firstElem = startwith == null ? 0 : startwith;
+        Integer numElem = limit == null ? DEFAULT_PAGE_LENGTH : limit;
         if (network == null)
+        {
             network = false;
+        }
 
         Datacenter datacenter = service.getDatacenter(datacenterId);
         List<Enterprise> enterprises =
@@ -149,6 +159,23 @@ public class DatacenterResource extends AbstractResource
         service.removeDatacenter(datacenterId);
     }
 
+    @PUT
+    @Path(UPDATE_RESOURCES_PATH)
+    public void updateUsedResources(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Rack> racks = service.getRacks(datacenter);
+        for (Rack rack : racks)
+        {
+            List<Machine> machines = infraService.getMachines(rack);
+            for (Machine machine : machines)
+            {
+                infraService.updateUsedResourcesByMachine(machine);
+            }
+        }
+
+    }
+
     public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
         datacenter.setLinks(builder.buildDatacenterLinks(datacenter));
@@ -182,7 +209,7 @@ public class DatacenterResource extends AbstractResource
         if (list.getCurrentElement() != 0)
         {
             Integer previous = list.getCurrentElement() - list.getPageSize();
-            previous = (previous < 0) ? 0 : previous;
+            previous = previous < 0 ? 0 : previous;
 
             links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
                 + AbstractResource.START_WITH + "=" + previous + '&' + AbstractResource.LIMIT + "="

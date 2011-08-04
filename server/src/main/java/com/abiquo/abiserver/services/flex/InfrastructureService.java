@@ -524,6 +524,7 @@ public class InfrastructureService
      * @param virtualMachine
      * @return
      */
+    @Deprecated
     public BasicResult moveVirtualMachine(final UserSession session,
         final VirtualMachine virtualMachine)
     {
@@ -559,10 +560,7 @@ public class InfrastructureService
     public BasicResult updateUsedResourcesByDatacenter(final UserSession session,
         final DataCenter dataCenter)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-        return command.updateUsedResourcesByDatacenter(dataCenter.toPojoHB());
-
+        return proxyDatacentersStub(session).updateUsedResources(dataCenter.getId());
     }
 
     /**

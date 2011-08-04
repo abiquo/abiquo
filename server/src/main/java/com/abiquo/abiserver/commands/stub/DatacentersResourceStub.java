@@ -24,6 +24,7 @@ package com.abiquo.abiserver.commands.stub;
 import java.util.ArrayList;
 
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 
 public interface DatacentersResourceStub
@@ -37,4 +38,6 @@ public interface DatacentersResourceStub
     public DataResult<DataCenter> deleteDatacenter(DataCenter datacenter);
 
     public DataResult<DataCenter> getDatacenter(Integer datacenterId);
+
+    public BasicResult updateUsedResources(Integer datacenterId);
 }

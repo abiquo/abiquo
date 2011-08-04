@@ -717,7 +717,12 @@ public class InfrastructureService extends DefaultApiService
     public void updateUsedResourcesByMachine(final Integer machineId)
     {
         Machine machine = machineService.getMachine(machineId);
-        Collection<VirtualMachine> vms = getVirtualMachinesByMachine(machineId);
+        updateUsedResourcesByMachine(machine);
+    }
+
+    public void updateUsedResourcesByMachine(final Machine machine)
+    {
+        Collection<VirtualMachine> vms = getVirtualMachinesByMachine(machine.getId());
 
         Integer ramUsed = 0;
         Integer cpuUsed = 0;

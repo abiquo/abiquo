@@ -617,6 +617,11 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createDatacenterLinkUsedResources(final Integer datacenterId)
+    {
+        return createDatacenterLink(datacenterId) + "action/updateUsedResources";
+    }
+
     protected String createDatacenterLink()
     {
         return createDatacenterLink(null);

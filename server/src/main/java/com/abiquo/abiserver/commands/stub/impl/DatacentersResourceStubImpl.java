@@ -26,9 +26,11 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 
+import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.DatacentersResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -190,6 +192,27 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         else
         {
             populateErrors(response, result, "deleteDatacenter");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult updateUsedResources(final Integer datacenterId)
+    {
+        BasicResult result = new BasicResult();
+
+        ClientResponse response = get(createDatacenterLinkUsedResources(datacenterId));
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+            result.setMessage(InfrastructureCommandImpl.getResourceManager().getMessage(
+                "updateUsedResourcesByDatacenter.success"));
+        }
+        else
+        {
+            populateErrors(response, result, "updateUsedResources");
         }
 
         return result;
