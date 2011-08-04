@@ -18,31 +18,34 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-package net.undf.abicloud.vo.result
+ 
+package net.undf.abicloud.vo.infrastructure
 {
+	[Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.Organization")]
+	public class Organization
+	{
+		//Public attributes
+		
+		public var name:String;
 
-    /**
-     * Object used when requesting a subset of a list of elements
-     * @author Oliver
-     *
-     */
-    [Bindable]
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.result.ListRequest")]
-    public class ListRequest
-    {
-        public var offset:int;
+        public var level:String;
 
-        public var filterLike:String;
+        public var dn:String;
+        
+        public var status:String;
+        
+        public var description:String;
+		
+		  
+		public function Organization()
+		{
+			name = "";
+			level = "";
+			dn = "";
+			status = "";
+			description = "";
+		}
 
-        public var numberOfNodes:int;
-
-        public var asc:Boolean;
-
-        public var orderBy:String;
-
-        public function ListRequest()
-        {
-        }
-    }
+	}
 }
