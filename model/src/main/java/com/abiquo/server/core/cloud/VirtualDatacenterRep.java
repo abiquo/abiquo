@@ -344,11 +344,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public List<IpPoolManagement> findPublicIpsPurchasedByVirtualDatacenter(final Integer vdcId,
-        final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        final Boolean onlyAvailable, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean descOrAsc)
     {
-        return ipManagementDAO.findpublicIpsPurchasedByVirtualDatacenter(vdcId, startwith, limit,
-            filter, orderByEnum, descOrAsc);
+        return ipManagementDAO.findpublicIpsPurchasedByVirtualDatacenter(vdcId, onlyAvailable,
+            startwith, limit, filter, orderByEnum, descOrAsc);
     }
 
     public List<IpPoolManagement> findPublicIpsToPurchaseByVirtualDatacenter(final Integer vdcId,

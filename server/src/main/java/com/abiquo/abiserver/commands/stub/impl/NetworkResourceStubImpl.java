@@ -125,7 +125,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult createPrivateVLANNetwork(final UserSession userSession, final Integer vdcId,
+    public BasicResult createPrivateVlan(final UserSession userSession, final Integer vdcId,
         final VLANNetworkDto dto)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
@@ -178,6 +178,24 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult deletePrivateVlan(final Integer vdcId, final Integer vlanId)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createPrivateNetworkLink(vdcId, vlanId);
+        ClientResponse response = delete(uri);
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "deletePrivateVlan");
+        }
+        return result;
+    }
+
+    @Override
     public BasicResult deletePublicVlan(final Integer datacenterId, final Integer vlanId)
     {
         BasicResult result = new BasicResult();
@@ -190,8 +208,29 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, result, "createPublicVlan");
+            populateErrors(response, result, "deletePublicVlan");
         }
+        return result;
+    }
+
+    @Override
+    public BasicResult editPrivateVlan(final Integer vdcId, final Integer vlanId,
+        final VLANNetworkDto vlandto)
+    {
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+        String uri = createPrivateNetworkLink(vdcId, vlanId);
+        ClientResponse response = put(uri, vlandto);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setData(createFlexObject(response.getEntity(VLANNetworkDto.class)));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editPublicIp");
+        }
+
         return result;
     }
 
@@ -654,8 +693,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     @Override
     public BasicResult getListNetworkPublicPoolPurchasedByVirtualDatacenter(final Integer vdcId,
-        final Integer offset, final Integer numberOfNodes, final String filterLike,
-        final String orderBy, final Boolean asc) throws NetworkCommandException
+        final Boolean onlyAvailable, final Integer offset, final Integer numberOfNodes,
+        final String filterLike, final String orderBy, final Boolean asc)
+        throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -667,6 +707,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        buildRequest.append("&onlyavailable=" + (onlyAvailable ? "true" : "false"));
+
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);

@@ -43,13 +43,16 @@ public interface NetworkResourceStub
     public BasicResult checkVLANTagAvailability(Integer datacenterId, Integer proposedVLANTag,
         Integer currentVlanId);
 
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
-        VLANNetworkDto dto);
+    public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
         NetworkConfiguration configuration, Enterprise enterprise);
 
+    public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
+
     public BasicResult deletePublicVlan(Integer datacenterId, Integer vlanId);
+
+    public BasicResult editPrivateVlan(Integer vdcId, Integer vlanId, VLANNetworkDto vlandto);
 
     public BasicResult editPublicIp(Integer datacenterId, Integer vlanId, Integer idManagement,
         IpPoolManagement ipPoolManagement);
@@ -95,8 +98,8 @@ public interface NetworkResourceStub
         Boolean all) throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolPurchasedByVirtualDatacenter(Integer vdcId,
-        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
+        Boolean onlyAvailable, Integer offset, Integer numberOfNodes, String filterLike,
+        String orderBy, Boolean asc) throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolToPurchaseByVirtualDatacenter(Integer vdcId,
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)

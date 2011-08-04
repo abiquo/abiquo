@@ -579,12 +579,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findpublicIpsPurchasedByVirtualDatacenter(final Integer vdcId,
-        Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
-        final Boolean descOrAsc)
+        final Boolean onlyAvailabe, Integer startwith, final Integer limit, final String filter,
+        final OrderByEnum orderByEnum, final Boolean descOrAsc)
     {
         Query finalQuery =
-            getSession()
-                .createQuery(BY_VDC_PURCHASED + " " + defineOrderBy(orderByEnum, descOrAsc));
+            getSession().createQuery(
+                BY_VDC_PURCHASED + " " + defineOnlyAvailableFilter(onlyAvailabe)
+                    + defineOrderBy(orderByEnum, descOrAsc));
         finalQuery.setParameter("vdc_id", vdcId);
         finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
             + filter + "%");
@@ -763,6 +764,18 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     private String defineFilterUsed()
     {
         return " AND vm is not null";
+    }
+
+    private String defineOnlyAvailableFilter(final Boolean onlyAvailable)
+    {
+        if (onlyAvailable)
+        {
+            return " AND vm is null ";
+        }
+        else
+        {
+            return "";
+        }
     }
 
     private String defineOrderBy(final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)

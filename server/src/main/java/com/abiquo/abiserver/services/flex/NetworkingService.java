@@ -68,11 +68,6 @@ public class NetworkingService
         networkStub = new NetworkResourceStubImpl();
     }
 
-    protected NetworkResourceStub proxyStub(final UserSession userSession)
-    {
-        return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
-    }
-
     /**
      * Create a new VLAN.
      * 
@@ -100,27 +95,8 @@ public class NetworkingService
         vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
         vlandto.setSufixDNS(configuration.getSufixDNS());
-        return proxyStub(userSession).createPrivateVLANNetwork(userSession, virtualdatacenterId,
-            vlandto);
+        return proxyStub(userSession).createPrivateVlan(userSession, virtualdatacenterId, vlandto);
 
-    }
-
-    private NetworkCommand instantiateNetworkCommand()
-    {
-        NetworkCommand netComm;
-        try
-        {
-            netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
-                    .newInstance();
-        }
-        catch (Exception e)
-        {
-            netComm = new NetworkCommandImpl();
-        }
-
-        return netComm;
     }
 
     /**
@@ -131,25 +107,10 @@ public class NetworkingService
      * @param vlanNetworkId identifier of the network.
      * @return a {@link BasicResult} object.
      */
-    public BasicResult deleteVLAN(final UserSession userSession, final Integer vlanNetworkId)
+    public BasicResult deleteVLAN(final UserSession userSession, final Integer vdcId,
+        final Integer vlanNetworkId)
     {
-        BasicResult basicResult = new BasicResult();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-            proxy.deleteVlanNetwork(userSession, vlanNetworkId);
-            basicResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            basicResult.setSuccess(Boolean.FALSE);
-            basicResult.setMessage(e.getMessage());
-        }
-
-        return basicResult;
+        return proxyStub(userSession).deletePrivateVlan(vdcId, vlanNetworkId);
     }
 
     /**
@@ -164,34 +125,41 @@ public class NetworkingService
      *            the previous default network.
      * @return a Data Result containing the created VLAN.
      */
-    public BasicResult editVLAN(final UserSession userSession, final Integer vlanNetworkId,
-        final String vlanName, final NetworkConfiguration configuration,
+    public BasicResult editVLAN(final UserSession userSession, final Integer vdcId,
+        final Integer vlanId, final String vlanName, final NetworkConfiguration configuration,
         final Boolean defaultNetwork)
     {
-        DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-            dataResult.setData(proxy.editPrivateVlanNetwork(userSession, vlanName, vlanNetworkId,
-                configuration.toPojoHB(), defaultNetwork).toPojo());
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
+        VLANNetworkDto vlandto = new VLANNetworkDto();
+        vlandto.setId(vlanId);
+        vlandto.setName(vlanName);
+        vlandto.setDefaultNetwork(defaultNetwork);
+        vlandto.setAddress(configuration.getNetworkAddress());
+        vlandto.setGateway(configuration.getGateway());
+        vlandto.setMask(configuration.getMask());
+        vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
+        vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
+        vlandto.setSufixDNS(configuration.getSufixDNS());
 
-        return dataResult;
+        return proxyStub(userSession).editPrivateVlan(vdcId, vlanId, vlandto);
 
     }
 
-    public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
+    /**
+     * Get the available IPs of the given VLAN.
+     * 
+     * @param userSession UserSession object with the information of the user that called this
+     *            method
+     * @param vlanId identifier of the VLAN.
+     * @param listRequest object that stores the options to filter the search.
+     * @return a DataResult containing the list of available IPs in its Data.
+     */
+    public BasicResult getAvailableVirtualMachineNICsByVLAN(final UserSession userSession,
+        final Integer vdcId, final Integer vlanId, final ListRequest listRequest)
     {
-        return proxyStub(userSession).getInfoDHCPServer(userSession, vdcId);
+        return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.TRUE);
     }
 
     /**
@@ -236,6 +204,11 @@ public class NetworkingService
         final Integer vdcId, final Integer vappId, final Integer vmId)
     {
         return proxyStub(userSession).getGatewayByVirtualMachine(vdcId, vappId, vmId);
+    }
+
+    public BasicResult getInfoDHCPServer(final UserSession userSession, final Integer vdcId)
+    {
+        return proxyStub(userSession).getInfoDHCPServer(userSession, vdcId);
     }
 
     /**
@@ -293,23 +266,6 @@ public class NetworkingService
     }
 
     /**
-     * Get the available IPs of the given VLAN.
-     * 
-     * @param userSession UserSession object with the information of the user that called this
-     *            method
-     * @param vlanId identifier of the VLAN.
-     * @param listRequest object that stores the options to filter the search.
-     * @return a DataResult containing the list of available IPs in its Data.
-     */
-    public BasicResult getAvailableVirtualMachineNICsByVLAN(final UserSession userSession,
-        final Integer vdcId, final Integer vlanId, final ListRequest listRequest)
-    {
-        return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
-            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
-            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.TRUE);
-    }
-
-    /**
      * Lists all the NICs used by a Virtual Machine.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -353,6 +309,19 @@ public class NetworkingService
     }
 
     /**
+     * Return the list of virtual networks from a virtual datacenter
+     * 
+     * @param userSession user who performs the action
+     * @param vdcId identifier of the virtual datacenter
+     * @return a BasicResult
+     */
+    public BasicResult getPrivateNetworksByVirtualDatacenter(final UserSession userSession,
+        final Integer vdcId)
+    {
+        return proxyStub(userSession).getPrivateNetworks(vdcId);
+    }
+
+    /**
      * Release a NIC resource from a Virtual Machine.
      * 
      * @param userSession UserSession object with the information of the user that called this
@@ -381,6 +350,36 @@ public class NetworkingService
         }
 
         return dataResult;
+    }
+
+    /**
+     * The NICs into a Virtual Machine are ordered. The order value represents the NICs eth0, eth1,
+     * eth2 and so on when the machine is deployed. This method reorders the NICs giving the new
+     * order of a single NIC.
+     * 
+     * @param userSession user object to register who performs the action.
+     * @param ipPoolManagementId identifier of the object that stores the info of the NIC
+     */
+    public BasicResult reorderNICintoVM(final UserSession userSession, final Integer newOrder,
+        final Integer ipPoolManagementId)
+    {
+        BasicResult basicResult = new BasicResult();
+
+        try
+        {
+            NetworkCommand netComm =
+                BusinessDelegateProxy.getInstance(userSession, new NetworkCommandImpl(),
+                    NetworkCommand.class);
+            netComm.reorderNICintoVM(userSession, newOrder, ipPoolManagementId);
+            basicResult.setSuccess(Boolean.TRUE);
+        }
+        catch (Exception e)
+        {
+            basicResult.setSuccess(Boolean.FALSE);
+            basicResult.setMessage(e.getMessage());
+        }
+
+        return basicResult;
     }
 
     /**
@@ -499,46 +498,26 @@ public class NetworkingService
         return dataResult;
     }
 
-    /**
-     * The NICs into a Virtual Machine are ordered. The order value represents the NICs eth0, eth1,
-     * eth2 and so on when the machine is deployed. This method reorders the NICs giving the new
-     * order of a single NIC.
-     * 
-     * @param userSession user object to register who performs the action.
-     * @param ipPoolManagementId identifier of the object that stores the info of the NIC
-     */
-    public BasicResult reorderNICintoVM(final UserSession userSession, final Integer newOrder,
-        final Integer ipPoolManagementId)
+    protected NetworkResourceStub proxyStub(final UserSession userSession)
     {
-        BasicResult basicResult = new BasicResult();
+        return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
+    }
 
+    private NetworkCommand instantiateNetworkCommand()
+    {
+        NetworkCommand netComm;
         try
         {
-            NetworkCommand netComm =
-                BusinessDelegateProxy.getInstance(userSession, new NetworkCommandImpl(),
-                    NetworkCommand.class);
-            netComm.reorderNICintoVM(userSession, newOrder, ipPoolManagementId);
-            basicResult.setSuccess(Boolean.TRUE);
+            netComm =
+                (NetworkCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                    .newInstance();
         }
         catch (Exception e)
         {
-            basicResult.setSuccess(Boolean.FALSE);
-            basicResult.setMessage(e.getMessage());
+            netComm = new NetworkCommandImpl();
         }
 
-        return basicResult;
-    }
-
-    /**
-     * Return the list of virtual networks from a virtual datacenter
-     * 
-     * @param userSession user who performs the action
-     * @param vdcId identifier of the virtual datacenter
-     * @return a BasicResult
-     */
-    public BasicResult getPrivateNetworksByVirtualDatacenter(final UserSession userSession,
-        final Integer vdcId)
-    {
-        return proxyStub(userSession).getPrivateNetworks(vdcId);
+        return netComm;
     }
 }
