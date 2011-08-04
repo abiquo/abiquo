@@ -21,11 +21,14 @@
 
 package com.abiquo.api.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,14 +39,17 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.server.core.util.network.NetworkResolver;
@@ -55,13 +61,15 @@ import com.abiquo.tracer.SeverityType;
 @Transactional(readOnly = true)
 public class NetworkService extends DefaultApiService
 {
-    @Autowired
-    VirtualDatacenterRep repo;
+    public static final String FENCE_MODE = "bridge";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
     @Autowired
     InfrastructureRep datacenterRepo;
 
-    public static final String FENCE_MODE = "bridge";
+    @Autowired
+    VirtualDatacenterRep repo;
 
     @Autowired
     TracerLogger tracer;
@@ -79,11 +87,6 @@ public class NetworkService extends DefaultApiService
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
         userService = new UserService(em);
-    }
-
-    public Collection<VLANNetwork> getNetworks()
-    {
-        return repo.findAllVlans();
     }
 
     /**
@@ -165,22 +168,125 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
-     * Return the private networks defined in a Virtual Datacenter.
+     * Delete a VLAN identified by its virtual datacenter id and its vlan id
      * 
-     * @param virtualDatacenterId identifier of the virtual datacenter.
-     * @return a Collection of {@link VLANNetwork} defined inside the Virtual Datacenter.
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the VLAN.
      */
-    public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deletePrivateNetwork(final Integer vdcId, final Integer vlanId)
     {
-        VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
-        Collection<VLANNetwork> networks = null;
+        VLANNetwork vlanToDelete = getPrivateNetwork(vdcId, vlanId);
+        VirtualDatacenter vdc = repo.findById(vdcId);
 
-        if (virtualDatacenter != null)
+        // If it is the last VLAN, can not be deleted
+        if (repo.findVlansByVirtualDatacener(vdc).size() == 1)
         {
-            networks = repo.findVlansByVirtualDatacener(virtualDatacenter);
+            addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
+            flushErrors();
         }
 
-        return networks;
+        // Default VLAN can not be deleted.
+        if (vlanToDelete.getDefaultNetwork())
+        {
+            addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
+            flushErrors();
+        }
+
+        // If any virtual machine is using by any IP of the VLAN, raise an exception
+        if (repo.findUsedIpsByPrivateVLAN(vdcId, vlanId).size() != 0)
+        {
+            addConflictErrors(APIError.VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED);
+            flushErrors();
+        }
+
+        repo.deleteVLAN(vlanToDelete);
+    }
+
+    public List<IpPoolManagement> getListIpPoolManagementByEnterprise(final Integer entId,
+        final Integer firstElem, final Integer numElem, final String has, final String orderBy,
+        final Boolean asc)
+    {
+
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER.info("Bad parameter 'by' in request to get the private ips by enterprise.");
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
+        }
+        return repo.findIpsByEnterprise(entId, firstElem, numElem, has, orderByEnum, asc);
+    }
+
+    public List<IpPoolManagement> getListIpPoolManagementByMachine(final VirtualMachine vm)
+    {
+        return repo.findIpsByVirtualMachine(vm);
+    }
+
+    public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
+        final Integer firstElem, final Integer numElem, final String has, final String orderBy,
+        final Boolean asc)
+    {
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER
+                .info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
+        }
+        return repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
+    }
+
+    public List<IpPoolManagement> getListIpPoolManagementByVirtualApp(final VirtualAppliance vapp)
+    {
+        return repo.findIpsByVirtualAppliance(vapp);
+    }
+
+    /**
+     * Return the list of IPs by a private VLAN.
+     * 
+     * @param vdcId
+     * @param vlanId
+     * @param startwith
+     * @param orderBy
+     * @param filter
+     * @param limit
+     * @param descOrAsc
+     * @param available
+     * @return
+     */
+    public List<IpPoolManagement> getListIpPoolManagementByVlan(final Integer vdcId,
+        final Integer vlanId, final Integer startwith, final String orderBy, final String filter,
+        final Integer limit, final Boolean descOrAsc, final Boolean available)
+    {
+        // Check if the orderBy element is actually one of the available ones
+        IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
+        if (orderByEnum == null)
+        {
+            LOGGER
+                .info("Bad parameter 'by' in request to get the private ips by virtualdatacenter.");
+            addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
+            flushErrors();
+        }
+
+        if (available)
+        {
+            return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter,
+                orderByEnum, descOrAsc);
+        }
+        else
+        {
+            return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter,
+                orderByEnum, descOrAsc);
+        }
+    }
+
+    public Collection<VLANNetwork> getNetworks()
+    {
+        return repo.findAllVlans();
     }
 
     /**
@@ -205,6 +311,132 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
         return vlan;
+    }
+
+    /**
+     * Return the private networks defined in a Virtual Datacenter.
+     * 
+     * @param virtualDatacenterId identifier of the virtual datacenter.
+     * @return a Collection of {@link VLANNetwork} defined inside the Virtual Datacenter.
+     */
+    public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
+    {
+        VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
+        Collection<VLANNetwork> networks = null;
+
+        if (virtualDatacenter != null)
+        {
+            networks = repo.findVlansByVirtualDatacener(virtualDatacenter);
+        }
+
+        return networks;
+    }
+
+    public VMNetworkConfiguration getVirtualMachineConfiguration(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vmConfigId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        // Generally there is only one IP, but we avoid problemes and
+        // we return IPs
+        List<IpPoolManagement> ips =
+            repo.findIpsWithConfigurationIdInVirtualMachine(vm, vmConfigId);
+
+        // The configuration is the same for all the Ips. Check if there is any with
+        // configureGateway == true -> that means the configuration is the used.
+        IpPoolManagement resultIp = ips.get(0);
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getConfigureGateway() == true)
+            {
+                resultIp = ip;
+                break;
+            }
+        }
+
+        VMNetworkConfiguration vmconfig = new VMNetworkConfiguration();
+        VLANNetwork vlan = resultIp.getVlanNetwork();
+        vmconfig.setGateway(vlan.getConfiguration().getGateway());
+        vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
+        vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
+        vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
+        vmconfig.setUsed(resultIp.getConfigureGateway());
+        vmconfig.setId(vlan.getConfiguration().getId());
+
+        return vmconfig;
+    }
+
+    /**
+     * Return the list of NetworkConfiguration objects for a given virtual machine.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine.
+     * @return the found list of {@link VMNetworkConfiguration}.
+     */
+    public List<VMNetworkConfiguration> getVirtualMachineConfigurations(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        // find all the IPs for the physical machine
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+        List<VMNetworkConfiguration> configs = new ArrayList<VMNetworkConfiguration>();
+        for (IpPoolManagement ip : ips)
+        {
+            VMNetworkConfiguration vmconfig = new VMNetworkConfiguration();
+            VLANNetwork vlan = ip.getVlanNetwork();
+            vmconfig.setGateway(vlan.getConfiguration().getGateway());
+            vmconfig.setPrimaryDNS(vlan.getConfiguration().getPrimaryDNS());
+            vmconfig.setSecondaryDNS(vlan.getConfiguration().getSecondaryDNS());
+            vmconfig.setSuffixDNS(vlan.getConfiguration().getSufixDNS());
+            vmconfig.setUsed(ip.getConfigureGateway());
+            vmconfig.setId(vlan.getConfiguration().getId());
+
+            if (!configs.contains(vmconfig))
+            {
+                configs.add(vmconfig);
+            }
+        }
+        return configs;
     }
 
     /**
@@ -330,40 +562,121 @@ public class NetworkService extends DefaultApiService
         return oldNetwork;
     }
 
-    /**
-     * Delete a VLAN identified by its virtual datacenter id and its vlan id
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vlanId identifier of the VLAN.
-     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deletePrivateNetwork(final Integer vdcId, final Integer vlanId)
+    public VMNetworkConfiguration updateVirtualMachineConfiguration(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vmConfigId,
+        final VMNetworkConfiguration vmConfig)
     {
-        VLANNetwork vlanToDelete = getPrivateNetwork(vdcId, vlanId);
-        VirtualDatacenter vdc = repo.findById(vdcId);
+        VMNetworkConfiguration oldConfig =
+            getVirtualMachineConfiguration(vdcId, vappId, vmId, vmConfigId);
 
-        // If it is the last VLAN, can not be deleted
-        if (repo.findVlansByVirtualDatacener(vdc).size() == 1)
+        // Check the Id of the path param is the same than the IP of the entity.
+        if (vmConfig.getId() == null || !vmConfig.getId().equals(vmConfigId))
         {
-            addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
+            addValidationErrors(APIError.INCOHERENT_IDS);
             flushErrors();
         }
 
-        // Default VLAN can not be deleted.
-        if (vlanToDelete.getDefaultNetwork())
+        // Only the 'used' attribute can be changed!
+
+        // First check the primary DNS.
+        if (oldConfig.getPrimaryDNS() == null && vmConfig.getPrimaryDNS() != null
+            && !vmConfig.getPrimaryDNS().isEmpty())
         {
-            addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
             flushErrors();
         }
 
-        // If any virtual machine is using by any IP of the VLAN, raise an exception
-        if (repo.findUsedIpsByPrivateVLAN(vdcId, vlanId).size() != 0)
+        if (oldConfig.getPrimaryDNS() != null
+            && (vmConfig.getPrimaryDNS() == null || !vmConfig.getPrimaryDNS().equals(
+                oldConfig.getPrimaryDNS())))
         {
-            addConflictErrors(APIError.VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
             flushErrors();
         }
 
-        repo.deleteVLAN(vlanToDelete);
+        // Then check the secondaryDNS
+        if (oldConfig.getSecondaryDNS() == null && vmConfig.getSecondaryDNS() != null
+            && !vmConfig.getSecondaryDNS().isEmpty())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
+            flushErrors();
+        }
+
+        if (oldConfig.getSecondaryDNS() != null
+            && (vmConfig.getSecondaryDNS() == null || !vmConfig.getSecondaryDNS().equals(
+                oldConfig.getSecondaryDNS())))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
+            flushErrors();
+        }
+
+        // Then check the suffixDNS
+        if (oldConfig.getSuffixDNS() == null && vmConfig.getSuffixDNS() != null
+            && !vmConfig.getSuffixDNS().isEmpty())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
+            flushErrors();
+        }
+
+        if (oldConfig.getSuffixDNS() != null
+            && (vmConfig.getSuffixDNS() == null || !vmConfig.getSuffixDNS().equals(
+                oldConfig.getSuffixDNS())))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
+            flushErrors();
+        }
+
+        // Then the rest of NOT_NULLABLE attributes.
+        if (!oldConfig.getId().equals(vmConfig.getId())
+            || !oldConfig.getGateway().equals(vmConfig.getGateway()))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED);
+            flushErrors();
+        }
+
+        // Check if something has changed.
+        if (!oldConfig.getUsed().equals(vmConfig.getUsed()))
+        {
+            if (!vmConfig.getUsed())
+            {
+                // That means : before it was the default configuration and now it doesn't.
+                // Raise an exception: it should be at least one network configuration.
+                addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
+                flushErrors();
+            }
+
+            // If we have arribed here, that means the 'used' configuration has changed and
+            // user wants to use a new configuration. Put the corresponding 'configureGateway' in
+            // the IPs.
+            Boolean foundIpConfigureGateway = Boolean.FALSE;
+            List<IpPoolManagement> ips =
+                repo.findIpsByVirtualMachine(repo.findVirtualMachineById(vmId));
+            for (IpPoolManagement ip : ips)
+            {
+                if (!foundIpConfigureGateway)
+                {
+                    if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+                    {
+                        ip.setConfigureGateway(Boolean.TRUE);
+                        foundIpConfigureGateway = Boolean.TRUE;
+                    }
+                    else
+                    {
+                        ip.setConfigureGateway(Boolean.FALSE);
+                    }
+                }
+                else
+                {
+                    ip.setConfigureGateway(Boolean.FALSE);
+                }
+
+                repo.updateIpManagement(ip);
+            }
+
+        }
+        return vmConfig;
+
     }
 
     /**

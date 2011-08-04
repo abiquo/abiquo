@@ -126,7 +126,10 @@ public enum APIError
         "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
         "Only 'quarantine' and 'available' attributes can be modified when edit an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
         "VLAN-19",
-        "Attributes 'address' and 'mask' can not be changed by the Edit process of private VLAN."),
+        "Attributes 'address' and 'mask' can not be changed by the Edit process of private VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
+        "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
+        "This IP address is currently used by a Virtual Machine. Can not be released"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -170,7 +173,10 @@ public enum APIError
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
         "The virtual machine cannot change the state to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change the state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
-        "VM-6", "The virtual machine does not support the action PAUSE"),
+        "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "VM-7",
+        "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
+        "VM-8", "It should be at least one 'used' configuration in each Virtual Machine"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

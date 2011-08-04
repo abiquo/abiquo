@@ -49,6 +49,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -157,5 +158,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip);
 
-    public List<RESTLink> buildPublicIpRasdLinks(IpPoolManagement ip);
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, IpPoolManagement ip);
+
+    public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, VMNetworkConfiguration config);
 }

@@ -27,6 +27,7 @@ package com.abiquo.abiserver.commands.stub;
 import java.util.ArrayList;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
@@ -66,6 +67,10 @@ public interface NetworkResourceStub
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
+    public BasicResult getGatewayByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
+
+    public BasicResult getGatewayListByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
+
     public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
         throws NetworkCommandException;
 
@@ -89,8 +94,23 @@ public interface NetworkResourceStub
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
         Boolean all) throws NetworkCommandException;
 
+    public BasicResult getListNetworkPublicPoolPurchasedByVirtualDatacenter(Integer vdcId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolToPurchaseByVirtualDatacenter(Integer vdcId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
     public BasicResult getPrivateNetworks(final Integer vdcId);
 
     public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
+
+    public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
+
+    public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId);
+
+    public BasicResult setGatewayForVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
+        IPAddress gateway);
 
 }

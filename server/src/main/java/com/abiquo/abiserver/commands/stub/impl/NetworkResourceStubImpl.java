@@ -35,6 +35,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
@@ -51,6 +52,8 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationsDto;
 import com.abiquo.server.core.infrastructure.network.VlanTagAvailabilityDto;
 
 /**
@@ -59,6 +62,7 @@ import com.abiquo.server.core.infrastructure.network.VlanTagAvailabilityDto;
 public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkResourceStub
 {
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataResult<Boolean> checkVLANTagAvailability(final Integer datacenterId,
         final Integer proposedVLANTag, final Integer currentVlanId)
@@ -320,6 +324,66 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         return dataResult;
 
+    }
+
+    @Override
+    public BasicResult getGatewayByVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        DataResult<IPAddress> result = new DataResult<IPAddress>();
+        String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
+            for (VMNetworkConfigurationDto dto : dtos.getCollection())
+            {
+                if (dto.getUsed())
+                {
+                    result.setData(IPAddress.newIPAddress(dto.getGateway()));
+                    result.setSuccess(Boolean.TRUE);
+                    return result;
+                }
+            }
+
+            // Unknown exception. At least one result should be returned before.
+            result.setSuccess(Boolean.FALSE);
+            result
+                .setMessage("Unknown exception while retrieving the gateway of the virtual machine "
+                    + vmId);
+        }
+        else
+        {
+            populateErrors(response, result, "getGatewayByVirtualMachine");
+        }
+        return result;
+    }
+
+    @Override
+    public BasicResult getGatewayListByVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        DataResult<List<IPAddress>> result = new DataResult<List<IPAddress>>();
+        List<IPAddress> gateways = new ArrayList<IPAddress>();
+        String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
+            for (VMNetworkConfigurationDto dto : dtos.getCollection())
+            {
+                gateways.add(IPAddress.newIPAddress(dto.getGateway()));
+            }
+            result.setData(gateways);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getGatewayListByVirtualMachine");
+        }
+        return result;
     }
 
     @Override
@@ -589,6 +653,98 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult getListNetworkPublicPoolPurchasedByVirtualDatacenter(final Integer vdcId,
+        final Integer offset, final Integer numberOfNodes, final String filterLike,
+        final String orderBy, final Boolean asc) throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacenterPublicPurchasedIPsLink(vdcId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numberOfNodes);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPublicPoolByDatacenter");
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public BasicResult getListNetworkPublicPoolToPurchaseByVirtualDatacenter(final Integer vdcId,
+        final Integer offset, final Integer numberOfNodes, final String filterLike,
+        final String orderBy, final Boolean asc) throws NetworkCommandException
+    {
+        DataResult<ListResponse<IpPoolManagement>> dataResult =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        ListResponse<IpPoolManagement> listResponse = new ListResponse<IpPoolManagement>();
+
+        StringBuilder buildRequest =
+            new StringBuilder(createVirtualDatacenterPublicToPurchaseIPsLink(vdcId));
+        buildRequest.append("?startwith=" + offset);
+        buildRequest.append("&limit=" + numberOfNodes);
+        buildRequest.append("&by=" + transformOrderBy(orderBy));
+        buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (!filterLike.isEmpty())
+        {
+            buildRequest.append("&has=" + filterLike);
+        }
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+            List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+            for (IpPoolManagementDto ip : ips.getCollection())
+            {
+                IpPoolManagement flexIp = createFlexObject(ip);
+                flexIps.add(flexIp);
+            }
+            listResponse.setList(flexIps);
+            listResponse.setTotalNumEntities(ips.getTotalSize());
+
+            dataResult.setData(listResponse);
+            dataResult.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, dataResult, "getListNetworkPublicPoolByDatacenter");
+        }
+
+        return dataResult;
+    }
+
+    @Override
     public BasicResult getPrivateNetworks(final Integer vdcId)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
@@ -628,7 +784,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         if (response.getStatusCode() == 200)
         {
             VLANNetworkDto networkDto = response.getEntity(VLANNetworkDto.class);
-            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
             result.setData(createFlexObject(networkDto));
             result.setSuccess(Boolean.TRUE);
         }
@@ -641,6 +796,100 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     }
 
+    @Override
+    public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId)
+    {
+        BasicResult result = new BasicResult();
+
+        StringBuilder uri =
+            new StringBuilder(createVirtualDatacenterPublicPurchasedIPLink(vdcId, ipId));
+
+        ClientResponse response = put(uri.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "purchasePublicIp");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId)
+    {
+        BasicResult result = new BasicResult();
+
+        StringBuilder uri =
+            new StringBuilder(createVirtualDatacenterPublicToPurchaseIPLink(vdcId, ipId));
+
+        ClientResponse response = put(uri.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "releasePublicIp");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult setGatewayForVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final IPAddress gateway)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createVirtualMachineConfigurationsLink(vdcId, vappId, vmId);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VMNetworkConfigurationsDto dtos = response.getEntity(VMNetworkConfigurationsDto.class);
+
+            // Due we receive a gateway from the Flex client and we want to send an id
+            // to update the gateway, search for the VMNetworkconfigurationDto object.
+            for (VMNetworkConfigurationDto dto : dtos.getCollection())
+            {
+                if (dto.getGateway().equalsIgnoreCase(gateway.toString()))
+                {
+                    // Here we have found the dto. Modify it to inform we want to use this
+                    // configuration
+                    // by default.
+                    String uriConfig =
+                        createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
+                    dto.setUsed(Boolean.TRUE);
+
+                    response = put(uriConfig, dto);
+                    if (response.getStatusCode() == 200)
+                    {
+                        result.setSuccess(Boolean.TRUE);
+                    }
+                    else
+                    {
+                        populateErrors(response, result, "setGatewayForVirtualMachine");
+                    }
+                    return result;
+                }
+            }
+
+            // Unknown exception. At least one result should be returned before.
+            result.setSuccess(Boolean.FALSE);
+            result.setMessage("Unknown exception while setting the gateway of the virtual machine "
+                + vmId);
+        }
+        else
+        {
+            populateErrors(response, result, "setGatewayForVirtualMachine");
+        }
+        return result;
+    }
+
     private IpPoolManagementDto createDtoObject(final IpPoolManagement ip)
     {
         IpPoolManagementDto dto = new IpPoolManagementDto();
@@ -649,7 +898,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setMac(ip.getMac());
         dto.setName(ip.getName());
         dto.setNetworkName(ip.getVlanNetworkName());
-        dto.setConfigurationGateway(ip.getConfigureGateway());
         dto.setQuarantine(ip.getQuarantine());
         dto.setAvailable(ip.getAvailable());
         return dto;
@@ -663,7 +911,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setIp(ip.getIp());
         flexIp.setMac(ip.getMac());
         flexIp.setQuarantine(ip.getQuarantine());
-        flexIp.setConfigureGateway(ip.getConfigurationGateway());
         flexIp.setName(ip.getName());
         flexIp.setAvailable(ip.getAvailable());
 

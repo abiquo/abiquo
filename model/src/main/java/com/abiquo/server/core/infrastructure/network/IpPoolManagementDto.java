@@ -64,18 +64,6 @@ public class IpPoolManagementDto extends SingleResourceTransportDto
         this.mac = mac;
     }
 
-    private boolean configurationGateway;
-
-    public boolean getConfigurationGateway()
-    {
-        return configurationGateway;
-    }
-
-    public void setConfigurationGateway(final boolean configurationGateway)
-    {
-        this.configurationGateway = configurationGateway;
-    }
-
     private boolean quarantine;
 
     public boolean getQuarantine()

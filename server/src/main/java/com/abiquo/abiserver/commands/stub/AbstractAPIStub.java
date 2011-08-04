@@ -170,6 +170,13 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML);
     }
 
+    protected ClientResponse put(final String uri)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).contentType(
+            MediaType.APPLICATION_XML).put(null);
+    }
+
     protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUser();
@@ -527,6 +534,73 @@ public class AbstractAPIStub
         params.put("vdcid", vdcId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips", params);
+    }
+
+    protected String createVirtualDatacenterPublicPurchasedIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased", params);
+    }
+
+    protected String createVirtualDatacenterPublicPurchasedIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased/{ip}",
+            params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase", params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase/{ip}",
+            params);
+    }
+
+    protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations",
+            params);
+    }
+
+    protected String createVirtualMachineConfigurationLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vmConfigId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("vmconfigid", vmConfigId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations/{vmconfigid}",
+            params);
     }
 
     protected String createMachineLink(final PhysicalMachine machine)

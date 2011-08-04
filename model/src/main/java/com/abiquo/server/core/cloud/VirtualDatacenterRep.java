@@ -305,6 +305,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByVirtualMachine(vm);
     }
 
+    public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
+        final VirtualMachine vm, final Integer vmConfigId)
+    {
+        return ipManagementDAO.findIpsByVirtualMachineWithConfigurationId(vm, vmConfigId);
+    }
+
     public Collection<NodeVirtualImage> findNodeVirtualImageByEnterprise(final Enterprise enterprise)
     {
         return nodeviDao.findByEnterprise(enterprise);
@@ -313,6 +319,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public NodeVirtualImage findNodeVirtualImageByVirtualMachine(final VirtualMachine vmachine)
     {
         return nodeviDao.findByVirtualMachine(vmachine);
+    }
+
+    public IpPoolManagement findPublicIpPurchasedByVirtualDatacenter(final Integer vdcId,
+        final Integer ipId)
+    {
+        return ipManagementDAO.findPublicIpPurchasedByVirtualDatacenter(vdcId, ipId);
     }
 
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
@@ -347,6 +359,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
             filter, orderByEnum, descOrAsc);
     }
 
+    public IpPoolManagement findPublicIpToPurchaseByVirtualDatacenter(final Integer vdcId,
+        final Integer ipId)
+    {
+        return ipManagementDAO.findPublicIpToPurchaseByVirtualDatacenter(vdcId, ipId);
+    }
+
     public Collection<RasdManagement> findResourcesByVirtualDatacenterAndResourceType(
         final VirtualDatacenter virtualDatacenter, final String idResource)
     {
@@ -371,6 +389,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return virtualApplianceDAO.findById(vappId);
     }
 
+    public VirtualAppliance findVirtualApplianceById(final VirtualDatacenter vdc,
+        final Integer vappId)
+    {
+        return virtualApplianceDAO.findById(vdc, vappId);
+    }
+
     public VirtualAppliance findVirtualApplianceByName(final String name)
     {
         return virtualApplianceDAO.findByName(name);
@@ -390,6 +414,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public VirtualMachine findVirtualMachineById(final Integer virtualMachineId)
     {
         return vmDao.findById(virtualMachineId);
+    }
+
+    public VirtualMachine findVirtualMachineById(final VirtualAppliance vapp, final Integer vmId)
+    {
+        return vmDao.findByIdByVirtualApp(vapp, vmId);
     }
 
     public VirtualMachine findVirtualMachineByName(final String name)

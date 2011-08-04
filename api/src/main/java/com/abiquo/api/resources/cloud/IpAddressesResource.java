@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -62,7 +62,7 @@ public class IpAddressesResource extends AbstractResource
     public static final String ONLYAVAILABLE = "onlyAvailable";
 
     @Autowired
-    private IpAddressService service;
+    private NetworkService service;
 
     @Context
     UriInfo uriInfo;
@@ -81,7 +81,7 @@ public class IpAddressesResource extends AbstractResource
     {
 
         List<IpPoolManagement> all =
-            service.getListIpPoolManagementByVLAN(vdcId, vlanId, startwith, orderBy, filter, limit,
+            service.getListIpPoolManagementByVlan(vdcId, vlanId, startwith, orderBy, filter, limit,
                 descOrAsc, available);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();

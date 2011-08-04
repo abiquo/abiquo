@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -74,6 +75,24 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
         + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_IP_PURCHASED = " SELECT ip FROM "
+        + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+        + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+        + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+        + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+        + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+        + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
+        + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id";
+
+    public static final String BY_IP_TO_PURCHASE = " SELECT ip FROM "
+        + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+        + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+        + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+        + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+        + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+        + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
+        + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null";
+
     public static final String BY_NETWORK = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
         + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
@@ -106,9 +125,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
             + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "vdc.datacenter.id = dc.id AND "
             + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
@@ -117,9 +137,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
             + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
-            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
+            + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "vdc.datacenter.id = dc.id AND "
             + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
@@ -452,6 +473,31 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     }
 
+    public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(
+        final VirtualMachine vm, final Integer vmConfigId)
+    {
+        List<IpPoolManagement> ips = findIpsByVirtualMachine(vm);
+        List<IpPoolManagement> resultIps = new ArrayList<IpPoolManagement>();
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+            {
+                resultIps.add(ip);
+            }
+        }
+        return resultIps;
+    }
+
+    public IpPoolManagement findPublicIpPurchasedByVirtualDatacenter(final Integer vdcId,
+        final Integer ipId)
+    {
+        Query finalQuery = getSession().createQuery(BY_IP_PURCHASED);
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("ip_id", ipId);
+
+        return (IpPoolManagement) finalQuery.uniqueResult();
+    }
+
     /**
      * Return all the public IPS defined into a Datacenter.
      * 
@@ -533,11 +579,38 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findpublicIpsPurchasedByVirtualDatacenter(final Integer vdcId,
-        final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Query finalQuery =
+            getSession()
+                .createQuery(BY_VDC_PURCHASED + " " + defineOrderBy(orderByEnum, descOrAsc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+            + filter + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (limit != null)
+        {
+            finalQuery.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - 1;
+            finalQuery.setMaxResults(1);
+        }
+        finalQuery.setFirstResult(startwith);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(limit);
+        ipList.setCurrentElement(startwith);
+
+        return ipList;
+
     }
 
     /**
@@ -554,11 +627,47 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     }
 
     public List<IpPoolManagement> findpublicIpsToPurchaseByVirtualDatacenter(final Integer vdcId,
-        final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Query finalQuery =
+            getSession().createQuery(
+                BY_VDC_TO_PURCHASE + " " + defineOrderBy(orderByEnum, descOrAsc));
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+            + filter + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (limit != null)
+        {
+            finalQuery.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - 1;
+            finalQuery.setMaxResults(1);
+        }
+        finalQuery.setFirstResult(startwith);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(limit);
+        ipList.setCurrentElement(startwith);
+
+        return ipList;
+    }
+
+    public IpPoolManagement findPublicIpToPurchaseByVirtualDatacenter(final Integer vdcId,
+        final Integer ipId)
+    {
+        Query finalQuery = getSession().createQuery(BY_IP_TO_PURCHASE);
+        finalQuery.setParameter("vdc_id", vdcId);
+        finalQuery.setParameter("ip_id", ipId);
+
+        return (IpPoolManagement) finalQuery.uniqueResult();
     }
 
     /**

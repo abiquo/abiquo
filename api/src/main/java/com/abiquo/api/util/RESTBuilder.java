@@ -57,6 +57,7 @@ import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
+import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
@@ -85,6 +86,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -844,10 +846,32 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildPublicIpRasdLinks(final IpPoolManagement ip)
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
     {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final VMNetworkConfiguration config)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, config.getId()
+            .toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links
+            .add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
+                    + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM, REL_EDIT,
+                params));
+
+        return links;
     }
 
 }

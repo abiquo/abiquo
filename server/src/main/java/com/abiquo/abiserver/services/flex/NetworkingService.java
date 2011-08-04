@@ -220,27 +220,9 @@ public class NetworkingService
      * @return a DataResult containing a list of Virtual Machines.
      */
     public BasicResult getGatewayListByVirtualMachine(final UserSession userSession,
-        final Integer vmId)
+        final Integer vdcId, final Integer vappId, final Integer vmId)
     {
-        DataResult<List<IPAddress>> dataResult = new DataResult<List<IPAddress>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            dataResult.setData(proxy.getListGatewaysByVirtualMachine(userSession, vmId));
-            dataResult.setSuccess(Boolean.TRUE);
-
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getGatewayListByVirtualMachine(vdcId, vappId, vmId);
     }
 
     /**
@@ -251,27 +233,9 @@ public class NetworkingService
      * @return a DataResult containing a list of Virtual Machines.
      */
     public BasicResult getGatewayUsedByVirtualMachine(final UserSession userSession,
-        final Integer vmId)
+        final Integer vdcId, final Integer vappId, final Integer vmId)
     {
-        DataResult<IPAddress> dataResult = new DataResult<IPAddress>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            dataResult.setData(proxy.getUsedGatewayByVirtualMachine(userSession, vmId));
-            dataResult.setSuccess(Boolean.TRUE);
-
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).getGatewayByVirtualMachine(vdcId, vappId, vmId);
     }
 
     /**
@@ -355,7 +319,8 @@ public class NetworkingService
      *         data.
      */
     public DataResult<List<IpPoolManagement>> getNICsByVirtualMachine(
-        final UserSession userSession, final Integer virtualMachineId)
+        final UserSession userSession, final Integer virtualDatacenterId, final Integer vappId,
+        final Integer virtualMachineId)
     {
         DataResult<List<IpPoolManagement>> dataResult = new DataResult<List<IpPoolManagement>>();
 
@@ -427,31 +392,9 @@ public class NetworkingService
      * @return
      */
     public BasicResult requestGatewayForVirtualMachine(final UserSession userSession,
-        final Integer vmId, final IPAddress gateway)
+        final Integer vdcId, final Integer vappId, final Integer vmId, final IPAddress gateway)
     {
-
-        BasicResult dataResult = new BasicResult();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            IPAddress gatewayAddress =
-                gateway == null ? IPAddress.newIPAddress("0.0.0.0") : gateway;
-
-            proxy.requestGatewayForVirtualMachine(userSession, vmId, gatewayAddress);
-
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).setGatewayForVirtualMachine(vdcId, vappId, vmId, gateway);
     }
 
     /**

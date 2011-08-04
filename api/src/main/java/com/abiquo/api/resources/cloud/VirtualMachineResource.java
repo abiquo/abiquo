@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
@@ -79,7 +79,7 @@ public class VirtualMachineResource extends AbstractResource
     UserService userService;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService networkService;
 
     /**
      * Return the virtual appliance if exists.
@@ -112,7 +112,7 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        List<IpPoolManagement> all = ipService.getListIpPoolManagementByMachine(vm);
+        List<IpPoolManagement> all = networkService.getListIpPoolManagementByMachine(vm);
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
         for (IpPoolManagement ip : all)
         {
@@ -232,7 +232,7 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-              vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
         }
     }
 
