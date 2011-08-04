@@ -18,9 +18,9 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
     {
     }
 
-    public CostCodeCurrencyDto(final BigDecimal purchase)
+    public CostCodeCurrencyDto(final BigDecimal price)
     {
-        this.purchase = purchase;
+        this.price = price;
 
     }
 
@@ -36,16 +36,16 @@ public class CostCodeCurrencyDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private BigDecimal purchase;
+    private BigDecimal price;
 
-    public BigDecimal getPurchase()
+    public BigDecimal getPrice()
     {
-        return purchase;
+        return price;
     }
 
-    public void setPurchase(final BigDecimal purchase)
+    public void setPrice(final BigDecimal price)
     {
-        this.purchase = purchase;
+        this.price = price;
     }
 
     private Integer idCurrency;

@@ -25,7 +25,7 @@ public class CostCodeCurrencyGenerator extends DefaultEntityGenerator<CostCodeCu
     @Override
     public void assertAllPropertiesEqual(final CostCodeCurrency obj1, final CostCodeCurrency obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, CostCodeCurrency.PURCHASE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, CostCodeCurrency.PRICE_PROPERTY);
     }
 
     @Override

@@ -4170,7 +4170,7 @@ CREATE TABLE  `kinton`.`costeCodeCurrency` (
   `idCosteCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idCostCode` int(10) unsigned,
   `idCurrency` int(10) unsigned,
-  `purchase` DECIMAL(20) NOT NULL default 0,
+  `price` DECIMAL(20) NOT NULL default 0,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY (`idCosteCodeCurrency`)
   -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),

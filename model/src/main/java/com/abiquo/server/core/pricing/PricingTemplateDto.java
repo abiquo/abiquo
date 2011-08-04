@@ -42,9 +42,9 @@ public class PricingTemplateDto extends SingleResourceTransportDto
 
     public PricingTemplateDto(final String name, final BigDecimal hdGb,
         final BigDecimal standingChargePeriod, final BigDecimal limitMaximumDeployedCharged,
-        final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
+        final BigDecimal vlan, final boolean showMinimumCharge, final Integer chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
-        final int minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
+        final Integer minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
         final BigDecimal memoryMB, final boolean defaultTemplate)
     {
         this.name = name;
@@ -161,14 +161,14 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.showMinimumCharge = showMinimumCharge;
     }
 
-    private int chargingPeriod;
+    private Integer chargingPeriod;
 
-    public int getChargingPeriod()
+    public Integer getChargingPeriod()
     {
         return chargingPeriod;
     }
 
-    public void setChargingPeriod(final int chargingPeriod)
+    public void setChargingPeriod(final Integer chargingPeriod)
     {
         this.chargingPeriod = chargingPeriod;
     }
@@ -197,14 +197,14 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.showChangesBefore = showChangesBefore;
     }
 
-    private int minimumCharge;
+    private Integer minimumCharge;
 
-    public int getMinimumCharge()
+    public Integer getMinimumCharge()
     {
         return minimumCharge;
     }
 
-    public void setMinimumCharge(final int minimumCharge)
+    public void setMinimumCharge(final Integer minimumCharge)
     {
         this.minimumCharge = minimumCharge;
     }

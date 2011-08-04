@@ -30,11 +30,10 @@ public class CostCodeCurrency extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public CostCodeCurrency(final BigDecimal purchase, final CostCode costCode,
-        final Currency currency)
+    public CostCodeCurrency(final BigDecimal price, final CostCode costCode, final Currency currency)
     {
         super();
-        setPurchase(purchase);
+        setPrice(price);
         setCostCode(costCode);
         setCurrency(currency);
     }
@@ -52,21 +51,21 @@ public class CostCodeCurrency extends DefaultEntityBase
         return this.id;
     }
 
-    public final static String PURCHASE_PROPERTY = "purchase";
+    public final static String PRICE_PROPERTY = "price";
 
-    private final static String PURCHASE_COLUMN = "purchase";
+    private final static String PRICE_COLUMN = "price";
 
-    @Column(name = PURCHASE_COLUMN, nullable = true)
-    private BigDecimal purchase;
+    @Column(name = PRICE_COLUMN, nullable = true)
+    private BigDecimal price;
 
-    public BigDecimal getPurchase()
+    public BigDecimal getPrice()
     {
-        return this.purchase;
+        return price;
     }
 
-    public void setPurchase(final BigDecimal purchase)
+    public void setPrice(final BigDecimal price)
     {
-        this.purchase = purchase;
+        this.price = price;
     }
 
     public final static String COST_CODE_PROPERTY = "costCode";

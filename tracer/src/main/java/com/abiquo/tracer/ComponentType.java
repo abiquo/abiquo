@@ -77,7 +77,10 @@ public enum ComponentType implements Serializable
     PRICING_TEMPLATE(4194304, "Pricing Template"),
 
     // COSTCODE_CURRENCY
-    COSTCODE_CURRENCY(8388608, "Cost Code - Currency");
+    COSTCODE_CURRENCY(8388608, "Cost Code - Currency"),
+
+    // COSTCODE
+    COSTCODE(16777216, "Cost Code");
 
     private final int component;
 

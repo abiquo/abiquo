@@ -29,6 +29,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -40,8 +41,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.PricingPeriod;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -64,9 +65,9 @@ public class PricingTemplate extends DefaultEntityBase
 
     public PricingTemplate(final String name, final BigDecimal hdGb,
         final BigDecimal standingChargePeriod, final BigDecimal limitMaximumDeployedCharged,
-        final BigDecimal vlan, final boolean showMinimumCharge, final int chargingPeriod,
+        final BigDecimal vlan, final boolean showMinimumCharge, final PricingPeriod chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
-        final int minimumCharge, final Currency currency, final BigDecimal publicIp,
+        final PricingPeriod minimumCharge, final Currency currency, final BigDecimal publicIp,
         final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate)
     {
 
@@ -225,20 +226,16 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static String CHARGING_PERIOD_COLUMN = "chargingPeriod";
 
-    private final static int CHARGING_PERIOD_MIN = Integer.MIN_VALUE;
-
-    private final static int CHARGING_PERIOD_MAX = Integer.MAX_VALUE;
-
+    @Enumerated(value = javax.persistence.EnumType.ORDINAL)
     @Column(name = CHARGING_PERIOD_COLUMN, nullable = !CHARGING_PERIOD_REQUIRED)
-    @Range(min = CHARGING_PERIOD_MIN, max = CHARGING_PERIOD_MAX)
-    private int chargingPeriod;
+    private PricingPeriod chargingPeriod;
 
-    public int getChargingPeriod()
+    public PricingPeriod getChargingPeriod()
     {
-        return this.chargingPeriod;
+        return chargingPeriod;
     }
 
-    public void setChargingPeriod(final int chargingPeriod)
+    public void setChargingPeriod(final PricingPeriod chargingPeriod)
     {
         this.chargingPeriod = chargingPeriod;
     }
@@ -286,20 +283,16 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static String MINIMUM_CHARGE_COLUMN = "minimumCharge";
 
-    private final static int MINIMUM_CHARGE_MIN = Integer.MIN_VALUE;
-
-    private final static int MINIMUM_CHARGE_MAX = Integer.MAX_VALUE;
-
     @Column(name = MINIMUM_CHARGE_COLUMN, nullable = !MINIMUM_CHARGE_REQUIRED)
-    @Range(min = MINIMUM_CHARGE_MIN, max = MINIMUM_CHARGE_MAX)
-    private int minimumCharge;
+    @Enumerated(value = javax.persistence.EnumType.ORDINAL)
+    private PricingPeriod minimumCharge;
 
-    public int getMinimumCharge()
+    public PricingPeriod getMinimumCharge()
     {
         return this.minimumCharge;
     }
 
-    public void setMinimumCharge(final int minimumCharge)
+    public void setMinimumCharge(final PricingPeriod minimumCharge)
     {
         this.minimumCharge = minimumCharge;
     }

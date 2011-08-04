@@ -202,4 +202,15 @@ public class PricingRep extends DefaultRepBase
         return costCodeCurrencyDao.existAnyOtherWithCurrency(costCodeCurrency, currency, costCode);
     }
 
+    public void deleteCostCode(final CostCode costCode)
+    {
+        costCodeDao.remove(costCode);
+
+    }
+
+    public void deleteCostCodecurrency(final CostCodeCurrency costCodeCurrency)
+    {
+        costCodeCurrencyDao.remove(costCodeCurrency);
+    }
+
 }

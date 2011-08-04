@@ -37,7 +37,7 @@ public class PricingTemplatesDto extends WrapperDto<PricingTemplateDto>
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "role")
+    @XmlElement(name = "pricingTemplate")
     public List<PricingTemplateDto> getCollection()
     {
         return collection;

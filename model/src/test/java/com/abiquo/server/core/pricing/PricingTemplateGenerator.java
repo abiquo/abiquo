@@ -24,6 +24,7 @@ package com.abiquo.server.core.pricing;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.abiquo.model.enumerator.PricingPeriod;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -71,17 +72,16 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
     public PricingTemplate createInstance(final String name, final Currency currency)
     {
         BigDecimal seed = newBigDecimal();
-        int seedint = nextSeed();
 
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
         final BigDecimal limitMaximumDeployedCharged = seed;
         final BigDecimal vlan = seed;
         final boolean showMinimumCharge = true;
-        final int chargingPeriod = seedint;
+        final PricingPeriod chargingPeriod = PricingPeriod.DAY;
         final BigDecimal minimumChargePeriod = seed;
         final boolean showChangesBefore = true;
-        final int minimumCharge = seedint;
+        final PricingPeriod minimumCharge = PricingPeriod.WEEK;
         final BigDecimal publicIp = seed;
         final BigDecimal vCpu = seed;
         final BigDecimal memoryMb = seed;
