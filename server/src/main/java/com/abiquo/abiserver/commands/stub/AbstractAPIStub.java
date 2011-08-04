@@ -764,4 +764,23 @@ public class AbstractAPIStub
             Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
+    protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
+        final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
 }

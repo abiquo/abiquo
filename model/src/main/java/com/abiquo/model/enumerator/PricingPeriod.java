@@ -11,18 +11,21 @@ public enum PricingPeriod
     MINUTE,
 
     /* 1 */
-    DAY,
+    HOUR,
 
     /* 2 */
-    WEEK,
+    DAY,
 
     /* 3 */
-    MONTH,
+    WEEK,
 
     /* 4 */
-    QUARTER,
+    MONTH,
 
     /* 5 */
+    QUARTER,
+
+    /* 6 */
     YEAR;
 
     public int id()
