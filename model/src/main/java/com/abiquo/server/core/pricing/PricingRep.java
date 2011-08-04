@@ -213,4 +213,21 @@ public class PricingRep extends DefaultRepBase
         costCodeCurrencyDao.remove(costCodeCurrency);
     }
 
+    public boolean existAnyOtherCostCodeWithName(final CostCode costCode, final String name)
+    {
+        return costCodeDao.existAnyOtherCostCodeWithName(costCode, name);
+    }
+
+    public void updateCostCode(final CostCode costCode)
+    {
+        costCodeDao.flush();
+
+    }
+
+    public boolean existAnyOtherCostCodeWithName(final String name)
+    {
+
+        return costCodeDao.existAnyOtherCostCodeWithName(name);
+    }
+
 }

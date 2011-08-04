@@ -95,7 +95,7 @@ public class CostCode extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(final String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -123,7 +123,7 @@ public class CostCode extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(final String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }

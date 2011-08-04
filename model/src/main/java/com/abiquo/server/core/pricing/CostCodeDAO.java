@@ -23,6 +23,8 @@ package com.abiquo.server.core.pricing;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -35,9 +37,24 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
         super(CostCode.class);
     }
 
-    public CostCodeDAO(EntityManager entityManager)
+    public CostCodeDAO(final EntityManager entityManager)
     {
         super(CostCode.class, entityManager);
+    }
+
+    public static Criterion sameName(final String name)
+    {
+        return Restrictions.eq(PricingTemplate.NAME_PROPERTY, name);
+    }
+
+    public boolean existAnyOtherCostCodeWithName(final CostCode costCode, final String name)
+    {
+        return existsAnyOtherByCriterions(costCode, sameName(name));
+    }
+
+    public boolean existAnyOtherCostCodeWithName(final String name)
+    {
+        return existsAnyByCriterions(sameName(name));
     }
 
 }

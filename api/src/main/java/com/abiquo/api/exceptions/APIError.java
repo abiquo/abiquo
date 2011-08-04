@@ -331,7 +331,8 @@ public enum APIError
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
-        "COSTCODE-1", "Missing  Cost Code parameter"),
+        "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
+        "Duplicated name for Cost Code"),
 
     // COST CODE- CURRENCY
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
