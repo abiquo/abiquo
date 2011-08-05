@@ -21,7 +21,7 @@ import com.softwarementors.validation.constraints.Required;
 @org.hibernate.annotations.Table(appliesTo = CostCodeCurrency.TABLE_NAME)
 public class CostCodeCurrency extends DefaultEntityBase
 {
-    public static final String TABLE_NAME = "costeCodeCurrency";
+    public static final String TABLE_NAME = "costCodeCurrency";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -38,7 +38,7 @@ public class CostCodeCurrency extends DefaultEntityBase
         setCurrency(currency);
     }
 
-    private final static String ID_COLUMN = "idCosteCodeCurrency";
+    private final static String ID_COLUMN = "idCostCodeCurrency";
 
     @Id
     @GeneratedValue
