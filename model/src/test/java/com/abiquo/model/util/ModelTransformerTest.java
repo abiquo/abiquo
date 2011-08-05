@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.transformer;
+package com.abiquo.model.util;
 
 import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
 import static org.testng.Assert.assertEquals;

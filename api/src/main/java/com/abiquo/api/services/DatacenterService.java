@@ -215,10 +215,7 @@ public class DatacenterService extends DefaultApiService
         else
         {
             // Log the event
-            tracer.log(
-                SeverityType.INFO,
-                ComponentType.DATACENTER,
-                EventType.DC_CREATE,
+            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
                 "Datacenter '" + datacenter.getName() + "' has been created in "
                     + datacenter.getLocation());
         }

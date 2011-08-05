@@ -349,7 +349,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
      * @return true if the virtual switch exists, false if contrary
      * @throws Exception
      */
-    private boolean existsVswitch(ManagedObjectReference hostmor, String vSwitchName)
+    private boolean existsVswitch(final ManagedObjectReference hostmor, final String vSwitchName)
         throws Exception
     {
         ExtendedAppUtil apputil = utils.getAppUtil();
@@ -516,7 +516,7 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
 
             // if we have connection with the vCenter, unregister the 'orphaned' machine.
             // Do nothing
-            if (vCenterBridge != null)
+            if (vCenterBridge != null && !vmConfig.getVirtualDiskBase().isHa())
             {
                 try
                 {
@@ -796,7 +796,9 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
     public void pauseMachine() throws VirtualMachineException
     {
         if (!checkState(State.PAUSE))
+        {
             executeTaskOnVM(VMTasks.PAUSE);
+        }
     }
 
     @Override
@@ -811,28 +813,36 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
         }
 
         if (!checkState(State.POWER_OFF))
+        {
             executeTaskOnVM(VMTasks.POWER_OFF);
+        }
     }
 
     @Override
     public void powerOnMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.POWER_ON);
+        }
     }
 
     @Override
     public void resetMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.RESET);
+        }
     }
 
     @Override
     public void resumeMachine() throws VirtualMachineException
     {
         if (!checkState(State.POWER_UP))
+        {
             executeTaskOnVM(VMTasks.RESUME);
+        }
     }
 
     @Override
