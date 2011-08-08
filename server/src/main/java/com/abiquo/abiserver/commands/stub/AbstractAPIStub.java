@@ -783,4 +783,21 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
+    protected String createCurrenciesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
 }
