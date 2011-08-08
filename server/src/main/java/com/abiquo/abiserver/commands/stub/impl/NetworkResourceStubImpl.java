@@ -46,10 +46,13 @@ import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListResponse;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.NicDto;
+import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationDto;
@@ -787,6 +790,36 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult getNICsByVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        DataResult<List<IpPoolManagement>> result = new DataResult<List<IpPoolManagement>>();
+
+        String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            NicsDto nics = response.getEntity(NicsDto.class);
+            List<IpPoolManagement> returnIps = new ArrayList<IpPoolManagement>();
+
+            for (NicDto dto : nics.getCollection())
+            {
+                returnIps.add(createFlexObject(dto));
+            }
+
+            result.setData(returnIps);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getNICsByVirtualMachine");
+        }
+
+        return result;
+    }
+
+    @Override
     public BasicResult getPrivateNetworks(final Integer vdcId)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
@@ -861,6 +894,29 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult releaseNICfromVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer nicOrder)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualMachineNICLink(vdcId, vappId, vmId, nicOrder);
+
+        ClientResponse response = delete(uri.toString());
+
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "releaseNICfromVirtualMachine");
+        }
+
+        return result;
+
+    }
+
+    @Override
     public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId)
     {
         BasicResult result = new BasicResult();
@@ -877,6 +933,63 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         else
         {
             populateErrors(response, result, "releasePublicIp");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult requestPrivateNICforVirtualMachine(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vlanId, final Integer idManagement)
+    {
+
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
+        String uriIp = createPrivateNetworkIPLink(vdcId, vlanId, idManagement);
+        LinksDto links = new LinksDto();
+        RESTLink ipLink = new RESTLink();
+        ipLink.setHref(uriIp);
+        ipLink.setRel("privateip");
+        links.addLink(ipLink);
+
+        ClientResponse response = post(uri, links);
+
+        if (response.getStatusCode() == 201)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "requestPrivateNICforVirtualMachine");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult requestPublicNICforVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer vlanNetworkId, final Integer idManagement)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
+        String uriIp = createVirtualDatacenterPublicPurchasedIPLink(vdcId, idManagement);
+        LinksDto links = new LinksDto();
+        RESTLink ipLink = new RESTLink();
+        ipLink.setHref(uriIp);
+        ipLink.setRel("publicip");
+        links.addLink(ipLink);
+
+        ClientResponse response = post(uri, links);
+
+        if (response.getStatusCode() == 201)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "requestPrivateNICforVirtualMachine");
         }
 
         return result;
@@ -989,6 +1102,17 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
         }
+
+        return flexIp;
+    }
+
+    private IpPoolManagement createFlexObject(final NicDto dto)
+    {
+        IpPoolManagement flexIp = new IpPoolManagement();
+
+        flexIp.setIdManagement(dto.getId());
+        flexIp.setIp(dto.getIp());
+        flexIp.setMac(dto.getMac());
 
         return flexIp;
     }

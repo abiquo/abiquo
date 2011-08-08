@@ -21,11 +21,9 @@
 
 package com.abiquo.abiserver.services.flex;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.impl.NetworkCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -274,38 +272,11 @@ public class NetworkingService
      * @return a {@link DataResult} object with a list of {@link IpPoolManagement} objects in its
      *         data.
      */
-    public DataResult<List<IpPoolManagement>> getNICsByVirtualMachine(
-        final UserSession userSession, final Integer virtualDatacenterId, final Integer vappId,
-        final Integer virtualMachineId)
+    public BasicResult getNICsByVirtualMachine(final UserSession userSession,
+        final Integer virtualDatacenterId, final Integer vappId, final Integer virtualMachineId)
     {
-        DataResult<List<IpPoolManagement>> dataResult = new DataResult<List<IpPoolManagement>>();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            List<IpPoolManagementHB> ipPoolHB =
-                proxy.getPrivateNICsByVirtualMachine(userSession, virtualMachineId);
-
-            List<IpPoolManagement> ipPool = new ArrayList<IpPoolManagement>();
-            for (IpPoolManagementHB ip : ipPoolHB)
-            {
-                ipPool.add(ip.toPojo());
-            }
-
-            dataResult.setData(ipPool);
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getNICsByVirtualMachine(virtualDatacenterId, vappId,
+            virtualMachineId);
     }
 
     /**
@@ -330,26 +301,9 @@ public class NetworkingService
      * @return a {@link BasicResult} object just saying if the method has successfully finished.
      */
     public BasicResult releaseNICfromVirtualMachine(final UserSession userSession,
-        final Integer ipPoolManagementId)
+        final Integer vdcId, final Integer vappId, final Integer vmId, final Integer nicOrder)
     {
-        BasicResult dataResult = new BasicResult();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-            proxy.releaseNICFromVirtualMachine(userSession, ipPoolManagementId);
-
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).releaseNICfromVirtualMachine(vdcId, vappId, vmId, nicOrder);
     }
 
     /**
@@ -408,27 +362,11 @@ public class NetworkingService
      * @return a {@link BasicResult} object just saying if the method has successfully finished.
      */
     public BasicResult requestNICforVirtualMachine(final UserSession userSession,
-        final Integer vmId, final Integer ipPoolManagementId)
+        final Integer vdcId, final Integer vappId, final Integer vmId,
+        final IpPoolManagement ipPoolManagement)
     {
-        BasicResult dataResult = new BasicResult();
-
-        try
-        {
-            NetworkCommand proxy =
-                BusinessDelegateProxy
-                    .getInstance(userSession, networkCommand, NetworkCommand.class);
-
-            proxy.requestNICforVirtualMachine(userSession, vmId, ipPoolManagementId);
-
-            dataResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            dataResult.setSuccess(Boolean.FALSE);
-            dataResult.setMessage(e.getMessage());
-        }
-
-        return dataResult;
+        return proxyStub(userSession).requestPrivateNICforVirtualMachine(vdcId, vappId, vmId,
+            ipPoolManagement.getVlanNetworkId(), ipPoolManagement.getIdManagement());
     }
 
     /**

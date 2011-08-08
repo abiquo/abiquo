@@ -47,7 +47,6 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -101,8 +100,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
         final VLANNetworkDto network);
-
-    public List<RESTLink> buildIPAddressLink(Integer vlanId, IpPoolManagementDto ip);
 
     /*
      * Premium methods
@@ -162,4 +159,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, VMNetworkConfiguration config);
+
+    public List<RESTLink> buildNICLinks(IpPoolManagement ip);
 }

@@ -84,7 +84,6 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -582,20 +581,6 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildIPAddressLink(final Integer vlanId, final IpPoolManagementDto ip)
-    {
-        List<RESTLink> links = new ArrayList<RESTLink>();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(PrivateNetworkResource.PRIVATE_NETWORK_PARAM, vlanId.toString());
-
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(PrivateNetworkResource.class,
-            PrivateNetworkResource.PRIVATE_NETWORK, params));
-
-        return links;
-    }
-
-    @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
@@ -870,6 +855,31 @@ public class RESTBuilder implements IRESTBuilder
                 VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
                     + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM, REL_EDIT,
                 params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildNICLinks(final IpPoolManagement ip)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, ip.getVirtualDatacenter().getId()
+            .toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, ip.getVirtualAppliance().getId()
+            .toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, ip.getVirtualMachine().getId()
+            .toString());
+        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getRasd()
+            .getConfigurationName());
+        params.put(IpAddressesResource.IP_ADDRESS, ip.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH + "/"
+                + VirtualMachineNetworkConfigurationResource.NIC_PARAM, REL_EDIT, params));
+        links.add(builder.buildRestLink(IpAddressesResource.class,
+            IpAddressesResource.IP_ADDRESS_PARAM, IpAddressesResource.IP_ADDRESS_PARAM, params));
 
         return links;
     }

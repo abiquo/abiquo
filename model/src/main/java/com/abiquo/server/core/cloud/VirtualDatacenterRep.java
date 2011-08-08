@@ -33,6 +33,7 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
@@ -156,6 +157,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         // TODO deassociate
         nodeviDao.remove(nvi);
+    }
+
+    public void deleteRasd(final Rasd rasd)
+    {
+        rasdDAO.remove(rasd);
     }
 
     public void deleteVirtualMachine(final VirtualMachine vmachine)
@@ -487,7 +493,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public void insertIpManagement(final IpPoolManagement ipManagement)
     {
-        rasdDAO.persist(ipManagement.getRasd());
+        if (ipManagement.getRasd() != null)
+        {
+            rasdDAO.persist(ipManagement.getRasd());
+        }
         ipManagementDAO.persist(ipManagement);
     }
 
@@ -504,6 +513,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void insertNetworkConfig(final NetworkConfiguration configuration)
     {
         networkConfigDAO.persist(configuration);
+    }
+
+    public void insertRasd(final Rasd rasd)
+    {
+        rasdDAO.persist(rasd);
     }
 
     public void insertVirtualAppliance(final VirtualAppliance vapp)
@@ -534,6 +548,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void updateIpManagement(final IpPoolManagement ip)
     {
         ipManagementDAO.flush();
+    }
+
+    public void updateRasd(final Rasd rasd)
+    {
+        rasdDAO.flush();
     }
 
     public void updateVirtualAppliance(final VirtualAppliance vapp)

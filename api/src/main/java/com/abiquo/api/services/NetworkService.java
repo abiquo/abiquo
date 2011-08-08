@@ -24,6 +24,7 @@ package com.abiquo.api.services;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -46,6 +47,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -87,6 +89,74 @@ public class NetworkService extends DefaultApiService
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
         userService = new UserService(em);
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public IpPoolManagement associateVirtualMachinePrivateNic(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vlanId, final Integer ipId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
+        if (vlan == null)
+        {
+            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        IpPoolManagement ip = repo.findIp(vlan, ipId);
+
+        // check if the ip address is already defined to a virtual machine
+        if (ip.getVirtualMachine() != null)
+        {
+            addConflictErrors(APIError.VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
+            flushErrors();
+        }
+
+        // create the Rasd object.
+        Rasd rasd =
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+
+        rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
+        rasd.setConnection("");
+        rasd.setAllocationUnits("0");
+        rasd.setAutomaticAllocation(0);
+        rasd.setAutomaticDeallocation(0);
+        rasd.setConfigurationName("0");
+        rasd.setAddress(ip.getMac());
+        rasd.setParent(ip.getNetworkName());
+        rasd.setResourceSubType(String.valueOf(IpPoolManagement.Type.PRIVATE.ordinal()));
+        // Configuration Name sets the order in the virtual machine, put it in the last place.
+        rasd.setConfigurationName(String.valueOf(repo.findIpsByVirtualMachine(vm).size()));
+        repo.insertRasd(rasd);
+
+        ip.setRasd(rasd);
+        ip.setVirtualAppliance(vapp);
+        ip.setVirtualMachine(vm);
+        repo.updateIpManagement(ip);
+
+        return ip;
     }
 
     /**
@@ -153,7 +223,8 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
             flushErrors();
         }
-        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range);
+        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range,
+            IpPoolManagement.Type.PRIVATE);
 
         // Trace the creation.
         String messageTrace =
@@ -219,11 +290,6 @@ public class NetworkService extends DefaultApiService
         return repo.findIpsByEnterprise(entId, firstElem, numElem, has, orderByEnum, asc);
     }
 
-    public List<IpPoolManagement> getListIpPoolManagementByMachine(final VirtualMachine vm)
-    {
-        return repo.findIpsByVirtualMachine(vm);
-    }
-
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
         final Boolean asc)
@@ -243,6 +309,33 @@ public class NetworkService extends DefaultApiService
     public List<IpPoolManagement> getListIpPoolManagementByVirtualApp(final VirtualAppliance vapp)
     {
         return repo.findIpsByVirtualAppliance(vapp);
+    }
+
+    public List<IpPoolManagement> getListIpPoolManagementByVirtualMachine(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        return repo.findIpsByVirtualMachine(vm);
     }
 
     /**
@@ -437,6 +530,159 @@ public class NetworkService extends DefaultApiService
             }
         }
         return configs;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void releaseNicFromVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer nicOrder)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        // We need to find the NICs that we want to release from the virtual machine
+        // and reorder the rest of NICs decrementing by 1 its 'configurationName'.
+        // We can do it in a simple loop because the method
+        // 'findIpsByVirtualMachine' return the ips from a VirtualMachine ordered by
+        // its order (rasd.configurationName).
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+        if (ips.size() == 1)
+        {
+            addConflictErrors(APIError.VLANS_CAN_NOT_DELETE_LAST_NIC);
+            flushErrors();
+        }
+        Boolean found = Boolean.FALSE;
+        for (IpPoolManagement ip : ips)
+        {
+            if (!found)
+            {
+                if (Integer.valueOf(ip.getRasd().getConfigurationName()).equals(nicOrder))
+                {
+                    // if this ip is the used by configurate the network, raise an exception.
+                    if (ip.getConfigureGateway() == Boolean.TRUE)
+                    {
+                        addConflictErrors(APIError.VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION);
+                        flushErrors();
+                    }
+                    repo.deleteRasd(ip.getRasd());
+                    // this is the object to release.
+                    ip.setVirtualAppliance(null);
+                    ip.setVirtualMachine(null);
+                    ip.setRasd(null);
+                    repo.updateIpManagement(ip);
+
+                    found = Boolean.TRUE;
+                }
+            }
+            else
+            {
+                // Decrement by 1 the order of the rest of NICs
+                Integer currentOrder = Integer.valueOf(ip.getRasd().getConfigurationName());
+                ip.getRasd().setConfigurationName(String.valueOf(currentOrder - 1));
+                repo.updateRasd(ip.getRasd());
+            }
+        }
+
+        // if the found is FALSE it means any NIC matches with the URI! Throw a NotFound
+        if (!found)
+        {
+            addNotFoundErrors(APIError.VLANS_NIC_NOT_FOUND);
+            flushErrors();
+        }
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void reorderVirtualMachineNic(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer linkOldOrder, final Integer nicOrder)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+
+        // All the
+        List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
+        if (nicOrder >= ips.size())
+        {
+            // If the order is bigger or equal than the size, then
+            // the resource does not exist. Ex: size = 2 -> nicOrder = 2 -> (ERROR! the order begins
+            // with 0 and if the size is true, the available values are 0,1.
+            addNotFoundErrors(APIError.VLANS_NIC_NOT_FOUND);
+        }
+
+        if (nicOrder == linkOldOrder)
+        {
+            // do nothing
+            return;
+        }
+
+        // Update the rest of ethernet values. The goal of this bucle is shift all
+        // the ethernet values between the new order and the previous one. Depending
+        // on the new order is bigger or smaller than the previous one, the shift
+        // will be right to left or left to right.
+
+        // The shift of the new values are leftToRight or rightToLeft?
+        Boolean leftToRight = Boolean.TRUE;
+        if (nicOrder > linkOldOrder)
+        {
+            leftToRight = Boolean.FALSE;
+        }
+
+        // move backwards or forwards the ip order in the loop.
+        for (IpPoolManagement ip : ips)
+        {
+            Integer eth = Integer.valueOf(ip.getRasd().getConfigurationName());
+            if (eth.equals(linkOldOrder))
+            {
+                // if its the value to modify, do it :)
+                // Set the new order to the NIC
+                ip.getRasd().setConfigurationName(String.valueOf(nicOrder));
+            }
+            if (leftToRight && eth >= nicOrder && eth < linkOldOrder)
+            {
+                ip.getRasd().setConfigurationName(String.valueOf(eth + 1));
+
+            }
+            else if (!leftToRight && eth <= nicOrder && eth > linkOldOrder)
+            {
+                ip.getRasd().setConfigurationName(String.valueOf(eth - 1));
+            }
+
+            repo.updateRasd(ip.getRasd());
+        }
     }
 
     /**
@@ -762,7 +1008,7 @@ public class NetworkService extends DefaultApiService
      * @return the created {@link DHCP} object
      */
     protected Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
-        final VLANNetwork vlan, final Collection<IPAddress> range)
+        final VLANNetwork vlan, final Collection<IPAddress> range, final IpPoolManagement.Type type)
     {
         List<RemoteService> dhcpServiceList =
             datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
@@ -805,7 +1051,7 @@ public class NetworkService extends DefaultApiService
                     name,
                     address.toString(),
                     vlan.getName(),
-                    IpPoolManagement.Type.PRIVATE);
+                    type);
 
             if (vdc != null)
             {

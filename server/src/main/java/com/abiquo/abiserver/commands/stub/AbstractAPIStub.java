@@ -603,6 +603,35 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createVirtualMachineNICsLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
+            params);
+    }
+
+    protected String createVirtualMachineNICLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer nicOrder)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("nicOrder", nicOrder.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics/{nicOrder}",
+            params);
+    }
+
     protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;
@@ -700,6 +729,18 @@ public class AbstractAPIStub
         params.put("vlan", vlanId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}", params);
+    }
+
+    protected String createPrivateNetworkIPLink(final Integer vdcId, final Integer vlanId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips/{ip}",
+            params);
     }
 
     protected String createPrivateNetworkIPsLink(final Integer vdcId, final Integer vlanId)

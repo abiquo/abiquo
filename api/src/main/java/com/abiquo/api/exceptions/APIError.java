@@ -129,7 +129,19 @@ public enum APIError
         "Attributes 'address' and 'mask' can not be changed by the Edit process of private VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
         "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
         "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
-        "This IP address is currently used by a Virtual Machine. Can not be released"),
+        "This IP address is currently used by a Virtual Machine. Can not be released"), VLANS_PRIVATE_IP_INVALID_LINK(
+        "VLAN-23", "Invalid link to private ip address to create NIC"), VLANS_IP_LINK_INVALID_VDC(
+        "VLAN-24", "Invalid Virtual Datacenter identifier in the IP link"), VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
+        "VLAN-25", "The IP address is already used by another virtual machine"), VLANS_PUBLIC_IP_INVALID_LINK(
+        "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
+        "VLAN-27",
+        "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
+            + "configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+        "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
+        "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
+        "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
+        "VLAN-31",
+        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs into a Virtual Machine."),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),

@@ -145,6 +145,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
+    public static final String BY_VIRTUAL_MACHINE = "SELECT ip "
+        + "FROM IpPoolManagement ip INNER JOIN ip.virtualMachine vm " + "WHERE vm.id = :vm_id "
+        + "ORDER BY ip.rasd.configurationName";
+
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
         + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
@@ -461,15 +465,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine virtualMachine)
     {
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
+        Query query = getSession().createQuery(BY_VIRTUAL_MACHINE);
+        query.setParameter("vm_id", virtualMachine.getId());
 
-        Criterion onVM = Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, virtualMachine);
-
-        criteria.add(onVM);
-
-        List<IpPoolManagement> result = getResultList(criteria);
-
-        return result;
+        return query.list();
 
     }
 

@@ -181,7 +181,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            ipsObjects.add(ippool.getRasd());
+            // ipsObjects.add(ippool.getRasd());
             ipsObjects.add(ippool);
             ip = ip.nextIPAddress();
         }

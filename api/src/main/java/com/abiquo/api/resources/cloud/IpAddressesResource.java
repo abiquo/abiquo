@@ -61,6 +61,10 @@ public class IpAddressesResource extends AbstractResource
 
     public static final String ONLYAVAILABLE = "onlyAvailable";
 
+    public static final String IP_ADDRESS = "ip";
+
+    public static final String IP_ADDRESS_PARAM = "{" + IP_ADDRESS + "}";
+
     @Autowired
     private NetworkService service;
 

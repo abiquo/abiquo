@@ -105,13 +105,25 @@ public interface NetworkResourceStub
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
+    public BasicResult getNICsByVirtualMachine(Integer virtualDatacenterId, Integer vappId,
+        Integer virtualMachineId);
+
     public BasicResult getPrivateNetworks(final Integer vdcId);
 
     public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
 
     public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
 
+    public BasicResult releaseNICfromVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
+        Integer nicOrder);
+
     public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId);
+
+    public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
+        Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
+    public BasicResult requestPublicNICforVirtualMachine(Integer vdcId, Integer vappId,
+        Integer vmId, Integer vlanNetworkId, Integer idManagement);
 
     public BasicResult setGatewayForVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
         IPAddress gateway);

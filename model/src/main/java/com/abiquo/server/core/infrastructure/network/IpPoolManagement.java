@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -38,7 +36,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -53,10 +50,13 @@ public class IpPoolManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "10";
 
-    private static final String DEFAULT_RESOURCE_NAME = "MAC Address";
+    public static final String DEFAULT_RESOURCE_NAME = "MAC Address";
 
-    private static final String DEFAULT_RESOURCE_DESCRIPTION =
+    public static final String DEFAULT_RESOURCE_DESCRIPTION =
         "MAC Address asociated to private Network";
+
+    public static final String DEFAULT_RESOURCE_PUBLIC_IP_DESCRIPTION =
+        "MAC Address asociated to public Network";
 
     public static enum Type
     {
@@ -92,22 +92,6 @@ public class IpPoolManagement extends RasdManagement
     {
         super(DISCRIMINATOR);
 
-        // RasdManagement properties
-        Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(DISCRIMINATOR));
-
-        rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
-        rasd.setConnection("");
-        rasd.setAllocationUnits("0");
-        rasd.setAutomaticAllocation(0);
-        rasd.setAutomaticDeallocation(0);
-
-        setRasd(rasd);
-
-        // IpManagement properties
-        setType(type);
         setDhcp(dhcp);
         setMac(mac);
         setName(name);
@@ -356,7 +340,6 @@ public class IpPoolManagement extends RasdManagement
     public void setType(final Type type)
     {
         getRasd().setResourceSubType(String.valueOf(type.ordinal()));
-        getRasd().setConfigurationName(String.valueOf(type.ordinal()));
     }
 
     public boolean isPrivateIp()
