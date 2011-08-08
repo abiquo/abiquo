@@ -72,15 +72,15 @@ CREATE TABLE `kinton`.`pricingTemplate_costcode` (
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
  --
--- Table `kinton`.`costeCodeCurrency`
+-- Table `kinton`.`costCodeCurrency`
 -- 
-CREATE TABLE  `kinton`.`costeCodeCurrency` (
-  `idCosteCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE  `kinton`.`costCodeCurrency` (
+  `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idCostCode` int(10) unsigned,
   `idCurrency` int(10) unsigned,
   `price` DECIMAL(20) NOT NULL default 0,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (`idCosteCodeCurrency`)
+  PRIMARY KEY (`idCostCodeCurrency`)
   -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
   -- CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `currency` (`idCurrency`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;

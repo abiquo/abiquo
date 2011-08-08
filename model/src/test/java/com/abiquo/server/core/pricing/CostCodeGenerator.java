@@ -54,6 +54,15 @@ public class CostCodeGenerator extends DefaultEntityGenerator<CostCode>
         return costeCode;
     }
 
+    public CostCode createInstance(final String name)
+    {
+        String description = newString(nextSeed(), 0, 255);
+
+        CostCode costeCode = new CostCode(name, description);
+
+        return costeCode;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final CostCode entity,
         final List<Object> entitiesToPersist)
