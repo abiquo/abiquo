@@ -112,7 +112,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws VirtualMachineException the virtual machine exception
      */
     public AbsHyperVMachine(final VirtualMachineConfiguration configuration)
-        throws VirtualMachineException
+    throws VirtualMachineException
     {
         super(configuration);
         if (config.getHyper() == null)
@@ -183,7 +183,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         for (int i = 0; i < s.length(); i++)
         {
             if (s.charAt(i) != c)
+            {
                 r += s.charAt(i);
+            }
         }
         return r;
     }
@@ -194,7 +196,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
     @Override
     public void bundleVirtualMachine(final String sourcePath, final String destinationPath,
         final String snapshotName, final boolean isManaged) throws VirtualMachineException
-    {
+        {
         // Bundlelling the image through the image service conversion method
 
         // Getting the bundle destination directory
@@ -253,7 +255,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.logout();
         }
 
-    }
+        }
 
     /**
      * Perform the virtual image cloning. Creates a copy of the original image and put it on where
@@ -456,7 +458,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         {
             String externalSwitchQuery =
                 "SELECT * FROM Msvm_VirtualSwitch WHERE ElementName='" + vnic.getVSwitchName()
-                    + "'";
+                + "'";
 
             JIVariant[] externalSwitchQueryResult = execQuery(externalSwitchQuery);
 
@@ -466,7 +468,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             {
                 String msg =
                     "External network: " + vnic.getVSwitchName()
-                        + " not found. The networking resources couldn't be configured";
+                    + " not found. The networking resources couldn't be configured";
                 // logger
                 // .error(
                 // "External network not found. The VM NIC with MAC address: {} will have no connectivity",
@@ -477,7 +479,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             IJIDispatch externalVswitchDispatcher =
                 (IJIDispatch) JIObjectFactory.narrowObject(externalVswitchSet[0][0]
-                    .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                 .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
             // Getting the path of the virtual switch
 
@@ -536,7 +538,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             String vlanesdexport =
                 "SELECT * FROM Msvm_VLANEndpointSettingData WHERE ElementName='"
-                    + vnic.getVSwitchName() + "_ExternalPort" + "'";
+                + vnic.getVSwitchName() + "_ExternalPort" + "'";
 
             JIVariant[] vlanesdexportQueryResult = execQuery(vlanesdexport);
 
@@ -546,14 +548,14 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             {
                 String msg =
                     "External network: " + vnic.getVSwitchName()
-                        + " not connected. The networking resources couldn't be configured";
+                    + " not connected. The networking resources couldn't be configured";
                 throw new VirtualMachineException(msg);
 
             }
 
             IJIDispatch vlanesdexportDispatch =
                 (IJIDispatch) JIObjectFactory.narrowObject(vlanesdSetExport[0][0]
-                    .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                               .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
             JIArray trunkedList = vlanesdexportDispatch.get("TrunkedVLANList").getObjectAsArray();
             JIVariant[] trunkArray = (JIVariant[]) trunkedList.getArrayInstance();
@@ -567,7 +569,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             String vlanesd =
                 "SELECT * FROM Msvm_VLANEndpointSettingData WHERE ElementName='" + firstNicPortName
-                    + "'";
+                + "'";
 
             JIVariant[] vlanesdQueryResult = execQuery(vlanesd);
 
@@ -609,7 +611,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             IJIDispatch globalSettingDispatcher =
                 HyperVUtils.createNewInstance(service.getObjectDispatcher(),
-                    "Msvm_VirtualSystemGlobalSettingData");
+                "Msvm_VirtualSystemGlobalSettingData");
 
             globalSettingDispatcher.put("ElementName", new JIVariant(new JIString(machineName)));
 
@@ -626,7 +628,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
             String globalSettingDataText =
                 globalSettingDispatcher.callMethodA("GetText_", new Object[] {new Integer(1)})[0]
-                    .getObjectAsString2();
+                                                                                               .getObjectAsString2();
 
             MsvmVirtualSystemManagementServiceExtended virtualSysteManagementServiceExt =
                 MsvmVirtualSystemManagementServiceExtended.getManagementServiceExtended(service);
@@ -667,7 +669,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         // Getting the SCSI controller
         String query =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.PARALLELSCSIHBA + "'";
+            + HyperVConstants.PARALLELSCSIHBA + "'";
 
         JIVariant[] scsiQueryResult = execQuery(query);
 
@@ -679,14 +681,14 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         IJIDispatch clonedSCSIDispatcher =
             (IJIDispatch) JIObjectFactory.narrowObject(cloneSCSIDefaultResult[0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                              .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         MsvmVirtualSystemManagementServiceExtended virtualSysteManagementServiceExt =
             MsvmVirtualSystemManagementServiceExtended.getManagementServiceExtended(service);
 
         // Adding SCSI controller since it's not created by default
         virtualSysteManagementServiceExt
-            .addVirtualSystemResources(vmDispatch, clonedSCSIDispatcher);
+        .addVirtualSystemResources(vmDispatch, clonedSCSIDispatcher);
 
         ArrayList<IJIDispatch> rasdList = getRASDAssociatedToSystemSettingData();
 
@@ -709,7 +711,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         // Getting the disk default drive
         String diskDefaultQuery =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.DISKSYNTHETIC + "'";
+            + HyperVConstants.DISKSYNTHETIC + "'";
 
         JIVariant[] diskDefaultQueryResult = execQuery(diskDefaultQuery);
 
@@ -721,7 +723,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         IJIDispatch clonedDiskDispatcher =
             (IJIDispatch) JIObjectFactory.narrowObject(cloneDiskDefaultResult[0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                              .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         // Getting the SCSI controller path
 
@@ -742,7 +744,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         String vhdQuery =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.VHD + "'";
+            + HyperVConstants.VHD + "'";
 
         JIVariant[] vhdDefaultQueryResult = execQuery(vhdQuery);
 
@@ -754,7 +756,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         IJIDispatch clonedvhdDispatcher =
             (IJIDispatch) JIObjectFactory.narrowObject(clonevhdDiskDefaultResult[0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                 .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         clonedvhdDispatcher.put("Parent", new JIVariant(diskResourcePath));
         clonedvhdDispatcher.put("Connection",
@@ -777,7 +779,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws Exception
      */
     public abstract void configureExtendedDiskResources(VirtualMachineConfiguration vmConfig)
-        throws Exception;
+    throws Exception;
 
     /**
      * Configures the virtual hard disk resource to attache the VHD cloned file
@@ -787,12 +789,12 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws Exception
      */
     protected void configureVHDDisk(final String controllerPath, final int addressSlot)
-        throws Exception
+    throws Exception
     {
         // Getting the disk default drive
         String diskDefaultQuery =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.DISKSYNTHETIC + "'";
+            + HyperVConstants.DISKSYNTHETIC + "'";
 
         JIVariant[] diskDefaultQueryResult = execQuery(diskDefaultQuery);
 
@@ -804,7 +806,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         IJIDispatch clonedDiskDispatcher =
             (IJIDispatch) JIObjectFactory.narrowObject(cloneDiskDefaultResult[0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                              .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         clonedDiskDispatcher.put("Parent", new JIVariant(controllerPath));
         clonedDiskDispatcher.put("Address", new JIVariant(addressSlot));
@@ -820,7 +822,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         String vhdQuery =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.VHD + "'";
+            + HyperVConstants.VHD + "'";
 
         JIVariant[] vhdDefaultQueryResult = execQuery(vhdQuery);
 
@@ -832,7 +834,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         IJIDispatch clonedvhdDispatcher =
             (IJIDispatch) JIObjectFactory.narrowObject(clonevhdDiskDefaultResult[0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                 .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         clonedvhdDispatcher.put("Parent", new JIVariant(diskResourcePath));
         clonedvhdDispatcher.put("Connection",
@@ -854,7 +856,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         ArrayList<IJIDispatch> res = new ArrayList<IJIDispatch>();
         JIVariant[] tmp =
             execQuery("Associators of {Msvm_VirtualSystemSettingData.InstanceID='"
-                + vssdDispatch.get(("InstanceID")).getObjectAsString2()
+                + vssdDispatch.get("InstanceID").getObjectAsString2()
                 + "'} Where ResultClass= Msvm_ResourceAllocationSettingData");
         JIVariant[][] rasdSet = enumToJIVariantArray(tmp);
         for (JIVariant[] element : rasdSet)
@@ -862,13 +864,13 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             try
             {
                 res.add((IJIDispatch) JIObjectFactory.narrowObject(element[0]
-                    .getObjectAsComObject().queryInterface(IJIDispatch.IID)));
+                                                                           .getObjectAsComObject().queryInterface(IJIDispatch.IID)));
             }
             catch (IndexOutOfBoundsException e)
             {
                 logger
-                    .warn("An error occured while determining the virtual system setting data of "
-                        + this.machineName);
+                .warn("An error occured while determining the virtual system setting data of "
+                    + this.machineName);
             }
         }
         return res;
@@ -881,7 +883,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws JIException
      */
     private ArrayList<IJIDispatch> getVSSDComponentAssociatedToSystemSettingData()
-        throws JIException
+    throws JIException
     {
         IJIDispatch vssdDispatch = getVirtualSystemSettingData();
         // Getting the dispatcher of the VSSD Path
@@ -916,8 +918,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             catch (IndexOutOfBoundsException e)
             {
                 logger
-                    .warn("An error occured while determining the virtual system setting data of "
-                        + this.machineName);
+                .warn("An error occured while determining the virtual system setting data of "
+                    + this.machineName);
             }
         }
         return res;
@@ -958,7 +960,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         IJIDispatch processorSettingDataDispatch = getRASDByClass("Msvm_ProcessorSettingData");
 
         processorSettingDataDispatch
-            .put("VirtualQuantity", new JIVariant(new Long(processorCount)));
+        .put("VirtualQuantity", new JIVariant(new Long(processorCount)));
         // processorSettingDataDispatch.put("Reservation", new JIVariant(new Long(processorCount)));
         // processorSettingDataDispatch.put("Limit", new JIVariant(new Long(processorCount)));
         processorSettingDataDispatch.put("Limit", new JIVariant(100000));
@@ -983,7 +985,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         JIVariant[][] vssdVariantArray = enumToJIVariantArray(tmp);
         IJIDispatch vmSettingDispatch =
             (IJIDispatch) JIObjectFactory.narrowObject(vssdVariantArray[0][0]
-                .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                           .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
         String vmSettingPath = getDispatchPath(vmSettingDispatch);
 
@@ -994,7 +996,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         JIVariant[][] resourceSettingVariantArray = enumToJIVariantArray(tmp2);
 
         return (IJIDispatch) JIObjectFactory.narrowObject(resourceSettingVariantArray[0][0]
-            .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                         .getObjectAsComObject().queryInterface(IJIDispatch.IID));
     }
 
     /**
@@ -1019,7 +1021,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 + "} Where AssocClass=Msvm_SettingsDefineState ResultClass=Msvm_VirtualSystemSettingData");
         JIVariant[][] vssdVariantArray = enumToJIVariantArray(tmp);
         return (IJIDispatch) JIObjectFactory.narrowObject(vssdVariantArray[0][0]
-            .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                              .getObjectAsComObject().queryInterface(IJIDispatch.IID));
     }
 
     /**
@@ -1086,7 +1088,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
         // Getting the SCSI controller
         String query =
             "Select * From Msvm_ResourceAllocationSettingData Where ResourceSubType='"
-                + HyperVConstants.IDECONTROLLER + "'";
+            + HyperVConstants.IDECONTROLLER + "'";
 
         JIVariant[] ideQueryResult = execQuery(query);
 
@@ -1108,8 +1110,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             catch (IndexOutOfBoundsException e)
             {
                 logger
-                    .warn("An error occured while determining the virtual system setting data of "
-                        + this.machineName);
+                .warn("An error occured while determining the virtual system setting data of "
+                    + this.machineName);
             }
         }
 
@@ -1124,7 +1126,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      * @throws JIException
      */
     protected IJIDispatch getResourceAllocationSettingDataDefault(final JIVariant[][] rasdSet)
-        throws JIException
+    throws JIException
     {
         IJIDispatch resourceDispatch = null;
         for (JIVariant[] element : rasdSet)
@@ -1142,8 +1144,8 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             catch (IndexOutOfBoundsException e)
             {
                 logger
-                    .warn("An error occured while determining the virtual system setting data of "
-                        + this.machineName);
+                .warn("An error occured while determining the virtual system setting data of "
+                    + this.machineName);
             }
         }
 
@@ -1161,13 +1163,15 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             // Preparing the query
             String query =
                 "Select * From Msvm_VirtualSystemGlobalSettingData Where ElementName='"
-                    + machineName + "'";
+                + machineName + "'";
 
             JIVariant[] result = execQuery(query);
 
             JIVariant[][] tmpSet = enumToJIVariantArray(result);
             if (tmpSet.length > 0)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -1189,7 +1193,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.reconnect();
 
             if (!checkState(State.PAUSE))
+            {
                 changeVirtualMachineState(HyperVConstants.PAUSED);
+            }
 
         }
         catch (Exception e)
@@ -1214,7 +1220,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.reconnect();
 
             if (!checkState(State.POWER_OFF))
+            {
                 changeVirtualMachineState(HyperVConstants.POWER_OFF);
+            }
 
         }
         catch (Exception e)
@@ -1239,7 +1247,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.reconnect();
 
             if (!checkState(State.POWER_UP))
+            {
                 changeVirtualMachineState(HyperVConstants.POWER_ON);
+            }
 
         }
         catch (Exception e)
@@ -1308,7 +1318,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                     {
                         String message =
                             "An exception occured while monitoring " + this.machineName
-                                + "this state changement" + state + e;
+                            + "this state changement" + state + e;
                         throw new VirtualMachineException(message);
                     }
                 }
@@ -1332,7 +1342,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      */
     @Override
     public void reconfigVM(final VirtualMachineConfiguration newConfiguration)
-        throws VirtualMachineException
+    throws VirtualMachineException
     {
         try
         {
@@ -1386,7 +1396,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 // Checking if this VLAN is used by other VM
                 String vlanUsedCheckQuery =
                     "SELECT * FROM Msvm_VLANEndpointSettingData WHERE AccessVLAN="
-                        + vnic.getVlanTag();
+                    + vnic.getVlanTag();
 
                 JIVariant[] vlancheckQueryResult = execQuery(vlanUsedCheckQuery);
 
@@ -1396,7 +1406,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
                 {
                     String vlanesdexport =
                         "SELECT * FROM Msvm_VLANEndpointSettingData WHERE ElementName='"
-                            + vnic.getVSwitchName() + "_ExternalPort" + "'";
+                        + vnic.getVSwitchName() + "_ExternalPort" + "'";
 
                     JIVariant[] vlanesdexportQueryResult = execQuery(vlanesdexport);
 
@@ -1404,7 +1414,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
                     IJIDispatch vlanesdexportDispatch =
                         (IJIDispatch) JIObjectFactory.narrowObject(vlanesdSetExport[0][0]
-                            .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                       .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
                     JIArray trunkedList =
                         vlanesdexportDispatch.get("TrunkedVLANList").getObjectAsArray();
@@ -1428,7 +1438,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
                 IJIDispatch nicSwitchPortDispatch =
                     (IJIDispatch) JIObjectFactory.narrowObject(nicPortSwitchSet[0][0]
-                        .getObjectAsComObject().queryInterface(IJIDispatch.IID));
+                                                                                   .getObjectAsComObject().queryInterface(IJIDispatch.IID));
 
                 // Getting the dispatcher of the VM Path
                 IJIDispatch nicSwitchPortDispatcher =
@@ -1489,12 +1499,11 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
      */
 
     private JIVariant[] eraseVLANFromArray(final JIVariant[] trunkArray, final int vlanTag)
-        throws JIException
+    throws JIException
     {
         List<JIVariant> tagList = new ArrayList<JIVariant>();
-        for (int i = 0; i < trunkArray.length; i++)
+        for (JIVariant jiVariant : trunkArray)
         {
-            JIVariant jiVariant = trunkArray[i];
             int trunkTag = jiVariant.getObjectAsInt();
             if (trunkTag != vlanTag)
             {
@@ -1518,7 +1527,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.reconnect();
 
             if (!checkState(State.POWER_UP))
+            {
                 changeVirtualMachineState(HyperVConstants.REBOOT);
+            }
 
         }
         catch (Exception e)
@@ -1543,7 +1554,9 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
             hyperVHypervisor.reconnect();
 
             if (!checkState(State.POWER_UP))
+            {
                 changeVirtualMachineState(HyperVConstants.POWER_ON);
+            }
 
         }
         catch (Exception e)
@@ -1571,7 +1584,7 @@ public abstract class AbsHyperVMachine extends AbsVirtualMachine
 
         JIVariant[] res =
             hyperVHypervisor.getCIMService().getObjectDispatcher()
-                .callMethodA("ExecQuery", new Object[] {new JIString(query)});
+            .callMethodA("ExecQuery", new Object[] {new JIString(query)});
 
         JIVariant[][] fileSet = HyperVUtils.enumToJIVariantArray(res);
 
