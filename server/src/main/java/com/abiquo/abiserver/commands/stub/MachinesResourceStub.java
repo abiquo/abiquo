@@ -26,7 +26,10 @@ import java.util.List;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.infrastructure.Machine.State;
 
 public interface MachinesResourceStub
 {
@@ -54,4 +57,10 @@ public interface MachinesResourceStub
     public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(Integer dcId, Integer rackId,
         Integer pmId);
 
+    public DataResult<State> checkPhysicalMachineState(Integer datacenterId, Integer rackId,
+        Integer machineId, String ip, HypervisorType hypervisor, String user, String password,
+        Integer port);
+
+    public BasicResult isStonithUp(Integer datacenterId, Integer rackId, Integer machineId,
+        String ip, String user, String password, Integer port);
 }

@@ -67,7 +67,11 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES = "enterprises";
+
     public static final String ENTERPRISES_PATH = "action/enterprises";
+
+    public static final String UPDATE_RESOURCES = "updateUsedResources";
 
     public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
 

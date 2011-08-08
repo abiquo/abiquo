@@ -137,7 +137,8 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
+        "MACHINE-8", "Invalid IPMI configuration."),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(

@@ -116,6 +116,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/action/discover" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/discover_multiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/hypervisor" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/updateUsedResources" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- RACKS -->
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
@@ -130,6 +131,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/action/checkState" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -139,6 +142,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/reenableafterha" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- DATASTORES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />

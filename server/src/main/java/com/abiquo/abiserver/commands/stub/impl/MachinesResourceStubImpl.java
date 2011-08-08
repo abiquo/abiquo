@@ -35,9 +35,12 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.RackDto;
@@ -142,6 +145,25 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
     @Override
     public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(final Integer dcId,
         final Integer rackId, final Integer pmId)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<State> checkPhysicalMachineState(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final String ip,
+        final HypervisorType hypervisor, final String user, final String password,
+        final Integer port)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public BasicResult isStonithUp(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String user, final String password,
+        final Integer port)
     {
         // PREMIUM
         return null;

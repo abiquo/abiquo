@@ -601,6 +601,72 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createMachineLinkCheckState(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String hypervisor, final String user,
+        final String password, final Integer port)
+    {
+        boolean includeMachineId = false;
+        if (machineId != null && machineId != 0)
+        {
+            includeMachineId = true;
+        }
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        if (includeMachineId)
+        {
+            params.put("machine", machineId.toString());
+        }
+        params.put("ip", ip);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        if (includeMachineId)
+        {
+            uri += "{machine}/";
+        }
+        uri +=
+            "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createMachineLinkCheckIpmi(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String user, final String password,
+        final Integer port)
+    {
+        boolean includeMachineId = false;
+        if (machineId != null && machineId != 0)
+        {
+            includeMachineId = true;
+        }
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        if (includeMachineId)
+        {
+            params.put("machine", machineId.toString());
+        }
+        params.put("ip", ip);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        if (includeMachineId)
+        {
+            uri += "{machine}/";
+        }
+        uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
         return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");

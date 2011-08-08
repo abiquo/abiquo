@@ -32,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
-import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -58,7 +57,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 
-@Parent(MachinesResource.class)
+//@Parent(MachinesResource.class)
 @Path(MachineResource.MACHINE_PARAM)
 @Controller
 public class MachineResource extends AbstractResource

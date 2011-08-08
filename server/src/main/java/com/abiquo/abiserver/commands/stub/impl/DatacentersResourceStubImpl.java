@@ -202,9 +202,9 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
     {
         BasicResult result = new BasicResult();
 
-        ClientResponse response = get(createDatacenterLinkUsedResources(datacenterId));
+        ClientResponse response = put(createDatacenterLinkUsedResources(datacenterId), null);
 
-        if (response.getStatusCode() == 200)
+        if (response.getStatusCode() == 204)
         {
             result.setSuccess(true);
             result.setMessage(InfrastructureCommandImpl.getResourceManager().getMessage(
