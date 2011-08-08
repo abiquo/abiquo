@@ -84,9 +84,9 @@ public class CostCodeCurrencyDAOTest extends
 
         CostCodeCurrencyDAO dao = createDaoForRollbackTransaction();
 
-        Collection<CostCodeCurrency> ccs = dao.find(null, null, false, 0, 25, c1.getCostCode());
+        Collection<CostCodeCurrency> ccs = dao.find(c1.getCostCode());
         AssertEx.assertSize(ccs, 1);
-        ccs = dao.find(null, null, false, 0, 25, c2.getCostCode());
+        ccs = dao.find(c2.getCostCode());
         AssertEx.assertSize(ccs, 1);
 
     }

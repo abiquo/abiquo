@@ -230,11 +230,9 @@ public class PricingRep extends DefaultRepBase
         return costCodeDao.existAnyOtherCostCodeWithName(name);
     }
 
-    public Collection<CostCodeCurrency> findCostCodeCurrencies(final String filter,
-        final String orderBy, final boolean desc, final int page, final int numResults,
-        final CostCode cc)
+    public Collection<CostCodeCurrency> findCostCodeCurrencies(final CostCode cc)
     {
-        return costCodeCurrencyDao.find(filter, orderBy, desc, page, numResults, cc);
+        return costCodeCurrencyDao.find(cc);
     }
 
 }
