@@ -21,13 +21,21 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.util.PagedList;
 
 @Repository("jpaCosteCodeDAO")
 public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
@@ -47,6 +55,15 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
         return Restrictions.eq(PricingTemplate.NAME_PROPERTY, name);
     }
 
+    private Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(CostCode.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
+    }
+
     public boolean existAnyOtherCostCodeWithName(final CostCode costCode, final String name)
     {
         return existsAnyOtherByCriterions(costCode, sameName(name));
@@ -55,6 +72,52 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
     public boolean existAnyOtherCostCodeWithName(final String name)
     {
         return existsAnyByCriterions(sameName(name));
+    }
+
+    public Collection<CostCode> find(final String filter, final String orderBy, final boolean desc,
+        final int offset, final int numResults)
+    {
+        Criteria criteria = createCriteria(filter, orderBy, desc);
+
+        Long total = count(criteria);
+
+        criteria = createCriteria(filter, orderBy, desc);
+
+        criteria.setFirstResult(offset * numResults);
+        criteria.setMaxResults(numResults);
+
+        List<CostCode> result = getResultList(criteria);
+
+        PagedList<CostCode> page = new PagedList<CostCode>();
+        page.addAll(result);
+        page.setCurrentElement(offset);
+        page.setPageSize(numResults);
+        page.setTotalResults(total.intValue());
+
+        return page;
+    }
+
+    private Criteria createCriteria(final String filter, final String orderBy, final boolean desc)
+    {
+        Criteria criteria = createCriteria();
+
+        if (!StringUtils.isEmpty(filter))
+        {
+            criteria.add(filterBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderBy))
+        {
+            Order order = Order.asc(orderBy);
+            if (desc)
+            {
+                order = Order.desc(orderBy);
+            }
+            criteria.addOrder(order);
+            criteria.addOrder(Order.asc(PricingTemplate.NAME_PROPERTY));
+        }
+
+        return criteria;
     }
 
 }

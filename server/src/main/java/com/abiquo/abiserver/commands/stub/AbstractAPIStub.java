@@ -695,14 +695,14 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currencyId}",
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
             Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
     {
         return URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}",
-            Collections.singletonMap("role", valueOf(templateId)));
+            Collections.singletonMap("template", valueOf(templateId)));
     }
 
     protected String createPricingTemplatesLink()
@@ -760,7 +760,7 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costCodes/{costCodeId}",
+        return URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}",
             Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
@@ -772,6 +772,28 @@ public class AbstractAPIStub
                 Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCurrenciesLink()
+    {
+        return createCurrenciesLink(null, null);
+    }
+
+    protected String createCurrenciesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
         if (offset != null && numResults != null)
         {
             offset = offset / numResults;
