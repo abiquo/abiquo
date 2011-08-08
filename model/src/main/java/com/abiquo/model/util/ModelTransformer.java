@@ -74,7 +74,6 @@ public class ModelTransformer
             int modifiers = field.getModifiers();
             if (!Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers))
             {
-
                 String name = field.getName();
                 try
                 {
