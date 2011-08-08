@@ -783,6 +783,11 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
+    protected String createCurrenciesLink()
+    {
+        return createCostCodesLink(null, null);
+    }
+
     protected String createCurrenciesLink(Integer offset, final Integer numResults)
     {
         String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
