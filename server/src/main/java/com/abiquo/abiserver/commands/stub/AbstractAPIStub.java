@@ -695,14 +695,14 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currencyId}",
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
             Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
     {
         return URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}",
-            Collections.singletonMap("role", valueOf(templateId)));
+            Collections.singletonMap("template", valueOf(templateId)));
     }
 
     protected String createPricingTemplatesLink()
@@ -760,7 +760,7 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costCodes/{costCodeId}",
+        return URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}",
             Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
@@ -785,7 +785,7 @@ public class AbstractAPIStub
 
     protected String createCurrenciesLink()
     {
-        return createCostCodesLink(null, null);
+        return createCurrenciesLink(null, null);
     }
 
     protected String createCurrenciesLink(Integer offset, final Integer numResults)
