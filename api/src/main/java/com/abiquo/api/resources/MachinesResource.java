@@ -63,9 +63,6 @@ public class MachinesResource extends AbstractResource
     public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
 
     @Autowired
-    protected MachineResource machineResource;
-
-    @Autowired
     protected MachineService machineService;
 
     @Autowired
@@ -117,12 +114,6 @@ public class MachinesResource extends AbstractResource
         MachinesDto transfer = MachineResource.createTransferObjects(machinesCreated, restBuilder);
 
         return transfer;
-    }
-
-    @Path("/{machine}")
-    public MachineResource route()
-    {
-        return machineResource;
     }
 
     public static MachinesDto transformMachinesDto(final IRESTBuilder restBuilder,
