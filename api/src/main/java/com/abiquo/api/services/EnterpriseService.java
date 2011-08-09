@@ -40,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.resources.config.PricingTemplateResource;
+import com.abiquo.api.resources.config.PricingTemplatesResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
@@ -231,9 +233,15 @@ public class EnterpriseService extends DefaultApiService
         old.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         old.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
-
         isValidEnterprise(old);
         isValidEnterpriseLimit(old);
+
+        if (dto.searchLink("template") != null)
+        {
+
+            PricingTemplate pricingTemplate = findPricingTemplate(getPricingTemplateId(dto));
+            old.setPricingTemplate(pricingTemplate);
+        }
 
         repo.update(old);
         return old;
@@ -581,5 +589,30 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
         return pt;
+    }
+
+    private Integer getPricingTemplateId(final EnterpriseDto dto)
+    {
+        RESTLink pt = dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE);
+
+        if (pt == null)
+        {
+            addValidationErrors(APIError.MISSING_PRICING_TEMPLATE_LINK);
+            flushErrors();
+        }
+
+        String buildPath =
+            buildPath(PricingTemplatesResource.PRICING_TEMPLATES_PATH,
+                PricingTemplateResource.PRICING_TEMPLATE_PARAM);
+        MultivaluedMap<String, String> values = URIResolver.resolveFromURI(buildPath, pt.getHref());
+
+        if (values == null || !values.containsKey(PricingTemplateResource.PRICING_TEMPLATE))
+        {
+            addNotFoundErrors(APIError.PRICING_TEMPLATE_PARAM_NOT_FOUND);
+            flushErrors();
+        }
+
+        Integer roleId = Integer.valueOf(values.getFirst(PricingTemplateResource.PRICING_TEMPLATE));
+        return roleId;
     }
 }

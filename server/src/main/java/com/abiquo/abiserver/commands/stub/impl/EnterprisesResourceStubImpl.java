@@ -103,47 +103,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
     @Override
     public DataResult<Enterprise> editEnterprise(final Enterprise enterprise)
     {
-        DataResult<Enterprise> result;
-        ErrorsDto errors = modifyDatacenterLimits(enterprise);
-
-        if (errors != null)
-        {
-            result = new DataResult<Enterprise>();
-            result.setSuccess(false);
-            result.setMessage(errors.toString());
-            return result;
-        }
-
-        errors = modifyReservedMachines(enterprise);
-
-        if (errors != null)
-        {
-            result = new DataResult<Enterprise>();
-            result.setSuccess(false);
-            result.setMessage(errors.toString());
-            return result;
-        }
-
-        String uri = createEnterpriseLink(enterprise.getId());
-
-        EnterpriseDto dto = fromEnterpriseToDto(enterprise);
-
-        result = new DataResult<Enterprise>();
-
-        ClientResponse response = put(uri, dto);
-        if (response.getStatusCode() == 200)
-        {
-            Enterprise data = getEnterprise(response);
-
-            result.setSuccess(true);
-            result.setData(data);
-        }
-        else
-        {
-            populateErrors(response, result, "editEnterprise");
-        }
-
-        return result;
+        return editEnterprise(enterprise, null);
     }
 
     protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
@@ -431,6 +391,56 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         else
         {
             populateErrors(response, result, "getEnterprises");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<Enterprise> editEnterprise(final Enterprise enterprise,
+        final Integer idPricingTemplate)
+    {
+        DataResult<Enterprise> result;
+        ErrorsDto errors = modifyDatacenterLimits(enterprise);
+
+        if (errors != null)
+        {
+            result = new DataResult<Enterprise>();
+            result.setSuccess(false);
+            result.setMessage(errors.toString());
+            return result;
+        }
+
+        errors = modifyReservedMachines(enterprise);
+
+        if (errors != null)
+        {
+            result = new DataResult<Enterprise>();
+            result.setSuccess(false);
+            result.setMessage(errors.toString());
+            return result;
+        }
+
+        String uri = createEnterpriseLink(enterprise.getId());
+
+        EnterpriseDto dto = fromEnterpriseToDto(enterprise);
+        if (idPricingTemplate != null)
+        {
+            dto.setIdPricingTemplate(idPricingTemplate);
+        }
+        result = new DataResult<Enterprise>();
+
+        ClientResponse response = put(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            Enterprise data = getEnterprise(response);
+
+            result.setSuccess(true);
+            result.setData(data);
+        }
+        else
+        {
+            populateErrors(response, result, "editEnterprise");
         }
 
         return result;

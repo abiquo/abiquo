@@ -72,7 +72,9 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-9", "Missing link to the enterprise"),
+        "ENTERPRISE-9", "Missing link to the enterprise"), MISSING_PRICING_TEMPLATE_LINK(
+        "ENTERPRISE-10", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
+        "ENTERPRISE-11", "Missing pricing template parameter"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
