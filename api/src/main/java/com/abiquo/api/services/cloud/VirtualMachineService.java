@@ -53,6 +53,9 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -202,6 +205,20 @@ public class VirtualMachineService extends DefaultApiService
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         repo.deleteNotManagedVirtualMachines(hypervisor);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
+    {
+        this.deleteNotManagedVirtualMachines(hypervisor);
+
+        if (trace)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
+                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
+                "Virtual Machines not managed by host from '" + hypervisor.getIp()
+                    + "' have been deleted");
+        }
     }
 
     /**

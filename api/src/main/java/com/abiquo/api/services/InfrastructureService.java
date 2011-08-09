@@ -180,6 +180,7 @@ public class InfrastructureService extends DefaultApiService
     public Machine addMachine(final Machine machine, final Integer datacenterId,
         final Integer rackId)
     {
+        machine.setId(null);
 
         // Gets the rack. It throws the NotFoundException if needed.
         Rack rack = getRack(datacenterId, rackId);
@@ -191,6 +192,8 @@ public class InfrastructureService extends DefaultApiService
             addConflictErrors(APIError.MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK);
             flushErrors();
         }
+
+        checkAvailableCores(machine);
 
         Long realHardDiskInBytes = 0l;
         Long virtualHardDiskInBytes = 0l;
@@ -244,6 +247,7 @@ public class InfrastructureService extends DefaultApiService
         flushErrors();
 
         repo.insertMachine(machine);
+        repo.insertHypervisor(machine.getHypervisor());
 
         // Get the remote service to monitor the machine
         RemoteService vsmRS =
@@ -251,6 +255,9 @@ public class InfrastructureService extends DefaultApiService
         vsmServiceStub.monitor(vsmRS.getUri(), machine.getHypervisor().getIp(), machine
             .getHypervisor().getPort(), machine.getHypervisor().getType().name(), machine
             .getHypervisor().getUser(), machine.getHypervisor().getPassword());
+
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
+            + machine.getName() + "' has been created succesfully");
 
         return machine;
     }
@@ -750,6 +757,11 @@ public class InfrastructureService extends DefaultApiService
     {
         return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
             && rack.getVlanPerVdcExpected() != null;
+    }
+
+    public void checkAvailableCores(final Machine machine)
+    {
+        // PREMIUM
     }
 
 }

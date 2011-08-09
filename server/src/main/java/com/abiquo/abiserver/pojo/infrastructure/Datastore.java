@@ -43,6 +43,7 @@ package com.abiquo.abiserver.pojo.infrastructure;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
 
 /**
  * Represents a mounted point resource in the host machine
@@ -62,11 +63,10 @@ public class Datastore implements IPojo<DatastoreHB>
     private String directory;
 
     private String datastoreUUID;
-    
+
     private Long size;
-    
+
     private Long usedSize;
-        
 
     public Datastore()
     {
@@ -89,7 +89,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param id the id to set
      */
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -109,7 +109,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param name the name to set
      */
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -129,7 +129,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param uUID the uUID to set
      */
-    public void setUUID(String uUID)
+    public void setUUID(final String uUID)
     {
         UUID = uUID;
     }
@@ -149,7 +149,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param enabled the enabled to set
      */
-    public void setEnabled(Boolean enabled)
+    public void setEnabled(final Boolean enabled)
     {
         this.enabled = enabled;
     }
@@ -169,7 +169,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param directory the directory to set
      */
-    public void setDirectory(String directory)
+    public void setDirectory(final String directory)
     {
         this.directory = directory;
     }
@@ -179,7 +179,7 @@ public class Datastore implements IPojo<DatastoreHB>
      * 
      * @param size the size to set
      */
-    public void setSize(Long size)
+    public void setSize(final Long size)
     {
         this.size = size;
     }
@@ -197,7 +197,7 @@ public class Datastore implements IPojo<DatastoreHB>
     /**
      * @param usedSize the usedSize to set
      */
-    public void setUsedSize(Long usedSize)
+    public void setUsedSize(final Long usedSize)
     {
         this.usedSize = usedSize;
     }
@@ -209,13 +209,13 @@ public class Datastore implements IPojo<DatastoreHB>
     {
         return usedSize;
     }
-    
+
     /**
      * Sets UUID used to identify this Datastore in Abiquo
      * 
      * @param datastoreUUID
      */
-    public void setDatastoreUUID(String datastoreUUID)
+    public void setDatastoreUUID(final String datastoreUUID)
     {
         this.datastoreUUID = datastoreUUID;
     }
@@ -229,7 +229,7 @@ public class Datastore implements IPojo<DatastoreHB>
     {
         return datastoreUUID;
     }
-    
+
     @Override
     public DatastoreHB toPojoHB()
     {
@@ -247,8 +247,20 @@ public class Datastore implements IPojo<DatastoreHB>
         return datastore;
     }
 
-    
+    public DatastoreDto toDto()
+    {
+        DatastoreDto dto = new DatastoreDto();
 
-  
+        dto.setDatastoreUUID(this.datastoreUUID);
+        dto.setDirectory(this.directory);
+        dto.setEnabled(this.enabled);
+        dto.setId(this.id);
+        dto.setName(this.name);
+        dto.setRootPath(this.UUID);
+        dto.setSize(this.size);
+        dto.setUsedSize(this.usedSize);
+
+        return dto;
+    }
 
 }

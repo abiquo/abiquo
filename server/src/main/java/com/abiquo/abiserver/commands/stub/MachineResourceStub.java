@@ -22,7 +22,10 @@
 package com.abiquo.abiserver.commands.stub;
 
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.server.core.infrastructure.MachineDto;
 
 public interface MachineResourceStub
 {
@@ -45,5 +48,8 @@ public interface MachineResourceStub
      * @return BasicResult
      */
     public BasicResult powerOn(PhysicalMachine machine);
+
+    public DataResult<MachineDto> createPhysicalMachine(
+        PhysicalMachineCreation createPhysicalMachine);
 
 }

@@ -27,14 +27,41 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
+import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
+    @Override
+    public DataResult<MachineDto> createPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine)
+    {
+        Rack rack = (Rack) createPhysicalMachine.getPhysicalMachine().getAssignedTo();
+        String uri = createMachinesLink(rack.getDataCenter().getId(), rack.getId());
+
+        DataResult<MachineDto> result = new DataResult<MachineDto>();
+
+        MachineDto dto = createPhysicalMachine.toMachineDto();
+
+        ClientResponse response = post(uri, dto);
+        if (response.getStatusCode() == 201)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+        }
+
+        return result;
+
+    }
 
     @Override
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine)
+    public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
         uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
@@ -54,7 +81,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         return result;
     }
 
-    public static MachineDto fromPhysicalMachineToDto(PhysicalMachine machine)
+    public static MachineDto fromPhysicalMachineToDto(final PhysicalMachine machine)
     {
         MachineDto dto = new MachineDto();
         dto.setId(machine.getId());
@@ -78,7 +105,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOff(PhysicalMachine machine)
+    public BasicResult powerOff(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
@@ -88,7 +115,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOn(PhysicalMachine machine)
+    public BasicResult powerOn(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
