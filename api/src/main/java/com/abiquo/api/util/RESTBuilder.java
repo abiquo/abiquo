@@ -90,6 +90,8 @@ import com.abiquo.server.core.pricing.CostCode;
 import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingCostCodeDto;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTemplateDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -850,6 +852,14 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildCostCodeCurrencyLinks(final CostCode costCode,
         final Currency currency, final CostCodeCurrencyDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingCostCodeLinks(final CostCode costCode,
+        final PricingTemplate pricingTemplate, final PricingCostCodeDto dto)
     {
         // TODO Auto-generated method stub
         return null;

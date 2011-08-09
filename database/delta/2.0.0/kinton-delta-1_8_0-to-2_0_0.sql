@@ -62,13 +62,14 @@ CREATE TABLE `kinton`.`pricing_template` (
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- PRICING --
--- Definition of table `kinton`.`pricingTemplate_costcode`
-CREATE TABLE `kinton`.`pricingTemplate_costcode` (
+-- Definition of table `kinton`.`pricingCostCode`
+CREATE TABLE `kinton`.`pricingCostCode` (
+`idPricingCostCode` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idCostCode` int(10) UNSIGNED NOT NULL,
-  `price` int(10) UNSIGNED NOT NULL ,
+  `price` DECIMAL(20) NOT NULL default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricingTemplate`, `idCostCode`) 
+  PRIMARY KEY (`idPricingCostCode`)  
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
   
  --

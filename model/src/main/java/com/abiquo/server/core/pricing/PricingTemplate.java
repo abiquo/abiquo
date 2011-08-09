@@ -37,6 +37,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
@@ -404,21 +405,27 @@ public class PricingTemplate extends DefaultEntityBase
         this.lastUpdate = lastUpdate;
     }
 
-    public final static String ASSOCIATION_TABLE = "pricingTemplate_costcode";
+    @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "costCode")
+    private List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
 
-    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = CostCode.ID_COLUMN))
-    private List<CostCode> costCodes = new ArrayList<CostCode>();
-
-    public List<CostCode> getCostCodes()
-    {
-        return costCodes;
-    }
-
-    public void setCostCodes(final List<CostCode> costCodes)
-    {
-        this.costCodes = costCodes;
-    }
+    //
+    // public final static String ASSOCIATION_TABLE = "pricingCostCode";
+    //
+    // @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade =
+    // CascadeType.DETACH)
+    // @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN),
+    // inverseJoinColumns = @JoinColumn(name = CostCode.ID_COLUMN))
+    // private List<CostCode> costCodes = new ArrayList<CostCode>();
+    //
+    // public List<CostCode> getCostCodes()
+    // {
+    // return costCodes;
+    // }
+    //
+    // public void setCostCodes(final List<CostCode> costCodes)
+    // {
+    // this.costCodes = costCodes;
+    // }
 
     public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
 
@@ -438,14 +445,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     // ************************* Helper methods ****************************
 
-    public void addCostCode(final CostCode costCode)
-    {
-        if (costCodes == null)
-        {
-            costCodes = new ArrayList<CostCode>();
-        }
-        costCodes.add(costCode);
-    }
+    // public void addCostCode(final CostCode costCode)
+    // {
+    // if (costCodes == null)
+    // {
+    // costCodes = new ArrayList<CostCode>();
+    // }
+    // costCodes.add(costCode);
+    // }
 
     public void addTier(final Tier tier)
     {

@@ -175,7 +175,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
             "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
             "metering", "tasks", "alerts", "heartbeatlog", "icon", "register", "costCodeCurrency",
-            "pricingTemplate", "currency", "costCode"};
+            "pricingCostCode", "pricingTemplate", "currency", "costCode"};
 
         tearDown(entities);
     }

@@ -51,6 +51,9 @@ public class PricingRep extends DefaultRepBase
     private CostCodeCurrencyDAO costCodeCurrencyDao;
 
     @Autowired
+    private PricingCostCodeDAO pricingCostCodeDao;
+
+    @Autowired
     private EnterpriseRep enterpriseRep;
 
     public PricingRep()
@@ -239,6 +242,16 @@ public class PricingRep extends DefaultRepBase
         final boolean desc, final int page, final int numResults)
     {
         return costCodeDao.find(filter, order, desc, page, numResults);
+    }
+
+    public Object findPricingCostCode(final CostCode costCode, final PricingTemplate pricing)
+    {
+        return pricingCostCodeDao.findPricingCostCode(costCode, pricing);
+    }
+
+    public void insertPricingCostCode(final PricingCostCode pricingCostCode)
+    {
+        pricingCostCodeDao.persist(pricingCostCode);
     }
 
 }

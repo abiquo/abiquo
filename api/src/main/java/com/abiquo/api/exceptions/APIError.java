@@ -339,7 +339,12 @@ public enum APIError
     // COST CODE- CURRENCY
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
         "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
-        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist");
+        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"),
+
+    // PRICING - COST CODE
+    PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
+        "Duplicated value by Cost Code and PricingTemplate"), NON_EXISTENT_PRICING_COSTCODE(
+        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist");
 
     /**
      * Internal error code

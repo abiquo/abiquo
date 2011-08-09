@@ -316,6 +316,15 @@
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         
+           <!-- PRIGING- COST CODE -->
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="POST" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="PUT" access="ROLE_PRICING_MANAGE" />
+        
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->

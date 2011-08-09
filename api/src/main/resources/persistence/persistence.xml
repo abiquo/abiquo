@@ -74,6 +74,7 @@
 		<class>com.abiquo.server.core.pricing.CostCode</class>
 		<class>com.abiquo.server.core.pricing.Currency</class>
         <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
+         <class>com.abiquo.server.core.pricing.PricingCostCode</class>
 		<!-- end:pricing-->
 		
   	<properties>

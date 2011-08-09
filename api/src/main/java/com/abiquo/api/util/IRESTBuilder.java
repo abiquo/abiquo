@@ -54,6 +54,8 @@ import com.abiquo.server.core.pricing.CostCode;
 import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingCostCodeDto;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTemplateDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -164,5 +166,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildCostCodeCurrencyLinks(CostCode costCode, Currency currency,
         CostCodeCurrencyDto dto);
+
+    public List<RESTLink> buildPricingCostCodeLinks(CostCode costCode,
+        PricingTemplate pricingTemplate, PricingCostCodeDto dto);
 
 }
