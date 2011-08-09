@@ -22,10 +22,12 @@
 package com.abiquo.server.core.pricing;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -44,6 +46,9 @@ public class CostCodeCurrencyDAO extends DefaultDAOBase<Integer, CostCodeCurrenc
     {
         super(CostCodeCurrency.class, entityManager);
     }
+
+    private final static String COST_CODES =
+        " select distinct ccc.costCode FROM com.abiquo.server.core.pricing.CostCodeCurrency ccc ";
 
     private Criterion sameCostCode(final CostCode costCode)
     {
@@ -74,6 +79,13 @@ public class CostCodeCurrencyDAO extends DefaultDAOBase<Integer, CostCodeCurrenc
         Criteria criteria = createCriteria(sameCostCode(cc));
 
         return criteria.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<CostCode> findCostCodesIds()
+    {
+        Query query = getSession().createQuery(COST_CODES);
+        return query.list();
     }
 
 }

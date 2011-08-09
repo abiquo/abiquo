@@ -76,13 +76,15 @@ public class PricingRep extends DefaultRepBase
         return currencyDao.findAll();
     }
 
-    public void insertCurrency(final Currency currency)
+    public Integer insertCurrency(final Currency currency)
     {
         if (currency != null)
         {
             currencyDao.persist(currency);
             currencyDao.flush();
         }
+
+        return currency.getId();
     }
 
     public Currency findCurrencyById(final Integer currencyId)
@@ -239,6 +241,11 @@ public class PricingRep extends DefaultRepBase
         final boolean desc, final int page, final int numResults)
     {
         return costCodeDao.find(filter, order, desc, page, numResults);
+    }
+
+    public List<CostCode> findCostCodesIds()
+    {
+        return costCodeCurrencyDao.findCostCodesIds();
     }
 
 }
