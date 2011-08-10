@@ -403,8 +403,8 @@
             event.virtualDatacenter.id,
             event.virtualAppliance.id,
             event.virtualMachine.id,
-            event.newOrder, 
-            event.ipPoolManagementId]}">
+            event.oldOrder,
+            event.newOrder]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
