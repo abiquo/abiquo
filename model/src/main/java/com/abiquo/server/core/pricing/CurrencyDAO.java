@@ -35,7 +35,7 @@ public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
         super(Currency.class);
     }
 
-    public CurrencyDAO(EntityManager entityManager)
+    public CurrencyDAO(final EntityManager entityManager)
     {
         super(Currency.class, entityManager);
     }

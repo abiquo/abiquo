@@ -130,4 +130,8 @@ public class CostCode extends DefaultEntityBase
 
     @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "costCode")
     private List<CostCodeCurrency> costCodeByCurrency = new ArrayList<CostCodeCurrency>();
+
+    @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "costCode")
+    private List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
+
 }

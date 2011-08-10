@@ -73,10 +73,19 @@ public class CostCodeCurrencyDAO extends DefaultDAOBase<Integer, CostCodeCurrenc
             sameCostCode(costCode));
     }
 
-    public Collection<CostCodeCurrency> find(final CostCode cc)
+    public Collection<CostCodeCurrency> find(final CostCode cc, final Currency currency)
     {
 
-        Criteria criteria = createCriteria(sameCostCode(cc));
+        Criteria criteria = createCriteria();
+        if (cc != null)
+        {
+            criteria.add(sameCostCode(cc));
+        }
+        else if (currency != null)
+        {
+            criteria.add(sameCurrency(currency));
+        }
+        // Criteria criteria = createCriteria(sameCurrency(cc));
 
         return criteria.list();
     }
