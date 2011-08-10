@@ -45,6 +45,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.appliancemanager.transport.MachineState;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.DefaultEntityBase;
@@ -81,12 +82,11 @@ public class Machine extends DefaultEntityBase
     {
         return this.id;
     }
-    
-    public void setId(Integer id)
+
+    public void setId(final Integer id)
     {
         this.id = id;
     }
-    
 
     // ******************************* Properties
     // *******************************
@@ -397,11 +397,6 @@ public class Machine extends DefaultEntityBase
         this.virtualCpusPerCore = virtualCpusPerCore;
     }
 
-    public enum State
-    {
-        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA;
-    }
-
     public final static String STATE_PROPERTY = "state";
 
     private final static boolean STATE_REQUIRED = true;
@@ -410,15 +405,15 @@ public class Machine extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.ORDINAL)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state;
+    private MachineState state;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public MachineState getState()
     {
         return this.state;
     }
 
-    public void setState(final State state)
+    public void setState(final MachineState state)
     {
         this.state = state;
     }
@@ -474,7 +469,7 @@ public class Machine extends DefaultEntityBase
         return this.ipmiIP;
     }
 
-    public void setIpmiIP(String ipmiIP)
+    public void setIpmiIP(final String ipmiIP)
     {
         this.ipmiIP = ipmiIP;
     }
@@ -499,7 +494,7 @@ public class Machine extends DefaultEntityBase
         return this.ipmiPort;
     }
 
-    public void setIpmiPort(Integer ipmiPort)
+    public void setIpmiPort(final Integer ipmiPort)
     {
         this.ipmiPort = ipmiPort;
     }
@@ -527,7 +522,7 @@ public class Machine extends DefaultEntityBase
         return this.ipmiUser;
     }
 
-    public void setIpmiUser(String ipmiUser)
+    public void setIpmiUser(final String ipmiUser)
     {
         this.ipmiUser = ipmiUser;
     }
@@ -555,7 +550,7 @@ public class Machine extends DefaultEntityBase
         return this.ipmiPassword;
     }
 
-    public void setIpmiPassword(String ipmiPassword)
+    public void setIpmiPassword(final String ipmiPassword)
     {
         this.ipmiPassword = ipmiPassword;
     }
@@ -723,7 +718,7 @@ public class Machine extends DefaultEntityBase
         final int virtualRamInMb, final int realRamInMb, final int virtualRamUsedInMb,
         final long virtualHardDiskInMb, final long realHardDiskInMb,
         final long virtualHardDiskUsed, final int realCpuCores, final int virtualCpuCores,
-        final int virtualCpusUsed, final int virtualCpusPerCore, final State state,
+        final int virtualCpusUsed, final int virtualCpusPerCore, final MachineState state,
         final String virtualSwitch)
     {
         setDatacenter(datacenter);
@@ -758,7 +753,7 @@ public class Machine extends DefaultEntityBase
 
     public boolean hasFencingCapabilities()
     {
-        return (getIpmiIP() != null && getIpmiUser() != null && getIpmiPassword() != null);
+        return getIpmiIP() != null && getIpmiUser() != null && getIpmiPassword() != null;
     }
 
     @Override
@@ -766,13 +761,13 @@ public class Machine extends DefaultEntityBase
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-    
+
     // Transient attributes needed to Management Racks functionality
-    
+
     @Transient
     private List<String> listOfMacs;
-    
-    public void setListOfMacs(List<String> listOfMacs)
+
+    public void setListOfMacs(final List<String> listOfMacs)
     {
         this.listOfMacs = listOfMacs;
     }
@@ -785,11 +780,11 @@ public class Machine extends DefaultEntityBase
         }
         return listOfMacs;
     }
-    
+
     @Transient
     private Boolean belongsToManagedRack = Boolean.FALSE;
-    
-    public void setBelongsToManagedRack(Boolean belongsToManagedRack)
+
+    public void setBelongsToManagedRack(final Boolean belongsToManagedRack)
     {
         this.belongsToManagedRack = belongsToManagedRack;
     }
@@ -798,7 +793,5 @@ public class Machine extends DefaultEntityBase
     {
         return belongsToManagedRack;
     }
-
-    
 
 }

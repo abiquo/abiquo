@@ -42,10 +42,10 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.appliancemanager.transport.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.softwarementors.commons.bean.CaseInsensitiveStringPropertyComparator;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -104,7 +104,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.location;
     }
 
-    public void setLocation(String location)
+    public void setLocation(final String location)
     {
         this.location = location;
     }
@@ -132,7 +132,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -157,13 +157,13 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.network;
     }
 
-    public void setNetwork(Network network)
+    public void setNetwork(final Network network)
     {
         this.network = network;
     }
 
     // *************************** Mandatory constructors ***********************
-    public Datacenter(String name, String location)
+    public Datacenter(final String name, final String location)
     {
         super();
         setName(name);
@@ -171,16 +171,17 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     }
 
     // *************************** Business methods ***********************
-    public Rack createRack(String name, Integer vlanIdMin, Integer vlanIdMax,
-        Integer vlanPerVdcExpected, Integer nrsq)
+    public Rack createRack(final String name, final Integer vlanIdMin, final Integer vlanIdMax,
+        final Integer vlanPerVdcExpected, final Integer nrsq)
     {
         return new Rack(name, this, vlanIdMin, vlanIdMax, vlanPerVdcExpected, nrsq);
     }
 
-    public Machine createMachine(String name, String description, int ramInMb, int realRamInMb,
-        int currentRamInUseInMb, long hardDiskInMb, long realHardDiskInMb,
-        long currentHardDiskInUse, int realCpuThreads, int realCpuCores, int virtualCpusPerThread,
-        int currentCpusInUse, State state, String virtualSwitch)
+    public Machine createMachine(final String name, final String description, final int ramInMb,
+        final int realRamInMb, final int currentRamInUseInMb, final long hardDiskInMb,
+        final long realHardDiskInMb, final long currentHardDiskInUse, final int realCpuThreads,
+        final int realCpuCores, final int virtualCpusPerThread, final int currentCpusInUse,
+        final MachineState state, final String virtualSwitch)
     {
         return new Machine(this,
             name,
@@ -199,7 +200,8 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
             virtualSwitch);
     }
 
-    public RemoteService createRemoteService(RemoteServiceType type, String uri, int status)
+    public RemoteService createRemoteService(final RemoteServiceType type, final String uri,
+        final int status)
     {
         return new RemoteService(this, type, uri, status);
     }
