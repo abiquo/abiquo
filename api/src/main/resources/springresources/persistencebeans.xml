@@ -50,6 +50,8 @@
                 <ref bean="privateNetworksResource" />
                 <ref bean="privateNetworkResource" />
                 <ref bean="ipAddressesResource" />
+                <ref bean="eventsResource" />
+                <ref bean="eventResource" />
                 <!-- -->
                 <ref bean="virtualAppliancesResource" />
                 <ref bean="virtualApplianceResource" />

@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -39,6 +40,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaUserDAO")
 public class UserDAO extends DefaultDAOBase<Integer, User>
@@ -60,7 +62,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
     public static Criterion sameId(final Integer userId)
     {
-        return Restrictions.eq(User.ID_PROPERTY, userId);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, userId);
     }
 
     public static Criterion sameNick(final String nick)
@@ -87,7 +89,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
 
     public Collection<User> findByRole(final Role role)
     {
-        return find(null, role, null, User.ID_PROPERTY, false, false, 0, 25);
+        return find(null, role, null, PersistentEntity.ID_PROPERTY, false, false, 0, 25);
     }
 
     public Collection<User> findByEnterprise(final Enterprise enterprise)
@@ -166,7 +168,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         if (connected)
         {
             criteria.createCriteria("sessions").add(Restrictions.gt("expireDate", new Date()));
-            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+            criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
         }
         return criteria;
     }
@@ -198,7 +200,7 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
     }
 
     /**
-     * eturns a User with nick {login} that is login to [authType].
+     * Returns a User with nick {login} that is login to [authType].
      * 
      * @param login that must match.
      * @param authType a {@link User.AuthType} value.
