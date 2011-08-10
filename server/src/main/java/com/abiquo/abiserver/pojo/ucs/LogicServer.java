@@ -28,7 +28,7 @@
 
 package com.abiquo.abiserver.pojo.ucs;
 
-import com.abiquo.server.core.infrastructure.nodecollector.ucs.LogicServerDto;
+import com.abiquo.server.core.infrastructure.nodecollector.LogicServerDto;
 
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.

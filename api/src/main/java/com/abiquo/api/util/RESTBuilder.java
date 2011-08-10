@@ -203,6 +203,9 @@ public class RESTBuilder implements IRESTBuilder
                 RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES,
                 RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES_REL, params));
             links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
                 RackResource.RACK_ACTION_ORGANIZATIONS, RackResource.RACK_ACTION_ORGANIZATIONS_REL,
                 params));
         }
@@ -240,6 +243,8 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
                 params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_LS, MachineResource.MACHINE_ACTION_LS__REL, params));
         }
 
         return links;

@@ -26,52 +26,33 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector.ucs;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+package com.abiquo.server.core.infrastructure.nodecollector;
 
 /**
- * The object contains the current needed values of the Organizations capabilities to retrieve
- * <p>
- * Java class for OrganizationDto complex type.
- * <p>
- * The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="OrganizationDto">
- *   &lt;complexContent>
- *       &lt;sequence>
- *        &lt;element name="dn" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="level" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="status" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *       &lt;/sequence>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
+ * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "OrganizationDto", propOrder = {"dn", "name", "level", "status", "description"})
-public class OrganizationDto
+public class LogicServer
 {
-    @XmlElement(required = true)
-    protected String dn;
 
-    @XmlElement(required = true)
     protected String name;
 
-    @XmlElement(required = true)
-    protected String level;
+    protected String type;
 
-    @XmlElement(required = true, nillable = true)
-    protected String status;
+    protected String associated;
 
-    @XmlElement(required = true, nillable = true)
+    protected String associatedTo;
+
     protected String description;
+
+    /**
+     * Gets the value of the type property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getType()
+    {
+        return type;
+    }
 
     /**
      * Gets the value of the name property.
@@ -84,24 +65,13 @@ public class OrganizationDto
     }
 
     /**
-     * Gets the value of the associated property.
-     * 
-     * @return possible object is {@link String }
-     */
-
-    public String getDn()
-    {
-        return dn;
-    }
-
-    /**
-     * Sets the value of the name property.
+     * Sets the value of the type property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setDn(final String dn)
+    public void setType(final String value)
     {
-        this.dn = dn;
+        this.type = value;
     }
 
     /**
@@ -119,9 +89,9 @@ public class OrganizationDto
      * 
      * @return possible object is {@link String }
      */
-    public String getLevel()
+    public String getAssociated()
     {
-        return level;
+        return associated;
     }
 
     /**
@@ -129,9 +99,9 @@ public class OrganizationDto
      * 
      * @param value allowed object is {@link String }
      */
-    public void setLevel(final String value)
+    public void setAssociated(final String value)
     {
-        this.level = value;
+        this.associated = value;
     }
 
     /**
@@ -139,9 +109,9 @@ public class OrganizationDto
      * 
      * @return possible object is {@link String }
      */
-    public String getStatus()
+    public String getAssociatedTo()
     {
-        return status;
+        return associatedTo;
     }
 
     /**
@@ -149,9 +119,9 @@ public class OrganizationDto
      * 
      * @param value allowed object is {@link String }
      */
-    public void setStatus(final String value)
+    public void setAssociatedTo(final String value)
     {
-        this.status = value;
+        this.associatedTo = value;
     }
 
     /**

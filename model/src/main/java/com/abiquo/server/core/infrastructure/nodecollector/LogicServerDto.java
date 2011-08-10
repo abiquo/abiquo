@@ -26,33 +26,55 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector.ucs;
+package com.abiquo.server.core.infrastructure.nodecollector;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
- * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
+ * The object contains the current needed values of the Logic Server capabilities to retrieve
+ * <p>
+ * Java class for LogicServerDto complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * 
+ * <pre>
+ * &lt;complexType name="LogicServerDto">
+ *   &lt;complexContent>
+ *       &lt;sequence>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="type" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="associated" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="associatedTo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *       &lt;/sequence>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
  */
-public class LogicServer
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "LogicServerDto", propOrder = {"name", "type", "associated", "associatedTo",
+"description"})
+public class LogicServerDto
 {
 
+    @XmlElement(required = true)
     protected String name;
 
+    // It can be template (update or initial) or instance
+    @XmlElement(required = true)
     protected String type;
 
+    @XmlElement(required = true)
     protected String associated;
 
+    @XmlElement(required = false)
     protected String associatedTo;
 
+    @XmlElement(required = false)
     protected String description;
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getType()
-    {
-        return type;
-    }
 
     /**
      * Gets the value of the name property.
@@ -92,6 +114,16 @@ public class LogicServer
     public String getAssociated()
     {
         return associated;
+    }
+
+    /**
+     * Gets the value of the type property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getType()
+    {
+        return type;
     }
 
     /**

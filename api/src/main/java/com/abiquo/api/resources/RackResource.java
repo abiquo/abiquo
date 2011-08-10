@@ -74,6 +74,8 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
         "logicServers/assocTemplate";
 
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicServers/assocClone";
+
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
 
     public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL = "ls-dissociate";
@@ -91,7 +93,9 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
         "ls-associateTemplate";
 
-    // Define its service. It should only have ONE service!
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateClone";
+
+    // Define its service. It should only have ONE
     @Autowired
     private InfrastructureService service;
 

@@ -322,7 +322,7 @@ public final class MessageValues
      * The Logic Server is wan not associated to a LS due to an unknown error.
      */
     public static final String UCS_LS_ASSOC_GEN_ERROR =
-        "Cannot associate the Logic Server due to an unknown error";
+        "Cannot associate the Logic Server due to an unknown error. Take a look at the log for more info.";
 
     /**
      * The Logic Server was not unassociated due unknown error.
@@ -361,6 +361,24 @@ public final class MessageValues
      */
     public static final String UCS_LS_TEMPLATE_INSTANTIATION_ERROR =
         "Cannot instantiate the Logic Server due to an unknown error";
+
+    /**
+     * The Logic Server is already unassociated.
+     */
+    public static final String UCS_BLADE_ASSOC_ERROR =
+        "Cannot associate the Blade because it is already associated";
+
+    /**
+     * The UCS XML could not be parsed.
+     */
+    public static final String UCS_XML_ERROR =
+        "There was a problem with UCS response. Review the logs of the application for more information";
+
+    /**
+     * No assoc.
+     */
+    public static final String UCS_LS_ASSOCIATION_SEE_LOGS_ERROR =
+        "Cannot associate the Logic Server due to an unknown error. Review the logs of the application for more information";
 
     /**
      * Private constructor due it is an utility class.

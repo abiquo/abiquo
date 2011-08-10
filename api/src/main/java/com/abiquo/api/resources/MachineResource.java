@@ -83,6 +83,10 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_LED_ON_REL = "ledOn";
 
+    public static final String MACHINE_ACTION_LS = "logicServer";
+
+    public static final String MACHINE_ACTION_LS__REL = "logicServer";
+
     @Autowired
     MachineService service;
 

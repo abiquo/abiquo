@@ -26,7 +26,7 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector.ucs;
+package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -34,20 +34,20 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * The object contains the current needed values of the Logic Server capabilities to retrieve
+ * The object contains the current needed values of the Organizations capabilities to retrieve
  * <p>
- * Java class for LogicServerDto complex type.
+ * Java class for OrganizationDto complex type.
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LogicServerDto">
+ * &lt;complexType name="OrganizationDto">
  *   &lt;complexContent>
  *       &lt;sequence>
+ *        &lt;element name="dn" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="type" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="associated" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="associatedTo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="level" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="status" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *   &lt;/complexContent>
@@ -55,23 +55,20 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LogicServerDto", propOrder = {"name", "type", "associated", "associatedTo",
-"description"})
-public class LogicServerDto
+@XmlType(name = "OrganizationDto", propOrder = {"dn", "name", "level", "status", "description"})
+public class OrganizationDto
 {
+    @XmlElement(required = true)
+    protected String dn;
 
     @XmlElement(required = true)
     protected String name;
 
-    // It can be template (update or initial) or instance
     @XmlElement(required = true)
-    protected String type;
-
-    @XmlElement(required = true)
-    protected String associated;
+    protected String level;
 
     @XmlElement(required = true, nillable = true)
-    protected String associatedTo;
+    protected String status;
 
     @XmlElement(required = true, nillable = true)
     protected String description;
@@ -87,13 +84,24 @@ public class LogicServerDto
     }
 
     /**
-     * Sets the value of the type property.
+     * Gets the value of the associated property.
+     * 
+     * @return possible object is {@link String }
+     */
+
+    public String getDn()
+    {
+        return dn;
+    }
+
+    /**
+     * Sets the value of the name property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setType(final String value)
+    public void setDn(final String dn)
     {
-        this.type = value;
+        this.dn = dn;
     }
 
     /**
@@ -111,19 +119,9 @@ public class LogicServerDto
      * 
      * @return possible object is {@link String }
      */
-    public String getAssociated()
+    public String getLevel()
     {
-        return associated;
-    }
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getType()
-    {
-        return type;
+        return level;
     }
 
     /**
@@ -131,9 +129,9 @@ public class LogicServerDto
      * 
      * @param value allowed object is {@link String }
      */
-    public void setAssociated(final String value)
+    public void setLevel(final String value)
     {
-        this.associated = value;
+        this.level = value;
     }
 
     /**
@@ -141,9 +139,9 @@ public class LogicServerDto
      * 
      * @return possible object is {@link String }
      */
-    public String getAssociatedTo()
+    public String getStatus()
     {
-        return associatedTo;
+        return status;
     }
 
     /**
@@ -151,9 +149,9 @@ public class LogicServerDto
      * 
      * @param value allowed object is {@link String }
      */
-    public void setAssociatedTo(final String value)
+    public void setStatus(final String value)
     {
-        this.associatedTo = value;
+        this.status = value;
     }
 
     /**
