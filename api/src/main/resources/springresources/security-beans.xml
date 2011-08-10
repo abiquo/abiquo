@@ -309,6 +309,7 @@
         <security:intercept-url pattern="/config/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
           <!-- COST CODE- CURRENCY -->
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="POST" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/costcodes/*/currencies" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="GET" access="ROLE_PRICING_VIEW" />
