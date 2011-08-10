@@ -34,12 +34,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -58,11 +61,22 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+
     @Autowired
     VirtualApplianceService service;
 
     @Autowired
     IpAddressService ipService;
+
+    @Autowired
+    UserService userService;
 
     /**
      * Return the virtual appliance if exists.
@@ -75,22 +89,22 @@ public class VirtualApplianceResource
      */
     @GET
     public VirtualApplianceDto getVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
         return createTransferObject(vapp, restBuilder);
     }
-    
+
     @PUT
     public VirtualApplianceDto updateVirtualAppliance(
-		@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-    	VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
+        VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
 
         return createTransferObject(vapp, restBuilder);
     }
@@ -98,9 +112,9 @@ public class VirtualApplianceResource
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
@@ -123,12 +137,12 @@ public class VirtualApplianceResource
      * @return the result Dto object
      * @throws Exception
      */
-    public static VirtualApplianceDto createTransferObject(VirtualAppliance vapp,
-        IRESTBuilder builder) throws Exception
+    public static VirtualApplianceDto createTransferObject(final VirtualAppliance vapp,
+        final IRESTBuilder builder) throws Exception
     {
         VirtualApplianceDto dto =
             ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
-        
+
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());
@@ -136,8 +150,8 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private static VirtualApplianceDto addLinks(IRESTBuilder builder, VirtualApplianceDto dto,
-        Integer vdcId, Integer enterpriseId)
+    private static VirtualApplianceDto addLinks(final IRESTBuilder builder,
+        final VirtualApplianceDto dto, final Integer vdcId, final Integer enterpriseId)
     {
         dto.setLinks(builder.buildVirtualApplianceLinks(dto, vdcId, enterpriseId));
 
@@ -151,8 +165,10 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void addImage(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId, VirtualImageDto image)
+    public void addImage(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualImageDto image)
     {
 
     }
@@ -164,9 +180,62 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void deploy(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId)
+    public void deploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
     {
         service.startVirtualAppliance(vdcId, vappId);
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_POWERON)
+    public List<VirtualMachineChangeStateResultDto> powerOnVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.RUNNING);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_POWEROFF)
+    public List<VirtualMachineChangeStateResultDto> powerOffVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.POWERED_OFF);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_PAUSE)
+    public List<VirtualMachineChangeStateResultDto> pauseVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.PAUSED);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_RESUME)
+    public List<VirtualMachineChangeStateResultDto> resumeVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.REBOOTED);
+
     }
 }
