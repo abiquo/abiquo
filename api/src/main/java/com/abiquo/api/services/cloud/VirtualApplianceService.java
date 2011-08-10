@@ -26,7 +26,9 @@ package com.abiquo.api.services.cloud;
 
 import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -39,6 +41,8 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
@@ -46,6 +50,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
@@ -56,6 +61,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
@@ -95,6 +101,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     UserService userService;
 
+    @Autowired
+    VirtualMachineService vmService;
+    
     public VirtualApplianceService()
     {
 
@@ -107,6 +116,7 @@ public class VirtualApplianceService extends DefaultApiService
         this.vdcService = new VirtualDatacenterService(em);
         this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
+
     }
 
     /**
@@ -262,5 +272,55 @@ public class VirtualApplianceService extends DefaultApiService
         repo.updateVirtualAppliance(vapp);
 
         return vapp;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public List<VirtualMachineChangeStateResultDto> changeVirtualAppMachinesState(
+        final Integer vdcId, final Integer vappId, final State state)
+    {
+        VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
+        if (vapp.getState().equals(State.NOT_DEPLOYED))
+        {
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
+            flushErrors();
+        }
+        if (!vapp.getState().equals(State.RUNNING))
+        {
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
+            flushErrors();
+        }
+        List<VirtualMachine> vmachines = vmService.findByVirtualAppliance(vapp);
+        List<VirtualMachineChangeStateResultDto> results =
+            new ArrayList<VirtualMachineChangeStateResultDto>();
+        for (VirtualMachine vm : vmachines)
+        {
+            try
+            {
+                if (!vmService.sameState(vm, state))
+                {
+                    vmService.changeVirtualMachineState(vm.getId(), vappId, vdcId, state);
+                }
+                VirtualMachineChangeStateResultDto result =
+                    new VirtualMachineChangeStateResultDto();
+                result.setId(vm.getId());
+                result.setName(vm.getName());
+                result.setSuccess(true);
+                results.add(result);
+            }
+            catch (ConflictException e)
+            {
+                VirtualMachineChangeStateResultDto result =
+                    new VirtualMachineChangeStateResultDto();
+                result.setId(vm.getId());
+                result.setName(vm.getName());
+                result.setSuccess(false);
+                for (CommonError er : e.getErrors())
+                {
+                    result.setMessage(er.getMessage());
+                }
+                results.add(result);
+            }
+        }
+        return results;
     }
 }
