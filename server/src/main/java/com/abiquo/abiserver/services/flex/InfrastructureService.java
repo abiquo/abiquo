@@ -396,23 +396,8 @@ public class InfrastructureService
         final PhysicalMachineCreation physicalMachineCreation)
     {
 
-        return proxyMachineStub(session).createPhysicalMachine(physicalMachineCreation);
+        return proxyMachinesStub(session).createPhysicalMachine(physicalMachineCreation);
 
-        // InfrastructureCommand command = proxyCommand(session);
-        //
-        // DataResult<PhysicalMachineCreation> result = new DataResult<PhysicalMachineCreation>();
-        //
-        // try
-        // {
-        // result = command.createPhysicalMachine(session, physicalMachineCreation);
-        // }
-        // catch (InfrastructureCommandException e)
-        // {
-        // result.setSuccess(false);
-        // result.setMessage(e.getMessage());
-        // }
-        //
-        // return result;
     }
 
     /**

@@ -27,39 +27,11 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
-import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
-import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
-    @Override
-    public DataResult<MachineDto> createPhysicalMachine(
-        final PhysicalMachineCreation createPhysicalMachine)
-    {
-        Rack rack = (Rack) createPhysicalMachine.getPhysicalMachine().getAssignedTo();
-        String uri = createMachinesLink(rack.getDataCenter().getId(), rack.getId());
-
-        DataResult<MachineDto> result = new DataResult<MachineDto>();
-
-        MachineDto dto = createPhysicalMachine.toMachineDto();
-
-        ClientResponse response = post(uri, dto);
-        if (response.getStatusCode() == 201)
-        {
-            result.setSuccess(true);
-        }
-        else
-        {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
-        }
-
-        return result;
-
-    }
-
     @Override
     public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
@@ -116,6 +88,13 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      */
     @Override
     public BasicResult powerOn(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;

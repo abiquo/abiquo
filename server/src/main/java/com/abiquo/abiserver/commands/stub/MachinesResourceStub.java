@@ -23,13 +23,16 @@ package com.abiquo.abiserver.commands.stub;
 
 import java.util.List;
 
+import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.infrastructure.Machine.State;
+import com.abiquo.server.core.infrastructure.MachineDto;
 
 public interface MachinesResourceStub
 {
@@ -63,4 +66,14 @@ public interface MachinesResourceStub
 
     public BasicResult isStonithUp(Integer datacenterId, Integer rackId, Integer machineId,
         String ip, String user, String password, Integer port);
+
+    public DataResult<MachineDto> createPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine);
+
+    public DataResult<List<PhysicalMachine>> createMultiplePhysicalMachine(
+        final Integer datacenterId, final Integer rackId, final IPAddress ipFrom,
+        final IPAddress ipTo, final Integer hypervisorType, final String user,
+        final String password, final Integer port, final String vSwitch);
+
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine);
 }

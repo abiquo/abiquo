@@ -366,6 +366,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
 
+    public Machine findMachineByIp(final Integer datacenterId, final String ip)
+    {
+        return this.machineDao.findByIp(datacenterId, ip);
+    }
+
     public void insertMachine(final Machine machine)
     {
         assert machine != null;

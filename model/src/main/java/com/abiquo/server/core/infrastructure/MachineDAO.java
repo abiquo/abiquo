@@ -778,4 +778,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
+    public Machine findByIp(final Integer datacenterId, final String ip)
+    {
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
+            Restrictions.eq("hypervisor.ip", ip));
+    }
+
 }

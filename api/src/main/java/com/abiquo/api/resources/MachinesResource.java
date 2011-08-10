@@ -25,6 +25,8 @@ import static com.abiquo.api.resources.MachineResource.createTransferObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -47,6 +49,8 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
@@ -103,17 +107,35 @@ public class MachinesResource extends AbstractResource
     @POST
     @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
     @Produces(MULTIPLE_MACHINES_MIME_TYPE)
+    @SuppressWarnings("unchecked")
     public MachinesDto postMultipleMachines(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
-        @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachinesDto machines,
+        @PathParam(RackResource.RACK) @Min(0) final Integer rackId,
+        @QueryParam("ipFrom") @NotNull final String ipFrom,
+        @QueryParam("ipTo") @NotNull final String ipTo,
+        @QueryParam("hypervisor") @NotNull final String hypervisor,
+        @QueryParam("user") @NotNull final String user,
+        @QueryParam("password") @NotNull final String password,
+        @QueryParam("port") @NotNull final Integer port,
+        @QueryParam("vSwitch") @NotNull final String vSwitch,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        List<Machine> machinesToCreate = MachineResource.createPersistenceObjects(machines);
-        List<Machine> machinesCreated =
-            infrastructureService.addMachines(machinesToCreate, datacenterId, rackId);
-        MachinesDto transfer = MachineResource.createTransferObjects(machinesCreated, restBuilder);
 
-        return transfer;
+        Map<String, Object> map =
+            infrastructureService.addMachines(datacenterId, rackId, ipFrom, ipTo, hypervisor, user,
+                password, port, vSwitch);
+
+        List<Machine> machines = (List<Machine>) map.get("machines");
+        MachinesDto machinesDto = MachineResource.createTransferObjects(machines, restBuilder);
+
+        if (map.get("errors") != null)
+        {
+            Set<CommonError> errors = (Set<CommonError>) map.get("errors");
+            ErrorsDto errorsDto = new ErrorsDto(errors);
+            machinesDto.setErrors(errorsDto);
+        }
+
+        return machinesDto;
     }
 
     public static MachinesDto transformMachinesDto(final IRESTBuilder restBuilder,

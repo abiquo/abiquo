@@ -667,6 +667,30 @@ public class AbstractAPIStub
         return resolveURI(apiUri, uri, params);
     }
 
+    protected String createMachinesLinkMultiplePost(final Integer datacenterId,
+        final Integer rackId, final String ipFrom, final String ipTo, final String hypervisor,
+        final String user, final String password, final Integer port, final String vSwitch)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("ipFrom", ipFrom);
+        params.put("ipTo", ipTo);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+        params.put("vSwitch", vSwitch);
+
+        String uri =
+            "admin/datacenters/{datacenter}/racks/{rack}/machines"
+                + "?ipFrom={ipFrom}&ipTo={ipTo}&hypervisor={hypervisor}&user={user}"
+                + "&password={password}&port={port}&vSwitch={vSwitch}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
         return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");

@@ -246,7 +246,14 @@ public class MachineService extends DefaultApiService
             virtualMachineService.updateVirtualMachine(vm);
         }
 
+        deleteMachineLoadRulesFromMachine(machine);
+
         repo.deleteMachine(machine);
+    }
+
+    protected void deleteMachineLoadRulesFromMachine(final Machine machine)
+    {
+        // PREMIUM
     }
 
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId,
