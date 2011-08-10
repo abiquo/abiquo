@@ -46,6 +46,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -396,11 +397,6 @@ public class Machine extends DefaultEntityBase
         this.virtualCpusPerCore = virtualCpusPerCore;
     }
 
-    public enum State
-    {
-        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA;
-    }
-
     public final static String STATE_PROPERTY = "state";
 
     private final static boolean STATE_REQUIRED = true;
@@ -409,15 +405,15 @@ public class Machine extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.ORDINAL)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state;
+    private MachineState state;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public MachineState getState()
     {
         return this.state;
     }
 
-    public void setState(final State state)
+    public void setState(final MachineState state)
     {
         this.state = state;
     }
@@ -727,7 +723,7 @@ public class Machine extends DefaultEntityBase
         final int virtualRamInMb, final int realRamInMb, final int virtualRamUsedInMb,
         final long virtualHardDiskInMb, final long realHardDiskInMb,
         final long virtualHardDiskUsed, final int realCpuCores, final int virtualCpuCores,
-        final int virtualCpusUsed, final int virtualCpusPerCore, final State state,
+        final int virtualCpusUsed, final int virtualCpusPerCore, final MachineState state,
         final String virtualSwitch)
     {
         setDatacenter(datacenter);

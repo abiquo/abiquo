@@ -42,10 +42,10 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.softwarementors.commons.bean.CaseInsensitiveStringPropertyComparator;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -181,7 +181,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         final int realRamInMb, final int currentRamInUseInMb, final long hardDiskInMb,
         final long realHardDiskInMb, final long currentHardDiskInUse, final int realCpuThreads,
         final int realCpuCores, final int virtualCpusPerThread, final int currentCpusInUse,
-        final State state, final String virtualSwitch)
+        final MachineState state, final String virtualSwitch)
     {
         return new Machine(this,
             name,

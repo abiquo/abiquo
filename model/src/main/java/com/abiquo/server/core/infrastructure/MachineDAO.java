@@ -38,10 +38,10 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
@@ -151,7 +151,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
         // Is a managed one
-        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, MachineState.MANAGED));
 
         // Has fencing capabilities
         criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
@@ -275,7 +275,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
         query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
         query.setInteger("idRack", idRack);
-        query.setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        query.setParameter("state", MachineState.MANAGED);
         query.setParameter("enterpriseId", enterprise.getId());
 
         machines = query.list();
@@ -309,8 +309,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameterList("reserveds", reserveds);
 
             machines = query.list();
@@ -354,8 +353,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
                 getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED_HA_EXCLUDE_ORIGINAL);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameterList("reserveds", reserveds);
             query.setInteger("enterpriseId", enterprise.getId());
             query.setInteger("originalHypervisorId", originalHypervisorId);
@@ -402,8 +400,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES_HA_EXCLUDE_ORIGINAL);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameter("enterpriseId", enterprise.getId());
             query.setParameter("originalHypervisorId", originalHypervisorId);
 
@@ -415,25 +412,26 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query.setInteger("idRack", idRack);
-            query
-                .setParameter("state", com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query.setParameter("state", MachineState.MANAGED);
             query.setParameter("enterpriseId", enterprise.getId());
 
             machines = query.list();
 
             if (machines == null || machines.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                        + "Pleas check the machine reservation policies.", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                            + "Pleas check the machine reservation policies.", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
             else
             {
-                throw new PersistenceException(String.format(
-                    "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
-                        + "is the target of the high availability (so can't be used) ", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
+                            + "is the target of the high availability (so can't be used) ", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
         }
 
@@ -512,10 +510,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                        + "Please check the racks and hypervisor technology on the infrastructure.",
-                    reservedMachinesB.toString(), idRack, idVirtualDatacenter));
+                throw new PersistenceException(String
+                    .format(
+                        "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                            + "Please check the racks and hypervisor technology on the infrastructure.",
+                        reservedMachinesB.toString(), idRack, idVirtualDatacenter));
             }
 
             /**
@@ -524,8 +523,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query2 = getSession().createQuery(QUERY_CANDIDATE_MACHINES_RESERVED);
             query2.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query2.setInteger("idRack", idRack);
-            query2.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query2.setParameter("state", MachineState.MANAGED);
             query2.setParameterList("reserveds", reserveds);
 
             List<Integer> query2res = query2.list();
@@ -558,10 +556,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                        + "Please check the racks and hypervisor technology on the infrastructure.",
-                    idRack, idVirtualDatacenter));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                            + "Please check the racks and hypervisor technology on the infrastructure.",
+                        idRack, idVirtualDatacenter));
             }
 
             /**
@@ -571,8 +570,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
                 getSession().createQuery(WHT_QUERY_CANDIDATE_SAME_VDC_RACK_AND_TYPE_AND_STATE);
             query2.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query2.setInteger("idRack", idRack);
-            query2.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query2.setParameter("state", MachineState.MANAGED);
 
             List<Integer> query2res = query2.list();
 
@@ -590,18 +588,18 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Query query3 = getSession().createQuery(QUERY_CANDIDATE_MACHINES);
             query3.setInteger("idVirtualDataCenter", idVirtualDatacenter);
             query3.setInteger("idRack", idRack);
-            query3.setParameter("state",
-                com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+            query3.setParameter("state", MachineState.MANAGED);
             query3.setParameter("enterpriseId", enterprise.getId());
 
             List<Integer> query3res = query3.list();
 
             if (query3res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                        + "Pleas check the machine reservation policies.", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                            + "Pleas check the machine reservation policies.", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
 
             /**
@@ -774,8 +772,8 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId), Restrictions
+            .eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
 }
