@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.testng.Assert;
 
-import com.abiquo.appliancemanager.transport.MachineState;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.commons.test.SeedGenerator;

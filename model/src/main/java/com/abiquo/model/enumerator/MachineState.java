@@ -1,4 +1,4 @@
-package com.abiquo.appliancemanager.transport;
+package com.abiquo.model.enumerator;
 
 public enum MachineState
 {

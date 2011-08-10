@@ -38,12 +38,12 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -306,7 +306,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setVirtualHardDiskInMb(100L);
         m.setVirtualHardDiskUsedInMb(10L);
 
-        m.setState(State.STOPPED);
+        m.setState(MachineState.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
 
         m.setType(HypervisorType.HYPERV_301);

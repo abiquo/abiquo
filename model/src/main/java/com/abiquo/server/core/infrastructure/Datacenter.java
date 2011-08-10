@@ -42,7 +42,7 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
-import com.abiquo.appliancemanager.transport.MachineState;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
