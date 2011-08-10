@@ -204,7 +204,7 @@
 
             private function nicOrderLabelFunction(item:Object, column:DataGridColumn):String
             {
-                return (virtualMachineNICs.getItemIndex(item) + 1).toString();
+                return (virtualMachineNICs.getItemIndex(item)).toString();
             }
 
             ////////////////////////

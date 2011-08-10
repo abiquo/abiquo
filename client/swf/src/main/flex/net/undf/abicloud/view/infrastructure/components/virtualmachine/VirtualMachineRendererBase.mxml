@@ -89,17 +89,31 @@
             private var _editMode:Boolean;
             
             //Related Virtual Datacenter
-            private var _virtualDatacenter:VirtualDataCenter;
+            [Bindable]
+            protected var _virtualDatacenter:VirtualDataCenter;
             
             public function set virtualDatacenter(value:VirtualDataCenter):void{
             	this._virtualDatacenter = value;
             }
             
+            [Bindable(event="virtualDatacenterChange")]
+            public function get virtualDatacenter():VirtualDataCenter
+            {
+                return this._virtualDatacenter;
+            }
+            
             //Related Virtual Datacenter
+            [Bindable]
             private var _virtualAppliance:VirtualAppliance;
             
             public function set virtualAppliance(value:VirtualAppliance):void{
                 this._virtualAppliance = value;
+            }
+            
+            [Bindable(event="virtualApplianceChange")]
+            public function get virtualAppliance():VirtualAppliance
+            {
+                return this._virtualAppliance;
             }
 
 
@@ -754,9 +768,9 @@
                     <!-- Networking -->
                     <virtualmachine:VirtualMachineNICListSmall id="virtualMachineNICSmall"
                         label="@Resource(bundle='Networking', key='LABEL_NETWORK')"
-                        virtualDatacenter="{_virtualDatacenter}"
-                        virtualAppliance="{_virtualAppliance}"
-                        virtualMachine="{_virtualMachine}"/>
+                        virtualDatacenter="{this._virtualDatacenter}"
+                        virtualAppliance="{this._virtualAppliance}"
+                        virtualMachine="{this._virtualMachine}"/>
                 </mx:ViewStack>
             </mx:HBox>
 
