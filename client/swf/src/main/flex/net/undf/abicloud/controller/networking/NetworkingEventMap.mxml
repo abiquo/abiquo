@@ -481,7 +481,7 @@
             event.virtualDatacenter.id,
             event.virtualAppliance.id,
             event.virtualMachine.id,
-            event.ipPoolManagement]}">
+            event.orderInList]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

@@ -84,6 +84,8 @@
             //To order dragged object
             public var newIndex:int;
             
+            public var oldIndex:int;
+            
             public var itemMoved:Object;
 
             override protected function createChildren():void
@@ -194,7 +196,7 @@
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE);
                     event.virtualDatacenter = _virtualDatacenter;
                     event.virtualAppliance = _virtualAppliance;
-                    event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
+                    event.orderInList = virtualMachineNICsDataGrid.selectedIndex;
                     event.virtualMachine = _virtualMachine;
                     dispatchEvent(event);
                 }
@@ -290,25 +292,25 @@
             		}            		
             	}
             	
-            	reorderNicIntoVM(newIndex,IPPoolManagement(itemMoved).idManagement);
+            	reorderNicIntoVM(oldIndex,newIndex,IPPoolManagement(itemMoved).idManagement);
 
             	
             	//
             		
             }
             
-            protected function reorderNicIntoVM(newIndex:int ,ipPoolManagement:int ):void{
+            protected function reorderNicIntoVM(oldIndex:int, newIndex:int ,ipPoolManagement:int ):void{
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE);
             	event.virtualDatacenter = _virtualDatacenter;
             	event.virtualAppliance = _virtualAppliance;
             	event.virtualMachine = _virtualMachine;
+                event.oldOrder = oldIndex;
                 event.newOrder = newIndex;
-                event.ipPoolManagementId = ipPoolManagement;
                 dispatchEvent(event);
             }
             
             private function onDragStart(event:DragEvent):void{
-            	
+            
             }
             
             private function onDragStop(event:DragEvent):void{
@@ -318,7 +320,10 @@
              private function onMouseDownUsersDataGrid():void
             {
                 if (virtualMachineNICsDataGrid.selectedIndex > -1)
+                {
                     itemMoved = virtualMachineNICsDataGrid.selectedItem;
+                    oldIndex = virtualMachineNICsDataGrid.selectedIndex;
+                }
             }
             
           

@@ -120,9 +120,13 @@ package net.undf.abicloud.events
         
         public var newOrder:int;
         
+        public var oldOrder:int;
+        
         public var ipPoolManagementId:int;
         
         public var virtualAppliance:VirtualAppliance;
+        
+        public var orderInList:int;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)
