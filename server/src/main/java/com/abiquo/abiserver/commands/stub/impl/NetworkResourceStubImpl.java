@@ -939,6 +939,34 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult reorderNICintoVM(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer oldOrder, final Integer newOrder)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualMachineNICLink(vdcId, vappId, vmId, newOrder);
+        String uriOld = createVirtualMachineNICLink(vdcId, vappId, vmId, oldOrder);
+        LinksDto links = new LinksDto();
+        RESTLink ipLink = new RESTLink();
+        ipLink.setHref(uriOld);
+        ipLink.setRel("nic");
+        links.addLink(ipLink);
+
+        ClientResponse response = put(uri, links);
+
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "reorderNICintoVM");
+        }
+
+        return result;
+    }
+
+    @Override
     public BasicResult requestPrivateNICforVirtualMachine(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer vlanId, final Integer idManagement)
     {
@@ -1101,6 +1129,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
+            else if (currentLink.getRel().equalsIgnoreCase("enterprise"))
+            {
+                flexIp.setEnterpriseName(currentLink.getTitle());
+                flexIp.setEnterpriseId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
         }
 
         return flexIp;
@@ -1114,6 +1148,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setIp(dto.getIp());
         flexIp.setMac(dto.getMac());
 
+        for (RESTLink currentLink : dto.getLinks())
+        {
+            if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+            if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+        }
         return flexIp;
     }
 

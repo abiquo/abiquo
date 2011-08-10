@@ -119,6 +119,9 @@ public interface NetworkResourceStub
 
     public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId);
 
+    public BasicResult reorderNICintoVM(Integer vdcId, Integer vappId, Integer vmId,
+        Integer oldOrder, Integer newOrder);
+
     public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
         Integer vmId, Integer vlanNetworkId, Integer idManagement);
 

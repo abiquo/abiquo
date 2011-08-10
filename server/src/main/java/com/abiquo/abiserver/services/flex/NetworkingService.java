@@ -30,6 +30,7 @@ import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.networking.IPAddress;
+import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
@@ -314,26 +315,10 @@ public class NetworkingService
      * @param userSession user object to register who performs the action.
      * @param ipPoolManagementId identifier of the object that stores the info of the NIC
      */
-    public BasicResult reorderNICintoVM(final UserSession userSession, final Integer newOrder,
-        final Integer ipPoolManagementId)
+    public BasicResult reorderNICintoVM(final UserSession userSession, final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer oldOrder, final Integer newOrder)
     {
-        BasicResult basicResult = new BasicResult();
-
-        try
-        {
-            NetworkCommand netComm =
-                BusinessDelegateProxy.getInstance(userSession, new NetworkCommandImpl(),
-                    NetworkCommand.class);
-            netComm.reorderNICintoVM(userSession, newOrder, ipPoolManagementId);
-            basicResult.setSuccess(Boolean.TRUE);
-        }
-        catch (Exception e)
-        {
-            basicResult.setSuccess(Boolean.FALSE);
-            basicResult.setMessage(e.getMessage());
-        }
-
-        return basicResult;
+        return proxyStub(userSession).reorderNICintoVM(vdcId, vappId, vmId, oldOrder, newOrder);
     }
 
     /**
@@ -389,7 +374,9 @@ public class NetworkingService
                 BusinessDelegateProxy
                     .getInstance(userSession, networkCommand, NetworkCommand.class);
 
-            dataResult.setData(proxy.resolveNetworkMaskFromClassType(networkClass));
+            NetworkResolver netResolver = new NetworkResolver();
+            List<String> mask = netResolver.resolveMask(networkClass);
+            dataResult.setData(mask);
 
             dataResult.setSuccess(Boolean.TRUE);
         }
@@ -424,7 +411,10 @@ public class NetworkingService
                 BusinessDelegateProxy
                     .getInstance(userSession, networkCommand, NetworkCommand.class);
 
-            dataResult.setData(proxy.resolveNetworksFromClassTypeAndMask(networkClass, netmask));
+            NetworkResolver netResolver = new NetworkResolver();
+            List<List<String>> networks =
+                netResolver.resolvePossibleNetworks(networkClass, netmask);
+            dataResult.setData(networks);
             dataResult.setSuccess(Boolean.TRUE);
         }
         catch (Exception e)

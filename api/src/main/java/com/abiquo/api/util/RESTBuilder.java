@@ -591,7 +591,12 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(VirtualMachineResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
