@@ -174,6 +174,33 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
     }
 
     @Override
+    public DataResult<MachineDto> editPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine)
+    {
+        Rack rack = (Rack) createPhysicalMachine.getPhysicalMachine().getAssignedTo();
+        String uri =
+            createMachineLink(rack.getDataCenter().getId(), rack.getId(), createPhysicalMachine
+                .getPhysicalMachine().getId());
+
+        DataResult<MachineDto> result = new DataResult<MachineDto>();
+
+        MachineDto dto = createPhysicalMachine.toMachineDto();
+
+        ClientResponse response = put(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "editPhysicalMachine");
+        }
+
+        return result;
+
+    }
+
+    @Override
     public DataResult<List<PhysicalMachine>> createMultiplePhysicalMachine(
         final Integer datacenterId, final Integer rackId, final IPAddress ipFrom,
         final IPAddress ipTo, final Integer hypervisorType, final String user,

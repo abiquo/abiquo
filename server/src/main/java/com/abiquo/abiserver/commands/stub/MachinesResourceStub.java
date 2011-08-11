@@ -76,4 +76,7 @@ public interface MachinesResourceStub
         final String password, final Integer port, final String vSwitch);
 
     public BasicResult deletePhysicalMachine(final PhysicalMachine machine);
+
+    public DataResult<MachineDto> editPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine);
 }

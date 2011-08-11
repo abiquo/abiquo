@@ -151,6 +151,7 @@ public class MachineService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
+        throws Exception
     {
         Machine old = getMachine(machineId);
 
