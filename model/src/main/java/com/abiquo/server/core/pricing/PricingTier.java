@@ -35,32 +35,33 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ForeignKey;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = PricingCostCode.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = PricingCostCode.TABLE_NAME)
-public class PricingCostCode extends DefaultEntityBase
+@Table(name = PricingTier.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = PricingTier.TABLE_NAME)
+public class PricingTier extends DefaultEntityBase
 {
-    public static final String TABLE_NAME = "pricingCostCode";
+    public static final String TABLE_NAME = "pricingTier";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected PricingCostCode()
+    protected PricingTier()
     {
         // Just for JPA support
     }
 
-    public PricingCostCode(final BigDecimal price, final PricingTemplate pricingTemplate,
-        final CostCode costCode)
+    public PricingTier(final BigDecimal price, final PricingTemplate pricingTemplate,
+        final Tier tier)
     {
         super();
-        setPrice(price);
-        setCostCode(costCode);
+        setTier(tier);
         setPricingTemplate(pricingTemplate);
+        setPrice(price);
     }
 
-    private final static String ID_COLUMN = "idPricingCostCode";
+    private final static String ID_COLUMN = "idPricingTier";
 
     @Id
     @GeneratedValue
@@ -112,26 +113,26 @@ public class PricingCostCode extends DefaultEntityBase
         this.pricingTemplate = pricingTemplate;
     }
 
-    public final static String COST_CODE_PROPERTY = "costCode";
+    public final static String TIER_PROPERTY = "tier";
 
-    private final static boolean COST_CODE_REQUIRED = true;
+    private final static boolean TIER_REQUIRED = true;
 
-    private final static String COST_CODE_ID_COLUMN = "idCostCode";
+    private final static String TIER_ID_COLUMN = "idTier";
 
-    @JoinColumn(name = COST_CODE_ID_COLUMN)
+    @JoinColumn(name = TIER_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_costCode")
-    private CostCode costCode;
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_tier")
+    private Tier tier;
 
-    @Required(value = COST_CODE_REQUIRED)
-    public CostCode getCostCode()
+    @Required(value = TIER_REQUIRED)
+    public Tier getTier()
     {
-        return this.costCode;
+        return tier;
     }
 
-    public void setCostCode(final CostCode costCode)
+    public void setTier(final Tier tier)
     {
-        this.costCode = costCode;
+        this.tier = tier;
     }
 
 }

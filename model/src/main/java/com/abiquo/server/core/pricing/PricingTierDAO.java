@@ -23,33 +23,21 @@ package com.abiquo.server.core.pricing;
 
 import javax.persistence.EntityManager;
 
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaCurrencyDAO")
-public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
+@Repository("jpaPricingTierDAO")
+public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
 {
-    public CurrencyDAO()
+    public PricingTierDAO()
     {
-        super(Currency.class);
+        super(PricingTier.class);
     }
 
-    public CurrencyDAO(final EntityManager entityManager)
+    public PricingTierDAO(final EntityManager entityManager)
     {
-        super(Currency.class, entityManager);
-    }
-
-    public boolean existAnyOtherCurrencyWithName(final String name)
-    {
-        return existsAnyByCriterions(sameName(name));
-    }
-
-    public static Criterion sameName(final String name)
-    {
-        return Restrictions.eq(Currency.NAME_PROPERTY, name);
+        super(PricingTier.class, entityManager);
     }
 
 }

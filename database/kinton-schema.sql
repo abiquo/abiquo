@@ -4184,12 +4184,13 @@ CREATE TABLE  `kinton`.`costCodeCurrency` (
 --  
 
 
-CREATE TABLE `kinton`.`pricingTemplate_tier` (
+CREATE TABLE `kinton`.`pricingTier` (
+  `idPricingTier` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
-  `price` int(10) UNSIGNED NOT NULL ,
+  `price` DECIMAL(20) UNSIGNED NOT NULL ,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idPricingTemplate`, `idTier`) 
+  PRIMARY KEY (`idPricingTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
   
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
