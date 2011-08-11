@@ -813,22 +813,4 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes", params);
     }
 
-    protected String createPricingCostCodesLink(final Integer pricingId, Integer offset,
-        final Integer numResults)
-    {
-        String uri =
-            URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes",
-                Collections.singletonMap("template", pricingId.toString()));
-
-        Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        if (offset != null && numResults != null)
-        {
-            offset = offset / numResults;
-
-            queryParams.put("page", new String[] {offset.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
-        }
-
-        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
-    }
 }
