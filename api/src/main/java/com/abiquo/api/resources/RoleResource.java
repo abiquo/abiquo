@@ -85,13 +85,14 @@ public class RoleResource extends AbstractResource
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        User currentUser = userService.getCurrentUser();
+        Role role = null;
         if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
             && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
         {
-            User currentUser = userService.getCurrentUser();
             if (currentUser.getRole().getId().equals(roleId))
             {
-                Role role = service.getRole(roleId);
+                role = service.getRole(roleId);
                 return createTransferObject(role, restBuilder);
             }
             else
@@ -101,8 +102,12 @@ public class RoleResource extends AbstractResource
             }
 
         }
-
-        Role role = service.getRole(roleId);
+        else
+        {
+            role = service.getRole(roleId);
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
+        }
 
         return createTransferObject(role, restBuilder);
     }
@@ -129,6 +134,12 @@ public class RoleResource extends AbstractResource
         {
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
         }
+        else
+        {
+            User currentUser = userService.getCurrentUser();
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
+        }
 
         return addPrivilegeLinks(restBuilder, role.getPrivileges());
     }
@@ -154,6 +165,12 @@ public class RoleResource extends AbstractResource
         if (role == null)
         {
             throw new NotFoundException(APIError.NON_EXISTENT_ROLE);
+        }
+        else
+        {
+            User currentUser = userService.getCurrentUser();
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return PrivilegesResource.createAdminTransferObjects(role.getPrivileges(), restBuilder);

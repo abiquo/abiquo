@@ -108,6 +108,14 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
+    protected ClientResponse getWithMediaType(final String uri, final String accept,
+        final String contentType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
+            .get();
+    }
+
     protected ClientResponse post(final String uri, final Object dto, final String user,
         final String password)
     {
@@ -176,7 +184,7 @@ public class AbstractAPIStub
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
-    
+
     // protected ClientResponse put(final String uri, final Object dto, String mediaType)
     // {
     // UserHB user = getCurrentUser();
@@ -204,8 +212,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -415,8 +423,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -448,8 +456,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -549,8 +557,9 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLink(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -560,26 +569,29 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn",
-            params);
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
     }
-    
-    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
             params);
     }
 
@@ -671,7 +683,7 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
     }
-    
+
     protected String createMachinesLink(final Integer datacenterId, final Integer rackId)
     {
         Map<String, String> params = new HashMap<String, String>();

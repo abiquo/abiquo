@@ -55,7 +55,9 @@ import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.UserWithRoleDto;
 import com.abiquo.server.core.enterprise.UsersDto;
+import com.abiquo.server.core.enterprise.UsersWithRolesDto;
 
 public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResourceStub
 {
@@ -197,7 +199,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
             UsersDto usersDto = response.getEntity(UsersDto.class);
@@ -286,19 +288,21 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
-        ClientResponse response = get(uri);
+        ClientResponse response = getWithMediaType(uri, FLAT_MEDIA_TYPE, FLAT_MEDIA_TYPE);
         if (response.getStatusCode() == 200)
         {
-            UsersDto usersDto = response.getEntity(UsersDto.class);
+            UsersWithRolesDto usersDto = response.getEntity(UsersWithRolesDto.class);
             Collection<User> users = new ArrayList<User>();
             Collection<User> normalUsers = new ArrayList<User>();
             Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
             Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
             Map<String, Set<Privilege>> catchedPrivileges = new HashMap<String, Set<Privilege>>();
 
-            for (UserDto dto : usersDto.getCollection())
+            for (int i = 0; i < usersDto.getCollection().size(); i++)
             {
-                RoleDto role = getRole(dto.searchLink("role").getHref(), catchedRoles);
+                UserWithRoleDto dto = usersDto.getCollection().get(i);
+                RoleDto role = dto.getRole();
+                // RoleDto role = getRole(dto.searchLink("role").getHref(), catchedRoles);
                 EnterpriseDto enterprise =
                     getEnterprise(dto.searchLink("enterprise").getHref(), catchedEnterprises);
 
@@ -311,23 +315,33 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                     entRole = Enterprise.create(enterpriseRole);
                 }
 
-                RESTLink privilegesLink = role.searchLink("action", "privileges");
-                Set<Privilege> privileges = new HashSet<Privilege>();
-                if (privilegesLink != null)
-                {
-                    privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
-                }
+                DataResult<Boolean> result = checkRoleAccess(role.getId());
 
-                if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
-                    && orderBy.equalsIgnoreCase("role"))
+                if (result.getSuccess() && result.getData())
                 {
-                    normalUsers.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role, entRole, privileges)));
+                    RESTLink privilegesLink = role.searchLink("action", "privileges");
+                    Set<Privilege> privileges = new HashSet<Privilege>();
+                    if (privilegesLink != null)
+                    {
+                        privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
+                    }
+
+                    if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
+                        && orderBy.equalsIgnoreCase("role"))
+                    {
+                        normalUsers.add(User.create(dto, Enterprise.create(enterprise),
+                            Role.create(role, entRole, privileges)));
+                    }
+                    else
+                    {
+                        users.add(User.create(dto, Enterprise.create(enterprise),
+                            Role.create(role, entRole, privileges)));
+                    }
                 }
                 else
                 {
                     users.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role, entRole, privileges)));
+                        Role.create(role, entRole, new HashSet<Privilege>())));
                 }
             }
             Collection<User> usersWithoutVDC = new ArrayList<User>();
@@ -375,8 +389,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         if (!cache.containsKey(privilegesUri))
         {
             PrivilegesDto ps =
-                get(privilegesUri, UsersResourceStubImpl.FLAT_MEDIA_TYPE).getEntity(
-                    PrivilegesDto.class);
+                get(privilegesUri, AbstractAPIStub.FLAT_MEDIA_TYPE).getEntity(PrivilegesDto.class);
             if (ps.getCollection() != null)
             {
                 for (PrivilegeDto p : ps.getCollection())
@@ -631,7 +644,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         Boolean hasPrivilege = false;
 
-        if (dr.getData().getPrivileges() != null && !dr.getData().getPrivileges().isEmpty())
+        if (dr.getSuccess() && dr.getData().getPrivileges() != null
+            && !dr.getData().getPrivileges().isEmpty())
         {
             for (Privilege p : dr.getData().getPrivileges())
             {
@@ -645,6 +659,30 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         basicResult.setData(hasPrivilege);
         basicResult.setSuccess(true);
+
+        return basicResult;
+    }
+
+    @Override
+    public DataResult<Boolean> checkRoleAccess(final Integer idRole)
+    {
+
+        DataResult<Boolean> basicResult = new DataResult<Boolean>();
+
+        String uri = createRoleLink(idRole);
+
+        ClientResponse response = get(uri, LINK_MEDIA_TYPE);
+
+        if (response.getStatusCode() == 200)
+        {
+            basicResult.setSuccess(true);
+            basicResult.setData(true);
+        }
+        else
+        {
+            basicResult.setSuccess(true);
+            basicResult.setData(false);
+        }
 
         return basicResult;
     }

@@ -540,4 +540,22 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         return basicResult;
     }
+
+    @Override
+    public BasicResult checkRoleAccess(final UserSession userSession, final Integer idRole)
+    {
+        BasicResult basicResult = new BasicResult();
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        basicResult = proxy.checkRoleAccess(idRole);
+        if (basicResult.getSuccess())
+        {
+            basicResult.setMessage(resourceManager.getMessage("checkRoleAccess.success"));
+        }
+
+        return basicResult;
+    }
 }
