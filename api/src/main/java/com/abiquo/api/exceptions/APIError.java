@@ -170,7 +170,8 @@ public enum APIError
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
         "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a golbal role with the same name of an existing global role"),
+        "ROLE-7", "Cannot create a global role with the same name of an existing global role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Hasn't got enough privileges to manage this role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),

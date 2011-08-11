@@ -47,6 +47,7 @@ import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.UserWithRoleDto;
 
 @Parent(UsersResource.class)
 @Path(UserResource.USER_PARAM)
@@ -150,6 +151,23 @@ public class UserResource extends AbstractResource
         return user;
     }
 
+    private static UserWithRoleDto addLinks(final IRESTBuilder restBuilder,
+        final UserWithRoleDto user, final Integer enterpriseId, final Integer roleId)
+    {
+        user.setLinks(restBuilder.buildUserLinks(enterpriseId, roleId, user));
+        return user;
+    }
+
+    public static UserWithRoleDto createTransferObjectWithRole(final User user,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        UserWithRoleDto u = createTransferObjectWithRole(user);
+
+        u = addLinks(restBuilder, u, user.getEnterprise().getId(), user.getRole().getId());
+
+        return u;
+    }
+
     public static UserDto createTransferObject(final User user, final IRESTBuilder restBuilder)
         throws Exception
     {
@@ -163,6 +181,25 @@ public class UserResource extends AbstractResource
     public static UserDto createTransferObject(final User user)
     {
         UserDto u = new UserDto();
+
+        u.setId(user.getId());
+        u.setActive(user.getActive());
+        u.setEmail(user.getEmail());
+        u.setLocale(user.getLocale());
+        u.setName(user.getName());
+        u.setPassword(user.getPassword());
+        u.setSurname(user.getSurname());
+        u.setNick(user.getNick());
+        u.setDescription(user.getDescription());
+        u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+        u.setAuthType(user.getAuthType().name());
+
+        return u;
+    }
+
+    public static UserWithRoleDto createTransferObjectWithRole(final User user)
+    {
+        UserWithRoleDto u = new UserWithRoleDto();
 
         u.setId(user.getId());
         u.setActive(user.getActive());
