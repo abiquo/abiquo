@@ -68,13 +68,14 @@
         <!-- configuration -->
         <class>com.abiquo.server.core.config.SystemProperty</class>
         <class>com.abiquo.server.core.tasks.Task</class>
-        <!-- end: configuration -->
+        <!-- end: configuration --> 
 		<!-- pricing -->
 		<class>com.abiquo.server.core.pricing.PricingTemplate</class>
 		<class>com.abiquo.server.core.pricing.CostCode</class>
 		<class>com.abiquo.server.core.pricing.Currency</class>
         <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
-         <class>com.abiquo.server.core.pricing.PricingCostCode</class>
+        <class>com.abiquo.server.core.pricing.PricingCostCode</class>
+        <class>com.abiquo.server.core.pricing.PricingTier</class>
 		<!-- end:pricing-->
 		
   	<properties>

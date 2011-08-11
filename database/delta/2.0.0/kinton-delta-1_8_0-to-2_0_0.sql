@@ -6,8 +6,8 @@
 -- DROP THE TABLES RELATED TO PRICING --
 DROP TABLE IF EXISTS `kinton`.`pricing_template`;
 DROP TABLE IF EXISTS `kinton`.`costCode`;
-DROP TABLE IF EXISTS `kinton`.`pricingTemplate_costcode`;
-DROP TABLE IF EXISTS `kinton`.`pricingTemplate_tier`;
+DROP TABLE IF EXISTS `kinton`.`pricingCostCode`;
+DROP TABLE IF EXISTS `kinton`.`pricingTier`;
 DROP TABLE IF EXISTS `kinton`.`currency`;
 
 
@@ -87,8 +87,8 @@ CREATE TABLE  `kinton`.`costCodeCurrency` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- PRICING --
--- Definition of table `kinton`.`pricingTemplate_tier`
-CREATE TABLE `kinton`.`pricingTemplate_tier` (
+-- Definition of table `kinton`.`pricingTier`
+CREATE TABLE `kinton`.`pricingTier` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
   `price` int(10) UNSIGNED NOT NULL ,

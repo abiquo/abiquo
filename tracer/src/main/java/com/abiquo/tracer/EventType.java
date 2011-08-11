@@ -171,7 +171,14 @@ public enum EventType implements Serializable
     // COSTCODE_CURRENCY
     COSTCODE_CREATED(1800, "COSTCODE_CREATED", "Cost Code  created"), COSTCODE_MODIFIED(1801,
         "COSTCODE_MODIFIED", "Cost Code  updated"), COSTCODE_DELETED(1802, "COSTCODE_DELETED",
-        "Cost Code deleted"), ;
+        "Cost Code deleted"),
+
+    // CURRENCY
+    CURRENCY_CREATED(1900, "CURRENCY_CREATED", "Currency created"), CURRENCY_MODIFIED(1901,
+        "CURRENCY_MODIFIED", "Currency updated"), CURRENCY_DELETED(1902, "CURRENCY_DELETED",
+        "Currency deleted"),
+
+    ;
 
     private final int event;
 

@@ -43,7 +43,6 @@ import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.model.enumerator.PricingPeriod;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -424,7 +423,7 @@ public class PricingTemplate extends DefaultEntityBase
     // this.costCodes = costCodes;
     // }
 
-    @OneToMany(targetEntity = Tier.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "tier")
+    @OneToMany(targetEntity = PricingTier.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
     private List<PricingTier> pricingTier = new ArrayList<PricingTier>();
 
     // public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
