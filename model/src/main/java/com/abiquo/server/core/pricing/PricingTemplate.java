@@ -465,4 +465,13 @@ public class PricingTemplate extends DefaultEntityBase
     // tiers.add(tier);
     // }
 
+    // public void addTier(final Tier tier)
+    // {
+    // if (tiers == null)
+    // {
+    // tiers = new ArrayList<Tier>();
+    // }
+    // tiers.add(tier);
+    // }
+
 }

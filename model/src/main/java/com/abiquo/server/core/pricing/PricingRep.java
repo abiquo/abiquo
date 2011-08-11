@@ -240,9 +240,12 @@ public class PricingRep extends DefaultRepBase
         return costCodeDao.existAnyOtherCostCodeWithName(name);
     }
 
-    public Collection<CostCodeCurrency> findCostCodeCurrencies(final CostCode cc)
+    public Collection<CostCodeCurrency> findCostCodeCurrencies(final CostCode cc,
+        final Currency currency)
     {
-        return costCodeCurrencyDao.find(cc);
+
+        return costCodeCurrencyDao.find(cc, currency);
+
     }
 
     public Collection<CostCode> findCostCodes(final String filter, final String order,
@@ -269,6 +272,16 @@ public class PricingRep extends DefaultRepBase
     public boolean existAnyOtherCurrencyWithName(final String name)
     {
         return currencyDao.existAnyOtherCurrencyWithName(name);
+    }
+
+    public Collection<PricingCostCode> findPricingCostCodes(final PricingTemplate pricing)
+    {
+        return pricingCostCodeDao.findPricingCostCodes(pricing);
+    }
+
+    public List<Currency> findCurrencies()
+    {
+        return currencyDao.findAll();
     }
 
 }
