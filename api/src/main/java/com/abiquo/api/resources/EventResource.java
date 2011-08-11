@@ -38,6 +38,9 @@ import com.abiquo.api.services.EventService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.EventDto;
 
+/**
+ * @author vmahe
+ */
 @Parent(EventsResource.class)
 @Path(EventResource.EVENT_PARAM)
 @Controller
@@ -57,6 +60,8 @@ public class EventResource extends AbstractResource
     public EventDto getEvent(@PathParam(EVENT) final Integer eventId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        return eventService.getEvent(eventId);
+        EventDto event = eventService.getEvent(eventId);
+
+        return event;
     }
 }

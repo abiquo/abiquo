@@ -11,7 +11,6 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "events")
 public class EventsDto extends WrapperDto<EventDto>
 {
-
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -24,5 +23,4 @@ public class EventsDto extends WrapperDto<EventDto>
         }
         return collection;
     }
-
 }

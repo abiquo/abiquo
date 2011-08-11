@@ -74,6 +74,9 @@ public class EnterpriseRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO limitsDAO;
 
+    @Autowired
+    private EventDAO eventDAO;
+
     public EnterpriseRep()
     {
 
@@ -91,6 +94,7 @@ public class EnterpriseRep extends DefaultRepBase
         roleDAO = new RoleDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);
         roleLdapDAO = new RoleLdapDAO(entityManager);
+        eventDAO = new EventDAO(entityManager);
     }
 
     public void insert(final Enterprise enterprise)
@@ -435,5 +439,10 @@ public class EnterpriseRep extends DefaultRepBase
     public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
+    }
+
+    public List<Event> findAllEvents()
+    {
+        return eventDAO.findAll();
     }
 }
