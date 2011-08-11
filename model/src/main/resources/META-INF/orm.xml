@@ -81,6 +81,7 @@
     <orm:entity class="com.abiquo.server.core.pricing.Currency"></orm:entity>
     <orm:entity class="com.abiquo.server.core.pricing.CostCodeCurrency"></orm:entity>
     <orm:entity class="com.abiquo.server.core.pricing.PricingCostCode"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.PricingTier"></orm:entity>
     <!-- end: pricing -->
     <!-- tasks -->
     <orm:entity class="com.abiquo.server.core.tasks.Task" />

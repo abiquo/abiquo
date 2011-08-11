@@ -18,38 +18,44 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
 package com.abiquo.server.core.pricing;
 
-import javax.persistence.EntityManager;
+import java.math.BigDecimal;
 
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@Repository("jpaCurrencyDAO")
-public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
+@XmlRootElement(name = "pricingTier")
+public class PricingTierDto extends SingleResourceTransportDto
 {
-    public CurrencyDAO()
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    private Integer id;
+
+    public Integer getId()
     {
-        super(Currency.class);
+        return id;
     }
 
-    public CurrencyDAO(final EntityManager entityManager)
+    public void setId(final Integer id)
     {
-        super(Currency.class, entityManager);
+        this.id = id;
     }
 
-    public boolean existAnyOtherCurrencyWithName(final String name)
+    private BigDecimal price;
+
+    public BigDecimal getPrice()
     {
-        return existsAnyByCriterions(sameName(name));
+        return price;
     }
 
-    public static Criterion sameName(final String name)
+    public void setPrice(final BigDecimal price)
     {
-        return Restrictions.eq(Currency.NAME_PROPERTY, name);
+        this.price = price;
     }
 
 }

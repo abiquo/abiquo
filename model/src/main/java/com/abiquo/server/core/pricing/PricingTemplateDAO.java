@@ -36,6 +36,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaPricingTemplateDAO")
 public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
@@ -133,4 +134,12 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
 
         return criteria.list();
     }
+
+    public List<PricingTemplate> findPricingTemplatesByCurrency(final Integer idCurrency)
+    {
+        Criteria crit = createNestedCriteria(PricingTemplate.CURRENCY_PROPERTY);
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, idCurrency));
+        return getResultList(crit);
+    }
+
 }

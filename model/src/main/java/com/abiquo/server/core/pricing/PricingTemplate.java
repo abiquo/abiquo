@@ -34,8 +34,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -45,7 +43,6 @@ import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.model.enumerator.PricingPeriod;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -427,21 +424,26 @@ public class PricingTemplate extends DefaultEntityBase
     // this.costCodes = costCodes;
     // }
 
-    public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
+    @OneToMany(targetEntity = Tier.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "tier")
+    private List<PricingTier> pricingTier = new ArrayList<PricingTier>();
 
-    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN), inverseJoinColumns = @JoinColumn(name = "idTier"))
-    private List<Tier> tiers = new ArrayList<Tier>();
-
-    public List<Tier> getTiers()
-    {
-        return tiers;
-    }
-
-    public void setTiers(final List<Tier> tiers)
-    {
-        this.tiers = tiers;
-    }
+    // public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
+    //
+    // @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade =
+    // CascadeType.DETACH)
+    // @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN),
+    // inverseJoinColumns = @JoinColumn(name = "idTier"))
+    // private List<Tier> tiers = new ArrayList<Tier>();
+    //
+    // public List<Tier> getTiers()
+    // {
+    // return tiers;
+    // }
+    //
+    // public void setTiers(final List<Tier> tiers)
+    // {
+    // this.tiers = tiers;
+    // }
 
     // ************************* Helper methods ****************************
 
@@ -454,13 +456,13 @@ public class PricingTemplate extends DefaultEntityBase
     // costCodes.add(costCode);
     // }
 
-    public void addTier(final Tier tier)
-    {
-        if (tiers == null)
-        {
-            tiers = new ArrayList<Tier>();
-        }
-        tiers.add(tier);
-    }
+    // public void addTier(final Tier tier)
+    // {
+    // if (tiers == null)
+    // {
+    // tiers = new ArrayList<Tier>();
+    // }
+    // tiers.add(tier);
+    // }
 
 }

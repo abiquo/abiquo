@@ -141,6 +141,11 @@ public class PricingRep extends DefaultRepBase
         return pricingTemplateDao.findById(id);
     }
 
+    public List<PricingTemplate> findPricingTemplatesByCurrency(final Integer id)
+    {
+        return pricingTemplateDao.findPricingTemplatesByCurrency(id);
+    }
+
     public void updatePricingTemplate(final PricingTemplate pricingTemplate)
     {
         pricingTemplateDao.flush();
@@ -259,6 +264,11 @@ public class PricingRep extends DefaultRepBase
     public List<CostCode> findCostCodesIds()
     {
         return costCodeCurrencyDao.findCostCodesIds();
+    }
+
+    public boolean existAnyOtherCurrencyWithName(final String name)
+    {
+        return currencyDao.existAnyOtherCurrencyWithName(name);
     }
 
 }
