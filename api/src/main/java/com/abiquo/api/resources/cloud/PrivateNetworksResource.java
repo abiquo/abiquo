@@ -26,6 +26,7 @@ import static com.abiquo.api.resources.cloud.PrivateNetworkResource.createTransf
 import java.util.Collection;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -57,7 +58,7 @@ public class PrivateNetworksResource extends AbstractResource
 
     @GET
     public VLANNetworksDto getPrivateNetworks(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer virtualDatacenterId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<VLANNetwork> all = service.getPrivateNetworks(virtualDatacenterId);
@@ -79,8 +80,9 @@ public class PrivateNetworksResource extends AbstractResource
 
     @POST
     public VLANNetworkDto createNetwork(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @Min(0) final Integer virtualDatacenterId,
-        final VLANNetworkDto dto, @Context final IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
+        @NotNull final VLANNetworkDto dto, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         VLANNetwork network = PrivateNetworkResource.createPersistenceObject(dto);
         network = service.createPrivateNetwork(virtualDatacenterId, network);
