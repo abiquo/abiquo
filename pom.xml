@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo.abicloud</groupId>
     <artifactId>platform</artifactId>
-    <version>1.8.0-HF1</version>
+    <version>1.8.0-HF2</version>
     <packaging>pom</packaging>
 
     <!-- Shared Properties -->
