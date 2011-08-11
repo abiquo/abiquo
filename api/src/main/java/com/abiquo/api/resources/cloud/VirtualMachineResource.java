@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -86,9 +88,9 @@ public class VirtualMachineResource extends AbstractResource
      */
     @GET
     public VirtualMachineDto getVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
@@ -98,9 +100,9 @@ public class VirtualMachineResource extends AbstractResource
 
     @PUT
     public VirtualMachineDto updateVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.updateVirtualMachine(vdcId, vappId, vmId, dto);
@@ -111,8 +113,8 @@ public class VirtualMachineResource extends AbstractResource
     @PUT
     @Path("action/allocate")
     public synchronized VirtualMachineDto allocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer virtualApplianceId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer virtualMachineId,
         final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
         throws Exception
     {

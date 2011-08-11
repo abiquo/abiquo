@@ -141,7 +141,10 @@ public enum APIError
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
         "VLAN-31",
-        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs into a Virtual Machine."),
+        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs into a Virtual Machine."), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
+        "VLAN-32", "Can not set the IP as 'not available' while is purchased by an Enterprise"), VLANS_PUBIC_IP_CAN_NOT_RELEASE(
+        "VLAN-33", "Can not release a Public IP while is assigned to a Virtual Machine"), VLANS_NON_EXISTENT_CONFIGURATION(
+        "VLAN-34", "The configuration does not exist"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -188,7 +191,9 @@ public enum APIError
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-7",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-8", "It should be at least one 'used' configuration in each Virtual Machine"),
+        "VM-8", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_INCOHERENT_STATE(
+        "VM-9",
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
