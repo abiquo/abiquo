@@ -28,7 +28,6 @@ import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -41,7 +40,6 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
@@ -103,7 +101,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualMachineService vmService;
-    
+
     public VirtualApplianceService()
     {
 
@@ -116,7 +114,7 @@ public class VirtualApplianceService extends DefaultApiService
         this.vdcService = new VirtualDatacenterService(em);
         this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
-        this.vmService = new VirtualMachineService(em);
+
     }
 
     /**

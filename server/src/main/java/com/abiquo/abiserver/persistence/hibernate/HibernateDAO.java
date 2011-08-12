@@ -259,4 +259,24 @@ public class HibernateDAO<T, ID extends Serializable> implements DAO<T, ID>
         this.session = session;
     }
 
+    /**
+     * @see com.abiquo.abiserver.persistence.Crudable#merge(java.lang.Object)
+     * @see org.hibernate.Session#merge(Object)
+     */
+    @Override
+    public T merge(final T entity) throws PersistenceException
+    {
+        return (T) getSession().merge(entity);
+    }
+
+    /**
+     * @see com.abiquo.abiserver.persistence.Crudable#merge(java.lang.String, java.lang.Object)
+     * @see org.hibernate.Session#merge(String, Object)
+     */
+    @Override
+    public T merge(final String entityName, final T entity) throws PersistenceException
+    {
+        return (T) getSession().merge(entityName, entity);
+    }
+
 }
