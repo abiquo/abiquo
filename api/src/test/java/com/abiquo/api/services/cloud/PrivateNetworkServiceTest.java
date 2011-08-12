@@ -79,10 +79,10 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         setup(e, r, u);
 
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
-        vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        vdc = vdcGenerator.createInstance(rs.getDatacenter(), e);
 
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vdc);
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan.setDefaultNetwork(Boolean.TRUE);
         vlan.setEnterprise(vdc.getEnterprise());
@@ -398,6 +398,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
 
         // Create the second one
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        vlan2.setEnterprise(vdc.getEnterprise());
         setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
 
         // Assert here we have two vlans.

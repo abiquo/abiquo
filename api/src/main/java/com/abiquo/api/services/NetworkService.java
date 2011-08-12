@@ -506,12 +506,15 @@ public class NetworkService extends DefaultApiService
         VirtualDatacenter vdc = repo.findById(virtualDatacenterId);
         Collection<VLANNetwork> networks = null;
 
-        if (vdc != null)
+        if (vdc == null)
         {
-            networks = repo.findVlansByVirtualDatacener(vdc);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
         }
+        networks = repo.findVlansByVirtualDatacener(vdc);
         LOGGER.debug("Returning the list of internal VLANs for VirtualDatacenter '" + vdc.getName()
             + "'.");
+
         return networks;
     }
 

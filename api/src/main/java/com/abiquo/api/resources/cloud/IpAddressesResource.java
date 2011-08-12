@@ -86,7 +86,7 @@ public class IpAddressesResource extends AbstractResource
 
         List<IpPoolManagement> all =
             service.getListIpPoolManagementByVlan(vdcId, vlanId, startwith, orderBy, filter, limit,
-                descOrAsc, available);
+                descOrAsc);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 

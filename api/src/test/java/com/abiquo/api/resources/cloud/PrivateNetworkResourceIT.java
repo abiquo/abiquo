@@ -50,6 +50,9 @@ import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
@@ -75,11 +78,16 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
     @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setup()
     {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance();
+        User u = userGenerator.createInstance(e, r, "basicUser", "basicUser");
+        setup(e, r, u);
+
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
-        vdc = vdcGenerator.createInstance(rs.getDatacenter());
+        vdc = vdcGenerator.createInstance(rs.getDatacenter(), e);
 
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vdc);
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan.setEnterprise(vdc.getEnterprise());
         setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, dclimit);
@@ -192,11 +200,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         dto.setName("newname");
         dto.setPrimaryDNS("45.45.45.0");
 
-        Resource resource = client.resource(validURI);
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .put(dto);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = put(validURI, dto, "basicUser", "basicUser");
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         // Ensure the VLAN has changed.
         VLANNetworkDto dtoResponse = response.getEntity(VLANNetworkDto.class);
@@ -211,8 +216,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // Ensure the IPs of the VLAN have changed its 'vlanname' attribute. Get a random IP and
         // check it
         String ipsUri = resolvePrivateNetworkIPsURI(vdc.getId(), vlan.getId());
-        resource = client.resource(ipsUri);
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response = get(ipsUri);
         IpsPoolManagementDto dtoIPs = response.getEntity(IpsPoolManagementDto.class);
         assertNotNull(dtoIPs);
         IpPoolManagementDto dtoIP = dtoIPs.getCollection().get(new Random().nextInt(24));
@@ -295,18 +299,15 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs);
         vlan2.setEnterprise(vdc.getEnterprise());
         setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        String uri = resolvePrivateNetworkURI(vdc.getId(), vlan2.getId());
+        ClientResponse response = delete(uri, "basicUser", "basicUser");
 
-        Resource resource = client.resource(resolvePrivateNetworkURI(vdc.getId(), vlan2.getId()));
-        ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
-                .delete();
         // Response ok.
-        assertEquals(Status.NO_CONTENT.getStatusCode(), response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         // Perform a GET to ensure the entity has been deleted
-        response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).get();
-        assertEquals(Status.NOT_FOUND.getStatusCode(), response.getStatusCode());
+        response = get(uri, "basicUser", "basicUser");
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
 
     }
 

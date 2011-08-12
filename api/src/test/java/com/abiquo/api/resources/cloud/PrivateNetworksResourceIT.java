@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -129,10 +130,10 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworksListInvalidVDC() throws Exception
     {
-        Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt()));
+        Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt(1000)));
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     @Test(groups = {BASIC_INTEGRATION_TESTS})
