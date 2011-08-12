@@ -381,6 +381,18 @@ public final class MessageValues
         "Cannot associate the Logic Server due to an unknown error. Review the logs of the application for more information";
 
     /**
+     * Task ongoing.
+     */
+    public static final String UCS_ONGOING_SEE_LOGS_ERROR =
+        "Cannot complete the request. The is an ongoing task performed by the object. Try again in a few minutes. Review the logs of the application, or the UCS Manager, for more information";
+
+    /**
+     * Task ongoing.
+     */
+    public static final String UCS_ERROR_SEE_LOGS_ERROR =
+        "Cannot complete the request. The is an unknown error. Try again in a few minutes. Review the logs of the application for more information";
+
+    /**
      * Private constructor due it is an utility class.
      */
     private MessageValues()
