@@ -8,6 +8,7 @@
         <groups>
             <run>
                 <include name="it-basic" />
+                <include name="it-network" />
                 <include name="it-all" />
             </run>
         </groups>

@@ -106,6 +106,28 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
+    public List<RESTLink> searchLinks(final String rel)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        if (getLinks() == null)
+        {
+            setLinks(new ArrayList<RESTLink>());
+        }
+
+        for (RESTLink link : getLinks())
+        {
+            if (link.getRel() != null)
+            {
+                if (link.getRel().equals(rel))
+                {
+                    links.add(link);
+                }
+            }
+        }
+        return links;
+    }
+
     public RESTLink searchLink(final String rel, final String title)
     {
         if (getLinks() == null)

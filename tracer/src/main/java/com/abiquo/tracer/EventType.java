@@ -123,7 +123,8 @@ public enum EventType implements Serializable
         "RELEASED_QUARANTINE", "IP Address released from its quarantine"), PRIVATE_IP_ASSIGN(809,
         "PRIVATE_IP_ASSIGN", "Private IP assigned"), PRIVATE_IP_UNASSIGN(810,
         "PRIVATE_IP_UNASSIGN", "Private IP unassigned"), PUBLIC_IP_ASSIGN(811, "PUBLIC_IP_ASSIGN",
-        "Public IP assigned"), PUBLIC_IP_UNASSIGN(812, "PUBLIC_IP_UNASSIGN", "Public IP unassigned"),
+        "Public IP assigned"), PUBLIC_IP_UNASSIGN(812, "PUBLIC_IP_UNASSIGN", "Public IP unassigned"), NETWORK_CONFIGURATION_UPDATED(
+        813, "NETWORK_CONFIGURATION_UPDATED", "Virtual Machine's network configuration updated"),
 
     // API events
     API_REQUEST(900, "API_REQUEST", "Functionallity executed by API request"), API_RESPONSE(901,

@@ -49,7 +49,7 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
@@ -97,7 +97,7 @@ public class EnterpriseResource extends AbstractResource
     EnterpriseService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
 
     @Autowired
     VirtualMachineService vmService;
@@ -176,7 +176,7 @@ public class EnterpriseResource extends AbstractResource
         // Set query Params by default if they are not informed
         String filterwith = URLDecoder.decode(filter, "UTF-8");
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByEnterprise(id, startwith, limit, filterwith,
+            netService.getListIpPoolManagementByEnterprise(id, startwith, limit, filterwith,
                 orderBy, desc_or_asc);
 
         if (all == null)

@@ -53,8 +53,8 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      *      javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
-    public UserDetails processAutoLoginCookie(String[] cookieTokens, HttpServletRequest request,
-        HttpServletResponse response)
+    public UserDetails processAutoLoginCookie(final String[] cookieTokens,
+        final HttpServletRequest request, final HttpServletResponse response)
     {
 
         if (cookieTokens.length != 4)
@@ -136,7 +136,8 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      * @return runtime instance.
      * @throws Exception T
      */
-    protected <T> T getTargetObject(Object proxy, Class<T> targetClass) throws Exception
+    protected <T> T getTargetObject(final Object proxy, final Class<T> targetClass)
+        throws Exception
     {
         while (AopUtils.isJdkDynamicProxy(proxy))
         {
@@ -151,8 +152,8 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      *      javax.servlet.http.HttpServletResponse, org.springframework.security.Authentication)
      */
     @Override
-    public void onLoginSuccess(HttpServletRequest request, HttpServletResponse response,
-        Authentication successfulAuthentication)
+    public void onLoginSuccess(final HttpServletRequest request,
+        final HttpServletResponse response, final Authentication successfulAuthentication)
     {
         String authType = retrieveAuthType(successfulAuthentication);
         String username = retrieveUserName(successfulAuthentication);
@@ -175,9 +176,9 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
         setCookie(new String[] {username, Long.toString(expiryTime), signatureValue + authType},
             tokenLifetime, request, response);
 
-        if (logger.isDebugEnabled())
+        if (logger.isTraceEnabled())
         {
-            logger.debug("Added remember-me cookie for user '" + username + "', expiry: '"
+            logger.trace("Added remember-me cookie for user '" + username + "', expiry: '"
                 + new Date(expiryTime) + "'");
         }
     }
@@ -188,7 +189,7 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      * @param authentication object.
      * @return String value of {@link AuthType }.
      */
-    protected String retrieveAuthType(Authentication authentication)
+    protected String retrieveAuthType(final Authentication authentication)
     {
         if (isInstanceOfAbiquoUserDetails(authentication))
         {
@@ -206,7 +207,7 @@ public class AbiquoTokenBasedRememberMe extends TokenBasedRememberMeServices
      * @param authentication login.
      * @return true if is an instance of {@link AbiquoUserDetails }. False otherwise.
      */
-    private boolean isInstanceOfAbiquoUserDetails(Authentication authentication)
+    private boolean isInstanceOfAbiquoUserDetails(final Authentication authentication)
     {
         return authentication.getPrincipal() instanceof AbiquoUserDetails;
     }

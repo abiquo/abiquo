@@ -43,8 +43,12 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.util.PagedList;
@@ -95,6 +99,12 @@ public class InfrastructureRep extends DefaultRepBase
     private NetworkDAO networkDao;
 
     @Autowired
+    private VLANNetworkDAO vlanDao;
+
+    @Autowired
+    private IpPoolManagementDAO ipPoolDao;
+
+    @Autowired
     private RepositoryDAO repositoryDao;
 
     @Autowired
@@ -129,6 +139,8 @@ public class InfrastructureRep extends DefaultRepBase
         this.networkDao = new NetworkDAO(entityManager);
         this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
         this.storageRep = new StorageRep(entityManager);
+        this.vlanDao = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
     public Datacenter findById(final Integer id)
@@ -700,6 +712,63 @@ public class InfrastructureRep extends DefaultRepBase
     public boolean existAnyHypervisorWithIpInDatacenter(final String ip, final Integer datacenterId)
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
+    }
+
+    /**
+     * Return all the public VLANs by Datacenter.
+     * 
+     * @param datacenter {@link Datacenter} where we search for.
+     * @return list of found {@link VLANNetwork}
+     */
+    public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter)
+    {
+        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return all the public VLANs by Datacenter.
+     * 
+     * @param datacenter {@link Datacenter} where we search for.
+     * @return list of found {@link VLANNetwork}
+     */
+    public List<VLANNetwork> findAllPrivateVlansByDatacenter(final Datacenter datacenter)
+    {
+        return vlanDao.findPrivateVLANNetworksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return an unique VLAN inside a Datacenter.
+     * 
+     * @param dc {@link Datacenter} where we search for.
+     * @param vlanId identifier of the vlan.
+     * @return the found {@link VLANNetwork}.
+     */
+    public VLANNetwork findPublicVlanByDatacenter(final Datacenter dc, final Integer vlanId)
+    {
+        return vlanDao.findPublicVlanByDatacenter(dc, vlanId);
+    }
+
+    /**
+     * Return the list of purchased IPs by VLAN.
+     * 
+     * @param vlan vlan to search into.
+     * @return the list of purchased IPs.
+     */
+    public List<IpPoolManagement> findIpsPurchasedInPublicVlan(final VLANNetwork vlan)
+    {
+        return ipPoolDao.findPublicIpsPurchasedByVlan(vlan);
+    }
+
+    /**
+     * Return all the IPs from a VLAN.
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
+    {
+        return ipPoolDao.findIpsByNetwork(network, vlanId);
     }
 
 }
