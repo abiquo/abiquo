@@ -261,7 +261,7 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         // Check a randomly value
         ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), new Random().nextInt()));
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), new Random().nextInt(1000)));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
