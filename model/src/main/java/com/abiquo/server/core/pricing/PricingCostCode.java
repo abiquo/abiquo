@@ -85,7 +85,7 @@ public class PricingCostCode extends DefaultEntityBase
         return this.price;
     }
 
-    private void setPrice(final BigDecimal price)
+    public void setPrice(final BigDecimal price)
     {
         this.price = price;
     }
