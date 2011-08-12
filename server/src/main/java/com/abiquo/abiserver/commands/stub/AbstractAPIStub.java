@@ -813,4 +813,13 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes", params);
     }
 
+    protected String createPricingCostCodeLink(final Integer pricingId,
+        final Integer pricingCostCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+        params.put("costcode", pricingCostCodeId.toString());
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes/{costcode}", params);
+    }
+
 }
