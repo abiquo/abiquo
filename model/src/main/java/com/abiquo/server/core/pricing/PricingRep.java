@@ -54,6 +54,9 @@ public class PricingRep extends DefaultRepBase
     private PricingCostCodeDAO pricingCostCodeDao;
 
     @Autowired
+    private PricingTierDAO pricingTierDao;
+
+    @Autowired
     private EnterpriseRep enterpriseRep;
 
     public PricingRep()
@@ -282,6 +285,11 @@ public class PricingRep extends DefaultRepBase
     public List<Currency> findCurrencies()
     {
         return currencyDao.findAll();
+    }
+
+    public Collection<PricingTier> findPricingTiers(final PricingTemplate pricing)
+    {
+        return pricingTierDao.findPricingTiers(pricing);
     }
 
 }

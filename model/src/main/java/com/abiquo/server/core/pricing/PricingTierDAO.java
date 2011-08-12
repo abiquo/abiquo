@@ -21,8 +21,13 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -38,6 +43,18 @@ public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
     public PricingTierDAO(final EntityManager entityManager)
     {
         super(PricingTier.class, entityManager);
+    }
+
+    public Collection<PricingTier> findPricingTiers(final PricingTemplate pricing)
+    {
+        Criteria criteria = createCriteria(samePricing(pricing));
+
+        return criteria.list();
+    }
+
+    private Criterion samePricing(final PricingTemplate pricing)
+    {
+        return Restrictions.eq(PricingTier.PRICING_TEMPLATE_PROPERTY, pricing);
     }
 
 }
