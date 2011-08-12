@@ -116,7 +116,6 @@ public class VirtualApplianceService extends DefaultApiService
         this.vdcService = new VirtualDatacenterService(em);
         this.vdcService = new VirtualDatacenterService(em);
         this.infrastructureService = new InfrastructureService(em);
-        this.vmService = new VirtualMachineService(em);
     }
 
     /**
