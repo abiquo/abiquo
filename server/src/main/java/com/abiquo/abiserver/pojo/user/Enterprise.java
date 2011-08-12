@@ -74,6 +74,13 @@ public class Enterprise implements IPojo<EnterpriseHB>
         defaultTheme = "abiquoDefault";
     }
 
+    public Enterprise(final Enterprise enterprise)
+    {
+        reservedMachines = enterprise.getReservedMachines();
+        dcLimits = enterprise.getDcLimits();
+        defaultTheme = enterprise.getDefaultTheme();
+    }
+
     public Integer getId()
     {
         return id;

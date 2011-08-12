@@ -401,7 +401,7 @@ public class PricingTemplate extends DefaultEntityBase
         this.lastUpdate = lastUpdate;
     }
 
-    @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "costCode")
+    @OneToMany(targetEntity = PricingCostCode.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
     private List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
 
     //

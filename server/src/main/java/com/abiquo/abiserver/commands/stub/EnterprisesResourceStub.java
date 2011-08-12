@@ -47,5 +47,5 @@ public interface EnterprisesResourceStub
     public DataResult<EnterpriseListResult> getEnterprisesWithPricingTemplate(
         ListRequest listOptions, Integer idPricingTemplate, boolean included);
 
-    public DataResult<Enterprise> editEnterprise(Enterprise enterprise, Integer id);
+    public DataResult<Enterprise> editEnterprise(Enterprise enterprise, Integer pricingTemplateId);
 }

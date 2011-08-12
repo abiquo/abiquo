@@ -71,16 +71,4 @@ public class PricingCostCodeDto extends SingleResourceTransportDto
         this.idCostCode = idCostCode;
     }
 
-    private Integer idPricing;
-
-    public Integer getIdPricing()
-    {
-        return idPricing;
-    }
-
-    public void setIdPricing(final Integer idPricing)
-    {
-        this.idPricing = idPricing;
-    }
-
 }

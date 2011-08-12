@@ -37,6 +37,8 @@ public class PricingCostCodesDto extends WrapperDto<PricingCostCodeDto>
      */
     private static final long serialVersionUID = 1L;
 
+    public static final String MEDIA_TYPE = "application/pricingcostcodesdto+xml";
+
     @Override
     @XmlElement(name = "pricingCostCode")
     public List<PricingCostCodeDto> getCollection()

@@ -83,15 +83,21 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
 
         criteria = createCriteria(filter, orderBy, desc);
 
-        criteria.setFirstResult(offset * numResults);
-        criteria.setMaxResults(numResults);
+        if (numResults != 0)
+        {
+            criteria.setFirstResult(offset * numResults);
+            criteria.setMaxResults(numResults);
+        }
 
         List<CostCode> result = getResultList(criteria);
 
         PagedList<CostCode> page = new PagedList<CostCode>();
         page.addAll(result);
-        page.setCurrentElement(offset);
-        page.setPageSize(numResults);
+        if (numResults != 0)
+        {
+            page.setCurrentElement(offset);
+            page.setPageSize(numResults);
+        }
         page.setTotalResults(total.intValue());
 
         return page;

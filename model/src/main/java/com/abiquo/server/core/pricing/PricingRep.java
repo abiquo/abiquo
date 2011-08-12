@@ -159,6 +159,11 @@ public class PricingRep extends DefaultRepBase
         return pricingTemplateDao.findAllPricingTemplateByName(name);
     }
 
+    public List<PricingTemplate> findPricingTemplats()
+    {
+        return pricingTemplateDao.findAll();
+    }
+
     public boolean existAnyOtherPricingTempWithName(final PricingTemplate pricingTemplate,
         final String name)
     {
