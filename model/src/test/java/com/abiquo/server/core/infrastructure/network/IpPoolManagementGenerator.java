@@ -23,11 +23,9 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
@@ -55,8 +53,10 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
 
         vlanNetworkGenerator = new VLANNetworkGenerator(seed);
         dhcpGenerator = new DhcpGenerator(seed);
-        rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        rasdmGenerator = new RasdManagementGenerator(seed);
+        vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
@@ -142,27 +142,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         vlanNetworkGenerator.addAuxiliaryEntitiesToPersist(vlanNetwork, entitiesToPersist);
         entitiesToPersist.add(vlanNetwork);
 
-        VirtualDatacenter vdc = entity.getVirtualDatacenter();
-        if (vdc != null)
-        {
-            vdcGenerator.addAuxiliaryEntitiesToPersist(vdc, entitiesToPersist);
-            entitiesToPersist.add(vdc);
-        }
-
-        VirtualAppliance vapp = entity.getVirtualAppliance();
-        if (vapp != null)
-        {
-            vappGenerator.addAuxiliaryEntitiesToPersist(vapp, entitiesToPersist);
-            entitiesToPersist.add(vapp);
-        }
-
-        VirtualMachine vm = entity.getVirtualMachine();
-        if (vm != null)
-        {
-            vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
-            entitiesToPersist.add(vm);
-        }
-        // rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+        rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
 }
