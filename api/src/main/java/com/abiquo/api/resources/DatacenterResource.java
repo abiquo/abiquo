@@ -40,7 +40,6 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.NetworkService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
