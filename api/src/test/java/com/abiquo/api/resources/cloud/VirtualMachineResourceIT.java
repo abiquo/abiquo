@@ -21,9 +21,10 @@
 
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,7 +72,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.tracer.Constants;
 
 public class VirtualMachineResourceIT extends TestPopulate
@@ -109,7 +111,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         destroyTraceProcessor();
     }
 
-    @BeforeMethod
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setUp()
     {
         ent = enterpriseGenerator.createUniqueInstance();
@@ -117,6 +119,13 @@ public class VirtualMachineResourceIT extends TestPopulate
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
 
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 
     @Test(enabled = false, dataProvider = TestPopulate.DATA_PROVIDER)
@@ -223,20 +232,22 @@ public class VirtualMachineResourceIT extends TestPopulate
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
-        assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
-            "edit");
+        // assertLinkExist(vmDto,
+        // resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "action",
+        // VirtualMachineNetworkConfigurationResource.NICS_PATH);
+        // assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
+        // "edit");
         assertNotNull(vmDto);
 
         // Check for vm2
         response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
-        assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
-            "edit");
+        // assertLinkExist(vmDto,
+        // resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId()), "action",
+        // VirtualMachineNetworkConfigurationResource.NICS_PATH);
+        // assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
+        // "edit");
         assertNotNull(vmDto);
     }
 
@@ -298,7 +309,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         assertNotNull(vmDto);
 
         // Check again the valid value of vm Id but with an invalid vapp Id
-        response = get(resolveVirtualMachineURI(vdc.getId(), new Random().nextInt(), vm.getId()));
+        response =
+            get(resolveVirtualMachineURI(vdc.getId(), new Random().nextInt(1000), vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -346,7 +358,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         assertNotNull(vmDto);
 
         // Check again the valid value of vm Id but with an invalid vdc Id
-        response = get(resolveVirtualMachineURI(new Random().nextInt(), vapp.getId(), vm.getId()));
+        response =
+            get(resolveVirtualMachineURI(new Random().nextInt(1000), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -355,7 +368,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     /**
      * Create a virtual machine. Check the action resource returns an empty list
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getVirtualMachineActionIPsEmptyList()
     {
         VirtualMachine vm = vmGenerator.createInstance(ent);
@@ -392,7 +405,7 @@ public class VirtualMachineResourceIT extends TestPopulate
             get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
-        IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
+        NicsDto entity = response.getEntity(NicsDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 0);
@@ -401,13 +414,13 @@ public class VirtualMachineResourceIT extends TestPopulate
     /**
      * Create a virtual machine. Ask the IPs for an invalid virtual machine identifier value.
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getVirtualMachineActionIPsRaises404WhenVmIsARandomValue()
     {
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), new Random()
-                .nextInt()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
+                new Random().nextInt(1000)));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -415,7 +428,7 @@ public class VirtualMachineResourceIT extends TestPopulate
      * Create a virtual machine. Ask the IPs for a valid virtual appliance but invalid virtual
      * datacenter.
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getVirtualMachineActionIPsRaises404WhenVappNotBelongsToVDC()
     {
         VirtualMachine vm = vmGenerator.createInstance(ent);
@@ -448,8 +461,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -490,8 +503,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(1000),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -525,8 +538,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
 
         Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_XML);
 
         if (action.allocate)
         {
@@ -555,13 +568,13 @@ public class VirtualMachineResourceIT extends TestPopulate
 
                 if (action.targetMachineName.contains("no_resource"))
                 {
-                    Assert.assertTrue(noResources, String.format(
-                        "expected no_resource for vmId [%d]", virtualMachineId));
+                    Assert.assertTrue(noResources,
+                        String.format("expected no_resource for vmId [%d]", virtualMachineId));
                 }
                 else if (action.targetMachineName.contains("limit"))
                 {
-                    Assert.assertTrue(limit, String.format("expected limit for vmId [%d]",
-                        virtualMachineId));
+                    Assert.assertTrue(limit,
+                        String.format("expected limit for vmId [%d]", virtualMachineId));
                 }
                 else
                 {

@@ -638,7 +638,7 @@ public class UriTestResolver
     public static String resolveVirtualMachineActionGetIPsURI(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
-        return resolveVirtualMachineURI(vdcId, vappId, vmId)
+        return resolveVirtualMachineURI(vdcId, vappId, vmId) + "/"
             + VirtualMachineNetworkConfigurationResource.NETWORK + "/"
             + VirtualMachineNetworkConfigurationResource.NICS_PATH;
     }
