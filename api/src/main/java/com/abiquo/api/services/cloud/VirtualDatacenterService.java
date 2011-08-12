@@ -147,7 +147,6 @@ public class VirtualDatacenterService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
-        userService.checkCurrentEnterprise(vdc.getEnterprise());
         return vdc;
     }
 

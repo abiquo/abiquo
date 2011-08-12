@@ -610,7 +610,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
-        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+        links.add(builder.buildActionLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
             VirtualMachineNetworkConfigurationResource.NICS_PATH, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
