@@ -37,10 +37,39 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository
 public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 {
+    private static Criterion sameNetwork(final Network network)
+    {
+        return Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, network);
+    }
+
+    private static Criterion sameNetwork(final VirtualDatacenter virtualDatacenter)
+    {
+        return sameNetwork(virtualDatacenter.getNetwork());
+    }
+
+    private final String FIND_BY_ENTERPRISE = " SELECT vlan "//
+        + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
+        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+        + "WHERE vlan.network.id = vdc.network.id "//
+        + "and vdc.enterprise.id = :enterpriseId";
+
+    private final String FIND_BY_DATACENTER =
+        " Select vlan "
+            + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "
+            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "
+            + "INNER JOIN vdc.network net WHERE vdc.datacenter.id = :datacenterId and vlan.network.id = net.id";
+
+    private final String GET_VLAN_DATACENTER =
+        "SELECT dc " //
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
+            + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
+            + "WHERE net.id = vlan.network.id AND vlan.id = :id";
+
     public VLANNetworkDAO()
     {
         super(VLANNetwork.class);
@@ -51,7 +80,68 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         super(VLANNetwork.class, em);
     }
 
-    public List<VLANNetwork> findVLANNetworks(final VirtualDatacenter virtualDatacenter)
+    public boolean existsAnyWithName(final Network network, final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return existsAnyByCriterions(sameNetwork(network), nameEqual(name));
+    }
+
+    public List<VLANNetwork> findByEnterprise(final int enterpriseId)
+    {
+        Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
+        query.setParameter("enterpriseId", enterpriseId);
+
+        return query.list();
+    }
+
+    public List<VLANNetwork> findPrivateVLANNetworksByDatacenter(final Datacenter datacenter)
+    {
+        Query query = getSession().createQuery(FIND_BY_DATACENTER);
+        query.setParameter("datacenterId", datacenter.getId());
+
+        return query.list();
+    }
+
+    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(final Datacenter datacenter)
+    {
+
+        Criterion inNetwork =
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
+        Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
+
+        return criteria.list();
+    }
+
+    public VLANNetwork findPublicVlanByDatacenter(final Datacenter dc, final Integer vlanId)
+    {
+        return findUniqueByCriterions(sameNetwork(dc.getNetwork()),
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
+    }
+
+    public VLANNetwork findVlanByDefaultInVirtualDatacenter(
+        final VirtualDatacenter virtualDatacenter)
+    {
+        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()),
+            Restrictions.eq(VLANNetwork.DEFAULT_PROPERTY, true));
+    }
+
+    public VLANNetwork findVlanByNameInNetwork(final Network network, final String name)
+    {
+        return findUniqueByCriterions(sameNetwork(network),
+            Restrictions.eq(VLANNetwork.NAME_PROPERTY, name));
+
+    }
+
+    public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualDatacenter,
+        final Integer vlanId)
+    {
+        return findUniqueByCriterions(
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
+    }
+
+    public List<VLANNetwork> findVlanNetworks(final VirtualDatacenter virtualDatacenter)
     {
         assert virtualDatacenter != null;
 
@@ -60,56 +150,6 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         List<VLANNetwork> result = getResultList(criteria);
 
         return result;
-    }
-
-    public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualDatacenter,
-        final Integer vlanId)
-    {
-        return findUniqueByCriterions(Restrictions.eq(VLANNetwork.NETWORK_PROPERTY,
-            virtualDatacenter.getNetwork()), Restrictions.eq(VLANNetwork.ID_PROPERTY, vlanId));
-    }
-
-    private static Criterion sameNetwork(final VirtualDatacenter virtualDatacenter)
-    {
-        return sameNetwork(virtualDatacenter.getNetwork());
-    }
-
-    private static Criterion sameNetwork(final Network network)
-    {
-        return Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, network);
-    }
-
-    public boolean existsAnyWithName(final Network network, final String name)
-    {
-        return StringUtils.isEmpty(name) ? false : existsAnyByCriterions(sameNetwork(network),
-            nameEqual(name));
-    }
-
-    public VLANNetwork findByDefault(final VirtualDatacenter virtualDatacenter)
-    {
-        return findUniqueByCriterions(sameNetwork(virtualDatacenter.getNetwork()), Restrictions.eq(
-            VLANNetwork.DEFAULT_PROPERTY, true));
-    }
-
-    private Criterion nameEqual(final String name)
-    {
-        assert name != null;
-
-        return Restrictions.eq(VLANNetwork.NAME_PROPERTY, name);
-    }
-
-    private final String FIND_BY_ENTERPRISE = " SELECT vlan "//
-        + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
-        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "WHERE vlan.network.id = vdc.network.id "//
-        + "and vdc.enterprise.id = :enterpriseId";
-
-    public List<VLANNetwork> findByEnterprise(final int enterpriseId)
-    {
-        Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
-        query.setParameter("enterpriseId", enterpriseId);
-
-        return query.list();
     }
 
     public List<Integer> getVLANTagsUsedInRack(final Rack rack)
@@ -130,28 +170,19 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         return query.list();
     }
 
-    public List<VLANNetwork> findPublicVLANNetworksByDatacenter(final Datacenter datacenter)
-    {
-
-        Criterion inNetwork =
-            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
-        Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
-
-        return criteria.list();
-    }
-
-    private final String GET_VLAN_DATACENTER =
-        "SELECT dc " //
-            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc " //
-            + "inner join dc.network net, com.abiquo.server.core.infrastructure.network.VLANNetwork vlan " //
-            + "WHERE net.id = vlan.network.id AND vlan.id = :id";
-
     public boolean isPublic(final VLANNetwork vlan)
     {
         Query query = getSession().createQuery(GET_VLAN_DATACENTER);
         query.setParameter("id", vlan.getId());
 
         return query.uniqueResult() != null;
+    }
+
+    private Criterion nameEqual(final String name)
+    {
+        assert name != null;
+
+        return Restrictions.eq(VLANNetwork.NAME_PROPERTY, name);
     }
 
 }

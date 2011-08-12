@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.vo.networking.IPPoolManagement;
         	import net.undf.abicloud.events.NetworkingEvent;
@@ -50,6 +51,9 @@
             [Bindable]
             protected var _virtualDatacenter:VirtualDataCenter;
 
+            //The related VirtualAppliance
+            protected var _virtualAppliance:VirtualAppliance;
+            
             //The VirtualMachine to assign a new NIC
             protected var _virtualMachine:VirtualMachine;
 
@@ -68,18 +72,21 @@
             public function onAssignNicToVirtualMachine(evt:Event):void{
             	 //Assign the selected NIC to the Virtual Machine
                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE);
-                event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
-                event.virtualMachine = _virtualMachine;
-                dispatchEvent(event);
+               event.virtualDatacenter = _virtualDatacenter;
+               event.virtualAppliance = _virtualAppliance;
+               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
+               event.virtualMachine = _virtualMachine;
+               dispatchEvent(event);
 
-                privateNICSelector.close();
+               privateNICSelector.close();
             }
 
-            public function init(virtualDatacenter:VirtualDataCenter, virtualMachine:VirtualMachine):void
+            public function init(virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance, virtualMachine:VirtualMachine):void
             {
                 toggledContainer.selectedIndex = 0;
 
                 _virtualDatacenter = virtualDatacenter;
+                _virtualAppliance = virtualAppliance;
                 _virtualMachine = virtualMachine;
 
                 privateNICSelector.init(_virtualDatacenter, _virtualMachine);

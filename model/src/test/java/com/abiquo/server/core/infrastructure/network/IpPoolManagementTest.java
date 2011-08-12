@@ -35,7 +35,7 @@ public class IpPoolManagementTest extends DefaultEntityTestBase<IpPoolManagement
         return new IpPoolManagementGenerator(getSeed());
     }
 
-    @Test
+    @Test(enabled = false)
     public void testIpType()
     {
         IpPoolManagement ip = createUniqueEntity();

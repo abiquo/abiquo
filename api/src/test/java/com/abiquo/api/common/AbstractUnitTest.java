@@ -20,7 +20,7 @@
  */
 package com.abiquo.api.common;
 
-import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
+import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
  * 
  * @author ibarrera
  */
-@Test(groups = BASIC_UNIT_TESTS)
+@Test(groups = ALL_UNIT_TESTS)
 public abstract class AbstractUnitTest extends AbstractGeneratorTest
 {
     @BeforeMethod

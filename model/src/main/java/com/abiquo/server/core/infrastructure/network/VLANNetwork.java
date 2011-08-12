@@ -57,7 +57,7 @@ public class VLANNetwork extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected VLANNetwork()
+    public VLANNetwork()
     {
         // Just for JPA support
     }
@@ -73,6 +73,11 @@ public class VLANNetwork extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+    
+    public void setId(Integer id)
+    {
+        this.id = id;
     }
 
     // ******************************* Properties *******************************
@@ -99,7 +104,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(String name)
+    public void setName(String name)
     {
         this.name = name;
     }
