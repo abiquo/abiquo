@@ -334,4 +334,5 @@
         <property name="cookieName" value="auth" />
         <property name="tokenValiditySeconds" value="1800" />
     </bean>
-<?xml version="1.0" encoding="UTF-8"?>
+</beans>
+
