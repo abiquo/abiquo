@@ -39,6 +39,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -49,19 +50,20 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
-        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP =
+        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
+            + "WHERE nvi.virtualAppliance.id = :vapp_id";
 
-    public static final String BY_DC = "SELECT vm "
-        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-        + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC =
+        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+            + " AND pm.datacenter.id = :datacenterId";
 
     public static final int MANAGED = 1;
 
@@ -453,19 +455,19 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String STATE_COLUMN = "state";
 
-    private final static State STATE_DEFAULT = State.NOT_DEPLOYED;
+    private final static VirtualMachineState STATE_DEFAULT = VirtualMachineState.NOT_DEPLOYED;
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state = STATE_DEFAULT;
+    private VirtualMachineState state = STATE_DEFAULT;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public VirtualMachineState getState()
     {
         return this.state;
     }
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
@@ -493,7 +495,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }

@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.api.exceptions.EventingException;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.vsm.client.VSMClient;
@@ -56,7 +56,6 @@ public final class EventingSupport
      * It sends a subscription message to the abicloud virtualSystemMonitor.
      * 
      * @param virtualSystemAddress the virtualSystemAddress of the hypervisor
-     * @param virtualSystemType the virtual system type
      * @param virtualSystemID the UUID of the virtual system
      * @param virtualSystemMonitorAddress the abicloud virtual system monitor address
      * @throws EventingException the eventing exception
@@ -121,7 +120,7 @@ public final class EventingSupport
     public static void subscribeEvent(final VirtualMachine virtualMachine,
         final String virtualSystemMonitorAddress) throws EventingException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
 
         if (hypervisor != null)
         {
@@ -176,7 +175,7 @@ public final class EventingSupport
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
             VirtualMachine vm = node.getVirtualMachine();
-            if (vm.getState() == State.NOT_DEPLOYED)
+            if (vm.getState() == VirtualMachineState.NOT_DEPLOYED)
             {
                 subscribeEvent(vm, virtualSystemMonitorAddress);
             }
@@ -284,7 +283,7 @@ public final class EventingSupport
     public static void subscribePullEvent(final VirtualMachine virtualMachine,
         final String virtualSystemMonitorAddress) throws EventingException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
 
         if (hypervisor != null)
         {
@@ -357,7 +356,7 @@ public final class EventingSupport
      * @param virtualSystemAddress the physical machine addres to monitor
      * @throws EventingException
      */
-    public static void unMonitorPhysicalMachine(String virtualSystemAddress,
+    public static void unMonitorPhysicalMachine(final String virtualSystemAddress,
         final String virtualSystemMonitorAddress, final String user, final String password)
         throws EventingException
     {

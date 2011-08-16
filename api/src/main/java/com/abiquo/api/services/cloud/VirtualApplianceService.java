@@ -24,7 +24,7 @@
  */
 package com.abiquo.api.services.cloud;
 
-import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
+import static com.abiquo.model.enumerator.VirtualMachineState.NOT_DEPLOYED;
 
 import java.util.List;
 
@@ -46,9 +46,9 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
@@ -91,7 +91,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
@@ -105,8 +105,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.infrastructureService = new InfrastructureService(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     /**
@@ -121,7 +121,7 @@ public class VirtualApplianceService extends DefaultApiService
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
     }
 
-    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
@@ -158,11 +158,11 @@ public class VirtualApplianceService extends DefaultApiService
 
         try
         {
-            if (virtualAppliance.getState() == State.NOT_DEPLOYED)
+            if (virtualAppliance.getState() == VirtualMachineState.NOT_DEPLOYED)
             {
                 allocate(virtualAppliance);
 
-                virtualAppliance.setState(State.IN_PROGRESS);
+                virtualAppliance.setState(VirtualMachineState.IN_PROGRESS);
                 repo.updateVirtualAppliance(virtualAppliance);
 
                 EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
@@ -185,12 +185,12 @@ public class VirtualApplianceService extends DefaultApiService
 
                 EventingSupport.subscribeToAllVA(virtualAppliance, vsm.getUri());
 
-                changeState(resource, envelop, State.RUNNING.toResourceState());
+                changeState(resource, envelop, VirtualMachineState.RUNNING.toResourceState());
             }
         }
         catch (Exception e)
         {
-            virtualAppliance.setState(State.NOT_DEPLOYED);
+            virtualAppliance.setState(VirtualMachineState.NOT_DEPLOYED);
             repo.updateVirtualAppliance(virtualAppliance);
         }
     }

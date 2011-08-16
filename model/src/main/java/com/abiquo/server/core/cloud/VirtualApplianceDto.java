@@ -23,6 +23,7 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualAppliance")
@@ -35,7 +36,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,7 +48,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -59,7 +60,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return nodecollections;
     }
 
-    public void setNodecollections(String nodecollections)
+    public void setNodecollections(final String nodecollections)
     {
         this.nodecollections = nodecollections;
     }
@@ -71,7 +72,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return publicApp;
     }
 
-    public void setPublicApp(int publicApp)
+    public void setPublicApp(final int publicApp)
     {
         this.publicApp = publicApp;
     }
@@ -83,7 +84,7 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -95,31 +96,31 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         return error;
     }
 
-    public void setError(int error)
+    public void setError(final int error)
     {
         this.error = error;
     }
 
-    private State subState;
+    private VirtualMachineState subState;
 
-    public State getSubState()
+    public VirtualMachineState getSubState()
     {
         return subState;
     }
 
-    public void setSubState(State subState)
+    public void setSubState(final VirtualMachineState subState)
     {
         this.subState = subState;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

@@ -23,7 +23,7 @@ package com.abiquo.server.core.cloud.stateful;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -64,7 +64,7 @@ public class VirtualApplianceStatefulConversionGenerator extends
     @Override
     public VirtualApplianceStatefulConversion createUniqueInstance()
     {
-        State state = newEnum(State.class, nextSeed());
+        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
 
         User user = userGenerator.createUniqueInstance();
         VirtualAppliance virtualAppliance = virtualApplianceGenerator.createUniqueInstance();
