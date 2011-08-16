@@ -468,7 +468,10 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         }
 
         EnterpriseDto dto = fromEnterpriseToDto(enterprise);
-        dto.setIdPricingTemplate(idPricingTemplate);
+        if (idPricingTemplate != null)
+        {
+            dto.addLink(new RESTLink("template", createPricingTemplateLink(idPricingTemplate)));
+        }
 
         result = new DataResult<Enterprise>();
 
