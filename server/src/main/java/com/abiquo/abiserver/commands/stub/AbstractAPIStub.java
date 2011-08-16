@@ -822,4 +822,20 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes/{costcode}", params);
     }
 
+    protected String createPricingTiersLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers", params);
+    }
+
+    protected String createPricingTierLink(final Integer pricingId, final Integer pricingTierId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+        params.put("tier", pricingTierId.toString());
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers/{tier}", params);
+    }
+
 }

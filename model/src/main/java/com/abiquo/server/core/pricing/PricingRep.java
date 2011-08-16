@@ -297,4 +297,9 @@ public class PricingRep extends DefaultRepBase
         return pricingTierDao.findPricingTiers(pricing);
     }
 
+    public void insertPricingTier(final PricingTier pricingTier)
+    {
+        pricingTierDao.persist(pricingTier);
+    }
+
 }

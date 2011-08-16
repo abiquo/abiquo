@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,8 @@ import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 
 @Service
 @Transactional(readOnly = true)
@@ -95,12 +98,25 @@ public class DatacenterService extends DefaultApiService
         DatacenterDto responseDto =
             ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
 
+        List<PricingTemplate> pricingTemplateList = repo.getPricingTemplates();
+        BigDecimal zero = new BigDecimal(0);
+
         // Add the default tiers
         for (int i = 1; i <= 4; i++)
         {
             Tier tier =
                 new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
             repo.insertTier(tier);
+
+            if (!pricingTemplateList.isEmpty())
+            {
+                for (PricingTemplate pt : pricingTemplateList)
+                {
+                    PricingTier pricingTier = new PricingTier(zero, pt, tier);
+                    repo.insertPricingTier(pricingTier);
+                }
+
+            }
         }
 
         // Add the Remote Services in database in case are informed in the request
@@ -173,22 +189,22 @@ public class DatacenterService extends DefaultApiService
         flushErrors();
     }
 
-    public List<Rack> getRacks(Datacenter datacenter)
+    public List<Rack> getRacks(final Datacenter datacenter)
     {
         return repo.findRacks(datacenter);
     }
 
-    public List<Rack> getRacksWithHAEnabled(Datacenter datacenter)
+    public List<Rack> getRacksWithHAEnabled(final Datacenter datacenter)
     {
         return repo.findRacksWithHAEnabled(datacenter);
     }
 
-    public List<Machine> getMachines(Rack rack)
+    public List<Machine> getMachines(final Rack rack)
     {
         return repo.findRackMachines(rack);
     }
 
-    public List<Machine> getEnabledMachines(Rack rack)
+    public List<Machine> getEnabledMachines(final Rack rack)
     {
         return repo.findRackEnabledForHAMachines(rack);
     }

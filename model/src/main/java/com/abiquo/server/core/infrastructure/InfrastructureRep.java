@@ -24,7 +24,6 @@ package com.abiquo.server.core.infrastructure;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +47,9 @@ import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository
@@ -103,6 +105,9 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private StorageRep storageRep;
+
+    @Autowired
+    private PricingRep pricingRep;
 
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
@@ -269,7 +274,7 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
-    public boolean existsAnyUcsRackWithIp(String ip)
+    public boolean existsAnyUcsRackWithIp(final String ip)
     {
         return this.ucsRackDao.existAnyOtherWithIP(ip);
     }
@@ -303,7 +308,7 @@ public class InfrastructureRep extends DefaultRepBase
         this.ucsRackDao.flush();
     }
 
-    public UcsRack findUcsRackById(Integer rackId)
+    public UcsRack findUcsRackById(final Integer rackId)
     {
         return ucsRackDao.findById(rackId);
     }
@@ -346,7 +351,8 @@ public class InfrastructureRep extends DefaultRepBase
         return this.machineDao.findById(id);
     }
 
-    public Machine findMachineByIds(Integer datacenterId, Integer rackId, Integer machineId)
+    public Machine findMachineByIds(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
@@ -540,8 +546,9 @@ public class InfrastructureRep extends DefaultRepBase
             enterprise);
     }
 
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    public List<Machine> findCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Enterprise enterprise, final String datastoreUuid,
+        final Integer originalHypervisorId)
     {
         return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
             datastoreUuid, originalHypervisorId);
@@ -594,7 +601,8 @@ public class InfrastructureRep extends DefaultRepBase
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
 
-    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+    public boolean existRepositoryInSameDatacenter(final Datacenter datacenter,
+        final String repositoryLocation)
     {
         return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
     }
@@ -618,9 +626,9 @@ public class InfrastructureRep extends DefaultRepBase
         assert datacenter != null;
         List<VirtualMachine> vmachinesInDC =
             virtualMachineDao.findVirtualMachinesByDatacenter(datacenter.getId());
-        for (Iterator iterator = vmachinesInDC.iterator(); iterator.hasNext();)
+        for (Object element : vmachinesInDC)
         {
-            VirtualMachine virtualMachine = (VirtualMachine) iterator.next();
+            VirtualMachine virtualMachine = (VirtualMachine) element;
             // We can ignore CRASHED state: it means the VM is actually not deployed
             if (!(virtualMachine.getState().equals("NOT_DEPLOYED") || virtualMachine.getState()
                 .equals("CRASHED")))
@@ -631,17 +639,17 @@ public class InfrastructureRep extends DefaultRepBase
         return false;
     }
 
-    public Rack findRackByIds(Integer datacenterId, Integer rackId)
+    public Rack findRackByIds(final Integer datacenterId, final Integer rackId)
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
 
-    public List<Rack> findRacksWithHAEnabled(Datacenter dc)
+    public List<Rack> findRacksWithHAEnabled(final Datacenter dc)
     {
         return rackDao.findRacksWithHAEnabled(dc);
     }
 
-    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
         return machineDao.findRackEnabledForHAMachines(rack);
     }
@@ -668,9 +676,19 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
     }
 
-    public boolean existAnyHypervisorWithIpInDatacenter(String ip, Integer datacenterId)
+    public boolean existAnyHypervisorWithIpInDatacenter(final String ip, final Integer datacenterId)
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
+    }
+
+    public List<PricingTemplate> getPricingTemplates()
+    {
+        return pricingRep.findPricingTemplats();
+    }
+
+    public void insertPricingTier(final PricingTier pricingTier)
+    {
+        pricingRep.insertPricingTier(pricingTier);
     }
 
 }
