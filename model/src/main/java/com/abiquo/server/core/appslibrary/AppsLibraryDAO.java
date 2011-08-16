@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.appslibrary;
 
-
 public class AppsLibraryDAO
 {
 

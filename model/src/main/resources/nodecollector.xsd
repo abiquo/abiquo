@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema targetNamespace="http://abiquo.com/server/core/infrastructure/nodecollector"
-    xmlns:nc="http://abiquo.com/server/core/infrastructure/nodecollector" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:nc="http://abiquo.com/server/core/infrastructure/nodecollector" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0" attributeFormDefault="qualified"
     elementFormDefault="qualified">
     <!-- -->

@@ -58,7 +58,45 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_PARAM = "{" + RACK + "}";
 
-    // Define its service. It should only have ONE service!
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE = "logicServers/associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE = "logicServers/dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS = "logicServers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE = "logicServers/delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE = "logicServers/clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS = "organizations";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lsTemplates";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
+        "logicServers/assocTemplate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicServers/assocClone";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL = "ls-dissociate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_REL = "logicServers";
+
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE_REL = "ls-delete";
+
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE_REL = "ls-clone";
+
+    public static final String RACK_ACTION_ORGANIZATIONS_REL = "organizations";
+
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES_REL = "ls-templates";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
+        "ls-associateTemplate";
+
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateClone";
+
+    // Define its service. It should only have ONE
     @Autowired
     private InfrastructureService service;
 
