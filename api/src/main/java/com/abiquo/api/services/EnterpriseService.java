@@ -236,6 +236,7 @@ public class EnterpriseService extends DefaultApiService
         isValidEnterprise(old);
         isValidEnterpriseLimit(old);
 
+        //
         if (dto.searchLink("template") != null)
         {
 
@@ -243,6 +244,23 @@ public class EnterpriseService extends DefaultApiService
             old.setPricingTemplate(pricingTemplate);
         }
 
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        else if (dto.getIdPricingTemplate() != null)
+        {
+            if (dto.getIdPricingTemplate() == 0)
+            {
+                old.setPricingTemplate(null);
+            }
+            else
+            {
+                PricingTemplate pricingTemplate = findPricingTemplate(dto.getIdPricingTemplate());
+                old.setPricingTemplate(pricingTemplate);
+            }
+
+        }
+
+        //
         repo.update(old);
         return old;
     }
@@ -612,7 +630,8 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
-        Integer roleId = Integer.valueOf(values.getFirst(PricingTemplateResource.PRICING_TEMPLATE));
-        return roleId;
+        Integer pricingTemplateId =
+            Integer.valueOf(values.getFirst(PricingTemplateResource.PRICING_TEMPLATE));
+        return pricingTemplateId;
     }
 }

@@ -67,6 +67,18 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
     private String defaultTheme;
 
+    private Integer idPricingTemplate;
+
+    public Integer getIdPricingTemplate()
+    {
+        return idPricingTemplate;
+    }
+
+    public void setIdPricingTemplate(final Integer idPricingTemplate)
+    {
+        this.idPricingTemplate = idPricingTemplate;
+    }
+
     public Enterprise()
     {
         reservedMachines = new ArrayList<PhysicalMachine>();
@@ -226,6 +238,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
         enterprise.setId(dto.getId());
         enterprise.setName(dto.getName());
+        enterprise.setIdPricingTemplate(dto.getIdPricingTemplate());
 
         ResourceAllocationLimit ral = new ResourceAllocationLimit();
 
