@@ -154,6 +154,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/logicServer" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <!-- DATASTORES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />

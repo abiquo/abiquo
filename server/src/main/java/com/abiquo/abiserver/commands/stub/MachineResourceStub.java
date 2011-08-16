@@ -23,6 +23,8 @@ package com.abiquo.abiserver.commands.stub;
 
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.LogicServer;
 
 public interface MachineResourceStub
 {
@@ -46,4 +48,19 @@ public interface MachineResourceStub
      */
     public BasicResult powerOn(PhysicalMachine machine);
 
+    /**
+     * Light the LED.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public BasicResult bladeLocatorLED(final PhysicalMachine machine);
+
+    /**
+     * Returns teh {@link LogicServer} in blade.
+     * 
+     * @param ucsRack ucsRack.
+     * @return wrapper which contains the {@link LogicServer} which is the blade. Or in case of
+     *         error the appropiate object.
+     */
+    public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine);
 }

@@ -68,6 +68,20 @@ public class AbstractAPIStub
 
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
+    public static final String START_WITH = "startwith";
+
+    public static final String BY = "by";
+
+    public static final String FILTER = "has";
+
+    public static final String LIMIT = "limit";
+
+    public static final String ASC = "asc";
+
+    public static final Integer DEFAULT_PAGE_LENGTH = 25;
+
+    public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
+
     protected RestClient client = new RestClient();
 
     protected final String apiUri;
@@ -908,5 +922,122 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
+    }
+
+    protected String createRackOrganizationsLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/organizations",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServersLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServerTemplatesLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lsTemplates",
+            params, queryParams);
+    }
+
+    protected String createRackCloneLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers/clone",
+            params, queryParams);
+    }
+
+    protected String createRackAssociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/associate", params,
+            queryParams);
+    }
+
+    protected String createRackDissociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/dissociate", params,
+            queryParams);
+    }
+
+    protected String createRackDeleteLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/delete", params, queryParams);
+    }
+
+    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOn", params);
+    }
+
+    protected String createMachineBladeLsLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicServer", params);
+    }
+
+    protected String createRackAssociateLogicServerTemplateLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocTemplate", params,
+            queryParams);
+    }
+
+    protected String createRackAssociateLogicServerCloneLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
+            queryParams);
     }
 }

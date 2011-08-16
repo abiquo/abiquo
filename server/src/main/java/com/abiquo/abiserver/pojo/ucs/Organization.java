@@ -26,7 +26,9 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector.ucs;
+package com.abiquo.abiserver.pojo.ucs;
+
+import com.abiquo.server.core.infrastructure.nodecollector.OrganizationDto;
 
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
@@ -145,4 +147,14 @@ public class Organization
         this.description = value;
     }
 
+    public static Organization create(final OrganizationDto dto)
+    {
+        Organization organization = new Organization();
+        organization.setDn(dto.getDn());
+        organization.setName(dto.getName());
+        organization.setLevel(dto.getLevel());
+        organization.setStatus(dto.getStatus());
+        organization.setDescription(dto.getDescription());
+        return organization;
+    }
 }
