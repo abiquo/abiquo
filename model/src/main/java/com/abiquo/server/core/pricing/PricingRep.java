@@ -54,6 +54,9 @@ public class PricingRep extends DefaultRepBase
     private PricingCostCodeDAO pricingCostCodeDao;
 
     @Autowired
+    private PricingTierDAO pricingTierDao;
+
+    @Autowired
     private EnterpriseRep enterpriseRep;
 
     public PricingRep()
@@ -259,7 +262,8 @@ public class PricingRep extends DefaultRepBase
         return costCodeDao.find(filter, order, desc, page, numResults);
     }
 
-    public Object findPricingCostCode(final CostCode costCode, final PricingTemplate pricing)
+    public PricingCostCode findPricingCostCode(final CostCode costCode,
+        final PricingTemplate pricing)
     {
         return pricingCostCodeDao.findPricingCostCode(costCode, pricing);
     }
@@ -287,6 +291,29 @@ public class PricingRep extends DefaultRepBase
     public List<Currency> findCurrencies()
     {
         return currencyDao.findAll();
+    }
+
+    public PricingCostCode findPricingCostCodeById(final Integer id)
+    {
+        return pricingCostCodeDao.findById(id);
+    }
+
+    public boolean existAnyOtherWithCostCode(final PricingCostCode pricingCostCode,
+        final CostCode costCode, final PricingTemplate pricingTemplate)
+    {
+        return pricingCostCodeDao.existAnyOtherWithCostCode(pricingCostCode, costCode,
+            pricingTemplate);
+
+    }
+
+    public void updatePricingCostCode(final PricingCostCode old)
+    {
+        pricingCostCodeDao.flush();
+    }
+
+    public Collection<PricingTier> findPricingTiers(final PricingTemplate pricing)
+    {
+        return pricingTierDao.findPricingTiers(pricing);
     }
 
 }

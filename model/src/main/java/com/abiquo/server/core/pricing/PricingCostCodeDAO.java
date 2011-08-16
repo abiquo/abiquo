@@ -55,9 +55,11 @@ public class PricingCostCodeDAO extends DefaultDAOBase<Integer, PricingCostCode>
         return Restrictions.eq(PricingCostCode.PRICING_TEMPLATE_PROPERTY, pricing);
     }
 
-    public Object findPricingCostCode(final CostCode costCode, final PricingTemplate pricing)
+    public PricingCostCode findPricingCostCode(final CostCode costCode,
+        final PricingTemplate pricing)
     {
-        return createCriteria(sameCostCode(costCode), samePricing(pricing)).uniqueResult();
+        return (PricingCostCode) createCriteria(sameCostCode(costCode), samePricing(pricing))
+            .uniqueResult();
     }
 
     public Collection<PricingCostCode> findPricingCostCodes(final PricingTemplate pricing)
@@ -66,6 +68,13 @@ public class PricingCostCodeDAO extends DefaultDAOBase<Integer, PricingCostCode>
         Criteria criteria = createCriteria(samePricing(pricing));
 
         return criteria.list();
+    }
+
+    public boolean existAnyOtherWithCostCode(final PricingCostCode pricingCostCode,
+        final CostCode costCode, final PricingTemplate pricing)
+    {
+        return existsAnyOtherByCriterions(pricingCostCode, sameCostCode(costCode),
+            samePricing(pricing));
     }
 
 }

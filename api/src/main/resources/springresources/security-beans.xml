@@ -309,7 +309,7 @@
         <security:intercept-url pattern="/config/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
           <!-- COST CODE- CURRENCY -->
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="POST" access="ROLE_PRICING_MANAGE" />
-         <security:intercept-url pattern="/config/costcodes/*/currencies" method="PUT" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/costcodes/*/currencies" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -318,14 +318,24 @@
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         
-           <!-- PRIGING- COST CODE -->
+        <!-- PRICING- COST CODE -->
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="POST" access="ROLE_PRICING_MANAGE" />
+         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/pricingTemplates/*/costcodes/*" method="PUT" access="ROLE_PRICING_MANAGE" />
+        
+        <!-- PRICING-TIER -->
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers" method="POST" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers/*" method="GET" access="ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/pricingTemplates/*/tiers/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         
         <!--=================================== -->
         <!--============= LOGIN =============== -->

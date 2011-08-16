@@ -106,6 +106,13 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return editEnterprise(enterprise, null);
     }
 
+    protected EnterpriseDto fromPricingEnterpriseToDto(final Enterprise enterprise)
+    {
+        EnterpriseDto dto = new EnterpriseDto();
+        dto.setName(enterprise.getName());
+        return dto;
+    }
+
     protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
     {
         EnterpriseDto dto = new EnterpriseDto();
@@ -423,11 +430,17 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
 
         String uri = createEnterpriseLink(enterprise.getId());
 
-        EnterpriseDto dto = fromEnterpriseToDto(enterprise);
+        EnterpriseDto dto;
         if (idPricingTemplate != null)
         {
+            dto = fromPricingEnterpriseToDto(enterprise);
             dto.setIdPricingTemplate(idPricingTemplate);
         }
+        else
+        {
+            dto = fromEnterpriseToDto(enterprise);
+        }
+
         result = new DataResult<Enterprise>();
 
         ClientResponse response = put(uri, dto);
