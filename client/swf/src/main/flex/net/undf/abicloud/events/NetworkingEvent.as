@@ -58,6 +58,8 @@ package net.undf.abicloud.events
         public static const GET_PRIVATE_IPs_BY_VDC:String = "getPrivateIPsByVDCNetworkingEvent";
 
         public static const GET_PRIVATE_IPs_BY_VLAN:String = "getPrivateIPsByVLANNetworkingEvent";
+        
+        public static const GET_EXTERNAL_IPs_BY_VLAN:String = "getExternalIPsByVLANNetworkingEvent";
 
         public static const GET_NICs_BY_VIRTUAL_MACHINE:String = "getNICsByVirtualMachineNetworkingEvent";
 
@@ -72,6 +74,8 @@ package net.undf.abicloud.events
         public static const VIRTUAL_MACHINE_GATEWAY_CHANGED:String = "virtualMachineGatewayChangedNetworkingEvent";
 
         public static const ASSIGN_NIC_TO_VIRTUAL_MACHINE:String = "assignNICToVirtualMachineNetworkingEvent";
+        
+        public static const ASSIGN_EXTERNAL_NIC_TO_VIRTUAL_MACHINE:String = "assignExternalNICToVirtualMachineNetworkingEvent";
 
         public static const REMOVE_NIC_FROM_VIRTUAL_MACHINE:String = "removeNICFromVirtualMachineNetworkingEvent";
 
@@ -82,6 +86,8 @@ package net.undf.abicloud.events
         public static const GET_PRIVATE_NETWORKS_BY_ENTERPRISE:String = "getPrivateNetworksByEnterpriseNetworkingEvent";
         
         public static const GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER:String = "getPrivateNetworksByVirtualDatacenterNetworkingEvent";
+        
+        public static const GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER:String = "getExternalNetworksByVirtualDatacenterNetworkingEvent";
         
         public static const REORDER_NIC_INTO_VIRTUAL_MACHINE:String = "reorderNicIntoVirtualMachineEvent";
 
@@ -127,6 +133,8 @@ package net.undf.abicloud.events
         public var virtualAppliance:VirtualAppliance;
         
         public var orderInList:int;
+        
+        public var available:Boolean;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

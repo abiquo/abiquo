@@ -114,16 +114,26 @@
             }
             
             private function getNetworksByVirtualDatacenter():void{
+            	_virtualDatacenter.network.networks = new ArrayCollection();
+            	//Private Vlan Networks
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
             	if(this._virtualDatacenter){
 	            	dispatchEvent(event);            		
             	}
+            	
+            	//External Vlan Networks
+                event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER);
+                event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.callback = populatePrivateNetworks;
+                if(this._virtualDatacenter){
+                    dispatchEvent(event);                   
+                }
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
-            	_virtualDatacenter.network.networks = networks;
+            	_virtualDatacenter.network.networks.addAll(networks);
             }
 
             private function onClickAllVLANLabel():void

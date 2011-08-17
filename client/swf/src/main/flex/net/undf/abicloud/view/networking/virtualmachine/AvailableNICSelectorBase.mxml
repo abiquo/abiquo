@@ -63,6 +63,7 @@
 
                 privateNICSelector = new PrivateNICSelector();
                 privateNICSelector.addEventListener("onAssignNicToVirtualMachine",onAssignNicToVirtualMachine);
+                privateNICSelector.addEventListener("onAssignExternalNicToVirtualMachine",onAssignExternalNicToVirtualMachine);
                 privateNICSelector.addEventListener("close", onClose);
 
                 toggledContainer.addContent(privateNICSelector, ResourceManager.getInstance().getString("Networking",
@@ -72,6 +73,19 @@
             public function onAssignNicToVirtualMachine(evt:Event):void{
             	 //Assign the selected NIC to the Virtual Machine
                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE);
+               event.virtualDatacenter = _virtualDatacenter;
+               event.virtualAppliance = _virtualAppliance;
+               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
+               event.virtualMachine = _virtualMachine;
+               dispatchEvent(event);
+
+               privateNICSelector.close();
+            }
+            
+            public function onAssignExternalNicToVirtualMachine(evt:Event):void{
+                 //Assign the selected NIC to the Virtual Machine
+               var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_EXTERNAL_NIC_TO_VIRTUAL_MACHINE);
+               event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                event.virtualDatacenter = _virtualDatacenter;
                event.virtualAppliance = _virtualAppliance;
                event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
