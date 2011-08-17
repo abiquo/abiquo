@@ -19,10 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.resources;
+package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworksURI;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -32,13 +34,16 @@ import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -57,6 +62,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworksDto;
  * 
  * @author jdevesa@abiquo.com
  */
+@Test(groups = {NETWORK_INTEGRATION_TESTS})
 public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 {
 
@@ -68,7 +74,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
     Enterprise sysEnterprise;
 
-    @BeforeMethod
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setUp()
     {
         rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -95,6 +101,13 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
     }
 
+    @Override
+    @AfterMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
+    }
+
     @Test
     public void getPrivateNetworks()
     {
@@ -117,13 +130,13 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getPrivateNetworksListInvalidVDC() throws Exception
     {
-        Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt()));
+        Resource resource = client.resource(resolvePrivateNetworksURI(new Random().nextInt(1000)));
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(404, response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
-    @Test
+    @Test(groups = {BASIC_INTEGRATION_TESTS})
     public void createPrivateNetwork()
     {
         VLANNetworkDto dto = createValidNetworkDto();
@@ -131,11 +144,10 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
 
-        assertEquals(201, response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
         VLANNetworkDto dtoResponse = response.getEntity(VLANNetworkDto.class);
 
         assertEquals(dto.getName(), dtoResponse.getName());
-        assertEquals(dto.getDefaultNetwork(), dtoResponse.getDefaultNetwork());
         assertEquals(dto.getAddress(), dtoResponse.getAddress());
         assertEquals(dto.getGateway(), dtoResponse.getGateway());
         assertTrue(dto.getMask() == dtoResponse.getMask());
@@ -153,7 +165,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         VLANNetworkDto dto = createValidNetworkDto();
         Integer integer = new Random().nextInt();
-        integer = (integer < 0) ? integer * (-1) : integer;
+        integer = integer < 0 ? integer * -1 : integer;
         ClientResponse response =
             post(resolvePrivateNetworksURI(integer), dto, "sysadmin", "sysadmin");
         assertErrors(response, 404, APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
@@ -191,12 +203,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         VLANNetworkDto dto = createValidNetworkDto();
         dto.setName(null);
         ClientResponse response = res.post(dto);
-        assertEquals(response.getStatusCode(), 400);
-
-        // Default network null
-        dto = createValidNetworkDto();
-        dto.setDefaultNetwork(null);
-        response = res.post(dto);
         assertEquals(response.getStatusCode(), 400);
 
         // Address null
@@ -287,7 +293,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
 
         // Check we can not create the dto again caused by the network name.
         response = post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
-        assertErrors(response, 409, APIError.VLANS_DUPLICATED_VLAN_NAME);
+        assertErrors(response, 409, APIError.VLANS_DUPLICATED_VLAN_NAME_VDC);
 
         // Ensure we can create it with the same name into another vdc.
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(rs.getDatacenter());

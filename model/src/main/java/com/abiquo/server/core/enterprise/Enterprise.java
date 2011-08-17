@@ -30,11 +30,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -43,6 +46,7 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -100,7 +104,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -120,7 +124,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(boolean isReservationRestricted)
+    public void setIsReservationRestricted(final boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -145,7 +149,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.repositorySoft;
     }
 
-    private void setRepositorySoft(long repositorySoft)
+    private void setRepositorySoft(final long repositorySoft)
     {
         this.repositorySoft = repositorySoft;
     }
@@ -170,7 +174,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.repositoryHard;
     }
 
-    private void setRepositoryHard(long repositoryHard)
+    private void setRepositoryHard(final long repositoryHard)
     {
         this.repositoryHard = repositoryHard;
     }
@@ -181,15 +185,38 @@ public class Enterprise extends DefaultEntityWithLimits
         return new Limit(repositorySoft, repositoryHard);
     }
 
-    public void setRepositoryLimits(Limit limit)
+    public void setRepositoryLimits(final Limit limit)
     {
         setRepositorySoft(limit.soft);
         setRepositoryHard(limit.hard);
     }
 
+    public final static String DEFAULT_VLAN_PROPERTY = "defaultVlan";
+
+    private final static boolean DEFAULT_VLAN_REQUIRED = false;
+
+    private final static String DEFAULT_VLAN_COLUMN = "default_vlan_network_id";
+
+    @JoinColumn(name = DEFAULT_VLAN_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_vlan")
+    private VLANNetwork defaultVlan;
+
+    @Required(value = DEFAULT_VLAN_REQUIRED)
+    public VLANNetwork getDefaultVlan()
+    {
+        return this.defaultVlan;
+    }
+
+    public void setDefaultVlan(final VLANNetwork defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
+    }
+
     // *************************** Mandatory constructors ***********************
-    public Enterprise(String name, int ramSoftLimitInMb, int cpuCountSoftLimit,
-        long hdSoftLimitInMb, int ramHardLimitInMb, int cpuCountHardLimit, long hdHardLimitInMb)
+    public Enterprise(final String name, final int ramSoftLimitInMb, final int cpuCountSoftLimit,
+        final long hdSoftLimitInMb, final int ramHardLimitInMb, final int cpuCountHardLimit,
+        final long hdHardLimitInMb)
     {
         setName(name);
         setIsReservationRestricted(Boolean.FALSE);
@@ -218,8 +245,8 @@ public class Enterprise extends DefaultEntityWithLimits
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
     private final List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();
 
-    public User createUser(Role role, String name, String surname, String email, String nick,
-        String password, String locale)
+    public User createUser(final Role role, final String name, final String surname,
+        final String email, final String nick, final String password, final String locale)
     {
         return new User(this, role, name, surname, email, nick, password, locale);
     }

@@ -115,7 +115,7 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
     }
 
     @Test
-    public void createVirtualDatacenterByUserWithVdcsAssigned()
+    public void createVirtualDatacenterByUserWithVdcsAssigned() throws Exception
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Datacenter d = datacenterGenerator.createUniqueInstance();
@@ -164,7 +164,7 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
 
         commitActiveTransaction(em);
 
-        Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
+        org.testng.Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
             "," + virtualDatacenter.getId()));
 
     }

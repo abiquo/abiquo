@@ -47,8 +47,8 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -66,7 +66,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
-    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, Boolean managedRack, MachineDto machine);
+    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId,
+        Boolean managedRack, MachineDto machine);
 
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
@@ -97,7 +98,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildPrivateNetworkLinks(Integer virtualDatacenterId,
         VLANNetworkDto network);
 
-    public List<RESTLink> buildIPAddressLink(Integer vlanId, IpPoolManagementDto ip);
+    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
+        final VLANNetworkDto network);
 
     /*
      * Premium methods
@@ -139,7 +141,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId);
-    
+
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         EnterpriseExclusionRule enterpriseExclusion);
@@ -148,4 +150,15 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
+    public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
+
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip);
+
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, IpPoolManagement ip);
+
+    public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, VMNetworkConfiguration config);
+
+    public List<RESTLink> buildNICLinks(IpPoolManagement ip);
 }

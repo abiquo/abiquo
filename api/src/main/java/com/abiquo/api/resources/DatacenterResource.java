@@ -39,11 +39,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
-import com.abiquo.api.services.IpAddressService;
-import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
@@ -71,7 +71,7 @@ public class DatacenterResource extends AbstractResource
     DatacenterService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
 
     @Context
     UriInfo uriInfo;
@@ -105,10 +105,12 @@ public class DatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {
-        Integer firstElem = (startwith == null) ? 0 : startwith;
-        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        Integer firstElem = startwith == null ? 0 : startwith;
+        Integer numElem = limit == null ? DEFAULT_PAGE_LENGTH : limit;
         if (network == null)
+        {
             network = false;
+        }
 
         Datacenter datacenter = service.getDatacenter(datacenterId);
         List<Enterprise> enterprises =
@@ -121,7 +123,7 @@ public class DatacenterResource extends AbstractResource
         }
         enterprisesDto.setTotalSize(((PagedList) enterprises).getTotalResults());
         enterprisesDto.addLinks(buildEnterprisesLinks(uriInfo.getAbsolutePath().toString(),
-            (PagedList) enterprises, network,numElem));
+            (PagedList) enterprises, network, numElem));
         return enterprisesDto;
 
     }
@@ -172,7 +174,7 @@ public class DatacenterResource extends AbstractResource
     }
 
     private List<RESTLink> buildEnterprisesLinks(final String Path, final PagedList< ? > list,
-        Boolean network, Integer numElem)
+        final Boolean network, final Integer numElem)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -181,16 +183,18 @@ public class DatacenterResource extends AbstractResource
         if (list.getCurrentElement() != 0)
         {
             Integer previous = list.getCurrentElement() - list.getPageSize();
-            previous = (previous < 0) ? 0 : previous;
+            previous = previous < 0 ? 0 : previous;
 
             links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + previous + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + previous + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
         Integer next = list.getCurrentElement() + list.getPageSize();
         if (next < list.getTotalResults())
         {
             links.add(new RESTLink("next", Path + "?" + NETWORK + "=" + network.toString() + '&'
-                + AbstractResource.START_WITH + "=" + next + '&' +AbstractResource.LIMIT +"=" + numElem ));
+                + AbstractResource.START_WITH + "=" + next + '&' + AbstractResource.LIMIT + "="
+                + numElem));
         }
 
         Integer last = list.getTotalResults() - list.getPageSize();
@@ -199,7 +203,8 @@ public class DatacenterResource extends AbstractResource
             last = 0;
         }
         links.add(new RESTLink("last", Path + "?" + NETWORK + "=" + network.toString() + '&'
-            + AbstractResource.START_WITH + "=" + last + '&' +AbstractResource.LIMIT +"=" + numElem));
+            + AbstractResource.START_WITH + "=" + last + '&' + AbstractResource.LIMIT + "="
+            + numElem));
         return links;
     }
 }

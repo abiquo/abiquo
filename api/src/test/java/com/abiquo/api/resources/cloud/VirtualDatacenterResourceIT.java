@@ -31,6 +31,8 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualAppliancesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetDHCPInfoURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -39,10 +41,12 @@ import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -71,7 +75,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
     private static final String SYSADMIN = "sysadmin";
 
-    @BeforeMethod
+    @BeforeMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
@@ -88,6 +92,13 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(u);
 
         setup(entitiesToSetup.toArray());
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_INTEGRATION_TESTS, NETWORK_INTEGRATION_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 
     @Test
@@ -207,7 +218,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
     }
 
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void deleteVirtualDatacenterWithIps()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
@@ -252,7 +263,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the link of the action when GET a VDC exists
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenter()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -283,8 +294,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
     }
 
@@ -292,7 +303,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=ip' query
      * param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByIp()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -312,15 +323,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=ip";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the
      * 'by=quarantine' query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByQuarantine()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -340,15 +351,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=quarantine";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=mac' query
      * param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByMAC()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -368,15 +379,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=mac";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=lease'
      * query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByLease()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -396,15 +407,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=lease";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the 'by=vlan'
      * query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByVlan()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -424,15 +435,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=vlan";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the
      * 'by=virtualdatacenter' query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualDatacenter()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -452,15 +463,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualdatacenter";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the
      * 'by=virtualmachine' query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualMachine()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -480,15 +491,15 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualmachine";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
      * Check if the request 'action/ips' of the virtualdatacenter resource allows the
      * 'by=virtualappliance' query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterOrderByVirtualAppliance()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -508,8 +519,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=virtualappliance";
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
     }
 
     /**
@@ -535,7 +546,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
         // Test Default
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
+        ClientResponse response = get(validURI);
         IpsPoolManagementDto entity = response.getEntity(IpsPoolManagementDto.class);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
@@ -546,7 +557,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         // Test 30
         validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?limit=30";
-        response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
+        response = get(validURI);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -555,7 +566,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         // Test 120
         validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?limit=120";
-        response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
+        response = get(validURI);
         assertEquals(200, response.getStatusCode());
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
@@ -567,7 +578,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
      * Check if the request 'action/ips' of the virtualdatacenter resource doesnt allow a
      * 'by={randomvalue}' query param
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getPrivateNetworkIPsByVirtualDatacenterRaises400WhenOrderByRandomParameter()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -587,21 +598,21 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
         validURI = validURI + "?by=" + Integer.valueOf(new Random().nextInt());
 
-        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(400, response.getStatusCode());
+        ClientResponse response = get(validURI);
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     // TESTS refered to the action of GET dhcpinfo by VDC
 
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void getdhcpInfoByVirtualDatacenter()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         String URI = resolveVirtualDatacenterActionGetDHCPInfoURI(vdc.getId());
-        ClientResponse response = get(URI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(URI);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         String entity = response.getEntity(String.class);
         assertNotNull(entity);
     }
@@ -613,7 +624,6 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            lists.add(ippool.getRasd());
             lists.add(ippool);
             ip = ip.nextIPAddress();
         }
