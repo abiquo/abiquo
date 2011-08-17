@@ -42,7 +42,7 @@ import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -313,18 +313,18 @@ public class MachineService extends DefaultApiService
             virtualMachineService.findByHypervisor(hypervisor);
         for (VirtualMachine vm : virtualMachines)
         {
-            vm.setState(State.NOT_DEPLOYED);
+            vm.setState(VirtualMachineState.NOT_DEPLOYED);
             vm.setDatastore(null);
             vm.setHypervisor(null);
 
             VirtualAppliance vapp = virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
 
-            State newState = State.NOT_DEPLOYED;
+            VirtualMachineState newState = VirtualMachineState.NOT_DEPLOYED;
             for (NodeVirtualImage node : vapp.getNodes())
             {
-                if (node.getVirtualMachine().getState() != State.NOT_DEPLOYED)
+                if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_DEPLOYED)
                 {
-                    newState = State.APPLY_CHANGES_NEEDED;
+                    newState = VirtualMachineState.APPLY_CHANGES_NEEDED;
                     break;
                 }
             }

@@ -33,6 +33,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -166,7 +167,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
-    public void updateVirtualMachineState(final Integer vmachineId, final State state)
+    public void updateVirtualMachineState(final Integer vmachineId, final VirtualMachineState state)
     {
         VirtualMachine vmachine = findById(vmachineId);
 

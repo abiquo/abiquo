@@ -23,8 +23,8 @@ package com.abiquo.scheduler;
 
 import javax.jms.ResourceAllocationException;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.workload.AllocatorException;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 
@@ -83,8 +83,8 @@ public interface IAllocator
      * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
      *         but we wants to move it.
      */
-    VirtualMachine allocateHAVirtualMachine(Integer  vmachineId, State targetState) throws AllocatorException,
-        ResourceAllocationException;
+    VirtualMachine allocateHAVirtualMachine(Integer vmachineId, VirtualMachineState targetState)
+        throws AllocatorException, ResourceAllocationException;
 
     /**
      * Roll back the changes on the target physical machine after the virtual machine is destroyed

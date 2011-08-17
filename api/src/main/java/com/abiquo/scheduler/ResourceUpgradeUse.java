@@ -39,9 +39,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -119,12 +119,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
 
+        // hypervisor
         // free resources on the original hypervisor
         Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();        
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
-    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
+    private void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final boolean isHA)
     {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
@@ -143,7 +145,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 updateUsageDatastore(virtualMachine, false);
                 updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
 
-                virtualMachine.setState(State.IN_PROGRESS);
+                virtualMachine.setState(VirtualMachineState.IN_PROGRESS);
             }
             else
             {
@@ -189,7 +191,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(State.NOT_DEPLOYED);
+            virtualMachine.setState(VirtualMachineState.NOT_DEPLOYED);
             vmachineDao.flush();
         }
         catch (final Exception e) // HibernateException NotEnoughResourcesException
@@ -257,13 +259,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // Discover the tag of the vlan if it is the first address to be deployed
             if (vlanNetwork.getTag() == null)
             {
-                List<VLANNetwork> publicVLANs = vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
-                List<Integer> vlansTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
-                vlansTagsUsed.addAll(getPublicVLANTagssFROMVLANNetworkList(publicVLANs));
-                
-                Integer freeTag = getFreeVLANFromUsedList(vlansTagsUsed, rack);
-                log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
-                    vlanNetwork.getId(), freeTag);
+                List<VLANNetwork> publicVLANs =
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
+                List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
+                vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
+
+                Integer freeTag = getFreeVLANFromUsedList(vlanTagsUsed, rack);
+                log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
+                    .getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
 
                 vlanNetworkDao.flush();
@@ -340,12 +343,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         final int newCpu =
-            (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu());
+            isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
+                .getVirtualCpusUsed()
+                + used.getCpu();
 
         final int newRam =
-            (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam());
+            isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
+                .getVirtualRamUsedInMb()
+                + used.getRam();
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -354,7 +359,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final Long newHd =
             isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
+                .getVirtualHardDiskUsedInBytes()
+                + used.getHdInBytes();
 
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
@@ -405,7 +411,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datastoreDao.flush();
     }
 
-    private void updateDatastore(Datastore datastore, Long requestSize, boolean isRollback)
+    private void updateDatastore(final Datastore datastore, final Long requestSize,
+        final boolean isRollback)
     {
         final Long actualSize = datastore.getUsedSize();
 
@@ -414,8 +421,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         if (newUsed > datastore.getSize())
         {
 
-            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
-                datastore.getName());
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s", datastore
+                .getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
@@ -553,7 +560,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return vlans_avoided_collection;
     }
 
-    public List<Integer> getPublicVLANTagssFROMVLANNetworkList(final List<VLANNetwork> vlanNetworkList)
+    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(
+        final List<VLANNetwork> vlanNetworkList)
     {
         List<Integer> publicTagsList = new ArrayList<Integer>();
         for (VLANNetwork vlanNetwork : vlanNetworkList)

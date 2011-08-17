@@ -39,6 +39,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -454,19 +455,19 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String STATE_COLUMN = "state";
 
-    private final static State STATE_DEFAULT = State.NOT_DEPLOYED;
+    private final static VirtualMachineState STATE_DEFAULT = VirtualMachineState.NOT_DEPLOYED;
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state = STATE_DEFAULT;
+    private VirtualMachineState state = STATE_DEFAULT;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public VirtualMachineState getState()
     {
         return this.state;
     }
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

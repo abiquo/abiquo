@@ -41,6 +41,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -57,8 +58,8 @@ public class VirtualAppliance extends DefaultEntityBase
     {
     }
 
-    public VirtualAppliance(Enterprise enterprise, VirtualDatacenter virtualDatacenter,
-        String name, State state, State subState)
+    public VirtualAppliance(final Enterprise enterprise, final VirtualDatacenter virtualDatacenter,
+        final String name, final VirtualMachineState state, final VirtualMachineState subState)
     {
         setEnterprise(enterprise);
         setVirtualDatacenter(virtualDatacenter);
@@ -106,7 +107,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -119,7 +120,7 @@ public class VirtualAppliance extends DefaultEntityBase
 
     private final static String NODECONNECTIONS_COLUMN = "nodeconnections";
 
-    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition="TEXT")
+    @Column(name = NODECONNECTIONS_COLUMN, nullable = !NODECONNECTIONS_REQUIRED, columnDefinition = "TEXT")
     private String nodeconnections;
 
     @Required(value = NODECONNECTIONS_REQUIRED)
@@ -129,7 +130,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.nodeconnections;
     }
 
-    public void setNodeconnections(String nodeconnections)
+    public void setNodeconnections(final String nodeconnections)
     {
         this.nodeconnections = nodeconnections;
     }
@@ -151,7 +152,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.publicApp;
     }
 
-    public void setPublicApp(int publicApp)
+    public void setPublicApp(final int publicApp)
     {
         this.publicApp = publicApp;
     }
@@ -173,7 +174,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -195,7 +196,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.virtualDatacenter;
     }
 
-    public void setVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public void setVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }
@@ -217,7 +218,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.highDisponibility;
     }
 
-    public void setHighDisponibility(int highDisponibility)
+    public void setHighDisponibility(final int highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -239,7 +240,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return this.error;
     }
 
-    private void setError(int error)
+    private void setError(final int error)
     {
         this.error = error;
     }
@@ -252,15 +253,15 @@ public class VirtualAppliance extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private State subState;
+    private VirtualMachineState subState;
 
     @Required(value = SUB_STATE_REQUIRED)
-    public State getSubState()
+    public VirtualMachineState getSubState()
     {
         return this.subState;
     }
 
-    public void setSubState(State subState)
+    public void setSubState(final VirtualMachineState subState)
     {
         this.subState = subState;
     }
@@ -273,15 +274,15 @@ public class VirtualAppliance extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state;
+    private VirtualMachineState state;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public VirtualMachineState getState()
     {
         return this.state;
     }
 
-    public void setState(State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
@@ -314,7 +315,7 @@ public class VirtualAppliance extends DefaultEntityBase
         return nodesvi;
     }
 
-    public void addToNodeVirtualImages(NodeVirtualImage value)
+    public void addToNodeVirtualImages(final NodeVirtualImage value)
     {
         assert value != null;
         assert !this.nodesVirtualImage.contains(value);
@@ -323,7 +324,7 @@ public class VirtualAppliance extends DefaultEntityBase
         value.setVirtualAppliance(this);
     }
 
-    public void removeFromNodeVirtualImages(NodeVirtualImage value)
+    public void removeFromNodeVirtualImages(final NodeVirtualImage value)
     {
         assert value != null;
         assert this.nodesVirtualImage.contains(value);

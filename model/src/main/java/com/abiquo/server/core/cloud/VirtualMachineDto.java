@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.util.StringUtils;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualMachine")
@@ -139,6 +140,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.idState = idState;
     }
 
+    private VirtualMachineState state;
+
+    public void setState(final VirtualMachineState state)
+    {
+        this.state = state;
+    }
+
+    public VirtualMachineState getState()
+    {
+        return state;
+    }
+
     private int highDisponibility;
 
     public int getHighDisponibility()
@@ -161,18 +174,6 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
     public void setIdType(final int idType)
     {
         this.idType = idType;
-    }
-
-    private State state;
-
-    public void setState(final State state)
-    {
-        this.state = state;
-    }
-
-    public State getState()
-    {
-        return state;
     }
 
     private String password;
