@@ -179,10 +179,38 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        if (dto.searchLink("template") != null)
+        {
+            int idPricing = getPricingTemplateId(dto);
+            if (idPricing == 0)
+            {
+                enterprise.setPricingTemplate(null);
+            }
+            else
+            {
+
+                PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                enterprise.setPricingTemplate(pricingTemplate);
+            }
+        }
+
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
         return enterprise;
+    }
+
+    public PricingTemplate getPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
     }
 
     public Enterprise getEnterprise(final Integer id)

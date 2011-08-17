@@ -146,17 +146,12 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
-    protected EnterpriseDto fromPricingEnterpriseToDto(final Enterprise enterprise)
-    {
-        EnterpriseDto dto = new EnterpriseDto();
-        dto.setName(enterprise.getName());
-        return dto;
-    }
-
     protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
+        dto.addLink(new RESTLink("template", createPricingTemplateLink(enterprise
+            .getIdPricingTemplate())));
 
         ResourceAllocationLimit limits = enterprise.getLimits();
         return (EnterpriseDto) fillLimits(dto, limits);
