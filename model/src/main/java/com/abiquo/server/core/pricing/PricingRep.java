@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 
 @Repository
 @Transactional
@@ -314,6 +315,16 @@ public class PricingRep extends DefaultRepBase
     public Collection<PricingTier> findPricingTiers(final PricingTemplate pricing)
     {
         return pricingTierDao.findPricingTiers(pricing);
+    }
+
+    public void insertPricingTier(final PricingTier pricingTier)
+    {
+        pricingTierDao.persist(pricingTier);
+    }
+
+    public PricingTier findPricingTier(final Tier tier, final PricingTemplate pricing)
+    {
+        return pricingTierDao.findPricingTier(tier, pricing);
     }
 
 }

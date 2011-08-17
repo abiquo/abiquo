@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "pricingTier")
+@XmlRootElement(name = "pricingTiers")
 public class PricingTiersDto extends WrapperDto<PricingTierDto>
 {
 
@@ -36,6 +36,8 @@ public class PricingTiersDto extends WrapperDto<PricingTierDto>
      * 
      */
     private static final long serialVersionUID = 1L;
+
+    public static final String MEDIA_TYPE = "application/pricingtiersdto+xml";
 
     @Override
     @XmlElement(name = "pricingTier")

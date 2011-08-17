@@ -58,6 +58,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.server.core.pricing.PricingRep;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -78,6 +79,9 @@ public class InfrastructureService extends DefaultApiService
     InfrastructureRep repo;
 
     @Autowired
+    private PricingRep pricingRep;
+
+    @Autowired
     protected VsmServiceStub vsmServiceStub;
 
     public InfrastructureService()
@@ -91,7 +95,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Rack addRack(Rack rack, Integer datacenterId)
+    public Rack addRack(final Rack rack, final Integer datacenterId)
     {
         Datacenter datacenter = this.getDatacenter(datacenterId);
 
@@ -135,8 +139,8 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Machine> addMachines(List<Machine> machinesToCreate, Integer datacenterId,
-        Integer rackId)
+    public List<Machine> addMachines(final List<Machine> machinesToCreate,
+        final Integer datacenterId, final Integer rackId)
     {
         List<Machine> machinesCreated = new ArrayList<Machine>();
         for (Machine currentMachine : machinesToCreate)
@@ -227,7 +231,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     // Return a rack.
-    public Rack getRack(final Integer datacenterId, Integer rackId)
+    public Rack getRack(final Integer datacenterId, final Integer rackId)
     {
         // Find the rack by itself and by its datacenter.
         Rack rack = repo.findRackByIds(datacenterId, rackId);
@@ -311,7 +315,7 @@ public class InfrastructureService extends DefaultApiService
         return repo.findAllRemoteServices();
     }
 
-    public List<RemoteService> getRemoteServicesByDatacenter(Integer datacenterId)
+    public List<RemoteService> getRemoteServicesByDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
         if (datacenter == null)
@@ -398,7 +402,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public RemoteServiceDto modifyRemoteService(Integer id, RemoteServiceDto dto)
+    public RemoteServiceDto modifyRemoteService(final Integer id, final RemoteServiceDto dto)
         throws URISyntaxException
     {
         RemoteService old = getRemoteService(id);
@@ -428,7 +432,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void removeRemoteService(Integer id)
+    public void removeRemoteService(final Integer id)
     {
         RemoteService remoteService = getRemoteService(id);
 
@@ -437,7 +441,7 @@ public class InfrastructureService extends DefaultApiService
         repo.deleteRemoteService(remoteService);
     }
 
-    protected void checkRemoteServiceStatusBeforeRemoving(RemoteService remoteService)
+    protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
     {
         if (remoteService.getType() == RemoteServiceType.APPLIANCE_MANAGER)
         {
@@ -447,8 +451,8 @@ public class InfrastructureService extends DefaultApiService
                 flushErrors();
             }
         }
-        if ((remoteService.getType() == RemoteServiceType.DHCP_SERVICE)
-            || (remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR))
+        if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
+            || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
         {
             if (repo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {
@@ -458,7 +462,7 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-    public ErrorsDto checkRemoteServiceStatus(RemoteServiceType type, String url)
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
         ErrorsDto configurationErrors = new ErrorsDto();
         if (type.canBeChecked())
@@ -503,7 +507,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     // PROTECTED METHODS
-    protected void checkUniqueness(Datacenter datacenter, RemoteServiceDto remoteService)
+    protected void checkUniqueness(final Datacenter datacenter, final RemoteServiceDto remoteService)
     {
         if (remoteService.getType().checkUniqueness())
         {
@@ -532,7 +536,8 @@ public class InfrastructureService extends DefaultApiService
     /**
      * Configure the Datacenter repository based on the ''repositoryLocation'' consulted from AM.
      */
-    protected ErrorsDto createApplianceManager(Datacenter datacenter, RemoteService remoteService)
+    protected ErrorsDto createApplianceManager(final Datacenter datacenter,
+        final RemoteService remoteService)
     {
         int previousStatus = remoteService.getStatus();
 
@@ -585,7 +590,7 @@ public class InfrastructureService extends DefaultApiService
     /*
      * Get the Datacenter and check if it exists.
      */
-    protected Datacenter getDatacenter(Integer datacenterId)
+    protected Datacenter getDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
 
@@ -604,7 +609,7 @@ public class InfrastructureService extends DefaultApiService
      * use the same repository uri. Also updates the repository location (if the old isn't being
      * used).
      */
-    protected void checkModifyApplianceManager(RemoteService old, RemoteServiceDto dto)
+    protected void checkModifyApplianceManager(final RemoteService old, final RemoteServiceDto dto)
     {
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(dto.getUri());
