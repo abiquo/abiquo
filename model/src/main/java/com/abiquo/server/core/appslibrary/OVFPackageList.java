@@ -75,6 +75,9 @@ public class OVFPackageList implements Serializable, PersistenceDto
     /**
      * OVFPackages included in this list
      */
+
+    public final static String ASSOCIATION_TABLE = "ovf_package_list_has_ovf_package";
+
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = OVFPackage.class, cascade = CascadeType.DETACH)
     @JoinTable(name = "ovf_package_list_has_ovf_package", joinColumns = @JoinColumn(name = "id_ovf_package_list"), inverseJoinColumns = @JoinColumn(name = "id_ovf_package"))
     private List<OVFPackage> ovfPackages;
@@ -120,12 +123,12 @@ public class OVFPackageList implements Serializable, PersistenceDto
         return url;
     }
 
-    public void setUrl(String url)
+    public void setUrl(final String url)
     {
         this.url = url;
     }
 
-    public void setOvfPackages(List<OVFPackage> ovfPackages)
+    public void setOvfPackages(final List<OVFPackage> ovfPackages)
     {
         this.ovfPackages = ovfPackages;
     }
@@ -145,7 +148,7 @@ public class OVFPackageList implements Serializable, PersistenceDto
         return appsLibrary;
     }
 
-    public void setAppsLibrary(AppsLibrary appsLibrary)
+    public void setAppsLibrary(final AppsLibrary appsLibrary)
     {
         this.appsLibrary = appsLibrary;
     }

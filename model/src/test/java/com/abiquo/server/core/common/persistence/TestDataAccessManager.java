@@ -24,6 +24,7 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -137,17 +138,19 @@ public class TestDataAccessManager
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
             VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
-            VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
-            NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
-            VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
-            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
-            EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
-            Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
-            RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
-            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
-            NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
+            VirtualImage.class, Category.class, IpPoolManagement.class, RasdManagement.class,
+            VLANNetwork.class, NetworkConfiguration.class, Dhcp.class,
+            VirtualDatacenterResources.class, VirtualDatacenter.class, DatacenterResources.class,
+            DatacenterLimits.class, Session.class, User.class, RoleLdap.class, Role.class,
+            Privilege.class, EnterpriseResources.class, Enterprise.class, Hypervisor.class,
+            Datastore.class, Machine.class, Rack.class, StoragePool.class, Tier.class,
+            StorageDevice.class, RemoteService.class, Repository.class, CloudUsage.class,
+            Datacenter.class, Network.class, SystemProperty.class, Rasd.class, License.class,
+            Task.class, NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class);
-
+        /*
+         * ,OVFPackageList.class, OVFPackage.class, AppsLibrary.class, Icon.class, Category.class
+         */
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,
         // Icon.class,
@@ -155,6 +158,6 @@ public class TestDataAccessManager
 
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
             DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE
-        /* , OVFPackageList.ASSOCIATION_TABLE */);
+        /* OVFPackageList.ASSOCIATION_TABLE */);
     }
 }
