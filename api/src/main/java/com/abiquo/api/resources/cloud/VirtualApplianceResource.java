@@ -33,12 +33,12 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.NetworkService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
@@ -130,7 +130,7 @@ public class VirtualApplianceResource
     }
 
     /**
-     * Return the {@link VirtualApplianceDt}o object from the POJO {@link VirtualAppliance}
+     * Return the {@link VirtualApplianceDto} object from the POJO {@link VirtualAppliance}
      * 
      * @param vapp object to convert
      * @param builder context rest builder
@@ -196,7 +196,7 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.RUNNING);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.RUNNING);
 
     }
 
@@ -209,7 +209,8 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.POWERED_OFF);
+        return service
+            .changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.POWERED_OFF);
 
     }
 
@@ -222,7 +223,7 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.PAUSED);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.PAUSED);
 
     }
 
@@ -235,7 +236,7 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.REBOOTED);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.REBOOTED);
 
     }
 }

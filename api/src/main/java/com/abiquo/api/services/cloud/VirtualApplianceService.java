@@ -274,15 +274,15 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<VirtualMachineChangeStateResultDto> changeVirtualAppMachinesState(
-        final Integer vdcId, final Integer vappId, final State state)
+        final Integer vdcId, final Integer vappId, final VirtualMachineState state)
     {
         VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-        if (vapp.getState().equals(State.NOT_DEPLOYED))
+        if (vapp.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (!vapp.getState().equals(State.RUNNING))
+        if (!vapp.getState().equals(VirtualMachineState.RUNNING))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
             flushErrors();
