@@ -61,8 +61,8 @@ public class PricingTemplate extends DefaultEntityBase
     }
 
     public PricingTemplate(final String name, final BigDecimal hdGb,
-        final BigDecimal standingChargePeriod, final BigDecimal limitMaximumDeployedCharged,
-        final BigDecimal vlan, final boolean showMinimumCharge, final PricingPeriod chargingPeriod,
+        final BigDecimal standingChargePeriod, final BigDecimal vlan,
+        final boolean showMinimumCharge, final PricingPeriod chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final PricingPeriod minimumCharge, final Currency currency, final BigDecimal publicIp,
         final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate)
@@ -71,7 +71,6 @@ public class PricingTemplate extends DefaultEntityBase
         setName(name);
         setHdGB(hdGb);
         setStandingChargePeriod(standingChargePeriod);
-        setLimitMaximumDeployedCharged(limitMaximumDeployedCharged);
         setVlan(vlan);
         setShowChangesBefore(showChangesBefore);
         setShowMinimumCharge(showMinimumCharge);
@@ -159,25 +158,6 @@ public class PricingTemplate extends DefaultEntityBase
     public void setStandingChargePeriod(final BigDecimal standingChargePeriod)
     {
         this.standingChargePeriod = standingChargePeriod;
-    }
-
-    public final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_PROPERTY =
-        "limitMaximumDeployedCharged";
-
-    private final static String LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN =
-        "limitMaximumDeployedCharged";
-
-    @Column(name = LIMIT_MAXIMUM_DEPLOYED_CHARGED_COLUMN, nullable = false)
-    private BigDecimal limitMaximumDeployedCharged;
-
-    public BigDecimal getLimitMaximumDeployedCharged()
-    {
-        return this.limitMaximumDeployedCharged;
-    }
-
-    public void setLimitMaximumDeployedCharged(final BigDecimal limitMaximumDeployedCharged)
-    {
-        this.limitMaximumDeployedCharged = limitMaximumDeployedCharged;
     }
 
     public final static String VLAN_PROPERTY = "vlan";
