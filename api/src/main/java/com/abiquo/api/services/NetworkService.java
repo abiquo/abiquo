@@ -39,6 +39,7 @@ import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -221,6 +222,7 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
         newVlan.setNetwork(virtualDatacenter.getNetwork());
+        newVlan.setType(NetworkType.INTERNAL);
         validate(newVlan);
         validate(newVlan.getConfiguration());
 
@@ -246,15 +248,6 @@ public class NetworkService extends DefaultApiService
 
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
         // put the previous default one as non-default.
-        if (newVlan.getDefaultNetwork())
-        {
-            VLANNetwork vlanDefault = repo.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
-            if (vlanDefault != null)
-            {
-                vlanDefault.setDefaultNetwork(Boolean.FALSE);
-                repo.updateVlan(vlanDefault);
-            }
-        }
         repo.insertNetworkConfig(newVlan.getConfiguration());
         repo.insertVlan(newVlan);
 
@@ -301,7 +294,7 @@ public class NetworkService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
             flushErrors();
         }
-        if (vlanToDelete.getDefaultNetwork())
+        if (vdc.getDefaultVlan().getId().equals(vlanToDelete.getId()))
         {
             addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
             flushErrors();
@@ -876,6 +869,7 @@ public class NetworkService extends DefaultApiService
         VLANNetwork oldNetwork = getPrivateNetwork(vdcId, vlanId);
         VirtualDatacenter vdc = repo.findById(vdcId);
         newNetwork.setNetwork(vdc.getNetwork());
+        newNetwork.setType(oldNetwork.getType());
         validate(newNetwork);
         if (!vlanId.equals(newNetwork.getId()))
         {
@@ -901,23 +895,6 @@ public class NetworkService extends DefaultApiService
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
-        }
-
-        // If we want to set the default network as non-default, and the network is
-        // actually the default one, raise an error: it should be at least one default vlan
-        if (!newNetwork.getDefaultNetwork() && oldNetwork.getDefaultNetwork())
-        {
-            addConflictErrors(APIError.VLANS_AT_LEAST_ONE_DEFAULT_NETWORK);
-            flushErrors();
-        }
-
-        // In the same order: if we put the newNetwork as default, set the previous one
-        // as non-default
-        if (newNetwork.getDefaultNetwork() && !oldNetwork.getDefaultNetwork())
-        {
-            VLANNetwork defaultVLAN = repo.findVlanByDefaultInVirtualDatacenter(vdc);
-            defaultVLAN.setDefaultNetwork(Boolean.FALSE);
-            repo.updateVlan(defaultVLAN);
         }
 
         // Check the new gateway is inside the range of IPs.
@@ -969,7 +946,6 @@ public class NetworkService extends DefaultApiService
             newNetwork.getConfiguration().getSecondaryDNS());
         oldNetwork.getConfiguration().setSufixDNS(newNetwork.getConfiguration().getSufixDNS());
         oldNetwork.setName(newNetwork.getName());
-        oldNetwork.setDefaultNetwork(newNetwork.getDefaultNetwork());
 
         repo.updateVlan(oldNetwork);
 
