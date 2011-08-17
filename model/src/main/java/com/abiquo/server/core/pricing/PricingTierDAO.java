@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 
 @Repository("jpaPricingTierDAO")
 public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
@@ -50,6 +51,16 @@ public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
         Criteria criteria = createCriteria(samePricing(pricing));
 
         return criteria.list();
+    }
+
+    public PricingTier findPricingTier(final Tier tier, final PricingTemplate pricing)
+    {
+        return (PricingTier) createCriteria(sameTier(tier), samePricing(pricing)).uniqueResult();
+    }
+
+    private Criterion sameTier(final Tier tier)
+    {
+        return Restrictions.eq(PricingTier.TIER_PROPERTY, tier);
     }
 
     private Criterion samePricing(final PricingTemplate pricing)

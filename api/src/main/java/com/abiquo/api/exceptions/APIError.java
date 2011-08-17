@@ -346,7 +346,11 @@ public enum APIError
     // PRICING - COST CODE
     PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
         "Duplicated value by Cost Code and PricingTemplate"), NON_EXISTENT_PRICING_COSTCODE(
-        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist");
+        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist"),
+
+    // PRICING - TIER
+    PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist");
 
     /**
      * Internal error code
