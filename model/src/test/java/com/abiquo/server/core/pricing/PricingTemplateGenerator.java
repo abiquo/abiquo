@@ -46,8 +46,8 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, PricingTemplate.NAME_PROPERTY,
             PricingTemplate.HD_GB_PROPERTY, PricingTemplate.STANDING_CHARGE_PERIOD_PROPERTY,
-            PricingTemplate.LIMIT_MAXIMUM_DEPLOYED_CHARGED_PROPERTY, PricingTemplate.VLAN_PROPERTY,
-            PricingTemplate.SHOW_MINIMUM_CHARGE_PROPERTY, PricingTemplate.CHARGING_PERIOD_PROPERTY,
+            PricingTemplate.VLAN_PROPERTY, PricingTemplate.SHOW_MINIMUM_CHARGE_PROPERTY,
+            PricingTemplate.CHARGING_PERIOD_PROPERTY,
             PricingTemplate.MINIMUM_CHARGE_PERIOD_PROPERTY,
             PricingTemplate.SHOW_CHANGES_BEFORE_PROPERTY, PricingTemplate.MINIMUM_CHARGE_PROPERTY,
             PricingTemplate.PUBLIC_IP_PROPERTY, PricingTemplate.V_CPU_PROPERTY,
@@ -75,7 +75,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
 
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
-        final BigDecimal limitMaximumDeployedCharged = seed;
         final BigDecimal vlan = seed;
         final boolean showMinimumCharge = true;
         final PricingPeriod chargingPeriod = PricingPeriod.DAY;
@@ -90,7 +89,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
             new PricingTemplate(name,
                 hdGb,
                 standingChargePeriod,
-                limitMaximumDeployedCharged,
                 vlan,
                 showMinimumCharge,
                 chargingPeriod,

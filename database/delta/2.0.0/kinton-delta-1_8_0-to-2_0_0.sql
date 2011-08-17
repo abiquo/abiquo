@@ -45,7 +45,6 @@ CREATE TABLE `kinton`.`pricing_template` (
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `limitMaximumDeployedCharged` DECIMAL(20),
   `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
   `vcpu` DECIMAL(20) NOT NULL default 0,
