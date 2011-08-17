@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -39,6 +40,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -74,8 +76,8 @@ public class VLANNetwork extends DefaultEntityBase
     {
         return this.id;
     }
-    
-    public void setId(Integer id)
+
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -104,7 +106,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -125,29 +127,32 @@ public class VLANNetwork extends DefaultEntityBase
         return this.tag;
     }
 
-    public void setTag(Integer tag)
+    public void setTag(final Integer tag)
     {
         this.tag = tag;
     }
 
-    public final static String DEFAULT_PROPERTY = "defaultNetwork";
+    public final static String TYPE_PROPERTY = "type";
 
-    private final static boolean DEFAULT_REQUIRED = true;
+    private final static boolean TYPE_REQUIRED = true;
 
-    private final static String DEFAULT_COLUMN = "default_network";
+    private final static String TYPE_COLUMN = "networktype";
 
-    @Column(name = DEFAULT_COLUMN, nullable = false)
-    private Boolean defaultNetwork;
+    private final static int TYPE_COLUMN_LENGTH = 255;
 
-    @Required(value = DEFAULT_REQUIRED)
-    public Boolean getDefaultNetwork()
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = TYPE_COLUMN, nullable = !TYPE_REQUIRED, length = TYPE_COLUMN_LENGTH)
+    private NetworkType type;
+
+    @Required(value = TYPE_REQUIRED)
+    public NetworkType getType()
     {
-        return this.defaultNetwork;
+        return this.type;
     }
 
-    public void setDefaultNetwork(Boolean defaultNetwork)
+    public void setType(final NetworkType type)
     {
-        this.defaultNetwork = defaultNetwork;
+        this.type = type;
     }
 
     // ****************************** Associations ******************************
@@ -168,7 +173,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.network;
     }
 
-    public void setNetwork(Network network)
+    public void setNetwork(final Network network)
     {
         this.network = network;
     }
@@ -192,7 +197,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -216,7 +221,7 @@ public class VLANNetwork extends DefaultEntityBase
         return this.configuration;
     }
 
-    public void setConfiguration(NetworkConfiguration configuration)
+    public void setConfiguration(final NetworkConfiguration configuration)
     {
         this.configuration = configuration;
     }
@@ -226,13 +231,13 @@ public class VLANNetwork extends DefaultEntityBase
     private List<IpPoolManagement> ipPoolManagements;
 
     // *************************** Mandatory constructors ***********************
-    public VLANNetwork(String name, Network network, Boolean defaultNetwork,
-        NetworkConfiguration configuration)
+    public VLANNetwork(final String name, final Network network, final NetworkType type,
+        final NetworkConfiguration configuration)
     {
         setName(name);
         setTag(tag);
         setNetwork(network);
-        setDefaultNetwork(defaultNetwork);
+        setType(type);
         setConfiguration(configuration);
     }
 

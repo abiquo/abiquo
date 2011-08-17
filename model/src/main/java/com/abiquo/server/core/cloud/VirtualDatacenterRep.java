@@ -432,12 +432,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return vmDao.findByName(name);
     }
 
-    public VLANNetwork findVlanByDefaultInVirtualDatacenter(
-        final VirtualDatacenter virtualDatacenter)
-    {
-        return vlanDAO.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
-    }
-
     public VLANNetwork findVlanById(final Integer id)
     {
         assert id != null;
