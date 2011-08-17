@@ -285,10 +285,8 @@ CREATE TABLE  `kinton`.`enterprise` (
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
   `isReservationRestricted` tinyint(1) default '0',
-  `default_vlan_network_id` int(11) unsigned default NULL,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (`idEnterprise`),
-  CONSTRAINT `enterprise_PK1` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
+  PRIMARY KEY  (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
@@ -297,7 +295,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, NULL, 1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
@@ -1576,9 +1574,9 @@ CREATE TABLE  `kinton`.`enterprise_limits_by_datacenter` (
   `vlanHard` bigint(20)  NOT NULL,
   `publicIPHard` bigint(20)  NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (`idDatacenterLimit`)
-  -- CONSTRAINT `idDataCenter_FK` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`),
-  -- CONSTRAINT `idEnterprise_FK` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`)
+  `default_vlan_network_id` int(11) unsigned default NULL,
+  PRIMARY KEY (`idDatacenterLimit`),
+  CONSTRAINT `enterprise_PK1` FOREIGN KEY (`default_vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- MySQL Administrator dump 1.4

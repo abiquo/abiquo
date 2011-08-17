@@ -15,9 +15,6 @@
         <property name="isReservationRestricted" type="boolean">
             <column name="isReservationRestricted" />
         </property>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" lazy="false" fetch="select" name="defaultVlan">
-            <column name="default_vlan_network_id" />
-        </many-to-one>
         <set name="dcLimits" lazy="false" cascade="all-delete-orphan">
             <key>
                 <column name="idEnterprise" not-null="true" />

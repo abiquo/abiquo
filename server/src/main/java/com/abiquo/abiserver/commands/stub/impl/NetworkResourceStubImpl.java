@@ -369,6 +369,38 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId,
+        final Boolean onlypublic)
+    {
+        DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
+
+        StringBuilder buildRequest = new StringBuilder(createPublicNetworksLink(datacenterId));
+        buildRequest.append("?onlypublic=" + (onlypublic ? "true" : "false"));
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            VLANNetworksDto networksDto = response.getEntity(VLANNetworksDto.class);
+            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
+
+            for (VLANNetworkDto dto : networksDto.getCollection())
+            {
+                nets.add(createFlexObject(dto));
+            }
+
+            result.setData(nets);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getPublicVlansByDatacenter");
+        }
+
+        return result;
+    }
+
+    @Override
     public BasicResult getGatewayByVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {

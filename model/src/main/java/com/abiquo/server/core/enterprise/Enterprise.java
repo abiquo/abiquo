@@ -30,14 +30,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
@@ -46,7 +43,6 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
-import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -189,28 +185,6 @@ public class Enterprise extends DefaultEntityWithLimits
     {
         setRepositorySoft(limit.soft);
         setRepositoryHard(limit.hard);
-    }
-
-    public final static String DEFAULT_VLAN_PROPERTY = "defaultVlan";
-
-    private final static boolean DEFAULT_VLAN_REQUIRED = false;
-
-    private final static String DEFAULT_VLAN_COLUMN = "default_vlan_network_id";
-
-    @JoinColumn(name = DEFAULT_VLAN_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_vlan")
-    private VLANNetwork defaultVlan;
-
-    @Required(value = DEFAULT_VLAN_REQUIRED)
-    public VLANNetwork getDefaultVlan()
-    {
-        return this.defaultVlan;
-    }
-
-    public void setDefaultVlan(final VLANNetwork defaultVlan)
-    {
-        this.defaultVlan = defaultVlan;
     }
 
     // *************************** Mandatory constructors ***********************

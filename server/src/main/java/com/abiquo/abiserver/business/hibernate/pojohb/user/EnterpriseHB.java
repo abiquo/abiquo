@@ -28,7 +28,6 @@ import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.config.AbiConfigManager;
@@ -62,8 +61,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     /** List of limits established by Datacenter */
     private Set<DatacenterLimitHB> dcLimits;
-
-    private VlanNetworkHB defaultVlan;
 
     public EnterpriseHB()
     {
@@ -174,16 +171,6 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         enterprise.setReservedMachines(rMachines);
 
         return enterprise;
-    }
-
-    public VlanNetworkHB getDefaultVlan()
-    {
-        return defaultVlan;
-    }
-
-    public void setDefaultVlan(VlanNetworkHB defaultVlan)
-    {
-        this.defaultVlan = defaultVlan;
     }
 
 }
