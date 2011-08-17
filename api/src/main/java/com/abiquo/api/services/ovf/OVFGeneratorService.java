@@ -97,16 +97,17 @@ import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement.OrderByEnum;
 
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-public class OVFGeneratorService
-{
-    @Autowired
-    VirtualDatacenterRep vdcRepo;
+public class OVFGeneratorService {
 
-    @Autowired
-    InfrastructureRep datacenterRepo;
+	@Autowired
+	VirtualDatacenterRep vdcRepo;
+
+	@Autowired
+	InfrastructureRep datacenterRepo;
 
     @Autowired
     VirtualMachineRep vmRepo;
@@ -124,8 +125,6 @@ public class OVFGeneratorService
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
 
     public final static QName HA_DISK = new QName("ha");
-
-    // /////////// InfrastructureWS
 
     public EnvelopeType changeMachineState(final VirtualMachine virtualMachine,
         final String machineState) throws Exception
@@ -575,7 +574,7 @@ public class OVFGeneratorService
         for (VLANNetwork vlan : listOfVLANidentifiers)
         {
             Integer numberOfRules = 0;
-            Collection<IpPoolManagement> ips = vdcRepo.findIpsByVLAN(vlan.getId(), 0, -1);
+            Collection<IpPoolManagement> ips = vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
 
             RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
             URI uri = new URI(dhcpRemoteService.getUri());

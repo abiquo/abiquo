@@ -153,7 +153,12 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="editVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.vlanNetwork.vlanNetworkId, 
+            event.networkName, 
+            event.networkConfiguration, 
+            event.defaultNetwork]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -187,7 +192,9 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="deleteVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.vlanNetwork.vlanNetworkId]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -287,7 +294,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getNetworkPoolInfoByVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -321,7 +328,10 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getNICsByVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -355,7 +365,7 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getAvailableVirtualMachineNICsByVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event. virtualDatacenter.id, event.vlanNetwork.vlanNetworkId, event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -389,7 +399,12 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="reorderNICintoVM"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.newOrder, event.ipPoolManagementId]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id,
+            event.oldOrder,
+            event.newOrder]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -424,7 +439,11 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="requestNICforVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id, event.ipPoolManagement.idManagement]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id, 
+            event.ipPoolManagement]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -458,7 +477,11 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="releaseNICfromVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ipPoolManagement.idManagement]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id,
+            event.orderInList]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -492,7 +515,10 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getGatewayUsedByVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -526,7 +552,10 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getGatewayListByVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -560,7 +589,11 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="requestGatewayForVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualMachine.id, event.gateway]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id,
+            event.virtualMachine.id, 
+            event.gateway]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

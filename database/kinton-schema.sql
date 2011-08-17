@@ -725,6 +725,7 @@ CREATE TABLE  `kinton`.`ip_pool_management` (
   `vlan_network_name` varchar(40),
   `vlan_network_id` int(11) unsigned,
   `quarantine` boolean NOT NULL default 0,
+  `available` boolean NOT NULL default 1,
   `version_c` integer NOT NULL DEFAULT 1,
   KEY `id_management_FK` (`idManagement`),
   KEY `ippool_dhcpservice_FK` (`dhcp_service_id`),

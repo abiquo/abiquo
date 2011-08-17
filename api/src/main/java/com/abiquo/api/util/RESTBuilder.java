@@ -57,6 +57,7 @@ import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
+import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
@@ -81,10 +82,11 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.server.core.infrastructure.UcsRackDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -179,6 +181,36 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachinesResource.class, MachinesResource.MACHINES_PATH,
             params));
 
+        if (rack instanceof UcsRackDto)
+        {
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_CLONE,
+                RackResource.RACK_ACTION_LOGICSERVERS_CLONE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_DELETE,
+                RackResource.RACK_ACTION_LOGICSERVERS_DELETE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_DISSOCIATE,
+                RackResource.RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS, RackResource.RACK_ACTION_LOGICSERVERS_REL,
+                params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES,
+                RackResource.RACK_ACTION_LOGICSERVERS_TEMPLATES_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE,
+                RackResource.RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL, params));
+            links.add(builder.buildRestLink(RackResource.class,
+                RackResource.RACK_ACTION_ORGANIZATIONS, RackResource.RACK_ACTION_ORGANIZATIONS_REL,
+                params));
+        }
         return links;
     }
 
@@ -213,6 +245,8 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
                 params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_LS, MachineResource.MACHINE_ACTION_LS__REL, params));
         }
 
         return links;
@@ -436,6 +470,13 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
+    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
+        final VLANNetworkDto network)
+    {
+        return null;
+    }
+
     protected List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
         final Integer datacenterId, final Integer enterpriseId, final AbiquoLinkBuilder builder)
     {
@@ -495,6 +536,18 @@ public class RESTBuilder implements IRESTBuilder
 
         links.add(builder.buildRestLink(VirtualMachinesResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE, params));
+
+        links.add(builder.buildActionLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_RESUME, "resume", params));
+
+        links.add(builder.buildActionLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_PAUSE, "pause", params));
+
+        links.add(builder.buildActionLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_POWEROFF, "power off", params));
+
+        links.add(builder.buildActionLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_POWERON, "power on", params));
 
         links.add(builder.buildActionLink(VirtualApplianceResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
@@ -577,20 +630,6 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildIPAddressLink(final Integer vlanId, final IpPoolManagementDto ip)
-    {
-        List<RESTLink> links = new ArrayList<RESTLink>();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(PrivateNetworkResource.PRIVATE_NETWORK_PARAM, vlanId.toString());
-
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(PrivateNetworkResource.class,
-            PrivateNetworkResource.PRIVATE_NETWORK, params));
-
-        return links;
-    }
-
-    @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
@@ -601,7 +640,12 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(VirtualMachineResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
+        links.add(builder.buildActionLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
@@ -824,6 +868,74 @@ public class RESTBuilder implements IRESTBuilder
     {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final VMNetworkConfiguration config)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        params.put(VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, config.getId()
+            .toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links
+            .add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+                VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH + "/"
+                    + VirtualMachineNetworkConfigurationResource.CONFIGURATION_PARAM, REL_EDIT,
+                params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildNICLinks(final IpPoolManagement ip)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, ip.getVirtualDatacenter().getId()
+            .toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, ip.getVirtualAppliance().getId()
+            .toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, ip.getVirtualMachine().getId()
+            .toString());
+        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getRasd()
+            .getConfigurationName());
+        params.put(IpAddressesResource.IP_ADDRESS, ip.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH + "/"
+                + VirtualMachineNetworkConfigurationResource.NIC_PARAM, REL_EDIT, params));
+        links.add(builder.buildRestLink(IpAddressesResource.class,
+            IpAddressesResource.IP_ADDRESS_PARAM, IpAddressesResource.IP_ADDRESS_PARAM, params));
+
+        return links;
     }
 
 }

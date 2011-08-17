@@ -128,6 +128,7 @@
                 if (_vlanNetwork != null)
                 {
                     event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_VLAN);
+                    event.virtualDatacenter = _virtualDatacenter;
                     event.vlanNetwork = _vlanNetwork;
                 }
                 else if (_virtualDatacenter != null)

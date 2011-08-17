@@ -219,6 +219,7 @@ public class VirtualMachineService extends DefaultApiService
         updateVirtualMachine(vm);
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void validMachineStateChange(final VirtualMachineState oldState, final VirtualMachineState newState)
     {
         if (oldState == VirtualMachineState.NOT_DEPLOYED)
@@ -243,6 +244,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void changeVirtualMachineState(final Integer vmId, final Integer vappId, final Integer vdcId, final VirtualMachineState state)
     {
         // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);

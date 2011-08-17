@@ -28,6 +28,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -42,6 +43,29 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 @Repository("jpaVirtualMachineDAO")
 public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
 {
+    public static final String BY_VAPP_AND_ID = "SELECT nvi.virtualMachine "
+        + "FROM NodeVirtualImage nvi "
+        + "WHERE nvi.virtualAppliance.id = :vapp_id AND nvi.virtualMachine.id = :vm_id";
+
+    private static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        assert enterprise != null;
+
+        return Restrictions.eq(VirtualMachine.ENTERPRISE_PROPERTY, enterprise);
+    }
+
+    private static Criterion sameHypervisor(final Hypervisor hypervisor)
+    {
+        assert hypervisor != null;
+
+        return Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, hypervisor);
+    }
+
+    private static Criterion sameUser(final User user)
+    {
+        return Restrictions.eq(VirtualMachine.USER_PROPERTY, user);
+    }
+
     public VirtualMachineDAO()
     {
         super(VirtualMachine.class);
@@ -52,33 +76,46 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         super(VirtualMachine.class, entityManager);
     }
 
-    private static Criterion sameHypervisor(final Hypervisor hypervisor)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
+        List<VirtualMachine> notManaged = getResultList(criteria);
+
+        for (VirtualMachine vm : notManaged)
+        {
+            remove(vm);
+        }
+        flush();
+    }
+
+    public VirtualMachine findByIdByVirtualApp(final VirtualAppliance vapp, final Integer vmId)
+    {
+        Query finalQuery = getSession().createQuery(BY_VAPP_AND_ID);
+        finalQuery.setParameter("vapp_id", vapp.getId());
+        finalQuery.setParameter("vm_id", vmId);
+
+        return (VirtualMachine) finalQuery.uniqueResult();
+    }
+
+    public VirtualMachine findByName(final String name)
+    {
+        return findUniqueByProperty(VirtualMachine.NAME_PROPERTY, name);
+    }
+
+    public VirtualMachine findByUUID(final String uuid)
+    {
+        return findUniqueByProperty(VirtualMachine.UUID_PROPERTY, uuid);
+    }
+
+    public List<VirtualMachine> findManagedVirtualMachines(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
+        assert isManaged2(hypervisor);
 
-        return Restrictions.eq(VirtualMachine.HYPERVISOR_PROPERTY, hypervisor);
-    }
-
-    private static Criterion sameEnterprise(final Enterprise enterprise)
-    {
-        assert enterprise != null;
-
-        return Restrictions.eq(VirtualMachine.ENTERPRISE_PROPERTY, enterprise);
-    }
-
-    private static Criterion sameUser(final User user)
-    {
-        return Restrictions.eq(VirtualMachine.USER_PROPERTY, user);
-    }
-
-    private Criterion notManaged()
-    {
-        return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
-    }
-
-    private Criterion managed()
-    {
-        return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.MANAGED);
+        Criteria criteria = createCriteria(sameHypervisor(hypervisor), managed());
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualMachine> result = getResultList(criteria);
+        return result;
     }
 
     public List<VirtualMachine> findVirtualMachines(final Hypervisor hypervisor)
@@ -92,15 +129,15 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public List<VirtualMachine> findManagedVirtualMachines(final Hypervisor hypervisor)
+    public List<VirtualMachine> findVirtualMachinesByDatacenter(final Integer datacenterId)
     {
-        assert hypervisor != null;
-        assert isManaged2(hypervisor);
+        List<VirtualMachine> vmList = null;
+        TypedQuery<VirtualMachine> query =
+            getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_DC", VirtualMachine.class);
+        query.setParameter("datacenterId", datacenterId);
+        vmList = query.getResultList();
 
-        Criteria criteria = createCriteria(sameHypervisor(hypervisor), managed());
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualMachine> result = getResultList(criteria);
-        return result;
+        return vmList;
     }
 
     public List<VirtualMachine> findVirtualMachinesByEnterprise(final Enterprise enterprise)
@@ -123,45 +160,12 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return result;
     }
 
-    public VirtualMachine findByName(final String name)
-    {
-        return findUniqueByProperty(VirtualMachine.NAME_PROPERTY, name);
-    }
-
-    public VirtualMachine findByUUID(final String uuid)
-    {
-        return findUniqueByProperty(VirtualMachine.UUID_PROPERTY, uuid);
-    }
-
     public List<VirtualMachine> findVirtualMachinesByVirtualAppliance(final Integer vappId)
     {
         List<VirtualMachine> vmList = null;
         TypedQuery<VirtualMachine> query =
             getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_VAPP", VirtualMachine.class);
         query.setParameter("vapp_id", vappId);
-        vmList = query.getResultList();
-
-        return vmList;
-    }
-
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
-    {
-        Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
-        List<VirtualMachine> notManaged = getResultList(criteria);
-
-        for (VirtualMachine vm : notManaged)
-        {
-            remove(vm);
-        }
-        flush();
-    }
-
-    public List<VirtualMachine> findVirtualMachinesByDatacenter(final Integer datacenterId)
-    {
-        List<VirtualMachine> vmList = null;
-        TypedQuery<VirtualMachine> query =
-            getEntityManager().createNamedQuery("VIRTUAL_MACHINE.BY_DC", VirtualMachine.class);
-        query.setParameter("datacenterId", datacenterId);
         vmList = query.getResultList();
 
         return vmList;
@@ -174,6 +178,16 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         vmachine.setState(state);
 
         flush();
+    }
+
+    private Criterion managed()
+    {
+        return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.MANAGED);
+    }
+
+    private Criterion notManaged()
+    {
+        return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
     }
 
     private static Criterion equalName(final String name)

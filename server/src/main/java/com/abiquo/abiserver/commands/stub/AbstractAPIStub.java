@@ -68,6 +68,20 @@ public class AbstractAPIStub
 
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
+    public static final String START_WITH = "startwith";
+
+    public static final String BY = "by";
+
+    public static final String FILTER = "has";
+
+    public static final String LIMIT = "limit";
+
+    public static final String ASC = "asc";
+
+    public static final Integer DEFAULT_PAGE_LENGTH = 25;
+
+    public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
+
     protected RestClient client = new RestClient();
 
     protected final String apiUri;
@@ -106,6 +120,14 @@ public class AbstractAPIStub
     {
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+    }
+
+    protected ClientResponse getWithMediaType(final String uri, final String accept,
+        final String contentType)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
+            .get();
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String user,
@@ -168,6 +190,13 @@ public class AbstractAPIStub
         UserHB user = getCurrentUser();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML);
+    }
+
+    protected ClientResponse put(final String uri)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).contentType(
+            MediaType.APPLICATION_XML).put(null);
     }
 
     protected ClientResponse put(final String uri, final Object dto)
@@ -529,6 +558,102 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips", params);
     }
 
+    protected String createVirtualDatacenterPublicPurchasedIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased", params);
+    }
+
+    protected String createVirtualDatacenterPublicPurchasedIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased/{ip}",
+            params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase", params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase/{ip}",
+            params);
+    }
+
+    protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations",
+            params);
+    }
+
+    protected String createVirtualMachineConfigurationLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vmConfigId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("vmconfigid", vmConfigId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations/{vmconfigid}",
+            params);
+    }
+
+    protected String createVirtualMachineNICsLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
+            params);
+    }
+
+    protected String createVirtualMachineNICLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer nicOrder)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("nicOrder", nicOrder.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics/{nicOrder}",
+            params);
+    }
+
     protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;
@@ -629,6 +754,90 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
     }
 
+    protected String createPrivateNetworkLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}", params);
+    }
+
+    protected String createPrivateNetworkIPLink(final Integer vdcId, final Integer vlanId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips/{ip}",
+            params);
+    }
+
+    protected String createPrivateNetworkIPsLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips",
+            params);
+    }
+
+    protected String createDatacenterPublicIPsLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/publicips", params);
+    }
+
+    protected String createDatacenterPublicTagCheck(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/checkavailability", params);
+    }
+
+    protected String createPublicNetworksLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network", params);
+    }
+
+    protected String createPublicNetworkLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}", params);
+    }
+
+    protected String createPublicNetworkIPsLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips", params);
+    }
+
+    protected String createPublicNetworkIPLink(final Integer datacenterId, final Integer networkId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips/{ip}", params);
+    }
+
     protected Resource resource(final String uri, final String user, final String password,
         final ClientHandler... handlers)
     {
@@ -713,5 +922,122 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
+    }
+
+    protected String createRackOrganizationsLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/organizations",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServersLink(final Integer datacenterId, final Integer rackId,
+        final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers",
+            params, queryParams);
+    }
+
+    protected String createRackLogicServerTemplatesLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/lsTemplates",
+            params, queryParams);
+    }
+
+    protected String createRackCloneLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/logicServers/clone",
+            params, queryParams);
+    }
+
+    protected String createRackAssociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/associate", params,
+            queryParams);
+    }
+
+    protected String createRackDissociateLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/dissociate", params,
+            queryParams);
+    }
+
+    protected String createRackDeleteLogicServerLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/delete", params, queryParams);
+    }
+
+    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOn", params);
+    }
+
+    protected String createMachineBladeLsLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/logicServer", params);
+    }
+
+    protected String createRackAssociateLogicServerTemplateLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocTemplate", params,
+            queryParams);
+    }
+
+    protected String createRackAssociateLogicServerCloneLink(final Integer datacenterId,
+        final Integer rackId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
+            queryParams);
     }
 }

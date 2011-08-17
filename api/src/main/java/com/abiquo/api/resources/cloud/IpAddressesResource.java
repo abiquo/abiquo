@@ -27,6 +27,7 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -38,11 +39,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ConflictException;
-import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -58,24 +56,37 @@ import com.abiquo.server.core.util.PagedList;
 @Controller
 public class IpAddressesResource extends AbstractResource
 {
+
     public static final String IP_ADDRESSES = "ips";
 
+    public static final String ONLYAVAILABLE = "onlyAvailable";
+
+    public static final String IP_ADDRESS = "ip";
+
+    public static final String IP_ADDRESS_PARAM = "{" + IP_ADDRESS + "}";
+
     @Autowired
-    private IpAddressService service;
+    private NetworkService service;
 
     @Context
     UriInfo uriInfo;
 
     @GET
     public IpsPoolManagementDto getIPAddresses(
-        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) Integer vlanId,
-        @QueryParam(START_WITH) @Min(0) Integer startwith,
-        @QueryParam(LIMIT) @Min(0) Integer limit, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(PrivateNetworkResource.PRIVATE_NETWORK) final Integer vlanId,
+        @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
+        @QueryParam(BY) @DefaultValue("ip") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @Min(0) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
+        @QueryParam(ONLYAVAILABLE) @DefaultValue("false") final Boolean available,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
+
         List<IpPoolManagement> all =
-            service.getListIpPoolManagementByVLAN(vlanId, (startwith == null) ? 0 : startwith,
-                (limit == null) ? DEFAULT_PAGE_LENGTH : limit);
+            service.getListIpPoolManagementByVlan(vdcId, vlanId, startwith, orderBy, filter, limit,
+                descOrAsc);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
@@ -91,8 +102,8 @@ public class IpAddressesResource extends AbstractResource
         return ips;
     }
 
-    public static IpPoolManagementDto createTransferObject(IpPoolManagement ip,
-        IRESTBuilder restBuilder) throws Exception
+    public static IpPoolManagementDto createTransferObject(final IpPoolManagement ip,
+        final IRESTBuilder restBuilder) throws Exception
     {
         IpPoolManagementDto dto =
             ModelTransformer.transportFromPersistence(IpPoolManagementDto.class, ip);

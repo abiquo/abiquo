@@ -123,6 +123,7 @@
                 listRequest.filterLike = ipFilter.text;
 
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+                event.virtualDatacenter = _virtualDatacenter;
                 event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
                 event.listRequest = listRequest;
                 event.callback = setAvailablePrivateIPAddresses;

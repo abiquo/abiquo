@@ -38,11 +38,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.ConflictException;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.util.IRESTBuilder;
@@ -70,11 +67,11 @@ public class VirtualDatacenterResource extends AbstractResource
     VirtualDatacenterService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
 
     @Autowired
     UserService userService;
-    
+
     @Context
     UriInfo uriInfo;
 
@@ -108,25 +105,24 @@ public class VirtualDatacenterResource extends AbstractResource
     @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
-        @QueryParam(START_WITH) @Min(0) final Integer startwith, @QueryParam(BY) final String orderBy,
-        @QueryParam(FILTER) final String filter, @QueryParam(LIMIT) @Min(0)final Integer limit,
-        @QueryParam(ASC) final Boolean desc_or_asc, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @QueryParam(START_WITH) @Min(0) final Integer startwith,
+        @QueryParam(BY) final String orderBy, @QueryParam(FILTER) final String filter,
+        @QueryParam(LIMIT) @Min(0) final Integer limit, @QueryParam(ASC) final Boolean desc_or_asc,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         // Set query Params by default if they are not informed
-        Integer firstElem = (startwith == null) ? 0 : startwith;
-        String by = (orderBy == null || orderBy.isEmpty()) ? "ip" : orderBy;
-        String has = (filter == null) ? "" : filter;
-        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
-        Boolean asc = (desc_or_asc == null) ? true : desc_or_asc;
+        Integer firstElem = startwith == null ? 0 : startwith;
+        String by = orderBy == null || orderBy.isEmpty() ? "ip" : orderBy;
+        String has = filter == null ? "" : filter;
+        Integer numElem = limit == null ? DEFAULT_PAGE_LENGTH : limit;
+        Boolean asc = desc_or_asc == null ? true : desc_or_asc;
 
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
+            netService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
         /*
-        if (all == null || all.isEmpty())
-        {
-            throw new ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS);
-        }*/
+         * if (all == null || all.isEmpty()) { throw new
+         * ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS); }
+         */
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
@@ -148,7 +144,7 @@ public class VirtualDatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<IpPoolManagement> all =
-            ipService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
+            netService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
         StringBuilder formattedData = new StringBuilder();
         formattedData.append("## AbiCloud DHCP configuration for network "
             + service.getVirtualDatacenter(id).getNetwork().getUuid() + "\n");

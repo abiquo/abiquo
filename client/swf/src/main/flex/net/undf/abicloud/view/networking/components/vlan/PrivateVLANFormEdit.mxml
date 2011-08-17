@@ -29,6 +29,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.model.AbiCloudModel;
             import mx.utils.ObjectUtil;
             import mx.utils.StringUtil;
@@ -43,13 +44,16 @@
 
             //The Network to which the VLAN belongs
             private var _network:Network;
+            
+            private var _virtualDatacenter:VirtualDataCenter;
 
             [Bindable]
             private var _isFormValid:Boolean;
 
-            public function init(network:Network, vlanNetwork:VlanNetwork):void
+            public function init(virtualDatacenter:VirtualDataCenter, vlanNetwork:VlanNetwork):void
             {
-                _network = network;
+                _virtualDatacenter = _virtualDatacenter;
+                _network = virtualDatacenter.network;
                 _vlanNetwork = vlanNetwork;
 
                 //Setting fields
@@ -84,6 +88,7 @@
                 networkConfiguration.sufixDNS = sufixDNSInput.text;
 
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
+                event.virtualDatacenter = _virtualDatacenter;
                 event.network = _network;
                 event.vlanNetwork = _vlanNetwork;
                 event.networkName = nameInput.text;

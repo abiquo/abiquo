@@ -24,11 +24,15 @@
  */
 package com.abiquo.abiserver.commands.stub;
 
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
+import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
+import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -36,39 +40,95 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
  */
 public interface NetworkResourceStub
 {
-    public BasicResult getPrivateNetworks(final Integer vdcId);
+    public BasicResult checkVLANTagAvailability(Integer datacenterId, Integer proposedVLANTag,
+        Integer currentVlanId);
 
-    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
+    public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
-    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws NetworkCommandException;
+    public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
+        NetworkConfiguration configuration, Enterprise enterprise);
+
+    public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
+
+    public BasicResult deletePublicVlan(Integer datacenterId, Integer vlanId);
+
+    public BasicResult editPrivateVlan(Integer vdcId, Integer vlanId, VLANNetworkDto vlandto);
+
+    public BasicResult editPublicIp(Integer datacenterId, Integer vlanId, Integer idManagement,
+        IpPoolManagement ipPoolManagement);
+
+    public BasicResult editPublicIps(Integer datacenterId, Integer vlanNetworkId,
+        ArrayList<IpPoolManagement> listOfPublicIPs);
+
+    public BasicResult editPublicVlan(Integer datacenterId, Integer vlanNetworkId, String vlanName,
+        Integer vlanTag, NetworkConfiguration configuration, Boolean defaultNetwork,
+        Enterprise enterprise);
+
+    public BasicResult getEnterpriseFromReservedVlanId(Integer datacenterId, Integer vlanId);
 
     public BasicResult getEnterprisesWithNetworksByDatacenter(UserSession userSession,
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
-    /**
-     * Creates a new Private vlan network
-     * 
-     * @param userSession user who performs the action
-     * @param vdcId identifier of the virtualdatacenter
-     * @param vlanDto object to create.
-     * @return BasicResult
-     */
-    public BasicResult createPrivateVLANNetwork(UserSession userSession, Integer vdcId,
-        VLANNetworkDto dto);
+    public BasicResult getGatewayByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
 
-    /**
-     * Retrieves into a parsed string all the IP-MAC rules inside a datacenter.
-     * 
-     * @param userSession user who performs the action.
-     * @param vdcId virtual datacenter identifier.
-     * @return the DHCP info into a parsed String.
-     * @throws NetworkCommandException for encapsulate any non-runtime exception.
-     */
+    public BasicResult getGatewayListByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
+
     public BasicResult getInfoDHCPServer(UserSession userSession, Integer vdcId)
         throws NetworkCommandException;
+
+    public BasicResult getListNetworkPoolByEnterprise(Integer enterpriseId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId, Integer vlanId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
+        Boolean onlyAvailable);
+
+    public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
+        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
+        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolByVlan(Integer datacenterId, Integer vlanId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
+        Boolean all) throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolPurchasedByVirtualDatacenter(Integer vdcId,
+        Boolean onlyAvailable, Integer offset, Integer numberOfNodes, String filterLike,
+        String orderBy, Boolean asc) throws NetworkCommandException;
+
+    public BasicResult getListNetworkPublicPoolToPurchaseByVirtualDatacenter(Integer vdcId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        throws NetworkCommandException;
+
+    public BasicResult getNICsByVirtualMachine(Integer virtualDatacenterId, Integer vappId,
+        Integer virtualMachineId);
+
+    public BasicResult getPrivateNetworks(final Integer vdcId);
+
+    public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
+
+    public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
+
+    public BasicResult releaseNICfromVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
+        Integer nicOrder);
+
+    public BasicResult releasePublicIp(final Integer vdcId, final Integer ipId);
+
+    public BasicResult reorderNICintoVM(Integer vdcId, Integer vappId, Integer vmId,
+        Integer oldOrder, Integer newOrder);
+
+    public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
+        Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
+    public BasicResult requestPublicNICforVirtualMachine(Integer vdcId, Integer vappId,
+        Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
+    public BasicResult setGatewayForVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
+        IPAddress gateway);
+
 }

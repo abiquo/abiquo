@@ -173,7 +173,7 @@
                                       true);
                 PopUpManager.centerPopUp(vlanFormEdit);
 
-                vlanFormEdit.init(_virtualDatacenter.network, _selectedVLAN);
+                vlanFormEdit.init(_virtualDatacenter, _selectedVLAN);
             }
 
             private function closeVLANFormEdit(event:Event = null):void
@@ -212,6 +212,7 @@
                 if (closeEvent.detail == Alert.YES)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.DELETE_VLAN);
+                    event.virtualDatacenter = _virtualDatacenter;
                     event.network = _virtualDatacenter.network;
                     event.vlanNetwork = _selectedVLAN;
                     dispatchEvent(event);

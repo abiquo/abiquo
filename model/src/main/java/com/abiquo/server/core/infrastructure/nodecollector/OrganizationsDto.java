@@ -26,7 +26,7 @@
 // Generated on: 2011.05.25 at 12:44:58 PM CEST 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector.ucs;
+package com.abiquo.server.core.infrastructure.nodecollector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,16 +41,16 @@ import com.abiquo.model.transport.WrapperDto;
 /**
  * Wrapper class to get a list of Logic Servers.
  * <p>
- * Java class for LogicServersDto complex type.
+ * Java class for OrganizationsDto complex type.
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LogicServersDto">
+ * &lt;complexType name="OrganizationsDto">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="logicServer" type="{http://abiquo.com/server/core/infrastructure/nodecollector/ucs}LogicServerDto" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="organization" type="{http://abiquo.com/server/core/infrastructure/nodecollector}OrganizationDto" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -58,14 +58,14 @@ import com.abiquo.model.transport.WrapperDto;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "logicServers")
-public class LogicServersDto extends WrapperDto<LogicServerDto>
+@XmlType(name = "organizations")
+public class OrganizationsDto extends WrapperDto<OrganizationDto>
 {
 
     /**
      * 
      */
-    private static final long serialVersionUID = 2702037384156369201L;
+    private static final long serialVersionUID = 5643469409057556537L;
 
     /**
      * Gets the value of the host property.
@@ -80,15 +80,15 @@ public class LogicServersDto extends WrapperDto<LogicServerDto>
      * getCollection().add(newItem);
      * </pre>
      * <p>
-     * Objects of the following type(s) are allowed in the list {@link LogicServerDto }
+     * Objects of the following type(s) are allowed in the list {@link OrganizationDto }
      */
     @Override
-    @XmlElement(name = "logicServer")
-    public List<LogicServerDto> getCollection()
+    @XmlElement(name = "organization")
+    public List<OrganizationDto> getCollection()
     {
         if (collection == null)
         {
-            collection = new ArrayList<LogicServerDto>();
+            collection = new ArrayList<OrganizationDto>();
         }
         return this.collection;
     }
