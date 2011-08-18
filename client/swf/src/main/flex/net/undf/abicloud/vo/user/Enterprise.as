@@ -52,6 +52,15 @@ package net.undf.abicloud.vo.user
 
 		//FIXME: this is hardcoded. Should be aquire from server         
         public var defaultTheme:String ="abicloudDefault";
+        
+        /*******
+        * 
+        * Related with Chef integration
+        * 
+        * ******/
+        public var chefURL:String;
+        
+        public var chefValidatorCertificate:String;
 
         public function Enterprise()
         {
