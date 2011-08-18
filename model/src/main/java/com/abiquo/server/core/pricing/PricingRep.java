@@ -328,4 +328,15 @@ public class PricingRep extends DefaultRepBase
         return pricingTierDao.findPricingTier(tier, pricing);
     }
 
+    public PricingTier findPricingTierById(final Integer id)
+    {
+        return pricingTierDao.findById(id);
+    }
+
+    public void updatePricingTier(final PricingTier old)
+    {
+        pricingTierDao.flush();
+
+    }
+
 }
