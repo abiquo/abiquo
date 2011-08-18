@@ -114,7 +114,9 @@
             }
             
             private function getNetworksByVirtualDatacenter():void{
-            	_virtualDatacenter.network.networks = new ArrayCollection();
+            	if(_virtualDatacenter && _virtualDatacenter.network){
+	            	_virtualDatacenter.network.networks = new ArrayCollection();            		
+            	}
             	//Private Vlan Networks
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
             	event.virtualDatacenter = this._virtualDatacenter;
