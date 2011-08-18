@@ -22,6 +22,9 @@
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" lazy="false" fetch="select" name="datacenter">
             <column name="idDataCenter" />
         </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" lazy="false" fetch="select" name="defaultVlan">
+            <column name="default_vlan_network_id" />
+        </many-to-one>
         <!-- Limits -->
         <component name="limits" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
             <component name="cpu" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">

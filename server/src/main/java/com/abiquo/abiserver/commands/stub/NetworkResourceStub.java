@@ -70,6 +70,8 @@ public interface NetworkResourceStub
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
+    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, Boolean onlypublic);
+
     public BasicResult getGatewayByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
 
     public BasicResult getGatewayListByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);

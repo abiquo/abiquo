@@ -803,8 +803,9 @@
 
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.networkingService}"
-            method="getExternalVlansByEnterprise"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id]}">
+            method="getExternalVlansByVirtualDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

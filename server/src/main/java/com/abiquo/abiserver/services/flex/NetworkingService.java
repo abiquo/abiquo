@@ -426,6 +426,42 @@ public class NetworkingService
         return dataResult;
     }
 
+    public BasicResult getExternalVlansByDatacenter(final UserSession userSession,
+        final Integer datacenterId, final Boolean onlypublic)
+    {
+        return proxyStub(userSession).getPublicVlansByDatacenter(datacenterId, onlypublic);
+    }
+
+    public DataResult<VlanNetwork> getExternalVlansByEnterprise(final UserSession userSession,
+        final Integer enteprirseId)
+    {
+        // TODO
+        return null;
+    }
+
+    public DataResult<VlanNetwork> getExternalVlansByVirtualDatacenter(
+        final UserSession userSession, final Integer vdcId)
+    {
+        // TODO
+        return null;
+    }
+
+    public DataResult<IpPoolManagement> getNetworkPoolInfoByEnternalVlan(
+        final UserSession userSession, final Integer enteprirseId, final Integer vlanId,
+        final Boolean available)
+    {
+        // TODO
+        return null;
+    }
+
+    public BasicResult requestExternalNICforVirtualMachine(final UserSession userSession,
+        final Integer enterpriseId, final Integer vdcId, final Integer vappId, final Integer vmId,
+        final IpPoolManagement ipPoolManagement)
+    {
+        // TODO
+        return null;
+    }
+
     protected NetworkResourceStub proxyStub(final UserSession userSession)
     {
         return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
