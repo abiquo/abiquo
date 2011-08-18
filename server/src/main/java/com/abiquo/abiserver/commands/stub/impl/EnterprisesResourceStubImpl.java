@@ -146,12 +146,24 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         return result;
     }
 
+    protected EnterpriseDto fromEnterpriseToDtoWithoutPricing(final Enterprise enterprise)
+    {
+        EnterpriseDto dto = new EnterpriseDto();
+        dto.setName(enterprise.getName());
+
+        ResourceAllocationLimit limits = enterprise.getLimits();
+        return (EnterpriseDto) fillLimits(dto, limits);
+    }
+
     protected EnterpriseDto fromEnterpriseToDto(final Enterprise enterprise)
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
-        dto.addLink(new RESTLink("template", createPricingTemplateLink(enterprise
-            .getIdPricingTemplate())));
+        if (enterprise.getIdPricingTemplate() != null)
+        {
+            dto.addLink(new RESTLink("template", createPricingTemplateLink(enterprise
+                .getIdPricingTemplate())));
+        }
 
         ResourceAllocationLimit limits = enterprise.getLimits();
         return (EnterpriseDto) fillLimits(dto, limits);
@@ -462,7 +474,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             populateErrors(response, result, "getEnterprise");
         }
 
-        EnterpriseDto dto = fromEnterpriseToDto(enterprise);
+        EnterpriseDto dto = fromEnterpriseToDtoWithoutPricing(enterprise);
         if (idPricingTemplate != null)
         {
             dto.addLink(new RESTLink("template", createPricingTemplateLink(idPricingTemplate)));

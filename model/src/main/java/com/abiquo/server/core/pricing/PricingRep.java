@@ -76,6 +76,7 @@ public class PricingRep extends DefaultRepBase
         currencyDao = new CurrencyDAO(entityManager);
         costCodeDao = new CostCodeDAO(entityManager);
         costCodeCurrencyDao = new CostCodeCurrencyDAO(entityManager);
+        pricingCostCodeDao = new PricingCostCodeDAO(entityManager);
     }
 
     public List<Currency> findAllCurrency()
