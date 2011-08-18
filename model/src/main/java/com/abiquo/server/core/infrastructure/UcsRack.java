@@ -49,7 +49,8 @@ public class UcsRack extends Rack
 
     /* package */UcsRack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
         final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer nrsq,
-        final String ip, final Integer port, final String user, final String password)
+        final String ip, final Integer port, final String user, final String password,
+        final String defaultTemplate)
     {
         setDatacenter(datacenter);
         setName(name);
@@ -174,4 +175,31 @@ public class UcsRack extends Rack
         this.user = user;
     }
 
+    public final static String DEFAULT_TEMPLATE_PROPERTY = "defaultTemplate";
+
+    private final static boolean DEFAULT_TEMPLATE_REQUIRED = false;
+
+    private final static int DEFAULT_TEMPLATE_LENGTH_MIN = 0;
+
+    private final static int DEFAULT_TEMPLATE_LENGTH_MAX = 255;
+
+    private final static boolean DEFAULT_TEMPLATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DEFAULT_TEMPLATE_COLUMN = "defaultTemplate";
+
+    @Column(name = DEFAULT_TEMPLATE_COLUMN, nullable = !DEFAULT_TEMPLATE_REQUIRED, length = DEFAULT_TEMPLATE_LENGTH_MAX)
+    private String defaultTemplate;
+
+    @Required(value = DEFAULT_TEMPLATE_REQUIRED)
+    @Length(min = DEFAULT_TEMPLATE_LENGTH_MIN, max = DEFAULT_TEMPLATE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DEFAULT_TEMPLATE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
+    }
 }

@@ -41,7 +41,7 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
         super(UcsRack.class);
     }
 
-    public UcsRackDAO(EntityManager entityManager)
+    public UcsRackDAO(final EntityManager entityManager)
     {
         super(UcsRack.class, entityManager);
     }
@@ -52,7 +52,7 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
      * @param datacenterId id.
      * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
      */
-    public List<UcsRack> findAllUcsRacksByDatacenter(Datacenter datacenter)
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
     {
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
@@ -66,12 +66,18 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
      * @param datacenterId {@link Datacenter}.
      * @return Criterion
      */
-    private Criterion sameDatacenter(Datacenter datacenterId)
+    private Criterion sameDatacenter(final Datacenter datacenterId)
     {
-        return Restrictions.eq(UcsRack.DATACENTER_PROPERTY, datacenterId);
+        return Restrictions.eq(Rack.DATACENTER_PROPERTY, datacenterId);
     }
 
-    public boolean existAnyOtherWithIP(String ip)
+    /**
+     * The ip is unique in DB.
+     * 
+     * @param ip ip.
+     * @return boolean
+     */
+    public boolean existAnyOtherWithIP(final String ip)
     {
         return existsAnyByCriterions(Restrictions.eq(UcsRack.IP_PROPERTY, ip));
     }

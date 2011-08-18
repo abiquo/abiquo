@@ -69,6 +69,8 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_ACTION_ORGANIZATIONS = "organizations";
 
+    public static final String RACK_ACTION_FSM = "fsm";
+
     public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lsTemplates";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
@@ -89,6 +91,8 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_ORGANIZATIONS_REL = "organizations";
 
     public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES_REL = "ls-templates";
+
+    public static final String RACK_ACTION_FSM_REL = "fsm";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
         "ls-associateTemplate";

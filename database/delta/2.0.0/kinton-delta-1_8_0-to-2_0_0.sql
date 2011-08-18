@@ -13,6 +13,9 @@
 -- ---------------------------------------------- --
 ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
 
+-- UCS default template
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `defaultTemplate` varchar(200);
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --

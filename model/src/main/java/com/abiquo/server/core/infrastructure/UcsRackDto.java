@@ -75,4 +75,16 @@ public class UcsRackDto extends RackDto
     {
         this.user = user;
     }
+
+    private String defaultTemplate;
+
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
+    }
 }

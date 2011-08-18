@@ -74,6 +74,12 @@ public class ObjectFactory
     private final static QName _Organizations_QNAME =
         new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Organizations");
 
+    private final static QName _Fsm_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsm");
+
+    private final static QName _Fsms_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsms");
+
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes
      * for package: com.abiquo.server.core.infrastructure.nodecollector
@@ -154,6 +160,23 @@ public class ObjectFactory
         return new OrganizationsDto();
     }
 
+
+    /**
+     * Create an instance of {@link FsmDto }
+     */
+    public FsmDto createFsmDto()
+    {
+        return new FsmDto();
+    }
+
+    /**
+     * Create an instance of {@link FsmsDto }
+     */
+    public FsmsDto createFsmsDto()
+    {
+        return new FsmsDto();
+    }
+    
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link HypervisorEnumTypeDto }{@code >}
      */
@@ -253,6 +276,30 @@ public class ObjectFactory
     {
         return new JAXBElement<OrganizationsDto>(_Organizations_QNAME,
             OrganizationsDto.class,
+            null,
+            value);
+    }
+    
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link FsmDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsm")
+    public JAXBElement<FsmDto> createFsm(final FsmDto value)
+    {
+        return new JAXBElement<FsmDto>(_Fsm_QNAME,
+            FsmDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link FsmsDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsms")
+    public JAXBElement<FsmsDto> createFsms(final FsmsDto value)
+    {
+        return new JAXBElement<FsmsDto>(_Fsms_QNAME,
+            FsmsDto.class,
             null,
             value);
     }

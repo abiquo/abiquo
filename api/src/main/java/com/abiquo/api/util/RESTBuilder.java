@@ -208,6 +208,8 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildRestLink(RackResource.class,
                 RackResource.RACK_ACTION_ORGANIZATIONS, RackResource.RACK_ACTION_ORGANIZATIONS_REL,
                 params));
+            links.add(builder.buildRestLink(RackResource.class, RackResource.RACK_ACTION_FSM,
+                RackResource.RACK_ACTION_FSM_REL, params));
         }
         return links;
     }
