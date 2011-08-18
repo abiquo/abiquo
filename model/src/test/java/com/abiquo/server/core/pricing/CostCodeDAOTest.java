@@ -21,9 +21,10 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,10 +32,12 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -46,7 +49,7 @@ public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
     }
 
     @Override
-    protected CostCodeDAO createDao(EntityManager entityManager)
+    protected CostCodeDAO createDao(final EntityManager entityManager)
     {
         return new CostCodeDAO(entityManager);
     }
@@ -69,4 +72,18 @@ public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
         return (CostCodeGenerator) super.eg();
     }
 
+    @Test
+    public void findCostCodes()
+    {
+        CostCode c1 = eg().createUniqueInstance();
+        CostCode c2 = eg().createUniqueInstance();
+
+        ds().persistAll(c1, c2);
+
+        CostCodeDAO dao = createDaoForRollbackTransaction();
+
+        Collection<CostCode> costCodes = dao.find(null, null, false, 0, 25);
+        AssertEx.assertSize(costCodes, 2);
+
+    }
 }

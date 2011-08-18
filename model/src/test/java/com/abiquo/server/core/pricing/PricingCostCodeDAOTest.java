@@ -21,9 +21,10 @@
 
 package com.abiquo.server.core.pricing;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,21 +32,24 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingCostCodeDAOTest extends DefaultDAOTestBase<PricingCostCodeDAO, PricingCostCode>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected PricingCostCodeDAO createDao(EntityManager entityManager)
+    protected PricingCostCodeDAO createDao(final EntityManager entityManager)
     {
         return new PricingCostCodeDAO(entityManager);
     }
@@ -68,5 +72,41 @@ public class PricingCostCodeDAOTest extends DefaultDAOTestBase<PricingCostCodeDA
         return (PricingCostCodeGenerator) super.eg();
     }
 
-    
+    @Test
+    public void findPricingCostCodes()
+    {
+        PricingCostCode pc1 = eg().createUniqueInstance();
+        PricingCostCode pc2 = eg().createUniqueInstance();
+
+        ds().persistAll(pc1.getCostCode(), pc1.getPricingTemplate().getCurrency(),
+            pc1.getPricingTemplate(), pc1, pc2.getCostCode(),
+            pc2.getPricingTemplate().getCurrency(), pc2.getPricingTemplate(), pc2);
+
+        PricingCostCodeDAO dao = createDaoForRollbackTransaction();
+
+        Collection<PricingCostCode> pccs = dao.findPricingCostCodes(pc1.getPricingTemplate());
+        AssertEx.assertSize(pccs, 1);
+        pccs = dao.findPricingCostCodes(pc2.getPricingTemplate());
+        AssertEx.assertSize(pccs, 1);
+
+    }
+
+    @Test
+    public void existAnyOtherWithCostCode()
+    {
+        PricingCostCode pc1 = eg().createUniqueInstance();
+        PricingCostCode pc2 = eg().createUniqueInstance();
+
+        ds().persistAll(pc1.getCostCode(), pc1.getPricingTemplate().getCurrency(),
+            pc1.getPricingTemplate(), pc1, pc2.getCostCode(),
+            pc2.getPricingTemplate().getCurrency(), pc2.getPricingTemplate(), pc2);
+
+        PricingCostCodeDAO dao = createDaoForReadWriteTransaction();
+
+        assertFalse(dao.existAnyOtherWithCostCode(pc1, pc1.getCostCode(), pc1.getPricingTemplate()));
+
+        assertFalse(dao.existAnyOtherWithCostCode(pc1, pc1.getCostCode(), pc2.getPricingTemplate()));
+
+    }
+
 }
