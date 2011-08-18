@@ -4112,9 +4112,9 @@ CREATE TABLE `kinton`.`currency` (
 
 /*!40000 ALTER TABLE `currency` DISABLE KEYS */;
 LOCK TABLES `currency` WRITE;
-INSERT INTO `kinton`.`currency` values (1, "USD", "Dolar($)", 0);
-INSERT INTO `kinton`.`currency` values (2, "EUR", "Euro(€)", 0);
-INSERT INTO `kinton`.`currency` values (3, "YEN", "Yen(¥)", 0);
+INSERT INTO `kinton`.`currency` values (1, "USD", "Dolar-$", 0);
+INSERT INTO `kinton`.`currency` values (2, "EUR", "Euro-€", 0);
+INSERT INTO `kinton`.`currency` values (3, "YEN", "Yen-¥", 0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;  
   
