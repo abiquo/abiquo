@@ -87,4 +87,39 @@ public class PricingTemplateDAOTest extends DefaultDAOTestBase<PricingTemplateDA
 
     }
 
+    @Test
+    public void findAllPricingTemplatesByName()
+    {
+        PricingTemplate pt1 = eg().createInstance("pt1");
+        PricingTemplate pt2 = eg().createInstance("pt2");
+
+        ds().persistAll(pt1.getCurrency(), pt2.getCurrency(), pt1, pt2);
+
+        PricingTemplateDAO dao = createDaoForRollbackTransaction();
+
+        Collection<PricingTemplate> pts = dao.findAllPricingTemplateByName("pt1");
+        AssertEx.assertSize(pts, 1);
+        pts = dao.findAllPricingTemplateByName("pt2");
+        AssertEx.assertSize(pts, 1);
+
+    }
+
+    @Test
+    public void findAllPricingTemplatesByCurrency()
+    {
+        PricingTemplate pt1 = eg().createInstance("pt1");
+        PricingTemplate pt2 = eg().createInstance("pt2");
+
+        ds().persistAll(pt1.getCurrency(), pt2.getCurrency(), pt1, pt2);
+
+        PricingTemplateDAO dao = createDaoForRollbackTransaction();
+
+        Collection<PricingTemplate> pts =
+            dao.findPricingTemplatesByCurrency(pt1.getCurrency().getId());
+        AssertEx.assertSize(pts, 1);
+        pts = dao.findPricingTemplatesByCurrency(pt2.getCurrency().getId());
+        AssertEx.assertSize(pts, 1);
+
+    }
+
 }
