@@ -26,40 +26,25 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector;
-
+package com.abiquo.server.core.infrastructure;
 
 /**
- * The object contains the current needed values of the State Machine capabilities to retrieve
+ * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
-public class Fsm
+public class Organization
 {
+
+    protected String name;
+
+    protected String level;
+
     protected String dn;
 
-    protected String status;
-
-    protected String progress;
-
-    protected String description;
-
-    protected String error;
-
     /**
-     * Gets the value of the status property.
+     * Gets the value of the name property.
      * 
      * @return possible object is {@link String }
      */
-    public String getStatus()
-    {
-        return status;
-    }
-
-    /**
-     * Gets the value of the associated property.
-     * 
-     * @return possible object is {@link String }
-     */
-
     public String getDn()
     {
         return dn;
@@ -70,39 +55,74 @@ public class Fsm
      * 
      * @param value allowed object is {@link String }
      */
+
     public void setDn(final String dn)
     {
         this.dn = dn;
     }
 
-    /**
-     * Sets the value of the status property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setStatus(final String status)
-    {
-        this.status = status;
-    }
+    protected String status;
+
+    protected String description;
 
     /**
-     * Gets the value of the progress property.
+     * Gets the value of the name property.
      * 
      * @return possible object is {@link String }
      */
-    public String getProgress()
+    public String getName()
     {
-        return progress;
+        return name;
     }
 
     /**
-     * Sets the value of the progress property.
+     * Sets the value of the name property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setProgress(final String progress)
+    public void setName(final String value)
     {
-        this.progress = progress;
+        this.name = value;
+    }
+
+    /**
+     * Gets the value of the associated property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getLevel()
+    {
+        return level;
+    }
+
+    /**
+     * Sets the value of the associated property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setLevel(final String value)
+    {
+        this.level = value;
+    }
+
+    /**
+     * Gets the value of the associatedTo property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getStatus()
+    {
+        return status;
+    }
+
+    /**
+     * Sets the value of the associatedTo property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setStatus(final String value)
+    {
+        this.status = value;
     }
 
     /**
@@ -120,29 +140,9 @@ public class Fsm
      * 
      * @param value allowed object is {@link String }
      */
-    public void setDescription(final String description)
+    public void setDescription(final String value)
     {
-        this.description = description;
-    }
-
-    /**
-     * Gets the value of the error property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getError()
-    {
-        return error;
-    }
-
-    /**
-     * Sets the value of the error property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setError(final String error)
-    {
-        this.error = error;
+        this.description = value;
     }
 
 }

@@ -26,33 +26,24 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector;
+package com.abiquo.server.core.infrastructure;
+
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
-public class LogicServer
+@XmlRootElement(name = "organization")
+public class OrganizationDto
 {
+    protected String dn;
 
     protected String name;
 
-    protected String type;
+    protected String level;
 
-    protected String associated;
-
-    protected String associatedTo;
+    protected String status;
 
     protected String description;
-
-    /**
-     * Gets the value of the type property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getType()
-    {
-        return type;
-    }
 
     /**
      * Gets the value of the name property.
@@ -65,13 +56,24 @@ public class LogicServer
     }
 
     /**
-     * Sets the value of the type property.
+     * Gets the value of the dn property.
+     * 
+     * @return possible object is {@link String }
+     */
+
+    public String getDn()
+    {
+        return dn;
+    }
+
+    /**
+     * Sets the value of the dn property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setType(final String value)
+    public void setDn(final String dn)
     {
-        this.type = value;
+        this.dn = dn;
     }
 
     /**
@@ -85,43 +87,43 @@ public class LogicServer
     }
 
     /**
-     * Gets the value of the associated property.
+     * Gets the value of the level property.
      * 
      * @return possible object is {@link String }
      */
-    public String getAssociated()
+    public String getLevel()
     {
-        return associated;
+        return level;
     }
 
     /**
-     * Sets the value of the associated property.
+     * Sets the value of the level property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setAssociated(final String value)
+    public void setLevel(final String value)
     {
-        this.associated = value;
+        this.level = value;
     }
 
     /**
-     * Gets the value of the associatedTo property.
+     * Gets the value of the status property.
      * 
      * @return possible object is {@link String }
      */
-    public String getAssociatedTo()
+    public String getStatus()
     {
-        return associatedTo;
+        return status;
     }
 
     /**
-     * Sets the value of the associatedTo property.
+     * Sets the value of the status property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setAssociatedTo(final String value)
+    public void setStatus(final String value)
     {
-        this.associatedTo = value;
+        this.status = value;
     }
 
     /**
