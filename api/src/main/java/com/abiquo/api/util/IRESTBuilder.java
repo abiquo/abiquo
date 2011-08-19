@@ -98,8 +98,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildPrivateNetworkLinks(Integer virtualDatacenterId,
         VLANNetworkDto network);
 
-    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
-        final VLANNetworkDto network);
+    public List<RESTLink> buildPublicNetworkLinks(final Integer enterpriseId,
+        final Integer datacenterId, final VLANNetworkDto network);
 
     /*
      * Premium methods

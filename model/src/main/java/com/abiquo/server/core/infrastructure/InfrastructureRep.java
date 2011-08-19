@@ -285,6 +285,12 @@ public class InfrastructureRep extends DefaultRepBase
         return this.ucsRackDao.existAnyOtherWithIP(ip);
     }
 
+    public boolean existsAnyVirtualMachineUsingNetwork(final Integer vlanId)
+    {
+        assert vlanId != null;
+        return !this.ipPoolDao.findUsedIpsByPrivateVLAN(vlanId).isEmpty();
+    }
+
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;

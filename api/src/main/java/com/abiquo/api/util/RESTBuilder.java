@@ -434,8 +434,8 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
-        final VLANNetworkDto network)
+    public List<RESTLink> buildPublicNetworkLinks(final Integer enterpriseId,
+        final Integer datacenterId, final VLANNetworkDto network)
     {
         return null;
     }
