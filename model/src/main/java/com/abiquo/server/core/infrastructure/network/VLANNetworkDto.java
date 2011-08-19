@@ -25,7 +25,6 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "network")
@@ -48,8 +47,6 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     private String secondaryDNS;
 
     private String sufixDNS;
-
-    private Boolean defaultNetwork;
 
     private NetworkType type;
 
@@ -141,16 +138,6 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     public void setSufixDNS(final String sufixDNS)
     {
         this.sufixDNS = sufixDNS;
-    }
-
-    public Boolean getDefaultNetwork()
-    {
-        return defaultNetwork;
-    }
-
-    public void setDefaultNetwork(final Boolean defaultNetwork)
-    {
-        this.defaultNetwork = defaultNetwork;
     }
 
     public NetworkType getType()

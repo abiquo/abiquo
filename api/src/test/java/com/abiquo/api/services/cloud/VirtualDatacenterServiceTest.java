@@ -146,7 +146,6 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
         VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("DefaultNetwork");
-        networkDto.setDefaultNetwork(Boolean.TRUE);
         networkDto.setAddress("192.168.0.0");
         networkDto.setGateway("192.168.0.1");
         networkDto.setMask(24);

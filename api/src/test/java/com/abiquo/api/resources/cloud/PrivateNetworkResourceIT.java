@@ -209,7 +209,6 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dtoResponse);
         assertEquals(dto.getId(), dtoResponse.getId());
         assertEquals("newname", dtoResponse.getName());
-        assertEquals(dto.getDefaultNetwork(), dtoResponse.getDefaultNetwork());
         assertEquals(dto.getAddress(), dtoResponse.getAddress());
         assertEquals("45.45.45.0", dtoResponse.getPrimaryDNS());
         assertEquals(dto.getSecondaryDNS(), dtoResponse.getSecondaryDNS());

@@ -127,6 +127,11 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
             dcLimit.setLimits(getLimits().toPojo());
         }
 
+        if (getDefaultVlan() != null)
+        {
+
+        }
+
         return dcLimit;
     }
 }

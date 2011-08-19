@@ -22,6 +22,7 @@
 package net.undf.abicloud.vo.virtualhardware
 {
 	import net.undf.abicloud.vo.infrastructure.DataCenter;
+	import net.undf.abicloud.vo.networking.VlanNetwork;
 
     [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit")]
     [Bindable]
@@ -32,12 +33,12 @@ package net.undf.abicloud.vo.virtualhardware
         
         public var limits:ResourceAllocationLimit;	
         
-
+        public var defaultVlan:VlanNetwork; 
+        
         public function DatacenterLimit()
         {
         	datacenter = null;
         	limits = new ResourceAllocationLimit();    
-		
         }    
     }
 }

@@ -21,6 +21,7 @@
 
 package com.abiquo.abiserver.services.flex;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
@@ -87,7 +88,6 @@ public class NetworkingService
 
         VLANNetworkDto vlandto = new VLANNetworkDto();
         vlandto.setName(vlanName);
-        vlandto.setDefaultNetwork(defaultNetwork);
         vlandto.setAddress(configuration.getNetworkAddress());
         vlandto.setGateway(configuration.getGateway());
         vlandto.setMask(configuration.getMask());
@@ -132,7 +132,6 @@ public class NetworkingService
         VLANNetworkDto vlandto = new VLANNetworkDto();
         vlandto.setId(vlanId);
         vlandto.setName(vlanName);
-        vlandto.setDefaultNetwork(defaultNetwork);
         vlandto.setAddress(configuration.getNetworkAddress());
         vlandto.setGateway(configuration.getGateway());
         vlandto.setMask(configuration.getMask());
@@ -437,6 +436,25 @@ public class NetworkingService
     {
         // TODO
         return null;
+    }
+
+    public BasicResult getExternalVlansByDatacenterInEnterprise(final UserSession userSession,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        List<VlanNetwork> vlans = new ArrayList<VlanNetwork>();
+
+        VlanNetwork vlan = new VlanNetwork();
+        vlan.setConfiguration(new NetworkConfiguration());
+        vlan.setNetworkId(67);
+        vlan.setNetworkName("fake tetas");
+        vlan.setVlanTag(56);
+
+        vlans.add(vlan);
+
+        DataResult<List> dr = new DataResult<List>();
+        dr.setData(vlans);
+        dr.setSuccess(Boolean.TRUE);
+        return dr;
     }
 
     public DataResult<VlanNetwork> getExternalVlansByVirtualDatacenter(

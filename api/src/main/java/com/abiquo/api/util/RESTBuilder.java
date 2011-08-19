@@ -66,7 +66,7 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
-import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -84,8 +84,8 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
-import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -436,12 +436,14 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildPublicNetworkLinks(final Integer enterpriseId,
         final Integer datacenterId, final VLANNetworkDto network)
+
     {
         return null;
     }
 
-    protected List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
-        final Integer datacenterId, final Integer enterpriseId, final AbiquoLinkBuilder builder)
+    @Override
+    public List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenter vdc,
+        final Integer datacenterId, final Integer enterpriseId)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -450,7 +452,9 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc.getId().toString());
         params.put(DatacenterResource.DATACENTER, datacenterId.toString());
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        params.put(PrivateNetworkResource.PRIVATE_NETWORK, vdc.getDefaultVlan().getId().toString());
 
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualDatacenterResource.class, REL_EDIT, params));
 
         links.add(builder.buildRestLink(PrivateNetworksResource.class,
@@ -461,21 +465,23 @@ public class RESTBuilder implements IRESTBuilder
             params));
         links.add(builder.buildRestLink(VirtualAppliancesResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE, params));
+        links.add(builder.buildRestLink(PrivateNetworkResource.class, "defaultnetwork", params));
         links.add(builder.buildActionLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
         links.add(builder.buildActionLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO, "dhcpinfo", params));
-
+        RESTLink getVlanLink =
+            builder.buildActionLink(VirtualDatacenterResource.class,
+                VirtualDatacenterResource.ACTION_DEFAULT_VLAN, "defaultvlan", params);
+        getVlanLink.setType("GET");
+        RESTLink setVlanLink =
+            builder.buildActionLink(VirtualDatacenterResource.class,
+                VirtualDatacenterResource.ACTION_DEFAULT_VLAN, "defaultvlan", params);
+        setVlanLink.setType("PUT");
+        links.add(getVlanLink);
+        links.add(setVlanLink);
         return links;
-    }
-
-    @Override
-    public List<RESTLink> buildVirtualDatacenterLinks(final VirtualDatacenterDto vdc,
-        final Integer datacenterId, final Integer enterpriseId)
-    {
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        return buildVirtualDatacenterLinks(vdc, datacenterId, enterpriseId, builder);
     }
 
     @Override
@@ -887,6 +893,27 @@ public class RESTBuilder implements IRESTBuilder
             IpAddressesResource.IP_ADDRESS_PARAM, IpAddressesResource.IP_ADDRESS_PARAM, params));
 
         return links;
+    }
+
+    @Override
+    public List<RESTLink> buildExternalNetworkLinks(final Integer enterpriseId,
+        final VLANNetworkDto dto)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildExternalNetworkByDatacenterLinks(final Integer enterpriseId,
+        final Integer limitId, final VLANNetwork network)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildExternalNetworksByDatacenterLinks(final Integer enterpriseId,
+        final Integer limitId)
+    {
+        return null;
     }
 
 }
