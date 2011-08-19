@@ -158,7 +158,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         VLANNetworkDto dto = new VLANNetworkDto();
         dto.setAddress(configuration.getNetworkAddress());
-        dto.setDefaultNetwork(Boolean.FALSE);
         dto.setGateway(configuration.getGateway());
         dto.setMask(configuration.getMask());
         dto.setName(networkName);
@@ -292,7 +291,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         VLANNetworkDto dto = new VLANNetworkDto();
         dto.setAddress(configuration.getNetworkAddress());
-        dto.setDefaultNetwork(defaultNetwork);
         dto.setGateway(configuration.getGateway());
         dto.setId(vlanNetworkId);
         dto.setMask(configuration.getMask());
@@ -1212,7 +1210,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         VlanNetwork newNet = new VlanNetwork();
         newNet.setConfiguration(netconf);
-        newNet.setDefaultNetwork(dto.getDefaultNetwork());
         newNet.setNetworkName(dto.getName());
         newNet.setVlanNetworkId(dto.getId());
         newNet.setVlanTag(dto.getTag());

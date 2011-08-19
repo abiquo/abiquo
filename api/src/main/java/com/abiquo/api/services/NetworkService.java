@@ -321,6 +321,30 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
+     * Get the default network for virtual datacenter.
+     * 
+     * @param id identifier of the virtual datacenter
+     * @return
+     */
+    public VLANNetwork getDefaultNetworkForVirtualDatacenter(final Integer id)
+    {
+        VirtualDatacenter vdc = repo.findById(id);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+
+        if (vdc.getDefaultVlan() == null)
+        {
+            addUnexpectedErrors(APIError.VLANS_VIRTUAL_DATACENTER_SHOULD_HAVE_A_DEFAULT_VLAN);
+            flushErrors();
+        }
+
+        return vdc.getDefaultVlan();
+    }
+
+    /**
      * Asks for all the Private IPs managed by an Enterprise.
      * 
      * @param entId identifier of the Enterprise.
@@ -850,6 +874,34 @@ public class NetworkService extends DefaultApiService
 
         LOGGER.debug("Reordering NICs into a Virtual Machine '" + vm.getName()
             + "' finished successfully");
+    }
+
+    /**
+     * Set one of the internal networks of the Virtual Datacenter as the default one.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan to be the default one.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void setInternalNetworkAsDefaultInVirtualDatacenter(final Integer vdcId,
+        final Integer vlanId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
+        if (vlan == null)
+        {
+            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+            flushErrors();
+        }
+
+        vdc.setDefaultVlan(vlan);
+        repo.update(vdc);
+
     }
 
     /**

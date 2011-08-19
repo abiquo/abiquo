@@ -224,6 +224,28 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return virtualDatacenterDAO.findUniqueByProperty(VirtualDatacenter.NAME_PROPERTY, name);
     }
 
+    public VLANNetwork findExternalVlanByEnterprise(final Enterprise ent, final Integer vlanId)
+    {
+        return vlanDAO.findExternalVlanByEnterprise(ent, vlanId);
+    }
+
+    public VLANNetwork findExternalVlanByEnterpriseInDatacenter(final Enterprise ent,
+        final Datacenter datacenter, final Integer vlanId)
+    {
+        return vlanDAO.findExternalVlanByEnterpriseInDatacenter(ent, datacenter, vlanId);
+    }
+
+    public List<VLANNetwork> findExternalVlansByEnterprise(final Enterprise ent)
+    {
+        return vlanDAO.findExternalVlansByEnterprise(ent);
+    }
+
+    public List<VLANNetwork> findExternalVlansByEnterpriseInDatacenter(final Enterprise ent,
+        final Datacenter datacenter)
+    {
+        return vlanDAO.findExternalVlansByEnterpriseInDatacenter(ent, datacenter);
+    }
+
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
     {
         return ipManagementDAO.findIp(vlan, ipId);

@@ -693,9 +693,10 @@ public class InfrastructureRep extends DefaultRepBase
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}
      */
-    public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter)
+    public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter,
+        final Boolean onlyPublic)
     {
-        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter);
+        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter, onlyPublic);
     }
 
     /**
@@ -742,6 +743,11 @@ public class InfrastructureRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
     {
         return ipPoolDao.findIpsByNetwork(network, vlanId);
+    }
+
+    public void updateLimits(final DatacenterLimits dclimits)
+    {
+        datacenterLimitDao.flush();
     }
 
 }

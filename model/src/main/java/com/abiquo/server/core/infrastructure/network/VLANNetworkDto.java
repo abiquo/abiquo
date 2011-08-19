@@ -47,15 +47,13 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     private String secondaryDNS;
 
     private String sufixDNS;
-    
-    private Boolean defaultNetwork;
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -65,7 +63,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -75,17 +73,17 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return tag;
     }
 
-    public void setTag(Integer tag)
+    public void setTag(final Integer tag)
     {
         this.tag = tag;
     }
-    
+
     public String getGateway()
     {
         return gateway;
     }
 
-    public void setGateway(String gateway)
+    public void setGateway(final String gateway)
     {
         this.gateway = gateway;
     }
@@ -95,7 +93,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return address;
     }
 
-    public void setAddress(String address)
+    public void setAddress(final String address)
     {
         this.address = address;
     }
@@ -105,7 +103,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return mask;
     }
 
-    public void setMask(Integer mask)
+    public void setMask(final Integer mask)
     {
         this.mask = mask;
     }
@@ -115,7 +113,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return primaryDNS;
     }
 
-    public void setPrimaryDNS(String primaryDNS)
+    public void setPrimaryDNS(final String primaryDNS)
     {
         this.primaryDNS = primaryDNS;
     }
@@ -125,7 +123,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return secondaryDNS;
     }
 
-    public void setSecondaryDNS(String secondaryDNS)
+    public void setSecondaryDNS(final String secondaryDNS)
     {
         this.secondaryDNS = secondaryDNS;
     }
@@ -135,19 +133,9 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         return sufixDNS;
     }
 
-    public void setSufixDNS(String sufixDNS)
+    public void setSufixDNS(final String sufixDNS)
     {
         this.sufixDNS = sufixDNS;
-    }
-
-    public Boolean getDefaultNetwork()
-    {
-        return defaultNetwork;
-    }
-
-    public void setDefaultNetwork(Boolean defaultNetwork)
-    {
-        this.defaultNetwork = defaultNetwork;
     }
 
 }

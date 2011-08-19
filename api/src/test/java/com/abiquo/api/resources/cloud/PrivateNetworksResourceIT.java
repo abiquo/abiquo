@@ -431,7 +431,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("Default Network");
-        networkDto.setDefaultNetwork(Boolean.TRUE);
         networkDto.setAddress("192.168.0.0");
         networkDto.setGateway("192.168.0.1");
         networkDto.setMask(24);
