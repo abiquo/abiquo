@@ -55,8 +55,8 @@ public class UserDto extends SingleResourceTransportDto
      *             instead.
      */
     @Deprecated
-    public UserDto(String name, String surname, String email, String nick, String password,
-        String locale, String description)
+    public UserDto(final String name, final String surname, final String email, final String nick,
+        final String password, final String locale, final String description)
     {
         this.name = name;
         this.surname = surname;
@@ -79,8 +79,8 @@ public class UserDto extends SingleResourceTransportDto
      * @param description Desc.
      * @param authType AuthType value.
      */
-    public UserDto(String name, String surname, String email, String nick, String password,
-        String locale, String description, String authType)
+    public UserDto(final String name, final String surname, final String email, final String nick,
+        final String password, final String locale, final String description, final String authType)
     {
         this.name = name;
         this.surname = surname;
@@ -97,7 +97,7 @@ public class UserDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -109,7 +109,7 @@ public class UserDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -121,7 +121,7 @@ public class UserDto extends SingleResourceTransportDto
         return nick;
     }
 
-    public void setNick(String nick)
+    public void setNick(final String nick)
     {
         this.nick = nick;
     }
@@ -133,7 +133,7 @@ public class UserDto extends SingleResourceTransportDto
         return locale;
     }
 
-    public void setLocale(String locale)
+    public void setLocale(final String locale)
     {
         this.locale = locale;
     }
@@ -145,7 +145,7 @@ public class UserDto extends SingleResourceTransportDto
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -157,7 +157,7 @@ public class UserDto extends SingleResourceTransportDto
         return surname;
     }
 
-    public void setSurname(String surname)
+    public void setSurname(final String surname)
     {
         this.surname = surname;
     }
@@ -169,12 +169,12 @@ public class UserDto extends SingleResourceTransportDto
         return active;
     }
 
-    public void setActive(int active)
+    public void setActive(final int active)
     {
         this.active = active == 1;
     }
 
-    public void setActive(boolean active)
+    public void setActive(final boolean active)
     {
         this.active = active;
     }
@@ -186,7 +186,7 @@ public class UserDto extends SingleResourceTransportDto
         return email;
     }
 
-    public void setEmail(String email)
+    public void setEmail(final String email)
     {
         this.email = email;
     }
@@ -198,7 +198,7 @@ public class UserDto extends SingleResourceTransportDto
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -211,33 +211,9 @@ public class UserDto extends SingleResourceTransportDto
         return availableVirtualDatacenters;
     }
 
-    public void setAvailableVirtualDatacenters(String availableVirtualDatacenters)
+    public void setAvailableVirtualDatacenters(final String availableVirtualDatacenters)
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
-    }
-
-    private int idRole;
-
-    public int getIdRole()
-    {
-        return idRole;
-    }
-
-    public void setIdRole(int idRole)
-    {
-        this.idRole = idRole;
-    }
-
-    private int idEnterprise;
-
-    public int getIdEnterprise()
-    {
-        return idEnterprise;
-    }
-
-    public void setIdEnterprise(int idEnterprise)
-    {
-        this.idEnterprise = idEnterprise;
     }
 
     /**
@@ -260,7 +236,7 @@ public class UserDto extends SingleResourceTransportDto
      * 
      * @param authType {@link com.abiquo.server.core.enterprise.User.AuthType} value.
      */
-    public void setAuthType(String authType)
+    public void setAuthType(final String authType)
     {
         this.authType = authType;
     }

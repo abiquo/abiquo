@@ -154,6 +154,12 @@ public abstract class SingleResourceTransportDto implements Serializable
         searchLink(rel).setHref(href);
     }
 
+    public Integer getIdFromLink(final String rel)
+    {
+        String href = this.searchLink(rel).getHref();
+        return Integer.getInteger(href.substring(href.lastIndexOf("/"), (href.length() - 1)));
+    }
+
     public static enum LinkOrder implements Comparator<RESTLink>
     {
         BY_REL
