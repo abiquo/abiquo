@@ -90,6 +90,9 @@ package net.undf.abicloud.events
         public static const GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER:String = "getExternalNetworksByVirtualDatacenterNetworkingEvent";
         
         public static const REORDER_NIC_INTO_VIRTUAL_MACHINE:String = "reorderNicIntoVirtualMachineEvent";
+        
+        public static const SET_DEFAULT_VLAN:String = "setDefaultNetworkEvent";
+        
 
         /* ------------- Public atributes ------------- */
         public var datacenter:DataCenter;
