@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.vo.infrastructure
 {
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.user.User;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
@@ -73,6 +75,8 @@ package net.undf.abicloud.vo.infrastructure
         public var datastore:Datastore;
         
         public var password:String;
+        
+        public var cookbooks:ArrayCollection;
 
 
         /* ------------- Constructor ------------- */
@@ -93,6 +97,7 @@ package net.undf.abicloud.vo.infrastructure
             user = new User();
             idType = 0;
             password = "";
+            cookbooks = new ArrayCollection();
         }
 
 
