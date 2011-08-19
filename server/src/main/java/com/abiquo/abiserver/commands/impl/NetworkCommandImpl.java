@@ -42,7 +42,6 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
-import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
@@ -83,22 +82,25 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(final UserHB user, final Integer networkId,
-        final Integer vmId) throws NetworkCommandException
+    public void assignDefaultNICResource(final UserHB user, final Integer vmId)
+        throws NetworkCommandException
     {
         try
         {
             // NOTE: this method needs an embedded transaction
 
             // Define the needed DAOs
-            VlanNetworkDAO vlanNetDAO = factory.getVlanNetworkDAO();
             IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
             VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
             VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
             ResourceAllocationSettingDataDAO rasdDAO =
                 factory.getResourceAllocationSettingDataDAO();
+
+            VirtualmachineHB vmHB = vmDAO.findById(vmId);
+            VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
+
             // Get the default VLAN
-            VlanNetworkHB vlanHB = vlanNetDAO.getDefaultVLAN(networkId);
+            VlanNetworkHB vlanHB = vapp.getVirtualDataCenterHB().getDefaultVlan();
 
             DHCPServiceHB dhcpServiceHB =
                 (DHCPServiceHB) vlanHB.getConfiguration().getDhcpService();
@@ -109,8 +111,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                     .getGateway());
 
             // Find the virtual machine and the virtual appliance by its ID
-            VirtualmachineHB vmHB = vmDAO.findById(vmId);
-            VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
 
             // Generate the resource allocation setting data associed
             ResourceAllocationSettingData rasd =
@@ -137,8 +137,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(final UserSession userSession, final Integer networkId,
-        final Integer vmId) throws NetworkCommandException
+    public void assignDefaultNICResource(final UserSession userSession, final Integer vmId)
+        throws NetworkCommandException
     {
         try
         {
@@ -147,7 +147,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             UserDAO userDAO = factory.getUserDAO();
             UserHB user = userDAO.findUserHBByName(userSession.getUser());
 
-            assignDefaultNICResource(user, networkId, vmId);
+            assignDefaultNICResource(user, vmId);
 
             factory.endConnection();
         }
