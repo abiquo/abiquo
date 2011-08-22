@@ -370,6 +370,14 @@ public class AbstractAPIStub
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
+    protected String createEnterpriseLimitsByDatacenterLink(final int enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits", params);
+    }
+
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -378,6 +386,34 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits/{limit}",
             params);
+    }
+
+    protected String createExternalNetworkByDatacenterSetDefaultLink(final Integer entId,
+        final Integer limitId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/{externalvlan}/action/default",
+                params);
+    }
+
+    protected String createExternalNetworksByDatacenterActionInternalDefaultLink(
+        final Integer entId, final Integer limitId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+
+        return URIResolver
+            .resolveURI(apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/action/default",
+                params);
     }
 
     protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
@@ -517,6 +553,14 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters",
             new HashMap<String, String>(), queryParams);
+    }
+
+    protected String createExternalVlansByVDCLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+
+        return null;
     }
 
     protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise)

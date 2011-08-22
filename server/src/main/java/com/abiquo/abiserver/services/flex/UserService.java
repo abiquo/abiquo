@@ -27,7 +27,11 @@ import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
@@ -45,6 +49,9 @@ public class UserService
 
     private UserCommand userCommand;
 
+    /** The stub used to connect to the API. */
+    private NetworkResourceStub networkStub;
+
     public UserService()
     {
         try
@@ -58,6 +65,7 @@ public class UserService
         {
             userCommand = new UserCommandImpl();
         }
+        networkStub = new NetworkResourceStubImpl();
     }
 
     protected UserCommand proxyCommand(final UserSession userSession)
@@ -238,7 +246,22 @@ public class UserService
         UserCommand command = proxyCommand(userSession);
         try
         {
-            return command.editEnterprise(userSession, enterprise);
+            BasicResult res = command.editEnterprise(userSession, enterprise);
+
+            // now edit the vlan
+            VlanNetwork defaultvlan = enterprise.getDcLimits().iterator().next().getDefaultVlan();
+            Integer limitId = enterprise.getDcLimits().iterator().next().getIdEnterprise();
+            if (defaultvlan == null)
+            {
+                proxyStub(userSession).setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
+                    enterprise.getId(), limitId);
+            }
+            else
+            {
+                proxyStub(userSession).setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
+                    enterprise.getId(), limitId, defaultvlan.getNetworkId());
+            }
+            return res;
         }
         catch (UserSessionException e)
         {
@@ -354,5 +377,10 @@ public class UserService
         {
             return e.getResult();
         }
+    }
+
+    protected NetworkResourceStub proxyStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
 }

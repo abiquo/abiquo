@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.services.flex;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
@@ -39,6 +38,7 @@ import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -441,35 +441,20 @@ public class NetworkingService
     public BasicResult getExternalVlansByDatacenterInEnterprise(final UserSession userSession,
         final Integer datacenterId, final Integer enterpriseId)
     {
-        List<VlanNetwork> vlans = new ArrayList<VlanNetwork>();
-
-        VlanNetwork vlan = new VlanNetwork();
-        vlan.setConfiguration(new NetworkConfiguration());
-        vlan.setNetworkId(67);
-        vlan.setNetworkName("fake tetas");
-        vlan.setVlanTag(56);
-
-        vlans.add(vlan);
-
-        DataResult<List> dr = new DataResult<List>();
-        dr.setData(vlans);
-        dr.setSuccess(Boolean.TRUE);
-        return dr;
+        return proxyStub(userSession).getExternalVlansByDatacenterInEnterprise(datacenterId,
+            enterpriseId);
     }
 
-    public DataResult<VlanNetwork> getExternalVlansByVirtualDatacenter(
-        final UserSession userSession, final Integer vdcId)
+    public BasicResult getExternalVlansByVirtualDatacenter(final UserSession userSession,
+        final VirtualDataCenter vdc)
     {
-        // TODO
-        return null;
+        return proxyStub(userSession).getExternalVlansByVirtualDatacenter(vdc);
     }
 
-    public DataResult<IpPoolManagement> getNetworkPoolInfoByEnternalVlan(
-        final UserSession userSession, final Integer enteprirseId, final Integer vlanId,
-        final Boolean available)
+    public BasicResult getNetworkPoolInfoByExternalVlan(final UserSession userSession,
+        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available)
     {
-        // TODO
-        return null;
+        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId, available);
     }
 
     public BasicResult requestExternalNICforVirtualMachine(final UserSession userSession,
@@ -478,6 +463,12 @@ public class NetworkingService
     {
         // TODO
         return null;
+    }
+
+    public BasicResult setExternalVlanAsDefaultInVirtualDatacenter(final UserSession userSession,
+        final VirtualDataCenter vdc, final Integer vlanId)
+    {
+        return proxyStub(userSession).setExternalVlanAsDefaultInVirtualDatacenter(vdc, vlanId);
     }
 
     protected NetworkResourceStub proxyStub(final UserSession userSession)

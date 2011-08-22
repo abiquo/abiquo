@@ -52,12 +52,6 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     private Integer networkId;
 
     /**
-     * If this network is the default network; The default network is the one which a new node will
-     * request an available IP.
-     */
-    private Boolean defaultNetwork;
-
-    /**
      * Name of the network.
      */
     protected String networkName;
@@ -71,6 +65,10 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
      * The configuration of the VLAN
      */
     private NetworkConfiguration configuration;
+
+    private Boolean defaultNetwork;
+
+    private String networkType;
 
     /**
      * @return the vlanNetworkId
@@ -102,22 +100,6 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     public void setNetworkId(final Integer networkId)
     {
         this.networkId = networkId;
-    }
-
-    /**
-     * @return the defaultNetwork
-     */
-    public Boolean getDefaultNetwork()
-    {
-        return defaultNetwork;
-    }
-
-    /**
-     * @param defaultNetwork the defaultNetwork to set
-     */
-    public void setDefaultNetwork(final Boolean defaultNetwork)
-    {
-        this.defaultNetwork = defaultNetwork;
     }
 
     /**
@@ -184,6 +166,26 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         }
 
         return vnetHB;
+    }
+
+    public Boolean getDefaultNetwork()
+    {
+        return defaultNetwork;
+    }
+
+    public void setDefaultNetwork(Boolean defaultNetwork)
+    {
+        this.defaultNetwork = defaultNetwork;
+    }
+
+    public String getNetworkType()
+    {
+        return networkType;
+    }
+
+    public void setNetworkType(String networkType)
+    {
+        this.networkType = networkType;
     }
 
 }

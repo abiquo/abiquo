@@ -202,8 +202,9 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "where net.id = vlan.network.id "//
         + "and dhcp.id = ip.dhcp.id "//
         + "and dc.id = vdc.datacenter.id "//
-        + "and vdc.enterprise.id = :enterpriseId "//
-        + "and ip.virtualDatacenter.id = vdc.id ";
+        + "and vdc.enterprise.id = :enterpriseId "
+        + "and ip.virtualDatacenter.id = vdc.id "
+        + "and vlan.type = 'PUBLIC'";
 
     private static Criterion equalMac(final String mac)
     {
@@ -756,7 +757,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return criteria.list();
     }
 
-    public List<IpPoolManagement> getNetworkPoolPurchasedByEnterprise(final Integer enterpriseId)
+    public List<IpPoolManagement> getPublicNetworkPoolPurchasedByEnterprise(
+        final Integer enterpriseId)
     {
         Query query = getSession().createQuery(GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
