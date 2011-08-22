@@ -34,7 +34,7 @@ import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerF
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class CurrencyDAOTest extends DefaultDAOTestBase<CurrencyDAO, Currency>
+public class PricingTierDAOTest extends DefaultDAOTestBase<PricingTierDAO, PricingTier>
 {
 
     @Override
@@ -49,15 +49,15 @@ public class CurrencyDAOTest extends DefaultDAOTestBase<CurrencyDAO, Currency>
     }
 
     @Override
-    protected CurrencyDAO createDao(final EntityManager entityManager)
+    protected PricingTierDAO createDao(final EntityManager entityManager)
     {
-        return new CurrencyDAO(entityManager);
+        return new PricingTierDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<Currency> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<PricingTier> createEntityInstanceGenerator()
     {
-        return new CurrencyGenerator(getSeed());
+        return new PricingTierGenerator(getSeed());
     }
 
     @Override
@@ -67,23 +67,43 @@ public class CurrencyDAOTest extends DefaultDAOTestBase<CurrencyDAO, Currency>
     }
 
     @Override
-    public CurrencyGenerator eg()
+    public PricingTierGenerator eg()
     {
-        return (CurrencyGenerator) super.eg();
+        return (PricingTierGenerator) super.eg();
     }
 
     @Test
-    public void findCurrencies()
+    public void findPricingTiers()
     {
-        Currency c1 = eg().createUniqueInstance();
-        Currency c2 = eg().createUniqueInstance();
+        PricingTier pt1 = eg().createUniqueInstance();
+        PricingTier pt2 = eg().createUniqueInstance();
 
-        ds().persistAll(c1, c2);
+        ds().persistAll(pt1.getTier(), pt1.getPricingTemplate(), pt1, pt2.getTier(),
+            pt2.getPricingTemplate(), pt2);
 
-        CurrencyDAO dao = createDaoForRollbackTransaction();
+        PricingTierDAO dao = createDaoForRollbackTransaction();
 
-        Collection<Currency> currencies = dao.findAll();
-        AssertEx.assertSize(currencies, 2);
+        Collection<PricingTier> ptts = dao.findPricingTiers(pt1.getPricingTemplate());
+        AssertEx.assertSize(ptts, 1);
+        ptts = dao.findPricingTiers(pt2.getPricingTemplate());
+        AssertEx.assertSize(ptts, 1);
+
+    }
+
+    @Test
+    public void existAnyOtherWithTier()
+    {
+        PricingTier pt1 = eg().createUniqueInstance();
+        PricingTier pt2 = eg().createUniqueInstance();
+
+        ds().persistAll(pt1.getTier(), pt1.getPricingTemplate(), pt1, pt2.getTier(),
+            pt2.getPricingTemplate(), pt2);
+
+        PricingTierDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.existAnyOtherWithTier(pt1, pt1.getTier(), pt1.getPricingTemplate()));
+
+        assertFalse(dao.existAnyOtherWithTier(pt1, pt1.getTier(), pt2.getPricingTemplate()));
 
     }
 
