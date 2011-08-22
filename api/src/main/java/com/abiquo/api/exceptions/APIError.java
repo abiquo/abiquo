@@ -321,7 +321,7 @@ public enum APIError
 
     // Chef
     CHEF_ERROR_GETTING_COOKBOOKS("CHEF-0",
-        "Could not get the list of cookboks available for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
+        "Could not get the list of cookbooks available for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
         "CHEF-1", "Chef client already exists"), CHEF_ERROR_CONNECTION("CHEF-2",
         "Cannot connect to the chef server"),
 
