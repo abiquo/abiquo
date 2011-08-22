@@ -136,6 +136,19 @@
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
             	_virtualDatacenter.network.networks.addAll(networks);
+            	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
+            }
+            
+            private function setDefaultNetwork(vlan:VlanNetwork, networks:ArrayCollection):void{
+            	var testedVlan:VlanNetwork;
+            	for(var i:int = 0 ; i < networks.length ; i++){
+            		testedVlan = VlanNetwork(networks.getItemAt(i)) as VlanNetwork;
+            		if(vlan.networkId == testedVlan.networkId){
+            			testedVlan.defaultNetwork = true;
+            		}else{
+            			testedVlan.defaultNetwork = false;
+            		}
+            	}
             }
 
             private function onClickAllVLANLabel():void

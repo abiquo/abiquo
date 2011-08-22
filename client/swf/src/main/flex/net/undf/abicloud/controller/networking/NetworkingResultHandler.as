@@ -295,6 +295,20 @@ package net.undf.abicloud.controller.networking
             }
         }
         
+        public function handleSetExternalVlanAsDefaultInVirtualDatacenter(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                //dispatch an event to close the edit vlan form
+                AbiCloudModel.getInstance().networkingManager.dispatchEvent(new Event("vlanUpdated"));
+            }
+            else
+            {
+                //There was a problem
+                super.handleResult(result);
+            }
+        }
+        
     }
 
 }

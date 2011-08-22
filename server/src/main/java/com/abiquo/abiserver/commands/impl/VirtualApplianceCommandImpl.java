@@ -878,7 +878,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (vapp == null)
         {
             transaction.rollback();
-            
+
             dataResult.setSuccess(false);
             dataResult.setMessage(resourceManager
                 .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
@@ -886,7 +886,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             return dataResult;
         }
         transaction.commit();
-        
 
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
@@ -2051,7 +2050,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         EventType eventType, final int... resultCode)
     {
 
-        eventType = (eventType == null) ? EventType.VAPP_POWERON : eventType;
+        eventType = eventType == null ? EventType.VAPP_POWERON : eventType;
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
 
         traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
@@ -3344,7 +3343,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     NodeVirtualImage nodevi = (NodeVirtualImage) currentNode;
                     if (nodevi.getVirtualMachine().getState().toEnum() == StateEnum.NOT_DEPLOYED)
                     {
-                        // check if there is any private IP related to this node
+                        // check if there is any private IP associated to this node
                         IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
                         List<IpPoolManagementHB> listPools =
                             ipPoolDAO.getPrivateNICsByVirtualMachine(nodevi.getVirtualMachine()
@@ -3353,10 +3352,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         if (listPools.size() == 0)
                         {
                             VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-                            VirtualDataCenterHB vdcHB =
-                                vdcDAO.getVirtualDatacenterFromVirtualAppliance(vappId);
-                            netcommand.assignDefaultNICResource(user, vdcHB.getNetwork()
-                                .getNetworkId(), nodevi.getVirtualMachine().getId());
+                            netcommand.assignDefaultNICResource(user, nodevi.getVirtualMachine()
+                                .getId());
                         }
 
                     }

@@ -23,6 +23,7 @@ package net.undf.abicloud.vo.virtualappliance
 {
     import net.undf.abicloud.vo.infrastructure.HyperVisorType;
     import net.undf.abicloud.vo.networking.Network;
+    import net.undf.abicloud.vo.networking.VlanNetwork;
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.virtualhardware.ResourceAllocationLimit;
 
@@ -43,6 +44,8 @@ package net.undf.abicloud.vo.virtualappliance
         public var network:Network;
         
         public var limits:ResourceAllocationLimit;
+        
+        public var defaultVlan:VlanNetwork;
 
 
         public function VirtualDataCenter()
@@ -53,7 +56,7 @@ package net.undf.abicloud.vo.virtualappliance
             idDataCenter = 0;
             hyperType = new HyperVisorType();
             limits = new ResourceAllocationLimit();
-
+            defaultVlan = new VlanNetwork();
         }
 
     }

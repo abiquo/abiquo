@@ -327,9 +327,9 @@
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.networkingService}"
-            method="getNetworkPoolInfoByEnternalVlan"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
-            event.enterprise.id,
+            method="getNetworkPoolInfoByExternalVlan"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session,
+            event.virtualDatacenter, 
             event.vlanNetwork.vlanNetworkId, 
             event.available]}">
 
@@ -804,8 +804,8 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getExternalVlansByVirtualDatacenter"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
-            event.virtualDatacenter.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session,
+            event.virtualDatacenter]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -827,6 +827,43 @@
 
         </RemoteObjectInvoker>
 
-    </EventHandlers>   
+    </EventHandlers>
+    
+    <!-- NetworkingEvent.SET_DEFAULT_VLAN _____________________________________________________ -->
+    <EventHandlers type="{NetworkingEvent.SET_DEFAULT_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="setExternalVlanAsDefaultInVirtualDatacenter"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter,
+            event.vlanNetwork.vlanNetworkId]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleSetExternalVlanAsDefaultInVirtualDatacenter"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
     
 </EventMap>
