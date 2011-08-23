@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 
 @Repository
@@ -60,6 +61,9 @@ public class PricingRep extends DefaultRepBase
     @Autowired
     private EnterpriseRep enterpriseRep;
 
+    @Autowired
+    private StorageRep storageRep;
+
     public PricingRep()
     {
 
@@ -72,11 +76,13 @@ public class PricingRep extends DefaultRepBase
 
         this.entityManager = entityManager;
         enterpriseRep = new EnterpriseRep(entityManager);
+        storageRep = new StorageRep(entityManager);
         pricingTemplateDao = new PricingTemplateDAO(entityManager);
         currencyDao = new CurrencyDAO(entityManager);
         costCodeDao = new CostCodeDAO(entityManager);
         costCodeCurrencyDao = new CostCodeCurrencyDAO(entityManager);
         pricingCostCodeDao = new PricingCostCodeDAO(entityManager);
+        pricingTierDao = new PricingTierDAO(entityManager);
     }
 
     public List<Currency> findAllCurrency()
@@ -337,6 +343,11 @@ public class PricingRep extends DefaultRepBase
     {
         pricingTierDao.flush();
 
+    }
+
+    public Tier findTierById(final Integer id)
+    {
+        return storageRep.findTierById(id);
     }
 
 }

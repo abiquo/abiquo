@@ -68,4 +68,10 @@ public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
         return Restrictions.eq(PricingTier.PRICING_TEMPLATE_PROPERTY, pricing);
     }
 
+    public boolean existAnyOtherWithTier(final PricingTier pt1, final Tier tier,
+        final PricingTemplate pricingTemplate)
+    {
+        return existsAnyOtherByCriterions(pt1, sameTier(tier), samePricing(pricingTemplate));
+    }
+
 }
