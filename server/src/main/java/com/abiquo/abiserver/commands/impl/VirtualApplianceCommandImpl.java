@@ -2052,11 +2052,21 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         EventType eventType, final int... resultCode)
     {
 
-        eventType = (eventType == null) ? EventType.VAPP_POWERON : eventType;
+        eventType = eventType == null ? EventType.VAPP_POWERON : eventType;
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
 
-        traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
-            .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+        if (resultCode != null && resultCode.length > 0
+            && resultCode[0] == BasicResult.SOFT_LIMT_EXCEEDED)
+        {
+            traceLog(SeverityType.INFO, componentType, eventType, userSession, null, vApp
+                .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+
+        }
+        else
+        {
+            traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
+                .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+        }
 
         errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
             vApp.getId());
