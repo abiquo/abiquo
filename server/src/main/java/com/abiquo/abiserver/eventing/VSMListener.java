@@ -32,8 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
@@ -75,10 +73,9 @@ public class VSMListener implements VSMCallback
             + "from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB as vm "
             + "where vm.name = :uuid";
 
-    private final static String HY_BY_VM =
-        "Select hy "
-            + "from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB as hy "
-            + "inner join hy.virtualmachines as vm " + "where vm.idVm = :idVM";
+    private final static String HY_BY_VM = "Select hy "
+        + "from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB as hy "
+        + "inner join hy.virtualmachines as vm " + "where vm.idVm = :idVM";
 
     private final static String ALL_VM =
         "from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB as vm";
@@ -87,7 +84,7 @@ public class VSMListener implements VSMCallback
     public void onEvent(VirtualSystemEvent event)
     {
         try
-        {            
+        {
             updateEventOnDb(event);
         }
         catch (EventingException e)
@@ -129,60 +126,16 @@ public class VSMListener implements VSMCallback
 
             Query query = session.createQuery(VM_BY_UUID);
             query.setString("uuid", event.getVirtualSystemId());
-            
+            VirtualmachineHB virtualMachine = (VirtualmachineHB) query.uniqueResult();
 
-            // HORRIBLE HACK for ABICLOUDPREMIUM-1846
-            VirtualmachineHB virtualMachineAux = (VirtualmachineHB) query.uniqueResult();
-            VirtualmachineHB virtualMachine = null;
-
-            if (virtualMachineAux != null
-                && (virtualMachineAux.getHypervisor() == null || virtualMachineAux.getHypervisor()
-                    .getPhysicalMachine() == null))
-            {
-                // Sometimes when the event is received, Hibernate session object is incomplete and Hypervisor information is not associated.
-                // If this is the case we try to wait and force Hibernate to use another transaction to recover the full info.
-                // Hopefully this will be fixed properly by replacing the EventSink by using JPA.
-                logger
-                    .error("WARNING-> virtualMachineAux.getHypervisor() IS NULL. Forcing Hibernate to restore complete VirtualMachine entity...");
-
-                transaction.commit();
-
-                Thread.sleep(2000);
-
-                Session session2 = HibernateUtil.getSession();
-
-                transaction = session2.beginTransaction();
-
-                Query query2 = session2.createQuery(HY_BY_VM);
-                query2.setInteger("idVM", virtualMachineAux.getIdVm());
-
-                HypervisorHB hypervFound = (HypervisorHB) query2.uniqueResult();
-
-                virtualMachine = virtualMachineAux;
-
-                virtualMachine.setHypervisor(hypervFound);
-
-                transaction.commit();
-
-                session = HibernateUtil.getSession();
-
-                transaction = session.beginTransaction();
-
-                logger
-                    .error("Hibernate was forced to restore complete VirtualMachine: Hypervisor is now "
-                        + virtualMachine.getHypervisor());
-
-            }
-            else
-            {
-                virtualMachine = virtualMachineAux;
-            }
-            // HORRIBLE HACK - end.
-
-            // We must ignore events coming from Virtual Machines being moved by HA
+            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 -
+            // DISABLED_FOR_HA states
             if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
             {
-                logger.trace("Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process", virtualMachine.getIdVm(), virtualMachine.getState());
+                logger
+                    .trace(
+                        "Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process",
+                        virtualMachine.getIdVm(), virtualMachine.getState());
                 return;
             }
 
