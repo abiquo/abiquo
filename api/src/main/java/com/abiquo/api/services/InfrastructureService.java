@@ -58,7 +58,6 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.UcsRack;
-import com.abiquo.server.core.pricing.PricingRep;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -77,9 +76,6 @@ public class InfrastructureService extends DefaultApiService
     // Declare the Repo. It only should use ONE repo.
     @Autowired
     InfrastructureRep repo;
-
-    @Autowired
-    private PricingRep pricingRep;
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
