@@ -59,6 +59,13 @@ public class CostCodeCurrencyGenerator extends DefaultEntityGenerator<CostCodeCu
         return createInstance(costCode, currency, seedPurchase);
     }
 
+    public CostCodeCurrency createInstance(final CostCode costCode)
+    {
+        BigDecimal purchase = newBigDecimal();
+        Currency currency = currencyGenerator.createUniqueInstance();
+        return new CostCodeCurrency(purchase, costCode, currency);
+    }
+
     public CostCodeCurrency createInstance(final CostCode costCode, final Currency currency)
     {
         BigDecimal purchase = newBigDecimal();

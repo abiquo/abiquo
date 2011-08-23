@@ -120,7 +120,6 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
                 order = Order.desc(orderBy);
             }
             criteria.addOrder(order);
-            criteria.addOrder(Order.asc(PricingTemplate.NAME_PROPERTY));
         }
 
         return criteria;
