@@ -98,7 +98,6 @@ import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.cloud.chef.ChefCookbooksDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -2409,12 +2408,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         }
 
         return dataResult;
-    }
-
-    public DataResult<ChefCookbooksDto> setCookbooks(final VirtualMachine virtualMachine,
-        final ChefCookbooksDto cookbooks)
-    {
-        return null;
     }
 
     /*
