@@ -24,6 +24,8 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -41,12 +43,14 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     RepositoryGenerator repositoryGenerator;
 
+    CategoryGenerator categoryGenerator;
+
     public VirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
         enterpriseGenerator = new EnterpriseGenerator(seed);
         repositoryGenerator = new RepositoryGenerator(seed);
-        // XXX categoryGenerator = new CategoryGenerator(seed);
+        categoryGenerator = new CategoryGenerator(seed);
     }
 
     @Override
@@ -58,7 +62,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
-            /* VirtualImage.ID_CATEGORY_PROPERTY, */VirtualImage.DISK_FILE_SIZE_PROPERTY,
+            VirtualImage.CATEGORY_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
             VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY,
             VirtualImage.ID_REPOSITORY_PROPERTY);
     }
@@ -69,10 +73,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         // FIXME: Write here how to create the pojo
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
 
-        // XXX Category category = categoryGenerator.createUniqueInstance();
+        Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
-        // XXX vi.setCategory(category);
+        vi.setCategory(category);
 
         return vi;
 
@@ -82,10 +86,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     public VirtualImage createInstance(final Enterprise enterprise)
     {
-        // XXX Category category = categoryGenerator.createUniqueInstance();
+        Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
-        // XXX vi.setCategory(category);
+        vi.setCategory(category);
 
         return vi;
 
@@ -139,9 +143,9 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
 
-        // XXX Category category = entity.getCategory();
-        // categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
-        // entitiesToPersist.add(category);
+        Category category = entity.getCategory();
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        entitiesToPersist.add(category);
 
     }
 

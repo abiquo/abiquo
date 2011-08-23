@@ -41,6 +41,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -59,7 +60,7 @@ public class VirtualImage extends DefaultEntityBase
         super();
     }
 
-    public VirtualImage(Enterprise enterprise)
+    public VirtualImage(final Enterprise enterprise)
     {
         super();
         setEnterprise(enterprise);
@@ -70,7 +71,7 @@ public class VirtualImage extends DefaultEntityBase
 
     }
 
-    public VirtualImage(Enterprise enterprise, DiskFormatType diskFormatType)
+    public VirtualImage(final Enterprise enterprise, final DiskFormatType diskFormatType)
     {
         super();
         setEnterprise(enterprise);
@@ -112,7 +113,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.diskFormatType;
     }
 
-    public void setDiskFormatType(DiskFormatType diskFormatType)
+    public void setDiskFormatType(final DiskFormatType diskFormatType)
     {
         this.diskFormatType = diskFormatType;
     }
@@ -140,7 +141,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -162,7 +163,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
-    private void setStateful(Integer stateful)
+    private void setStateful(final Integer stateful)
     {
         this.stateful = stateful;
     }
@@ -184,7 +185,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.treaty;
     }
 
-    private void setTreaty(Integer treaty)
+    private void setTreaty(final Integer treaty)
     {
         this.treaty = treaty;
     }
@@ -209,7 +210,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.treaty;
     }
 
-    private void setShared(Integer shared)
+    private void setShared(final Integer shared)
     {
         this.shared = shared;
     }
@@ -231,7 +232,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.cpuRequired;
     }
 
-    public void setCpuRequired(int cpuRequired)
+    public void setCpuRequired(final int cpuRequired)
     {
         this.cpuRequired = cpuRequired;
     }
@@ -253,7 +254,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -281,7 +282,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.pathName;
     }
 
-    public void setPathName(String pathName)
+    public void setPathName(final String pathName)
     {
         this.pathName = pathName;
     }
@@ -309,7 +310,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.ovfid;
     }
 
-    public void setOvfid(String ovfid)
+    public void setOvfid(final String ovfid)
     {
         this.ovfid = ovfid;
     }
@@ -331,7 +332,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.ramRequired;
     }
 
-    public void setRamRequired(int ramRequired)
+    public void setRamRequired(final int ramRequired)
     {
         this.ramRequired = ramRequired;
     }
@@ -353,7 +354,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.hdRequiredInBytes;
     }
 
-    public void setHdRequiredInBytes(long hdRequiredInBytes)
+    public void setHdRequiredInBytes(final long hdRequiredInBytes)
     {
         this.hdRequiredInBytes = hdRequiredInBytes;
     }
@@ -375,7 +376,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.deleted;
     }
 
-    private void setDeleted(Integer deleted)
+    private void setDeleted(final Integer deleted)
     {
         this.deleted = deleted;
     }
@@ -397,55 +398,55 @@ public class VirtualImage extends DefaultEntityBase
         return this.idMaster;
     }
 
-    private void setIdMaster(Integer idMaster)
+    private void setIdMaster(final Integer idMaster)
     {
         this.idMaster = idMaster;
     }
 
-    public final static String ID_CATEGORY_PROPERTY = "idCategory";
-
-    private final static String ID_CATEGORY_COLUMN = "idCategory";
-
-    private final static int ID_CATEGORY_MIN = Integer.MIN_VALUE;
-
-    private final static int ID_CATEGORY_MAX = Integer.MAX_VALUE;
-
-    @Column(name = ID_CATEGORY_COLUMN, nullable = true)
-    @Range(min = ID_CATEGORY_MIN, max = ID_CATEGORY_MAX)
-    private Integer idCategory = 1; // others
-
-    public Integer getIdCategory()
-    {
-        return this.idCategory;
-    }
-
-    public void setIdCategory(Integer idCategory)
-    {
-        this.idCategory = idCategory;
-    }
+    // public final static String ID_CATEGORY_PROPERTY = "idCategory";
+    //
+    // private final static String ID_CATEGORY_COLUMN = "idCategory";
+    //
+    // private final static int ID_CATEGORY_MIN = Integer.MIN_VALUE;
+    //
+    // private final static int ID_CATEGORY_MAX = Integer.MAX_VALUE;
+    //
+    // @Column(name = ID_CATEGORY_COLUMN, nullable = true)
+    // @Range(min = ID_CATEGORY_MIN, max = ID_CATEGORY_MAX)
+    // private Integer idCategory = 1; // others
+    //
+    // public Integer getIdCategory()
+    // {
+    // return this.idCategory;
+    // }
+    //
+    // public void setIdCategory(Integer idCategory)
+    // {
+    // this.idCategory = idCategory;
+    // }
 
     // FIXME
-    // public final static String CATEGORY_PROPERTY = "category";
-    //
-    // private final static boolean CATEGORY_REQUIRED = true;
-    //
-    // private final static String CATEGORY_ID_COLUMN = "idCategory";
-    //
-    // @JoinColumn(name = CATEGORY_ID_COLUMN)
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @ForeignKey(name = "FK_" + TABLE_NAME + "_category")
-    // private Category category;
-    //
-    // @Required(value = CATEGORY_REQUIRED)
-    // public Category getCategory()
-    // {
-    // return this.category;
-    // }
-    //
-    // public void setCategory(Category category)
-    // {
-    // this.category = category;
-    // }
+    public final static String CATEGORY_PROPERTY = "category";
+
+    private final static boolean CATEGORY_REQUIRED = true;
+
+    private final static String CATEGORY_ID_COLUMN = "idCategory";
+
+    @JoinColumn(name = CATEGORY_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_category")
+    private Category category;
+
+    @Required(value = CATEGORY_REQUIRED)
+    public Category getCategory()
+    {
+        return this.category;
+    }
+
+    public void setCategory(final Category category)
+    {
+        this.category = category;
+    }
 
     public final static String DISK_FILE_SIZE_PROPERTY = "diskFileSize";
 
@@ -464,7 +465,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.diskFileSize;
     }
 
-    public void setDiskFileSize(long diskFileSize)
+    public void setDiskFileSize(final long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -492,7 +493,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(String description)
+    private void setDescription(final String description)
     {
         this.description = description;
     }
@@ -514,7 +515,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.idIcon;
     }
 
-    private void setIdIcon(Integer idIcon)
+    private void setIdIcon(final Integer idIcon)
     {
         this.idIcon = idIcon;
     }
@@ -539,7 +540,7 @@ public class VirtualImage extends DefaultEntityBase
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final String costCode)
     {
         this.costCode = costCode;
     }
@@ -558,12 +559,12 @@ public class VirtualImage extends DefaultEntityBase
         return repository;
     }
 
-    public void setRepository(Repository repository)
+    public void setRepository(final Repository repository)
     {
         this.repository = repository;
     }
 
-    public void setRequirements(int cpu, int ram, long hd)
+    public void setRequirements(final int cpu, final int ram, final long hd)
     {
         setCpuRequired(cpu);
         setRamRequired(ram);
@@ -614,7 +615,7 @@ public class VirtualImage extends DefaultEntityBase
     private final List<VirtualImageConversion> conversions =
         new ArrayList<VirtualImageConversion>();
 
-    protected void addConversion(VirtualImageConversion conversion)
+    protected void addConversion(final VirtualImageConversion conversion)
     {
         conversions.add(conversion);
     }
