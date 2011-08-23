@@ -276,9 +276,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByPrivateVLAN(vdcId, vlanId);
     }
 
-    public List<IpPoolManagement> findIpsByPrivateVLANUsedByAndVDC(final Integer vlanId)
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
     {
-        return ipManagementDAO.findIpsByPrivateVLAN(vlanId);
+        return ipManagementDAO.privateVLANinUseByAnyVDC(vlanId);
     }
 
     /**

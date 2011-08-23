@@ -162,20 +162,26 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
             + " OR vm.name like :filterLike " + ")";
 
+    // public static final String BY_VLAN_USED_BY_ANY_VDC =
+    // " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
+    // + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
+    // + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+    // + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+    // + " AND ip.rasd.virtualDatacenter.id = vdc.id" + " AND ( ip.ip like :filterLike "
+    // + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+    // + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
     public static final String BY_VLAN_USED_BY_ANY_VDC =
-        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
-            + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
-            + " AND vn.network.id = vdc.network.id" + " AND ( ip.ip like :filterLike "
-            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+        " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
+            + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
+            + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
 
     public static final String BY_VLAN_USED_BY_ANY_VM =
         " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
             + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
             + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
             + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+            + " AND vn.id = :vlan_id " + " AND ip.rasd.configurationName = '2' "
             + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
             + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
             + " OR vm.name like :filterLike " + ")";
@@ -367,19 +373,18 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     }
 
-    public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vlanId)
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
     {
+        List<IpPoolManagement> ippoolList;
+        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        ippoolList = query.list();
 
-        Query finalQuery = getSession().createQuery(BY_VLAN_USED_BY_ANY_VDC);
-        finalQuery.setParameter("vlan_id", vlanId);
-        finalQuery.setParameter("filterLike", "%");
-
-        Integer totalResults = finalQuery.list().size();
-
-        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
-        ipList.setTotalResults(totalResults);
-
-        return ipList;
+        if (ippoolList.isEmpty())
+        {
+            return false;
+        }
+        return true;
 
     }
 
