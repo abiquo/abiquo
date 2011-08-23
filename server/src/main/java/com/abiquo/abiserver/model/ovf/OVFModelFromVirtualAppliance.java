@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
@@ -800,14 +801,14 @@ public class OVFModelFromVirtualAppliance
 
     private static void addBootstrapConfiguration(final Integer idVirtualdatacenter,
         final Integer idVirtualAppliance, final VirtualmachineHB virtualMachine,
-        final IpPoolType rule)
+        final IpPoolType rule) throws Exception
     {
         // Captured VMs may have null virtual images
         if (virtualMachine.getImage() != null && virtualMachine.getImage().isChefEnabled())
         {
             // Build the bootstrap configuration URI
             String bootstrapURITemplate =
-                "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/bootstrapconfig";
+                "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/config/bootstrap";
 
             String apiLocation = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
             if (apiLocation.endsWith("/"))
@@ -819,8 +820,15 @@ public class OVFModelFromVirtualAppliance
                 String.format(bootstrapURITemplate, apiLocation, idVirtualdatacenter,
                     idVirtualAppliance, virtualMachine.getIdVm());
 
+            // Generate the one-time authentication token
+            DAOFactory factory = HibernateDAOFactory.instance();
+            factory.beginConnection();
+            OneTimeTokenSessionHB oneTimeToken =
+                factory.getOneTimeTokenSessionDAO().generateToken();
+            factory.endConnection();
+
             rule.setBootstrapConfigURI(bootstrapURI);
-            rule.setBootstrapConfigAuth("TODO: ONETIMETOKEN");
+            rule.setBootstrapConfigAuth(oneTimeToken.getToken());
         }
     }
 

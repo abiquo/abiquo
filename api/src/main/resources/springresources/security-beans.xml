@@ -297,6 +297,7 @@
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/poweroff" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/cookbooks" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
 		<security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/cookbooks" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/bootstrap" method="GET" access="ROLE_ONE_TIME" />
 
 		<!--===================================-->
 		<!--============= CONFIG ==============-->
@@ -347,7 +348,7 @@
 		<property name="key" value="abiquo-auth-key" />
 		<property name="cookieName" value="auth" />
 		<property name="tokenValiditySeconds" value="1800" />
-        </bean>
+    </bean>
 
 	<bean id="oneTimeTokenFilter"
 		class="com.abiquo.api.spring.security.onetimetoken.filter.OneTimeTokenFilter">

@@ -35,6 +35,8 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 /**
  * Provides the basic functionalities to operate one time token.
+ * <p>
+ * <b>IMPORTANT</b>: This class is still not used. Token generation is performed in server.
  * 
  * @author ssedano
  */

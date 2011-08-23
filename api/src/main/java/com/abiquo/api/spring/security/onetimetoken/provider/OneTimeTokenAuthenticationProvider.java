@@ -36,6 +36,9 @@ import com.abiquo.api.spring.security.onetimetoken.token.OneTimeTokenToken;
 
 public class OneTimeTokenAuthenticationProvider implements InitializingBean, AuthenticationProvider
 {
+    /** The role granted to one-time authentication requests. */
+    public static final String ONE_TIME_AUTH_ROLE = "ROLE_ONE_TIME";
+
     private OneTimeTokenDetailsService oneTimeTokenDetailsService;
 
     public OneTimeTokenDetailsService getOneTimeTokenDetailsService()
@@ -43,7 +46,8 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
         return oneTimeTokenDetailsService;
     }
 
-    public void setOneTimeTokenDetailsService(OneTimeTokenDetailsService oneTimeTokenDetailsService)
+    public void setOneTimeTokenDetailsService(
+        final OneTimeTokenDetailsService oneTimeTokenDetailsService)
     {
         this.oneTimeTokenDetailsService = oneTimeTokenDetailsService;
     }
@@ -52,7 +56,7 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
      * @see org.springframework.security.providers.AuthenticationProvider#authenticate(org.springframework.security.Authentication)
      */
     @Override
-    public Authentication authenticate(Authentication authentication)
+    public Authentication authenticate(final Authentication authentication)
         throws AuthenticationException
     {
         if (!supports(authentication.getClass()))
@@ -71,7 +75,7 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
             OneTimeTokenToken auth =
                 new OneTimeTokenToken(((OneTimeTokenToken) authentication).getToken(),
                     userDetails,
-                    new GrantedAuthority[] {new GrantedAuthorityImpl("ROLE_ONE_TIME")});
+                    new GrantedAuthority[] {new GrantedAuthorityImpl(ONE_TIME_AUTH_ROLE)});
 
             userDetails.setAuthorities(auth.getAuthorities());
             auth.setDetails(userDetails);
@@ -82,7 +86,7 @@ public class OneTimeTokenAuthenticationProvider implements InitializingBean, Aut
     }
 
     @Override
-    public boolean supports(Class authentication)
+    public boolean supports(final Class authentication)
     {
         return OneTimeTokenToken.class.isAssignableFrom(authentication);
     }
