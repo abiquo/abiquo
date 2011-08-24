@@ -68,6 +68,7 @@ public class NetworkConfiguration extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -98,7 +99,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.gateway;
     }
 
-    public void setGateway(String gateway)
+    public void setGateway(final String gateway)
     {
         this.gateway = gateway;
     }
@@ -127,7 +128,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.address;
     }
 
-    public void setAddress(String address)
+    public void setAddress(final String address)
     {
         this.address = address;
     }
@@ -137,8 +138,9 @@ public class NetworkConfiguration extends DefaultEntityBase
     private final static boolean MASK_REQUIRED = true;
 
     private final static String MASK_COLUMN = "mask";
-    
+
     private final static long MASK_MIN_VALUE = 0L;
+
     private final static long MASK_MAX_VALUE = 31L;
 
     @Column(name = MASK_COLUMN, nullable = !MASK_REQUIRED)
@@ -152,7 +154,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.mask;
     }
 
-    public void setMask(Integer mask)
+    public void setMask(final Integer mask)
     {
         this.mask = mask;
     }
@@ -180,7 +182,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.netMask;
     }
 
-    private void setNetMask(String netMask)
+    private void setNetMask(final String netMask)
     {
         this.netMask = netMask;
     }
@@ -209,7 +211,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.primaryDNS;
     }
 
-    public void setPrimaryDNS(String primaryDNS)
+    public void setPrimaryDNS(final String primaryDNS)
     {
         this.primaryDNS = primaryDNS;
     }
@@ -238,7 +240,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.secondaryDNS;
     }
 
-    public void setSecondaryDNS(String secondaryDNS)
+    public void setSecondaryDNS(final String secondaryDNS)
     {
         this.secondaryDNS = secondaryDNS;
     }
@@ -266,7 +268,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.sufixDNS;
     }
 
-    public void setSufixDNS(String sufixDNS)
+    public void setSufixDNS(final String sufixDNS)
     {
         this.sufixDNS = sufixDNS;
     }
@@ -294,7 +296,7 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.fenceMode;
     }
 
-    private void setFenceMode(String fenceMode)
+    private void setFenceMode(final String fenceMode)
     {
         this.fenceMode = fenceMode;
     }
@@ -319,13 +321,14 @@ public class NetworkConfiguration extends DefaultEntityBase
         return this.dhcp;
     }
 
-    public void setDhcp(Dhcp dhcp)
+    public void setDhcp(final Dhcp dhcp)
     {
         this.dhcp = dhcp;
     }
 
     // *************************** Mandatory constructors ***********************
-    public NetworkConfiguration(String address, Integer mask, String netmask, String gateway, String fenceMode)
+    public NetworkConfiguration(final String address, final Integer mask, final String netmask,
+        final String gateway, final String fenceMode)
     {
         setAddress(address);
         setMask(mask);

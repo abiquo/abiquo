@@ -39,12 +39,14 @@ import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -120,31 +122,12 @@ public class NetworkService extends DefaultApiService
     public IpPoolManagement associateVirtualMachinePrivateNic(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer vlanId, final Integer ipId)
     {
-        // Check input parameters logic.
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
-        if (vlan == null)
-        {
-            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
-            flushErrors();
-        }
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        // Get the needed objects.
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
         IpPoolManagement ip = repo.findIp(vlan, ipId);
 
         // The user has the role for manage This. But... is the user from the same enterprise
@@ -209,17 +192,12 @@ public class NetworkService extends DefaultApiService
      * @return the created {@link VLANNetwork} object.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VLANNetwork createPrivateNetwork(final Integer virtualDatacenterId,
-        final VLANNetwork newVlan)
+    public VLANNetwork createPrivateNetwork(final Integer vdcId, final VLANNetwork newVlan)
     {
 
-        VirtualDatacenter virtualDatacenter = repo.findById(virtualDatacenterId);
-        if (virtualDatacenter == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
+        VirtualDatacenter virtualDatacenter = getVirtualDatacenter(vdcId);
         newVlan.setNetwork(virtualDatacenter.getNetwork());
+        newVlan.setType(NetworkType.INTERNAL);
         validate(newVlan);
         validate(newVlan.getConfiguration());
 
@@ -245,15 +223,6 @@ public class NetworkService extends DefaultApiService
 
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
         // put the previous default one as non-default.
-        if (newVlan.getDefaultNetwork())
-        {
-            VLANNetwork vlanDefault = repo.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
-            if (vlanDefault != null)
-            {
-                vlanDefault.setDefaultNetwork(Boolean.FALSE);
-                repo.updateVlan(vlanDefault);
-            }
-        }
         repo.insertNetworkConfig(newVlan.getConfiguration());
         repo.insertVlan(newVlan);
 
@@ -292,7 +261,7 @@ public class NetworkService extends DefaultApiService
     public void deletePrivateNetwork(final Integer vdcId, final Integer vlanId)
     {
         VLANNetwork vlanToDelete = getPrivateNetwork(vdcId, vlanId);
-        VirtualDatacenter vdc = repo.findById(vdcId);
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         // Check input parameters existence
         if (repo.findVlansByVirtualDatacener(vdc).size() == 1)
@@ -300,7 +269,7 @@ public class NetworkService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_DATACENTER_MUST_HAVE_NETWORK);
             flushErrors();
         }
-        if (vlanToDelete.getDefaultNetwork())
+        if (vdc.getDefaultVlan().getId().equals(vlanToDelete.getId()))
         {
             addConflictErrors(APIError.VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED);
             flushErrors();
@@ -324,6 +293,25 @@ public class NetworkService extends DefaultApiService
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_DELETED,
                 messageTrace);
         }
+    }
+
+    /**
+     * Get the default network for virtual datacenter.
+     * 
+     * @param id identifier of the virtual datacenter
+     * @return
+     */
+    public VLANNetwork getDefaultNetworkForVirtualDatacenter(final Integer vdcId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+
+        if (vdc.getDefaultVlan() == null)
+        {
+            addUnexpectedErrors(APIError.VLANS_VIRTUAL_DATACENTER_SHOULD_HAVE_A_DEFAULT_VLAN);
+            flushErrors();
+        }
+
+        return vdc.getDefaultVlan();
     }
 
     /**
@@ -413,29 +401,24 @@ public class NetworkService extends DefaultApiService
     public List<IpPoolManagement> getListIpPoolManagementByVirtualMachine(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
         LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+
+        for (IpPoolManagement ip : ips)
+        {
+            if (ip.getVlanNetwork().getEnterprise() != null)
+            {
+                // needed for REST links.
+                DatacenterLimits dl =
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
+                ip.getVlanNetwork().setLimitId(dl.getId());
+            }
+        }
         return ips;
     }
 
@@ -476,20 +459,11 @@ public class NetworkService extends DefaultApiService
      * @param vlanId identifier of the vlan.
      * @return an instance of the requested {@link VLANNetwork}
      */
-    public VLANNetwork getPrivateNetwork(final Integer virtualdatacenterId, final Integer vlanId)
+    public VLANNetwork getPrivateNetwork(final Integer vdcId, final Integer vlanId)
     {
-        VirtualDatacenter vdc = repo.findById(virtualdatacenterId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
-        if (vlan == null)
-        {
-            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
+
         LOGGER.debug("Returning the VLAN entity with name '" + vlan.getName() + "'.");
         return vlan;
     }
@@ -500,16 +474,11 @@ public class NetworkService extends DefaultApiService
      * @param virtualDatacenterId identifier of the virtual datacenter.
      * @return a Collection of {@link VLANNetwork} defined inside the Virtual Datacenter.
      */
-    public Collection<VLANNetwork> getPrivateNetworks(final Integer virtualDatacenterId)
+    public Collection<VLANNetwork> getPrivateNetworks(final Integer vdcId)
     {
-        VirtualDatacenter vdc = repo.findById(virtualDatacenterId);
-        Collection<VLANNetwork> networks = null;
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
+        Collection<VLANNetwork> networks = null;
         networks = repo.findVlansByVirtualDatacener(vdc);
         LOGGER.debug("Returning the list of internal VLANs for VirtualDatacenter '" + vdc.getName()
             + "'.");
@@ -529,26 +498,9 @@ public class NetworkService extends DefaultApiService
     public VMNetworkConfiguration getVirtualMachineConfiguration(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer vmConfigId)
     {
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // Generally there is only one IP, but we avoid problemes and
         // we return IPs
@@ -599,24 +551,9 @@ public class NetworkService extends DefaultApiService
         final Integer vappId, final Integer vmId)
     {
         // Check the parameter's correctness
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // Find all the IPs for the physical machine
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
@@ -656,24 +593,9 @@ public class NetworkService extends DefaultApiService
     public void releaseNicFromVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId, final Integer nicOrder)
     {
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
@@ -714,6 +636,11 @@ public class NetworkService extends DefaultApiService
                     // this is the object to release.
                     ip.setVirtualAppliance(null);
                     ip.setVirtualMachine(null);
+                    if (ip.isExternalIp())
+                    {
+                        // set virtual datacenter as null when release an external IP.
+                        ip.setVirtualDatacenter(null);
+                    }
                     Boolean privateIp = ip.isPrivateIp(); // set the private value before to set the
                     // RASD to null;
                     ip.setRasd(null);
@@ -772,26 +699,9 @@ public class NetworkService extends DefaultApiService
         final Integer vmId, final Integer linkOldOrder, final Integer nicOrder)
     {
         // Find if the parameters exist.
-        VirtualDatacenter vdc = repo.findById(vdcId);
-        if (vdc == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
-            flushErrors();
-        }
-
-        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
-        if (vapp == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
-            flushErrors();
-        }
-
-        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
-        if (vm == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
-            flushErrors();
-        }
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // The user has the role for manage this. But... is the user from the same enterprise
         // than Virtual Datacenter?
@@ -859,6 +769,24 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
+     * Set one of the internal networks of the Virtual Datacenter as the default one.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vlanId identifier of the vlan to be the default one.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void setInternalNetworkAsDefaultInVirtualDatacenter(final Integer vdcId,
+        final Integer vlanId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
+
+        vdc.setDefaultVlan(vlan);
+        repo.update(vdc);
+
+    }
+
+    /**
      * Edit an existing VLAN.
      * 
      * @param vdcId identifier of the virtual datacenter the VLAN belongs to.
@@ -870,11 +798,11 @@ public class NetworkService extends DefaultApiService
     public VLANNetwork updatePrivateNetwork(final Integer vdcId, final Integer vlanId,
         final VLANNetwork newNetwork)
     {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VLANNetwork oldNetwork = getPrivateVlan(vdc, vlanId);
 
-        // Check if the fields are ok.
-        VLANNetwork oldNetwork = getPrivateNetwork(vdcId, vlanId);
-        VirtualDatacenter vdc = repo.findById(vdcId);
         newNetwork.setNetwork(vdc.getNetwork());
+        newNetwork.setType(oldNetwork.getType());
         validate(newNetwork);
         if (!vlanId.equals(newNetwork.getId()))
         {
@@ -900,23 +828,6 @@ public class NetworkService extends DefaultApiService
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
             flushErrors();
-        }
-
-        // If we want to set the default network as non-default, and the network is
-        // actually the default one, raise an error: it should be at least one default vlan
-        if (!newNetwork.getDefaultNetwork() && oldNetwork.getDefaultNetwork())
-        {
-            addConflictErrors(APIError.VLANS_AT_LEAST_ONE_DEFAULT_NETWORK);
-            flushErrors();
-        }
-
-        // In the same order: if we put the newNetwork as default, set the previous one
-        // as non-default
-        if (newNetwork.getDefaultNetwork() && !oldNetwork.getDefaultNetwork())
-        {
-            VLANNetwork defaultVLAN = repo.findVlanByDefaultInVirtualDatacenter(vdc);
-            defaultVLAN.setDefaultNetwork(Boolean.FALSE);
-            repo.updateVlan(defaultVLAN);
         }
 
         // Check the new gateway is inside the range of IPs.
@@ -968,7 +879,6 @@ public class NetworkService extends DefaultApiService
             newNetwork.getConfiguration().getSecondaryDNS());
         oldNetwork.getConfiguration().setSufixDNS(newNetwork.getConfiguration().getSufixDNS());
         oldNetwork.setName(newNetwork.getName());
-        oldNetwork.setDefaultNetwork(newNetwork.getDefaultNetwork());
 
         repo.updateVlan(oldNetwork);
 
@@ -1271,6 +1181,78 @@ public class NetworkService extends DefaultApiService
         vlan.getConfiguration().setDhcp(dhcp);
 
         return dhcp;
+    }
+
+    /**
+     * Gets a private Vlan. Raises a NOT_FOUND exception if it does not exist.
+     * 
+     * @param vdc {@link VirtualDatacenter} instance where the Vlan should be.
+     * @param vlanId identifier of the {@link VLANNetwork} instance.
+     * @return the found {@link VLANNetwork} instance.
+     */
+    protected VLANNetwork getPrivateVlan(final VirtualDatacenter vdc, final Integer vlanId)
+    {
+        VLANNetwork vlan = repo.findVlanByVirtualDatacenterId(vdc, vlanId);
+        if (vlan == null)
+        {
+            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+            flushErrors();
+        }
+        return vlan;
+    }
+
+    /**
+     * Gets a Virtual Appliance. Raises a NOT_FOUND exception if it does not exist.
+     * 
+     * @param vdc {@link VirtualDatacenter} instance where the vapp should be.
+     * @param vappId identifier of the {@link VirtualAppliance} instance.
+     * @return the found {@link VirtualAppliance} instance.
+     */
+    protected VirtualAppliance getVirtualAppliance(final VirtualDatacenter vdc, final Integer vappId)
+    {
+        VirtualAppliance vapp = repo.findVirtualApplianceById(vdc, vappId);
+        if (vapp == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        return vapp;
+    }
+
+    /**
+     * Gets a VirtualDatacenter. Raises an exception if it does not exist.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @return the found {@link VirtualDatacenter} instance.
+     */
+    protected VirtualDatacenter getVirtualDatacenter(final Integer vdcId)
+    {
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+        return vdc;
+    }
+
+    /**
+     * Gets a Virtual Machine. Raises a NOT_FOUND exception if it does not exist.
+     * 
+     * @param vapp {@link VirtualAppliance} instance where the VirtualMachine should be.
+     * @param vmId identifier of the {@link VirtualMachine} instance.
+     * @return the found {@link VirtualMachine} instance.
+     */
+    protected VirtualMachine getVirtualMachine(final VirtualAppliance vapp, final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineById(vapp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+        return vm;
+
     }
 
 }

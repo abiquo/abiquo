@@ -60,7 +60,7 @@ public class IpPoolManagement extends RasdManagement
 
     public static enum Type
     {
-        PRIVATE, PUBLIC; // 0 = private, 1 = public
+        PRIVATE, PUBLIC, EXTERNAL; // 0 = private, 1 = public, 2 = external
     }
 
     public static final String TABLE_NAME = "ip_pool_management";
@@ -349,7 +349,12 @@ public class IpPoolManagement extends RasdManagement
 
     public boolean isPublicIp()
     {
-        return !isPrivateIp();
+        return getType() == Type.PUBLIC;
+    }
+
+    public boolean isExternalIp()
+    {
+        return getType() == Type.EXTERNAL;
     }
 
     // ********************************** Others ********************************

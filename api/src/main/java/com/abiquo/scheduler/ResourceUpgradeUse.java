@@ -115,7 +115,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine, Integer sourceHypervisorId)
+    public void updateUseHa(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final Integer sourceHypervisorId)
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
 
@@ -260,7 +261,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             if (vlanNetwork.getTag() == null)
             {
                 List<VLANNetwork> publicVLANs =
-                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter(),
+                        Boolean.FALSE);
                 List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
@@ -344,13 +346,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         final int newCpu =
             isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed()
-                + used.getCpu();
+                .getVirtualCpusUsed() + used.getCpu();
 
         final int newRam =
             isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb()
-                + used.getRam();
+                .getVirtualRamUsedInMb() + used.getRam();
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -374,6 +374,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datacenterRepo.updateMachine(machine);
     }
 
+    @Override
     public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
     {
         machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);

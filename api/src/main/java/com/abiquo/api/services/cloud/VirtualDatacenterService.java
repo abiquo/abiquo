@@ -46,12 +46,14 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
@@ -164,9 +166,22 @@ public class VirtualDatacenterService extends DefaultApiService
         VirtualDatacenter vdc = createVirtualDatacenter(dto, datacenter, enterprise, network);
 
         // set as default vlan (as it is the first one) and create it.
-        dto.getVlan().setDefaultNetwork(Boolean.TRUE);
-        networkService.createPrivateNetwork(vdc.getId(),
-            PrivateNetworkResource.createPersistenceObject(dto.getVlan()));
+        VLANNetwork vlan =
+            networkService.createPrivateNetwork(vdc.getId(),
+                PrivateNetworkResource.createPersistenceObject(dto.getVlan()));
+
+        // find the default vlan.
+        DatacenterLimits dcLimits =
+            datacenterRepo.findDatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
+        if (dcLimits.getDefaultVlan() != null)
+        {
+            vdc.setDefaultVlan(dcLimits.getDefaultVlan());
+        }
+        else
+        {
+            vdc.setDefaultVlan(vlan);
+        }
+        repo.update(vdc);
 
         assignVirtualDatacenterToUser(vdc);
 

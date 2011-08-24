@@ -229,6 +229,28 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return virtualDatacenterDAO.findUniqueByProperty(VirtualDatacenter.NAME_PROPERTY, name);
     }
 
+    public VLANNetwork findExternalVlanByEnterprise(final Enterprise ent, final Integer vlanId)
+    {
+        return vlanDAO.findExternalVlanByEnterprise(ent, vlanId);
+    }
+
+    public VLANNetwork findExternalVlanByEnterpriseInDatacenter(final Enterprise ent,
+        final Datacenter datacenter, final Integer vlanId)
+    {
+        return vlanDAO.findExternalVlanByEnterpriseInDatacenter(ent, datacenter, vlanId);
+    }
+
+    public List<VLANNetwork> findExternalVlansByEnterprise(final Enterprise ent)
+    {
+        return vlanDAO.findExternalVlansByEnterprise(ent);
+    }
+
+    public List<VLANNetwork> findExternalVlansByEnterpriseInDatacenter(final Enterprise ent,
+        final Datacenter datacenter)
+    {
+        return vlanDAO.findExternalVlansByEnterpriseInDatacenter(ent, datacenter);
+    }
+
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
     {
         return ipManagementDAO.findIp(vlan, ipId);
@@ -257,6 +279,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
     {
         return ipManagementDAO.findIpsByPrivateVLAN(vdcId, vlanId);
+    }
+
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
+    {
+        return ipManagementDAO.privateVLANinUseByAnyVDC(vlanId);
     }
 
     /**
@@ -314,6 +341,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine vm)
     {
         return ipManagementDAO.findIpsByVirtualMachine(vm);
+    }
+
+    public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
+    {
+        return ipManagementDAO.findIpsByVlan(vlan);
     }
 
     public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
@@ -435,12 +467,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public VirtualMachine findVirtualMachineByName(final String name)
     {
         return vmDao.findByName(name);
-    }
-
-    public VLANNetwork findVlanByDefaultInVirtualDatacenter(
-        final VirtualDatacenter virtualDatacenter)
-    {
-        return vlanDAO.findVlanByDefaultInVirtualDatacenter(virtualDatacenter);
     }
 
     public VLANNetwork findVlanById(final Integer id)

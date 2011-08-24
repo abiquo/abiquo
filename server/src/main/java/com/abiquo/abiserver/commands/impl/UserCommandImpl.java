@@ -405,6 +405,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         if (result.getSuccess())
         {
+
             // Building result
             result.setSuccess(true);
             result.setMessage(resourceManager.getMessage("editEnterprise.success"));

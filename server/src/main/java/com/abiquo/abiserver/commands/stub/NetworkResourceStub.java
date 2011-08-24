@@ -33,6 +33,7 @@ import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -70,6 +71,14 @@ public interface NetworkResourceStub
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
+    public BasicResult getExternalVlanAsDefaultInEnterpriseByDatacenterLimit(Integer id,
+        Integer datacenterId);
+
+    public BasicResult getExternalVlansByDatacenterInEnterprise(Integer datacenterId,
+        Integer enterpriseId);
+
+    public BasicResult getExternalVlansByVirtualDatacenter(VirtualDataCenter vdc);
+
     public BasicResult getGatewayByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
 
     public BasicResult getGatewayListByVirtualMachine(Integer vdcId, Integer vappId, Integer vmId);
@@ -105,12 +114,17 @@ public interface NetworkResourceStub
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
         throws NetworkCommandException;
 
+    public BasicResult getNetworkPoolInfoByExternalVlan(VirtualDataCenter vdc, Integer vlanId,
+        Boolean available);
+
     public BasicResult getNICsByVirtualMachine(Integer virtualDatacenterId, Integer vappId,
         Integer virtualMachineId);
 
     public BasicResult getPrivateNetworks(final Integer vdcId);
 
     public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
+
+    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, Boolean onlypublic);
 
     public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
 
@@ -122,13 +136,28 @@ public interface NetworkResourceStub
     public BasicResult reorderNICintoVM(Integer vdcId, Integer vappId, Integer vmId,
         Integer oldOrder, Integer newOrder);
 
+    public BasicResult requestExternalNicforVirtualMachine(Integer enterpriseId, Integer vdcId,
+        Integer vappId, Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
     public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
         Integer vmId, Integer vlanNetworkId, Integer idManagement);
 
     public BasicResult requestPublicNICforVirtualMachine(Integer vdcId, Integer vappId,
         Integer vmId, Integer vlanNetworkId, Integer idManagement);
 
+    public BasicResult setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(Integer id,
+        Integer limitId, Integer networkId);
+
+    public BasicResult setExternalVlanAsDefaultInVirtualDatacenter(VirtualDataCenter vdc,
+        Integer vlanId);
+
     public BasicResult setGatewayForVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
         IPAddress gateway);
+
+    public BasicResult setInternalVlanAsDefaultInVirtualDatacenter(UserSession userSession,
+        Integer vdcId, Integer vlanId);
+
+    public BasicResult setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(Integer id,
+        Integer limitId);
 
 }

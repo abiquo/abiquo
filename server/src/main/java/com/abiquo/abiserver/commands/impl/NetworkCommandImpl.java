@@ -42,7 +42,6 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
-import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
@@ -50,6 +49,7 @@ import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceAllocationSe
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
+import com.abiquo.server.core.util.network.IPNetworkRang;
 
 /**
  * This class extends all the methods of the NetworkCommand.
@@ -83,22 +83,25 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(final UserHB user, final Integer networkId,
-        final Integer vmId) throws NetworkCommandException
+    public void assignDefaultNICResource(final UserHB user, final Integer vmId)
+        throws NetworkCommandException
     {
         try
         {
             // NOTE: this method needs an embedded transaction
 
             // Define the needed DAOs
-            VlanNetworkDAO vlanNetDAO = factory.getVlanNetworkDAO();
             IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
             VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
             VirtualApplianceDAO vappDAO = factory.getVirtualApplianceDAO();
             ResourceAllocationSettingDataDAO rasdDAO =
                 factory.getResourceAllocationSettingDataDAO();
+
+            VirtualmachineHB vmHB = vmDAO.findById(vmId);
+            VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
+
             // Get the default VLAN
-            VlanNetworkHB vlanHB = vlanNetDAO.getDefaultVLAN(networkId);
+            VlanNetworkHB vlanHB = vapp.getVirtualDataCenterHB().getDefaultVlan();
 
             DHCPServiceHB dhcpServiceHB =
                 (DHCPServiceHB) vlanHB.getConfiguration().getDhcpService();
@@ -108,14 +111,24 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 getNextAvailableIP(dhcpServiceHB.getDhcpServiceId(), vlanHB.getConfiguration()
                     .getGateway());
 
-            // Find the virtual machine and the virtual appliance by its ID
-            VirtualmachineHB vmHB = vmDAO.findById(vmId);
-            VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
-
-            // Generate the resource allocation setting data associed
-            ResourceAllocationSettingData rasd =
-                this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
-            rasd.setConfigurationName("0");
+            ResourceAllocationSettingData rasd;
+            if (nextIp.getVirtualDataCenter() == null)
+            {
+                // External IP! need to assign the virtual datacenter and the mac.
+                nextIp.setVirtualDataCenter(vapp.getVirtualDataCenterHB());
+                nextIp.setMac(IPNetworkRang.requestRandomMacAddress(vapp.getVirtualDataCenterHB()
+                    .getHypervisorType()));
+                rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
+                rasd.setConfigurationName("2");
+                rasd.setResourceSubType("2");
+            }
+            else
+            {
+                // Generate the resource allocation setting data associed
+                rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
+                rasd.setConfigurationName("0");
+                rasd.setResourceSubType("0");
+            }
             rasdDAO.makePersistent(rasd);
 
             // Associate the resource with the values
@@ -137,8 +150,8 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
-    public void assignDefaultNICResource(final UserSession userSession, final Integer networkId,
-        final Integer vmId) throws NetworkCommandException
+    public void assignDefaultNICResource(final UserSession userSession, final Integer vmId)
+        throws NetworkCommandException
     {
         try
         {
@@ -148,7 +161,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             UserHB user =
                 userDAO.getUserByLoginAuth(userSession.getUser(), userSession.getAuthType());
 
-            assignDefaultNICResource(user, networkId, vmId);
+            assignDefaultNICResource(user, vmId);
 
             factory.endConnection();
         }
@@ -201,8 +214,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         rasd.setDescription("MAC Address asociated to private Network");
         rasd.setInstanceID(UUID.randomUUID().toString());
         rasd.setResourceType(CIMResourceTypeEnum.Ethernet_Adapter.getNumericResourceType());
-        // Meaning is the the MAC address related to a private network
-        rasd.setResourceSubType("0");
 
         return rasd;
     }

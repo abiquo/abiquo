@@ -81,7 +81,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
         VLANNetworkDto vlanDto = new VLANNetworkDto();
         vlanDto.setName(networkName);
-        vlanDto.setDefaultNetwork(Boolean.TRUE);
         vlanDto.setName(networkName);
         vlanDto.setAddress(netConfig.getNetworkAddress());
         vlanDto.setGateway(netConfig.getGateway());
@@ -91,8 +90,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
-                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
+                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -242,7 +241,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         {
             result.setSuccess(true);
             DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
 
             VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
             Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
@@ -253,13 +251,24 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                     URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
                         "{datacenter}", "datacenter");
 
+                factory.beginConnection();
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise, network
-                    .toPojo()));
+                factory.endConnection();
+
+                VirtualDataCenter vdctoadd =
+                    VirtualDataCenter.create(vdc, datacenterId, enterprise, network.toPojo());
+
+                // Get the default network of the vdc.
+                RESTLink link = vdc.searchLink("defaultnetwork");
+                response = get(link.getHref());
+                VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
+
+                vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
+
+                datacenters.add(vdctoadd);
             }
             result.setData(datacenters);
 
-            factory.endConnection();
         }
         else
         {

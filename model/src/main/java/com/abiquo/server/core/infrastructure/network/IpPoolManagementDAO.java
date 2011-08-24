@@ -158,6 +158,19 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_VLAN_USED_BY_ANY_VDC =
+        " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
+            + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
+            + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
+
+    public static final String BY_VLAN_USED_BY_ANY_VM = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+        + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
+
     private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
         "SELECT * " //
             + "FROM ip_pool_management ip, " //
@@ -180,8 +193,9 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "where net.id = vlan.network.id "//
         + "and dhcp.id = ip.dhcp.id "//
         + "and dc.id = vdc.datacenter.id "//
-        + "and vdc.enterprise.id = :enterpriseId "//
-        + "and ip.virtualDatacenter.id = vdc.id ";
+        + "and vdc.enterprise.id = :enterpriseId "
+        + "and ip.virtualDatacenter.id = vdc.id "
+        + "and vlan.type = 'PUBLIC'";
 
     private static Criterion equalMac(final String mac)
     {
@@ -319,6 +333,20 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         ipList.setCurrentElement(firstElem);
 
         return ipList;
+    }
+
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
+    {
+        List<IpPoolManagement> ippoolList;
+        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        ippoolList = query.list();
+
+        if (ippoolList.isEmpty())
+        {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -485,6 +513,11 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             }
         }
         return resultIps;
+    }
+
+    public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
+    {
+        return findByCriterions(Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan));
     }
 
     public IpPoolManagement findPublicIpPurchasedByVirtualDatacenter(final Integer vdcId,
@@ -670,6 +703,21 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return (IpPoolManagement) finalQuery.uniqueResult();
     }
 
+    public List<IpPoolManagement> findUsedIpsByPrivateVLAN(final Integer vlanId)
+    {
+        Query finalQuery =
+            getSession().createQuery(BY_VLAN_USED_BY_ANY_VM + " " + defineFilterUsed());
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", "%");
+
+        Integer totalResults = finalQuery.list().size();
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+
+        return ipList;
+    }
+
     /**
      * Return the {@link PagedList} entity with the used Ips by VLAN.
      * 
@@ -703,7 +751,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return criteria.list();
     }
 
-    public List<IpPoolManagement> getNetworkPoolPurchasedByEnterprise(final Integer enterpriseId)
+    public List<IpPoolManagement> getPublicNetworkPoolPurchasedByEnterprise(
+        final Integer enterpriseId)
     {
         Query query = getSession().createQuery(GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);

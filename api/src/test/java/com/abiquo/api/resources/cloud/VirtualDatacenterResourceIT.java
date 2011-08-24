@@ -116,7 +116,13 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualDatacenter() throws Exception
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        RemoteService rs =
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
+                vdc.getDatacenter());
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        vdc.setDefaultVlan(vlan);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         assertNotNull(dto);
@@ -134,9 +140,11 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
 
     private VirtualDatacenterDto getValidVdc(final VirtualDatacenter vdc)
     {
-        ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
+        // ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN,
+        // SYSADMIN);
 
-        assertEquals(200, response.getStatusCode());
+        ClientResponse response = get(resolveVirtualDatacenterURI(vdc.getId()));
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
 
         VirtualDatacenterDto dto = response.getEntity(VirtualDatacenterDto.class);
         return dto;
@@ -146,7 +154,13 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     public void updateVirtualDatacenter()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        RemoteService rs =
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
+                vdc.getDatacenter());
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        vdc.setDefaultVlan(vlan);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
 
@@ -164,7 +178,13 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     public void updateVirtualDatacenterModifyLimits()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        RemoteService rs =
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
+                vdc.getDatacenter());
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
+        vdc.setDefaultVlan(vlan);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
+            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         dto.setCpuCountLimits(1000, 1001);
@@ -182,7 +202,9 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     public void deleteVirtualDatacenter()
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc);
+        // VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork());
+        // vdc.setDefaultVlan(vlan);
+        setup(vdc.getNetwork(), vdc.getDatacenter(), vdc.getEnterprise(), vdc);
 
         ClientResponse response =
             delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
@@ -194,7 +216,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualAppliance vapp = virtualApplianceGenerator.createUniqueInstance();
         VirtualDatacenter vdc = vapp.getVirtualDatacenter();
-        setup(vdc.getDatacenter(), vdc.getEnterprise(), vdc.getNetwork(), vdc, vapp);
+        setup(vdc.getNetwork(), vdc.getDatacenter(), vdc.getEnterprise(), vdc, vapp);
 
         ClientResponse response =
             delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);

@@ -21,10 +21,13 @@
 
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -32,21 +35,29 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(VirtualDatacentersResource.class)
@@ -61,6 +72,8 @@ public class VirtualDatacenterResource extends AbstractResource
     public static final String VIRTUAL_DATACENTER_ACTION_GET_IPS = "/action/ips";
 
     public static final String VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO = "/action/dhcpinfo";
+
+    public static final String ACTION_DEFAULT_VLAN = "/action/defaultvlan";
 
     // @Autowired
     @Resource(name = "virtualDatacenterService")
@@ -179,20 +192,60 @@ public class VirtualDatacenterResource extends AbstractResource
         return formattedData.toString();
     }
 
-    private static VirtualDatacenterDto addLinks(final IRESTBuilder builder,
-        final VirtualDatacenterDto vdc, final Integer datacenterId, final Integer enterpriseId)
+    // ALERT! this method is @override in enterprise version, any change here
+    // should be also changed in enterprise version.
+    @GET
+    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    public VLANNetworkDto getDefaultVlan(
+        @PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vdc.setLinks(builder.buildVirtualDatacenterLinks(vdc, datacenterId, enterpriseId));
+        VLANNetwork vlan = netService.getDefaultNetworkForVirtualDatacenter(id);
+        return PrivateNetworkResource.createTransferObject(vlan, id, restBuilder);
+    }
 
-        return vdc;
+    // ALERT! this method is @override in enterprise version, any change here
+    // should be also changed in enterprise version.
+    @PUT
+    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    public void setDefaultVlan(@PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
+        @NotNull final LinksDto links, @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        RESTLink privateLink = links.searchLink("internalnetwork");
+        if (privateLink == null)
+        {
+            throw new BadRequestException(APIError.INVALID_LINK);
+        }
+
+        // Parse the URI with the expected parameters and extract the identifier values.
+        String buildPath =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                PrivateNetworksResource.PRIVATE_NETWORKS_PATH,
+                PrivateNetworkResource.PRIVATE_NETWORK_PARAM);
+        MultivaluedMap<String, String> ipsValues =
+            URIResolver.resolveFromURI(buildPath, privateLink.getHref());
+        // Private IP must belong to the same Virtual Datacenter where the Virtual Machine
+        // belongs to.
+        Integer vdcId =
+            Integer.parseInt(ipsValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+        if (!vdcId.equals(id))
+        {
+            throw new BadRequestException(APIError.VLANS_IP_LINK_INVALID_VDC);
+        }
+        // Extract the vlanId and ipId values to execute the association.
+        Integer vlanId =
+            Integer.parseInt(ipsValues.getFirst(PrivateNetworkResource.PRIVATE_NETWORK));
+
+        netService.setInternalNetworkAsDefaultInVirtualDatacenter(vdcId, vlanId);
     }
 
     public static VirtualDatacenterDto createTransferObject(final VirtualDatacenter vdc,
         final IRESTBuilder builder) throws Exception
     {
         VirtualDatacenterDto response = createTransferObject(vdc);
-        response =
-            addLinks(builder, response, vdc.getDatacenter().getId(), vdc.getEnterprise().getId());
+        response.setLinks(builder.buildVirtualDatacenterLinks(vdc, vdc.getDatacenter().getId(), vdc
+            .getEnterprise().getId()));
 
         return response;
     }

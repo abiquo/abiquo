@@ -45,8 +45,12 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListResponse;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.LinksDto;
+import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
+import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
@@ -64,6 +68,28 @@ import com.abiquo.server.core.infrastructure.network.VlanTagAvailabilityDto;
  */
 public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkResourceStub
 {
+
+    public static VlanNetwork createFlexObject(final VLANNetworkDto dto)
+    {
+        NetworkConfiguration netconf = new NetworkConfiguration();
+        netconf.setGateway(dto.getGateway());
+        netconf.setMask(dto.getMask());
+        netconf.setNetworkAddress(dto.getAddress());
+        netconf.setPrimaryDNS(dto.getPrimaryDNS());
+        netconf.setSecondaryDNS(dto.getSecondaryDNS());
+        netconf.setSufixDNS(dto.getSufixDNS());
+        netconf.setFenceMode("bridge");
+        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
+
+        VlanNetwork newNet = new VlanNetwork();
+        newNet.setConfiguration(netconf);
+        newNet.setNetworkName(dto.getName());
+        newNet.setVlanNetworkId(dto.getId());
+        newNet.setVlanTag(dto.getTag());
+        newNet.setNetworkId(dto.getId());
+
+        return newNet;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -158,7 +184,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         VLANNetworkDto dto = new VLANNetworkDto();
         dto.setAddress(configuration.getNetworkAddress());
-        dto.setDefaultNetwork(Boolean.FALSE);
         dto.setGateway(configuration.getGateway());
         dto.setMask(configuration.getMask());
         dto.setName(networkName);
@@ -166,6 +191,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setSecondaryDNS(configuration.getSecondaryDNS());
         dto.setSufixDNS(configuration.getSufixDNS());
         dto.setTag(vlanTag);
+
+        if (enterprise != null)
+        {
+            // It is an External network.
+            RESTLink entLink = new RESTLink();
+            entLink.setRel("enterprise");
+            entLink.setHref(createEnterpriseLink(enterprise.getId()));
+            dto.addLink(entLink);
+        }
 
         ClientResponse response = post(uri, dto);
         if (response.getStatusCode() == 201)
@@ -231,7 +265,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         else
         {
-            populateErrors(response, result, "editPublicIp");
+            populateErrors(response, result, "editPrivateVlan");
         }
 
         return result;
@@ -292,7 +326,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         VLANNetworkDto dto = new VLANNetworkDto();
         dto.setAddress(configuration.getNetworkAddress());
-        dto.setDefaultNetwork(defaultNetwork);
         dto.setGateway(configuration.getGateway());
         dto.setId(vlanNetworkId);
         dto.setMask(configuration.getMask());
@@ -318,10 +351,42 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     public BasicResult getEnterpriseFromReservedVlanId(final Integer datacenterId,
         final Integer vlanId)
     {
-        // TODO: per a interroute aplicar aixo.
         DataResult<Enterprise> dr = new DataResult<Enterprise>();
-        dr.setSuccess(Boolean.TRUE);
-        dr.setData(null);
+        String uri = createPublicNetworkLink(datacenterId, vlanId);
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            VLANNetworkDto vlandto = response.getEntity(VLANNetworkDto.class);
+            RESTLink entLink = vlandto.searchLink("enterprise");
+            if (entLink != null)
+            {
+                response = get(entLink.getHref());
+                if (response.getStatusCode() == 200)
+                {
+                    EnterpriseDto entDto = response.getEntity(EnterpriseDto.class);
+                    Enterprise ent = new Enterprise();
+                    ent.setId(entDto.getId());
+                    ent.setIsReservationRestricted(entDto.getIsReservationRestricted());
+                    ent.setName(entDto.getName());
+                    dr.setData(ent);
+                    dr.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, dr, "getEnterpriseFromReservedVlanId");
+                }
+            }
+            else
+            {
+                dr.setData(null);
+                dr.setSuccess(Boolean.TRUE);
+            }
+        }
+        else
+        {
+            populateErrors(response, dr, "getEnterpriseFromReservedVlanId");
+        }
 
         return dr;
     }
@@ -366,6 +431,106 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
         return dataResult;
 
+    }
+
+    @Override
+    public BasicResult getExternalVlanAsDefaultInEnterpriseByDatacenterLimit(final Integer id,
+        final Integer datacenterId)
+    {
+
+        DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
+        String uri = createEnterpriseLimitsByDatacenterLink(id);
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                uri = limitDto.searchLink("externalnetworks").getHref() + "/action/default";
+                response = get(uri);
+                if (response.getStatusCode() == 200)
+                {
+                    VLANNetworkDto vlanDto = response.getEntity(VLANNetworkDto.class);
+                    if (vlanDto.getId() == null)
+                    {
+                        // null object, it means it has de internal by default.
+                        result.setData(null);
+                    }
+                    else
+                    {
+                        result.setData(createFlexObject(vlanDto));
+                    }
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result,
+                        "getExternalVlanAsDefaultInEnterpriseByDatacenterLimit");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
+    @Override
+    public BasicResult getExternalVlansByDatacenterInEnterprise(final Integer datacenterId,
+        final Integer enterpriseId)
+    {
+        DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
+        String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                response = get(limitDto.searchLink("externalnetworks").getHref());
+                if (response.getStatusCode() == 200)
+                {
+                    List<VlanNetwork> listOfNetworks = new ArrayList<VlanNetwork>();
+                    VLANNetworksDto dtos = response.getEntity(VLANNetworksDto.class);
+
+                    for (VLANNetworkDto dto : dtos.getCollection())
+                    {
+                        VlanNetwork net = createFlexObject(dto);
+                        net.setNetworkType("EXTERNAL");
+                        listOfNetworks.add(net);
+                    }
+
+                    result.setData(listOfNetworks);
+                    result.setSuccess(Boolean.TRUE);
+
+                }
+                else
+                {
+                    populateErrors(response, result, "getExternalVlansByVirtualDatacenter");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
+    @Override
+    public BasicResult getExternalVlansByVirtualDatacenter(final VirtualDataCenter vdc)
+    {
+        return this.getExternalVlansByDatacenterInEnterprise(vdc.getIdDataCenter(), vdc
+            .getEnterprise().getId());
     }
 
     @Override
@@ -790,6 +955,58 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult getNetworkPoolInfoByExternalVlan(final VirtualDataCenter vdc,
+        final Integer vlanId, final Boolean available)
+    {
+        DataResult<ListResponse<IpPoolManagement>> result =
+            new DataResult<ListResponse<IpPoolManagement>>();
+        String uri = createEnterpriseLimitsByDatacenterLink(vdc.getEnterprise().getId());
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(vdc.getIdDataCenter()))
+            {
+                String uriIps =
+                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanId + "/ips";
+                response = get(uriIps);
+                if (response.getStatusCode() == 200)
+                {
+                    ListResponse<IpPoolManagement> listResponse =
+                        new ListResponse<IpPoolManagement>();
+                    IpsPoolManagementDto ips = response.getEntity(IpsPoolManagementDto.class);
+                    List<IpPoolManagement> flexIps = new ArrayList<IpPoolManagement>();
+
+                    for (IpPoolManagementDto ip : ips.getCollection())
+                    {
+                        IpPoolManagement flexIp = createFlexObject(ip);
+                        flexIps.add(flexIp);
+                    }
+                    listResponse.setList(flexIps);
+                    listResponse.setTotalNumEntities(ips.getTotalSize());
+
+                    result.setData(listResponse);
+                    result.setSuccess(Boolean.TRUE);
+
+                }
+                else
+                {
+                    populateErrors(response, result, "getExternalVlansByVirtualDatacenter");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
+    @Override
     public BasicResult getNICsByVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
@@ -834,7 +1051,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
             for (VLANNetworkDto dto : networksDto.getCollection())
             {
-                nets.add(createFlexObject(dto));
+                VlanNetwork vlan = createFlexObject(dto);
+                vlan.setNetworkType("INTERNAL");
+                nets.add(vlan);
             }
 
             result.setData(nets);
@@ -869,6 +1088,38 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
         return result;
 
+    }
+
+    @Override
+    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId,
+        final Boolean onlypublic)
+    {
+        DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
+
+        StringBuilder buildRequest = new StringBuilder(createPublicNetworksLink(datacenterId));
+        buildRequest.append("?onlypublic=" + (onlypublic ? "true" : "false"));
+
+        ClientResponse response = get(buildRequest.toString());
+
+        if (response.getStatusCode() == 200)
+        {
+            VLANNetworksDto networksDto = response.getEntity(VLANNetworksDto.class);
+            List<VlanNetwork> nets = new ArrayList<VlanNetwork>();
+
+            for (VLANNetworkDto dto : networksDto.getCollection())
+            {
+                nets.add(createFlexObject(dto));
+            }
+
+            result.setData(nets);
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "getPublicVlansByDatacenter");
+        }
+
+        return result;
     }
 
     @Override
@@ -967,6 +1218,60 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult requestExternalNicforVirtualMachine(final Integer enterpriseId,
+        final Integer vdcId, final Integer vappId, final Integer vmId, final Integer vlanNetworkId,
+        final Integer idManagement)
+    {
+
+        // First get the virtual datacenter
+        VirtualDatacenterDto vdcDto =
+            get(createVirtualDatacenterLink(vdcId)).getEntity(VirtualDatacenterDto.class);
+        RESTLink dcLink = vdcDto.searchLink("datacenter");
+        Integer datacenterId =
+            Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+
+        BasicResult result = new BasicResult();
+        String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                String uriNIC = createVirtualMachineNICsLink(vdcId, vappId, vmId);
+                String uriIp =
+                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanNetworkId
+                        + "/ips/" + idManagement;
+                RESTLink externalIPlink = new RESTLink();
+                externalIPlink.setRel("externalip");
+                externalIPlink.setHref(uriIp);
+
+                LinksDto linkDto = new LinksDto();
+                linkDto.addLink(externalIPlink);
+
+                response = post(uriNIC, linkDto);
+                if (response.getStatusCode() == 201)
+                {
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result, "requestExternalNicforVirtualMachine");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
+    @Override
     public BasicResult requestPrivateNICforVirtualMachine(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer vlanId, final Integer idManagement)
     {
@@ -1024,6 +1329,87 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
+    public BasicResult setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(final Integer id,
+        final Integer datacenterId, final Integer vlanId)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createEnterpriseLimitsByDatacenterLink(id);
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                uri =
+                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanId
+                        + "/action/default";
+                response = put(uri);
+                if (response.getStatusCode() == 204)
+                {
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result,
+                        "setExternalVlanAsDefaultInEnterpriseByDatacenterLimit");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+
+    }
+
+    @Override
+    public BasicResult setExternalVlanAsDefaultInVirtualDatacenter(final VirtualDataCenter vdc,
+        final Integer vlanId)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createEnterpriseLimitsByDatacenterLink(vdc.getEnterprise().getId());
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(vdc.getIdDataCenter()))
+            {
+                uri = createVirtualDatacenterActionDefaultVlan(vdc.getId());
+                RESTLink linkVlan = new RESTLink();
+                linkVlan.setRel("externalnetwork");
+                linkVlan.setHref(createExternalNetworkLink(vdc.getEnterprise().getId(), vlanId));
+
+                LinksDto dto = new LinksDto();
+                dto.addLink(linkVlan);
+
+                response = put(uri, dto);
+                if (response.getStatusCode() == 204)
+                {
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result, "setExternalVlanAsDefaultInVirtualDatacenter");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
+    @Override
     public BasicResult setGatewayForVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId, final IPAddress gateway)
     {
@@ -1073,6 +1459,70 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         return result;
     }
 
+    @Override
+    public BasicResult setInternalVlanAsDefaultInVirtualDatacenter(final UserSession userSession,
+        final Integer vdcId, final Integer vlanId)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createVirtualDatacenterActionDefaultVlan(vdcId);
+
+        RESTLink linkVlan = new RESTLink();
+        linkVlan.setRel("internalnetwork");
+        linkVlan.setHref(createPrivateNetworkLink(vdcId, vlanId));
+
+        LinksDto dto = new LinksDto();
+        dto.addLink(linkVlan);
+
+        ClientResponse response = put(uri, dto);
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "setInternalVlanAsDefaultInVirtualDatacenter");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public BasicResult setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(final Integer id,
+        final Integer datacenterId)
+    {
+        BasicResult result = new BasicResult();
+        String uri = createEnterpriseLimitsByDatacenterLink(id);
+        ClientResponse response = get(uri);
+        DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
+        for (DatacenterLimitsDto limitDto : limits.getCollection())
+        {
+            RESTLink dcLink = limitDto.searchLink("datacenter");
+            Integer dcId =
+                Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
+            if (dcId.equals(datacenterId))
+            {
+                uri = limitDto.searchLink("externalnetworks").getHref() + "/action/default";
+                response = put(uri);
+                if (response.getStatusCode() == 204)
+                {
+                    result.setSuccess(Boolean.TRUE);
+                }
+                else
+                {
+                    populateErrors(response, result,
+                        "setInternalVlansAsDefaultInEnterpriseByDatacenterLimit");
+                }
+
+                return result;
+            }
+        }
+
+        result.setSuccess(Boolean.FALSE);
+        result.setMessage("Unknow exception. External networks not found.");
+        return result;
+    }
+
     private IpPoolManagementDto createDtoObject(final IpPoolManagement ip)
     {
         IpPoolManagementDto dto = new IpPoolManagementDto();
@@ -1106,6 +1556,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
             if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
+            if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
             {
                 flexIp.setVlanNetworkName(currentLink.getTitle());
                 flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
@@ -1162,31 +1618,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
                     currentLink.getHref().lastIndexOf("/") + 1)));
             }
+            if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
+            {
+                flexIp.setVlanNetworkName(currentLink.getTitle());
+                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                    currentLink.getHref().lastIndexOf("/") + 1)));
+            }
         }
         return flexIp;
-    }
-
-    private VlanNetwork createFlexObject(final VLANNetworkDto dto)
-    {
-        NetworkConfiguration netconf = new NetworkConfiguration();
-        netconf.setGateway(dto.getGateway());
-        netconf.setMask(dto.getMask());
-        netconf.setNetworkAddress(dto.getAddress());
-        netconf.setPrimaryDNS(dto.getPrimaryDNS());
-        netconf.setSecondaryDNS(dto.getSecondaryDNS());
-        netconf.setSufixDNS(dto.getSufixDNS());
-        netconf.setFenceMode("bridge");
-        netconf.setNetmask(IPNetworkRang.transformIntegerMaskToIPMask(dto.getMask()).toString());
-
-        VlanNetwork newNet = new VlanNetwork();
-        newNet.setConfiguration(netconf);
-        newNet.setDefaultNetwork(dto.getDefaultNetwork());
-        newNet.setNetworkName(dto.getName());
-        newNet.setVlanNetworkId(dto.getId());
-        newNet.setVlanTag(dto.getTag());
-        newNet.setNetworkId(dto.getId());
-
-        return newNet;
     }
 
     private String transformOrderBy(final String orderBy)

@@ -40,6 +40,7 @@
             import net.undf.abicloud.vo.networking.VlanNetwork;
 
             //The VlanNetwork to edit
+            [Bindable]
             private var _vlanNetwork:VlanNetwork;
 
             //The Network to which the VLAN belongs
@@ -52,7 +53,7 @@
 
             public function init(virtualDatacenter:VirtualDataCenter, vlanNetwork:VlanNetwork):void
             {
-                _virtualDatacenter = _virtualDatacenter;
+                _virtualDatacenter = virtualDatacenter;
                 _network = virtualDatacenter.network;
                 _vlanNetwork = vlanNetwork;
 
@@ -66,6 +67,7 @@
                 secondaryDNSInput.text = _vlanNetwork.configuration.secondaryDNS;
                 sufixDNSInput.text = _vlanNetwork.configuration.sufixDNS;
                 defaultNetworkInput.selected = _vlanNetwork.defaultNetwork;
+                defaultNetworkInput.enabled = !_vlanNetwork.defaultNetwork;
 
                 validateForm();
                 nameInput.setFocus();
@@ -87,7 +89,14 @@
                 networkConfiguration.secondaryDNS = secondaryDNSInput.text;
                 networkConfiguration.sufixDNS = sufixDNSInput.text;
 
-                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
+                var event:NetworkingEvent;
+                
+                if(this._vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                	event = new NetworkingEvent(NetworkingEvent.SET_DEFAULT_VLAN);
+                }else{
+                	event = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
+                }
+                
                 event.virtualDatacenter = _virtualDatacenter;
                 event.network = _network;
                 event.vlanNetwork = _vlanNetwork;
@@ -95,12 +104,19 @@
                 event.networkConfiguration = networkConfiguration;
                 event.defaultNetwork = defaultNetworkInput.selected;
                 event.callback = closeForm;
-                dispatchEvent(event);
+                
+                //Close in case of External Vlan and no changes done
+                if(this._vlanNetwork.networkType == VlanNetwork.EXTERNAL && !defaultNetworkInput.selected){
+                    closeForm();	
+                }else{
+	                dispatchEvent(event);                	
+                }
+                
  
             }
 
 
-            private function closeForm(event:Event):void
+            private function closeForm(event:Event = null):void
             {
                 dispatchEvent(new Event("vlanFormEditClose"));
             }
@@ -129,6 +145,7 @@
             label="@Resource(bundle='Networking', key='LABEL_NAME')"
             required="true">
             <mx:TextInput id="nameInput"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
                 height="20"
                 maxChars="39"
                 change="validateForm()"/>
@@ -150,6 +167,7 @@
             label="@Resource(bundle='Networking', key='LABEL_GATEWAY')"
             required="true">
             <mx:TextInput id="gatewayInput"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
                 height="20"
                 maxChars="39"
                 change="validateForm()"
@@ -158,6 +176,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">
             <mx:TextInput id="primaryDNSInput"
+                editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
                 height="20"
                 maxChars="39"
                 restrict="0-9.:A-F"/>
@@ -165,6 +184,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_SECONDARY_DNS')">
             <mx:TextInput id="secondaryDNSInput"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
                 height="20"
                 maxChars="39"
                 restrict="0-9.:A-F"/>
@@ -172,6 +192,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_DNS_SUFIX')">
             <mx:TextInput id="sufixDNSInput"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
                 height="20"
                 maxChars="39"/>
         </mx:FormItem>

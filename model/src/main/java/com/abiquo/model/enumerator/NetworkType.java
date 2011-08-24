@@ -19,38 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package net.undf.abicloud.vo.networking
+/**
+ * 
+ */
+package com.abiquo.model.enumerator;
+
+/**
+ * All kind of VLAN networks.
+ * 
+ * @author jdevesa@abiquo.com
+ */
+public enum NetworkType
 {
-
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.networking.VlanNetwork")]
-    [Bindable]
-    public class VlanNetwork
-    {
-        
-        //CONST
-        public static const INTERNAL:String = "INTERNAL";
-        
-        public static const EXTERNAL:String = "EXTERNAL";
-        
-        public static const INTPUBLICERNAL:String = "PUBLIC";
-        
-        
-        public var vlanNetworkId:int;
-
-        public var networkId:int;
-
-        public var defaultNetwork:Boolean;
-
-        public var networkName:String;
-
-        public var vlanTag:int;
-
-        public var configuration:NetworkConfiguration;
-        
-        public var networkType:String;
-
-        public function VlanNetwork()
-        {
-        }
-    }
+    INTERNAL, EXTERNAL, PUBLIC;
 }

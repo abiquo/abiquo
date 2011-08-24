@@ -41,8 +41,7 @@ public interface NetworkCommand
      * @param networkId the identifier of the network.
      * @param vmId identifier of the virtual machine.
      */
-    public void assignDefaultNICResource(UserHB user, Integer networkId, Integer vmId)
-        throws NetworkCommandException;
+    public void assignDefaultNICResource(UserHB user, Integer vmId) throws NetworkCommandException;
 
     /**
      * The same functionality than the previous method. But this one creates a new transaction.
@@ -51,7 +50,7 @@ public interface NetworkCommand
      * @param networkId the identifier of the network.
      * @param vmId identifier of the virtual machine.
      */
-    public void assignDefaultNICResource(UserSession userSession, Integer networkId, Integer vmId)
+    public void assignDefaultNICResource(UserSession userSession, Integer vmId)
         throws NetworkCommandException;
 
     /**

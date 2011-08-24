@@ -49,7 +49,7 @@ public enum APIError
         "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
-        "Invalid credentials"),
+        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -145,7 +145,16 @@ public enum APIError
         "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs into a Virtual Machine."), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
         "VLAN-32", "Can not set the IP as 'not available' while is purchased by an Enterprise"), VLANS_PUBIC_IP_CAN_NOT_RELEASE(
         "VLAN-33", "Can not release a Public IP while is assigned to a Virtual Machine"), VLANS_NON_EXISTENT_CONFIGURATION(
-        "VLAN-34", "The configuration does not exist"),
+        "VLAN-34", "The configuration does not exist"), VLANS_CAN_NOT_ASSIGN_TO_DEFAULT_ENTERPRISE(
+        "VLAN-35",
+        "Can not assign external VLAN as default because it is not assigned to any enterprise"), VLANS_VIRTUAL_DATACENTER_SHOULD_HAVE_A_DEFAULT_VLAN(
+        "VLAN-36",
+        "Unable to found default VLAN in Virtual Datacenter. Incoherent state in Database"), VLANS_INVALID_ENTERPRISE_LINK(
+        "VLAN-37", "Invalid Enterprise identifier in the Enterprise link"), VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_DATACENTER(
+        "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
+        "VLAN-39", "Can not delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
+        "VLAN-40",
+        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
@@ -413,8 +422,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

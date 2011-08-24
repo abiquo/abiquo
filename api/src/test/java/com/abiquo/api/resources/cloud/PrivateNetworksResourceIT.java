@@ -144,11 +144,10 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(resolvePrivateNetworksURI(vdc.getId()), dto, "sysadmin", "sysadmin");
 
-        assertEquals(201, response.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
         VLANNetworkDto dtoResponse = response.getEntity(VLANNetworkDto.class);
 
         assertEquals(dto.getName(), dtoResponse.getName());
-        assertEquals(dto.getDefaultNetwork(), dtoResponse.getDefaultNetwork());
         assertEquals(dto.getAddress(), dtoResponse.getAddress());
         assertEquals(dto.getGateway(), dtoResponse.getGateway());
         assertTrue(dto.getMask() == dtoResponse.getMask());
@@ -204,12 +203,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         VLANNetworkDto dto = createValidNetworkDto();
         dto.setName(null);
         ClientResponse response = res.post(dto);
-        assertEquals(response.getStatusCode(), 400);
-
-        // Default network null
-        dto = createValidNetworkDto();
-        dto.setDefaultNetwork(null);
-        response = res.post(dto);
         assertEquals(response.getStatusCode(), 400);
 
         // Address null
@@ -438,7 +431,6 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
     {
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("Default Network");
-        networkDto.setDefaultNetwork(Boolean.TRUE);
         networkDto.setAddress("192.168.0.0");
         networkDto.setGateway("192.168.0.1");
         networkDto.setMask(24);
