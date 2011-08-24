@@ -33,10 +33,12 @@ import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 
 /**
  * This class defines all services related to Users management
@@ -250,16 +252,20 @@ public class UserService
 
             // now edit the vlan
             VlanNetwork defaultvlan = enterprise.getDcLimits().iterator().next().getDefaultVlan();
-            Integer limitId = enterprise.getDcLimits().iterator().next().getIdEnterprise();
-            if (defaultvlan == null)
+
+            for (DatacenterLimit dl : enterprise.getDcLimits())
             {
-                proxyStub(userSession).setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
-                    enterprise.getId(), limitId);
-            }
-            else
-            {
-                proxyStub(userSession).setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
-                    enterprise.getId(), limitId, defaultvlan.getNetworkId());
+                Integer datacenterId = dl.getDatacenter().getId();
+                if (defaultvlan == null)
+                {
+                    proxyStub(userSession).setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
+                        enterprise.getId(), datacenterId);
+                }
+                else
+                {
+                    proxyStub(userSession).setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
+                        enterprise.getId(), datacenterId, defaultvlan.getNetworkId());
+                }
             }
             return res;
         }
@@ -296,7 +302,22 @@ public class UserService
         UserCommand command = proxyCommand(userSession);
         try
         {
-            return command.getEnterprise(userSession, enterpriseId);
+            DataResult<Enterprise> dataResult = command.getEnterprise(userSession, enterpriseId);
+
+            Enterprise ent = dataResult.getData();
+
+            for (DatacenterLimit dl : ent.getDcLimits())
+            {
+                Integer datacenterId = dl.getDatacenter().getId();
+                @SuppressWarnings("unchecked")
+                DataResult<VlanNetwork> defaultVlan =
+                    (DataResult<VlanNetwork>) proxyStub(userSession)
+                        .getExternalVlanAsDefaultInEnterpriseByDatacenterLimit(ent.getId(),
+                            datacenterId);
+                dl.setDefaultVlan(defaultVlan.getData());
+            }
+
+            return dataResult;
         }
         catch (UserSessionException e)
         {

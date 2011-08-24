@@ -71,6 +71,9 @@ public interface NetworkResourceStub
         Integer datacenterId, Integer offset, Integer numElem, String filterLike)
         throws NetworkCommandException;
 
+    public BasicResult getExternalVlanAsDefaultInEnterpriseByDatacenterLimit(Integer id,
+        Integer datacenterId);
+
     public BasicResult getExternalVlansByDatacenterInEnterprise(Integer datacenterId,
         Integer enterpriseId);
 
@@ -133,6 +136,9 @@ public interface NetworkResourceStub
     public BasicResult reorderNICintoVM(Integer vdcId, Integer vappId, Integer vmId,
         Integer oldOrder, Integer newOrder);
 
+    public BasicResult requestExternalNicforVirtualMachine(Integer enterpriseId, Integer vdcId,
+        Integer vappId, Integer vmId, Integer vlanNetworkId, Integer idManagement);
+
     public BasicResult requestPrivateNICforVirtualMachine(Integer vdcId, Integer vappId,
         Integer vmId, Integer vlanNetworkId, Integer idManagement);
 
@@ -147,6 +153,9 @@ public interface NetworkResourceStub
 
     public BasicResult setGatewayForVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
         IPAddress gateway);
+
+    public BasicResult setInternalVlanAsDefaultInVirtualDatacenter(UserSession userSession,
+        Integer vdcId, Integer vlanId);
 
     public BasicResult setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(Integer id,
         Integer limitId);

@@ -388,6 +388,30 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createExternalNetworkLink(final Integer entId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/action/externalnetworks/{externalvlan}", params);
+    }
+
+    protected String createExternalNetworkByDatacenterLink(final Integer entId,
+        final Integer limitId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver
+            .resolveURI(apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/{externalvlan}",
+                params);
+    }
+
     protected String createExternalNetworkByDatacenterSetDefaultLink(final Integer entId,
         final Integer limitId, final Integer vlanId)
     {
@@ -555,12 +579,12 @@ public class AbstractAPIStub
             new HashMap<String, String>(), queryParams);
     }
 
-    protected String createExternalVlansByVDCLink(final Integer vdcId)
+    protected String createVirtualDatacenterLink(final Integer vdcId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("vdc", vdcId.toString());
+        params.put("vdcid", vdcId.toString());
 
-        return null;
+        return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}", params);
     }
 
     protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise)
@@ -616,6 +640,14 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase/{ip}",
             params);
+    }
+
+    protected String createVirtualDatacenterActionDefaultVlan(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
     }
 
     protected String createVirtualMachineConfigurationsLink(final Integer vdcId,

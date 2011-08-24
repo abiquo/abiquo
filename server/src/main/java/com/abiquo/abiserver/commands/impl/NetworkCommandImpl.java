@@ -49,6 +49,7 @@ import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceAllocationSe
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
+import com.abiquo.server.core.util.network.IPNetworkRang;
 
 /**
  * This class extends all the methods of the NetworkCommand.
@@ -110,12 +111,24 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 getNextAvailableIP(dhcpServiceHB.getDhcpServiceId(), vlanHB.getConfiguration()
                     .getGateway());
 
-            // Find the virtual machine and the virtual appliance by its ID
-
-            // Generate the resource allocation setting data associed
-            ResourceAllocationSettingData rasd =
-                this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
-            rasd.setConfigurationName("0");
+            ResourceAllocationSettingData rasd;
+            if (nextIp.getVirtualDataCenter() == null)
+            {
+                // External IP! need to assign the virtual datacenter and the mac.
+                nextIp.setVirtualDataCenter(vapp.getVirtualDataCenterHB());
+                nextIp.setMac(IPNetworkRang.requestRandomMacAddress(vapp.getVirtualDataCenterHB()
+                    .getHypervisorType()));
+                rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
+                rasd.setConfigurationName("2");
+                rasd.setResourceSubType("2");
+            }
+            else
+            {
+                // Generate the resource allocation setting data associed
+                rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
+                rasd.setConfigurationName("0");
+                rasd.setResourceSubType("0");
+            }
             rasdDAO.makePersistent(rasd);
 
             // Associate the resource with the values
@@ -200,8 +213,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         rasd.setDescription("MAC Address asociated to private Network");
         rasd.setInstanceID(UUID.randomUUID().toString());
         rasd.setResourceType(CIMResourceTypeEnum.Ethernet_Adapter.getNumericResourceType());
-        // Meaning is the the MAC address related to a private network
-        rasd.setResourceSubType("0");
 
         return rasd;
     }

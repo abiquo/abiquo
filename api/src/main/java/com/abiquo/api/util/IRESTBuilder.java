@@ -170,4 +170,7 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildExternalNetworksByDatacenterLinks(Integer enterpriseId,
         Integer limitId);
+
+    public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
+        IpPoolManagement ip);
 }

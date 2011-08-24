@@ -34,6 +34,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -224,6 +225,22 @@ public class VLANNetwork extends DefaultEntityBase
     public void setConfiguration(final NetworkConfiguration configuration)
     {
         this.configuration = configuration;
+    }
+
+    /**
+     * Used to get the limit id in REST links when the vlan is an external network.
+     */
+    @Transient
+    private Integer limitId;
+
+    public void setLimitId(final Integer limitId)
+    {
+        this.limitId = limitId;
+    }
+
+    public Integer getLimitId()
+    {
+        return limitId;
     }
 
     // I don't want to access the ips directly but I want to remove them in cascade

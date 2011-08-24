@@ -139,7 +139,14 @@ public class NetworkingService
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
         vlandto.setSufixDNS(configuration.getSufixDNS());
 
-        return proxyStub(userSession).editPrivateVlan(vdcId, vlanId, vlandto);
+        BasicResult res = proxyStub(userSession).editPrivateVlan(vdcId, vlanId, vlandto);
+        if (res.getSuccess() && defaultNetwork)
+        {
+            res =
+                proxyStub(userSession).setInternalVlanAsDefaultInVirtualDatacenter(userSession,
+                    vdcId, vlanId);
+        }
+        return res;
 
     }
 
@@ -461,8 +468,8 @@ public class NetworkingService
         final Integer enterpriseId, final Integer vdcId, final Integer vappId, final Integer vmId,
         final IpPoolManagement ipPoolManagement)
     {
-        // TODO
-        return null;
+        return proxyStub(userSession).requestExternalNicforVirtualMachine(enterpriseId, vdcId,
+            vappId, vmId, ipPoolManagement.getVlanNetworkId(), ipPoolManagement.getIdManagement());
     }
 
     public BasicResult setExternalVlanAsDefaultInVirtualDatacenter(final UserSession userSession,

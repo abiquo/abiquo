@@ -241,7 +241,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         {
             result.setSuccess(true);
             DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
 
             VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
             Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
@@ -252,7 +251,10 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                     URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
                         "{datacenter}", "datacenter");
 
+                factory.beginConnection();
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
+                factory.endConnection();
+
                 VirtualDataCenter vdctoadd =
                     VirtualDataCenter.create(vdc, datacenterId, enterprise, network.toPojo());
 
@@ -267,7 +269,6 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
             }
             result.setData(datacenters);
 
-            factory.endConnection();
         }
         else
         {

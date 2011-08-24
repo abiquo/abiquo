@@ -319,7 +319,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @PathParam(NIC) @NotNull @Min(1) final Integer nicOrder,
+        @PathParam(NIC) @NotNull @Min(0) final Integer nicOrder,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         service.releaseNicFromVirtualMachine(vdcId, vappId, vmId, nicOrder);

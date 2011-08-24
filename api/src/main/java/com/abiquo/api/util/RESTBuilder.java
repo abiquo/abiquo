@@ -916,4 +916,11 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
+        final IpPoolManagement ip)
+    {
+        return null;
+    }
+
 }

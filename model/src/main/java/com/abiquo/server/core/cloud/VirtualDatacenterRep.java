@@ -40,6 +40,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.DhcpDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,7 +50,6 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
@@ -276,11 +276,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findIpsByPrivateVLAN(vdcId, vlanId);
     }
 
-    public List<IpPoolManagement> findIpsByPrivateVLANUsedByAndVDC(final Integer vlanId)
-    {
-        return ipManagementDAO.findIpsByPrivateVLAN(vlanId);
-    }
-
     /**
      * Return all the available private IPs by VLAN with filter options.
      * 
@@ -307,6 +302,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         return ipManagementDAO.findIpsByPrivateVLANFiltered(vdcId, vlanId, firstElem, numElem, has,
             orderBy, asc);
+    }
+
+    public List<IpPoolManagement> findIpsByPrivateVLANUsedByAndVDC(final Integer vlanId)
+    {
+        return ipManagementDAO.findIpsByPrivateVLAN(vlanId);
     }
 
     /**
@@ -336,6 +336,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByVirtualMachine(final VirtualMachine vm)
     {
         return ipManagementDAO.findIpsByVirtualMachine(vm);
+    }
+
+    public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
+    {
+        return ipManagementDAO.findIpsByVlan(vlan);
     }
 
     public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(

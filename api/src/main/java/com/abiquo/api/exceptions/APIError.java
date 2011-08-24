@@ -151,7 +151,9 @@ public enum APIError
         "Unable to found default VLAN in Virtual Datacenter. Incoherent state in Database"), VLANS_INVALID_ENTERPRISE_LINK(
         "VLAN-37", "Invalid Enterprise identifier in the Enterprise link"), VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_DATACENTER(
         "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
-        "VLAN-39", "Can not delete a VLAN with IPs assigned to a Virtual Datacenter"),
+        "VLAN-39", "Can not delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
+        "VLAN-40",
+        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -416,8 +418,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

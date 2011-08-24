@@ -85,7 +85,8 @@
         <security:intercept-url pattern="/admin/enterprises/*/limits/*/externalnetworks/action/default" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits/*/externalnetworks/*" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <security:intercept-url pattern="/admin/enterprises/*/limits/*/externalnetworks/*/action/default" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE" />
-        
+        <security:intercept-url pattern="/admin/enterprises/*/limits/*/externalnetworks/*/ips" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
+        <security:intercept-url pattern="/admin/enterprises/*/limits/*/externalnetworks/*/ips/*" method="GET" access="ROLE_USERS_MANAGE_ENTERPRISE" />
         <!-- RESERVED MACHINES -->
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines" method="POST" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines" method="GET" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
