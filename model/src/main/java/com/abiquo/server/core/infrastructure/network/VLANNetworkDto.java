@@ -51,7 +51,7 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
 
     private Boolean defaultNetwork;
 
-    private NetworkType networkType;
+    private NetworkType type;
 
     public Integer getId()
     {
@@ -153,14 +153,14 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
         this.defaultNetwork = defaultNetwork;
     }
 
-    public NetworkType getNetworkType()
+    public NetworkType getType()
     {
-        return networkType;
+        return type;
     }
 
-    public void setNetworkType(final NetworkType networkType)
+    public void setType(final NetworkType type)
     {
-        this.networkType = networkType;
+        this.type = type;
     }
 
 }

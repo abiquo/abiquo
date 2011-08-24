@@ -364,6 +364,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
      */
     public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
     {
+        List<IpPoolManagement> ippoolList;
+        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        ippoolList = query.list();
 
         Query finalQuery = getSession().createQuery(BY_VLAN);
         finalQuery.setParameter("vdc_id", vdcId);
