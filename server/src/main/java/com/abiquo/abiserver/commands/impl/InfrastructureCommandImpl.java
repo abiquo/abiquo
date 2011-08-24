@@ -361,9 +361,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         physicalmachineHB, enterpriseId);
             }
 
-            if ((numberOfVM.equals(new Long(0)))
-                && ((physicalmachineHB.getIdEnterprise() == null) || (physicalmachineHB
-                    .getIdEnterprise() == 0)))
+            if (numberOfVM.equals(new Long(0))
+                && (physicalmachineHB.getIdEnterprise() == null || physicalmachineHB
+                    .getIdEnterprise() == 0))
             {
                 infrastructures.add(physicalmachineHB.toPojo());
             }
@@ -906,8 +906,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-                    
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
+
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
+                        userSession);
                 }
                 else
                 {
@@ -1066,8 +1067,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 
@@ -1841,6 +1842,10 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                             basicResult.setMessage(e.toString());
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             return basicResult;
                         }
                     }
