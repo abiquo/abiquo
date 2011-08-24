@@ -309,11 +309,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
             orderBy, asc);
     }
 
-    public List<IpPoolManagement> findIpsByPrivateVLANUsedByAndVDC(final Integer vlanId)
-    {
-        return ipManagementDAO.findIpsByPrivateVLAN(vlanId);
-    }
-
     /**
      * Return all the private IPs by Virtual Datacenter
      * 

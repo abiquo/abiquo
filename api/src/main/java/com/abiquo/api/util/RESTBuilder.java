@@ -452,6 +452,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc.getId().toString());
         params.put(DatacenterResource.DATACENTER, datacenterId.toString());
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+
         params.put(PrivateNetworkResource.PRIVATE_NETWORK, vdc.getDefaultVlan().getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
