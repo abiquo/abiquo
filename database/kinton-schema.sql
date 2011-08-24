@@ -1158,25 +1158,21 @@ CREATE TABLE  `kinton`.`remote_service` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Definition of table `kinton`.`chefcookbook`
+-- Definition of table `kinton`.`chef_recipe`
 --
 
-DROP TABLE IF EXISTS `kinton`.`chefcookbook`;
-CREATE TABLE  `kinton`.`chefcookbook` (
-  `chefCookbookId` int(10) unsigned NOT NULL auto_increment,
+DROP TABLE IF EXISTS `kinton`.`chef_recipe`;
+CREATE TABLE  `kinton`.`chef_recipe` (
+  `idRecipe` int(10) unsigned NOT NULL auto_increment,
   `idVM` int(10) unsigned NOT NULL,
-  `cookbook` varchar(50) NOT NULL,
-  `cookbookVersion` varchar(20) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` varchar(255),
   `version_c` int(11) default 0,
-  PRIMARY KEY  (`chefCookbookId`),
-  KEY `chefcookbook_FK1` (`idVM`),
-  CONSTRAINT `chefcookbook_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY  (`idRecipe`),
+  KEY `chef_recipe_FK1` (`idVM`),
+  CONSTRAINT `chef_recipe_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40000 ALTER TABLE `chefcookbook` DISABLE KEYS */;
-LOCK TABLES `chefcookbook` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `chefcookbook` ENABLE KEYS */;
 
 /**
  *  Definition of table `kinton`.`metering`

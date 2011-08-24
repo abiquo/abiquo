@@ -320,8 +320,8 @@ public enum APIError
         "RULE-6", "The load balance type indicated is null or invalid"),
 
     // Chef
-    CHEF_ERROR_GETTING_COOKBOOKS("CHEF-0",
-        "Could not get the list of cookbooks available for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
+    CHEF_ERROR_GETTING_RECIPES("CHEF-0",
+        "Could not get the list of available recipes for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
         "CHEF-1", "Chef client already exists"), CHEF_ERROR_CONNECTION("CHEF-2",
         "Cannot connect to the chef server"),
 
@@ -376,8 +376,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

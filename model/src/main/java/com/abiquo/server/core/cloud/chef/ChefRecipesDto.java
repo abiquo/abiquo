@@ -19,18 +19,32 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.cloud;
+/**
+ * 
+ */
+package com.abiquo.server.core.cloud.chef;
 
-  import com.abiquo.server.core.cloud.chef.ChefCookbook;
-import com.abiquo.server.core.common.DefaultEntityTestBase;
-import com.softwarementors.bzngine.entities.test.InstanceTester;
+import java.util.List;
 
-  public class ChefCookbookTest extends DefaultEntityTestBase<ChefCookbook>
-  {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-      @Override
-      protected InstanceTester<ChefCookbook> createEntityInstanceGenerator()
-      {
-          return new ChefCookbookGenerator(getSeed());
-      }
-  }
+import com.abiquo.model.transport.WrapperDto;
+
+/**
+ * Represents a collection of {@link ChefRecipeDto}.
+ * 
+ * @author ibarrera
+ */
+@XmlRootElement(name = "recipes")
+public class ChefRecipesDto extends WrapperDto<ChefRecipeDto>
+{
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    @XmlElement(name = "recipe")
+    public List<ChefRecipeDto> getCollection()
+    {
+        return collection;
+    }
+}

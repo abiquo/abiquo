@@ -45,9 +45,9 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.cloud.chef.ChefCookbook;
-import com.abiquo.server.core.cloud.chef.ChefCookbookDto;
-import com.abiquo.server.core.cloud.chef.ChefCookbooksDto;
+import com.abiquo.server.core.cloud.chef.ChefRecipe;
+import com.abiquo.server.core.cloud.chef.ChefRecipeDto;
+import com.abiquo.server.core.cloud.chef.ChefRecipesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -324,17 +324,17 @@ public class VirtualMachineResource extends AbstractResource
         dto.setState(v.getState());
         dto.setVdrpIP(v.getVdrpIP());
         dto.setVdrpPort(v.getVdrpPort());
-        if (v.getCookbooks() != null)
+        if (v.getRecipes() != null)
         {
-            ChefCookbooksDto cbooks = new ChefCookbooksDto();
-            dto.setCookbooks(cbooks);
-            for (ChefCookbook cookbook : v.getCookbooks())
+            dto.setRecipes(new ChefRecipesDto());
+
+            for (ChefRecipe recipeDto : v.getRecipes())
             {
-                ChefCookbookDto cbook = new ChefCookbookDto();
-                cbook.setName(cookbook.getName());
-                cbook.setVersion(cookbook.getCookbookVersion());
-                cbook.setId(cookbook.getId());
-                dto.getCookbooks().add(cbook);
+                ChefRecipeDto recipe = new ChefRecipeDto();
+                recipe.setId(recipeDto.getId());
+                recipe.setName(recipeDto.getName());
+                recipe.setDescription(recipeDto.getDescription());
+                dto.getRecipes().add(recipe);
             }
         }
         return dto;

@@ -29,8 +29,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.chef.ChefCookbook;
-import com.abiquo.server.core.cloud.chef.ChefCookbookDAO;
+import com.abiquo.server.core.cloud.chef.ChefRecipe;
+import com.abiquo.server.core.cloud.chef.ChefRecipeDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -48,7 +48,7 @@ public class VirtualMachineRep extends DefaultRepBase
     private RasdManagementDAO rasdDao;
 
     @Autowired
-    private ChefCookbookDAO chefDao;
+    private ChefRecipeDAO chefDao;
 
     public VirtualMachineRep()
     {
@@ -64,7 +64,7 @@ public class VirtualMachineRep extends DefaultRepBase
 
         this.dao = new VirtualMachineDAO(entityManager);
         this.rasdDao = new RasdManagementDAO(entityManager);
-        this.chefDao = new ChefCookbookDAO(entityManager);
+        this.chefDao = new ChefRecipeDAO(entityManager);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -127,12 +127,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
 
-    public void insertCookbook(final ChefCookbook cookbook)
+    public void insertRecipe(final ChefRecipe recipe)
     {
-        chefDao.persist(cookbook);
+        chefDao.persist(recipe);
     }
 
-    public List<ChefCookbook> findCookbooksByVirtualMachine(final VirtualMachine virtualMachine)
+    public List<ChefRecipe> findRecipesByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return chefDao.findByVirtualMachine(virtualMachine);
     }

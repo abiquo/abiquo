@@ -24,7 +24,7 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.chef.ChefCookbooksDto;
+import com.abiquo.server.core.cloud.chef.ChefRecipesDto;
 
 @XmlRootElement(name = "virtualMachine")
 public class VirtualMachineDto extends SingleResourceTransportDto
@@ -185,16 +185,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.password = password;
     }
 
-    private ChefCookbooksDto cookbooks;
+    private ChefRecipesDto recipes;
 
-    public ChefCookbooksDto getCookbooks()
+    public ChefRecipesDto getRecipes()
     {
-        return cookbooks;
+        return recipes;
     }
 
-    public void setCookbooks(final ChefCookbooksDto cookbooks)
+    public void setRecipes(final ChefRecipesDto recipes)
     {
-        this.cookbooks = cookbooks;
+        this.recipes = recipes;
     }
 
 }

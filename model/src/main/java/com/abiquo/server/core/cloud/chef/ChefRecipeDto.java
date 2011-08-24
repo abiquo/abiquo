@@ -19,32 +19,51 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
 package com.abiquo.server.core.cloud.chef;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-/**
- * Represents a collection of {@link ChefCookbookDto}
- * 
- * @author ibarrera
- */
-@XmlRootElement(name = "cookbooks")
-public class ChefCookbooksDto extends WrapperDto<ChefCookbookDto>
+@XmlRootElement(name = "recipe")
+public class ChefRecipeDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
-    @Override
-    @XmlElement(name = "cookbook")
-    public List<ChefCookbookDto> getCollection()
+    private Integer id;
+
+    public Integer getId()
     {
-        return collection;
+        return id;
     }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    private String description;
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(final String description)
+    {
+        this.description = description;
+    }
+
 }

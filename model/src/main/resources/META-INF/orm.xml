@@ -44,7 +44,7 @@
     <orm:entity class="com.abiquo.server.core.cloud.Node"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.NodeVirtualImage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.VirtualAppliance"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.cloud.chef.ChefCookbook"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.chef.ChefRecipe"></orm:entity>
     
     <!-- end: cloud infrastructure -->
     

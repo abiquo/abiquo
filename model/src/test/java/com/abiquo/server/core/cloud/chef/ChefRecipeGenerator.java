@@ -19,74 +19,73 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud.chef;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.chef.ChefCookbook;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class ChefCookbookGenerator extends DefaultEntityGenerator<ChefCookbook>
+public class ChefRecipeGenerator extends DefaultEntityGenerator<ChefRecipe>
 {
+    protected VirtualMachineGenerator virtualMachineGenerator;
 
-    VirtualMachineGenerator virtualMachineGenerator;
-
-    public ChefCookbookGenerator(final SeedGenerator seed)
+    public ChefRecipeGenerator(final SeedGenerator seed)
     {
         super(seed);
-
         virtualMachineGenerator = new VirtualMachineGenerator(seed);
-
     }
 
     @Override
-    public void assertAllPropertiesEqual(final ChefCookbook obj1, final ChefCookbook obj2)
+    public void assertAllPropertiesEqual(final ChefRecipe obj1, final ChefRecipe obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, ChefCookbook.COOKBOOK_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, ChefRecipe.NAME_PROPERTY,
+            ChefRecipe.DESCRIPTION_PROPERTY);
+
+        virtualMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(),
+            obj2.getVirtualMachine());
     }
 
     @Override
-    public ChefCookbook createUniqueInstance()
+    public ChefRecipe createUniqueInstance()
     {
         VirtualMachine virtualMachine = virtualMachineGenerator.createUniqueInstance();
-
-        String version = newString(nextSeed(), 0, 5);
-        String cookbook = newString(nextSeed(), 0, 255);
-        ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook, version);
-
-        return chefCookbook;
+        return createInstance(virtualMachine);
     }
 
-    public ChefCookbook createInstance(final VirtualMachine virtualMachine, final String cookbook,
-        final String version)
+    public ChefRecipe createInstanceWithoutVirtualMachine()
     {
-        ChefCookbook chefCookbook = new ChefCookbook(virtualMachine, cookbook, version);
-
-        return chefCookbook;
+        return createInstance(null);
     }
 
-    public ChefCookbook createInstanceWithoutVirtualMachine()
+    public ChefRecipe createInstance(final VirtualMachine virtualMachine)
     {
-        String version = newString(nextSeed(), 0, 5);
-        String cookbook = newString(nextSeed(), 0, 255);
-        ChefCookbook chefCookbook = new ChefCookbook(null, cookbook, version);
-        chefCookbook.setVersion(version);
+        String name = newString(nextSeed(), 0, 5);
+        return createInstance(name, virtualMachine);
+    }
 
-        return chefCookbook;
+    public ChefRecipe createInstance(final String name, final VirtualMachine virtualMachine)
+    {
+        String description = newString(nextSeed(), 0, 255);
+
+        ChefRecipe recipe = new ChefRecipe(name, description);
+        recipe.setVirtualMachine(virtualMachine);
+
+        return recipe;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(final ChefCookbook entity,
+    public void addAuxiliaryEntitiesToPersist(final ChefRecipe entity,
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualMachine virtualMachine = entity.getVirtualmachine();
+        VirtualMachine virtualMachine = entity.getVirtualMachine();
         virtualMachineGenerator.addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
         entitiesToPersist.add(virtualMachine);
-
     }
 
 }

@@ -59,7 +59,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -161,7 +161,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "virtualimage_conversions", "node_virtual_image_stateful_conversions",
             "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
-            "network_configuration", "chefcookbook", "dhcp_service", "storage_pool", "tier",
+            "network_configuration", "chef_recipe", "dhcp_service", "storage_pool", "tier",
             "storage_device", "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter",
             "repository", "workload_fit_policy_rule", "network", "session", "user",

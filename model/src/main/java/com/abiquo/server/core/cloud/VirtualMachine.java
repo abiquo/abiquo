@@ -43,7 +43,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.cloud.chef.ChefCookbook;
+import com.abiquo.server.core.cloud.chef.ChefRecipe;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -54,20 +54,19 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
-@NamedQueries( {@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
+@NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
 @NamedQuery(name = "VIRTUAL_MACHINE.BY_DC", query = VirtualMachine.BY_DC)})
 public class VirtualMachine extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualmachine";
 
-    public static final String BY_VAPP =
-        "SELECT nvi.virtualMachine " + "FROM NodeVirtualImage nvi "
-            + "WHERE nvi.virtualAppliance.id = :vapp_id";
+    public static final String BY_VAPP = "SELECT nvi.virtualMachine "
+        + "FROM NodeVirtualImage nvi " + "WHERE nvi.virtualAppliance.id = :vapp_id";
 
-    public static final String BY_DC =
-        "SELECT vm " + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
-            + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
-            + " AND pm.datacenter.id = :datacenterId";
+    public static final String BY_DC = "SELECT vm "
+        + "FROM VirtualMachine vm, Hypervisor hy, Machine pm "
+        + " WHERE vm.hypervisor.id = hy.id and hy.machine = pm.id "
+        + " AND pm.datacenter.id = :datacenterId";
 
     public static final int MANAGED = 1;
 
@@ -525,41 +524,41 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
-    public static final String CHEFCOOKBOOK_TABLE = "chefcookbook";
+    public static final String CHEFRECIPES_TABLE = "chef_recipe";
 
-    public static final String CHEFCOOKBOOK_PROPERTY = "cookbooks";
+    public static final String CHEFRECIPES_PROPERTY = "recipes";
 
-    static final String CHEFCOOKBOOK_ID_COLUMN = "chefCookbookId";
+    static final String CHEFRECIPES_ID_COLUMN = "idRecipe";
 
     static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = CHEFCOOKBOOK_TABLE, joinColumns = {@JoinColumn(name = CHEFCOOKBOOK_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
-    private List<ChefCookbook> cookbooks = new ArrayList<ChefCookbook>();
+    @JoinTable(name = CHEFRECIPES_TABLE, joinColumns = {@JoinColumn(name = CHEFRECIPES_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    private List<ChefRecipe> recipes = new ArrayList<ChefRecipe>();
 
-    public List<ChefCookbook> getCookbooks()
+    public List<ChefRecipe> getRecipes()
     {
-        if (cookbooks == null)
+        if (recipes == null)
         {
-            cookbooks = new ArrayList<ChefCookbook>();
+            recipes = new ArrayList<ChefRecipe>();
         }
-        return cookbooks;
+        return recipes;
     }
 
-    /* package */void addToCookbooks(final ChefCookbook cookbook)
+    /* package */void addRecipe(final ChefRecipe recipe)
     {
-        assert cookbook != null;
-        assert !this.cookbooks.contains(cookbook);
+        assert recipes != null;
+        assert !this.recipes.contains(recipe);
 
-        this.cookbooks.add(cookbook);
+        this.recipes.add(recipe);
     }
 
-    /* package */void removeFromCookbooks(final ChefCookbook cookbook)
+    /* package */void removeRecipe(final ChefRecipe recipe)
     {
-        assert cookbook != null;
-        assert this.cookbooks.contains(cookbook);
+        assert recipe != null;
+        assert this.recipes.contains(recipe);
 
-        this.cookbooks.remove(cookbook);
+        this.recipes.remove(recipe);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
