@@ -37,7 +37,6 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.cloud.HypervisorService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -105,8 +104,7 @@ public class VirtualMachinesResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
 
-        VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+        VirtualMachineDto vmDto = VirtualMachineResource.createTransferObject(vm, restBuilder);
 
         Hypervisor hypervisor = vm.getHypervisor();
         Machine machine = hypervisor == null ? null : hypervisor.getMachine();
@@ -147,7 +145,7 @@ public class VirtualMachinesResource extends AbstractResource
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+            VirtualMachineResource.createTransferObject(vm, vdcId, vappId, restBuilder);
         Hypervisor hypervisor = vm.getHypervisor();
         Machine machine = hypervisor == null ? null : hypervisor.getMachine();
         Rack rack = machine == null ? null : machine.getRack();

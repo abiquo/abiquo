@@ -101,7 +101,7 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        return createCloudTransferObject(vm, vdcId, vappId, restBuilder);
+        return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
 
     @GET
@@ -155,7 +155,7 @@ public class VirtualMachineResource extends AbstractResource
 
         service.updateVirtualMachineUse(virtualApplianceId, vmachine);
 
-        return createTransferObject(vmachine, virtualApplianceId, restBuilder);
+        return createTransferObject(vmachine, restBuilder);
     }
 
     // TODO forceEnterpriseLimits = true
@@ -304,8 +304,8 @@ public class VirtualMachineResource extends AbstractResource
         return vmDto;
     }
 
-    private static VirtualMachineDto createTransferObject(final VirtualMachine v,
-        final Integer vappId, final IRESTBuilder restBuilder)
+    public static VirtualMachineDto createTransferObject(final VirtualMachine v,
+        final IRESTBuilder restBuilder)
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
@@ -343,7 +343,7 @@ public class VirtualMachineResource extends AbstractResource
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder)
     {
-        return createTransferObject(v, vappId, restBuilder);
+        return createTransferObject(v, restBuilder);
 
     }
 }
