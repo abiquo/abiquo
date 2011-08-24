@@ -76,7 +76,7 @@ package net.undf.abicloud.vo.infrastructure
         
         public var password:String;
         
-        public var cookbooks:ArrayCollection;
+        public var recipes:ArrayCollection;
 
 
         /* ------------- Constructor ------------- */
@@ -97,7 +97,7 @@ package net.undf.abicloud.vo.infrastructure
             user = new User();
             idType = 0;
             password = "";
-            cookbooks = new ArrayCollection();
+            recipes = new ArrayCollection();
         }
 
 
