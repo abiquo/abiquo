@@ -63,13 +63,15 @@ public class ChefRecipeGenerator extends DefaultEntityGenerator<ChefRecipe>
 
     public ChefRecipe createInstance(final VirtualMachine virtualMachine)
     {
-        String name = newString(nextSeed(), 0, 5);
+        String name = newString(nextSeed(), ChefRecipe.NAME_LENGTH_MIN, ChefRecipe.NAME_LENGTH_MAX);
         return createInstance(name, virtualMachine);
     }
 
     public ChefRecipe createInstance(final String name, final VirtualMachine virtualMachine)
     {
-        String description = newString(nextSeed(), 0, 255);
+        String description =
+            newString(nextSeed(), ChefRecipe.DESCRIPTION_LENGTH_MIN,
+                ChefRecipe.DESCRIPTION_LENGTH_MAX);
 
         ChefRecipe recipe = new ChefRecipe(name, description);
         recipe.setVirtualMachine(virtualMachine);

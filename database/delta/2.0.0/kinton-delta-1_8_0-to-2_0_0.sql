@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS `kinton`.`chef_recipe`;
 CREATE TABLE  `kinton`.`chef_recipe` (
   `idRecipe` int(10) unsigned NOT NULL auto_increment,
   `idVM` int(10) unsigned NOT NULL,
-  `name` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
   `description` varchar(255),
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRecipe`),
