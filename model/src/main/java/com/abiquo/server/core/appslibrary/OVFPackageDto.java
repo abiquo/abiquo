@@ -1,167 +1,131 @@
-/**
- * Abiquo community edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.server.core.appslibrary;
-
-import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "ovfPackage")
-public class OVFPackageDto extends SingleResourceTransportDto implements Serializable
+@XmlRootElement(name = "")
+public class OVFPackageDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = 273004070322922926L;
-
     private Integer id;
-
-    private String description;
-
-    private String url;
-
-    private String productName;
-
-    private String productUrl;
-
-    private String productVersion;
-
-    private String productVendor;
-
-    private String categoryName;
-
-    private String iconPath;
-
-    private String diskFormatTypeUri;
-
-    private Long diskSizeMb;
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
-    public String getUrl()
-    {
-        return url;
-    }
-
-    public void setUrl(String url)
-    {
-        this.url = url;
-    }
-
-    public String getProductName()
-    {
-        return productName;
-    }
-
-    public void setProductName(String productName)
-    {
-        this.productName = productName;
-    }
-
-    public String getProductUrl()
-    {
-        return productUrl;
-    }
-
-    public void setProductUrl(String productUrl)
-    {
-        this.productUrl = productUrl;
-    }
+    private String productVersion;
 
     public String getProductVersion()
     {
         return productVersion;
     }
 
-    public void setProductVersion(String productVersion)
+    public void setProductVersion(final String productVersion)
     {
         this.productVersion = productVersion;
     }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    private String productVendor;
 
     public String getProductVendor()
     {
         return productVendor;
     }
 
-    public void setProductVendor(String productVendor)
+    public void setProductVendor(final String productVendor)
     {
         this.productVendor = productVendor;
     }
 
-    public String getCategoryName()
+    private String productUrl;
+
+    public String getProductUrl()
     {
-        return categoryName;
+        return productUrl;
     }
 
-    public void setCategoryName(String categoryName)
+    public void setProductUrl(final String productUrl)
     {
-        this.categoryName = categoryName;
+        this.productUrl = productUrl;
     }
 
-    public String getIconPath()
+    private String url;
+
+    public String getUrl()
     {
-        return iconPath;
+        return url;
     }
 
-    public void setIconPath(String iconPath)
+    public void setUrl(final String url)
     {
-        this.iconPath = iconPath;
+        this.url = url;
     }
 
-    public String getDiskFormatTypeUri()
+    private DiskFormatType type;
+
+    public DiskFormatType getType()
     {
-        return diskFormatTypeUri;
+        return type;
     }
 
-    public void setDiskFormatTypeUri(String diskFormatTypeUri)
+    public void setType(final DiskFormatType type)
     {
-        this.diskFormatTypeUri = diskFormatTypeUri;
+        this.type = type;
     }
 
-    public Long getDiskSizeMb()
+    private String productName;
+
+    public String getProductName()
+    {
+        return productName;
+    }
+
+    public void setProductName(final String productName)
+    {
+        this.productName = productName;
+    }
+
+    private long diskSizeMb;
+
+    public long getDiskSizeMb()
     {
         return diskSizeMb;
     }
 
-    public void setDiskSizeMb(Long diskSizeMb)
+    public void setDiskSizeMb(final long diskSizeMb)
     {
         this.diskSizeMb = diskSizeMb;
+    }
+
+    private String description;
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(final String description)
+    {
+        this.description = description;
     }
 
 }

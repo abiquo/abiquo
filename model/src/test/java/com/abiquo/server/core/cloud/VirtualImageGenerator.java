@@ -62,9 +62,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
-            VirtualImage.CATEGORY_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
-            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY,
-            VirtualImage.ID_REPOSITORY_PROPERTY);
+            VirtualImage.DISK_FILE_SIZE_PROPERTY, VirtualImage.DESCRIPTION_PROPERTY,
+            VirtualImage.ID_ICON_PROPERTY, VirtualImage.ID_REPOSITORY_PROPERTY);
     }
 
     @Override
