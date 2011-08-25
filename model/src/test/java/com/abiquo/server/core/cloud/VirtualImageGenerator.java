@@ -149,4 +149,15 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     }
 
+    public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
+        final List<Object> entitiesToPersist)
+    {
+        super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        Category category = entity.getCategory();
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        entitiesToPersist.add(category);
+
+    }
+
 }

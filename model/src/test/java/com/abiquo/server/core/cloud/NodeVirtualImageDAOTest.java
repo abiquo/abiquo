@@ -31,6 +31,8 @@ import junit.framework.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -54,6 +56,8 @@ public class NodeVirtualImageDAOTest extends
 
     private VirtualImage vimage;
 
+    private CategoryGenerator categoryGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -63,6 +67,7 @@ public class NodeVirtualImageDAOTest extends
         virtualMachineGenerator = new VirtualMachineGenerator(getSeed());
         virtualApplianceGenerator = new VirtualApplianceGenerator(getSeed());
         virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        categoryGenerator = new CategoryGenerator(getSeed());
 
         vimage = virtualImageGenerator.createUniqueInstance();
         vapp = virtualApplianceGenerator.createUniqueInstance();
@@ -75,7 +80,7 @@ public class NodeVirtualImageDAOTest extends
         // entitiesToSetup.add(vimage);
         // entitiesToSetup.add(vmachine);
         // ds().persistAll(entitiesToSetup.toArray());
-        saveVirtualImage(vimage);
+        // saveVirtualImage(vimage);
         saveVirtualMachine(vmachine);
     }
 
@@ -299,10 +304,10 @@ public class NodeVirtualImageDAOTest extends
         persistAll(ds(), entitiesToPersist, virtualMachine);
     }
 
-    private void saveVirtualImage(final VirtualImage virtualImage)
+    private void saveCategory(final Category category)
     {
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
-        persistAll(ds(), entitiesToPersist, virtualImage);
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, category);
     }
 }
