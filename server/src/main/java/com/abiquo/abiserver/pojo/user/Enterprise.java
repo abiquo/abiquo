@@ -105,7 +105,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    public void setIsReservationRestricted(final Boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -126,7 +126,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.limits = limits;
     }
 
-    public void setReservedMachines(Collection<PhysicalMachine> reservedMachines)
+    public void setReservedMachines(final Collection<PhysicalMachine> reservedMachines)
     {
         this.reservedMachines = reservedMachines;
     }
@@ -171,7 +171,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return dcLimits;
     }
 
-    public void setDcLimits(Set<DatacenterLimit> dcLimits)
+    public void setDcLimits(final Set<DatacenterLimit> dcLimits)
     {
         this.dcLimits = dcLimits;
     }
@@ -181,12 +181,12 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return this.defaultTheme;
     }
 
-    public void setDefaultTheme(String defaultTheme)
+    public void setDefaultTheme(final String defaultTheme)
     {
         this.defaultTheme = defaultTheme;
     }
 
-    public void addDatacenterLimit(DatacenterLimit limit)
+    public void addDatacenterLimit(final DatacenterLimit limit)
     {
         if (dcLimits == null)
         {
@@ -195,7 +195,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         dcLimits.add(limit);
     }
 
-    public void addReservedMachine(PhysicalMachine machine)
+    public void addReservedMachine(final PhysicalMachine machine)
     {
         if (reservedMachines == null)
         {
@@ -251,7 +251,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         return enterpriseHB;
     }
 
-    public static Enterprise create(EnterpriseDto dto)
+    public static Enterprise create(final EnterpriseDto dto)
     {
         Enterprise enterprise = new Enterprise();
 
@@ -268,6 +268,10 @@ public class Enterprise implements IPojo<EnterpriseHB>
         ral.setStorage(new Limit(dto.getStorageHard(), dto.getStorageSoft()));
 
         enterprise.setLimits(ral);
+
+        enterprise.setChefClientCertificate(dto.getChefClientCertificate());
+        enterprise.setChefURL(dto.getChefURL());
+        enterprise.setChefValidatorCertificate(dto.getChefValidatorCertificate());
 
         return enterprise;
     }
