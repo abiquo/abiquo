@@ -101,7 +101,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -121,7 +121,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(boolean isReservationRestricted)
+    public void setIsReservationRestricted(final boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -146,7 +146,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.repositorySoft;
     }
 
-    private void setRepositorySoft(long repositorySoft)
+    private void setRepositorySoft(final long repositorySoft)
     {
         this.repositorySoft = repositorySoft;
     }
@@ -171,7 +171,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return this.repositoryHard;
     }
 
-    private void setRepositoryHard(long repositoryHard)
+    private void setRepositoryHard(final long repositoryHard)
     {
         this.repositoryHard = repositoryHard;
     }
@@ -182,7 +182,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return new Limit(repositorySoft, repositoryHard);
     }
 
-    public void setRepositoryLimits(Limit limit)
+    public void setRepositoryLimits(final Limit limit)
     {
         setRepositorySoft(limit.soft);
         setRepositoryHard(limit.hard);
@@ -212,7 +212,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return chefURL;
     }
 
-    public void setChefURL(String chefURL)
+    public void setChefURL(final String chefURL)
     {
         this.chefURL = chefURL;
     }
@@ -235,7 +235,7 @@ public class Enterprise extends DefaultEntityWithLimits
         return chefClientCertificate;
     }
 
-    public void setChefClientCertificate(String chefClientCertificate)
+    public void setChefClientCertificate(final String chefClientCertificate)
     {
         this.chefClientCertificate = chefClientCertificate.trim();
     }
@@ -259,14 +259,15 @@ public class Enterprise extends DefaultEntityWithLimits
         return chefValidatorCertificate;
     }
 
-    public void setChefValidatorCertificate(String chefValidatorCertificate)
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
     {
         this.chefValidatorCertificate = chefValidatorCertificate.trim();
     }
 
     // *************************** Mandatory constructors ***********************
-    public Enterprise(String name, int ramSoftLimitInMb, int cpuCountSoftLimit,
-        long hdSoftLimitInMb, int ramHardLimitInMb, int cpuCountHardLimit, long hdHardLimitInMb)
+    public Enterprise(final String name, final int ramSoftLimitInMb, final int cpuCountSoftLimit,
+        final long hdSoftLimitInMb, final int ramHardLimitInMb, final int cpuCountHardLimit,
+        final long hdHardLimitInMb)
     {
         setName(name);
         setIsReservationRestricted(Boolean.FALSE);
@@ -295,8 +296,8 @@ public class Enterprise extends DefaultEntityWithLimits
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
     private final List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();
 
-    public User createUser(Role role, String name, String surname, String email, String nick,
-        String password, String locale)
+    public User createUser(final Role role, final String name, final String surname,
+        final String email, final String nick, final String password, final String locale)
     {
         return new User(this, role, name, surname, email, nick, password, locale);
     }

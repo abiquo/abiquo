@@ -45,9 +45,6 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.cloud.chef.ChefRecipe;
-import com.abiquo.server.core.cloud.chef.ChefRecipeDto;
-import com.abiquo.server.core.cloud.chef.ChefRecipesDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -56,7 +53,6 @@ import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
-
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
@@ -70,6 +66,11 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
+
+    // Chef constants to help link builders. Method implementation are premium.
+    public static final String VIRTUAL_MACHINE_RECIPES_PATH = "/config/recipes";
+
+    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
     @Autowired
     VirtualMachineService vmService;
@@ -290,13 +291,6 @@ public class VirtualMachineResource extends AbstractResource
         }
     }
 
-    @GET
-    @Path("chefrecipes")
-    public String getChefRecipes() throws Exception
-    {
-        return "chef";
-    }
-
     public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
@@ -307,7 +301,6 @@ public class VirtualMachineResource extends AbstractResource
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final IRESTBuilder restBuilder)
     {
-
         VirtualMachineDto dto = new VirtualMachineDto();
 
         dto.setCpu(v.getCpu());
@@ -324,19 +317,7 @@ public class VirtualMachineResource extends AbstractResource
         dto.setState(v.getState());
         dto.setVdrpIP(v.getVdrpIP());
         dto.setVdrpPort(v.getVdrpPort());
-        if (v.getRecipes() != null)
-        {
-            dto.setRecipes(new ChefRecipesDto());
 
-            for (ChefRecipe recipeDto : v.getRecipes())
-            {
-                ChefRecipeDto recipe = new ChefRecipeDto();
-                recipe.setId(recipeDto.getId());
-                recipe.setName(recipeDto.getName());
-                recipe.setDescription(recipeDto.getDescription());
-                dto.getRecipes().add(recipe);
-            }
-        }
         return dto;
     }
 

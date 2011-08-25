@@ -86,8 +86,12 @@ public class ChefRecipeGenerator extends DefaultEntityGenerator<ChefRecipe>
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
         VirtualMachine virtualMachine = entity.getVirtualMachine();
-        virtualMachineGenerator.addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
-        entitiesToPersist.add(virtualMachine);
+        if (virtualMachine != null)
+        {
+            virtualMachineGenerator
+                .addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
+            entitiesToPersist.add(virtualMachine);
+        }
     }
 
 }

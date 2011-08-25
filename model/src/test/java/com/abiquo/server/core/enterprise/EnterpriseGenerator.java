@@ -28,13 +28,13 @@ import com.softwarementors.commons.test.SeedGenerator;
 public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
 {
 
-    public EnterpriseGenerator(SeedGenerator seed)
+    public EnterpriseGenerator(final SeedGenerator seed)
     {
         super(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Enterprise obj1, Enterprise obj2)
+    public void assertAllPropertiesEqual(final Enterprise obj1, final Enterprise obj2)
     {
 
     }
@@ -42,13 +42,12 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
     @Override
     public Enterprise createUniqueInstance()
     {
-        int seed = nextSeed();
-
-        final String name = newString(seed, Enterprise.NAME_LENGTH_MIN, Enterprise.NAME_LENGTH_MAX);
+        final String name =
+            newString(nextSeed(), Enterprise.NAME_LENGTH_MIN, Enterprise.NAME_LENGTH_MAX);
         return createInstance(name);
     }
 
-    public Enterprise createInstance(String name)
+    public Enterprise createInstance(final String name)
     {
         int seed = nextSeed();
 
@@ -68,13 +67,33 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
             hdHardLimitInMb);
     }
 
-    public Enterprise createInstanceNoLimits(String name)
+    public Enterprise createInstanceNoLimits(final String name)
     {
         return new Enterprise(name, 0, 0, 0, 0, 0, 0);
     }
 
+    public Enterprise createChefInstance()
+    {
+        Enterprise enterprise = createUniqueInstance();
+        return addChefConfig(enterprise);
+    }
+
+    public Enterprise addChefConfig(final Enterprise enterprise)
+    {
+        String chefServerURL = "https://api.opscode.com/organizations/ent" + nextSeed();
+        String clientCert = newString(nextSeed(), 0, 100);
+        String validationCert = newString(nextSeed(), 0, 100);
+
+        enterprise.setChefURL(chefServerURL);
+        enterprise.setChefValidatorCertificate(validationCert);
+        enterprise.setChefClientCertificate(clientCert);
+
+        return enterprise;
+    }
+
     @Override
-    public void addAuxiliaryEntitiesToPersist(Enterprise entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Enterprise entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
