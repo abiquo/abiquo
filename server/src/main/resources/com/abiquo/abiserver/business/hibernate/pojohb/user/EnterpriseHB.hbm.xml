@@ -22,7 +22,8 @@
             <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
         </set>
         <!-- Limits -->
-        <component name="limits" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
+        <component name="limits"
+            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
             <component name="cpu" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="cpuHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="cpuSoft" type="java.lang.Long" not-null="true" />
@@ -64,14 +65,21 @@
         SQL query to obtain the total allocations of a resource. only sum
         virtualMachiens on state different to NOT_DEPLOYED.
     -->
-    <query name="SUM_USED_CPU_RESOURCES"> SELECT SUM(vm.cpu) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
-        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state</query>
-    <query name="SUM_USED_RAM_RESOURCES"> SELECT SUM(vm.ram) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
-        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state</query>
-    <query name="SUM_USED_HD_RESOURCES"> SELECT SUM(vm.hd) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
-        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state</query>
-    <query name="GET_ALL_ENTERPRISE_IDS"> SELECT enter.idEnterprise FROM EnterpriseHB as enter</query>
-    <query name="GET_BY_VIRTAL_APP"> SELECT enter FROM EnterpriseHB as enter, VirtualappHB as vapp WHERE vapp.enterpriseHB.idEnterprise = enter.idEnterprise AND vapp.idVirtualApp = :idVirtualApp</query>
-    <query name="GET_DATACENTER_LIMITS"> SELECT dclimit FROM DatacenterLimitHB as dclimit WHERE dclimit.enterprise.idEnterprise = :idEnterprise AND dclimit.datacenter.idDataCenter = :idDatacenter</query>
-    <query name="ENTERPRISE.GET_ENTERPRISE_RESERVED_BY_VLAN_ID"> SELECT vlan.enterpriseHB FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB as vlan WHERE vlan.vlanNetworkId = :vlan_id</query>
+    <query name="SUM_USED_CPU_RESOURCES"> SELECT SUM(vm.cpu) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va,
+        VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND n.idVirtualApp=va.idVirtualApp AND
+        nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state </query>
+    <query name="SUM_USED_RAM_RESOURCES"> SELECT SUM(vm.ram) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va,
+        VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND n.idVirtualApp=va.idVirtualApp AND
+        nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state </query>
+    <query name="SUM_USED_HD_RESOURCES"> SELECT SUM(vm.hd) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va,
+        VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND n.idVirtualApp=va.idVirtualApp AND
+        nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state </query>
+    <query name="GET_ALL_ENTERPRISE_IDS"> SELECT enter.idEnterprise FROM EnterpriseHB as enter </query>
+    <query name="GET_BY_VIRTAL_APP"> SELECT enter FROM EnterpriseHB as enter, VirtualappHB as vapp WHERE
+        vapp.enterpriseHB.idEnterprise = enter.idEnterprise AND vapp.idVirtualApp = :idVirtualApp </query>
+    <query name="GET_DATACENTER_LIMITS"> SELECT dclimit FROM DatacenterLimitHB as dclimit WHERE dclimit.enterprise.idEnterprise =
+        :idEnterprise AND dclimit.datacenter.idDataCenter = :idDatacenter </query>
+    <query name="ENTERPRISE.GET_ENTERPRISE_RESERVED_BY_VLAN_ID"> SELECT vlan.enterpriseHB FROM
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB as vlan WHERE vlan.vlanNetworkId =
+        :vlan_id </query>
 </hibernate-mapping>

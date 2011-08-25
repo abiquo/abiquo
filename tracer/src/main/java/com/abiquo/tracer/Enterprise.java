@@ -27,8 +27,8 @@ public class Enterprise implements Serializable
 {
     private static final long serialVersionUID = -2787051086998140963L;
 
-    public static Enterprise SYSTEM_ENTERPRISE =
-        Enterprise.enterprise("Abiquo System").user(User.SYSTEM_USER);
+    public static Enterprise SYSTEM_ENTERPRISE = Enterprise.enterprise("Abiquo System").user(
+        User.SYSTEM_USER);
 
     private String name;
 
@@ -36,29 +36,29 @@ public class Enterprise implements Serializable
 
     private VirtualDatacenter virtualDatacenter;
 
-    private Enterprise(String storagePool)
+    private Enterprise(final String storagePool)
     {
         this.setName(storagePool);
     }
 
-    public static Enterprise enterprise(String enterprise)
+    public static Enterprise enterprise(final String enterprise)
     {
         return new Enterprise(enterprise);
     }
 
-    public Enterprise user(User user)
+    public Enterprise user(final User user)
     {
         this.setUser(user);
         return this;
     }
 
-    public Enterprise virtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public Enterprise virtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         this.setVirtualDatacenter(virtualDatacenter);
         return this;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -68,7 +68,7 @@ public class Enterprise implements Serializable
         return name;
     }
 
-    public void setUser(User user)
+    public void setUser(final User user)
     {
         this.user = user;
     }
@@ -78,7 +78,7 @@ public class Enterprise implements Serializable
         return user;
     }
 
-    public void setVirtualDatacenter(VirtualDatacenter virtualDatacenter)
+    public void setVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }

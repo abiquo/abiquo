@@ -33,8 +33,8 @@ import com.abiquo.model.transport.WrapperDto;
 
 /**
  * Wrapper class anotation for class {@link IpPoolManagementDto} object
+ * 
  * @author jdevesa@abiquo.com
- *
  */
 @XmlRootElement(name = "ips")
 public class IpsPoolManagementDto extends WrapperDto<IpPoolManagementDto>

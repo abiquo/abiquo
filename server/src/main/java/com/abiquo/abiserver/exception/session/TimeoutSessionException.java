@@ -48,5 +48,4 @@ public class TimeoutSessionException extends Exception
         super(message);
     }
 
-    
 }

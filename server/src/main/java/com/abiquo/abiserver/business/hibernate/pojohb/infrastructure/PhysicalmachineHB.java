@@ -68,7 +68,7 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     private String vswitchName;
 
     private String initiatorIQN;
-    
+
     private String ipmiIp;
 
     private Integer ipmiPort;
@@ -90,9 +90,9 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     public static final int STATE_HALTED = 4;
 
     public static final int STATE_UNLICENSED = 5;
-    
+
     public static final int STATE_HA_IN_PROGRESS = 6;
-    
+
     public static final int STATE_DISABLED_FOR_HA = 7;
 
     /**
@@ -364,7 +364,7 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     {
         return idEnterprise;
     }
-    
+
     public String getIpmiIp()
     {
         return ipmiIp;
@@ -404,7 +404,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     {
         this.ipmiPassword = ipmiPassword;
     }
-
 
     @Override
     public PhysicalMachine toPojo()
@@ -448,10 +447,10 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         {
             physicalMachine.setRack(rack.toPojo());
         }
-        
+
         if (hypervisor != null)
         {
-        	physicalMachine.setHypervisor(hypervisor.toPojo(physicalMachine));
+            physicalMachine.setHypervisor(hypervisor.toPojo(physicalMachine));
         }
 
         return physicalMachine;

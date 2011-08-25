@@ -46,6 +46,7 @@ import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -121,6 +122,53 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         EnterprisesDto entity = response.getEntity(EnterprisesDto.class);
         Assert.assertSize(entity.getCollection(), 1);
+    }
+
+    @Test
+    public void getEnterpriseWithPricingTemplate() throws Exception
+    {
+        Enterprise e1 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e2 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e3 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e4 = enterpriseGenerator.createUniqueInstance();
+        Enterprise e5 = enterpriseGenerator.createUniqueInstance();
+
+        PricingTemplate pt = pricingTemplateGenerator.createUniqueInstance();
+        PricingTemplate pt1 = pricingTemplateGenerator.createUniqueInstance();
+
+        e1.setPricingTemplate(pt);
+        e2.setPricingTemplate(pt1);
+        e3.setPricingTemplate(pt);
+        e4.setPricingTemplate(pt);
+        Role r1 = roleGenerator.createInstance();
+        User u1 = userGenerator.createInstance(e1, r1, "foo");
+
+        setup(pt.getCurrency(), pt, pt1.getCurrency(), pt1, e1, e2, e3, e4, e5, r1, u1);
+
+        // Enterprise associated to the pricing template
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put("idPricingTemplate", new String[] {Integer.toString(pt.getId())});
+        queryParams.put("included", new String[] {"true"});
+
+        String uri = UriHelper.appendQueryParamsToPath(enterprisesURI, queryParams, false);
+
+        ClientResponse response = get(uri, u1.getNick(), "foo");
+        assertEquals(response.getStatusCode(), 200);
+
+        EnterprisesDto entity = response.getEntity(EnterprisesDto.class);
+        Assert.assertSize(entity.getCollection(), 3);
+
+        // Enterprise not associated to the pricing template
+        Map<String, String[]> queryParams2 = new HashMap<String, String[]>();
+        queryParams2.put("idPricingTemplate", new String[] {Integer.toString(pt.getId())});
+        queryParams2.put("included", new String[] {"false"});
+
+        uri = UriHelper.appendQueryParamsToPath(enterprisesURI, queryParams2, false);
+
+        response = get(uri, u1.getNick(), "foo");
+        assertEquals(response.getStatusCode(), 200);
+        entity = response.getEntity(EnterprisesDto.class);
+        Assert.assertSize(entity.getCollection(), 2);
     }
 
     @Test

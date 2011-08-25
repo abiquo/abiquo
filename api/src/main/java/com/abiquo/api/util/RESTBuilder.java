@@ -88,7 +88,16 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
+import com.abiquo.server.core.pricing.Currency;
+import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingCostCodeDto;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTemplateDto;
+import com.abiquo.server.core.pricing.PricingTierDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
@@ -893,6 +902,50 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
+        final PricingTemplateDto pricingTemplate)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeCurrencyLinks(final CostCode costCode,
+        final Currency currency, final CostCodeCurrencyDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingCostCodeLinks(final CostCode costCode,
+        final PricingTemplate pricingTemplate, final PricingCostCodeDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingTierLinks(final Tier tier,
+        final PricingTemplate pricingTemplate, final PricingTierDto dto)
     {
         // TODO Auto-generated method stub
         return null;

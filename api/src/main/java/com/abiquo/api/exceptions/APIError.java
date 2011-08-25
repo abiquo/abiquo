@@ -73,7 +73,9 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), MISSING_ENTERPRISE_LINK("ENTERPRISE-8",
         "Missing enterprise link"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-9",
-        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"),
+        "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_PRICING_TEMPLATE_LINK(
+        "ENTERPRISE-10", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
+        "ENTERPRISE-11", "Missing pricing template parameter"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -371,7 +373,36 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
-    ;
+    // PRICING TEMPLATE
+    CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
+        "PRICINGTEMPLATE-1", "Missing enterprise parameter"), PRICING_TEMPLATE_DUPLICATED_NAME(
+        "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
+        "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
+        "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"),
+
+    // CURRENCY
+    NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
+        "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
+        "Duplicated name for Currency"),
+
+    // COST CODE
+    NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
+        "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
+        "Duplicated name for Cost Code"),
+
+    // COST CODE- CURRENCY
+    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
+        "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"),
+
+    // PRICING - COST CODE
+    PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
+        "Duplicated value by Cost Code and PricingTemplate"), NON_EXISTENT_PRICING_COSTCODE(
+        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist"),
+
+    // PRICING - TIER
+    PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist");
 
     /**
      * Internal error code

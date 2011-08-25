@@ -148,7 +148,7 @@ public class Rack extends InfrastructureElement implements IPojo<RackHB>, Compar
     @Override
     public int compareTo(final Rack r2)
     {
-        if (StringUtils.hasText(this.getName()) && (StringUtils.hasText(r2.getName())))
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(r2.getName()))
         {
             return this.getName().compareTo(r2.getName());
         }

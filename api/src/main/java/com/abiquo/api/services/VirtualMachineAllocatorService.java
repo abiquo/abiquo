@@ -148,7 +148,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (Exception e)
         {
             addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));            
+                virtualMachineId, e));
         }
         finally
         {
@@ -158,9 +158,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return vmachine;
     }
 
-
-    private CommonError createErrorWithExceptionDetails(APIError apiError,
-        Integer virtualMachineId, Exception e)
+    private CommonError createErrorWithExceptionDetails(final APIError apiError,
+        final Integer virtualMachineId, final Exception e)
     {
         final String msg =
             String.format("%s (%s)\n%s", apiError.getMessage(),
@@ -169,7 +168,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return new CommonError(apiError.getCode(), msg);
     }
 
-    
     public void updateVirtualMachineUse(final Integer idVirtualApp, final VirtualMachine vMachine)
     {
         // UPGRADE PHYSICAL MACHINE USE

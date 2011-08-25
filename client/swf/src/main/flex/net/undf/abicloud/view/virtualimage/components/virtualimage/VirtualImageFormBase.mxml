@@ -94,7 +94,7 @@
 
             //The VirtualImage being created or edited
             [Bindable]
-            private var _virtualImage:VirtualImage;
+            protected var _virtualImage:VirtualImage;
 
             private var _uploadProgressTimer:Timer;
 
@@ -105,6 +105,8 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
+            
+            protected var _costCodeId:int;
 			
             private function onCreationComplete():void
             {
@@ -139,6 +141,7 @@
                 this._uploadProgressTimer.addEventListener(TimerEvent.TIMER_COMPLETE, checkVirtualImageUploadProgress);
 
                 requestDiskFormatTypes();
+                
             }
 
             private function requestDiskFormatTypes():void
@@ -226,7 +229,8 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
-                    costInput.text = this._virtualImage.costCode;
+                    
+                    this._costCodeId = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -284,7 +288,7 @@
                     else
                         updatedValues.shared = 0; 
                         
-                    updatedValues.costCode = costInput.text;                   
+                    updatedValues.costCode = this._costCodeId;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
@@ -812,10 +816,11 @@
                 label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
                 includeInLayout="{this._virtualImage != null}"
                 visible="{this._virtualImage != null}">
-                <mx:TextInput id="costInput"
-                    height="18"
-                    maxChars="50"
-                    change="validateForm()"/>
+                <mx:ComboBox id="costInput"
+                	prompt="@Resource(bundle='Common',key='LABEL_NOT_AVAILABLE')"
+                	enabled="{costInput.dataProvider}"
+                	labelField="name"
+                    height="18"/>
             </mx:FormItem>
         </mx:Form>
 

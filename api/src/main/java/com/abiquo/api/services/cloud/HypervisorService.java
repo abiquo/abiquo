@@ -44,37 +44,16 @@ public class HypervisorService extends DefaultApiService
     MachineService machineService;
 
     /*
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Hypervisor addHypervisor(Integer machineId, HypervisorDto dto)
-    {
-        Machine machine = repo.findMachineById(machineId);
-
-        if (repo.existAnyHypervisorWithIp(dto.getIp()))
-        {
-            errors.add(APIError.HYPERVISOR_EXIST_IP);
-        }
-
-        if (repo.existAnyHypervisorWithIpService(dto.getIpService()))
-        {
-            errors.add(APIError.HYPERVISOR_EXIST_SERVICE_IP);
-        }
-
-        Hypervisor hypervisor =
-            machine.createHypervisor(dto.getType(), "", dto.getIp(), dto.getIpService(), dto
-                .getPort(), dto.getUser(), dto.getPassword());
-
-        if (!hypervisor.isValid())
-        {
-            validationErrors.addAll(hypervisor.getValidationErrors());
-        }
-        flushErrors();
-
-        repo.insertHypervisor(hypervisor);
-        return hypervisor;
-    }
-
-    public boolean isAssignedTo(Integer datacenterId, Integer rackId, Integer machineId)
-    {
-        return machineService.isAssignedTo(datacenterId, rackId, machineId);
-    }*/
+     * @Transactional(propagation = Propagation.REQUIRED) public Hypervisor addHypervisor(Integer
+     * machineId, HypervisorDto dto) { Machine machine = repo.findMachineById(machineId); if
+     * (repo.existAnyHypervisorWithIp(dto.getIp())) { errors.add(APIError.HYPERVISOR_EXIST_IP); } if
+     * (repo.existAnyHypervisorWithIpService(dto.getIpService())) {
+     * errors.add(APIError.HYPERVISOR_EXIST_SERVICE_IP); } Hypervisor hypervisor =
+     * machine.createHypervisor(dto.getType(), "", dto.getIp(), dto.getIpService(), dto .getPort(),
+     * dto.getUser(), dto.getPassword()); if (!hypervisor.isValid()) {
+     * validationErrors.addAll(hypervisor.getValidationErrors()); } flushErrors();
+     * repo.insertHypervisor(hypervisor); return hypervisor; } public boolean isAssignedTo(Integer
+     * datacenterId, Integer rackId, Integer machineId) { return
+     * machineService.isAssignedTo(datacenterId, rackId, machineId); }
+     */
 }

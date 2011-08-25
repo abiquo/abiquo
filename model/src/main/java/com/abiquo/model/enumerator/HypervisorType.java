@@ -83,16 +83,17 @@ public enum HypervisorType
     {
         return name().toLowerCase().replace("_", "-");
     }
-    
+
     public boolean requiresCredentials()
     {
-    	switch (this) {
-		case KVM:
-		case XEN_3:
-			return false;
-		default:
-			return true;
-		}
+        switch (this)
+        {
+            case KVM:
+            case XEN_3:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /**

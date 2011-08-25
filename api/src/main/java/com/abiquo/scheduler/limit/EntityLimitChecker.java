@@ -180,12 +180,12 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private boolean allNoLimits(final T limit)
     {
-        return (limit.getCpuCountLimits().isNoLimit() //
+        return limit.getCpuCountLimits().isNoLimit() //
             && limit.getRamLimitsInMb().isNoLimit() //
             && limit.getHdLimitsInMb().isNoLimit() //
             && (limit.getVlansLimits() == null || limit.getVlansLimits().isNoLimit()) //
             && (limit.getStorageLimits() == null || limit.getStorageLimits().isNoLimit()) //
-        && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit()));
+            && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit());
     }
 
     /**

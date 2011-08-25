@@ -123,7 +123,7 @@ public class ObjectFactory
     }
 
     /**
-     * Create an instance of {@link LogicServerDto }
+     * <<<<<<< HEAD Create an instance of {@link LogicServerDto }
      */
     public LogicServerDto createLogicServerDto()
     {

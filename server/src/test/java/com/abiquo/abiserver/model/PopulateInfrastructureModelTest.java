@@ -49,8 +49,8 @@ import com.abiquo.model.enumerator.HypervisorType;
 public class PopulateInfrastructureModelTest
 {
 
-    private final static Logger log =
-        LoggerFactory.getLogger(PopulateInfrastructureModelTest.class);
+    private final static Logger log = LoggerFactory
+        .getLogger(PopulateInfrastructureModelTest.class);
 
     public static void main(String[] args) throws PersistenceException, JAXBException
     {
@@ -258,7 +258,7 @@ public class PopulateInfrastructureModelTest
 
         hyp.setIp(ip);
         hyp.setPort(hType.defaultPort);
-        
+
         hyp.setType(hType);
         hyp.setPhysicalMachine(physicalMachien);
 

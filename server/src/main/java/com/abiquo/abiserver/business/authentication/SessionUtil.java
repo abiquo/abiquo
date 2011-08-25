@@ -43,7 +43,7 @@ public class SessionUtil
      * @return
      */
     @Deprecated
-    public static UserHB findUserHBByName(String name)
+    public static UserHB findUserHBByName(final String name)
     {
         return findUserHBByName(name, AuthType.ABIQUO.name());
     }
@@ -56,7 +56,7 @@ public class SessionUtil
      * @return
      */
     @Deprecated
-    public static UserHB findUserHBByName(String name, String authType)
+    public static UserHB findUserHBByName(final String name, final String authType)
     {
         Session session = HibernateUtil.getSession();
         Transaction transaction = null;

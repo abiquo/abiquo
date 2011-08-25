@@ -129,7 +129,8 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
         if (filter.containsKey("enterprise"))
         {
-            stringQuery.append(" and enterprise like '%" + replaceApostrophe(filter.get("enterprise")) + "%'");
+            stringQuery.append(" and enterprise like '%"
+                + replaceApostrophe(filter.get("enterprise")) + "%'");
         }
         if (filter.containsKey("user"))
         {
@@ -164,7 +165,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         if (filter.containsKey("component"))
         {
             stringQuery.append(" and component like '%" + filter.get("component") + "%'");
-        }   
+        }
 
         // if (role != Role.SYS_ADMIN)
         if (!SecurityService.isCloudAdmin(role.toPojo()))
@@ -201,7 +202,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
 
         return listOfMeters;
     }
-    
+
     private final String replaceApostrophe(final String name)
     {
         return name.replaceAll("'", "''");

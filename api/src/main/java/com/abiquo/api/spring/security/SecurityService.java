@@ -69,6 +69,10 @@ public class SecurityService
 
     public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
 
+    public static final String PRICING_VIEW = DRP + "PRICING_VIEW";
+
+    public static final String PRICING_MANAGE = DRP + "PRICING_MANAGE";
+
     public boolean hasPrivilege(final String privilege)
     {
         return AuthorityUtils.userHasAuthority(privilege);

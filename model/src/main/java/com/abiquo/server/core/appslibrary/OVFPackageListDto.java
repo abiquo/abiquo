@@ -32,7 +32,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "ovfPackageList")
 public class OVFPackageListDto extends SingleResourceTransportDto implements Serializable
-{    
+{
     private static final long serialVersionUID = 6951687879883540967L;
 
     private Integer id;
@@ -40,7 +40,7 @@ public class OVFPackageListDto extends SingleResourceTransportDto implements Ser
     private String name;
 
     private List<OVFPackageDto> ovfPackages = new LinkedList<OVFPackageDto>();
-    
+
     @XmlElement(name = "ovfPackage")
     public List<OVFPackageDto> getOvfPackages()
     {
@@ -72,5 +72,4 @@ public class OVFPackageListDto extends SingleResourceTransportDto implements Ser
         this.name = name;
     }
 
-    
 }

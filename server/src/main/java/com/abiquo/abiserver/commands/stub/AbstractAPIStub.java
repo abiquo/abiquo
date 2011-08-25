@@ -1121,4 +1121,150 @@ public class AbstractAPIStub
             "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
             queryParams);
     }
+
+    protected String createCurrencyLink(final int currencyId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
+    }
+
+    protected String createPricingTemplateLink(final int templateId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}",
+            Collections.singletonMap("template", valueOf(templateId)));
+    }
+
+    protected String createPricingTemplatesLink()
+    {
+        return createPricingTemplatesLink(null, null);
+    }
+
+    protected String createPricingTemplatesLink(Integer offset, final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/pricingTemplates", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodesLink()
+    {
+        return createCostCodesLink(null, null);
+    }
+
+    protected String createCostCodesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/costCodes", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodeCurrenciesLink(final Integer costCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("costcode", costCodeId.toString());
+
+        return resolveURI(apiUri, "config/costCodes/{costcode}/currencies", params);
+    }
+
+    protected String createCostCodeLink(final int costCodeId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
+    }
+
+    protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
+        final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCurrenciesLink()
+    {
+        return createCurrenciesLink(null, null);
+    }
+
+    protected String createCurrenciesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createPricingCostCodesLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes", params);
+    }
+
+    protected String createPricingCostCodeLink(final Integer pricingId,
+        final Integer pricingCostCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+        params.put("costcode", pricingCostCodeId.toString());
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes/{costcode}", params);
+    }
+
+    protected String createPricingTiersLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers", params);
+    }
+
+    protected String createPricingTierLink(final Integer pricingId, final Integer pricingTierId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("template", pricingId.toString());
+        params.put("tier", pricingTierId.toString());
+        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers/{tier}", params);
+    }
+
 }

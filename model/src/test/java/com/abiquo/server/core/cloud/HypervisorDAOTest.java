@@ -81,8 +81,8 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
 
         HypervisorDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor.getMachine()
-            .getDatacenter().getId()));
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId()));
     }
 
     private Hypervisor createHypervisor()

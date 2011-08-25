@@ -30,7 +30,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-
 /**
  * @author apuig
  */
@@ -52,11 +51,11 @@ public class Icon implements Serializable, PersistenceDto
     public Icon()
     {
     }
-    
+
     public Icon(final String path)
     {
         setPath(path);
-    }    
+    }
 
     public Integer getId()
     {

@@ -19,646 +19,676 @@
  * Boston, MA 02111-1307, USA.
  */
 
+
 /* ****************************************************************************************************************
 	MAIN AREA: HEADER, BODY, FOOTER, LOGIN, DASHBOARD
 	 
 ***************************************************************************************************************** */
+	
+	
+	/*ToogleButtonBar*/
+	.MainHeaderToggleButtonBar
+	{
+		horizontal-gap: 0;
+		selectedButtonTextStyleName:	"MainHeaderToggleButtonBarSelectedButtonText";
+		header-height:					64;
+		color:							#333333;
+		vertical-align:					middle;
+	}
+	
+		.MainHeaderToggleButtonBarSelectedButtonText
+		{
+			color: 						#333333;
+		}
 
-/*ToogleButtonBar*/
-.MainHeaderToggleButtonBar {
-	horizontal-gap: 0;
-	selectedButtonTextStyleName:
-		"MainHeaderToggleButtonBarSelectedButtonText";
-	header-height: 64;
-	color: #333333;
-	vertical-align: middle;
-}
+		.SecurableHeader
+		{
+			font-size:					"12";
+			font-weight:				"bold";
+			text-align:					"right";
+		}
+	.MainHeaderStartButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/startbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/startbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/startbutton/down_icon.png");
+		selected-up-icon:		Embed("/assets/application/main/header/startbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/startbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/startbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");	
+		
+	}
+	
+	.MainHeaderInfrastructureButton
+	{			
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/infrastructurebutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/infrastructurebutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/infrastructurebutton/down_icon.png");
+		selected-up-icon:		Embed("/assets/application/main/header/infrastructurebutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/infrastructurebutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/infrastructurebutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderVirtualAppButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/virtualappbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/virtualappbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/virtualappbutton/down_icon.png");
+		selected-up-icon:		Embed("/assets/application/main/header/virtualappbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/virtualappbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/virtualappbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
 
-.MainHeaderToggleButtonBarSelectedButtonText {
-	color: #333333;
-}
+	.MainHeaderVirtualImageButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/virtualimagebutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/virtualimagebutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/virtualimagebutton/down_icon.png");
+		selected-up-icon:		Embed("/assets/application/main/header/virtualimagebutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/virtualimagebutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/virtualimagebutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}	
+	
+	.MainHeaderUsersButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:				#212121;
+		text-roll-over-color:		#212121;
+		text-selected-color:		#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/usersbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/usersbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/usersbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/usersbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/usersbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/usersbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderPricingButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:				#212121;
+		text-roll-over-color:		#212121;
+		text-selected-color:		#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/pricingbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/pricingbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/pricingbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/pricingbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/pricingbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/pricingbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderDocumentationButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/documentationbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/documentationbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/documentationbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/documentationbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/documentationbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/documentationbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
 
-.SecurableHeader {
-	font-size: "12";
-	font-weight: "bold";
-	text-align: "right";
-}
+	.MainHeaderReportButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/reportbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/reportbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/reportbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/reportbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/reportbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/reportbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderSupportButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:				#333333;
+		text-roll-over-color:		#333333;
+		text-selected-color:		#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/supportbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/supportbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/supportbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/supportbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/supportbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/supportbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderMeteringButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:						#333333;
+		text-roll-over-color:		#333333;
+		text-selected-color:		#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/meteringbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/meteringbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/meteringbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/meteringbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/meteringbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/meteringbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	.MainHeaderConfigurationButton
+	{
+		padding-left:			5;
+		padding-right:			5;
+		color:					#333333;
+		text-roll-over-color:	#333333;
+		text-selected-color:	#000000;
+		font-size:				10;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/configurationbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/configurationbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/configurationbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/configurationbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/configurationbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/configurationbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-over-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		selected-down-skin:		Embed("/assets/application/main/header/selected_up_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+	}
+	
+	
+	.MainHeaderLogoutButton
+	{	
+		padding-top:			0;
+		padding-bottom:			0;
+		padding-left:			0;
+		padding-right:			0;
+		horizontal-gap:			0;
+		color:				#333333;
+		text-roll-over-color:		#333333;
+		text-selected-color:		#000000;
+		font-size:				11;
+		font-weight:			bold;
+		
+		up-icon:				Embed("/assets/application/main/header/logoutbutton/up_icon.png");
+		over-icon:				Embed("/assets/application/main/header/logoutbutton/over_icon.png");
+		down-icon:				Embed("/assets/application/main/header/logoutbutton/down_icon.png");
+		selected-up-icon:			Embed("/assets/application/main/header/logoutbutton/up_icon.png");
+		selected-over-icon:		Embed("/assets/application/main/header/logoutbutton/over_icon.png");
+		selected-down-icon:		Embed("/assets/application/main/header/logoutbutton/down_icon.png");
+		
+		up-skin:				Embed("/assets/nullPixel.png");
+		over-skin:				Embed("/assets/nullPixel.png");
+		down-skin:				Embed("/assets/application/main/header/over_skin.png", scaleGridTop="7", scaleGridBottom="45", scaleGridLeft="7", scaleGridRight="10");
+		
+		selected-up-skin:			Embed("/assets/nullPixel.png");
+		selected-over-skin:		Embed("/assets/nullPixel.png");
+		selected-down-skin:		Embed("/assets/nullPixel.png");
+	}
+	
+	
+	.MainWindow
+	{
+		background-image:			Embed("/assets/application/main/background_image.png", scaleGridTop="62", scaleGridBottom="80", scaleGridLeft="17", scaleGridRight="80");
+		background-size:			"100%";
+		background-color:			none;
+	}
+	
+	.MainFooterSkin
+	{
+		background-image:			Embed("/assets/application/main/footer/background_image.png", scaleGridTop="8", scaleGridBottom="15", scaleGridLeft="8", scaleGridRight="19");
+		background-size:			"100%";
+ 		color:						#cccccc;
+		horizontal-gap:				"0";
+		padding-left:				"8";
+		padding-right:				"6";
+		padding-top:				"3";
+		vertical-align:				"middle";
 
-.MainHeaderStartButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/startbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/startbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/startbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/startbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/startbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/startbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
+	}
+	
+	.footerText{
+		color:			#cccccc;
+	}
+	
+	
+	.FooterVRule1
+	{
+		stroke-color:				"#999999";
+		stroke-width:				"1";
+	}
+	
+	.FooterNoLineIcon
+	{
+		/**custom property**/
+		source:Embed("/assets/application/main/footer/noLine.png");
+	}
+	
+	.FooterAlertIcon
+	{
+		/**custom property**/
+		source:Embed("/assets/application/icons/alert.png");
+	}
 
-.MainHeaderInfrastructureButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/infrastructurebutton/up_icon.png"
-		);
-	over-icon: Embed("/assets/application/main/header/infrastructurebutton/over_icon.png"
-		);
-	down-icon: Embed("/assets/application/main/header/infrastructurebutton/down_icon.png"
-		);
-	selected-up-icon: Embed("/assets/application/main/header/infrastructurebutton/up_icon.png"
-		);
-	selected-over-icon: Embed("/assets/application/main/header/infrastructurebutton/over_icon.png"
-		);
-	selected-down-icon: Embed("/assets/application/main/header/infrastructurebutton/down_icon.png"
-		);
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
+	.FooterClock
+	{
+		/**custom property**/
+		source:Embed("/assets/application/main/footer/clock.swf");
+	}
+	
+	
+	
+	
+	.SecurableDashboardShortcurtLabel1
+	{
+		font-size:"16";
+		font-weight:"bold";
 
-.MainHeaderVirtualAppButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/virtualappbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/virtualappbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/virtualappbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/virtualappbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/virtualappbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/virtualappbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
+	}
 
-.MainHeaderVirtualImageButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/virtualimagebutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/virtualimagebutton/over_icon.png"
-		);
-	down-icon: Embed("/assets/application/main/header/virtualimagebutton/down_icon.png"
-		);
-	selected-up-icon: Embed("/assets/application/main/header/virtualimagebutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/virtualimagebutton/over_icon.png"
-		);
-	selected-down-icon: Embed("/assets/application/main/header/virtualimagebutton/down_icon.png"
-		);
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
 
-.MainHeaderUsersButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #212121;
-	text-roll-over-color: #212121;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/usersbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/usersbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/usersbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/usersbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/usersbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/usersbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
 
-.MainHeaderDocumentationButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/documentationbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/documentationbutton/over_icon.png"
-		);
-	down-icon: Embed("/assets/application/main/header/documentationbutton/down_icon.png"
-		);
-	selected-up-icon: Embed("/assets/application/main/header/documentationbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/documentationbutton/over_icon.png"
-		);
-	selected-down-icon: Embed("/assets/application/main/header/documentationbutton/down_icon.png"
-		);
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
 
-.MainHeaderReportButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/reportbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/reportbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/reportbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/reportbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/reportbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/reportbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
 
-.MainHeaderSupportButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/supportbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/supportbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/supportbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/supportbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/supportbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/supportbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
-
-.MainHeaderMeteringButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/meteringbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/meteringbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/meteringbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/meteringbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/meteringbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/meteringbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
-
-.MainHeaderConfigurationButton {
-	padding-left: 5;
-	padding-right: 5;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 10;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/configurationbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/configurationbutton/over_icon.png"
-		);
-	down-icon: Embed("/assets/application/main/header/configurationbutton/down_icon.png"
-		);
-	selected-up-icon: Embed("/assets/application/main/header/configurationbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/configurationbutton/over_icon.png"
-		);
-	selected-down-icon: Embed("/assets/application/main/header/configurationbutton/down_icon.png"
-		);
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-over-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-	selected-down-skin: Embed("/assets/application/main/header/selected_up_skin.png",
-		scaleGridTop =       "7", scaleGridBottom =       "45", scaleGridLeft
-		= 
-		     "7", scaleGridRight =       "10");
-}
-
-.MainHeaderLogoutButton {
-	padding-top: 0;
-	padding-bottom: 0;
-	padding-left: 0;
-	padding-right: 0;
-	horizontal-gap: 0;
-	color: #333333;
-	text-roll-over-color: #333333;
-	text-selected-color: #000000;
-	font-size: 11;
-	font-weight: bold;
-	up-icon: Embed("/assets/application/main/header/logoutbutton/up_icon.png");
-	over-icon: Embed("/assets/application/main/header/logoutbutton/over_icon.png");
-	down-icon: Embed("/assets/application/main/header/logoutbutton/down_icon.png");
-	selected-up-icon: Embed("/assets/application/main/header/logoutbutton/up_icon.png");
-	selected-over-icon: Embed("/assets/application/main/header/logoutbutton/over_icon.png");
-	selected-down-icon: Embed("/assets/application/main/header/logoutbutton/down_icon.png");
-	up-skin: Embed("/assets/nullPixel.png");
-	over-skin: Embed("/assets/nullPixel.png");
-	down-skin: Embed("/assets/application/main/header/over_skin.png", scaleGridTop =   
-		   "7", scaleGridBottom =       "45", scaleGridLeft =       "7",
-		scaleGridRight =   
-		   "10");
-	selected-up-skin: Embed("/assets/nullPixel.png");
-	selected-over-skin: Embed("/assets/nullPixel.png");
-	selected-down-skin: Embed("/assets/nullPixel.png");
-}
-
-.MainWindow {
-	background-image: Embed("/assets/application/main/background_image.png", scaleGridTop =   
-		   "62", scaleGridBottom =       "80", scaleGridLeft =       "17",
-		scaleGridRight =   
-		   "80");
-	background-size: "100%";
-	background-color: none;
-}
-
-.MainFooterSkin {
-	background-image: Embed("/assets/application/main/footer/background_image.png",
-		scaleGridTop =       "8", scaleGridBottom =       "15", scaleGridLeft
-		= 
-		     "8", scaleGridRight =       "19");
-	background-size: "100%";
-	color: #cccccc;
-	horizontal-gap: "0";
-	padding-left: "8";
-	padding-right: "6";
-	padding-top: "3";
-	vertical-align: "middle";
-}
-
-.footerText {
-	color: #cccccc;
-}
-
-.FooterVRule1 {
-	stroke-color: "#999999";
-	stroke-width: "1";
-}
-
-.FooterNoLineIcon { /**custom property**/
-	source: Embed("/assets/application/main/footer/noLine.png");
-}
-
-.FooterAlertIcon { /**custom property**/
-	source: Embed("/assets/application/icons/alert.png");
-}
-
-.FooterClock { /**custom property**/
-	source: Embed("/assets/application/main/footer/clock.swf");
-}
-
-.SecurableDashboardShortcurtLabel1 {
-	font-size: "16";
-	font-weight: "bold";
-}
 
 /***
  * general states for the different components
  **/
-.MainStateRUNNING { /**custom property**/
-	source: Embed("/assets/application/icons/green_ball.png");
+ 
+ .MainStateRUNNING
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/green_ball.png");
+ }
+ 
+ .MainStatePAUSED
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/yellow_ball.png");
+ }
+
+.MainStatePOWEREDOFF
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/red_ball.png");
+ }
+
+.MainStateNOTDEPLOYED
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/grey_ball.png");
+ }
+
+.MainStateAPPLYCHANGESNEEDED
+{
+	/**custom property**/
+	source:Embed("/assets/application/icons/yellow_ball.png");
 }
 
-.MainStatePAUSED { /**custom property**/
-	source: Embed("/assets/application/icons/yellow_ball.png");
+.MainStateSTOPPED
+{
+	/**custom property**/
+	source:Embed("/assets/application/icons/stopped.png");
 }
 
-.MainStatePOWEREDOFF { /**custom property**/
-	source: Embed("/assets/application/icons/red_ball.png");
+.MainStateDISABLED
+{
+	/**custom property**/
+	source:Embed("/assets/application/icons/disabled.png");
 }
 
-.MainStateNOTDEPLOYED { /**custom property**/
-	source: Embed("/assets/application/icons/grey_ball.png");
+.MainStateMOUNTEDRESERVED{
+	/**custom property**/
+	source:Embed("/assets/application/icons/green_ball.png");
 }
 
-.MainStateAPPLYCHANGESNEEDED { /**custom property**/
-	source: Embed("/assets/application/icons/yellow_ball.png");
+.MainStateNOTMOUNTEDRESERVED{
+	/**custom property**/
+	source:Embed("/assets/application/icons/yellow_ball.png");
 }
 
-.MainStateSTOPPED { /**custom property**/
-	source: Embed("/assets/application/icons/stopped.png");
+.MainStateNOTMOUNTEDNOTRESERVED{
+	/**custom property**/
+	source:Embed("/assets/application/icons/red_ball.png");
 }
 
-.MainStateDISABLED { /**custom property**/
-	source: Embed("/assets/application/icons/disabled.png");
-}
-
-.MainStateMOUNTEDRESERVED { /**custom property**/
-	source: Embed("/assets/application/icons/green_ball.png");
-}
-
-.MainStateNOTMOUNTEDRESERVED { /**custom property**/
-	source: Embed("/assets/application/icons/yellow_ball.png");
-}
-
-.MainStateNOTMOUNTEDNOTRESERVED { /**custom property**/
-	source: Embed("/assets/application/icons/red_ball.png");
-}
 
 /**
  *
  * Common assets used all over the application
  * they all use the "source" custom property
  **/
-.CommonAssetsInfo {
-	source: Embed("/assets/application/icons/info.png");
-}
-
-.CommonAssetsMagnifier {
-	source: Embed("/assets/application/icons/magnifier.png");
-}
-
-/**
+ .CommonAssetsInfo
+ {
+	source:Embed("/assets/application/icons/info.png");
+ }
+ 
+ .CommonAssetsMagnifier
+ {
+	source:Embed("/assets/application/icons/magnifier.png");
+ }
+ 
+ /**
  * 3x20px
  */
-.CommonAssetsSeparator {
-	source: Embed("/assets/application/icons/separator.png");
-}
-
-/**
+ .CommonAssetsSeparator
+ {
+	source:Embed("/assets/application/icons/separator.png");
+ }
+ 
+ /**
  * 2x19px
  **/
-.CommonAssetsHeaderSpacer {
-	source: Embed("/assets/application/main/header/spacer.png");
-}
+ .CommonAssetsHeaderSpacer
+ {
+	source:Embed("/assets/application/main/header/spacer.png");
+ }
+ 
 
-.CommonAssetsAlert { /**custom property**/
-	source: Embed("/assets/application/icons/alert.png");
-}
+ .CommonAssetsAlert
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/alert.png");
+ }
 
-.CommonAssetsChecked { /**custom property**/
-	source: Embed("/assets/application/icons/checked.png");
-}
+.CommonAssetsChecked
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/checked.png");
+ }
 
-.SecurableDashboardShortcurtLabel1 {
-	font-size: "16";
-	font-weight: "bold";
-}
+ 
+ 
+	.SecurableDashboardShortcurtLabel1
+	{
+		font-size:"16";
+		font-weight:"bold";
 
-/**
+	}
+
+ /**
 * Common found in CommonAssets
 **/
-.CommonAssetsAlertIconOk { /**custom property**/
-	source: Embed("/assets/customcomponents/abicloudalert/icon_ok.png");
+
+ .CommonAssetsAlertIconOk
+ {
+	/**custom property**/
+	source:Embed("/assets/customcomponents/abicloudalert/icon_ok.png");
+ }
+
+ 
+.CommonAssetsAlertIconAlert
+ {
+	/**custom property**/
+	source:Embed("/assets/customcomponents/abicloudalert/icon_alert.png");
+ }
+
+.CommonAssetsAlertIconError
+ {
+	/**custom property**/
+	source:Embed("/assets/customcomponents/abicloudalert/icon_error.png");
+ }
+ 
+.CommonAssetsCursorLineTool
+ {
+	/**custom property**/
+	source:Embed("/assets/cursors/LineTool.png");
+ }
+ 
+.CommonAssetsCursorMoveTool
+ {
+	/**custom property**/
+	source:Embed("/assets/cursors/MoveTool.png");
+ }
+ 
+ .CommonAssetsCursorScissorsTool
+ {
+	/**custom property**/
+	source:Embed("/assets/cursors/Scissors.png");
+ }
+ 
+.physicalMachineSmallIcon
+ {
+	/**custom property**/
+	source:Embed("/assets/infrastructure/physicalMachine_small.png");
+ }
+
+.virtualApplianceDrawingArea
+ {
+	/**custom property**/
+	source:Embed("/assets/virtualappliance/drawingarea.png");
+ }
+ 
+.CommonAssetsPostLoginBackground
+ {
+	/**custom property**/
+	source:Embed("/assets/application/postlogin_background_image.png");
+ }
+
+.genericIdle
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/grey_ball.png");
+ }
+
+.genericOK
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/green_ball.png");
+ }
+
+.genericKO
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/red_ball.png");
+ }
+ 
+ .genericShared
+ {
+	/**custom property**/
+	source:Embed("/assets/application/icons/yellow_ball.png");
+ }
+ .crashedIcon{
+ 	source:Embed("/assets/application/icons/crashed.png");
+ }
+ 
+ .unknownIcon{
+ 	source:Embed("/assets/application/icons/unknown.png");
+ }
+
+.genericLoadingSmall{
+	/**custom property**/
+	source:Embed("/assets/application/icons/loading_small.swf");
 }
 
-.CommonAssetsAlertIconAlert { /**custom property**/
-	source: Embed("/assets/customcomponents/abicloudalert/icon_alert.png");
+
+.openBranchArrow
+{
+	/**custom property**/
+	source:Embed("/assets/networking/networktree/opened_branch_arrow.png");
 }
 
-.CommonAssetsAlertIconError { /**custom property**/
-	source: Embed("/assets/customcomponents/abicloudalert/icon_error.png");
+.closeBranchArrow
+{
+	/**custom property**/
+	source:Embed("/assets/networking/networktree/closed_branch_arrow.png");
 }
 
-.CommonAssetsCursorLineTool { /**custom property**/
-	source: Embed("/assets/cursors/LineTool.png");
+
+
+.dashboardMenuInfrastructure
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/infraestructura.jpg");
+}
+.dashboardMenuMetering
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/metering.png");
+}
+.dashboardMenuVirtualApplications
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/aplicaciones_virtuales.jpg");
+}
+.dashboardMenuUsers
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/usuario.jpg");
+}
+.dashboardMenuVirtualImages
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/imagenes_virtuales.jpg");
+}
+.dashboardMenuConfiguration
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/configuracion.jpg");
 }
 
-.CommonAssetsCursorMoveTool { /**custom property**/
-	source: Embed("/assets/cursors/MoveTool.png");
-}
-
-.CommonAssetsCursorScissorsTool { /**custom property**/
-	source: Embed("/assets/cursors/Scissors.png");
-}
-
-.physicalMachineSmallIcon { /**custom property**/
-	source: Embed("/assets/infrastructure/physicalMachine_small.png");
-}
-
-.virtualApplianceDrawingArea { /**custom property**/
-	source: Embed("/assets/virtualappliance/drawingarea.png");
-}
-
-.CommonAssetsPostLoginBackground { /**custom property**/
-	source: Embed("/assets/application/postlogin_background_image.png");
-}
-
-.genericIdle { /**custom property**/
-	source: Embed("/assets/application/icons/grey_ball.png");
-}
-
-.genericOK { /**custom property**/
-	source: Embed("/assets/application/icons/green_ball.png");
-}
-
-.genericKO { /**custom property**/
-	source: Embed("/assets/application/icons/red_ball.png");
-}
-
-.genericShared { /**custom property**/
-	source: Embed("/assets/application/icons/yellow_ball.png");
-}
-
-.crashedIcon {
-	source: Embed("/assets/application/icons/crashed.png");
-}
-
-.unknownIcon {
-	source: Embed("/assets/application/icons/unknown.png");
-}
-
-.genericLoadingSmall { /**custom property**/
-	source: Embed("/assets/application/icons/loading_small.swf");
-}
-
-.openBranchArrow { /**custom property**/
-	source: Embed("/assets/networking/networktree/opened_branch_arrow.png");
-}
-
-.closeBranchArrow { /**custom property**/
-	source: Embed("/assets/networking/networktree/closed_branch_arrow.png");
-}
-
-.dashboardMenuInfrastructure { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/infraestructura.jpg");
-}
-
-.dashboardMenuMetering { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/metering.png");
-}
-
-.dashboardMenuVirtualApplications { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/aplicaciones_virtuales.jpg");
-}
-
-.dashboardMenuUsers { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/usuario.jpg");
-}
-
-.dashboardMenuVirtualImages { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/imagenes_virtuales.jpg");
-}
-
-.dashboardMenuConfiguration { /**custom property**/
-	source: Embed("/assets/application/main/dashboard/configuracion.jpg");
+.dashboardMenuStatistics
+{
+	/**custom property**/
+	source:Embed("/assets/application/main/dashboard/estadisticas.jpg");
 }
 
 .dashboardMenuStatistics { /**custom property**/

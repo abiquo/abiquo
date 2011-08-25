@@ -56,7 +56,7 @@ public class HibernateUtil
             Configuration conf = new Configuration();
             conf.configure(hibernateConfRootDir + "hibernate.cfg.xml");
 
-            hibernateConfRootDir += "ext/";            
+            hibernateConfRootDir += "ext/";
 
             URL url = HibernateUtil.class.getClassLoader().getResource(hibernateConfRootDir);
 
@@ -86,13 +86,11 @@ public class HibernateUtil
             throw new ExceptionInInitializerError(ex);
         }
     }
-    
-    
+
     public static SessionFactory getSessionFactory()
     {
         return sessionFactory;
     }
-    
 
     public static void beginTransaction()
     {
@@ -102,8 +100,8 @@ public class HibernateUtil
     // public static SessionFactory getSessionFactory()
     // {
     // return sessionFactory;
-    //        
-    //        
+    //
+    //
     // }
 
     public static void commitTransaction()

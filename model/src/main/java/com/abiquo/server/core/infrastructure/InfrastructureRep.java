@@ -51,6 +51,9 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository
@@ -112,6 +115,9 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private StorageRep storageRep;
+
+    @Autowired
+    private PricingRep pricingRep;
 
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
@@ -781,6 +787,16 @@ public class InfrastructureRep extends DefaultRepBase
     public void updateLimits(final DatacenterLimits dclimits)
     {
         datacenterLimitDao.flush();
+    }
+
+    public List<PricingTemplate> getPricingTemplates()
+    {
+        return pricingRep.findPricingTemplats();
+    }
+
+    public void insertPricingTier(final PricingTier pricingTier)
+    {
+        pricingRep.insertPricingTier(pricingTier);
     }
 
 }

@@ -173,7 +173,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         return defaultNetwork;
     }
 
-    public void setDefaultNetwork(Boolean defaultNetwork)
+    public void setDefaultNetwork(final Boolean defaultNetwork)
     {
         this.defaultNetwork = defaultNetwork;
     }
@@ -183,7 +183,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         return networkType;
     }
 
-    public void setNetworkType(String networkType)
+    public void setNetworkType(final String networkType)
     {
         this.networkType = networkType;
     }

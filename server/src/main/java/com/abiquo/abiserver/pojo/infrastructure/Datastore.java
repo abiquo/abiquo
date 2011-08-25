@@ -62,11 +62,10 @@ public class Datastore implements IPojo<DatastoreHB>
     private String directory;
 
     private String datastoreUUID;
-    
+
     private Long size;
-    
+
     private Long usedSize;
-        
 
     public Datastore()
     {
@@ -209,7 +208,7 @@ public class Datastore implements IPojo<DatastoreHB>
     {
         return usedSize;
     }
-    
+
     /**
      * Sets UUID used to identify this Datastore in Abiquo
      * 
@@ -229,7 +228,7 @@ public class Datastore implements IPojo<DatastoreHB>
     {
         return datastoreUUID;
     }
-    
+
     @Override
     public DatastoreHB toPojoHB()
     {
@@ -246,9 +245,5 @@ public class Datastore implements IPojo<DatastoreHB>
 
         return datastore;
     }
-
-    
-
-  
 
 }

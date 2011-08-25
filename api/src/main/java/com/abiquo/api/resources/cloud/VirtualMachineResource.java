@@ -41,8 +41,8 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -208,7 +208,8 @@ public class VirtualMachineResource extends AbstractResource
 
         if (!vmService.sameState(vm, VirtualMachineState.POWERED_OFF))
         {
-              vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId,
+                VirtualMachineState.POWERED_OFF);
         }
     }
 

@@ -35,13 +35,12 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
     private Integer id;
 
     private String name, shortDescription, longDescription;
-    
+
     private Integer vlanIdMin, vlanIdMax, vlanPerVdcExpected, nrsq;
 
     private String vlansIdAvoided;
-    
-    private boolean haEnabled = false;    
 
+    private boolean haEnabled = false;
 
     public Integer getId()
     {
@@ -82,7 +81,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
     {
         this.longDescription = description;
     }
-    
+
     public Integer getVlanIdMin()
     {
         return vlanIdMin;
@@ -132,7 +131,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
     {
         this.vlansIdAvoided = vlansIdAvoided;
     }
-    
+
     public boolean isHaEnabled()
     {
         return haEnabled;

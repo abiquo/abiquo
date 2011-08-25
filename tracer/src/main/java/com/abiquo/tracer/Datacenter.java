@@ -28,71 +28,88 @@ import java.io.Serializable;
 
 /**
  * @author Administrador
- * 
  */
-public class Datacenter implements Serializable {
+public class Datacenter implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -8729306234713999390L;
-	private String name;
-	private Rack rack;
-	private VirtualStorage virtualStorage;
-	private Network network;
+    private static final long serialVersionUID = -8729306234713999390L;
 
-	public static Datacenter datacenter(String datacenter) {
-		return new Datacenter(datacenter);
-	}
+    private String name;
 
-	private Datacenter(String datacenter) {
-		this.setName(datacenter);
-	}
+    private Rack rack;
 
-	public Datacenter rack(Rack rack) {
-		this.setRack(rack);
-		return this;
-	}
+    private VirtualStorage virtualStorage;
 
-	public Datacenter virtualStorage(VirtualStorage virtualStorage) {
-		this.setVirtualStorage(virtualStorage);
-		return this;
-	}
+    private Network network;
 
-	public Datacenter network(Network network) {
-		this.setNetwork(network);
-		return this;
-	}
+    public static Datacenter datacenter(String datacenter)
+    {
+        return new Datacenter(datacenter);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private Datacenter(String datacenter)
+    {
+        this.setName(datacenter);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Datacenter rack(Rack rack)
+    {
+        this.setRack(rack);
+        return this;
+    }
 
-	public void setRack(Rack rack) {
-		this.rack = rack;
-	}
+    public Datacenter virtualStorage(VirtualStorage virtualStorage)
+    {
+        this.setVirtualStorage(virtualStorage);
+        return this;
+    }
 
-	public Rack getRack() {
-		return rack;
-	}
+    public Datacenter network(Network network)
+    {
+        this.setNetwork(network);
+        return this;
+    }
 
-	public void setVirtualStorage(VirtualStorage virtualStorage) {
-		this.virtualStorage = virtualStorage;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public VirtualStorage getVirtualStorage() {
-		return virtualStorage;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public void setNetwork(Network network) {
-		this.network = network;
-	}
+    public void setRack(Rack rack)
+    {
+        this.rack = rack;
+    }
 
-	public Network getNetwork() {
-		return network;
-	}
+    public Rack getRack()
+    {
+        return rack;
+    }
+
+    public void setVirtualStorage(VirtualStorage virtualStorage)
+    {
+        this.virtualStorage = virtualStorage;
+    }
+
+    public VirtualStorage getVirtualStorage()
+    {
+        return virtualStorage;
+    }
+
+    public void setNetwork(Network network)
+    {
+        this.network = network;
+    }
+
+    public Network getNetwork()
+    {
+        return network;
+    }
 }

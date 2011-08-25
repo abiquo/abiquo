@@ -27,7 +27,7 @@ public class InvalidPrivateNetworkClassTypeException extends NetworkCommandExcep
      * Serial version.
      */
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Initialize the exception with a message. (Throwing a new exception)
      * 
@@ -40,6 +40,7 @@ public class InvalidPrivateNetworkClassTypeException extends NetworkCommandExcep
 
     /**
      * Initalize the exception with the message and an error code.
+     * 
      * @param message to provide more information to the exception.
      * @param abicloudErrorCode previously-defined abicloud network error.
      */
@@ -66,11 +67,12 @@ public class InvalidPrivateNetworkClassTypeException extends NetworkCommandExcep
      * @param e The exception to be thrown
      * @param abicloudErrorCode code error
      */
-    public InvalidPrivateNetworkClassTypeException(String message, Throwable e, int abicloudErrorCode)
+    public InvalidPrivateNetworkClassTypeException(String message, Throwable e,
+        int abicloudErrorCode)
     {
         super(message, e, abicloudErrorCode);
     }
-    
+
     /**
      * Create the exception only with the throwable argument. (Not recommended).
      * 
@@ -80,14 +82,14 @@ public class InvalidPrivateNetworkClassTypeException extends NetworkCommandExcep
     {
         super(e);
     }
-    
+
     /**
      * Create the exception with the throwable and the error code (Not recommended).
      * 
      * @param e The exception to be thrown
      * @param abicloudErrorCode code error
      */
-    public InvalidPrivateNetworkClassTypeException(Throwable e,  int abicloudErrorCode)
+    public InvalidPrivateNetworkClassTypeException(Throwable e, int abicloudErrorCode)
     {
         super(e, abicloudErrorCode);
     }

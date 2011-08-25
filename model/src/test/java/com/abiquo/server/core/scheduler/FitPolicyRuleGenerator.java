@@ -35,7 +35,7 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
 
     DatacenterGenerator datacenterGen;
 
-    public FitPolicyRuleGenerator(SeedGenerator seed)
+    public FitPolicyRuleGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -44,7 +44,7 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
     }
 
     @Override
-    public void assertAllPropertiesEqual(FitPolicyRule obj1, FitPolicyRule obj2)
+    public void assertAllPropertiesEqual(final FitPolicyRule obj1, final FitPolicyRule obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, FitPolicyRule.FIT_POLICY_PROPERTY);
     }
@@ -56,8 +56,8 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
 
         return createInstance(datacenter);
     }
-    
-    public FitPolicyRule createInstance(Datacenter datacenter)
+
+    public FitPolicyRule createInstance(final Datacenter datacenter)
     {
         FitPolicyRule fitPolicyRule = new FitPolicyRule(datacenter, FitPolicy.PROGRESSIVE);
 
@@ -68,10 +68,10 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
     {
         return new FitPolicyRule(FitPolicy.PROGRESSIVE);
     }
-    
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(FitPolicyRule entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final FitPolicyRule entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

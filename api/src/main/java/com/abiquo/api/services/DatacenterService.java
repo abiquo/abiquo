@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,6 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -59,6 +59,8 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -144,12 +146,25 @@ public class DatacenterService extends DefaultApiService
             new DatacenterLimits(userService.getCurrentUser().getEnterprise(), datacenter);
         enterpriseRep.insertLimit(dcLimits);
 
+        List<PricingTemplate> pricingTemplateList = repo.getPricingTemplates();
+        BigDecimal zero = new BigDecimal(0);
+
         // Add the default tiers
         for (int i = 1; i <= 4; i++)
         {
             Tier tier =
                 new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
             repo.insertTier(tier);
+
+            if (!pricingTemplateList.isEmpty())
+            {
+                for (PricingTemplate pt : pricingTemplateList)
+                {
+                    PricingTier pricingTier = new PricingTier(zero, pt, tier);
+                    repo.insertPricingTier(pricingTier);
+                }
+
+            }
         }
 
         // Log the event
@@ -216,7 +231,10 @@ public class DatacenterService extends DefaultApiService
         else
         {
             // Log the event
-            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
+            tracer.log(
+                SeverityType.INFO,
+                ComponentType.DATACENTER,
+                EventType.DC_CREATE,
                 "Datacenter '" + datacenter.getName() + "' has been created in "
                     + datacenter.getLocation());
         }

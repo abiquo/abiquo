@@ -46,13 +46,13 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     @Override
     public void assertAllPropertiesEqual(final NodeVirtualImage obj1, final NodeVirtualImage obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, NodeVirtualImage.MODIFIED_PROPERTY,
-            NodeVirtualImage.NAME_PROPERTY);
+        AssertEx
+            .assertPropertiesEqualSilent(obj1, obj2, Node.MODIFIED_PROPERTY, Node.NAME_PROPERTY);
 
-        vApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-            .getVirtualAppliance());
-        vMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(), obj2
-            .getVirtualMachine());
+        vApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
+            obj2.getVirtualAppliance());
+        vMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(),
+            obj2.getVirtualMachine());
         vImageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
     }
 
@@ -81,9 +81,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine)
     {
-        String name =
-            newString(nextSeed(), NodeVirtualImage.NAME_LENGTH_MIN,
-                NodeVirtualImage.NAME_LENGTH_MAX);
+        String name = newString(nextSeed(), Node.NAME_LENGTH_MIN, Node.NAME_LENGTH_MAX);
 
         return new NodeVirtualImage(name, virtualAppliance, vMachine.getVirtualImage(), vMachine);
     }

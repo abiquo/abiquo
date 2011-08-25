@@ -193,7 +193,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     }
 
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
-        final Collection<Integer> nodeIds, final String userName, String authType)
+        final Collection<Integer> nodeIds, final String userName, final String authType)
     {
         //
         // // Block the virtual appliance
@@ -440,9 +440,9 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         {
             if (!virtualApp.getNodes().isEmpty())
             {
-                for(Node node:virtualApp.getNodes())
+                for (Node node : virtualApp.getNodes())
                 {
-                    String message = "Instance process started in "+ node.getName();
+                    String message = "Instance process started in " + node.getName();
                     TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                         EventType.VAPP_INSTANCE, message, user, platform);
                 }

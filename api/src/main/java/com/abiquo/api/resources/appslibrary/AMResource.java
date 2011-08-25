@@ -63,7 +63,7 @@ public class AMResource extends StaticRemoteServiceResource
     /**
      * The service that contains business logic.
      */
-    //@Autowired
+    // @Autowired
     private InfrastructureService service;
 
     /**

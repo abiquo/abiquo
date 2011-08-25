@@ -265,8 +265,8 @@ public class InfrastructureService extends DefaultApiService
         }
         return rack;
     }
-    
-    public Rack getRackById(Integer rackId)
+
+    public Rack getRackById(final Integer rackId)
     {
         // Find the rack by itself and by its datacenter.
         Rack rack = repo.findRackById(rackId);
@@ -723,5 +723,4 @@ public class InfrastructureService extends DefaultApiService
         return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
             && rack.getVlanPerVdcExpected() != null;
     }
-
 }
