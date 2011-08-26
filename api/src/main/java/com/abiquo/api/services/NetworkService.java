@@ -159,7 +159,6 @@ public class NetworkService extends DefaultApiService
         rasd.setAllocationUnits("0");
         rasd.setAutomaticAllocation(0);
         rasd.setAutomaticDeallocation(0);
-        rasd.setConfigurationName("0");
         rasd.setAddress(ip.getMac());
         rasd.setParent(ip.getNetworkName());
         rasd.setResourceSubType(String.valueOf(IpPoolManagement.Type.PRIVATE.ordinal()));
