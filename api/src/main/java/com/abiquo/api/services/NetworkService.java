@@ -640,6 +640,8 @@ public class NetworkService extends DefaultApiService
                     {
                         // set virtual datacenter as null when release an external IP.
                         ip.setVirtualDatacenter(null);
+                        ip.setName(null);
+                        ip.setMac(null);
                     }
                     Boolean privateIp = ip.isPrivateIp(); // set the private value before to set the
                                                           // RASD to null;
